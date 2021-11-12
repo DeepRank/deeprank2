@@ -1,3 +1,6 @@
+# Editor swaps
+*.swp
+
 #Byte-compiled / optimized
 *__pycache__*
 
