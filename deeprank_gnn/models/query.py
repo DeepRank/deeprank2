@@ -16,7 +16,7 @@ class Query:
 
 
 class SingleResidueVariantQuery(Query):
-    def __init__(self, model_id, chain_id, residue_number, wildtype_amino_acid, variant_amino_acid, distance_cutoff=10.0, target=None, insertion_code=None):
+    def __init__(self, model_id, chain_id, residue_number, wildtype_amino_acid, variant_amino_acid, nonbonded_distance_cutoff=10.0, target=None, insertion_code=None):
         Query.__init__(QueryType.SINGLE_RESIDUE_VARIANT, model_id, distance_cutoff, target)
 
         self._chain_id = chain_id
