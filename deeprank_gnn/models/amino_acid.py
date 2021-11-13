@@ -14,6 +14,10 @@ class AminoAcid:
     def three_letter_code(self):
         return self._three_letter_code
 
+    @property
+    def one_letter_code(self):
+        return self._one_letter_code
+
     def __hash__(self):
         return hash(self.name)
 

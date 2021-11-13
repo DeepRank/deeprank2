@@ -1,45 +1,49 @@
 import os
 import numpy as np
 
+from deeprank_gnn.models.structure import Residue, Chain
+from deeprank_gnn.models.conservation import ConservationRow, ConservationTable
+from deeprank_gnn.domain.amino_acid import amino_acids
 
-def read_PSSM_data(fname):
+
+amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids}
+
+
+def parse_pssm(file_, chain):
     """Read the PSSM data."""
 
-    f = open(fname,'r')
-    data = f.readlines()
-    f.close()
+    conservation_rows = {}
 
-    filters = (lambda x: len(x.split())>0, lambda x: x.split()[0].isdigit())
-    return list(map(lambda x: x.split(),list(filter(lambda x: all(f(x) for f in filters), data))))
+    header = next(file_).split()
+    column_indices = {column_name.strip(): index for index, column_name in enumerate(header)}
+
+    for line in file_:
+        row = line.split()
+
+        amino_acid = amino_acids_by_letter[row[column_indices["pdbresn"]]]
+
+        pdb_residue_number_string = row[column_indices["pdbresi"]]
+        if pdb_residue_number_string[-1].isalpha():
+
+            pdb_residue_number = int(pdb_residue_number_string[:-1])
+            pdb_insertion_code = pdb_residue_number_string[-1]
+        else:
+            pdb_residue_number = int(pdb_residue_number_string)
+            pdb_insertion_code = None
+
+        residue = Residue(chain, pdb_residue_number, amino_acid, pdb_insertion_code)
+
+        information_content = float(row[column_indices["IC"]])
+        conservations = {amino_acid: float(row[column_indices[amino_acid.one_letter_code]]) for amino_acid in amino_acids}
+
+        conservation_rows[residue] = ConservationRow(conservations, information_content)
+
+    return ConservationTable(conservation_rows)
 
 
-def PSSM_aligned(pssmfiles,style='HADDOCK'):
+def add_pssms(structure, pssm_paths):
+    for chain in structure.chains:
+        path = pssm_paths[chain.id]
+        with open(path, 'rt') as f:
+            chain.pssm = parse_pssm(f, chain)
 
-    resmap = {
-    'A' : 'ALA', 'R' : 'ARG', 'N' : 'ASN', 'D' : 'ASP', 'C' : 'CYS', 'E' : 'GLU', 'Q' : 'GLN',
-    'G' : 'GLY', 'H' : 'HIS', 'I' : 'ILE', 'L' : 'LEU', 'K' : 'LYS', 'M' : 'MET', 'F' : 'PHE',
-    'P' : 'PRO', 'S' : 'SER', 'T' : 'THR', 'W' : 'TRP', 'Y' : 'TYR', 'V' : 'VAL',
-    'B' : 'ASX', 'U' : 'SEC', 'Z' : 'GLX'
-    }
-
-    pssm, ic = {}, {}
-    for chain in ['A','B']:
-
-        data = read_PSSM_data(pssmfiles[chain])
-        for l in data :
-            if style == 'res':
-                resi = int(l[0])
-                resn = resmap[l[1]]
-            elif style == 'seq':
-                resi = int(l[2])
-                resn = resmap[l[3]]
-            pssm[(chain,resi,resn)] = list(map(lambda x: float(x), l[4:24]))
-            ic[(chain,resi,resn)] = float(l[24])
-
-    return pssm, ic
-
-def get_pssm_data(node,pssm):
-    return pssm[node] if node in pssm else [0]*20
-
-def get_ic_data(node,ic):
-    return ic[node] if node in ic else 0.

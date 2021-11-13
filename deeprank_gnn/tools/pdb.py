@@ -8,6 +8,7 @@ def get_structure(pdb2sql, name):
     """ Builds a structure from rows in a pdb file
         Args:
             pdb2sql (pdb2sql object): the pdb structure that we're investigating
+            name (str): name for the pdb structure
         Returns (Structure): the structure object, giving access to chains, residues, atoms
     """
 

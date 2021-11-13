@@ -1,5 +1,5 @@
 from pdb2sql import pdb2sql
-from deeprank_gnn.operate.pdb import get_structure
+from deeprank_gnn.tools.pdb import get_structure
 from deeprank_gnn.domain.amino_acid import valine
 from deeprank_gnn.models.structure import AtomicElement
 

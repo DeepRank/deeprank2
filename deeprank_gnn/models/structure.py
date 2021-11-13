@@ -100,6 +100,15 @@ class Chain:
         self._model = model
         self._id = id_
         self._residues = []
+        self._pssm = None
+
+    @property
+    def pssm(self):
+        return self._pssm
+
+    @pssm.setter
+    def pssm(self, pssm):
+        self._pssm = pssm
 
     def add_residue(self, residue):
         self._residues.append(residue)
@@ -125,7 +134,7 @@ class Chain:
 class Structure:
     def __init__(self, id_):
         self._id = id_
-        self._chains = []
+        self._chains = {}
 
     def __eq__(self, other):
         return type(self) == type(other) and self._id == other._id
@@ -136,9 +145,15 @@ class Structure:
     def __repr__(self):
         return self._id
 
+    def get_chain(self, chain_id):
+        return self._chains[chain_id]
+
     def add_chain(self, chain):
-        self._chains.append(chain)
+        if chain.id in self._chains:
+            raise ValueError("duplicate chain: {}".format(chain.id))
+
+        self._chains[chain.id] = chain
 
     @property
     def chains(self):
-        return self._chains
+        return list(self._chains.values())
