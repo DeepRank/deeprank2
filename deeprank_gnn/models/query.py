@@ -10,6 +10,10 @@ class Query:
         self._model_id = model_id
         self._target = target
 
+    @property
+    def model_id(self):
+        return self._model_id
+
 
 class SingleResidueVariantQuery(Query):
     def __init__(self, model_id, chain_id, residue_number, wildtype_amino_acid, variant_amino_acid, distance_cutoff=10.0, target=None, insertion_code=None):
