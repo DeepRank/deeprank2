@@ -4,11 +4,11 @@ from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, Atomi
 from deeprank_gnn.domain.amino_acid import amino_acids
 
 
-def get_structure(pdb2sql, name):
+def get_structure(pdb2sql, id_):
     """ Builds a structure from rows in a pdb file
         Args:
             pdb2sql (pdb2sql object): the pdb structure that we're investigating
-            name (str): name for the pdb structure
+            id (str): unique id for the pdb structure
         Returns (Structure): the structure object, giving access to chains, residues, atoms
     """
 
@@ -19,7 +19,7 @@ def get_structure(pdb2sql, name):
     chains = {}
     residues = {}
 
-    structure = Structure(name)
+    structure = Structure(id_)
 
     # Iterate over the atom output from pdb2sql
     for row in pdb2sql.get("x,y,z,rowID,name,altLoc,element,chainID,resSeq,resName,iCode", model=0):
