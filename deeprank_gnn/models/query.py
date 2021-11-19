@@ -58,6 +58,44 @@ class ProteinProteinInterfaceQuery(Query):
     def __repr__(self):
         return "ProteinProteinInterfaceQuery({},{})".format(self._chain_id1, self._chain_id2)
 
+    def build_residue_graph(self, environment):
+
+        # read the pdb
+        pdb_path = environment.get_pdb_path(self.model_id)
+        pdb = pdb2sql.interface(pdb_path)
+        try:
+            residue_contact_pairs = get_residue_contact_pairs(pdb, self.residue_distance_cutoff)
+        finally:
+            pdb._close()
+
+        # read the pssm
+        pssm = Pssm()
+        for chain_id, pssm_path in environment.get_pssm_paths(self.model_id).items():
+            pssm.update(parse_pssm(chain_id, pssm_path))
+
+        # filter
+        valid_nodes = ProteinProteinInterfaceQuery._filter_valid_nodes(residue_contact_pairs, pssm)
+
+        # calculate distances
+        distances = get_residue_distances(environment.device, residue_contact_pairs)
+
+        # create the graph
+        graph = Graph(self.get_query_id())
+
+        for pair in residue_contact_pairs:
+            residue1, residue2 = pair
+            if residue1 in valid_nodes and residue2 in valid_nodes:
+                distance = distances[pair]
+
+                if ProteinProteinInterfaceQuery._is_internal_edge(residue1, residue2):
+
+                    graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERNAL)
+                else:
+                    graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERFACE)
+
+        return graph
+
+
 
 class QueryDataset:
     def __init__(self):
