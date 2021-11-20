@@ -31,18 +31,6 @@ def test_uniqueness():
     eq_(d[pair1], 1)
 
 
-def test_table():
-    # These should be different:
-    table = PairTable()
-    table[1, 2] = 0
-    table[1, 3] = 1
-
-    # test lookup:
-    eq_(table[1, 2], 0)
-    eq_(table[2, 1], 0)
-    eq_(table[1, 3], 1)
-
-
 def test_contact():
     # should be different distances
     pair1 = ContactPair(0, 1, 0.1)

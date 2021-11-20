@@ -14,7 +14,7 @@ class Pair:
     def __hash__(self):
         # The hash should be solely based on the two paired items, not on their order.
         # So rearrange the two items and turn them into a hashable tuple.
-        return hash(tuple(sorted([self.item1, self.item2])))
+        return hash(tuple(sorted([str(self.item1), str(self.item2)])))
 
     def __eq__(self, other):
         # Compare the pairs as sets, so the order doesn't matter.
@@ -39,17 +39,6 @@ class ContactPair(Pair):
     def __hash__(self):
         # The hash should be solely based on the two paired items, not on their order.
         # So rearrange the two items and turn them into a hashable tuple.
-        return hash(tuple(sorted([self.item1, self.item2]), self.distance))
+        return hash(tuple(sorted([str(self.item1), str(self.item2)]), self.distance))
 
 
-class PairTable(dict):
-    "a table that stores values per pair"
-
-    def __setitem__(self, items, value):
-        dict.__setitem__(self, Pair(items[0], items[1]), value)
-
-    def __getitem__(self, items):
-        return dict.__getitem__(self, Pair(items[0], items[1]))
-
-    def __delitem__(self, items):
-        dict.__delitem__(self, Pair(items[0], items[1]))
