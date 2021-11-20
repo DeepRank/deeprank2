@@ -1,13 +1,29 @@
 import numpy
+import torch
+from pdb2sql import pdb2sql
 
-from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement
+from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement, AtomicDistanceTable
 from deeprank_gnn.domain.amino_acid import amino_acids
+from deeprank_gnn.models.pair import Pair
 
 
-def get_structure(pdb2sql, id_):
+def _add_atom_to_residue(atom, residue):
+
+    for other_atom in residue.atoms:
+        if other_atom.name == atom.name:
+            # Don't allow two atoms with the same name, pick the highest occupancy
+            if other_atom.occupancy < atom.occupancy:
+                other_atom.change_altloc(atom)
+                return
+
+    # not there yet, add it
+    residue.add_atom(atom)
+
+
+def get_structure(pdb, id_):
     """ Builds a structure from rows in a pdb file
         Args:
-            pdb2sql (pdb2sql object): the pdb structure that we're investigating
+            pdb (pdb2sql object): the pdb structure that we're investigating
             id (str): unique id for the pdb structure
         Returns (Structure): the structure object, giving access to chains, residues, atoms
     """
@@ -22,9 +38,9 @@ def get_structure(pdb2sql, id_):
     structure = Structure(id_)
 
     # Iterate over the atom output from pdb2sql
-    for row in pdb2sql.get("x,y,z,rowID,name,altLoc,element,chainID,resSeq,resName,iCode", model=0):
+    for row in pdb.get("x,y,z,rowID,name,altLoc,occ,element,chainID,resSeq,resName,iCode", model=0):
 
-        x, y, z, atom_number, atom_name, altloc, element, chain_id, residue_number, residue_name, insertion_code = row
+        x, y, z, atom_number, atom_name, altloc, occupancy, element, chain_id, residue_number, residue_name, insertion_code = row
 
         # Make sure not to take the same atom twice.
         if altloc is not None and altloc != "" and altloc != "A":
@@ -63,7 +79,55 @@ def get_structure(pdb2sql, id_):
             residue = residues[residue_id]
 
         # Init atom.
-        atom = Atom(residue, atom_name, elements_by_name[element], atom_position)
-        residue.add_atom(atom)
+        atom = Atom(residue, atom_name, elements_by_name[element], atom_position, occupancy)
+        _add_atom_to_residue(atom, residue)
 
     return structure
+
+
+def get_atom_distances(device, structure):
+
+    atom_list = structure.get_atoms()
+    position_list = torch.tensor([atom.position for atom in atom_list]).to(device)
+
+    distance_matrix = torch.cdist(position_list, position_list, p=2)
+
+    return AtomicDistanceTable(atom_list, distance_matrix)
+
+
+def _get_shortest_distance(residue1, residue2, atomic_distance_table):
+
+    shortest_distance = 1e99
+    for atom1 in residue1.atoms:
+        for atom2 in residue2.atoms:
+            distance = atomic_distance_table[atom1, atom2]
+            if distance < shortest_distance:
+                shortest_distance = distance
+
+    return shortest_distance
+
+
+def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distance_cutoff):
+
+    pdb_path = environment.get_pdb_path(pdb_ac)
+
+    pdb = pdb2sql(pdb_path)
+    try:
+        structure = get_structure(pdb, pdb_ac)
+    finally:
+        pdb._close()
+
+    atomic_distance_table = get_atom_distances(environment.device, structure)
+
+    pair_distances = {}
+    for residue1 in structure.get_chain(chain_id1).residues:
+        for residue2 in structure.get_chain(chain_id2).residues:
+            if residue1 != residue2:
+
+                distance = _get_shortest_distance(residue1, residue2, atomic_distance_table)
+
+                if distance < distance_cutoff:
+
+                    pair_distances[Pair(residue1, residue2)] = distance
+
+    return pair_distances

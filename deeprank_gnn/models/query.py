@@ -83,10 +83,11 @@ class ProteinProteinInterfaceQuery(Query):
         graph = Graph(self.get_query_id())
 
         for pair in residue_contact_pairs:
-            residue1, residue2 = pair
-            if residue1 in valid_nodes and residue2 in valid_nodes:
-                distance = distances[pair]
+            residue1 = pair.item1
+            residue2 = pair.item2
+            distance = pair.distance
 
+            if residue1 in valid_nodes and residue2 in valid_nodes:
                 if ProteinProteinInterfaceQuery._is_internal_edge(residue1, residue2):
 
                     graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERNAL)

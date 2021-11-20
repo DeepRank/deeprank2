@@ -25,20 +25,3 @@ class Pair:
         return iter([self.item1, self.item2])
 
 
-class ContactPair(Pair):
-    "like a pair, but holds a distance too"
-
-    def __init__(self, item1, item2, distance):
-        Pair.__init__(self, item1, item2)
-        self.distance = distance
-
-    def __eq__(self, other):
-        # distance must match too
-        return Pair.__eq__(self, other) and self.distance == other.distance
-
-    def __hash__(self):
-        # The hash should be solely based on the two paired items, not on their order.
-        # So rearrange the two items and turn them into a hashable tuple.
-        return hash(tuple(sorted([str(self.item1), str(self.item2)]), self.distance))
-
-

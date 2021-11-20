@@ -11,11 +11,12 @@ class AtomicElement(Enum):
 
 
 class Atom:
-    def __init__(self, residue, name, element, position):
+    def __init__(self, residue, name, element, position, occupancy):
         self._residue = residue
         self._name = name
         self._element = element
         self._position = position
+        self._occupancy = occupancy
 
     def __eq__(self, other):
         return type(self) == type(other) and \
@@ -25,6 +26,10 @@ class Atom:
     def __hash__(self):
         return hash((self._residue, self._name))
 
+    def change_altloc(self, alternative_atom):
+        self._position = alternative_atom.position
+        self._occupancy = alternative_atom.occupancy
+
     @property
     def name(self):
         return self._name
@@ -32,6 +37,10 @@ class Atom:
     @property
     def element(self):
         return self._element
+
+    @property
+    def occupancy(self):
+        return self._occupancy
 
     @property
     def position(self):
@@ -92,7 +101,7 @@ class Residue:
         self._atoms.append(atom)
 
     def __repr__(self):
-        return "{} {}".format(self._chain, self.get_number_string())
+        return "{} {}".format(self._chain, self.number_string)
 
 
 class Chain:
@@ -157,3 +166,24 @@ class Structure:
     @property
     def chains(self):
         return list(self._chains.values())
+
+    def get_atoms(self):
+        atoms = []
+        for chain in self._chains.values():
+            for residue in chain.residues:
+                atoms.extend(residue.atoms)
+
+        return atoms
+
+
+class AtomicDistanceTable:
+    def __init__(self, atom_list, distance_matrix):
+        self._atom_list = atom_list
+        self._atom_indices = {atom: index for index, atom in enumerate(atom_list)}
+        self._distance_matrix = distance_matrix
+
+    def __getitem__(self, atoms):
+        index0 = self._atom_indices[atoms[0]]
+        index1 = self._atom_indices[atoms[1]]
+
+        return self._distance_matrix[index0, index1]

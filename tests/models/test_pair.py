@@ -31,11 +31,3 @@ def test_uniqueness():
     eq_(d[pair1], 1)
 
 
-def test_contact():
-    # should be different distances
-    pair1 = ContactPair(0, 1, 0.1)
-    pair2 = ContactPair(1, 0, 0.1)
-    pair3 = ContactPair(0, 1, 0.2)
-
-    ok_(pair1 == pair2)
-    ok_(pair1 != pair3)
