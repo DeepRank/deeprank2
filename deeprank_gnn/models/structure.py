@@ -68,6 +68,13 @@ class Residue:
     def __hash__(self):
         return hash((self._chain, self._number, self._insertion_code))
 
+    def get_pssm(self):
+        pssm = self._chain.pssm
+        if pssm is None:
+            raise ValueError("pssm not set on {}".format(self._chain))
+
+        return pssm[self]
+
     @property
     def number(self):
         return self._number

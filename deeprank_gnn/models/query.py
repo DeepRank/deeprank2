@@ -1,10 +1,16 @@
 from enum import Enum
 import logging
 
+import pdb2sql
+import numpy
+
 from deeprank_gnn.tools.pssm import parse_pssm
+from deeprank_gnn.tools import BioWrappers, BSA
 from deeprank_gnn.tools.pdb import get_residue_contact_pairs, get_residue_distance
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
+from deeprank_gnn.domain.feature import *
+from deeprank_gnn.domain.amino_acid import *
 
 
 _log = logging.getLogger(__name__)
@@ -135,7 +141,9 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
                 distance = get_residue_distance(residue1, residue2)
 
-                graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERFACE)
+                graph.add_edge(residue1, residue2)
+                graph.edges[residue1, residue2][FEATURENAME_EDGEDISTANCE] = distance
+                graph.edges[residue1, residue2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
 
         # internal edges
         for residue_set in (residues_from_chain1, residues_from_chain2):
@@ -145,9 +153,53 @@ class ProteinProteinInterfaceResidueQuery(Query):
                     distance = get_residue_distance(residue1, residue2)
 
                     if distance < self._internal_distance_cutoff:
-                        graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERNAL)
+                        graph.add_edge(residue1, residue2)
+                        graph.edges[residue1, residue2][FEATURENAME_EDGEDISTANCE] = distance
+                        graph.edges[residue1, residue2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+
+        pdb_path = environment.get_pdb_path(self.model_id)
+
+        # get bsa
+        pdb = pdb2sql.interface(pdb_path)
+        try:
+            bsa_calc = BSA.BSA(pdb_path, pdb)
+            bsa_calc.get_structure()
+            bsa_calc.get_contact_residue_sasa(cutoff=self._interface_distance_cutoff)
+            bsa_data = bsa_calc.bsa_data
+        finally:
+            pdb._close()
+
+        # get biopython features
+        bio_model = BioWrappers.get_bio_model(pdb_path)
+        residue_depths = BioWrappers.get_depth_contact_res(bio_model,
+                                                           [(residue.chain.id, residue.number, residue.amino_acid.three_letter_code) for residue in graph.nodes])
+        hse = BioWrappers.get_hse(bio_model)
+
+        # add node features
+        chain_codes = {chain1: 0.0, chain2: 1.0}
+        for residue in graph.nodes:
+            residue_key = (residue.chain.id, residue.number, residue.amino_acid.three_letter_code)
+            bio_key = (residue.chain.id, residue.number)
+
+            pssm_row = residue.get_pssm()
+            pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in self.amino_acid_order]
+
+            graph.nodes[residue][FEATURENAME_CHAIN] = chain_codes[residue.chain]
+            graph.nodes[residue][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms])
+            graph.nodes[residue][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+            graph.nodes[residue][FEATURENAME_CHARGE] = residue.amino_acid.charge
+            graph.nodes[residue][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+            graph.nodes[residue][FEATURENAME_BURIEDSURFACEAREA] = bsa_data[residue_key]
+            graph.nodes[residue][FEATURENAME_PSSM] = pssm_value
+            graph.nodes[residue][FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
+            graph.nodes[residue][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+            graph.nodes[residue][FEATURENAME_RESIDUEDEPTH] = residue_depths[residue] if residue in residue_depths else 0.0
+            graph.nodes[residue][FEATURENAME_HALFSPHEREEXPOSURE] = hse[bio_key] if bio_key in hse else (0.0, 0.0, 0.0)
 
         return graph
+
+    amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
+                        leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
 
 
 class QueryDataset:
