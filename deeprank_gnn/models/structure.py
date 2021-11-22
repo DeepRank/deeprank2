@@ -112,6 +112,10 @@ class Chain:
         self._pssm = None
 
     @property
+    def model(self):
+        return self._model
+
+    @property
     def pssm(self):
         return self._pssm
 

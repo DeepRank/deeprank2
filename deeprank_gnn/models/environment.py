@@ -21,3 +21,11 @@ class Environment:
                 return path
 
         raise FileNotFoundError("No pdb file found for {} under {}".format(pdb_ac, self.pdb_root))
+
+    def get_pssm_path(self, pdb_ac, chain_id):
+        for path in [os.path.join(self.pssm_root, "{}/{}.{}.pdb.pssm".format(pdb_ac, pdb_ac, chain_id))]:
+
+            if os.path.isfile(path):
+                return path
+
+        raise FileNotFoundError("No pssm file found for {} {} under {}".format(pdb_ac, chain_id, self.pdb_root))

@@ -1,10 +1,10 @@
-import networkx
+from networkx import Graph as NetworkxGraph
 
+class Graph(NetworkxGraph):
+    "this is a graph just like in networkx, but with an id"
 
-def Graph(networkx.Graph):
-    def __init__(self, id_)
-        networkx.Graph.__init__(self)
-
+    def __init__(self, id_):
+        NetworkxGraph.__init__(self)
         self._id = id_
 
     @property

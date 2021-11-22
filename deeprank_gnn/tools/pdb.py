@@ -1,6 +1,7 @@
 from time import time
 import logging
 
+from scipy.spatial import distance_matrix
 import numpy
 import torch
 from pdb2sql import pdb2sql, interface as get_interface
@@ -91,16 +92,14 @@ def get_structure(pdb, id_):
     return structure
 
 
-def _get_shortest_distance(residue1, residue2, atomic_distance_table):
+def get_residue_distance(residue1, residue2):
 
-    shortest_distance = 1e99
-    for atom1 in residue1.atoms:
-        for atom2 in residue2.atoms:
-            distance = atomic_distance_table[atom1, atom2]
-            if distance < shortest_distance:
-                shortest_distance = distance
+    residue1_atom_positions = numpy.array([atom.position for atom in residue1.atoms])
+    residue2_atom_positions = numpy.array([atom.position for atom in residue2.atoms])
 
-    return shortest_distance
+    distances = distance_matrix(residue1_atom_positions, residue2_atom_positions, p=2)
+
+    return numpy.min(distances)
 
 
 def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distance_cutoff):
