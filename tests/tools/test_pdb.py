@@ -51,7 +51,7 @@ def test_residue_contact_pairs():
 
     environment = Environment(pdb_root="tests/data/pdb", device="cpu")
 
-    pair_distances = get_residue_contact_pairs(environment, "1ATN", "A", "B", 8.5)
+    residues1, residues2 = get_residue_contact_pairs(environment, "1ATN", "A", "B", 8.5)
 
-    assert len(pair_distances) > 0
-    assert list(pair_distances.values())[0] < 8.5
+    assert len(residues1) > 0
+    assert len(residues2) > 0

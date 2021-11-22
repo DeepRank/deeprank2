@@ -124,25 +124,21 @@ def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distanc
 
     contact_indices = torch.nonzero(neighbour_matrix)
 
-    residue_pair_distances = {}
     chain_pair = Pair(chain_id1, chain_id2)
 
+    residues1 = set([])
+    residues2 = set([])
+
     # Convert from torch tensor to numpy for faster data access.
-    distance_matrix = distance_matrix.numpy()
     for index1, index2 in contact_indices.numpy():
 
         atom1 = atom_list[index1]
         atom2 = atom_list[index2]
-        distance = distance_matrix[index1, index2]
 
-        residue1 = atom1.residue
-        residue2 = atom2.residue
+        if Pair(atom1.residue.chain.id, atom2.residue.chain.id) == chain_pair:
 
-        if Pair(residue1.chain.id, residue2.chain.id) == chain_pair:
+            residues1.add(atom1.residue)
+            residues2.add(atom2.residue)
 
-            residue_pair = Pair(residue1, residue2)
-            if residue_pair not in residue_pair_distances or residue_pair_distances[residue_pair] > distance:
-                residue_pair_distances[residue_pair] = distance
-
-    return residue_pair_distances
+    return residues1, residues2
 
