@@ -39,11 +39,3 @@ def parse_pssm(file_, chain):
         conservation_rows[residue] = ConservationRow(conservations, information_content)
 
     return ConservationTable(conservation_rows)
-
-
-def add_pssms(structure, pssm_paths):
-    for chain in structure.chains:
-        path = pssm_paths[chain.id]
-        with open(path, 'rt') as f:
-            chain.pssm = parse_pssm(f, chain)
-
