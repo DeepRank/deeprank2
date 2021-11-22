@@ -2,79 +2,30 @@ from deeprank_gnn.models.amino_acid import AminoAcid
 from deeprank_gnn.models.polarity import Polarity
 
 
-alanine = AminoAcid("Alanine", "ALA", "A")
-cysteine = AminoAcid("Cysteine", "CYS", "C")
-aspartate = AminoAcid("Aspartate", "ASP", "D")
-glutamate = AminoAcid("Glutamate", "GLU", "E")
-phenylalanine = AminoAcid("Phenylalanine", "PHE", "F")
-glycine = AminoAcid("Glycine", "GLY", "G")
-histidine = AminoAcid("Histidine", "HIS", "H")
-isoleucine = AminoAcid("Isoleucine", "ILE", "I")
-leucine = AminoAcid("Leucine", "LEU", "L")
-lysine = AminoAcid("Lysine", "LYS", "K")
-methionine = AminoAcid("Methionine", "MET", "M")
-proline = AminoAcid("Proline", "PRO", "P")
-serine = AminoAcid("Serine", "SER", "S")
-threonine = AminoAcid("Threonine", "THR", "T")
-tryptophan = AminoAcid("Tryptophan", "TRP", "W")
-tyrosine = AminoAcid("Tyrosine", "TYR", "Y")
-valine = AminoAcid("Valine", "VAL", "V")
+alanine = AminoAcid("Alanine", "ALA", "A", charge=-0.37, polarity=Polarity.APOLAR, index=0)
+cysteine = AminoAcid("Cysteine", "CYS", "C", charge=-0.64, polarity=Polarity.POLAR, index=1)
+aspartate = AminoAcid("Aspartate", "ASP", "D", charge=-1.37, polarity=Polarity.NEGATIVE_CHARGE, index=2)
+glutamate = AminoAcid("Glutamate", "GLU", "E", charge=-1.37, polarity=Polarity.NEGATIVE_CHARGE, index=3)
+phenylalanine = AminoAcid("Phenylalanine", "PHE", "F", charge=-0.37, polarity=Polarity.APOLAR, index=4)
+glycine = AminoAcid("Glycine", "GLY", "G", charge=-0.37, polarity=Polarity.APOLAR, index=5)
+histidine = AminoAcid("Histidine", "HIS", "H", charge=-0.29, polarity=Polarity.POLAR, index=6)
+isoleucine = AminoAcid("Isoleucine", "ILE", "I", charge=-0.37, polarity=Polarity.APOLAR, index=7)
+leucine = AminoAcid("Leucine", "LEU", "L", charge=-0.37, polarity=Polarity.APOLAR, index=8)
+lysine = AminoAcid("Lysine", "LYS", "K", charge=-0.36, polarity=Polarity.POSITIVE_CHARGE, index=9)
+methionine = AminoAcid("Methionine", "MET", "M", charge=-0.37, polarity=Polarity.APOLAR, index=10)
+proline = AminoAcid("Proline", "PRO", "P", charge=0.0, polarity=Polarity.APOLAR, index=11)
+serine = AminoAcid("Serine", "SER", "S", charge=-0.80, polarity=Polarity.POLAR, index=12)
+threonine = AminoAcid("Threonine", "THR", "T", charge=-0.80, polarity=Polarity.POLAR, index=13)
+tryptophan = AminoAcid("Tryptophan", "TRP", "W", charge=-0.79, polarity=Polarity.POLAR, index=14)
+tyrosine = AminoAcid("Tyrosine", "TYR", "Y", charge=-0.80, polarity=Polarity.POLAR, index=15)
+valine = AminoAcid("Valine", "VAL", "V", charge=-0.37, polarity=Polarity.APOLAR, index=16)
 selenocysteine = AminoAcid("Selenocysteine", "SEC", "U")
 pyrrolysine = AminoAcid("Pyrrolysine", "PYL", "O")
-arginine = AminoAcid("Arginine", "ARG", "R")
-asparagine = AminoAcid("Asparagine", "ASN", "N")
-glutamine = AminoAcid("Glutamine", "GLN", "Q")
+arginine = AminoAcid("Arginine", "ARG", "R", charge=-1.65, polarity=Polarity.POSITIVE_CHARGE, index=17)
+asparagine = AminoAcid("Asparagine", "ASN", "N", charge=-1.22, polarity=Polarity.POLAR, index=18)
+glutamine = AminoAcid("Glutamine", "GLN", "Q", charge=-1.22, polarity=Polarity.POLAR, index=19)
 
 
 amino_acids = [alanine, arginine, asparagine, aspartate, cysteine, glutamate, glutamine, glycine,
                histidine, isoleucine, leucine, lysine, methionine, phenylalanine, proline, serine,
                threonine, tryptophan, tyrosine, valine]
-
-amino_acid_charges = {
-
-    cysteine: -0.64,
-    histidine: -0.29,
-    asparagine: -1.22,
-    glutamine: -1.22,
-    serine: -0.80,
-    threonine: -0.80,
-    tyrosine: -0.80,
-    tryptophan: -0.79,
-    alanine: -0.37,
-    phenylalanine: -0.37,
-    glycine: -0.37,
-    isoleucine: -0.37,
-    valine: -0.37,
-    methionine: -0.37,
-    proline: 0.0,
-    leucine: -0.37,
-    glutamate: -1.37,
-    aspartate: -1.37,
-    lysine: -0.36,
-    arginine: -1.65
-}
-
-
-amino_acid_polarities = {
-
-    cysteine: Polarity.POLAR,
-    histidine: Polarity.POLAR,
-    asparagine: Polarity.POLAR,
-    glutamine: Polarity.POLAR,
-    serine: Polarity.POLAR,
-    threonine: Polarity.POLAR,
-    tyrosine: Polarity.POLAR,
-    tryptophan: Polarity.POLAR,
-    alanine: Polarity.APOLAR,
-    phenylalanine: Polarity.APOLAR,
-    glycine: Polarity.APOLAR,
-    isoleucine: Polarity.APOLAR,
-    valine: Polarity.APOLAR,
-    methionine: Polarity.APOLAR,
-    proline: Polarity.APOLAR,
-    leucine: Polarity.APOLAR,
-    glutamate: Polarity.NEGATIVE_CHARGE,
-    aspartate: Polarity.NEGATIVE_CHARGE,
-    lysine: Polarity.POSITIVE_CHARGE,
-    arginine: Polarity.POSITIVE_CHARGE
-}
