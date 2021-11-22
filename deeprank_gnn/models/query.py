@@ -1,6 +1,7 @@
 from enum import Enum
 
-from deeprank_gnn.tools.pdb import get_structure
+from deeprank_gnn.tools.pdb import get_residue_contact_pairs, get_residue_distance
+from deeprank_gnn.models.graph import Graph
 
 
 class Query:
@@ -42,12 +43,20 @@ class SingleResidueVariantQuery(Query):
                                                                  self._wildtype_amino_acid, self._variant_amino_acid)
 
 
-class ProteinProteinInterfaceQuery(Query):
-    def __init__(self, model_id, chain_id1, chain_id2, distance_cutoff=8.5, target=None):
-        Query.__init__(QueryType.PROTEIN_PROTEIN_INTERFACE, model_id, distance_cutoff, target)
+class ProteinProteinInterfaceResidueQuery(Query):
+    "a query that builds residue-based graphs, using the residues at a protein-protein interface"
+
+    def __init__(self, model_id, chain_id1, chain_id2, interface_distance_cutoff=8.5, internal_distance_cutoff=3.0, target=None):
+        Query.__init__(self, model_id, target)
 
         self._chain_id1 = chain_id1
         self._chain_id2 = chain_id2
+
+        self._interface_distance_cutoff = interface_distance_cutoff
+        self._internal_distance_cutoff = internal_distance_cutoff
+
+    def get_query_id(self):
+        return "{}:{}-{}".format(model_id, chain_id1, chain_id2)
 
     def __eq__(self, other):
         return type(self) == type(other) and {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
@@ -56,43 +65,47 @@ class ProteinProteinInterfaceQuery(Query):
         return hash(tuple(sorted([self._chain_id1, self._chain_id2])))
 
     def __repr__(self):
-        return "ProteinProteinInterfaceQuery({},{})".format(self._chain_id1, self._chain_id2)
+        return "ProteinProteinInterfaceResidueQuery({},{})".format(self._chain_id1, self._chain_id2)
 
-    def build_residue_graph(self, environment):
+    def build_graph(self, environment):
 
-        # read the pdb
-        pdb_path = environment.get_pdb_path(self.model_id)
-        pdb = pdb2sql.interface(pdb_path)
-        try:
-            residue_contact_pairs = get_residue_contact_pairs(pdb, self.residue_distance_cutoff)
-        finally:
-            pdb._close()
+        # get residues from the pdb
+        interface_pairs = get_residue_contact_pairs(environment,
+                                                    self.model_id, self._chain_id1, self._chain_id2,
+                                                    self._interface_distance_cutoff)
+        residues_from_chain1 = set([])
+        residues_from_chain2 = set([])
+        for residue1, residue2 in interface_pairs:
+
+            if residue1.chain.id == self._chain_id1:
+                residues_from_chain1.add(residue1)
+
+            elif residue1.chain.id == self._chain_id2:
+                residues_from_chain2.add(residue1)
+
+            if residue2.chain.id == self._chain_id1:
+                residues_from_chain1.add(residue2)
+
+            elif residue2.chain.id == self._chain_id2:
+                residues_from_chain2.add(residue2)
 
         # read the pssm
         pssm = Pssm()
         for chain_id, pssm_path in environment.get_pssm_paths(self.model_id).items():
-            pssm.update(parse_pssm(chain_id, pssm_path))
+            with open(pssm_path, 'rt') as f:
+                pssm.update(parse_pssm(f, chain_id))
 
         # filter
         valid_nodes = ProteinProteinInterfaceQuery._filter_valid_nodes(residue_contact_pairs, pssm)
-
-        # calculate distances
-        distances = get_residue_distances(environment.device, residue_contact_pairs)
 
         # create the graph
         graph = Graph(self.get_query_id())
 
         for pair in residue_contact_pairs:
-            residue1 = pair.item1
-            residue2 = pair.item2
-            distance = pair.distance
+            residue1, residue2 = pair
+            distance = get_residue_distance(residue1, residue2)
 
-            if residue1 in valid_nodes and residue2 in valid_nodes:
-                if ProteinProteinInterfaceQuery._is_internal_edge(residue1, residue2):
-
-                    graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERNAL)
-                else:
-                    graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERFACE)
+            graph.add_edge(residue1, residue2, dist=distance, type=EDGETYPE_INTERFACE)
 
         return graph
 
