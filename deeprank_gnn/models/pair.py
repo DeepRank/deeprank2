@@ -13,12 +13,20 @@ class Pair:
 
     def __hash__(self):
         # The hash should be solely based on the two paired items, not on their order.
-        # So rearrange the two items and turn them into a hashable tuple.
-        return hash(tuple(sorted([str(self.item1), str(self.item2)])))
+
+        s1 = str(self.item1)
+        s2 = str(self.item2)
+
+        if s1 < s2:
+            return hash(s1 + s2)
+        else:
+            return hash(s2 + s1)
 
     def __eq__(self, other):
         # Compare the pairs as sets, so the order doesn't matter.
-        return {self.item1, self.item2} == {other.item1, other.item2}
+
+        return self.item1 == other.item1 and self.item2 == other.item2 or \
+               self.item1 == other.item2 and self.item2 == other.item1
 
     def __iter__(self):
         # Iterate over the two items in the pair.

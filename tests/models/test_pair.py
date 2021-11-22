@@ -1,6 +1,6 @@
 from nose.tools import eq_, ok_
 
-from deeprank_gnn.models.pair import Pair, PairTable, ContactPair
+from deeprank_gnn.models.pair import Pair
 
 
 def test_order_independency():
