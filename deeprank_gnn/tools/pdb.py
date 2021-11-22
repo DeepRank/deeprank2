@@ -3,7 +3,7 @@ import logging
 
 import numpy
 import torch
-from pdb2sql import pdb2sql
+from pdb2sql import pdb2sql, interface as get_interface
 
 from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement
 from deeprank_gnn.domain.amino_acid import amino_acids
@@ -105,8 +105,7 @@ def _get_shortest_distance(residue1, residue2, atomic_distance_table):
 
 def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distance_cutoff):
 
-    t0 = time()
-
+    # load the structure
     pdb_path = environment.get_pdb_path(pdb_ac)
 
     pdb = pdb2sql(pdb_path)
@@ -115,30 +114,42 @@ def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distanc
     finally:
         pdb._close()
 
-    atom_list = structure.get_atoms()
-    position_list = torch.tensor([atom.position for atom in atom_list]).to(environment.device)
+    # Find out which residues are pairs
+    interface = get_interface(pdb_path)
+    try:
+        contact_residues = interface.get_contact_residues(cutoff=distance_cutoff,
+                                                          chain1=chain_id1, chain2=chain_id2,
+                                                          return_contact_pairs=True)
+    finally:
+        interface._close()
 
-    distance_matrix = torch.cdist(position_list, position_list, p=2)
+    # Map to residue objects
+    residue_pairs = set([])
+    for residue_key1 in contact_residues:
+        residue_chain_id1, residue_number1, residue_name1 = residue_key1
 
-    neighbour_matrix = distance_matrix < distance_cutoff
+        chain1 = structure.get_chain(residue_chain_id1)
 
-    contact_indices = torch.nonzero(neighbour_matrix)
+        residue1 = None
+        for residue in chain1.residues:
+            if residue.number == residue_number1 and residue.amino_acid.three_letter_code == residue_name1:
+                residue1 = residue
+                break
+        else:
+            raise ValueError("Not found: {} {} {} {}".format(pdb_ac, residue_chain_id1, residue_number1, residue_name1))
 
-    chain_pair = Pair(chain_id1, chain_id2)
+        for residue_chain_id2, residue_number2, residue_name2 in contact_residues[residue_key1]:
 
-    residues1 = set([])
-    residues2 = set([])
+            chain2 = structure.get_chain(residue_chain_id2)
 
-    # Convert from torch tensor to numpy for faster data access.
-    for index1, index2 in contact_indices.numpy():
+            residue2 = None
+            for residue in chain2.residues:
+                if residue.number == residue_number2 and residue.amino_acid.three_letter_code == residue_name2:
+                    residue2 = residue
+                    break
+            else:
+                raise ValueError("Not found: {} {} {} {}".format(pdb_ac, residue_chain_id2, residue_number2, residue_name2))
 
-        atom1 = atom_list[index1]
-        atom2 = atom_list[index2]
+            residue_pairs.add(Pair(residue1, residue2))
 
-        if Pair(atom1.residue.chain.id, atom2.residue.chain.id) == chain_pair:
-
-            residues1.add(atom1.residue)
-            residues2.add(atom2.residue)
-
-    return residues1, residues2
-
+    return residue_pairs
