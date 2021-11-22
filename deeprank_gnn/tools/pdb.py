@@ -127,7 +127,10 @@ def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distanc
     residue_pair_distances = {}
     chain_pair = Pair(chain_id1, chain_id2)
 
+    # Convert from torch tensor to numpy for faster data access.
+    distance_matrix = distance_matrix.numpy()
     for index1, index2 in contact_indices.numpy():
+
         atom1 = atom_list[index1]
         atom2 = atom_list[index2]
         distance = distance_matrix[index1, index2]
