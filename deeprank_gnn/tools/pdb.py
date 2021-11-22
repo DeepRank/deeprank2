@@ -1,10 +1,16 @@
+from time import time
+import logging
+
 import numpy
 import torch
 from pdb2sql import pdb2sql
 
-from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement, AtomicDistanceTable
+from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement
 from deeprank_gnn.domain.amino_acid import amino_acids
 from deeprank_gnn.models.pair import Pair
+
+
+_log = logging.getLogger(__name__)
 
 
 def _add_atom_to_residue(atom, residue):
@@ -85,16 +91,6 @@ def get_structure(pdb, id_):
     return structure
 
 
-def get_atom_distances(device, structure):
-
-    atom_list = structure.get_atoms()
-    position_list = torch.tensor([atom.position for atom in atom_list]).to(device)
-
-    distance_matrix = torch.cdist(position_list, position_list, p=2)
-
-    return AtomicDistanceTable(atom_list, distance_matrix)
-
-
 def _get_shortest_distance(residue1, residue2, atomic_distance_table):
 
     shortest_distance = 1e99
@@ -109,6 +105,8 @@ def _get_shortest_distance(residue1, residue2, atomic_distance_table):
 
 def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distance_cutoff):
 
+    t0 = time()
+
     pdb_path = environment.get_pdb_path(pdb_ac)
 
     pdb = pdb2sql(pdb_path)
@@ -117,17 +115,31 @@ def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distanc
     finally:
         pdb._close()
 
-    atomic_distance_table = get_atom_distances(environment.device, structure)
+    atom_list = structure.get_atoms()
+    position_list = torch.tensor([atom.position for atom in atom_list]).to(environment.device)
 
-    pair_distances = {}
-    for residue1 in structure.get_chain(chain_id1).residues:
-        for residue2 in structure.get_chain(chain_id2).residues:
-            if residue1 != residue2:
+    distance_matrix = torch.cdist(position_list, position_list, p=2)
 
-                distance = _get_shortest_distance(residue1, residue2, atomic_distance_table)
+    neighbour_matrix = distance_matrix < distance_cutoff
 
-                if distance < distance_cutoff:
+    contact_indices = torch.nonzero(neighbour_matrix)
 
-                    pair_distances[Pair(residue1, residue2)] = distance
+    residue_pair_distances = {}
+    chain_pair = Pair(chain_id1, chain_id2)
 
-    return pair_distances
+    for index1, index2 in contact_indices.numpy():
+        atom1 = atom_list[index1]
+        atom2 = atom_list[index2]
+        distance = distance_matrix[index1, index2]
+
+        residue1 = atom1.residue
+        residue2 = atom2.residue
+
+        if Pair(residue1.chain.id, residue2.chain.id) == chain_pair:
+
+            residue_pair = Pair(residue1, residue2)
+            if residue_pair not in residue_pair_distances or residue_pair_distances[residue_pair] > distance:
+                residue_pair_distances[residue_pair] = distance
+
+    return residue_pair_distances
+
