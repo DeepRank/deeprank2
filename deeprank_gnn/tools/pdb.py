@@ -132,7 +132,7 @@ def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distanc
 
         residue1 = None
         for residue in chain1.residues:
-            if residue.number == residue_number1 and residue.amino_acid.three_letter_code == residue_name1:
+            if residue.number == residue_number1 and residue.amino_acid is not None and residue.amino_acid.three_letter_code == residue_name1:
                 residue1 = residue
                 break
         else:
@@ -144,7 +144,7 @@ def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distanc
 
             residue2 = None
             for residue in chain2.residues:
-                if residue.number == residue_number2 and residue.amino_acid.three_letter_code == residue_name2:
+                if residue.number == residue_number2 and residue.amino_acid is not None and residue.amino_acid.three_letter_code == residue_name2:
                     residue2 = residue
                     break
             else:
