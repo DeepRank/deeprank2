@@ -6,6 +6,7 @@
 
 # distribution
 deeprank_gnn.egg-info
+DeepRank_GNN.egg-info
 build/*
 dist/*
 

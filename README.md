@@ -4,17 +4,29 @@
 [![Build Status](https://github.com/DeepRank/DeepRank-GNN/workflows/build/badge.svg)](https://github.com/DeepRank/DeepRank-GNN/actions)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/DeepRank-GNN?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/DeepRank-GNN&utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/DeepRank/Deeprank-GNN/badge.svg?branch=master)](https://coveralls.io/github/DeepRank/Deeprank-GNN?branch=master)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5705564.svg)](https://doi.org/10.5281/zenodo.5705564)
 
 ![alt-text](./deeprank_gnn.png)
 
 ## Installation
 
-You'll probably need to manually install pytorch geometric
-  * pytorch_geometric : https://github.com/rusty1s/pytorch_geometric
+Before installing DeepRank-GNN you need to install pytorch_geometric according to your needs. You can find detailled instructions here :
+  * pytorch_geometric : https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html
 
-When all the dependencies are installed just clone the repo and install it with:
+By default the CPU version of pytorch will be installed but you can also customize that installation following the instructions at:
+  * pytorch : https://pytorch.org/ 
+
+Once the dependencies installed, you can install the latest release of DeepRank-GNN using the PyPi package manager:
 
 ```
+pip install DeepRank-GNN
+```
+
+Alternatively you can get all the new developments by cloning the repo and installing the code with
+
+```
+git clone https://DeepRank/Deeprank-GNN 
+cd DeepRank-GNN
 pip install -e ./
 ```
 
