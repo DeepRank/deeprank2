@@ -185,16 +185,3 @@ class Structure:
                 atoms.extend(residue.atoms)
 
         return atoms
-
-
-class AtomicDistanceTable:
-    def __init__(self, atom_list, distance_matrix):
-        self._atom_list = atom_list
-        self._atom_indices = {atom: index for index, atom in enumerate(atom_list)}
-        self._distance_matrix = distance_matrix
-
-    def __getitem__(self, atoms):
-        index0 = self._atom_indices[atoms[0]]
-        index1 = self._atom_indices[atoms[1]]
-
-        return self._distance_matrix[index0, index1]
