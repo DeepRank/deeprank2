@@ -2,6 +2,8 @@ from enum import Enum
 
 
 class AtomicElement(Enum):
+    "value to represent the type of pdb atoms"
+    
     C = 1
     O = 2
     N = 3
@@ -11,7 +13,17 @@ class AtomicElement(Enum):
 
 
 class Atom:
+    "represents a pdb atom"
+    
     def __init__(self, residue, name, element, position, occupancy):
+        """
+            Args:
+                residue(deeprank residue object): the residue that this atom belongs to
+                name(str): pdb atom name
+                element(deeprank atomic element enumeration): the chemical element
+                position(numpy array of length 3): pdb position xyz of this atom
+                occupancy(float): pdb occupancy value
+        """
         self._residue = residue
         self._name = name
         self._element = element
@@ -27,6 +39,8 @@ class Atom:
         return hash((self._residue, self._name))
 
     def change_altloc(self, alternative_atom):
+        "replace the atom's location by another atom's location"
+        
         self._position = alternative_atom.position
         self._occupancy = alternative_atom.occupancy
 
@@ -52,7 +66,17 @@ class Atom:
 
 
 class Residue:
+    "represents a pdb residue"
+    
     def __init__(self, chain, number, amino_acid=None, insertion_code=None):
+        """
+        Args:
+            chain(deeprank chain object): the chain that this residue belongs to
+            number(int): the residue number
+            amino_acid(deeprank amino acid, optional): the residue's amino acid (if it's part of a protein)
+            insertion_code(str, optional): the pdb insertion code, if any
+        """
+        
         self._chain = chain
         self._number = number
         self._amino_acid = amino_acid
@@ -69,6 +93,10 @@ class Residue:
         return hash((self._chain, self._number, self._insertion_code))
 
     def get_pssm(self):
+        """ if the residue's chain has pssm info linked to it,
+            then return the part that belongs to this residue
+        """
+        
         pssm = self._chain.pssm
         if pssm is None:
             raise ValueError("pssm not set on {}".format(self._chain))
@@ -112,11 +140,19 @@ class Residue:
 
 
 class Chain:
+    "represents one pdb chain"
+    
     def __init__(self, model, id_):
+        """
+        Args:
+            model(deeprank structure object): the model that this chain is part of
+            id_(str): the pdb identifier of this chain
+        """
+        
         self._model = model
         self._id = id_
         self._residues = []
-        self._pssm = None
+        self._pssm = None  # pssm is per chain
 
     @property
     def model(self):
@@ -152,7 +188,13 @@ class Chain:
 
 
 class Structure:
+    "represents one entire pdb structure"
+    
     def __init__(self, id_):
+        """
+            Args:
+                id_(str): an unique identifier for this structure, usually the pdb accession code.
+        """
         self._id = id_
         self._chains = {}
 
@@ -179,6 +221,7 @@ class Structure:
         return list(self._chains.values())
 
     def get_atoms(self):
+        "shortcut to list all atoms in this structure"
         atoms = []
         for chain in self._chains.values():
             for residue in chain.residues:
