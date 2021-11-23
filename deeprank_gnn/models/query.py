@@ -224,3 +224,5 @@ class QueryDataset:
     def __contains__(self, query):
         return query in self._queries
 
+    def __iter__(self):
+        return iter(self._queries)
