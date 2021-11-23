@@ -19,18 +19,26 @@ _log = logging.getLogger(__name__)
 class Query:
     "objects of this class are created before any model is loaded"
 
-    def __init__(self, model_id, target=None):
+    def __init__(self, model_id, targets=None):
         self._model_id = model_id
-        self._target = target
+
+        if targets is None:
+            self._targets = {}
+        else:
+            self._targets = targets
 
     @property
     def model_id(self):
         return self._model_id
 
+    @property
+    def targets(self):
+        return self._targets
+
 
 class SingleResidueVariantQuery(Query):
-    def __init__(self, model_id, chain_id, residue_number, wildtype_amino_acid, variant_amino_acid, nonbonded_distance_cutoff=10.0, target=None, insertion_code=None):
-        Query.__init__(QueryType.SINGLE_RESIDUE_VARIANT, model_id, distance_cutoff, target)
+    def __init__(self, model_id, chain_id, residue_number, wildtype_amino_acid, variant_amino_acid, nonbonded_distance_cutoff=10.0, targets=None, insertion_code=None):
+        Query.__init__(QueryType.SINGLE_RESIDUE_VARIANT, model_id, distance_cutoff, targets)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -58,8 +66,8 @@ class SingleResidueVariantQuery(Query):
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
 
-    def __init__(self, model_id, chain_id1, chain_id2, interface_distance_cutoff=8.5, internal_distance_cutoff=3.0, target=None):
-        Query.__init__(self, model_id, target)
+    def __init__(self, model_id, chain_id1, chain_id2, interface_distance_cutoff=8.5, internal_distance_cutoff=3.0, targets=None):
+        Query.__init__(self, model_id, targets)
 
         self._chain_id1 = chain_id1
         self._chain_id2 = chain_id2
@@ -131,7 +139,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
                     residues_from_chain2.add(residue2)
 
         # create the graph
-        graph = Graph(self.get_query_id())
+        graph = Graph(self.get_query_id(), self.targets)
 
         # interface edges
         for pair in interface_pairs:

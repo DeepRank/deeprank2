@@ -1,4 +1,4 @@
-import torch
+import numpy
 
 from enum import Enum
 
@@ -9,8 +9,9 @@ class Polarity(Enum):
     NEGATIVE_CHARGE = 2
     POSITIVE_CHARGE = 3
 
+    @property
     def onehot(self):
-        value = torch.zeros(4)
-        value[self.value] = 1.0
+        t = numpy.zeros(4)
+        t[self.value] = 1.0
 
-        return value
+        return t

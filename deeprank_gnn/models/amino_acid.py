@@ -28,7 +28,7 @@ class AminoAcid:
         if self._index is None:
             raise ValueError("amino acid {} index is not set, thus no onehot can be computed".format(self._name))
 
-        a = numpy.zeros(20, dtype=numpy.float)
+        a = numpy.zeros(20)
         a[self._index] = 1.0
 
         return self._index
