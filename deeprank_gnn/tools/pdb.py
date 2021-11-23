@@ -93,6 +93,14 @@ def get_structure(pdb, id_):
 
 
 def get_residue_distance(residue1, residue2):
+    """ Get the shortest distance between two atoms from two different given residues.
+
+        Args:
+            residue1(deeprank residue object): the first residue
+            residue2(deeprank residue object): the second residue
+
+        Returns(float): the shortest distance
+    """
 
     residue1_atom_positions = numpy.array([atom.position for atom in residue1.atoms])
     residue2_atom_positions = numpy.array([atom.position for atom in residue2.atoms])
@@ -103,6 +111,17 @@ def get_residue_distance(residue1, residue2):
 
 
 def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distance_cutoff):
+    """ Get the residues that contact each other at a protein-protein interface.
+
+        Args:
+            environment(deeprank environment object): contains the pdb root directory and tells where the pdb files are found
+            pdb_ac(str): pdb accession code
+            chain_id1(str): first protein chain identifier
+            chain_id2(str): second protein chain identifier
+            distance_cutoff(float): max distance between two interacting residues
+
+        Returns: (list of deeprank residue pairs): the contacting residues
+    """
 
     # load the structure
     pdb_path = environment.get_pdb_path(pdb_ac)

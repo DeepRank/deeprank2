@@ -4,6 +4,8 @@ from enum import Enum
 
 
 class Polarity(Enum):
+    "a value to express a residue's polarity"
+
     APOLAR = 0
     POLAR = 1
     NEGATIVE_CHARGE = 2

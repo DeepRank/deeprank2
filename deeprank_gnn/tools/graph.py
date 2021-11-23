@@ -10,6 +10,12 @@ _log = logging.getLogger(__name__)
 
 
 def graph_to_hdf5(graph, hdf5_file):
+    """ Write a featured graph to an hdf5 file, according to deeprank standards.
+
+        Args:
+            graph (deeprank graph object): the input graph to write to the file
+            hdf5_file (h5py file object): the output hdf5 file
+    """
 
     graph_group = hdf5_file.create_group(graph.id)
 

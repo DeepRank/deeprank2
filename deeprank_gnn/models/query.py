@@ -17,9 +17,19 @@ _log = logging.getLogger(__name__)
 
 
 class Query:
-    "objects of this class are created before any model is loaded"
+    """ Represents one entity of interest, like a single residue variant or a protein-protein interface.
+
+        Query objects are used to generate graphs from structures.
+        objects of this class should be created before any model is loaded
+    """
 
     def __init__(self, model_id, targets=None):
+        """
+            Args:
+                model_id(str): the id of the model to load, usually a pdb accession code
+                targets(dict, optional): target values associated with this query
+        """
+
         self._model_id = model_id
 
         if targets is None:
@@ -36,7 +46,9 @@ class Query:
         return self._targets
 
 
-class SingleResidueVariantQuery(Query):
+class SingleResidueVariantAtomicQuery(Query):
+    "creates an atomic graph for a single residue variant in a pdb file"
+
     def __init__(self, model_id, chain_id, residue_number, wildtype_amino_acid, variant_amino_acid, nonbonded_distance_cutoff=10.0, targets=None, insertion_code=None):
         Query.__init__(QueryType.SINGLE_RESIDUE_VARIANT, model_id, distance_cutoff, targets)
 
@@ -67,6 +79,16 @@ class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
 
     def __init__(self, model_id, chain_id1, chain_id2, interface_distance_cutoff=8.5, internal_distance_cutoff=3.0, targets=None):
+        """
+            Args:
+                model_id(str): a pdb accession code
+                chain_id1(str): the pdb chain identifier of the first protein of interest
+                chain_id2(str): the pdb chain identifier of the second protein of interest
+                interface_distance_cutoff(float): max distance between two interacting residues of the two proteins
+                internal_distance_cutoff(float): max distance between two interacting residues within the same protein
+                targets(dict, optional): target values associated with this query
+        """
+
         Query.__init__(self, model_id, targets)
 
         self._chain_id1 = chain_id1
@@ -99,6 +121,12 @@ class ProteinProteinInterfaceResidueQuery(Query):
         return True
 
     def build_graph(self, environment):
+        """ Builds the residue graph.
+
+            Args:
+                environment(deeprank environment object): the environment settings, telling where the files can be found
+            Returns(deeprank graph object): the resulting graph
+        """
 
         # get residues from the pdb
         interface_pairs = get_residue_contact_pairs(environment,
@@ -211,6 +239,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
 
 class QueryDataset:
+    "represents a collection of data queries"
+
     def __init__(self):
         self._queries = []
 

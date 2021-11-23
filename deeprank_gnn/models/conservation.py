@@ -1,7 +1,7 @@
 
 
 class ConservationRow:
-    "holds data for one residue"
+    "holds data for one position-specific scoring matrix row"
 
     def __init__(self, conservations, information_content):
         self._conservations = conservations
@@ -17,7 +17,7 @@ class ConservationRow:
 
 
 class ConservationTable:
-    "holds data for one pssm file"
+    "holds data for one position-specific scoring table"
 
     def __init__(self, rows={}):
         self._rows = rows
@@ -29,5 +29,7 @@ class ConservationTable:
         return self._rows[residue]
 
     def update(self, other):
+        "can be used to merge two non-overlapping scoring tables"
+
         self._rows.update(other._rows)
 
