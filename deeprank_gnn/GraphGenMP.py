@@ -56,11 +56,14 @@ class GraphHDF5(object):
             else:
                 pdbs = pdbs[:limit]
 
-        # get the base name
+        # get the pssm data
+        pssm_paths = None
         for p in pdbs:
             base = os.path.basename(p)
             mol_name = os.path.splitext(base)[0]
             base_name = mol_name.split('_')[0]
+            if pssm_path is not None:
+                pssm_paths = self._get_pssm_paths(pssm_path, base_name)
 
         # get the ref path
         if ref_path is None:
@@ -71,8 +74,8 @@ class GraphHDF5(object):
         # compute all the graphs on 1 core and directly
         # store the graphs the HDF5 file
         if nproc == 1:
-            graphs = self.get_all_graphs(base_name,
-                pdbs, pssm_path, ref, outfile, use_tqdm, biopython)
+            graphs = self.get_all_graphs(
+                pdbs, pssm_paths, ref, outfile, use_tqdm, biopython)
 
         else:
             if not os.path.isdir(tmpdir):
@@ -80,10 +83,10 @@ class GraphHDF5(object):
 
             pool = mp.Pool(nproc)
             part_process = partial(
-                self._pickle_one_graph, model_id=base_name, pssm_root=pssm_path, ref=ref, tmpdir=tmpdir, biopython=biopython)
+                self._pickle_one_graph, pssm_paths=pssm_paths, ref=ref, tmpdir=tmpdir, biopython=biopython)
             pool.map(part_process, pdbs)
 
-            # get teh graph names
+            # get the graph names
             graph_names = [os.path.join(tmpdir, f)
                            for f in os.listdir(tmpdir)]
             graph_names = list(
@@ -114,7 +117,7 @@ class GraphHDF5(object):
         for f in rmfiles:
             os.remove(f)
 
-    def get_all_graphs(self, model_id, pdbs, pssm, ref, outfile, use_tqdm=True, biopython=False):
+    def get_all_graphs(self, pdbs, pssm_paths, ref, outfile, use_tqdm=True, biopython=False):
 
         graphs = []
         if use_tqdm:
@@ -123,12 +126,14 @@ class GraphHDF5(object):
         else:
             lst = pdbs
 
-        for name in lst:
+        for pdb_path in lst:
+            model_id = os.path.splitext(os.path.basename(pdb_path))[0]
+
             try:
                 graphs.append(self._get_one_graph(model_id,
-                    name, pssm, ref, biopython))
+                    pdb_path, pssm_paths, ref, biopython))
             except Exception as e:
-                print('Issue encountered while computing graph ', name)
+                print('Issue encountered while computing graph ', pdb_path)
                 traceback.print_exc()
 
         with h5py.File(outfile, 'w') as f5:
@@ -140,9 +145,9 @@ class GraphHDF5(object):
                     traceback.print_exc()
 
     @staticmethod
-    def _pickle_one_graph(pdb_path, model_id, pssm_root, ref, tmpdir='./', biopython=False):
+    def _pickle_one_graph(pdb_path, pssm_paths, ref, tmpdir='./', biopython=False):
 
-        environment = Environment(pssm_root=pssm_root)
+        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
         # get the graph
         try:
@@ -154,7 +159,7 @@ class GraphHDF5(object):
             q = ProteinProteinInterfaceResidueQuery(model_id, "A", "B",
                                                     targets=targets, use_biopython=biopython)
 
-            g = q.build_graph(pdb_path=pdb_path, environment=environment)
+            g = q.build_graph(pdb_path=pdb_path, pssm_paths=pssm_paths)
 
             # pickle it
             fname = os.path.join(tmpdir, '{}.pkl'.format(model_id))
@@ -168,9 +173,7 @@ class GraphHDF5(object):
             traceback.print_exc()
 
     @staticmethod
-    def _get_one_graph(model_id, pdb_path, pssm_root, ref, biopython):
-
-        environment = Environment(pssm_root=pssm_root)
+    def _get_one_graph(model_id, pdb_path, pssm_paths, ref, biopython):
 
         targets = {}
         if ref is not None:
@@ -181,7 +184,7 @@ class GraphHDF5(object):
         q = ProteinProteinInterfaceResidueQuery(model_id, "A", "B",
                                                 targets=targets, use_biopython=biopython)
 
-        g = q.build_graph(pdb_path=pdb_path, environment=environment)
+        g = q.build_graph(pdb_path=pdb_path, pssm_paths=pssm_paths)
 
         return g
 
@@ -224,3 +227,7 @@ class GraphHDF5(object):
                 scores['capri_class'] = val
 
         return scores
+
+    def _get_pssm_paths(self, pssm_path, pdb_ac):
+        return {"A": os.path.join(pssm_path, "{}.A.pdb.pssm".format(pdb_ac)),
+                "B": os.path.join(pssm_path, "{}.B.pdb.pssm".format(pdb_ac))}

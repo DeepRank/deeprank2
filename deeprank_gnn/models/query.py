@@ -78,7 +78,7 @@ class SingleResidueVariantAtomicQuery(Query):
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
 
-    def __init__(self, model_id, chain_id1, chain_id2, interface_distance_cutoff=8.5, internal_distance_cutoff=3.0, use_biopython=False, targets=None):
+    def __init__(self, model_id, chain_id1, chain_id2, interface_distance_cutoff=8.5, internal_distance_cutoff=3.0, use_biopython=False, use_pssm=True, targets=None):
         """
             Args:
                 model_id(str): a pdb accession code
@@ -87,6 +87,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
                 interface_distance_cutoff(float): max distance between two interacting residues of the two proteins
                 internal_distance_cutoff(float): max distance between two interacting residues within the same protein
                 use_biopython(bool): whether or not to use biopython tools
+                use_pssm(bool): whether or not to use pssm data
                 targets(dict, optional): target values associated with this query
         """
 
@@ -99,6 +100,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._internal_distance_cutoff = internal_distance_cutoff
 
         self._use_biopython = use_biopython
+        self._use_pssm = use_pssm
 
     def get_query_id(self):
         return "{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
@@ -123,19 +125,16 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         return True
 
-    def build_graph(self, environment, pdb_path=None):
+    def build_graph(self, pdb_path=None, pssm_paths=None):
         """ Builds the residue graph.
 
             Args:
-                environment(deeprank environment object): the environment settings, telling where the files can be found
-                pdb_path(str, optional): the path to the pdb file, overrides the environment if set
+                pdb_path(str, optional): the path to the pdb file
+                pssm_paths(dict(str,str), optional): paths per chain id to the pssm files
             Returns(deeprank graph object): the resulting graph
         """
 
         # get residues from the pdb
-
-        if pdb_path is None:
-            pdb_path = environment.get_pdb_path(self.model_id)
 
         interface_pairs = get_residue_contact_pairs(pdb_path, self.model_id,
                                                     self._chain_id1, self._chain_id2,
@@ -150,10 +149,12 @@ class ProteinProteinInterfaceResidueQuery(Query):
         chain2 = model.get_chain(self._chain_id2)
 
         # read the pssm
-        for chain in (chain1, chain2):
-            pssm_path = environment.get_pssm_path(self.model_id, chain.id)
-            with open(pssm_path, 'rt') as f:
-                chain.pssm = parse_pssm(f, chain)
+        if self._use_pssm:
+            for chain in (chain1, chain2):
+                pssm_path = pssm_paths[chain.id]
+
+                with open(pssm_path, 'rt') as f:
+                    chain.pssm = parse_pssm(f, chain)
 
         # separate residues by chain
         residues_from_chain1 = set([])
@@ -234,9 +235,11 @@ class ProteinProteinInterfaceResidueQuery(Query):
             graph.nodes[residue][FEATURENAME_CHARGE] = residue.amino_acid.charge
             graph.nodes[residue][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
             graph.nodes[residue][FEATURENAME_BURIEDSURFACEAREA] = bsa_data[residue_key]
-            graph.nodes[residue][FEATURENAME_PSSM] = pssm_value
-            graph.nodes[residue][FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
-            graph.nodes[residue][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+
+            if self._use_pssm:
+                graph.nodes[residue][FEATURENAME_PSSM] = pssm_value
+                graph.nodes[residue][FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
+                graph.nodes[residue][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
 
             if self._use_biopython:
                 graph.nodes[residue][FEATURENAME_RESIDUEDEPTH] = residue_depths[residue] if residue in residue_depths else 0.0
