@@ -1,9 +1,11 @@
+import numpy
+
 from enum import Enum
 
 
 class AtomicElement(Enum):
     "value to represent the type of pdb atoms"
-    
+
     C = 1
     O = 2
     N = 3
@@ -11,10 +13,16 @@ class AtomicElement(Enum):
     P = 5
     H = 6
 
+    @property
+    def onehot(self):
+        value = numpy.zeros(max([el.value for el in AtomicElement]))
+        value[self.value - 1] = 1.0
+        return value
+
 
 class Atom:
     "represents a pdb atom"
-    
+
     def __init__(self, residue, name, element, position, occupancy):
         """
             Args:
@@ -40,7 +48,7 @@ class Atom:
 
     def change_altloc(self, alternative_atom):
         "replace the atom's location by another atom's location"
-        
+
         self._position = alternative_atom.position
         self._occupancy = alternative_atom.occupancy
 
@@ -67,7 +75,7 @@ class Atom:
 
 class Residue:
     "represents a pdb residue"
-    
+
     def __init__(self, chain, number, amino_acid=None, insertion_code=None):
         """
         Args:
@@ -76,7 +84,7 @@ class Residue:
             amino_acid(deeprank amino acid, optional): the residue's amino acid (if it's part of a protein)
             insertion_code(str, optional): the pdb insertion code, if any
         """
-        
+
         self._chain = chain
         self._number = number
         self._amino_acid = amino_acid
@@ -96,7 +104,7 @@ class Residue:
         """ if the residue's chain has pssm info linked to it,
             then return the part that belongs to this residue
         """
-        
+
         pssm = self._chain.pssm
         if pssm is None:
             raise ValueError("pssm not set on {}".format(self._chain))
@@ -141,14 +149,14 @@ class Residue:
 
 class Chain:
     "represents one pdb chain"
-    
+
     def __init__(self, model, id_):
         """
         Args:
             model(deeprank structure object): the model that this chain is part of
             id_(str): the pdb identifier of this chain
         """
-        
+
         self._model = model
         self._id = id_
         self._residues = []
@@ -189,7 +197,7 @@ class Chain:
 
 class Structure:
     "represents one entire pdb structure"
-    
+
     def __init__(self, id_):
         """
             Args:
