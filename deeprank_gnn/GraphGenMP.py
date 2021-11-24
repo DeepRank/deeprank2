@@ -1,15 +1,19 @@
 import os
+import traceback
 import sys
 import glob
 import h5py
+from pdb2sql import StructureSimilarity
 from tqdm import tqdm
 import time
 import multiprocessing as mp
 from functools import partial
 import pickle
 
-from .ResidueGraph import ResidueGraph
-from .Graph import Graph
+from .models.graph import Graph
+from .models.query import ProteinProteinInterfaceResidueQuery
+from .models.environment import Environment
+from .tools.graph import graph_to_hdf5
 
 
 class GraphHDF5(object):
@@ -52,17 +56,11 @@ class GraphHDF5(object):
             else:
                 pdbs = pdbs[:limit]
 
-        # get the pssm data
-        pssm = {}
+        # get the base name
         for p in pdbs:
             base = os.path.basename(p)
             mol_name = os.path.splitext(base)[0]
             base_name = mol_name.split('_')[0]
-            if pssm_path is not None:
-                pssm[p] = self._get_pssm(
-                    pssm_path, mol_name, base_name)
-            else:
-                pssm[p] = None
 
         # get the ref path
         if ref_path is None:
@@ -73,17 +71,16 @@ class GraphHDF5(object):
         # compute all the graphs on 1 core and directly
         # store the graphs the HDF5 file
         if nproc == 1:
-            graphs = self.get_all_graphs(
-                pdbs, pssm, ref, outfile, use_tqdm, biopython)
+            graphs = self.get_all_graphs(base_name,
+                pdbs, pssm_path, ref, outfile, use_tqdm, biopython)
 
         else:
-
             if not os.path.isdir(tmpdir):
                 os.mkdir(tmpdir)
 
             pool = mp.Pool(nproc)
             part_process = partial(
-                self._pickle_one_graph, pssm=pssm, ref=ref, tmpdir=tmpdir, biopython=biopython)
+                self._pickle_one_graph, model_id=base_name, pssm_root=pssm_path, ref=ref, tmpdir=tmpdir, biopython=biopython)
             pool.map(part_process, pdbs)
 
             # get teh graph names
@@ -103,7 +100,7 @@ class GraphHDF5(object):
                     f = open(name, 'rb')
                     g = pickle.load(f)
                     try:
-                        g.nx2h5(f5)
+                        graph_to_hdf5(g, f5)
                     except Exception as e:
                         print(
                             'Issue encountered while computing graph ', name)
@@ -117,7 +114,7 @@ class GraphHDF5(object):
         for f in rmfiles:
             os.remove(f)
 
-    def get_all_graphs(self, pdbs, pssm, ref, outfile, use_tqdm=True, biopython=False):
+    def get_all_graphs(self, model_id, pdbs, pssm, ref, outfile, use_tqdm=True, biopython=False):
 
         graphs = []
         if use_tqdm:
@@ -128,73 +125,102 @@ class GraphHDF5(object):
 
         for name in lst:
             try:
-                graphs.append(self._get_one_graph(
+                graphs.append(self._get_one_graph(model_id,
                     name, pssm, ref, biopython))
             except Exception as e:
                 print('Issue encountered while computing graph ', name)
-                print(e)
+                traceback.print_exc()
 
         with h5py.File(outfile, 'w') as f5:
             for g in graphs:
                 try:
-                    g.nx2h5(f5)
+                    graph_to_hdf5(g, f5)
                 except Exception as e:
-                    print('Issue encountered while storing graph ', g.pdb)
-                    print(e)
+                    print('Issue encountered while storing graph ', g.id)
+                    traceback.print_exc()
 
     @staticmethod
-    def _pickle_one_graph(name, pssm, ref, tmpdir='./', biopython=False):
+    def _pickle_one_graph(pdb_path, model_id, pssm_root, ref, tmpdir='./', biopython=False):
+
+        environment = Environment(pssm_root=pssm_root)
 
         # get the graph
         try:
 
-            g = ResidueGraph(
-                pdb=name, pssm=pssm[name], biopython=biopython)
-
+            targets = {}
             if ref is not None:
-                g.get_score(ref)
+                targets = GraphHDF5._get_scores(pdb_path, ref)
+
+            q = ProteinProteinInterfaceResidueQuery(model_id, "A", "B",
+                                                    targets=targets, use_biopython=biopython)
+
+            g = q.build_graph(pdb_path=pdb_path, environment=environment)
 
             # pickle it
-            mol_name = os.path.basename(name)
-            mol_name = os.path.splitext(mol_name)[0]
-            fname = os.path.join(tmpdir, mol_name+'.pkl')
+            fname = os.path.join(tmpdir, '{}.pkl'.format(model_id))
 
             f = open(fname, 'wb')
             pickle.dump(g, f)
             f.close()
 
         except Exception as e:
-            print('Issue encountered while storing graph ', name)
-            print(e)
+            print('Issue encountered while storing graph ', pdb_path)
+            traceback.print_exc()
 
     @staticmethod
-    def _get_one_graph(name, pssm, ref, biopython):
+    def _get_one_graph(model_id, pdb_path, pssm_root, ref, biopython):
+
+        environment = Environment(pssm_root=pssm_root)
+
+        targets = {}
+        if ref is not None:
+            targets = GraphHDF5._get_scores(pdb_path, ref)
 
         # get the graph
-        g = ResidueGraph(
-            pdb=name, pssm=pssm[name], biopython=biopython)
-        if ref is not None:
-            g.get_score(ref)
+
+        q = ProteinProteinInterfaceResidueQuery(model_id, "A", "B",
+                                                targets=targets, use_biopython=biopython)
+
+        g = q.build_graph(pdb_path=pdb_path, environment=environment)
+
         return g
 
     @staticmethod
-    def _get_pssm(pssm_path, mol_name, base_name):
+    def _get_scores(pdb_path, reference_pdb_path):
+        """Assigns scores (lrmsd, irmsd, fnat, dockQ, bin_class, capri_class) to a protein graph
 
-        if pssm_path is None:
-            return None
+        Args:
+            pdb_path (path): path to the scored pdb structure
+            reference_pdb_path (path): path to the reference structure required to compute the different score
+        """
 
-        pssmA = os.path.join(pssm_path, base_name+'.A.pssm')
-        pssmB = os.path.join(pssm_path, base_name+'.B.pssm')
+        ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
+        sim = StructureSimilarity(pdb_path, reference_pdb_path)
 
-        # check if the pssms exists
-        if os.path.isfile(pssmA) and os.path.isfile(pssmB):
-            pssm = {'A': pssmA, 'B': pssmB}
+        scores = {}
+
+        # Input pre-computed zone files
+        if os.path.exists(ref_name+'.lzone'):
+            scores['lrmsd'] = sim.compute_lrmsd_fast(
+                method='svd', lzone=ref_name+'.lzone')
+            scores['irmsd'] = sim.compute_irmsd_fast(
+                method='svd', izone=ref_name+'.izone')
+
+        # Compute zone files
         else:
-            pssmA = os.path.join(pssm_path, base_name+'.A.pdb.pssm')
-            pssmB = os.path.join(pssm_path, base_name+'.B.pdb.pssm')
-            if os.path.isfile(pssmA) and os.path.isfile(pssmB):
-                pssm = {'A': pssmA, 'B': pssmB}
-            else:
-                raise FileNotFoundError(
-                    'PSSM file for ' + mol_name + ' not found')
-        return pssm
+            scores['lrmsd'] = sim.compute_lrmsd_fast(
+                method='svd')
+            scores['irmsd'] = sim.compute_irmsd_fast(
+                method='svd')
+
+        scores['fnat'] = sim.compute_fnat_fast()
+        scores['dockQ'] = sim.compute_DockQScore(
+            scores['fnat'], scores['lrmsd'], scores['irmsd'])
+        scores['bin_class'] = scores['irmsd'] < 4.0
+
+        scores['capri_class'] = 5
+        for thr, val in zip([6.0, 4.0, 2.0, 1.0], [4, 3, 2, 1]):
+            if scores['irmsd'] < thr:
+                scores['capri_class'] = val
+
+        return scores

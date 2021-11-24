@@ -110,12 +110,12 @@ def get_residue_distance(residue1, residue2):
     return numpy.min(distances)
 
 
-def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distance_cutoff):
+def get_residue_contact_pairs(pdb_path, model_id, chain_id1, chain_id2, distance_cutoff):
     """ Get the residues that contact each other at a protein-protein interface.
 
         Args:
-            environment(deeprank environment object): contains the pdb root directory and tells where the pdb files are found
-            pdb_ac(str): pdb accession code
+            pdb_path(str): path to the pdb file
+            model_id(str): unique identifier for the structure
             chain_id1(str): first protein chain identifier
             chain_id2(str): second protein chain identifier
             distance_cutoff(float): max distance between two interacting residues
@@ -124,11 +124,9 @@ def get_residue_contact_pairs(environment, pdb_ac, chain_id1, chain_id2, distanc
     """
 
     # load the structure
-    pdb_path = environment.get_pdb_path(pdb_ac)
-
     pdb = pdb2sql(pdb_path)
     try:
-        structure = get_structure(pdb, pdb_ac)
+        structure = get_structure(pdb, model_id)
     finally:
         pdb._close()
 

@@ -20,6 +20,9 @@ class Environment:
             Throws(FileNotFoundError): if no such pdb file can be found
         """
 
+        if self.pdb_root is None:
+            raise ValueError("pdb root directory is not set")
+
         for path in [os.path.join(self.pdb_root, "{}.pdb".format(pdb_ac.lower())),
                      os.path.join(self.pdb_root, "{}.PDB".format(pdb_ac.upper())),
                      os.path.join(self.pdb_root, "{}/{}.pdb".format(pdb_ac.upper(), pdb_ac.upper())),
@@ -42,9 +45,13 @@ class Environment:
             Throws(FileNotFoundError): if no such pssm file can be found
         """
 
-        for path in [os.path.join(self.pssm_root, "{}/{}.{}.pdb.pssm".format(pdb_ac, pdb_ac, chain_id))]:
+        if self.pssm_root is None:
+            raise ValueError("pssm root directory is not set")
+
+        for path in [os.path.join(self.pssm_root, "{}/{}.{}.pdb.pssm".format(pdb_ac, pdb_ac, chain_id)),
+                     os.path.join(self.pssm_root, "{}.{}.pdb.pssm".format(pdb_ac, chain_id))]:
 
             if os.path.isfile(path):
                 return path
 
-        raise FileNotFoundError("No pssm file found for {} {} under {}".format(pdb_ac, chain_id, self.pdb_root))
+        raise FileNotFoundError("No pssm file found for {} {} under {}".format(pdb_ac, chain_id, self.pssm_root))

@@ -40,11 +40,10 @@ class Atom:
 
     def __eq__(self, other):
         return type(self) == type(other) and \
-            self._residue == other._residue and \
             self._name == other._name
 
     def __hash__(self):
-        return hash((self._residue, self._name))
+        return hash(self._name)
 
     def change_altloc(self, alternative_atom):
         "replace the atom's location by another atom's location"
@@ -93,12 +92,11 @@ class Residue:
 
     def __eq__(self, other):
         return type(self) == type(other) and \
-            self._chain == other._chain and \
             self._number == other._number and \
             self._insertion_code == other._insertion_code
 
     def __hash__(self):
-        return hash((self._chain, self._number, self._insertion_code))
+        return hash((self._number, self._insertion_code))
 
     def get_pssm(self):
         """ if the residue's chain has pssm info linked to it,
@@ -186,10 +184,10 @@ class Chain:
         return self._residues
 
     def __eq__(self, other):
-        return type(self) == type(other) and self._model == other._model and self._id == other._id
+        return type(self) == type(other) and self._id == other._id
 
     def __hash__(self):
-        return hash((self._model, self._id))
+        return hash(self._id)
 
     def __repr__(self):
         return "{} {}".format(self._model, self._id)
@@ -198,10 +196,10 @@ class Chain:
 class Structure:
     "represents one entire pdb structure"
 
-    def __init__(self, id_):
+    def __init__(self, id_=None):
         """
             Args:
-                id_(str): an unique identifier for this structure, usually the pdb accession code.
+                id_(str): an unique identifier for this structure, can be the pdb accession code.
         """
         self._id = id_
         self._chains = {}
