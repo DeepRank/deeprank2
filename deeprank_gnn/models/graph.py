@@ -1,17 +1,22 @@
+from uuid import uuid4
+
 from networkx import Graph as NetworkxGraph
 
 class Graph(NetworkxGraph):
     "this is a graph just like in networkx, but with an id and associated target values"
 
-    def __init__(self, id_, targets=None):
+    def __init__(self, id_=None, targets=None):
         """
             Args:
-                id_(str): unique identifier for this graph
-                targets(dict): the target values, keys are the target names, values are numbers
+                id_(str, optional): unique identifier for this graph, random by default
+                targets(dict, optional): the target values, keys are the target names, values are numbers
         """
 
         NetworkxGraph.__init__(self)
-        self._id = id_
+        if id_ is None:
+            self._id = uuid4()
+        else:
+            self._id = id_
 
         if targets is None:
             self._targets = {}
