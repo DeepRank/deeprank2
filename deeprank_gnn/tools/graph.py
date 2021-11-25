@@ -118,7 +118,7 @@ def _get_node_key(value):
             key += item
 
         else:
-            raise TypeError("unexpected node key type: {}".format(type(item)))
+            key += str(item)
 
     return key
 
@@ -247,8 +247,7 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
     node_connect = {}
     for edge in graph.edges:
 
-        edge_type = graph.edges[edge[0],
-                                  edge[1]]['type'].decode('utf-8')
+        edge_type = str(graph.edges[edge[0], edge[1]]['type'])
         if edge_type == 'internal':
             trace = go.Scatter(x=[], y=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
                                line=go.scatter.Line(color='rgb(110,110,110)', width=3))
@@ -342,7 +341,7 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
 
     for edge in graph.edges:
 
-        edge_type = graph.edges[edge[0], edge[1]]['type'].decode('utf-8')
+        edge_type = str(graph.edges[edge[0], edge[1]]['type'])
         if edge_type == 'internal':
             trace = go.Scatter3d(x=[], y=[], z=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
                                  line=go.scatter3d.Line(color='rgb(110,110,110)', width=5))
@@ -380,7 +379,7 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
 
     for node in graph.nodes:
 
-        index = graph.nodes[node]['chain']
+        index = int(graph.nodes[node]['chain'])
         pos = graph.nodes[node]['pos']
 
         node_trace[index]['x'] += (pos[0],)
