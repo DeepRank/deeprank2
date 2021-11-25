@@ -5,6 +5,7 @@ import h5py
 
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.tools.graph import hdf5_to_graph, graph_to_hdf5, plotly_2d, plotly_3d
+from deeprank_gnn.tools.score import get_all_scores
 
 
 class TestGraph(unittest.TestCase):
@@ -25,6 +26,9 @@ class TestGraph(unittest.TestCase):
                 graph_to_hdf5(self.graph, f5)
         finally:
             os.remove(hdf5_path)
+
+    def test_score(self):
+        scores = get_all_scores(self.pdb_path, self.reference_path)
 
     def test_plot_2d(self):
         plotly_2d(self.graph, '1ATN', disable_plot=True)
