@@ -663,7 +663,7 @@ class NeuralNet(object):
             plt.xlabel("Number of epoch")
             plt.ylabel("Total loss")
             plt.legend()
-            plt.savefig('loss_epoch{}.png'.format(name))
+            plt.savefig(os.path.join(self.outdir, 'loss_epoch{}.png'.format(name)))
             plt.close()
 
     def plot_acc(self, name=''):
@@ -690,7 +690,7 @@ class NeuralNet(object):
             plt.xlabel("Number of epoch")
             plt.ylabel("Accuracy")
             plt.legend()
-            plt.savefig('acc_epoch{}.png'.format(name))
+            plt.savefig(os.path.join(self.outdir, 'acc_epoch{}.png'.format(name)))
             plt.close()
 
     def plot_hit_rate(self, data='eval', threshold=4, mode='percentage', name=''):
@@ -719,7 +719,7 @@ class NeuralNet(object):
             plt.xlabel("Number of models")
             plt.ylabel("Hit Rate")
             plt.legend()
-            plt.savefig('hitrate{}.png'.format(name))
+            plt.savefig(os.path.join(self.outdir, 'hitrate{}.png'.format(name)))
             plt.close()
 
         except:

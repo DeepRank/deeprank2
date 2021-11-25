@@ -1,3 +1,7 @@
+import tempfile
+import os
+import shutil
+
 import unittest
 import numpy as np
 from deeprank_gnn.tools.pssm_3dcons_to_deeprank import pssm_3dcons_to_deeprank
@@ -25,14 +29,26 @@ class TestTools(unittest.TestCase):
 
     def test_add_target(self):
 
-        target_list = ''
-        for i in range(1, 11):
-            target_list += '1ATN_%dw %d\n' % (i, i)
+        f, target_path = tempfile.mkstemp(prefix="target", suffix=".lst")
+        os.close(f)
 
-        with open('target.lst', 'w') as f:
-            f.write(target_list)
+        f, graph_path = tempfile.mkstemp(prefix="1ATN_residue", suffix=".hdf5")
+        os.close(f)
 
-        add_target(self.h5_graphs, 'test_target', 'target.lst')
+        try:
+            target_list = ''
+            for i in range(1, 11):
+                target_list += '1ATN_%dw %d\n' % (i, i)
+
+            with open(target_path, 'w') as f:
+                f.write(target_list)
+
+            shutil.copy(self.h5_graphs, graph_path)
+
+            add_target(graph_path, 'test_target', target_path)
+        finally:
+            os.remove(target_path)
+            os.remove(graph_path)
 
     def test_embeding(self):
         pos = np.random.rand(110, 3)

@@ -1,3 +1,6 @@
+import tempfile
+import shutil
+
 import unittest
 
 from deeprank_gnn.NeuralNet import NeuralNet
@@ -8,28 +11,35 @@ from deeprank_gnn.sGAT import sGAT
 
 def _model_base_test(database, model, task='reg', target='irmsd', plot=False):
 
-    NN = NeuralNet(database, model,
-                   node_feature=['type', 'polarity', 'bsa',
-                                 'depth', 'hse', 'ic', 'pssm'],
-                   edge_feature=['dist'],
-                   target=target,
-                   index=None,
-                   task=task,
-                   batch_size=64,
-                   percent=[0.8, 0.2])
+    temp_dir_path = tempfile.mkdtemp()
 
-    NN.train(nepoch=5, validate=True)
+    try:
+        NN = NeuralNet(database, model,
+                       node_feature=['type', 'polarity', 'bsa',
+                                     'depth', 'hse', 'ic', 'pssm'],
+                       edge_feature=['dist'],
+                       target=target,
+                       index=None,
+                       task=task,
+                       batch_size=64,
+                       percent=[0.8, 0.2],
+                       outdir=temp_dir_path)
 
-    NN.save_model('test.pth.tar')
+        NN.train(nepoch=5, validate=True)
 
-    NN_cpy = NeuralNet(database, model,
-                       pretrained_model='test.pth.tar')
+        NN.save_model('test.pth.tar')
 
-    if plot:
-        NN.plot_scatter()
-        NN.plot_loss()
-        NN.plot_acc()
-        NN.plot_hit_rate()
+        NN_cpy = NeuralNet(database, model,
+                           pretrained_model='test.pth.tar')
+
+        if plot:
+            NN.plot_scatter()
+            NN.plot_loss()
+            NN.plot_acc()
+            NN.plot_hit_rate()
+
+    finally:
+        shutil.rmtree(temp_dir_path)
 
 
 class TestNeuralNet(unittest.TestCase):
