@@ -4,18 +4,17 @@ from tempfile import mkstemp
 import h5py
 
 from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
-from deeprank_gnn.models.environment import Environment
 from deeprank_gnn.domain.feature import FEATURENAME_POSITION, FEATURENAME_EDGEDISTANCE
 from deeprank_gnn.tools.graph import graph_to_hdf5
 from deeprank_gnn.DataSet import HDF5DataSet
 
 
 def test_interface_graph():
-    environment = Environment(pdb_root="tests/data/pdb", pssm_root="tests/data/pssm", device="cpu")
+    query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/1ATN/1ATN_1w.pdb", "A", "B",
+                                                {"A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
+                                                 "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
 
-    query = ProteinProteinInterfaceResidueQuery("1ATN", "A", "B")
-
-    g = query.build_graph(environment)
+    g = query.build_graph()
 
     assert len(g.nodes) > 0, "no nodes"
     assert FEATURENAME_POSITION in list(g.nodes.values())[0]

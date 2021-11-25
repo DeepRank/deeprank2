@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 import logging
 
@@ -78,29 +79,36 @@ class SingleResidueVariantAtomicQuery(Query):
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
 
-    def __init__(self, model_id, chain_id1, chain_id2, interface_distance_cutoff=8.5, internal_distance_cutoff=3.0, use_biopython=False, use_pssm=True, targets=None):
+    def __init__(self, pdb_path, chain_id1, chain_id2, pssm_paths=None,
+                 interface_distance_cutoff=8.5, internal_distance_cutoff=3.0,
+                 use_biopython=False, targets=None):
         """
             Args:
-                model_id(str): a pdb accession code
+                pdb_path(str): the path to the pdb file
                 chain_id1(str): the pdb chain identifier of the first protein of interest
                 chain_id2(str): the pdb chain identifier of the second protein of interest
+                pssm_paths(dict(str,str)): the paths to the pssm files, per chain identifier
                 interface_distance_cutoff(float): max distance between two interacting residues of the two proteins
                 internal_distance_cutoff(float): max distance between two interacting residues within the same protein
                 use_biopython(bool): whether or not to use biopython tools
-                use_pssm(bool): whether or not to use pssm data
                 targets(dict, optional): target values associated with this query
         """
 
+        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
+
         Query.__init__(self, model_id, targets)
+
+        self._pdb_path = pdb_path
 
         self._chain_id1 = chain_id1
         self._chain_id2 = chain_id2
+
+        self._pssm_paths = pssm_paths
 
         self._interface_distance_cutoff = interface_distance_cutoff
         self._internal_distance_cutoff = internal_distance_cutoff
 
         self._use_biopython = use_biopython
-        self._use_pssm = use_pssm
 
     def get_query_id(self):
         return "{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
@@ -125,18 +133,15 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         return True
 
-    def build_graph(self, pdb_path=None, pssm_paths=None):
+    def build_graph(self):
         """ Builds the residue graph.
 
-            Args:
-                pdb_path(str, optional): the path to the pdb file
-                pssm_paths(dict(str,str), optional): paths per chain id to the pssm files
             Returns(deeprank graph object): the resulting graph
         """
 
         # get residues from the pdb
 
-        interface_pairs = get_residue_contact_pairs(pdb_path, self.model_id,
+        interface_pairs = get_residue_contact_pairs(self._pdb_path, self.model_id,
                                                     self._chain_id1, self._chain_id2,
                                                     self._interface_distance_cutoff)
         if len(interface_pairs) == 0:
@@ -149,9 +154,9 @@ class ProteinProteinInterfaceResidueQuery(Query):
         chain2 = model.get_chain(self._chain_id2)
 
         # read the pssm
-        if self._use_pssm:
+        if self._pssm_paths is not None:
             for chain in (chain1, chain2):
-                pssm_path = pssm_paths[chain.id]
+                pssm_path = self._pssm_paths[chain.id]
 
                 with open(pssm_path, 'rt') as f:
                     chain.pssm = parse_pssm(f, chain)
@@ -203,9 +208,9 @@ class ProteinProteinInterfaceResidueQuery(Query):
                         graph.edges[residue1, residue2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
 
         # get bsa
-        pdb = pdb2sql.interface(pdb_path)
+        pdb = pdb2sql.interface(self._pdb_path)
         try:
-            bsa_calc = BSA.BSA(pdb_path, pdb)
+            bsa_calc = BSA.BSA(self._pdb_path, pdb)
             bsa_calc.get_structure()
             bsa_calc.get_contact_residue_sasa(cutoff=self._interface_distance_cutoff)
             bsa_data = bsa_calc.bsa_data
@@ -214,7 +219,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         # get biopython features
         if self._use_biopython:
-            bio_model = BioWrappers.get_bio_model(pdb_path)
+            bio_model = BioWrappers.get_bio_model(self._pdb_path)
             residue_depths = BioWrappers.get_depth_contact_res(bio_model,
                                                                [(residue.chain.id, residue.number, residue.amino_acid.three_letter_code)
                                                                 for residue in graph.nodes])
@@ -236,7 +241,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             graph.nodes[residue][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
             graph.nodes[residue][FEATURENAME_BURIEDSURFACEAREA] = bsa_data[residue_key]
 
-            if self._use_pssm:
+            if self._pssm_paths is not None:
                 graph.nodes[residue][FEATURENAME_PSSM] = pssm_value
                 graph.nodes[residue][FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
                 graph.nodes[residue][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content

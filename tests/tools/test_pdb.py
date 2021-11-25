@@ -2,7 +2,6 @@ from pdb2sql import pdb2sql
 from deeprank_gnn.tools.pdb import get_structure, get_residue_contact_pairs
 from deeprank_gnn.domain.amino_acid import valine
 from deeprank_gnn.models.structure import AtomicElement
-from deeprank_gnn.models.environment import Environment
 
 
 def test_get_structure_complete():
@@ -48,8 +47,6 @@ def test_get_structure_from_nmr_with_dna():
 
 
 def test_residue_contact_pairs():
-
-    environment = Environment(pdb_root="tests/data/pdb", device="cpu")
 
     residue_pairs = get_residue_contact_pairs("tests/data/pdb/1ATN/1ATN_1w.pdb", "1ATN", "A", "B", 8.5)
 

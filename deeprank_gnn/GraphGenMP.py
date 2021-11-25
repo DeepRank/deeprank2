@@ -11,7 +11,6 @@ import pickle
 
 from .models.graph import Graph
 from .models.query import ProteinProteinInterfaceResidueQuery
-from .models.environment import Environment
 from .tools.graph import graph_to_hdf5
 from .tools.score import get_all_scores
 
@@ -127,10 +126,8 @@ class GraphHDF5(object):
             lst = pdbs
 
         for pdb_path in lst:
-            model_id = os.path.splitext(os.path.basename(pdb_path))[0]
-
             try:
-                graphs.append(self._get_one_graph(model_id,
+                graphs.append(self._get_one_graph(
                     pdb_path, pssm_paths, ref, biopython))
             except Exception as e:
                 print('Issue encountered while computing graph ', pdb_path)
@@ -147,8 +144,6 @@ class GraphHDF5(object):
     @staticmethod
     def _pickle_one_graph(pdb_path, pssm_paths, ref, tmpdir='./', biopython=False):
 
-        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
-
         # get the graph
         try:
 
@@ -156,13 +151,13 @@ class GraphHDF5(object):
             if ref is not None:
                 targets = get_all_scores(pdb_path, ref)
 
-            q = ProteinProteinInterfaceResidueQuery(model_id, "A", "B",
+            q = ProteinProteinInterfaceResidueQuery(pdb_path, "A", "B", pssm_paths=pssm_paths,
                                                     targets=targets, use_biopython=biopython)
 
-            g = q.build_graph(pdb_path=pdb_path, pssm_paths=pssm_paths)
+            g = q.build_graph()
 
             # pickle it
-            fname = os.path.join(tmpdir, '{}.pkl'.format(model_id))
+            fname = os.path.join(tmpdir, '{}.pkl'.format(g.id))
 
             f = open(fname, 'wb')
             pickle.dump(g, f)
@@ -173,7 +168,7 @@ class GraphHDF5(object):
             traceback.print_exc()
 
     @staticmethod
-    def _get_one_graph(model_id, pdb_path, pssm_paths, ref, biopython):
+    def _get_one_graph(pdb_path, pssm_paths, ref, biopython):
 
         targets = {}
         if ref is not None:
@@ -181,10 +176,10 @@ class GraphHDF5(object):
 
         # get the graph
 
-        q = ProteinProteinInterfaceResidueQuery(model_id, "A", "B",
+        q = ProteinProteinInterfaceResidueQuery(pdb_path, "A", "B", pssm_paths=pssm_paths,
                                                 targets=targets, use_biopython=biopython)
 
-        g = q.build_graph(pdb_path=pdb_path, pssm_paths=pssm_paths)
+        g = q.build_graph()
 
         return g
 
