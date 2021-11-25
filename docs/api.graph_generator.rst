@@ -8,14 +8,6 @@ Graphs
     :members:
     :undoc-members:
 
-Residue Graphs
---------------------------------------
-
-.. automodule:: deeprank_gnn.ResidueGraph
-    :members:
-    :undoc-members:
-
-
 
 Graph Generator
 ---------------------------------------
