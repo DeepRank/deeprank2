@@ -235,7 +235,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in self.amino_acid_order]
 
             graph.nodes[residue][FEATURENAME_CHAIN] = chain_codes[residue.chain]
-            graph.nodes[residue][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms])
+            graph.nodes[residue][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
             graph.nodes[residue][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
             graph.nodes[residue][FEATURENAME_CHARGE] = residue.amino_acid.charge
             graph.nodes[residue][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
