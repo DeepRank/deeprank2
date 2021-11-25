@@ -182,6 +182,14 @@ def hdf5_to_graph(graph_group):
     return graph
 
 
+def _get_edge_type_name(value):
+    if type(value) == numpy.bytes_ or type(value) == bytes:
+
+        return value.decode()
+    else:
+        return value
+
+
 def plotly_2d(graph, out=None, offline=False, iplot=True,
               disable_plot=False, method='louvain'):
 
@@ -216,7 +224,7 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
         typ = graph.edges[e]['type']
         if isinstance(typ, bytes):
             typ = typ.decode('utf-8')
-        if typ == 'interface':
+        if typ == EDGETYPE_INTERFACE:
             ebunch.append(e)
     gtmp.remove_edges_from(ebunch)
 
@@ -247,13 +255,16 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
     node_connect = {}
     for edge in graph.edges:
 
-        edge_type = str(graph.edges[edge[0], edge[1]]['type'])
-        if edge_type == 'internal':
+        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]]['type'])
+        if edge_type == EDGETYPE_INTERNAL:
             trace = go.Scatter(x=[], y=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
                                line=go.scatter.Line(color='rgb(110,110,110)', width=3))
-        elif edge_type == 'interface':
+
+        elif edge_type == EDGETYPE_INTERFACE:
             trace = go.Scatter(x=[], y=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
                                line=go.scatter.Line(color='rgb(210,210,210)', width=1))
+        else:
+            continue
 
         x0, y0 = graph.nodes[edge[0]]['pos2D']
         x1, y1 = graph.nodes[edge[1]]['pos2D']
@@ -261,9 +272,10 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
         trace['x'] += (x0, x1, None)
         trace['y'] += (y0, y1, None)
 
-        if edge_type == 'internal':
+        if edge_type == EDGETYPE_INTERNAL:
             internal_edge_trace_list.append(trace)
-        elif edge_type == 'interface':
+
+        elif edge_type == EDGETYPE_INTERFACE:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:
@@ -283,7 +295,7 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
 
     for node in graph.nodes:
 
-        index = graph.nodes[node]['chain']
+        index = int(graph.nodes[node]['chain'])
         pos = graph.nodes[node]['pos2D']
 
         node_trace[index]['x'] += (pos[0],)
@@ -341,13 +353,16 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
 
     for edge in graph.edges:
 
-        edge_type = str(graph.edges[edge[0], edge[1]]['type'])
-        if edge_type == 'internal':
+        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]]['type'])
+        if edge_type == EDGETYPE_INTERNAL:
             trace = go.Scatter3d(x=[], y=[], z=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
                                  line=go.scatter3d.Line(color='rgb(110,110,110)', width=5))
-        elif edge_type == 'interface':
+
+        elif edge_type == EDGETYPE_INTERFACE:
             trace = go.Scatter3d(x=[], y=[], z=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
                                  line=go.scatter3d.Line(color='rgb(210,210,210)', width=2))
+        else:
+            continue
 
         x0, y0, z0 = graph.nodes[edge[0]]['pos']
         x1, y1, z1 = graph.nodes[edge[1]]['pos']
@@ -356,9 +371,10 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
         trace['y'] += (y0, y1, None)
         trace['z'] += (z0, z1, None)
 
-        if edge_type == 'internal':
+        if edge_type == EDGETYPE_INTERNAL:
             internal_edge_trace_list.append(trace)
-        elif edge_type == 'interface':
+
+        elif edge_type == EDGETYPE_INTERFACE:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:
