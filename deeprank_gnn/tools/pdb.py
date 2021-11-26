@@ -177,9 +177,9 @@ def get_surrounding_residues(structure, residue, radius):
         Args:
             structure(deeprank structure object): the structure to take residues from
             residue(deeprank residue object): the residue in the structure
-            radius(max distance between atoms of the residue and the other residues
+            radius(float): max distance in Ångström between atoms of the residue and the other residues
 
-        Returns: (set of deeprank residues): the surrounding residues
+        Returns: (a set of deeprank residues): the surrounding residues
     """
 
     structure_atoms = structure.get_atoms()
@@ -202,3 +202,30 @@ def get_surrounding_residues(structure, residue, radius):
             close_residues.add(structure_atom.residue)
 
     return close_residues
+
+
+def find_neighbour_atoms(atoms, max_distance):
+    """ For a given list of atoms, find the pairs of atoms that lie next to each other.
+
+        Args:
+            atoms(list of deeprank atom objects): the atoms to look at
+            max_distance(float): max distance between two atoms in Ångström
+
+        Returns: (a set of deeprank atom object pairs): the paired atoms
+    """
+
+    atom_count = len(atoms)
+
+    atom_positions = [atom.position for atom in atoms]
+
+    distances = distance_matrix(atom_positions, atom_positions, p=2)
+
+    neighbours = distances < max_distance
+
+    pairs = set([])
+
+    for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
+        if atom1_index != atom2_index:
+            pairs.add(Pair(atoms[atom1_index], atoms[atom2_index]))
+
+    return pairs
