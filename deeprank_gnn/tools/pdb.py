@@ -169,3 +169,36 @@ def get_residue_contact_pairs(pdb_path, model_id, chain_id1, chain_id2, distance
             residue_pairs.add(Pair(residue1, residue2))
 
     return residue_pairs
+
+
+def get_surrounding_residues(structure, residue, radius):
+    """ Get the residues that lie within a radius around a residue.
+
+        Args:
+            structure(deeprank structure object): the structure to take residues from
+            residue(deeprank residue object): the residue in the structure
+            radius(max distance between atoms of the residue and the other residues
+
+        Returns: (set of deeprank residues): the surrounding residues
+    """
+
+    structure_atoms = structure.get_atoms()
+    residue_atoms = residue.atoms
+
+    structure_atom_positions = [atom.position for atom in structure_atoms]
+    residue_atom_positions = [atom.position for atom in residue_atoms]
+
+    distances = distance_matrix(structure_atom_positions, residue_atom_positions, p=2)
+
+    close_residues = set([])
+    for structure_atom_index in range(len(structure_atoms)):
+
+        shortest_distance = numpy.min(distances[structure_atom_index,:])
+
+        if shortest_distance < radius:
+
+            structure_atom = structure_atoms[structure_atom_index]
+
+            close_residues.add(structure_atom.residue)
+
+    return close_residues
