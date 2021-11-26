@@ -133,6 +133,15 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         return True
 
+    @staticmethod
+    def _get_residue_node_key(residue):
+        """ Pickle has trouble serializing a graph if the keys are residue objects, so
+            we map the residues to string identifiers
+        """
+
+        # this should include everything to identify the residue: structure, chain, number, insertion_code
+        return str(residue)
+
     def build_graph(self):
         """ Builds the residue graph.
 
@@ -183,6 +192,9 @@ class ProteinProteinInterfaceResidueQuery(Query):
         # create the graph
         graph = Graph(self.get_query_id(), self.targets)
 
+        # These will not be stored in the graph, but we need them to get features.
+        residues_by_node = {}
+
         # interface edges
         for pair in interface_pairs:
 
@@ -191,9 +203,15 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
                 distance = get_residue_distance(residue1, residue2)
 
-                graph.add_edge(residue1, residue2)
-                graph.edges[residue1, residue2][FEATURENAME_EDGEDISTANCE] = distance
-                graph.edges[residue1, residue2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
+                key1 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue1)
+                key2 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue2)
+
+                residues_by_node[key1] = residue1
+                residues_by_node[key2] = residue2
+
+                graph.add_edge(key1, key2)
+                graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
+                graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
 
         # internal edges
         for residue_set in (residues_from_chain1, residues_from_chain2):
@@ -203,9 +221,15 @@ class ProteinProteinInterfaceResidueQuery(Query):
                     distance = get_residue_distance(residue1, residue2)
 
                     if distance < self._internal_distance_cutoff:
-                        graph.add_edge(residue1, residue2)
-                        graph.edges[residue1, residue2][FEATURENAME_EDGEDISTANCE] = distance
-                        graph.edges[residue1, residue2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+                        key1 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue1)
+                        key2 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue2)
+
+                        residues_by_node[key1] = residue1
+                        residues_by_node[key2] = residue2
+
+                        graph.add_edge(key1, key2)
+                        graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
+                        graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
 
         # get bsa
         pdb = pdb2sql.interface(self._pdb_path)
@@ -222,33 +246,35 @@ class ProteinProteinInterfaceResidueQuery(Query):
             bio_model = BioWrappers.get_bio_model(self._pdb_path)
             residue_depths = BioWrappers.get_depth_contact_res(bio_model,
                                                                [(residue.chain.id, residue.number, residue.amino_acid.three_letter_code)
-                                                                for residue in graph.nodes])
+                                                                for residue in residues_by_node.values()])
             hse = BioWrappers.get_hse(bio_model)
 
         # add node features
         chain_codes = {chain1: 0.0, chain2: 1.0}
-        for residue in graph.nodes:
-            residue_key = (residue.chain.id, residue.number, residue.amino_acid.three_letter_code)
+        for node_key, node in graph.nodes.items():
+            residue = residues_by_node[node_key]
+
+            bsa_key = (residue.chain.id, residue.number, residue.amino_acid.three_letter_code)
             bio_key = (residue.chain.id, residue.number)
 
             pssm_row = residue.get_pssm()
             pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in self.amino_acid_order]
 
-            graph.nodes[residue][FEATURENAME_CHAIN] = chain_codes[residue.chain]
-            graph.nodes[residue][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
-            graph.nodes[residue][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
-            graph.nodes[residue][FEATURENAME_CHARGE] = residue.amino_acid.charge
-            graph.nodes[residue][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
-            graph.nodes[residue][FEATURENAME_BURIEDSURFACEAREA] = bsa_data[residue_key]
+            node[FEATURENAME_CHAIN] = chain_codes[residue.chain]
+            node[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
+            node[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+            node[FEATURENAME_CHARGE] = residue.amino_acid.charge
+            node[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+            node[FEATURENAME_BURIEDSURFACEAREA] = bsa_data[bsa_key]
 
             if self._pssm_paths is not None:
-                graph.nodes[residue][FEATURENAME_PSSM] = pssm_value
-                graph.nodes[residue][FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
-                graph.nodes[residue][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+                node[FEATURENAME_PSSM] = pssm_value
+                node[FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
+                node[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
 
             if self._use_biopython:
-                graph.nodes[residue][FEATURENAME_RESIDUEDEPTH] = residue_depths[residue] if residue in residue_depths else 0.0
-                graph.nodes[residue][FEATURENAME_HALFSPHEREEXPOSURE] = hse[bio_key] if bio_key in hse else (0.0, 0.0, 0.0)
+                node[FEATURENAME_RESIDUEDEPTH] = residue_depths[residue] if residue in residue_depths else 0.0
+                node[FEATURENAME_HALFSPHEREEXPOSURE] = hse[bio_key] if bio_key in hse else (0.0, 0.0, 0.0)
 
         return graph
 
