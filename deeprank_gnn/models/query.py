@@ -4,10 +4,11 @@ import logging
 
 import pdb2sql
 import numpy
+from scipy.spatial import distance_matrix
 
 from deeprank_gnn.tools.pssm import parse_pssm
 from deeprank_gnn.tools import BioWrappers, BSA
-from deeprank_gnn.tools.pdb import get_residue_contact_pairs, get_residue_distance
+from deeprank_gnn.tools.pdb import get_residue_contact_pairs, get_residue_distance, get_surrounding_residues, get_structure
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
 from deeprank_gnn.domain.feature import *
@@ -46,12 +47,39 @@ class Query:
     def targets(self):
         return self._targets
 
+    def __repr__(self):
+        return "{}({})".format(type(self), self.get_query_id())
+
 
 class SingleResidueVariantAtomicQuery(Query):
     "creates an atomic graph for a single residue variant in a pdb file"
 
-    def __init__(self, model_id, chain_id, residue_number, wildtype_amino_acid, variant_amino_acid, nonbonded_distance_cutoff=10.0, targets=None, insertion_code=None):
-        Query.__init__(QueryType.SINGLE_RESIDUE_VARIANT, model_id, distance_cutoff, targets)
+    def __init__(self, pdb_path, chain_id, residue_number, insertion_code, wildtype_amino_acid, variant_amino_acid,
+                 pssm_paths=None,
+                 radius=10.0, nonbonded_distance_cutoff=4.5, bonded_distance_cutoff=1.6, disulfid_distance=2.2,
+                 targets=None):
+        """
+            Args:
+                pdb_path(str): the path to the pdb file
+                chain_id(str): the pdb chain identifier of the variant residue
+                residue_number(int): the number of the variant residue
+                insertion_code(str): the insertion code of the variant residue, set to None if not applicable
+                wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
+                variant_amino_acid(deeprank amino acid object): the variant amino acid
+                pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+                radius(float): in Ångström, determines how many residues will be included in the graph
+                nonbonded_distance_cutoff(float): max distance in Ångström between a pair of nonbonded atoms to consider them as an edge in the graph
+                bonded_distance_cutoff(float): max distance in Ångström between a pair of covalently bonded atoms to consider them as an edge in the graph
+                disulfid_distance(float): max distance in Ångström between two gamma sulfur atoms to consider them as a disulfid bond
+                targets(dict(str,float)): named target values associated with this query
+        """
+
+        self._pdb_path = pdb_path
+        self._pssm_paths = pssm_paths
+
+        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
+
+        Query.__init__(self, model_id, targets)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -59,21 +87,114 @@ class SingleResidueVariantAtomicQuery(Query):
         self._wildtype_amino_acid = wildtype_amino_acid
         self._variant_amino_acid = variant_amino_acid
 
+        self._radius = radius
+        self._nonbonded_distance_cutoff = nonbonded_distance_cutoff
+        self._bonded_distance_cutoff = bonded_distance_cutoff
+        self._disulfid_distance = disulfid_distance
+
+    @property
+    def residue_id(self):
+        "string representation of the residue number and insertion code"
+
+        if self._insertion_code is not None:
+            return "{}{}".format(self._residue_number, self._insertion_code)
+        else:
+            return str(self._residue_number)
+
+    def get_query_id(self):
+        return "{}:{}:{}:{}->{}".format(self.model_id, self._chain_id, self.residue_id, self._wildtype_amino_acid.name, self._variant_amino_acid.name)
+
     def __eq__(self, other):
-        return type(self) == type(other) and self._residue == other._residue and \
-            self._wildtype_amino_acid == other.wildtype_amino_acid and \
-            self._variant_amino_acid == other.variant_amino_acid
+        return type(self) == type(other) and self.model_id == other.model_id and \
+            self._chain_id == other._chain_id and self.residue_id == other.residue_id and \
+            self._wildtype_amino_acid == other._wildtype_amino_acid and self._variant_amino_acid == other._variant_amino_acid
 
     def __hash__(self):
-        return hash((self._residue, self._wildtype_amino_acid, self._variant_amino_acid))
+        return hash((self.model_id, self._chain_id, self.residue_id, self._wildtype_amino_acid, self._variant_amino_acid))
 
-    def __repr__(self):
-        residue_id = str(self._residue_number)
-        if self._insertion_code is not None:
-            residue_id += self._insertion_code
+    @staticmethod
+    def _get_atom_node_key(atom):
+        """ Pickle has problems serializing the graph when the nodes are atoms,
+            so use this function to generate an unique key for the atom"""
 
-        return "SingleResidueVariantQuery({}{}{}:{}->{})".format(self._model_id, self._chain_id, residue_id,
-                                                                 self._wildtype_amino_acid, self._variant_amino_acid)
+        # This should include the model, chain, residue and atom
+        return str(atom)
+
+    def build_graph(self):
+
+        # load pdb strucure
+        try:
+            pdb = pdb2sql.pdb2sql(self._pdb_path)
+
+            structure = get_structure(pdb, self.model_id)
+        finally:
+            pdb._close()
+
+        # read the pssm
+        if self._pssm_paths is not None:
+            for chain in structure.chains:
+                pssm_path = self._pssm_paths[chain.id]
+
+                with open(pssm_path, 'rt') as f:
+                    chain.pssm = parse_pssm(f, chain)
+
+        # find the variant residue
+        variant_residues = [r for r in structure.get_chain(self._chain_id).residues
+                            if r.number == self._residue_number and r.insertion_code == self._insertion_code]
+        if len(variant_residues) == 0:
+            raise ValueError("Residue {}:{} not found in {}".format(self._chain_id, self.residue_id, self._pdb_path))
+        variant_residue = variant_residues[0]
+
+        # get the residues and atoms involved
+        residues = get_surrounding_residues(structure, variant_residue, self._radius)
+        atoms = []
+        for residue in residues:
+            atoms.extend(residue.atoms)
+
+        # build a graph and keep track of how we named the nodes
+        atom_node_names = {}
+        graph = Graph(self.get_query_id(), self.targets)
+
+        # find neighbouring atoms
+        atom_positions = [atom.position for atom in atoms]
+        distances = distance_matrix(atom_positions, atom_positions, p=2)
+        nonbonded_neighbours = distances < self._nonbonded_distance_cutoff
+        for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(nonbonded_neighbours)):
+            if atom1_index != atom2_index:  # do not pair an atom with itself
+
+                distance = distances[atom1_index, atom2_index]
+
+                atom1 = atoms[atom1_index]
+                atom2 = atoms[atom2_index]
+
+                atom1_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom1)
+                atom2_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom2)
+
+                if distance < self._bonded_distance_cutoff:
+
+                    edge_type = EDGETYPE_INTERNAL
+
+                elif atom1.name == "SG" and atom2.name == "SG" and distance < self._disulfid_distance:
+
+                    edge_type = EDGETYPE_INTERNAL
+                else:
+                    edge_type = EDGETYPE_INTERFACE
+
+                graph.add_edge(atom1_key, atom2_key)
+                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = edge_type
+                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGEDISTANCE] = distance
+
+                atom_node_names[atom1] = atom1_key
+                atom_node_names[atom2] = atom2_key
+
+        for atom, node_name in atom_node_names.items():
+            node = graph.nodes[node_name]
+            node[FEATURENAME_POSITION] = atom.position
+
+        # TODO: add pssm score change of the variant
+        # TODO: vanderwaals and coulomb features
+
+        return graph
 
 
 class ProteinProteinInterfaceResidueQuery(Query):
@@ -87,11 +208,11 @@ class ProteinProteinInterfaceResidueQuery(Query):
                 pdb_path(str): the path to the pdb file
                 chain_id1(str): the pdb chain identifier of the first protein of interest
                 chain_id2(str): the pdb chain identifier of the second protein of interest
-                pssm_paths(dict(str,str)): the paths to the pssm files, per chain identifier
-                interface_distance_cutoff(float): max distance between two interacting residues of the two proteins
-                internal_distance_cutoff(float): max distance between two interacting residues within the same protein
+                pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+                interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
+                internal_distance_cutoff(float): max distance in Ångström between two interacting residues within the same protein
                 use_biopython(bool): whether or not to use biopython tools
-                targets(dict, optional): target values associated with this query
+                targets(dict, optional): named target values associated with this query
         """
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
@@ -114,13 +235,11 @@ class ProteinProteinInterfaceResidueQuery(Query):
         return "{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
 
     def __eq__(self, other):
-        return type(self) == type(other) and {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
+        return type(self) == type(other) and self.model_id == other.model_id and \
+            {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
 
     def __hash__(self):
-        return hash(tuple(sorted([self._chain_id1, self._chain_id2])))
-
-    def __repr__(self):
-        return "ProteinProteinInterfaceResidueQuery({},{})".format(self._chain_id1, self._chain_id2)
+        return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
     @staticmethod
     def _residue_is_valid(residue):

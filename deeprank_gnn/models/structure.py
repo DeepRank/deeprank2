@@ -158,6 +158,10 @@ class Residue:
             return str(self._number)
 
     @property
+    def insertion_code(self):
+        return self._insertion_code
+
+    @property
     def atoms(self):
         return self._atoms
 
