@@ -193,6 +193,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         # TODO: add pssm score change of the variant
         # TODO: vanderwaals and coulomb features
+        # TODO: solvent accessibility
 
         return graph
 
