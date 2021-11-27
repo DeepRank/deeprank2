@@ -1,0 +1,8 @@
+PROP: name=PRO present(HT1, HT2)
+NTER: name=all present(HT1, HT2, HT3)
+CTER: name=all present(OXT)
+CTN:  name=all present(NT, HT1, HT2)
+CYNH: name=CYS present(1SG) absent(2SG)
+DISU: name=CYS present(1SG, 2SG)
+HISE: name=HIS present(ND1, CE1, CD2, NE2, HE2) absent(HD1)
+HISD: name=HIS present(ND1, CE1, CD2, NE2, HD1) absent(HE2)
