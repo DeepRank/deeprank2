@@ -10,6 +10,7 @@ from deeprank_gnn.NeuralNet import NeuralNet
 from deeprank_gnn.ginet import GINet
 from deeprank_gnn.foutnet import FoutNet
 from deeprank_gnn.sGAT import sGAT
+from deeprank_gnn.simple_net import SimpleNetwork
 
 
 def _model_base_test(work_directory, database, model, task='reg', target='irmsd', plot=False):
@@ -81,6 +82,9 @@ class TestNeuralNet(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(self.work_directory, self.database, sGAT)
+
+    def test_simple(self):
+        _model_base_test(self.work_directory, self.database, SimpleNetwork)
 
 
 if __name__ == "__main__":
