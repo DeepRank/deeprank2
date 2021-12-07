@@ -2,6 +2,7 @@ import os
 from enum import Enum
 import logging
 
+import freesasa
 import pdb2sql
 import numpy
 from scipy.spatial import distance_matrix
@@ -217,10 +218,44 @@ class SingleResidueVariantAtomicQuery(Query):
         SingleResidueVariantAtomicQuery._set_coulomb(graph, node_name_atoms, atom_charges, self._nonbonded_distance_cutoff)
         SingleResidueVariantAtomicQuery._set_vanderwaals(graph, node_name_atoms, atom_vanderwaals_parameters)
 
-        # TODO: add pssm score change of the variant
-        # TODO: add solvent accessibility
+        SingleResidueVariantAtomicQuery._set_pssm(graph, node_name_atoms, variant_residue,
+                                                  self._wildtype_amino_acid, self._variant_amino_acid)
+
+        SingleResidueVariantAtomicQuery._set_sasa(graph, node_name_atoms, self._pdb_path)
 
         return graph
+
+    @staticmethod
+    def _set_pssm(graph, node_name_atoms, variant_residue, wildtype_amino_acid, variant_amino_acid):
+
+        for node_name, atom in node_name_atoms.items():
+            pssm_value = 0.0
+            if atom.residue == variant_residue:
+                pssm_row = atom.residue.get_pssm()
+
+                pssm_value = pssm_row.get_conservation(variant_amino_acid) - pssm_row.get_conservation(wildtype_amino_acid)
+
+            graph.nodes[node_name][FEATURENAME_PSSMDIFFERENCE] = pssm_value
+
+    @staticmethod
+    def _set_sasa(graph, node_name_atoms, pdb_path):
+
+        structure = freesasa.Structure(pdb_path)
+        result = freesasa.calc(structure)
+
+        for node_name, atom in node_name_atoms.items():
+
+            if atom.element == "H":  # freeSASA doesn't have these
+                area = 0.0
+            else:
+                select_str = ('atom, (name %s) and (resi %d) and (chain %s)' % (atom.name, atom.residue.number, atom.residue.chain.id),)
+                area = freesasa.selectArea(select_str, structure, result)['atom']
+
+            if numpy.isnan(area):
+                raise ValueError("freesasa returned {} for {}:{}".format(area, pdb_path, atom))
+
+            graph.nodes[node_name][FEATURENAME_SASA] = area
+
 
     @staticmethod
     def _set_coulomb(graph, node_name_atoms, charges, max_interatomic_distance):

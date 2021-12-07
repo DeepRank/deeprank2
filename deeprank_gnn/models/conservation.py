@@ -15,6 +15,9 @@ class ConservationRow:
     def information_content(self):
         return self._information_content
 
+    def get_conservation(self, amino_acid):
+        return self._conservations[amino_acid]
+
 
 class ConservationTable:
     "holds data for one position-specific scoring table"
