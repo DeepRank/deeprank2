@@ -6,6 +6,7 @@ import pdb2sql
 import numpy
 from scipy.spatial import distance_matrix
 
+from deeprank_gnn.models.error import UnknownAtomError
 from deeprank_gnn.tools.pssm import parse_pssm
 from deeprank_gnn.tools import BioWrappers, BSA
 from deeprank_gnn.tools.pdb import get_residue_contact_pairs, get_residue_distance, get_surrounding_residues, get_structure
@@ -13,6 +14,10 @@ from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
 from deeprank_gnn.domain.feature import *
 from deeprank_gnn.domain.amino_acid import *
+from deeprank_gnn.domain.forcefield import (atomic_forcefield,
+                                            VANDERWAALS_DISTANCE_ON, VANDERWAALS_DISTANCE_OFF,
+                                            SQUARED_VANDERWAALS_DISTANCE_ON, SQUARED_VANDERWAALS_DISTANCE_OFF,
+                                            EPSILON0, COULOMB_CONSTANT)
 
 
 _log = logging.getLogger(__name__)
@@ -153,12 +158,16 @@ class SingleResidueVariantAtomicQuery(Query):
 
         # build a graph and keep track of how we named the nodes
         atom_node_names = {}
+        node_name_atoms = {}
         graph = Graph(self.get_query_id(), self.targets)
 
         # find neighbouring atoms
         atom_positions = [atom.position for atom in atoms]
         distances = distance_matrix(atom_positions, atom_positions, p=2)
-        nonbonded_neighbours = distances < self._nonbonded_distance_cutoff
+        nonbonded_neighbours = numpy.logical_and(distances < self._nonbonded_distance_cutoff,
+                                                 distances > 0.0)
+        atom_vanderwaals_parameters = {}
+        atom_charges = {}
         for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(nonbonded_neighbours)):
             if atom1_index != atom2_index:  # do not pair an atom with itself
 
@@ -166,6 +175,16 @@ class SingleResidueVariantAtomicQuery(Query):
 
                 atom1 = atoms[atom1_index]
                 atom2 = atoms[atom2_index]
+
+                try:
+                    for atom in [atom1, atom2]:
+                        atom_vanderwaals_parameters[atom] = atomic_forcefield.get_vanderwaals_parameters(atom)
+                        atom_charges[atom] = atomic_forcefield.get_charge(atom)
+
+                except UnknownAtomError:
+                    # if one of the atoms has no forcefield parameters, do not include this edge
+                    _log.warning(traceback.format_exc())
+                    continue
 
                 atom1_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom1)
                 atom2_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom2)
@@ -187,15 +206,106 @@ class SingleResidueVariantAtomicQuery(Query):
                 atom_node_names[atom1] = atom1_key
                 atom_node_names[atom2] = atom2_key
 
+                node_name_atoms[atom1_key] = atom1
+                node_name_atoms[atom2_key] = atom2
+
+        # Set the positions of the atoms in the graph
         for atom, node_name in atom_node_names.items():
             node = graph.nodes[node_name]
             node[FEATURENAME_POSITION] = atom.position
 
+        SingleResidueVariantAtomicQuery._set_coulomb(graph, node_name_atoms, atom_charges, self._nonbonded_distance_cutoff)
+        SingleResidueVariantAtomicQuery._set_vanderwaals(graph, node_name_atoms, atom_vanderwaals_parameters)
+
         # TODO: add pssm score change of the variant
-        # TODO: vanderwaals and coulomb features
-        # TODO: solvent accessibility
+        # TODO: add solvent accessibility
 
         return graph
+
+    @staticmethod
+    def _set_coulomb(graph, node_name_atoms, charges, max_interatomic_distance):
+
+        # get the edges
+        edge_keys = []
+        edge_count = len(graph.edges)
+        charges1 = numpy.empty(edge_count)
+        charges2 = numpy.empty(edge_count)
+        edge_distances = numpy.empty(edge_count)
+        for edge_index, ((atom1_name, atom2_name), edge) in enumerate(graph.edges.items()):
+            atom1 = node_name_atoms[atom1_name]
+            atom2 = node_name_atoms[atom2_name]
+            edge_keys.append((atom1_name, atom2_name))
+
+            charges1[edge_index] = charges[atom1]
+            charges2[edge_index] = charges[atom2]
+
+            edge_distances[edge_index] = edge[FEATURENAME_EDGEDISTANCE]
+
+        # calculate coulomb potentials
+        coulomb_constant_factor = COULOMB_CONSTANT / EPSILON0
+
+        coulomb_radius_factors = numpy.square(numpy.ones(edge_count) - numpy.square(edge_distances / max_interatomic_distance))
+
+        coulomb_potentials = charges1 * charges2 * coulomb_constant_factor / edge_distances * coulomb_radius_factors
+
+        # set the values to the edges
+        for index, potential in enumerate(coulomb_potentials):
+            graph.edges[edge_keys[index]][FEATURENAME_EDGECOULOMB] = potential
+
+    @staticmethod
+    def _set_vanderwaals(graph, node_name_atoms, vanderwaals_parameters):
+
+        edge_keys = []
+        edge_count = len(graph.edges)
+        sigmas = numpy.empty(edge_count)
+        epsilons = numpy.empty(edge_count)
+        edge_distances = numpy.empty(edge_count)
+        for edge_index, ((atom1_name, atom2_name), edge) in enumerate(graph.edges.items()):
+            atom1 = node_name_atoms[atom1_name]
+            atom2 = node_name_atoms[atom2_name]
+            edge_keys.append((atom1_name, atom2_name))
+
+            vanderwaals_parameters1 = vanderwaals_parameters[atom1]
+            vanderwaals_parameters2 = vanderwaals_parameters[atom2]
+
+            if atom1.residue.chain != atom2.residue.chain:
+
+                # intermolecular
+                sigma1 = vanderwaals_parameters1.inter_sigma
+                sigma2 = vanderwaals_parameters2.inter_sigma
+                epsilon1 = vanderwaals_parameters1.inter_epsilon
+                epsilon2 = vanderwaals_parameters2.inter_epsilon
+            else:
+                # intramolecular
+                sigma1 = vanderwaals_parameters1.intra_sigma
+                sigma2 = vanderwaals_parameters2.intra_sigma
+                epsilon1 = vanderwaals_parameters1.intra_epsilon
+                epsilon2 = vanderwaals_parameters2.intra_epsilon
+
+            sigmas[edge_index] = 0.5 * (sigma1 + sigma2)
+            epsilons[edge_index] = numpy.sqrt(epsilon1 * epsilon2)
+
+            edge_distances[edge_index] = edge[FEATURENAME_EDGEDISTANCE]
+
+        # calculate potentials
+        vanderwaals_constant_factor = (SQUARED_VANDERWAALS_DISTANCE_OFF - SQUARED_VANDERWAALS_DISTANCE_ON) ** 3
+
+        indices_tooclose = numpy.nonzero(edge_distances < VANDERWAALS_DISTANCE_ON)
+        indices_toofar = numpy.nonzero(edge_distances > VANDERWAALS_DISTANCE_OFF)
+
+        squared_distances = numpy.square(edge_distances)
+
+        vanderwaals_prefactors = (((SQUARED_VANDERWAALS_DISTANCE_OFF - squared_distances) ** 2) *
+                                  (SQUARED_VANDERWAALS_DISTANCE_OFF - squared_distances - 3 *
+                                  (SQUARED_VANDERWAALS_DISTANCE_ON - squared_distances)) / vanderwaals_constant_factor)
+        vanderwaals_prefactors[indices_tooclose] = 0.0
+        vanderwaals_prefactors[indices_toofar] = 1.0
+
+        vanderwaals_potentials = 4.0 * epsilons * ((sigmas / edge_distances) ** 12) - ((sigmas / edge_distances) ** 6) * vanderwaals_prefactors
+
+        # set the values to the edges
+        for index, potential in enumerate(vanderwaals_potentials):
+            graph.edges[edge_keys[index]][FEATURENAME_EDGEVANDERWAALS] = potential
 
 
 class ProteinProteinInterfaceResidueQuery(Query):

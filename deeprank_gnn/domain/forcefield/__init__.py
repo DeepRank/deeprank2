@@ -8,6 +8,7 @@ from deeprank_gnn.tools.forcefield.top import TopParser
 from deeprank_gnn.tools.forcefield.patch import PatchParser
 from deeprank_gnn.tools.forcefield.residue import ResidueClassParser
 from deeprank_gnn.tools.forcefield.param import ParamParser
+from deeprank_gnn.models.error import UnknownAtomError
 
 
 _log = logging.getLogger(__name__)
@@ -15,6 +16,15 @@ _log = logging.getLogger(__name__)
 
 _forcefield_directory_path = os.path.dirname(os.path.abspath(__file__))
 
+
+VANDERWAALS_DISTANCE_OFF = 10.0
+VANDERWAALS_DISTANCE_ON = 6.5
+
+SQUARED_VANDERWAALS_DISTANCE_OFF = numpy.square(VANDERWAALS_DISTANCE_OFF)
+SQUARED_VANDERWAALS_DISTANCE_ON = numpy.square(VANDERWAALS_DISTANCE_ON)
+
+EPSILON0 = 1.0
+COULOMB_CONSTANT = 332.0636
 
 class AtomicForcefield:
     def __init__(self):
@@ -41,14 +51,14 @@ class AtomicForcefield:
 
         return None
 
-    def _get_vanderwaals_parameters(self, atom):
+    def get_vanderwaals_parameters(self, atom):
         type_ = self._get_type(atom)
 
         return self._vanderwaals_parameters[type_]
 
     def _get_type(self, atom):
         atom_name = atom.name
-        residue_name = atom.residue.name
+        residue_name = atom.residue.amino_acid.three_letter_code
 
         type_ = None
 
@@ -67,7 +77,7 @@ class AtomicForcefield:
                     type_ = action["TYPE"]
 
         if type_ is None:
-            raise ValueError("not mentioned in top or patch: {}".format(top_key))
+            raise UnknownAtomError("not mentioned in top or patch: {}".format(top_key))
 
         return type_
 
@@ -98,7 +108,7 @@ class AtomicForcefield:
                     charge = float(action["CHARGE"])
 
         if charge is None:
-            raise ValueError("not mentioned in top or patch: {}".format(top_key))
+            raise UnknownAtomError("not mentioned in top or patch: {}".format(top_key))
 
         return charge
 
