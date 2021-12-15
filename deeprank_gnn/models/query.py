@@ -133,10 +133,11 @@ class SingleResidueVariantAtomicQuery(Query):
         # read the pssm
         if self._pssm_paths is not None:
             for chain in structure.chains:
-                pssm_path = self._pssm_paths[chain.id]
+                if chain.id in self._pssm_paths:
+                    pssm_path = self._pssm_paths[chain.id]
 
-                with open(pssm_path, 'rt') as f:
-                    chain.pssm = parse_pssm(f, chain)
+                    with open(pssm_path, 'rt') as f:
+                        chain.pssm = parse_pssm(f, chain)
 
         # find the variant residue
         variant_residues = [r for r in structure.get_chain(self._chain_id).residues
