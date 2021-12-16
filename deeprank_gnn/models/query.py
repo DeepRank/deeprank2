@@ -183,9 +183,9 @@ class SingleResidueVariantAtomicQuery(Query):
                         atom_vanderwaals_parameters[atom] = atomic_forcefield.get_vanderwaals_parameters(atom)
                         atom_charges[atom] = atomic_forcefield.get_charge(atom)
 
-                except UnknownAtomError:
+                except UnknownAtomError as e:
                     # if one of the atoms has no forcefield parameters, do not include this edge
-                    _log.warning(traceback.format_exc())
+                    _log.warning(str(e))
                     continue
 
                 atom1_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom1)
