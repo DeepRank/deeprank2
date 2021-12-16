@@ -8,13 +8,12 @@ from deeprank_gnn.models.structure import Residue, Atom, AtomicElement
 from deeprank_gnn.domain.amino_acid import alanine, phenylalanine, glutamine, arginine, asparagine
 from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery, SingleResidueVariantAtomicQuery
 from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.domain.feature import (FEATURENAME_POSITION, FEATURENAME_EDGEDISTANCE,
-                                         FEATURENAME_EDGECOULOMB, FEATURENAME_EDGEVANDERWAALS)
+from deeprank_gnn.domain.feature import *
 from deeprank_gnn.tools.graph import graph_to_hdf5
 from deeprank_gnn.DataSet import HDF5DataSet
 
 
-def _check_graph_makes_sense(g, node_feature_names):
+def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
     assert len(g.nodes) > 0, "no nodes"
     assert FEATURENAME_POSITION in list(g.nodes.values())[0]
@@ -33,13 +32,15 @@ def _check_graph_makes_sense(g, node_feature_names):
             entry_group = f5[list(f5.keys())[0]]
 
             for feature_name in node_feature_names:
-
                 assert entry_group["node_data/{}".format(feature_name)][()].size > 0, "no {} feature".format(feature_name)
 
             assert entry_group["edge_index"][()].shape[1] == 2, "wrong edge index shape"
 
             assert entry_group["edge_index"].shape[0] > 0, "no edge indices"
-            assert entry_group["edge_data/dist"][()].shape[0] == entry_group["edge_index"].shape[0], "not enough edge distances"
+
+            for feature_name in edge_feature_names:
+                assert entry_group["edge_data/{}".format(feature_name)][()].shape[0] == entry_group["edge_index"].shape[0], \
+                    "not enough edge {} feature values".format(feature_name)
 
             count_edges_hdf5 = entry_group["edge_index"].shape[0]
 
@@ -63,7 +64,13 @@ def test_interface_graph():
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g, ["pos", "charge"])
+    _check_graph_makes_sense(g,
+                             [FEATURENAME_POSITION,
+                              FEATURENAME_CHARGE,
+                              FEATURENAME_POLARITY,
+                              FEATURENAME_PSSM,
+                              FEATURENAME_INFORMATIONCONTENT],
+                             [FEATURENAME_EDGEDISTANCE])
 
 
 def test_variant_graph():
@@ -73,7 +80,13 @@ def test_variant_graph():
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g, ["pos"])
+    _check_graph_makes_sense(g,
+                             [FEATURENAME_POSITION,
+                              FEATURENAME_SASA,
+                              FEATURENAME_PSSMDIFFERENCE],
+                             [FEATURENAME_EDGEDISTANCE,
+                              FEATURENAME_EDGEVANDERWAALS,
+                              FEATURENAME_EDGECOULOMB])
 
     # Two negative nodes should result in positive coulomb potential
     # and less positive at longer distances:
