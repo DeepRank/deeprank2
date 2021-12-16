@@ -58,6 +58,10 @@ class AtomicForcefield:
 
     def _get_type(self, atom):
         atom_name = atom.name
+
+        if atom.residue.amino_acid is None:
+            raise UnknownAtomError("no amino acid for {}".format(atom))
+
         residue_name = atom.residue.amino_acid.three_letter_code
 
         type_ = None
