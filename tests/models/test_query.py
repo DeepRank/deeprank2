@@ -5,7 +5,7 @@ import numpy
 import h5py
 
 from deeprank_gnn.models.structure import Residue, Atom, AtomicElement
-from deeprank_gnn.domain.amino_acid import alanine, phenylalanine, glutamine, arginine, asparagine
+from deeprank_gnn.domain.amino_acid import *
 from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery, SingleResidueVariantAtomicQuery
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.domain.feature import *
@@ -76,10 +76,10 @@ def test_interface_graph():
                              [FEATURENAME_EDGEDISTANCE])
 
 
-def test_variant_graph():
+def test_variant_graph_101M():
     query = SingleResidueVariantAtomicQuery("tests/data/pdb/101M/101M.pdb", "A", 27, None, asparagine, phenylalanine,
                                             {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
-                                            targets={"binclass": 0}, radius=20.0, nonbonded_distance_cutoff=20.0)
+                                            targets={"bin_class": 0}, radius=20.0, nonbonded_distance_cutoff=20.0)
 
     g = query.build_graph()
 
@@ -123,4 +123,20 @@ def test_variant_graph():
     assert vanderwaals_close < 0, "vanderwaals potential is positive for two distant atoms"
     assert vanderwaals_far < 0, "vanderwaals potential is positive for two distant atoms"
     assert vanderwaals_close < vanderwaals_far, "two far atoms were given a stronger vanderwaals potential than two closer ones"
+
+
+def test_variant_graph_1A0Z():
+    query = SingleResidueVariantAtomicQuery("tests/data/pdb/1A0Z/1A0Z.pdb", "A", 125, None, leucine, arginine,
+                                            {"A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm", "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm"},
+                                            targets={"bin_class": 1})
+
+    g = query.build_graph()
+
+    _check_graph_makes_sense(g,
+                             [FEATURENAME_POSITION,
+                              FEATURENAME_SASA,
+                              FEATURENAME_PSSMDIFFERENCE],
+                             [FEATURENAME_EDGEDISTANCE,
+                              FEATURENAME_EDGEVANDERWAALS,
+                              FEATURENAME_EDGECOULOMB])
 
