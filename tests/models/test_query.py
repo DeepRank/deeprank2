@@ -42,6 +42,9 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
                 assert entry_group["edge_data/{}".format(feature_name)][()].shape[0] == entry_group["edge_index"].shape[0], \
                     "not enough edge {} feature values".format(feature_name)
 
+                assert entry_group["internal_edge_data/{}".format(feature_name)][()].shape[0] == entry_group["internal_edge_index"].shape[0], \
+                    "not enough edge {} feature values".format(feature_name)
+
             count_edges_hdf5 = entry_group["edge_index"].shape[0]
 
         dataset = HDF5DataSet(database=tmp_path)
