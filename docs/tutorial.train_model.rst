@@ -115,7 +115,6 @@ The user may :
 >>> from deeprank_gnn.NeuralNet import NeuralNet
 >>> from deeprank_gnn.ginet import GINet
 >>>
->>> database = './hdf5/1ACB_residue.hdf5'
 >>> database = './1ATN_residue.hdf5'
 >>>
 >>> model = NeuralNet(database, GINet,
@@ -287,7 +286,6 @@ In short
 >>> from deeprank_gnn.NeuralNet import NeuralNet
 >>> from deeprank_gnn.ginet import GINet
 >>>
->>> database = './hdf5/1ACB_residue.hdf5'
 >>> database = './1ATN_residue.hdf5'
 >>>
 >>> edge_feature=['dist']
@@ -352,5 +350,42 @@ Using default settings
 >>> model.save_model("model_backup.pth.tar")
 >>> model.test(database_test, threshold=4.0)
 
+Use DeepRank-GNN paper's pretrained model
+=============================================
+
+**See**: M. Réau, N. Renaud, L. C. Xue, A. M. J. J. Bonvin, "DeepRank-GNN: A Graph Neural Network Framework to Learn Patterns in Protein-Protein Interfaces", bioRxiv 2021.12.08.471762; doi: https://doi.org/10.1101/2021.12.08.471762
+
+You can get the `pre-trained model <https://github.com/DeepRank/Deeprank-GNN/tree/master/paper_pretrained_models/>`_ from DeepRank-GNN `github repository <https://github.com/DeepRank/Deeprank-GNN/>`_
+
+>>> import glob 
+>>> import sys 
+>>> import time
+>>> import datetime 
+>>> import numpy as np
+>>> 
+>>> from deeprank_gnn.GraphGenMP import GraphHDF5
+>>> from deeprank_gnn.NeuralNet import NeuralNet
+>>> from deeprank_gnn.ginet import GINet
+>>>
+>>> ### Graph generation section
+>>> pdb_path = '../tests/data/pdb/1ATN/'
+>>> pssm_path = '../tests/data/pdb/1ATN/'
+>>>
+>>> GraphHDF5(pdb_path=pdb_path, pssm_path=pssm_path,
+>>>         graph_type='residue', outfile='1ATN_residue.hdf5', nproc=4)
+>>> 
+>>> ### Prediction section
+>>> gnn = GINet
+>>> pretrained_model = 'fold6_treg_yfnat_b128_e20_lr0.001_4.pt'
+>>> database_test = glob.glob('1ATN_residue.hdf5')
+>>> 
+>>> start_time = time.time()
+>>> model = NeuralNet(database_test, gnn, pretrained_model = pretrained_model)    
+>>> model.test(threshold=None)
+>>> end_time = time.time()
+>>> print ('Elapsed time: {end_time-start_time}')
+>>> 
+>>> ### The output is automatically stored in **test_data.hdf5** 
+         
 .. note::  
  For storage convenience, all predictions are stored in a HDF5 file. A converter from HDF5 to csv is provided in the **tools** directory
