@@ -62,7 +62,7 @@ class TestNeuralNet(unittest.TestCase):
                 for i in range(1, 5):
                     f.write('1ATN_%dw:A-B %d\n' % (i, i % 2 == 0))
 
-            add_target(self.database, "binclass", target_path)
+            add_target(self.database, "bin_class", target_path)
         finally:
             os.remove(target_path)
 
@@ -75,7 +75,7 @@ class TestNeuralNet(unittest.TestCase):
 
     def test_ginet_class(self):
         _model_base_test(self.work_directory, self.database, GINet,
-                         task='class', target='binclass')
+                         task='class', target='bin_class')
 
     def test_fout(self):
         _model_base_test(self.work_directory, self.database, FoutNet)
