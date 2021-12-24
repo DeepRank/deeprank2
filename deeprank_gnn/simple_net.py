@@ -1,3 +1,4 @@
+import logging
 
 import torch
 from torch.nn import Parameter, Module, Linear
@@ -6,6 +7,9 @@ from torch_scatter import scatter_mean, scatter_sum
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
 from torch_geometric.data import DataLoader
+
+
+_log = logging.getLogger(__name__)
 
 
 class SimpleMessageLayer(Module):
@@ -35,16 +39,25 @@ class SimpleMessageLayer(Module):
         message_input = torch.cat([node1_features, node2_features, edge_features], dim=1)
         messages_per_edge = self._fe(message_input)
 
+        _log.debug(f"SimpleMessageLayer message is {message_input}")
+
         message_factors_per_edge = softmax(leaky_relu(messages_per_edge), dim=1)
 
         message_sums_per_node = scatter_sum(message_factors_per_edge, node1_indices, dim=0)
 
+        _log.debug(f"SimpleMessageLayer message per node is {message_sums_per_node}")
+
         node_input = torch.cat([node_features, message_sums_per_node], dim=1)
         z = self._fh(node_input)
+
+        _log.debug(f"SimpleMessageLayer returning {z}")
+
         return z
 
 
 class SimpleNetwork(Module):
+
+    number_of_message_layers = 2
 
     def __init__(self, input_shape, output_shape, input_shape_edge):
         """
@@ -56,31 +69,25 @@ class SimpleNetwork(Module):
 
         super(SimpleNetwork, self).__init__()
 
-        self._count_message_layers = 3
+        self._count_message_layers = SimpleNetwork.number_of_message_layers
 
         self._message_layers_internal = []
-        self._message_layers_external = []
         for layer_index in range(self._count_message_layers):
             self._message_layers_internal.append(SimpleMessageLayer(input_shape, input_shape_edge))
-            self._message_layers_external.append(SimpleMessageLayer(input_shape, input_shape_edge))
 
-        self._fc = Linear(input_shape * 2, output_shape)
+        self._fc = Linear(input_shape, output_shape)
 
     def forward(self, data):
 
-        node_features_external = data.x.clone().detach()
         node_features_internal = data.x.clone().detach()
         for layer_index in range(self._count_message_layers):
 
-            node_features_external = relu(self._message_layers_external[layer_index](node_features_external, data.edge_index, data.edge_attr))
-            node_features_internal = relu(self._message_layers_internal[layer_index](node_features_internal, data.edge_index, data.edge_attr))
+            node_features_internal = self._message_layers_internal[layer_index](node_features_internal, data.internal_edge_index, data.internal_edge_attr)
 
         batch = data.batch
 
-        node_features_external = scatter_mean(node_features_external, batch, dim=0)
         node_features_internal = scatter_mean(node_features_internal, batch, dim=0)
 
-        node_features = torch.cat([node_features_internal, node_features_external], dim=1)
+        z = relu(self._fc(node_features_internal))
 
-        z = relu(self._fc(node_features))
         return z
