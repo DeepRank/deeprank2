@@ -5,9 +5,6 @@ from torch.nn import Parameter, Module, Linear
 from torch.nn.functional import softmax, leaky_relu, relu
 from torch_scatter import scatter_mean, scatter_sum
 from torch_geometric.nn.inits import uniform
-from torch_geometric.nn import max_pool_x
-from torch_geometric.data import DataLoader
-
 
 _log = logging.getLogger(__name__)
 
@@ -22,8 +19,13 @@ class SimpleMessageLayer(Module):
 
         self._message_size = 16
 
-        self._fe = Linear(2 * count_node_features + count_edge_features, self._message_size)
-        self._fh = Linear(count_node_features + self._message_size, count_node_features)
+        edge_input_size = 2 * count_node_features + count_edge_features
+        self._fe = Linear(edge_input_size, self._message_size)
+        uniform(edge_input_size, self._fe.weight)
+
+        node_input_size = count_node_features + self._message_size
+        self._fh = Linear(node_input_size, count_node_features)
+        uniform(node_input_size, self._fh.weight)
 
     def forward(self, node_features, edge_node_indices, edge_features):
 
