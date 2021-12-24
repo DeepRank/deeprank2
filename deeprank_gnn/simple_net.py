@@ -39,18 +39,12 @@ class SimpleMessageLayer(Module):
         message_input = torch.cat([node1_features, node2_features, edge_features], dim=1)
         messages_per_edge = self._fe(message_input)
 
-        _log.debug(f"SimpleMessageLayer message is {message_input}")
-
         message_factors_per_edge = softmax(leaky_relu(messages_per_edge), dim=1)
 
         message_sums_per_node = scatter_sum(message_factors_per_edge, node1_indices, dim=0)
 
-        _log.debug(f"SimpleMessageLayer message per node is {message_sums_per_node}")
-
         node_input = torch.cat([node_features, message_sums_per_node], dim=1)
         z = self._fh(node_input)
-
-        _log.debug(f"SimpleMessageLayer returning {z}")
 
         return z
 
