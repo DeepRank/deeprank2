@@ -113,11 +113,14 @@ def test_variant_graph_101M():
     assert coulomb_attract_far < 0, "two opposite charges were given positive coulomb potential"
     assert coulomb_attract_close < coulomb_attract_far, "two far away charges were given stronger coulomb potential than two close ones"
 
+    # If two atoms are really close together, then the LJ potential should be positive.
     # If two atoms are further away from each other than their sigma values, then the LJ potential
     # should be negative and less negative at further distances.
+    vanderwaals_bump = g.edges[node_negative1, node_negative2][FEATURENAME_EDGEVANDERWAALS]
     vanderwaals_close = g.edges[node_negative1, node_positive1][FEATURENAME_EDGEVANDERWAALS]
     vanderwaals_far = g.edges[node_negative3, node_positive1][FEATURENAME_EDGEVANDERWAALS]
 
+    assert vanderwaals_bump > 0, "vanderwaals potential is negative for two bumping atoms"
     assert vanderwaals_close < 0, "vanderwaals potential is positive for two distant atoms"
     assert vanderwaals_far < 0, "vanderwaals potential is positive for two distant atoms"
     assert vanderwaals_close < vanderwaals_far, "two far atoms were given a stronger vanderwaals potential than two closer ones"
