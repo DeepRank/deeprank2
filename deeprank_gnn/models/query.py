@@ -62,7 +62,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
     def __init__(self, pdb_path, chain_id, residue_number, insertion_code, wildtype_amino_acid, variant_amino_acid,
                  pssm_paths=None,
-                 radius=10.0, nonbonded_distance_cutoff=4.5, bonded_distance_cutoff=1.6, disulfid_distance=2.2,
+                 radius=10.0, distance_cutoff=5.0,
                  targets=None):
         """
             Args:
@@ -74,9 +74,7 @@ class SingleResidueVariantAtomicQuery(Query):
                 variant_amino_acid(deeprank amino acid object): the variant amino acid
                 pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
                 radius(float): in Ångström, determines how many residues will be included in the graph
-                nonbonded_distance_cutoff(float): max distance in Ångström between a pair of nonbonded atoms to consider them as an edge in the graph
-                bonded_distance_cutoff(float): max distance in Ångström between a pair of covalently bonded atoms to consider them as an edge in the graph
-                disulfid_distance(float): max distance in Ångström between two gamma sulfur atoms to consider them as a disulfid bond
+                distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an edge in the graph
                 targets(dict(str,float)): named target values associated with this query
         """
 
@@ -94,9 +92,7 @@ class SingleResidueVariantAtomicQuery(Query):
         self._variant_amino_acid = variant_amino_acid
 
         self._radius = radius
-        self._nonbonded_distance_cutoff = nonbonded_distance_cutoff
-        self._bonded_distance_cutoff = bonded_distance_cutoff
-        self._disulfid_distance = disulfid_distance
+        self._distance_cutoff = distance_cutoff
 
     @property
     def residue_id(self):
@@ -159,18 +155,17 @@ class SingleResidueVariantAtomicQuery(Query):
             atoms.extend(residue.atoms)
 
         # build a graph and keep track of how we named the nodes
-        atom_node_names = {}
         node_name_atoms = {}
         graph = Graph(self.get_query_id(), self.targets)
 
         # find neighbouring atoms
         atom_positions = [atom.position for atom in atoms]
         distances = distance_matrix(atom_positions, atom_positions, p=2)
-        nonbonded_neighbours = numpy.logical_and(distances < self._nonbonded_distance_cutoff,
+        neighbours = numpy.logical_and(distances < self._distance_cutoff,
                                                  distances > 0.0)
         atom_vanderwaals_parameters = {}
         atom_charges = {}
-        for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(nonbonded_neighbours)):
+        for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
             if atom1_index != atom2_index:  # do not pair an atom with itself
 
                 distance = distances[atom1_index, atom2_index]
@@ -191,32 +186,20 @@ class SingleResidueVariantAtomicQuery(Query):
                 atom1_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom1)
                 atom2_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom2)
 
-                if distance < self._bonded_distance_cutoff:
-
-                    edge_type = EDGETYPE_INTERNAL
-
-                elif atom1.name == "SG" and atom2.name == "SG" and distance < self._disulfid_distance:
-
-                    edge_type = EDGETYPE_INTERNAL
-                else:
-                    edge_type = EDGETYPE_INTERFACE
-
+                # connect the atoms and set the distance
                 graph.add_edge(atom1_key, atom2_key)
-                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = edge_type
+                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
                 graph.edges[atom1_key, atom2_key][FEATURENAME_EDGEDISTANCE] = distance
 
-                atom_node_names[atom1] = atom1_key
-                atom_node_names[atom2] = atom2_key
+                # set the positions of the atoms
+                graph.nodes[atom1_key][FEATURENAME_POSITION] = atom1.position
+                graph.nodes[atom2_key][FEATURENAME_POSITION] = atom2.position
 
                 node_name_atoms[atom1_key] = atom1
                 node_name_atoms[atom2_key] = atom2
 
-        # Set the positions of the atoms in the graph
-        for atom, node_name in atom_node_names.items():
-            node = graph.nodes[node_name]
-            node[FEATURENAME_POSITION] = atom.position
-
-        SingleResidueVariantAtomicQuery._set_coulomb(graph, node_name_atoms, atom_charges, self._nonbonded_distance_cutoff)
+        # set additional features
+        SingleResidueVariantAtomicQuery._set_coulomb(graph, node_name_atoms, atom_charges, self._distance_cutoff)
         SingleResidueVariantAtomicQuery._set_vanderwaals(graph, node_name_atoms, atom_vanderwaals_parameters)
 
         SingleResidueVariantAtomicQuery._set_pssm(graph, node_name_atoms, variant_residue,
@@ -337,7 +320,7 @@ class SingleResidueVariantAtomicQuery(Query):
         vanderwaals_prefactors[indices_tooclose] = 0.0
         vanderwaals_prefactors[indices_toofar] = 1.0
 
-        vanderwaals_potentials = 4.0 * epsilons * ((sigmas / edge_distances) ** 12) - ((sigmas / edge_distances) ** 6) * vanderwaals_prefactors
+        vanderwaals_potentials = 4.0 * epsilons * (((sigmas / edge_distances) ** 12) - ((sigmas / edge_distances) ** 6)) * vanderwaals_prefactors
 
         # set the values to the edges
         for index, potential in enumerate(vanderwaals_potentials):

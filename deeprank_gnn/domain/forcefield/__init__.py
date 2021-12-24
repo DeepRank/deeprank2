@@ -17,8 +17,8 @@ _log = logging.getLogger(__name__)
 _forcefield_directory_path = os.path.dirname(os.path.abspath(__file__))
 
 
-VANDERWAALS_DISTANCE_OFF = 10.0
-VANDERWAALS_DISTANCE_ON = 6.5
+VANDERWAALS_DISTANCE_OFF = 20.0
+VANDERWAALS_DISTANCE_ON = 1.0
 
 SQUARED_VANDERWAALS_DISTANCE_OFF = numpy.square(VANDERWAALS_DISTANCE_OFF)
 SQUARED_VANDERWAALS_DISTANCE_ON = numpy.square(VANDERWAALS_DISTANCE_ON)
