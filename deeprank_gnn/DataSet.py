@@ -1,5 +1,7 @@
 import sys
 import os
+import traceback
+
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
@@ -264,7 +266,8 @@ class HDF5DataSet(Dataset):
         try:
             # index ! we have to have all the edges i.e : (i,j) and (j,i)
             ind = grp['edge_index'][()]
-            ind = np.vstack((ind, np.flip(ind, 1))).T
+            if ind.ndim == 2:
+                ind = np.vstack((ind, np.flip(ind, 1))).T
             edge_index = torch.tensor(
                 ind, dtype=torch.long).contiguous()
 
@@ -287,7 +290,8 @@ class HDF5DataSet(Dataset):
 
             # internal edges
             ind = grp['internal_edge_index'][()]
-            ind = np.vstack((ind, np.flip(ind, 1))).T
+            if ind.ndim == 2:
+                ind = np.vstack((ind, np.flip(ind, 1))).T
             internal_edge_index = torch.tensor(
                 ind, dtype=torch.long).contiguous()
 
@@ -309,8 +313,7 @@ class HDF5DataSet(Dataset):
                 internal_edge_attr = None
 
         except:
-            print('edge features not found in the file',
-                  self.database[0])
+            traceback.print_exc()
             f5.close()
             return None
 
