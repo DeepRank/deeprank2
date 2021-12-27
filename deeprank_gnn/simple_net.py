@@ -29,21 +29,18 @@ class SimpleMessageLayer(Module):
 
     def forward(self, node_features, edge_node_indices, edge_features):
 
-        node1_indices, node2_indices = edge_node_indices
-        count_nodes = len(node_features)
+        node0_indices, node1_indices = edge_node_indices
 
         if edge_features.dim() == 1:
             edge_features = edge_features.unsqueeze(-1)
 
+        node0_features = node_features[node0_indices]
         node1_features = node_features[node1_indices]
-        node2_features = node_features[node2_indices]
 
-        message_input = torch.cat([node1_features, node2_features, edge_features], dim=1)
-        messages_per_edge = self._fe(message_input)
+        message_input = torch.cat([node0_features, node1_features, edge_features], dim=1)
+        messages_per_neighbour = self._fe(message_input)
 
-        message_factors_per_edge = softmax(leaky_relu(messages_per_edge), dim=1)
-
-        message_sums_per_node = scatter_sum(message_factors_per_edge, node1_indices, dim=0)
+        message_sums_per_node = scatter_sum(messages_per_neighbour, node0_indices, dim=0)
 
         node_input = torch.cat([node_features, message_sums_per_node], dim=1)
         z = self._fh(node_input)
@@ -72,18 +69,18 @@ class SimpleNetwork(Module):
             self._message_layers_internal.append(SimpleMessageLayer(input_shape, input_shape_edge))
 
         self._fc = Linear(input_shape, output_shape)
+        uniform(input_shape, self._fc.weight)
 
     def forward(self, data):
 
-        node_features_internal = data.x.clone().detach()
+        node_features_updated = data.x.clone().detach()
         for layer_index in range(self._count_message_layers):
+            node_features_updated = self._message_layers_internal[layer_index](node_features_updated, data.internal_edge_index, data.internal_edge_attr)
 
-            node_features_internal = self._message_layers_internal[layer_index](node_features_internal, data.internal_edge_index, data.internal_edge_attr)
+        batches = data.batch
 
-        batch = data.batch
+        means_per_batch = scatter_mean(node_features_updated, batches, dim=0)
 
-        node_features_internal = scatter_mean(node_features_internal, batch, dim=0)
-
-        z = relu(self._fc(node_features_internal))
+        z = relu(self._fc(means_per_batch))
 
         return z
