@@ -195,7 +195,7 @@ class SingleResidueVariantAtomicQuery(Query):
                 # connect the atoms and set the distance
                 graph.add_edge(atom1_key, atom2_key)
 
-                if distance < self._internal_distancc_cutoff:
+                if distance < self._internal_distance_cutoff:
                     graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
                 else:
                     graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
