@@ -2,6 +2,7 @@ import numpy as np
 from time import time
 import h5py
 import os
+import logging
 
 # torch import
 import torch
@@ -13,6 +14,9 @@ from torch_geometric.data import DataLoader
 # deeprank_gnn import
 from .DataSet import HDF5DataSet, DivideDataSet, PreCluster
 from .Metrics import Metrics
+
+
+_log = logging.getLogger(__name__)
 
 
 class NeuralNet(object):
@@ -300,7 +304,7 @@ class NeuralNet(object):
                 self.train_acc.append(_acc)
 
                 # Print the loss and accuracy (training set)
-                self.print_epoch_data(
+                self.log_epoch_data(
                     'train', epoch, _loss, _acc, t)
 
                 # Validate the model
@@ -319,7 +323,7 @@ class NeuralNet(object):
                     self.valid_acc.append(_val_acc)
 
                     # Print loss and accuracy (validation set)
-                    self.print_epoch_data(
+                    self.log_epoch_data(
                         'valid', epoch, _val_loss, _val_acc, t)
 
                     # save the best model (i.e. lowest loss value on validation data)
@@ -407,8 +411,12 @@ class NeuralNet(object):
                 _test_acc = self.get_metrics('test', threshold).accuracy
                 self.test_acc = _test_acc
 
+                self.log_epoch_data(
+                    'test', 0, _test_loss, _test_acc, 0.0)
+
             self.test_loss = _test_loss
             self._export_epoch_hdf5(0, self.data)
+
 
 
     def eval(self, loader):
@@ -578,12 +586,12 @@ class NeuralNet(object):
         return weights
 
     @staticmethod
-    def print_epoch_data(stage, epoch, loss, acc, time):
+    def log_epoch_data(stage, epoch, loss, acc, time):
         """
         Prints the data of each epoch
 
         Args:
-            stage (str): tain or valid
+            stage (str): train or valid
             epoch (int): epoch number
             loss (float): loss during that epoch
             acc (float or None): accuracy
@@ -594,8 +602,7 @@ class NeuralNet(object):
         else:
             acc_str = '%1.4e' % acc
 
-        print('Epoch [%04d] : %s loss %e | accuracy %s | time %1.2e sec.' % (epoch,
-                                                                             stage, loss, acc_str, time))
+        _log.info('Epoch [%04d] : %s loss %e | accuracy %s | time %1.2e sec.' % (epoch, stage, loss, acc_str, time))
 
     def format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
