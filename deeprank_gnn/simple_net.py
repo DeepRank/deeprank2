@@ -4,7 +4,6 @@ import torch
 from torch.nn import Parameter, Module, Linear
 from torch.nn.functional import softmax, leaky_relu, relu
 from torch_scatter import scatter_mean, scatter_sum
-from torch_geometric.nn.inits import uniform
 
 _log = logging.getLogger(__name__)
 
@@ -17,15 +16,22 @@ class SimpleMessageLayer(Module):
 
         super(SimpleMessageLayer, self).__init__()
 
-        self._message_size = 16
+        message_size = 4
 
+        self._count_intermediary_layers = 0
+
+        # layer for inputting edge, node 0 and node 1
         edge_input_size = 2 * count_node_features + count_edge_features
-        self._fe = Linear(edge_input_size, self._message_size)
-        uniform(edge_input_size, self._fe.weight)
+        self._fe = Linear(edge_input_size, message_size)
 
-        node_input_size = count_node_features + self._message_size
+        # intermediary layers
+        self._intermediary_layers = []
+        for layer_index in range(self._count_intermediary_layers):
+            self._intermediary_layers.append(Linear(message_size, message_size))
+
+        # layer that makes the final output
+        node_input_size = count_node_features + message_size
         self._fh = Linear(node_input_size, count_node_features)
-        uniform(node_input_size, self._fh.weight)
 
     def forward(self, node_features, edge_node_indices, edge_features):
 
@@ -39,6 +45,8 @@ class SimpleMessageLayer(Module):
 
         message_input = torch.cat([node0_features, node1_features, edge_features], dim=1)
         messages_per_neighbour = self._fe(message_input)
+        for layer_index in range(self._count_intermediary_layers):
+            messages_per_neighbour = self._intermediary_layers[layer_index](messages_per_neighbour)
 
         message_sums_per_node = scatter_sum(messages_per_neighbour, node0_indices, dim=0)
 
@@ -50,8 +58,6 @@ class SimpleMessageLayer(Module):
 
 class SimpleNetwork(Module):
 
-    number_of_message_layers = 2
-
     def __init__(self, input_shape, output_shape, input_shape_edge):
         """
             Args:
@@ -62,14 +68,24 @@ class SimpleNetwork(Module):
 
         super(SimpleNetwork, self).__init__()
 
-        self._count_message_layers = SimpleNetwork.number_of_message_layers
+        self._count_message_layers = 2
+        self._count_intermediary_layers = 0
 
+        # The layers that combine edge information per node
         self._message_layers_internal = []
         for layer_index in range(self._count_message_layers):
             self._message_layers_internal.append(SimpleMessageLayer(input_shape, input_shape_edge))
 
-        self._fc = Linear(input_shape, output_shape)
-        uniform(input_shape, self._fc.weight)
+        intermediary_size = 16
+
+        # The layers that convert graph information
+        self._fc = Linear(input_shape, intermediary_size)
+
+        self._intermediary_layers = []
+        for layer_index in range(self._count_intermediary_layers):
+            self._intermediary_layers.append(Linear(intermediary_size, intermediary_size))
+
+        self._fz = Linear(intermediary_size, output_shape)
 
     def forward(self, data):
 
@@ -77,10 +93,15 @@ class SimpleNetwork(Module):
         for layer_index in range(self._count_message_layers):
             node_features_updated = self._message_layers_internal[layer_index](node_features_updated, data.internal_edge_index, data.internal_edge_attr)
 
-        batches = data.batch
+        graph_indices = data.batch
 
-        means_per_batch = scatter_mean(node_features_updated, batches, dim=0)
+        means_per_graph = scatter_mean(node_features_updated, graph_indices, dim=0)
 
-        z = relu(self._fc(means_per_batch))
+        intermediary = self._fc(means_per_graph)
+
+        for layer_index in range(self._count_intermediary_layers):
+            intermediary = self._intermediary_layers[layer_index](intermediary)
+
+        z = relu(self._fz(intermediary))
 
         return z
