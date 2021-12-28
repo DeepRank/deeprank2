@@ -62,7 +62,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
     def __init__(self, pdb_path, chain_id, residue_number, insertion_code, wildtype_amino_acid, variant_amino_acid,
                  pssm_paths=None,
-                 radius=10.0, distance_cutoff=5.0,
+                 radius=10.0, external_distance_cutoff=8.5, internal_distance_cutoff=3.0,
                  targets=None):
         """
             Args:
@@ -74,7 +74,8 @@ class SingleResidueVariantAtomicQuery(Query):
                 variant_amino_acid(deeprank amino acid object): the variant amino acid
                 pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
                 radius(float): in Ångström, determines how many residues will be included in the graph
-                distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an edge in the graph
+                external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
+                internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an internal edge in the graph (must be shorter than external)
                 targets(dict(str,float)): named target values associated with this query
         """
 
@@ -92,7 +93,12 @@ class SingleResidueVariantAtomicQuery(Query):
         self._variant_amino_acid = variant_amino_acid
 
         self._radius = radius
-        self._distance_cutoff = distance_cutoff
+
+        if external_distance_cutoff < internal_distance_cutoff:
+            raise ValueError("this query is not supported with internal distance cutoff shorter than external distance cutoff")
+
+        self._external_distance_cutoff = external_distance_cutoff
+        self._internal_distance_cutoff = internal_distance_cutoff
 
     @property
     def residue_id(self):
@@ -161,8 +167,8 @@ class SingleResidueVariantAtomicQuery(Query):
         # find neighbouring atoms
         atom_positions = [atom.position for atom in atoms]
         distances = distance_matrix(atom_positions, atom_positions, p=2)
-        neighbours = numpy.logical_and(distances < self._distance_cutoff,
-                                                 distances > 0.0)
+        neighbours = numpy.logical_and(distances < self._external_distance_cutoff,
+                                       distances > 0.0)
         atom_vanderwaals_parameters = {}
         atom_charges = {}
         for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
@@ -188,7 +194,12 @@ class SingleResidueVariantAtomicQuery(Query):
 
                 # connect the atoms and set the distance
                 graph.add_edge(atom1_key, atom2_key)
-                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+
+                if distance < self._internal_distancc_cutoff:
+                    graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+                else:
+                    graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
+
                 graph.edges[atom1_key, atom2_key][FEATURENAME_EDGEDISTANCE] = distance
 
                 # set the positions of the atoms
@@ -199,7 +210,7 @@ class SingleResidueVariantAtomicQuery(Query):
                 node_name_atoms[atom2_key] = atom2
 
         # set additional features
-        SingleResidueVariantAtomicQuery._set_coulomb(graph, node_name_atoms, atom_charges, self._distance_cutoff)
+        SingleResidueVariantAtomicQuery._set_coulomb(graph, node_name_atoms, atom_charges, self._external_distance_cutoff)
         SingleResidueVariantAtomicQuery._set_vanderwaals(graph, node_name_atoms, atom_vanderwaals_parameters)
 
         SingleResidueVariantAtomicQuery._set_pssm(graph, node_name_atoms, variant_residue,
