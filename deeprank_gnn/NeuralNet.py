@@ -484,7 +484,7 @@ class NeuralNet(object):
         running_loss = 0
         out = []
         y = []
-        data = {'outputs': [], 'targets': [], 'mol': []}
+        data = {'outputs': [], 'targets': [], 'mol': [], 'loss': []}
 
         for data_batch in self.train_loader:
             data_batch = data_batch.to(self.device)
@@ -525,6 +525,8 @@ class NeuralNet(object):
         else:
             data['targets'] += y
             data['outputs'] += out
+
+        data['loss'] += [running_loss]
 
         return out, y, running_loss, data
 
