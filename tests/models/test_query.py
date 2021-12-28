@@ -77,7 +77,7 @@ def test_interface_graph():
 def test_variant_graph_101M():
     query = SingleResidueVariantAtomicQuery("tests/data/pdb/101M/101M.pdb", "A", 27, None, asparagine, phenylalanine,
                                             {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
-                                            targets={"bin_class": 0}, radius=20.0, distance_cutoff=20.0)
+                                            targets={"bin_class": 0}, radius=20.0, external_distance_cutoff=20.0)
 
     g = query.build_graph()
 
