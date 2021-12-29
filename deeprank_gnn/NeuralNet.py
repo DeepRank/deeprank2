@@ -434,7 +434,7 @@ class NeuralNet(object):
         loss_func, loss_val = self.loss, 0
         out = []
         y = []
-        data = {'outputs': [], 'targets': [], 'mol': []}
+        data = {'outputs': [], 'targets': [], 'mol': [], 'loss': []}
 
         for data_batch in loader:
 
@@ -471,6 +471,8 @@ class NeuralNet(object):
         else:
             data['targets'] += y
             data['outputs'] += out
+
+        data['loss'] += [loss_val]
 
         return out, y, loss_val, data
 
