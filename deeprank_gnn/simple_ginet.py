@@ -56,7 +56,9 @@ class SimpleGiMessageLayer(Module):
 
         attenuated_node_output = attention * node0_output
 
-        z = scatter_sum(attenuated_node_output, node0_indices, dim=0)
+        out = torch.zeros(count_nodes, self._node_output_size).to(attention.device)
+        z = scatter_sum(attenuated_node_output, node0_indices, dim=0, out=out)
+
         return z
 
 
