@@ -131,9 +131,9 @@ class SingleResidueVariantAtomicQuery(Query):
     def build_graph(self):
 
         # load pdb strucure
-        try:
-            pdb = pdb2sql.pdb2sql(self._pdb_path)
+        pdb = pdb2sql.pdb2sql(self._pdb_path)
 
+        try:
             structure = get_structure(pdb, self.model_id)
         finally:
             pdb._close()
