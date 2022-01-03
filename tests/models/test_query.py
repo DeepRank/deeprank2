@@ -141,3 +141,19 @@ def test_variant_graph_1A0Z():
                               FEATURENAME_EDGEVANDERWAALS,
                               FEATURENAME_EDGECOULOMB])
 
+
+def test_variant_grap_9API():
+    query = SingleResidueVariantAtomicQuery("tests/data/pdb/9api/9api.pdb", "A", 310, None, lysine, glutamate,
+                                            {"A": "tests/data/pssm/9api/9api.A.pdb.pssm", "B": "tests/data/pssm/9api/9api.B.pdb.pssm"},
+                                            targets={"bin_class": 0})
+
+    g = query.build_graph()
+
+    _check_graph_makes_sense(g,
+                             [FEATURENAME_POSITION,
+                              FEATURENAME_SASA,
+                              FEATURENAME_PSSMDIFFERENCE],
+                             [FEATURENAME_EDGEDISTANCE,
+                              FEATURENAME_EDGEVANDERWAALS,
+                              FEATURENAME_EDGECOULOMB])
+
