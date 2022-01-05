@@ -295,7 +295,11 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
 
     for node in graph.nodes:
 
-        index = int(graph.nodes[node]['chain'])
+        if 'chain' in graph.nodes[node]:
+            index = int(graph.nodes[node]['chain'])
+        else:
+            index = 0
+
         pos = graph.nodes[node]['pos2D']
 
         node_trace[index]['x'] += (pos[0],)
@@ -395,7 +399,11 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
 
     for node in graph.nodes:
 
-        index = int(graph.nodes[node]['chain'])
+        if 'chain' in graph.nodes[node]:
+            index = int(graph.nodes[node]['chain'])
+        else:
+            index = 0
+
         pos = graph.nodes[node]['pos']
 
         node_trace[index]['x'] += (pos[0],)
