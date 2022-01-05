@@ -169,8 +169,17 @@ class SingleResidueVariantAtomicQuery(Query):
         distances = distance_matrix(atom_positions, atom_positions, p=2)
         neighbours = numpy.logical_and(distances < self._external_distance_cutoff,
                                        distances > 0.0)
+
+        # initialize these recording dictionaries
         atom_vanderwaals_parameters = {}
         atom_charges = {}
+        chain_codes = {}
+
+        # give every chain a code
+        for chain in structure.chains:
+            chain_codes[chain] = len(chain_codes)
+
+        # iterate over every pair of neighbouring atoms
         for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
             if atom1_index != atom2_index:  # do not pair an atom with itself
 
@@ -205,6 +214,8 @@ class SingleResidueVariantAtomicQuery(Query):
                 # set the positions of the atoms
                 graph.nodes[atom1_key][FEATURENAME_POSITION] = atom1.position
                 graph.nodes[atom2_key][FEATURENAME_POSITION] = atom2.position
+                graph.nodes[atom1_key][FEATURENAME_CHAIN] = chain_codes[atom1.residue.chain]
+                graph.nodes[atom2_key][FEATURENAME_CHAIN] = chain_codes[atom2.residue.chain]
 
                 node_name_atoms[atom1_key] = atom1
                 node_name_atoms[atom2_key] = atom2
