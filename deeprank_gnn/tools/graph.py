@@ -26,6 +26,28 @@ HDF5KEY_GRAPH_EDGEFEATURES = "edge_data"
 HDF5KEY_GRAPH_INTERNALEDGEFEATURES = "internal_edge_data"
 
 
+
+def graph_has_nan(graph):
+    for node_key, node_dict in graph.nodes.items():
+        for feature_name, feature_value in node_dict.items():
+
+            if numpy.any(numpy.isnan(feature_value)):
+                _log.debug(f"node {node_key} {feature_name} has NaN")
+                return True
+
+    for edge_key, edge_dict in graph.edges.items():
+        for feature_name, feature_value in edge_dict.items():
+
+            if feature_name == FEATURENAME_EDGETYPE:
+                continue  # is expected to be string
+
+            if numpy.any(numpy.isnan(feature_value)):
+                _log.debug(f"edge {edge_key} {feature_name} has NaN")
+                return True
+
+    return False
+
+
 def graph_to_hdf5(graph, hdf5_file):
     """ Write a featured graph to an hdf5 file, according to deeprank standards.
 
