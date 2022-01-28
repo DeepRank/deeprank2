@@ -57,6 +57,253 @@ class Query:
         return "{}({})".format(type(self), self.get_query_id())
 
 
+class SingleResidueVariantResidueQuery(Query):
+    "creates a residue graph from a single residue variant in a pdb file"
+
+    def __init__(self, pdb_path, chain_id, residue_number, insertion_code, wildtype_amino_acid, variant_amino_acid,
+                 pssm_paths=None, wildtype_conservation=None, variant_conservation=None,
+                 radius=10.0, external_distance_cutoff=8.5, targets=None):
+
+        """
+            Args:
+                pdb_path(str): the path to the pdb file
+                chain_id(str): the pdb chain identifier of the variant residue
+                residue_number(int): the number of the variant residue
+                insertion_code(str): the insertion code of the variant residue, set to None if not applicable
+                wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
+                variant_amino_acid(deeprank amino acid object): the variant amino acid
+                pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+                wildtype_conservation(float): conservation value for the wildtype
+                variant_conservation(float): conservation value for the variant
+                radius(float): in Ångström, determines how many residues will be included in the graph
+                external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
+                targets(dict(str,float)): named target values associated with this query
+        """
+
+        self._pdb_path = pdb_path
+        self._pssm_paths = pssm_paths
+        self._wildtype_conservation = wildtype_conservation
+        self._variant_conservation = variant_conservation
+
+        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
+
+        Query.__init__(self, model_id, targets)
+
+        self._chain_id = chain_id
+        self._residue_number = residue_number
+        self._insertion_code = insertion_code
+        self._wildtype_amino_acid = wildtype_amino_acid
+        self._variant_amino_acid = variant_amino_acid
+
+        self._radius = radius
+        self._external_distance_cutoff = external_distance_cutoff
+
+    @property
+    def residue_id(self):
+        "residue identifier within chain"
+
+        if self._insertion_code is not None:
+
+            return "{}{}".format(self._residue_number, self._insertion_code)
+        else:
+            return str(self._residue_number)
+
+    def get_query_id(self):
+        return "residue-graph-{}:{}:{}:{}->{}".format(self.model_id, self._chain_id, self.residue_id, self._wildtype_amino_acid.name, self._variant_amino_acid.name)
+
+    @staticmethod
+    def _get_residue_node_key(residue):
+        "produce an unique node key, given the residue"
+
+        return str(residue)
+
+    @staticmethod
+    def _is_next_residue_number(residue1, residue2):
+        if residue1.number == residue2.number:
+            if residue1.insertion_code is not None and residue2.insertion_code is not None:
+                return (ord(residue1.insertion_code) + 1) == ord(residue2.insertion_code)
+
+        elif (residue1.number + 1) == residue2.number:
+            return True
+
+        return False
+
+    @staticmethod
+    def _is_covalent_bond(atom1, atom2, distance):
+        if distance < 2.3:
+
+            # peptide bonds
+            if atom1.name == "C" and atom2.name == "N" and \
+                    SingleResidueVariantResidueQuery._is_next_residue_number(atom1.residue, atom2.residue):
+                return True
+
+            elif atom2.name == "C" and atom1.name == "N" and \
+                    SingleResidueVariantResidueQuery._is_next_residue_number(atom2.residue, atom1.residue):
+                return True
+
+            # disulfid bonds
+            elif atom1.name == "SG" and atom2.name == "SG":
+                return True
+
+        return False
+
+    @staticmethod
+    def _set_sasa(graph, node_name_residues, pdb_path):
+
+        structure = freesasa.Structure(pdb_path)
+        result = freesasa.calc(structure)
+
+        for node_name, residue in node_name_residues.items():
+
+            select_str = ('residue, (resi %s) and (chain %s)' % (residue.number_string, residue.chain.id),)
+
+            area = freesasa.selectArea(select_str, structure, result)['residue']
+
+            if numpy.isnan(area):
+                raise ValueError("freesasa returned {} for {}:{}".format(area, pdb_path, residue))
+
+            graph.nodes[node_name][FEATURENAME_SASA] = area
+
+    @staticmethod
+    def _set_amino_acid_properties(graph, node_name_residues):
+        for node_name, residue in node_name_residues.items():
+            graph.nodes[node_name][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
+            graph.nodes[node_name][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+            graph.nodes[node_name][FEATURENAME_CHARGE] = residue.amino_acid.charge
+            graph.nodes[node_name][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+
+    amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
+                        leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
+
+    @staticmethod
+    def _set_pssm(graph, node_name_residues, variant_residue, wildtype_amino_acid, variant_amino_acid):
+
+        for node_name, residue in node_name_residues.items():
+            pssm_row = residue.get_pssm()
+
+            pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in SingleResidueVariantResidueQuery.amino_acid_order]
+
+            if residue == variant_residue:
+
+                graph.nodes[node_name][FEATURENAME_PSSMDIFFERENCE] = pssm_row.get_conservation(variant_amino_acid) - \
+                                                                     pssm_row.get_conservation(wildtype_amino_acid)
+
+                graph.nodes[node_name][FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(wildtype_amino_acid)
+                graph.nodes[node_name][FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(variant_amino_acid)
+            else:
+                graph.nodes[node_name][FEATURENAME_PSSMDIFFERENCE] = 0.0
+                graph.nodes[node_name][FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(residue.amino_acid)
+                graph.nodes[node_name][FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(residue.amino_acid)
+
+            graph.nodes[node_name][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+            graph.nodes[node_name][FEATURENAME_PSSM] = pssm_value
+
+    @staticmethod
+    def _set_conservation(graph, node_name_residues, variant_residue, wildtype_conservation, variant_conservation):
+
+        for node_name, residue in node_name_residues.items():
+
+            if residue == variant_residue:
+                difference = variant_conservation - wildtype_conservation
+            else:
+                difference = 0.0
+
+            graph.nodes[node_name][FEATURENAME_CONSERVATIONDIFFERENCE] = difference
+
+    def build_graph(self):
+        # load pdb strucure
+        pdb = pdb2sql.pdb2sql(self._pdb_path)
+
+        try:
+            structure = get_structure(pdb, self.model_id)
+        finally:
+            pdb._close()
+
+        # read the pssm
+        if self._pssm_paths is not None:
+            for chain in structure.chains:
+                if chain.id in self._pssm_paths:
+                    pssm_path = self._pssm_paths[chain.id]
+
+                    with open(pssm_path, 'rt') as f:
+                        chain.pssm = parse_pssm(f, chain)
+
+        # find the variant residue
+        variant_residues = [r for r in structure.get_chain(self._chain_id).residues
+                            if r.number == self._residue_number and r.insertion_code == self._insertion_code]
+        if len(variant_residues) == 0:
+            raise ValueError("Residue {}:{} not found in {}".format(self._chain_id, self.residue_id, self._pdb_path))
+        variant_residue = variant_residues[0]
+
+        # get the residues and atoms involved
+        residues = get_surrounding_residues(structure, variant_residue, self._radius)
+        atoms = []
+        for residue in residues:
+            atoms.extend(residue.atoms)
+
+        # build a graph and keep track of how we named the nodes
+        node_name_residues = {}
+        graph = Graph(self.get_query_id(), self.targets)
+
+        # find neighbouring atoms
+        atom_positions = [atom.position for atom in atoms]
+        distances = distance_matrix(atom_positions, atom_positions, p=2)
+        neighbours = numpy.logical_and(distances < self._external_distance_cutoff,
+                                       distances > 0.0)
+
+        # iterate over every pair of neighbouring atoms
+        for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
+            if atom1_index != atom2_index:  # do not pair an atom with itself
+
+                atom_distance = distances[atom1_index, atom2_index]
+
+                atom1 = atoms[atom1_index]
+                atom2 = atoms[atom2_index]
+
+                if atom1.residue != atom2.residue:  # do not connect a residue to itself
+
+                    residue1 = atom1.residue
+                    residue2 = atom2.residue
+
+                    residue1_key = self._get_residue_node_key(residue1)
+                    residue2_key = self._get_residue_node_key(residue2)
+
+                    node_name_residues[residue1_key] = residue1
+                    node_name_residues[residue2_key] = residue2
+
+                    # add the edge if not already
+                    if not graph.has_edge(residue1_key, residue2_key):
+                        graph.add_edge(residue1_key, residue2_key)
+
+                        if self._is_covalent_bond(atom1, atom2, atom_distance):
+
+                            graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
+                        else:
+                            graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+
+                    # feature to hold whether the two residues are of the same chain
+                    graph.edges[residue1_key, residue2_key][FEATURENAME_EDGESAMECHAIN] = float(atom1.residue.chain == atom2.residue.chain)
+
+                    # Make sure we take the shortest distance
+                    if FEATURENAME_EDGEDISTANCE not in graph.edges[residue1_key, residue2_key]:
+                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGEDISTANCE] = atom_distance
+
+                    elif graph.edges[residue1_key, residue2_key][FEATURENAME_EDGEDISTANCE] > atom_distance:
+                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGEDISTANCE] = atom_distance
+
+        # set the node features
+        self._set_amino_acid_properties(graph, node_name_residues)
+        self._set_sasa(graph, node_name_residues, self._pdb_path)
+
+        self._set_pssm(graph, node_name_residues, variant_residue,
+                       self._wildtype_amino_acid, self._variant_amino_acid)
+        self._set_conservation(graph, node_name_residues, variant_residue,
+                               self._wildtype_conservation, self._variant_conservation)
+
+        return graph
+
+
+
 class SingleResidueVariantAtomicQuery(Query):
     "creates an atomic graph for a single residue variant in a pdb file"
 
@@ -238,11 +485,16 @@ class SingleResidueVariantAtomicQuery(Query):
 
         return graph
 
+    amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
+                        leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
+
     @staticmethod
     def _set_pssm(graph, node_name_atoms, variant_residue, wildtype_amino_acid, variant_amino_acid):
 
         for node_name, atom in node_name_atoms.items():
             pssm_row = atom.residue.get_pssm()
+
+            pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in SingleResidueVariantAtomicQuery.amino_acid_order]
 
             if atom.residue == variant_residue:
 
@@ -257,6 +509,7 @@ class SingleResidueVariantAtomicQuery(Query):
                 graph.nodes[node_name][FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(atom.residue.amino_acid)
 
             graph.nodes[node_name][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+            graph.nodes[node_name][FEATURENAME_PSSM] = pssm_value
 
     @staticmethod
     def _set_conservation(graph, node_name_atoms, variant_residue, wildtype_conservation, variant_conservation):
@@ -281,7 +534,7 @@ class SingleResidueVariantAtomicQuery(Query):
             if atom.element == "H":  # freeSASA doesn't have these
                 area = 0.0
             else:
-                select_str = ('atom, (name %s) and (resi %d) and (chain %s)' % (atom.name, atom.residue.number, atom.residue.chain.id),)
+                select_str = ('atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, atom.residue.number_string, atom.residue.chain.id),)
                 area = freesasa.selectArea(select_str, structure, result)['atom']
 
             if numpy.isnan(area):
