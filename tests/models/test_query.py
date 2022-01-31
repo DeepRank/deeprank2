@@ -129,7 +129,8 @@ def test_variant_graph_101M():
 
 def test_variant_graph_1A0Z():
     query = SingleResidueVariantAtomicQuery("tests/data/pdb/1A0Z/1A0Z.pdb", "A", 125, None, leucine, arginine,
-                                            {"A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm", "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm"},
+                                            {"A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm", "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
+                                             "C": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm", "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm"},
                                             1.0, 0.0,
                                             targets={"bin_class": 1})
 
