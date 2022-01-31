@@ -43,7 +43,7 @@ class AminoAcid:
         a = numpy.zeros(20)  # assumed that there are only 20 different amino acids
         a[self._index] = 1.0
 
-        return self._index
+        return a
 
     @property
     def charge(self):
