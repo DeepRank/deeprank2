@@ -239,7 +239,8 @@ class SingleResidueVariantResidueQuery(Query):
         residues = get_surrounding_residues(structure, variant_residue, self._radius)
         atoms = []
         for residue in residues:
-            atoms.extend(residue.atoms)
+            if residue.amino_acid is not None:
+                atoms.extend(residue.atoms)
 
         # build a graph and keep track of how we named the nodes
         node_name_residues = {}
@@ -408,7 +409,8 @@ class SingleResidueVariantAtomicQuery(Query):
         residues = get_surrounding_residues(structure, variant_residue, self._radius)
         atoms = []
         for residue in residues:
-            atoms.extend(residue.atoms)
+            if residue.amino_acid is not None:
+                atoms.extend(residue.atoms)
 
         # build a graph and keep track of how we named the nodes
         node_name_atoms = {}
