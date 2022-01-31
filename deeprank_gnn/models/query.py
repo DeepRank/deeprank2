@@ -274,12 +274,11 @@ class SingleResidueVariantResidueQuery(Query):
                     # add the edge if not already
                     if not graph.has_edge(residue1_key, residue2_key):
                         graph.add_edge(residue1_key, residue2_key)
+                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
 
-                        if self._is_covalent_bond(atom1, atom2, atom_distance):
-
-                            graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
-                        else:
-                            graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+                    # covalent bond overrided non-covalent
+                    if self._is_covalent_bond(atom1, atom2, atom_distance):
+                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
 
                     # feature to hold whether the two residues are of the same chain
                     graph.edges[residue1_key, residue2_key][FEATURENAME_EDGESAMECHAIN] = float(atom1.residue.chain == atom2.residue.chain)
