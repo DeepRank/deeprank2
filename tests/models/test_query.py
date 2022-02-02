@@ -34,6 +34,8 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
             for feature_name in node_feature_names:
                 assert entry_group["node_data/{}".format(feature_name)][()].size > 0, "no {} feature".format(feature_name)
 
+                assert len(numpy.nonzero(entry_group["node_data/{}".format(feature_name)][()])) > 0, "{}: all zero".format(feature_name)
+
             assert entry_group["internal_edge_index"][()].shape[1] == 2, "wrong internal edge index shape"
 
             assert entry_group["internal_edge_index"].shape[0] > 0, "no internal edge indices"
@@ -85,9 +87,12 @@ def test_variant_graph_101M():
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
                               FEATURENAME_SASA,
+                              FEATURENAME_AMINOACID,
+                              FEATURENAME_VARIANTAMINOACID,
                               FEATURENAME_PSSMDIFFERENCE],
                              [FEATURENAME_EDGEDISTANCE,
                               FEATURENAME_EDGEVANDERWAALS,
+                              FEATURENAME_EDGESAMECHAIN,
                               FEATURENAME_EDGECOULOMB])
 
     # Two negative nodes should result in positive coulomb potential
@@ -138,11 +143,14 @@ def test_variant_graph_1A0Z():
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
+                              FEATURENAME_AMINOACID,
+                              FEATURENAME_VARIANTAMINOACID,
                               FEATURENAME_SASA,
                               FEATURENAME_PSSMDIFFERENCE],
                              [FEATURENAME_EDGEDISTANCE,
                               FEATURENAME_EDGEVANDERWAALS,
-                              FEATURENAME_EDGECOULOMB])
+                              FEATURENAME_EDGECOULOMB,
+                              FEATURENAME_EDGESAMECHAIN])
 
 
 def test_variant_graph_9API():
@@ -155,11 +163,14 @@ def test_variant_graph_9API():
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
+                              FEATURENAME_AMINOACID,
+                              FEATURENAME_VARIANTAMINOACID,
                               FEATURENAME_SASA,
                               FEATURENAME_PSSMDIFFERENCE],
                              [FEATURENAME_EDGEDISTANCE,
                               FEATURENAME_EDGEVANDERWAALS,
-                              FEATURENAME_EDGECOULOMB])
+                              FEATURENAME_EDGECOULOMB,
+                              FEATURENAME_EDGESAMECHAIN])
 
 
 def test_variant_residue_graph_101M():
@@ -174,6 +185,7 @@ def test_variant_residue_graph_101M():
                               FEATURENAME_SASA,
                               FEATURENAME_PSSM,
                               FEATURENAME_AMINOACID,
+                              FEATURENAME_VARIANTAMINOACID,
                               FEATURENAME_CHARGE,
                               FEATURENAME_POLARITY],
                              [FEATURENAME_EDGEDISTANCE,

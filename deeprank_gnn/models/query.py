@@ -165,12 +165,19 @@ class SingleResidueVariantResidueQuery(Query):
             graph.nodes[node_name][FEATURENAME_SASA] = area
 
     @staticmethod
-    def _set_amino_acid_properties(graph, node_name_residues):
+    def _set_amino_acid_properties(graph, node_name_residues, variant_residue, wildtype_amino_acid, variant_amino_acid):
         for node_name, residue in node_name_residues.items():
             graph.nodes[node_name][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
-            graph.nodes[node_name][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
             graph.nodes[node_name][FEATURENAME_CHARGE] = residue.amino_acid.charge
             graph.nodes[node_name][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+
+            if residue == variant_residue:
+
+                graph.nodes[node_name][FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
+                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
+            else:
+                graph.nodes[node_name][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(residue.amino_acid.onehot))
 
     amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
                         leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
@@ -292,7 +299,7 @@ class SingleResidueVariantResidueQuery(Query):
                         graph.edges[residue1_key, residue2_key][FEATURENAME_EDGEDISTANCE] = atom_distance
 
         # set the node features
-        self._set_amino_acid_properties(graph, node_name_residues)
+        self._set_amino_acid_properties(graph, node_name_residues, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
         self._set_sasa(graph, node_name_residues, self._pdb_path)
 
         self._set_pssm(graph, node_name_residues, variant_residue,
@@ -463,6 +470,8 @@ class SingleResidueVariantAtomicQuery(Query):
 
                 graph.edges[atom1_key, atom2_key][FEATURENAME_EDGEDISTANCE] = distance
 
+                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGESAMECHAIN] = float(atom1.residue.chain == atom2.residue.chain)
+
                 # set the positions of the atoms
                 graph.nodes[atom1_key][FEATURENAME_POSITION] = atom1.position
                 graph.nodes[atom2_key][FEATURENAME_POSITION] = atom2.position
@@ -484,10 +493,26 @@ class SingleResidueVariantAtomicQuery(Query):
 
         SingleResidueVariantAtomicQuery._set_sasa(graph, node_name_atoms, self._pdb_path)
 
+        SingleResidueVariantAtomicQuery._set_amino_acid(graph, node_name_atoms, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
+
         return graph
 
     amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
                         leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
+
+    @staticmethod
+    def _set_amino_acid(graph, node_name_atoms, variant_residue, wildtype_amino_acid, variant_amino_acid):
+
+        for node_name, atom in node_name_atoms.items():
+
+            if atom.residue == variant_residue:
+
+                graph.nodes[node_name][FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
+                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
+            else:
+                graph.nodes[node_name][FEATURENAME_AMINOACID] = atom.residue.amino_acid.onehot
+                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(atom.residue.amino_acid.onehot))
+
 
     @staticmethod
     def _set_pssm(graph, node_name_atoms, variant_residue, wildtype_amino_acid, variant_amino_acid):
