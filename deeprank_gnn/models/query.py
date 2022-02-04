@@ -175,9 +175,13 @@ class SingleResidueVariantResidueQuery(Query):
 
                 graph.nodes[node_name][FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
                 graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
+                graph.nodes[node_name][FEATURENAME_SIZEDIFFERENCE] = variant_amino_acid.size - wildtype_amino_acid.size
+                graph.nodes[node_name][FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - wildtype_amino_acid.polarity.onehot
             else:
                 graph.nodes[node_name][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
                 graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(residue.amino_acid.onehot))
+                graph.nodes[node_name][FEATURENAME_SIZEDIFFERENCE] = 0
+                graph.nodes[node_name][FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(residue.amino_acid.polarity.onehot))
 
     amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
                         leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]

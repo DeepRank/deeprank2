@@ -20,6 +20,7 @@ class AminoAcid:
         self._three_letter_code = three_letter_code
         self._one_letter_code = one_letter_code
 
+        self._size = size
         self._charge = charge
         self._polarity = polarity
         self._index = index
@@ -53,6 +54,10 @@ class AminoAcid:
     @property
     def polarity(self):
         return self._polarity
+
+    @property
+    def size(self):
+        return self._size
 
     def __hash__(self):
         return hash(self.name)

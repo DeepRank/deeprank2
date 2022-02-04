@@ -17,6 +17,9 @@ FEATURENAME_PSSMDIFFERENCE = "pssm_difference"
 FEATURENAME_PSSMWILDTYPE = "pssm_wildtype"
 FEATURENAME_PSSMVARIANT = "pssm_variant"
 FEATURENAME_SASA = "sasa"
+FEATURENAME_SIZEDIFFERENCE = "size_difference"
+FEATURENAME_POLARITYDIFFERENCE = "polarity_difference"
+
 
 # edge features
 FEATURENAME_EDGECOULOMB = "coulomb"
