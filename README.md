@@ -55,7 +55,7 @@ print(preprocessor.output_paths)  # print the paths of the generated files
 
 ```
 
-The user is free to implement his/her own query class. Each implementation reequires the `build_graph` method to be present.
+The user is free to implement his/her own query class. Each implementation requires the `build_graph` method to be present.
 
 
 ## Graph Interaction Network
