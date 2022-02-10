@@ -34,19 +34,29 @@ The documentation can be found here : https://deeprank-gnn.readthedocs.io/
 
 ## Generate Graphs
 
-All the graphs/line graphs of all the pdb/pssm stored in `data/pdb/` and `data/pssm/` with the `GenGraph.py` script. This will generate the hdf5 file `graph_residue.hdf5` which contains the graph of the different conformations.
-
+The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
 
 ```python
-from GraphGenMP import GraphHDF5
+from deeprank_gnn.preprocess import PreProcessor
+from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
 
-pdb_path = './data/pdb'
-pssm_path = './data/pssm'
-ref = './data/ref'
+preprocessor = PreProcessor("train-data")
 
-GraphHDF5(pdb_path=pdb_path,ref_path=ref,pssm_path=pssm_path,
-	      graph_type='residue',outfile='graph_residue.hdf5')
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B")
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B")
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B")
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B")
+
+preprocessor.start()  # start builfing graphs from the queries
+
+preprocessor.wait()  # wait for all jobs to complete
+
+print(preprocessor.output_paths)  # print the paths of the generated files
+
 ```
+
+The user is free to implement his/her own query class. Each implementation reequires the `build_graph` method to be present.
+
 
 ## Graph Interaction Network
 
