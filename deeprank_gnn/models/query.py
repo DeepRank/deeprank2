@@ -248,6 +248,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         # get the residues and atoms involved
         residues = get_surrounding_residues(structure, variant_residue, self._radius)
+        residues.add(variant_residue)
         atoms = []
         for residue in residues:
             if residue.amino_acid is not None:
@@ -418,6 +419,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         # get the residues and atoms involved
         residues = get_surrounding_residues(structure, variant_residue, self._radius)
+        residues.add(variant_residue)
         atoms = []
         for residue in residues:
             if residue.amino_acid is not None:
