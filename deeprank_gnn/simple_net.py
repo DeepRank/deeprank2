@@ -18,16 +18,9 @@ class SimpleMessageLayer(Module):
 
         message_size = 4
 
-        self._count_intermediary_layers = 0
-
         # layer for inputting edge, node 0 and node 1
         edge_input_size = 2 * count_node_features + count_edge_features
         self._fe = Linear(edge_input_size, message_size)
-
-        # intermediary layers
-        self._intermediary_layers = []
-        for layer_index in range(self._count_intermediary_layers):
-            self._intermediary_layers.append(Linear(message_size, message_size))
 
         # layer that makes the final output
         node_input_size = count_node_features + message_size
@@ -44,9 +37,7 @@ class SimpleMessageLayer(Module):
         node1_features = node_features[node1_indices]
 
         message_input = torch.cat([node0_features, node1_features, edge_features], dim=1)
-        messages_per_neighbour = self._fe(message_input)
-        for layer_index in range(self._count_intermediary_layers):
-            messages_per_neighbour = self._intermediary_layers[layer_index](messages_per_neighbour)
+        messages_per_neighbour = softmax(leaky_relu(self._fe(message_input)), dim=1)
 
         message_sums_per_node = scatter_sum(messages_per_neighbour, node0_indices, dim=0)
 
@@ -91,17 +82,15 @@ class SimpleNetwork(Module):
 
         node_features_updated = data.x.clone().detach()
         for layer_index in range(self._count_message_layers):
-            node_features_updated = self._message_layers_internal[layer_index](node_features_updated, data.internal_edge_index, data.internal_edge_attr)
+            node_features_updated = relu(self._message_layers_internal[layer_index](node_features_updated, data.internal_edge_index, data.internal_edge_attr))
 
         graph_indices = data.batch
 
         means_per_graph = scatter_mean(node_features_updated, graph_indices, dim=0)
 
-        intermediary = self._fc(means_per_graph)
+        intermediary = relu(self._fc(means_per_graph))
 
         for layer_index in range(self._count_intermediary_layers):
-            intermediary = self._intermediary_layers[layer_index](intermediary)
+            intermediary = relu(self._intermediary_layers[layer_index](intermediary))
 
-        z = relu(self._fz(intermediary))
-
-        return z
+        return softmax(relu(self._fz(intermediary)), dim=1)
