@@ -1,50 +1,66 @@
 import logging
 
 import torch
-from torch.nn import Parameter, Module, Linear
-from torch.nn.functional import softmax, leaky_relu, relu
+from torch.nn import Parameter, Module, Linear, Sequential, ReLU, Softmax, SiLU
+from torch.nn.functional import relu, silu
 from torch_scatter import scatter_mean, scatter_sum
 
 _log = logging.getLogger(__name__)
 
 
-class SimpleMessageLayer(Module):
+class SimpleConvolutionalLayer(Module):
 
-    def __init__(self,
-                 count_node_features,
-                 count_edge_features):
+    def __init__(self, count_node_features, count_edge_features):
 
-        super(SimpleMessageLayer, self).__init__()
+        super(SimpleConvolutionalLayer, self).__init__()
 
         message_size = 4
+        hidden_size = 32
 
-        # layer for inputting edge, node 0 and node 1
         edge_input_size = 2 * count_node_features + count_edge_features
-        self._fe = Linear(edge_input_size, message_size)
+        self._edge_mlp = Sequential(Linear(edge_input_size, hidden_size),
+                                    SiLU(),
+                                    Linear(hidden_size, message_size),
+                                    SiLU())
 
-        # layer that makes the final output
         node_input_size = count_node_features + message_size
-        self._fh = Linear(node_input_size, count_node_features)
+        self._node_mlp = Sequential(Linear(node_input_size, hidden_size),
+                                    SiLU(),
+                                    Linear(hidden_size, count_node_features),
+                                    SiLU())
 
-    def forward(self, node_features, edge_node_indices, edge_features):
+    def _edge_forward(self, node_features, edge_node_indices, edge_features):
 
         node0_indices, node1_indices = edge_node_indices
-
-        if edge_features.dim() == 1:
-            edge_features = edge_features.unsqueeze(-1)
 
         node0_features = node_features[node0_indices]
         node1_features = node_features[node1_indices]
 
         message_input = torch.cat([node0_features, node1_features, edge_features], dim=1)
-        messages_per_neighbour = softmax(leaky_relu(self._fe(message_input)), dim=1)
+
+        messages_per_neighbour = self._edge_mlp(message_input)
+
+        return messages_per_neighbour
+
+    def _node_forward(self, node_features, message_sums_per_node):
+
+        node_input = torch.cat([node_features, message_sums_per_node], dim=1)
+
+        node_output = self._node_mlp(node_input)
+
+        return node_output
+
+    def forward(self, node_features, edge_node_indices, edge_features):
+
+        node0_indices, node1_indices = edge_node_indices
+
+        messages_per_neighbour = self._edge_forward(node_features, edge_node_indices, edge_features)
 
         message_sums_per_node = scatter_sum(messages_per_neighbour, node0_indices, dim=0)
 
-        node_input = torch.cat([node_features, message_sums_per_node], dim=1)
-        z = self._fh(node_input)
+        output = self._node_forward(node_features, message_sums_per_node)
 
-        return z
+        return output
 
 
 class SimpleNetwork(Module):
@@ -59,38 +75,46 @@ class SimpleNetwork(Module):
 
         super(SimpleNetwork, self).__init__()
 
-        self._count_message_layers = 2
-        self._count_intermediary_layers = 0
+        layer_count = 2
 
-        # The layers that combine edge information per node
-        self._message_layers_internal = []
-        for layer_index in range(self._count_message_layers):
-            self._message_layers_internal.append(SimpleMessageLayer(input_shape, input_shape_edge))
+        self._internal_convolutional_layers = []
+        self._external_convolutional_layers = []
+        for layer_index in range(layer_count):
+            self._internal_convolutional_layers.append(SimpleConvolutionalLayer(input_shape, input_shape_edge))
+            self._external_convolutional_layers.append(SimpleConvolutionalLayer(input_shape, input_shape_edge))
 
-        intermediary_size = 16
+        hidden_size = 32
 
-        # The layers that convert graph information
-        self._fc = Linear(input_shape, intermediary_size)
+        self._graph_mlp = Sequential(Linear(2 * input_shape, hidden_size),
+                                     SiLU(),
+                                     Linear(hidden_size, output_shape),
+                                     SiLU())
 
-        self._intermediary_layers = []
-        for layer_index in range(self._count_intermediary_layers):
-            self._intermediary_layers.append(Linear(intermediary_size, intermediary_size))
+    @staticmethod
+    def _update(node_features, edge_indices, edge_features, convolutional_layers):
 
-        self._fz = Linear(intermediary_size, output_shape)
+        updated_node_features = node_features.clone().detach()
+        for layer_index in range(len(convolutional_layers)):
+            updated_node_features = silu(convolutional_layers[layer_index](updated_node_features, edge_indices, edge_features))
+
+        return updated_node_features
+
+    def _graph_forward(self, features_internal, features_external):
+
+        input_ = torch.cat([features_internal, features_external], dim=1)
+
+        output = self._graph_mlp(input_)
+        return output
 
     def forward(self, data):
 
-        node_features_updated = data.x.clone().detach()
-        for layer_index in range(self._count_message_layers):
-            node_features_updated = relu(self._message_layers_internal[layer_index](node_features_updated, data.internal_edge_index, data.internal_edge_attr))
+        updated_internal = self._update(data.x, data.internal_edge_index, data.internal_edge_attr, self._internal_convolutional_layers)
+        updated_external = self._update(data.x, data.edge_index, data.edge_attr, self._external_convolutional_layers)
 
         graph_indices = data.batch
+        means_per_graph_internal = scatter_mean(updated_internal, graph_indices, dim=0)
+        means_per_graph_external = scatter_mean(updated_external, graph_indices, dim=0)
 
-        means_per_graph = scatter_mean(node_features_updated, graph_indices, dim=0)
+        output = self._graph_forward(means_per_graph_internal, means_per_graph_external)
+        return output
 
-        intermediary = relu(self._fc(means_per_graph))
-
-        for layer_index in range(self._count_intermediary_layers):
-            intermediary = relu(self._intermediary_layers[layer_index](intermediary))
-
-        return softmax(relu(self._fz(intermediary)), dim=1)
