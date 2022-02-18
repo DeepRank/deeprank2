@@ -56,7 +56,8 @@ class SimpleConvolutionalLayer(Module):
 
         messages_per_neighbour = self._edge_forward(node_features, edge_node_indices, edge_features)
 
-        message_sums_per_node = scatter_sum(messages_per_neighbour, node0_indices, dim=0)
+        message_sums_per_node = torch.zeros(node_features.shape[0], messages_per_neighbour.shape[1])
+        scatter_sum(messages_per_neighbour, node0_indices, dim=0, out=message_sums_per_node)
 
         output = self._node_forward(node_features, message_sums_per_node)
 
