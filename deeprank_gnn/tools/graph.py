@@ -56,6 +56,9 @@ def graph_to_hdf5(graph, hdf5_file):
             hdf5_file (h5py file object): the output hdf5 file
     """
 
+    if len(graph.nodes) == 0:
+        raise ValueError("Empty graph {}".format(graph.id))
+
     graph_group = hdf5_file.create_group(graph.id)
 
     # store node names
