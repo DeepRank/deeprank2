@@ -6,7 +6,7 @@ import h5py
 
 from deeprank_gnn.models.structure import Residue, Atom, AtomicElement
 from deeprank_gnn.domain.amino_acid import *
-from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery, SingleResidueVariantAtomicQuery, SingleResidueVariantResidueQuery
+from deeprank_gnn.models.query import *
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.domain.feature import *
 from deeprank_gnn.tools.graph import graph_to_hdf5
@@ -60,7 +60,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
         os.remove(tmp_path)
 
 
-def test_interface_graph():
+def test_interface_graph_residue():
     query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/1ATN/1ATN_1w.pdb", "A", "B",
                                                 {"A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
                                                  "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
@@ -72,6 +72,22 @@ def test_interface_graph():
                               FEATURENAME_CHARGE,
                               FEATURENAME_POLARITY,
                               FEATURENAME_PSSM,
+                              FEATURENAME_INFORMATIONCONTENT],
+                             [FEATURENAME_EDGEDISTANCE])
+
+
+def test_interface_graph_atomic():
+    query = ProteinProteinInterfaceAtomicQuery("tests/data/pdb/1ATN/1ATN_1w.pdb", "A", "B",
+                                               {"A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
+                                                "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
+
+    g = query.build_graph()
+
+    _check_graph_makes_sense(g,
+                             [FEATURENAME_POSITION,
+                              FEATURENAME_CHARGE,
+                              FEATURENAME_PSSM,
+                              FEATURENAME_BURIEDSURFACEAREA,
                               FEATURENAME_INFORMATIONCONTENT],
                              [FEATURENAME_EDGEDISTANCE])
 

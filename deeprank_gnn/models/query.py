@@ -672,6 +672,210 @@ class SingleResidueVariantAtomicQuery(Query):
             graph.edges[edge_keys[index]][FEATURENAME_EDGEVANDERWAALS] = potential
 
 
+class ProteinProteinInterfaceAtomicQuery(Query):
+    "a query that builds atom-based graphs, using the residues at a protein-protein interface"
+
+    def __init__(self, pdb_path, chain_id1, chain_id2, pssm_paths=None,
+                 interface_distance_cutoff=8.5, internal_distance_cutoff=3.0,
+                 targets=None):
+        """
+            Args:
+                pdb_path(str): the path to the pdb file
+                chain_id1(str): the pdb chain identifier of the first protein of interest
+                chain_id2(str): the pdb chain identifier of the second protein of interest
+                pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+                interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
+                internal_distance_cutoff(float): max distance in Ångström between two interacting residues within the same protein
+                targets(dict, optional): named target values associated with this query
+        """
+
+        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
+
+        Query.__init__(self, model_id, targets)
+
+        self._pdb_path = pdb_path
+
+        self._chain_id1 = chain_id1
+        self._chain_id2 = chain_id2
+
+        self._pssm_paths = pssm_paths
+
+        self._interface_distance_cutoff = interface_distance_cutoff
+        self._internal_distance_cutoff = internal_distance_cutoff
+
+    def get_query_id(self):
+        return "atom-ppi-{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
+
+    def __eq__(self, other):
+        return type(self) == type(other) and self.model_id == other.model_id and \
+            {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
+
+    def __hash__(self):
+        return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
+
+    @staticmethod
+    def _residue_is_valid(residue):
+        if residue.amino_acid is None:
+            return False
+
+        if residue not in residue.chain.pssm:
+            _log.debug("{} not in pssm".format(residue))
+            return False
+
+        return True
+
+    @staticmethod
+    def _get_atom_node_key(atom):
+        """ Pickle has trouble serializing a graph if the keys are atom objects, so
+            we map the residues to string identifiers
+        """
+
+        # this should include everything to identify the atom: structure, chain, residue number, insertion_code, atom name
+        return str(atom)
+
+    def build_graph(self):
+        """ Builds the residue graph.
+
+            Returns(deeprank graph object): the resulting graph
+        """
+
+        # get residues from the pdb
+        interface_pairs = get_residue_contact_pairs(self._pdb_path, self.model_id,
+                                                    self._chain_id1, self._chain_id2,
+                                                    self._interface_distance_cutoff)
+        if len(interface_pairs) == 0:
+            raise ValueError("no interface residues found")
+
+        model = list(interface_pairs)[0].item1.chain.model
+        chain1 = model.get_chain(self._chain_id1)
+        chain2 = model.get_chain(self._chain_id2)
+
+        # read the pssm
+        if self._pssm_paths is not None:
+            for chain in (chain1, chain2):
+                pssm_path = self._pssm_paths[chain.id]
+
+                with open(pssm_path, 'rt') as f:
+                    chain.pssm = parse_pssm(f, chain)
+
+        # Create an empty graph
+        graph = Graph(self.get_query_id(), self.targets)
+
+        # Keep track of the node-names that each atom was given
+        node_atoms = {}
+
+        # Pair the atoms at the interface.
+        atoms_chain1 = []
+        atoms_chain2 = []
+        for residue1, residue2 in interface_pairs:
+            atoms_residue1 = list(residue1.atoms)
+            atoms_residue2 = list(residue2.atoms)
+
+            atoms_chain1.extend(atoms_residue1)
+            atoms_chain2.extend(atoms_residue2)
+
+            distances = distance_matrix([atom.position for atom in atoms_residue1],
+                                        [atom.position for atom in atoms_residue2], p=2)
+
+            neighbours = numpy.logical_and(distances < self._interface_distance_cutoff,
+                                           distances > 0.0)
+
+            for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
+
+                atom1 = atoms_residue1[atom1_index]
+                atom2 = atoms_residue2[atom2_index]
+                distance = distances[atom1_index, atom2_index]
+
+                key1 = self._get_atom_node_key(atom1)
+                key2 = self._get_atom_node_key(atom2)
+
+                graph.add_edge(key1, key2)
+                graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
+                graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
+
+                node_atoms[key1] = atom1
+                node_atoms[key2] = atom2
+
+        # Pair the atoms within the two proteins
+        for atoms_in_chain in (atoms_chain1, atoms_chain2):
+            atom_positions = [atom.position for atom in atoms_in_chain]
+
+            distances = distance_matrix(atom_positions, atom_positions, p=2)
+
+            neighbours = numpy.logical_and(distances < self._internal_distance_cutoff,
+                                           distances > 0.0)
+
+            for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
+
+                atom1 = atoms_in_chain[atom1_index]
+                atom2 = atoms_in_chain[atom2_index]
+                distance = distances[atom1_index, atom2_index]
+
+                key1 = self._get_atom_node_key(atom1)
+                key2 = self._get_atom_node_key(atom2)
+
+                graph.add_edge(key1, key2)
+                graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
+                graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+
+                node_atoms[key1] = atom1
+                node_atoms[key2] = atom2
+
+        # build sasa structures
+        sasa_structures = {chain1: freesasa.Structure(),
+                           chain2: freesasa.Structure()}
+        sasa_structure_both = freesasa.Structure()
+        for atom in atoms_chain1:
+            sasa_structures[chain1].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+                                            atom.residue.number, atom.residue.chain.id,
+                                            atom.position[0], atom.position[1], atom.position[2])
+            sasa_structure_both.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+                                        atom.residue.number, atom.residue.chain.id,
+                                        atom.position[0], atom.position[1], atom.position[2])
+
+        for atom in atoms_chain2:
+            sasa_structures[chain2].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+                                            atom.residue.number, atom.residue.chain.id,
+                                            atom.position[0], atom.position[1], atom.position[2])
+            sasa_structure_both.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+                                        atom.residue.number, atom.residue.chain.id,
+                                        atom.position[0], atom.position[1], atom.position[2])
+
+        sasa_results = {chain1: freesasa.calc(sasa_structures[chain1]),
+                        chain2: freesasa.calc(sasa_structures[chain2])}
+        sasa_result_both = freesasa.calc(sasa_structure_both)
+
+        # Add the node features
+        chain_codes = {chain1: 0.0, chain2: 1.0}
+        for node_key, node in graph.nodes.items():
+            atom = node_atoms[node_key]
+            residue = atom.residue
+
+            pssm_row = residue.get_pssm()
+            pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in self.amino_acid_order]
+
+            node[FEATURENAME_CHAIN] = chain_codes[residue.chain]
+            node[FEATURENAME_POSITION] = atom.position
+            node[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+            node[FEATURENAME_CHARGE] = atomic_forcefield.get_charge(atom)
+            node[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+
+            select_str = ('atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, residue.number_string, residue.chain.id),)
+            area_unbound = freesasa.selectArea(select_str, sasa_structures[residue.chain], sasa_results[residue.chain])['atom']
+            area_bound = freesasa.selectArea(select_str, sasa_structure_both, sasa_result_both)['atom']
+            node[FEATURENAME_BURIEDSURFACEAREA] = area_unbound - area_bound
+
+            if self._pssm_paths is not None:
+                node[FEATURENAME_PSSM] = pssm_value
+                node[FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
+                node[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+
+        return graph
+
+    amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
+                        leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
+
+
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
 
@@ -707,7 +911,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._use_biopython = use_biopython
 
     def get_query_id(self):
-        return "{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
+        return "residue-ppi-{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
 
     def __eq__(self, other):
         return type(self) == type(other) and self.model_id == other.model_id and \
