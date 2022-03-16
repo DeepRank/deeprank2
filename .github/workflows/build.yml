@@ -1,68 +1,67 @@
-name: build
+name: Python package
 
-on: [push]
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
 
 jobs:
+
   build:
-
-    runs-on: ubuntu-latest
-
+    name: Build for (${{ '{{ ' -}} matrix.python-version }}, ${{ '{{ ' -}} matrix.os }})
+    runs-on: ${{ '{{ ' -}} matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        version: [3.7, 3.8]
-
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ['3.6', '3.7', '3.8', '3.9']
     steps:
-    - name: Cancel Previous Runs
-      uses: styfle/cancel-workflow-action@0.4.0
-      with:
-          access_token: ${{ github.token }}
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.version }}
-    - name: Setup conda
-      uses: s-weigand/setup-conda@v1
-      with:
-        update-conda: true
-        python-version: ${{ matrix.version }}
-        conda-channels: anaconda
-    - run: conda --version
-    - run: which python
-    - name: install conda dependenies
-      run: conda install scipy mpi4py h5py
-    - name: install torch
-      env:
-        TORCH: "1.8.0"
-        TORCH_VISION: "0.9.0"
-      run: pip install torch==${TORCH}+cpu torchvision==${TORCH_VISION}+cpu -f https://download.pytorch.org/whl/torch_stable.html
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ '{{ ' -}} matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ '{{ ' -}} matrix.python-version }}
+      - name: Python info
+        shell: bash -l {0}
+        run: |
+          which python3
+          python3 --version
+      - name: Upgrade pip and install dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install .[dev,publishing]
+      - name: Run unit tests
+        run: pytest -v
+      - name: Verify that we can build the package
+        run: python3 setup.py sdist bdist_wheel
+      - name: Build documentation
+        run: make coverage doctest html
+        working-directory: docs
 
-    - name: install torch geometric
-      env:
-        TORCH_GEO: "1.8.0"
-      run: |
-        pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
-        pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
-        pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
-        pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
-        pip install torch-geometric
-
-    - name: Install the package
-      run: pip install .[test]
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
-
-    - name: Test with pytest
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
-      run: |
-        pytest --cov-config setup.cfg
-
-    - name: Coveralls
-      env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
-        COVERALLS_FLAG_NAME: python-${{ matrix.version }}
-      run: |
-        coveralls --service=github
-
-
+  lint:
+    name: Linting build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Python info
+        shell: bash -l {0}
+        run: |
+          which python3
+          python3 --version
+      - name: Upgrade pip and install dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install .[dev,publishing]
+      - name: Check style against standards using prospector
+        run: prospector
+      - name: Check import order
+        run: isort --check-only {{ cookiecutter.package_name }}
