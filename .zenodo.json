@@ -1,0 +1,16 @@
+{
+    "creators": [
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Giulia Crocioni",
+            "orcid": "0000-0002-0823-0121"
+        }
+    ],
+    "keywords": [
+        "deeprank gnn"
+    ],
+    "license": {
+        "id": "Apache-2.0"
+    },
+    "title": "Deeprank GNN (tbd)"
+}
