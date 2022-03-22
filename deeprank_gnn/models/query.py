@@ -1,25 +1,27 @@
-import os
-from enum import Enum
 import logging
+import os
+from typing import Dict, List, Iterator
 
 import freesasa
-import pdb2sql
 import numpy
+import pdb2sql
 from scipy.spatial import distance_matrix
 
-from deeprank_gnn.models.error import UnknownAtomError
-from deeprank_gnn.tools.pssm import parse_pssm
-from deeprank_gnn.tools import BioWrappers, BSA
-from deeprank_gnn.tools.pdb import get_residue_contact_pairs, get_residue_distance, get_surrounding_residues, get_structure
-from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
-from deeprank_gnn.domain.feature import *
 from deeprank_gnn.domain.amino_acid import *
+from deeprank_gnn.domain.feature import *
 from deeprank_gnn.domain.forcefield import (atomic_forcefield,
                                             VANDERWAALS_DISTANCE_ON, VANDERWAALS_DISTANCE_OFF,
                                             SQUARED_VANDERWAALS_DISTANCE_ON, SQUARED_VANDERWAALS_DISTANCE_OFF,
                                             EPSILON0, COULOMB_CONSTANT)
-
+from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
+from deeprank_gnn.models.error import UnknownAtomError
+from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
+from deeprank_gnn.models.graph import Graph
+from deeprank_gnn.models.structure import Residue, Atom
+from deeprank_gnn.tools import BioWrappers, BSA
+from deeprank_gnn.tools.pdb import (get_residue_contact_pairs, get_residue_distance, get_surrounding_residues,
+                                    get_structure)
+from deeprank_gnn.tools.pssm import parse_pssm
 
 _log = logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ class Query:
         objects of this class should be created before any model is loaded
     """
 
-    def __init__(self, model_id, targets=None):
+    def __init__(self, model_id: str, targets: Dict[str, float] = None):
         """
             Args:
                 model_id(str): the id of the model to load, usually a pdb accession code
@@ -46,23 +48,25 @@ class Query:
             self._targets = targets
 
     @property
-    def model_id(self):
+    def model_id(self) -> str:
         return self._model_id
 
     @property
-    def targets(self):
+    def targets(self) -> Dict[str, float]:
         return self._targets
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "{}({})".format(type(self), self.get_query_id())
 
 
 class SingleResidueVariantResidueQuery(Query):
     "creates a residue graph from a single residue variant in a pdb file"
 
-    def __init__(self, pdb_path, chain_id, residue_number, insertion_code, wildtype_amino_acid, variant_amino_acid,
-                 pssm_paths=None, wildtype_conservation=None, variant_conservation=None,
-                 radius=10.0, external_distance_cutoff=4.5, targets=None):
+    def __init__(self, pdb_path: str, chain_id: str, residue_number: int, insertion_code: str,
+                 wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid,
+                 pssm_paths: Dict[str, str] = None, wildtype_conservation: float = None,
+                 variant_conservation: float = None, radius: float = 10.0,
+                 external_distance_cutoff: float = 4.5, targets: Dict[str, float] = None):
 
         """
             Args:
@@ -99,7 +103,7 @@ class SingleResidueVariantResidueQuery(Query):
         self._external_distance_cutoff = external_distance_cutoff
 
     @property
-    def residue_id(self):
+    def residue_id(self) -> str:
         "residue identifier within chain"
 
         if self._insertion_code is not None:
@@ -108,17 +112,17 @@ class SingleResidueVariantResidueQuery(Query):
         else:
             return str(self._residue_number)
 
-    def get_query_id(self):
+    def get_query_id(self) -> str:
         return "residue-graph-{}:{}:{}:{}->{}".format(self.model_id, self._chain_id, self.residue_id, self._wildtype_amino_acid.name, self._variant_amino_acid.name)
 
     @staticmethod
-    def _get_residue_node_key(residue):
+    def _get_residue_node_key(residue: Residue) -> str:
         "produce an unique node key, given the residue"
 
         return str(residue)
 
     @staticmethod
-    def _is_next_residue_number(residue1, residue2):
+    def _is_next_residue_number(residue1: Residue, residue2: Residue) -> bool:
         if residue1.number == residue2.number:
             if residue1.insertion_code is not None and residue2.insertion_code is not None:
                 return (ord(residue1.insertion_code) + 1) == ord(residue2.insertion_code)
@@ -129,7 +133,7 @@ class SingleResidueVariantResidueQuery(Query):
         return False
 
     @staticmethod
-    def _is_covalent_bond(atom1, atom2, distance):
+    def _is_covalent_bond(atom1: Atom, atom2: Atom, distance: float) -> bool:
         if distance < 2.3:
 
             # peptide bonds
@@ -148,7 +152,7 @@ class SingleResidueVariantResidueQuery(Query):
         return False
 
     @staticmethod
-    def _set_sasa(graph, node_name_residues, pdb_path):
+    def _set_sasa(graph: Graph, node_name_residues: Dict[str: Residue], pdb_path: str):
 
         structure = freesasa.Structure(pdb_path)
         result = freesasa.calc(structure)
@@ -165,7 +169,9 @@ class SingleResidueVariantResidueQuery(Query):
             graph.nodes[node_name][FEATURENAME_SASA] = area
 
     @staticmethod
-    def _set_amino_acid_properties(graph, node_name_residues, variant_residue, wildtype_amino_acid, variant_amino_acid):
+    def _set_amino_acid_properties(graph: Graph, node_name_residues: Dict[str: Residue],
+                                   variant_residue: Residue, wildtype_amino_acid: AminoAcid,
+                                   variant_amino_acid: AminoAcid):
         for node_name, residue in node_name_residues.items():
             graph.nodes[node_name][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
             graph.nodes[node_name][FEATURENAME_CHARGE] = residue.amino_acid.charge
@@ -188,7 +194,8 @@ class SingleResidueVariantResidueQuery(Query):
                         leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
 
     @staticmethod
-    def _set_pssm(graph, node_name_residues, variant_residue, wildtype_amino_acid, variant_amino_acid):
+    def _set_pssm(graph: Graph, node_name_residues: Dict[str, Residue], variant_residue: Residue,
+                  wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid):
 
         for node_name, residue in node_name_residues.items():
             pssm_row = residue.get_pssm()
@@ -211,7 +218,8 @@ class SingleResidueVariantResidueQuery(Query):
             graph.nodes[node_name][FEATURENAME_PSSM] = pssm_value
 
     @staticmethod
-    def _set_conservation(graph, node_name_residues, variant_residue, wildtype_conservation, variant_conservation):
+    def _set_conservation(graph: Graph, node_name_residues: Dict[str, Residue],
+                          variant_residue: Residue, wildtype_conservation: float, variant_conservation: float):
 
         for node_name, residue in node_name_residues.items():
 
@@ -222,7 +230,7 @@ class SingleResidueVariantResidueQuery(Query):
 
             graph.nodes[node_name][FEATURENAME_CONSERVATIONDIFFERENCE] = difference
 
-    def build_graph(self):
+    def build_graph(self) -> Graph:
         # load pdb strucure
         pdb = pdb2sql.pdb2sql(self._pdb_path)
 
@@ -316,14 +324,14 @@ class SingleResidueVariantResidueQuery(Query):
         return graph
 
 
-
 class SingleResidueVariantAtomicQuery(Query):
     "creates an atomic graph for a single residue variant in a pdb file"
 
-    def __init__(self, pdb_path, chain_id, residue_number, insertion_code, wildtype_amino_acid, variant_amino_acid,
-                 pssm_paths=None, wildtype_conservation=None, variant_conservation=None,
-                 radius=10.0, external_distance_cutoff=4.5, internal_distance_cutoff=3.0,
-                 targets=None):
+    def __init__(self, pdb_path: str, chain_id: str, residue_number: int, insertion_code: str,
+                 wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid,
+                 pssm_paths: Dict[str, str] = None, wildtype_conservation: float = None,
+                 variant_conservation: float = None, radius: float = 10.0, external_distance_cutoff: float = 4.5,
+                 internal_distance_cutoff: float = 3.0, targets: Dict[str, float] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file
@@ -365,7 +373,7 @@ class SingleResidueVariantAtomicQuery(Query):
         self._internal_distance_cutoff = internal_distance_cutoff
 
     @property
-    def residue_id(self):
+    def residue_id(self) -> str:
         "string representation of the residue number and insertion code"
 
         if self._insertion_code is not None:
@@ -373,26 +381,26 @@ class SingleResidueVariantAtomicQuery(Query):
         else:
             return str(self._residue_number)
 
-    def get_query_id(self):
+    def get_query_id(self) -> str:
         return "{}:{}:{}:{}->{}".format(self.model_id, self._chain_id, self.residue_id, self._wildtype_amino_acid.name, self._variant_amino_acid.name)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return type(self) == type(other) and self.model_id == other.model_id and \
             self._chain_id == other._chain_id and self.residue_id == other.residue_id and \
             self._wildtype_amino_acid == other._wildtype_amino_acid and self._variant_amino_acid == other._variant_amino_acid
 
-    def __hash__(self):
+    def __hash__(self) -> hash:
         return hash((self.model_id, self._chain_id, self.residue_id, self._wildtype_amino_acid, self._variant_amino_acid))
 
     @staticmethod
-    def _get_atom_node_key(atom):
+    def _get_atom_node_key(atom) -> str:
         """ Pickle has problems serializing the graph when the nodes are atoms,
             so use this function to generate an unique key for the atom"""
 
         # This should include the model, chain, residue and atom
         return str(atom)
 
-    def build_graph(self):
+    def build_graph(self) -> Graph:
 
         # load pdb strucure
         pdb = pdb2sql.pdb2sql(self._pdb_path)
@@ -508,7 +516,8 @@ class SingleResidueVariantAtomicQuery(Query):
                         leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
 
     @staticmethod
-    def _set_amino_acid(graph, node_name_atoms, variant_residue, wildtype_amino_acid, variant_amino_acid):
+    def _set_amino_acid(graph: Graph, node_name_atoms: Dict[str, Atom], variant_residue: Residue,
+                        wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid):
 
         for node_name, atom in node_name_atoms.items():
 
@@ -526,12 +535,14 @@ class SingleResidueVariantAtomicQuery(Query):
 
 
     @staticmethod
-    def _set_pssm(graph, node_name_atoms, variant_residue, wildtype_amino_acid, variant_amino_acid):
+    def _set_pssm(graph: Graph, node_name_atoms: Dict[str, Atom], variant_residue: Residue,
+                  wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid):
 
         for node_name, atom in node_name_atoms.items():
             pssm_row = atom.residue.get_pssm()
 
-            pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in SingleResidueVariantAtomicQuery.amino_acid_order]
+            pssm_value = [pssm_row.conservations[amino_acid]
+                          for amino_acid in SingleResidueVariantAtomicQuery.amino_acid_order]
 
             if atom.residue == variant_residue:
 
@@ -549,7 +560,8 @@ class SingleResidueVariantAtomicQuery(Query):
             graph.nodes[node_name][FEATURENAME_PSSM] = pssm_value
 
     @staticmethod
-    def _set_conservation(graph, node_name_atoms, variant_residue, wildtype_conservation, variant_conservation):
+    def _set_conservation(graph: Graph, node_name_atoms: Dict[str, Atom], variant_residue: Residue,
+                          wildtype_conservation: float, variant_conservation: float):
 
         for node_name, atom in node_name_atoms.items():
 
@@ -561,7 +573,7 @@ class SingleResidueVariantAtomicQuery(Query):
             graph.nodes[node_name][FEATURENAME_CONSERVATIONDIFFERENCE] = difference
 
     @staticmethod
-    def _set_sasa(graph, node_name_atoms, pdb_path):
+    def _set_sasa(graph: Graph, node_name_atoms: Dict[str, Atom], pdb_path: str):
 
         structure = freesasa.Structure(pdb_path)
         result = freesasa.calc(structure)
@@ -580,14 +592,15 @@ class SingleResidueVariantAtomicQuery(Query):
             graph.nodes[node_name][FEATURENAME_SASA] = area
 
     @staticmethod
-    def _set_charges(graph, node_name_atoms, charges):
+    def _set_charges(graph: Graph, node_name_atoms: Dict[str, Atom], charges: Dict[Atom, float]):
         for node_name in graph.nodes:
             atom = node_name_atoms[node_name]
             graph.nodes[node_name][FEATURENAME_CHARGE] = charges[atom]
 
 
     @staticmethod
-    def _set_coulomb(graph, node_name_atoms, charges, max_interatomic_distance):
+    def _set_coulomb(graph: Graph, node_name_atoms: Dict[str, Atom], charges: Dict[Atom, float],
+                     max_interatomic_distance: float):
 
         # get the edges
         edge_keys = []
@@ -617,7 +630,8 @@ class SingleResidueVariantAtomicQuery(Query):
             graph.edges[edge_keys[index]][FEATURENAME_EDGECOULOMB] = potential
 
     @staticmethod
-    def _set_vanderwaals(graph, node_name_atoms, vanderwaals_parameters):
+    def _set_vanderwaals(graph: Graph, node_name_atoms: Dict[str, Atom],
+                         vanderwaals_parameters: Dict[Atom, VanderwaalsParam]):
 
         edge_keys = []
         edge_count = len(graph.edges)
@@ -675,9 +689,9 @@ class SingleResidueVariantAtomicQuery(Query):
 class ProteinProteinInterfaceAtomicQuery(Query):
     "a query that builds atom-based graphs, using the residues at a protein-protein interface"
 
-    def __init__(self, pdb_path, chain_id1, chain_id2, pssm_paths=None,
-                 interface_distance_cutoff=8.5, internal_distance_cutoff=3.0,
-                 targets=None):
+    def __init__(self, pdb_path: str, chain_id1: str, chain_id2: str, pssm_paths: Dict[str, str] = None,
+                 interface_distance_cutoff: float = 8.5, internal_distance_cutoff: float = 3.0,
+                 targets: Dict[str, float] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file
@@ -703,18 +717,18 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         self._interface_distance_cutoff = interface_distance_cutoff
         self._internal_distance_cutoff = internal_distance_cutoff
 
-    def get_query_id(self):
+    def get_query_id(self) -> str:
         return "atom-ppi-{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return type(self) == type(other) and self.model_id == other.model_id and \
             {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
 
-    def __hash__(self):
+    def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
     @staticmethod
-    def _residue_is_valid(residue):
+    def _residue_is_valid(residue: Residue) -> bool:
         if residue.amino_acid is None:
             return False
 
@@ -725,7 +739,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         return True
 
     @staticmethod
-    def _get_atom_node_key(atom):
+    def _get_atom_node_key(atom: Atom) -> str:
         """ Pickle has trouble serializing a graph if the keys are atom objects, so
             we map the residues to string identifiers
         """
@@ -733,7 +747,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         # this should include everything to identify the atom: structure, chain, residue number, insertion_code, atom name
         return str(atom)
 
-    def build_graph(self):
+    def build_graph(self) -> Graph:
         """ Builds the residue graph.
 
             Returns(deeprank graph object): the resulting graph
@@ -879,9 +893,9 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
 
-    def __init__(self, pdb_path, chain_id1, chain_id2, pssm_paths=None,
-                 interface_distance_cutoff=8.5, internal_distance_cutoff=3.0,
-                 use_biopython=False, targets=None):
+    def __init__(self, pdb_path: str, chain_id1: str, chain_id2: str, pssm_paths: Dict[str, str] = None,
+                 interface_distance_cutoff: float = 8.5, internal_distance_cutoff:float = 3.0,
+                 use_biopython: bool = False, targets: Dict[str, float] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file
@@ -910,18 +924,18 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         self._use_biopython = use_biopython
 
-    def get_query_id(self):
+    def get_query_id(self) -> str:
         return "residue-ppi-{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return type(self) == type(other) and self.model_id == other.model_id and \
             {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
 
-    def __hash__(self):
+    def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
     @staticmethod
-    def _residue_is_valid(residue):
+    def _residue_is_valid(residue: Residue) -> bool:
         if residue.amino_acid is None:
             return False
 
@@ -932,7 +946,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         return True
 
     @staticmethod
-    def _get_residue_node_key(residue):
+    def _get_residue_node_key(residue: Residue) -> str:
         """ Pickle has trouble serializing a graph if the keys are residue objects, so
             we map the residues to string identifiers
         """
@@ -940,7 +954,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         # this should include everything to identify the residue: structure, chain, number, insertion_code
         return str(residue)
 
-    def build_graph(self):
+    def build_graph(self) -> Graph:
         """ Builds the residue graph.
 
             Returns(deeprank graph object): the resulting graph
@@ -1086,15 +1100,15 @@ class QueryDataset:
     def __init__(self):
         self._queries = []
 
-    def add(self, query):
+    def add(self, query: Query):
         self._queries.append(query)
 
     @property
-    def queries(self):
+    def queries(self) -> List[Query]:
         return self._queries
 
-    def __contains__(self, query):
+    def __contains__(self, query: Query) -> bool:
         return query in self._queries
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Query]:
         return iter(self._queries)
