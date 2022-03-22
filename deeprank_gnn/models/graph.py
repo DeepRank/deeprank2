@@ -1,3 +1,4 @@
+from typing import Dict
 from uuid import uuid4
 
 from networkx import Graph as NetworkxGraph
@@ -5,7 +6,7 @@ from networkx import Graph as NetworkxGraph
 class Graph(NetworkxGraph):
     "this is a graph just like in networkx, but with an id and associated target values"
 
-    def __init__(self, id_=None, targets=None):
+    def __init__(self, id_: str = None, targets: Dict[str, int] = None):
         """
             Args:
                 id_(str, optional): unique identifier for this graph, random by default
