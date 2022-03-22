@@ -33,8 +33,8 @@ jobs:
       run: conda install scipy mpi4py h5py
     - name: install torch
       env:
-        TORCH: "1.8.0"
-        TORCH_VISION: "0.9.0"
+        TORCH: "1.11.0"
+        TORCH_VISION: "1.0.0"
       run: pip install torch==${TORCH}+cpu torchvision==${TORCH_VISION}+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
     - name: install torch geometric
@@ -45,7 +45,7 @@ jobs:
         pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
         pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
         pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
-        pip install torch-geometric
+        pip install torch-geometric -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
 
     - name: Install the package
       run: pip install .[test]
