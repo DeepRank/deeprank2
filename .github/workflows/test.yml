@@ -36,7 +36,9 @@ jobs:
         conda-channels: anaconda
     - run: conda --version
     - run: which python
-    - name: install conda dependenies
+    # we install all dependencies here manually because setup.py is broken
+    # see issue #27
+    - name: install conda dependencies
       run: conda install scipy mpi4py h5py
     - name: install torch
       env:
