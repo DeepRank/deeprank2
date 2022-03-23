@@ -30,7 +30,9 @@ jobs:
     - run: conda --version
     - run: which python
     - name: install conda dependenies
-      run: conda install scipy mpi4py h5py
+      run: |
+           conda install scipy mpi4py h5py 
+           conda install -c bioconda msms
     - name: install torch
       env:
         TORCH: "1.8.0"
@@ -64,5 +66,3 @@ jobs:
         COVERALLS_FLAG_NAME: python-${{ matrix.version }}
       run: |
         coveralls --service=github
-
-
