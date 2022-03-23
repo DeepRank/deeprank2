@@ -21,7 +21,7 @@ setup(
     long_description=readme + '\n\n',
     long_description_content_type='text/markdown',
     author=["Giulia Crocioni", "Coos Baakman", "Daniel Rademaker", "Gayatri Ramakrishnan", "Sven van der Burg", "Li Xue", "Daniil Lepikhov"],
-    author_email='g.crocioni@esciencecenter.nl',
+    author_email='g.crocioni@esciencecenter.nl, Coos.Baakman@radboudumc.nl',
     url='https://github.com/DeepRank/deeprank-gnn-2',
     packages=find_packages(),
     package_dir={'deeprank_gnn_2': 'deeprank_gnn_2'},
