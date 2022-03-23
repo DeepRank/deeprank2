@@ -8,27 +8,27 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # To update the package version number, edit DeepRank-GNN/__version__.py
 version = {}
-with open(os.path.join(here, 'deeprank_gnn', '__version__.py')) as f:
+with open(os.path.join(here, 'deeprank_gnn_2', '__version__.py')) as f:
     exec(f.read(), version)
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(
-    name='DeepRank-GNN',
+    name='DeepRank-GNN-2',
     version=version['__version__'],
-    description='Graph Neural network Scoring of protein-protein conformations',
+    description='TBD',
     long_description=readme + '\n\n',
     long_description_content_type='text/markdown',
-    author=["Nicolas Renaud", "Manon Reau"],
-    author_email='n.renaud@esciencecenter.nl',
-    url='https://github.com/DeepRank/DeepRank-GNN',
+    author=["Giulia Crocioni", "Coos Baakman", "Daniel Rademaker", "Gayatri Ramakrishnan", "Sven van der Burg", "Li Xue", "Daniil Lepikhov"],
+    author_email='g.crocioni@esciencecenter.nl, Coos.Baakman@radboudumc.nl',
+    url='https://github.com/DeepRank/deeprank-gnn-2',
     packages=find_packages(),
-    package_dir={'deeprank_gnn': 'deeprank_gnn'},
+    package_dir={'deeprank_gnn_2': 'deeprank_gnn_2'},
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords='deeprank_gnn',
+    keywords='deeprank_gnn_2',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
