@@ -37,6 +37,9 @@ jobs:
     - run: conda --version
     - run: which python
 
+    - name: Install torch
+      run: pip install torch
+
     - name: Install the package
       run: pip install .[test]
       env:
