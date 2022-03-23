@@ -8,7 +8,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # To update the package version number, edit DeepRank-GNN/__version__.py
 version = {}
-with open(os.path.join(here, 'deeprank_gnn', '__version__.py')) as f:
+with open(os.path.join(here, 'deeprank_gnn_2', '__version__.py')) as f:
     exec(f.read(), version)
 
 with open('README.md') as readme_file:
