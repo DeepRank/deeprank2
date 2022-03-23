@@ -152,7 +152,7 @@ class SingleResidueVariantResidueQuery(Query):
         return False
 
     @staticmethod
-    def _set_sasa(graph: Graph, node_name_residues: Dict[str: Residue], pdb_path: str):
+    def _set_sasa(graph: Graph, node_name_residues: Dict[str, Residue], pdb_path: str):
 
         structure = freesasa.Structure(pdb_path)
         result = freesasa.calc(structure)
@@ -169,7 +169,7 @@ class SingleResidueVariantResidueQuery(Query):
             graph.nodes[node_name][FEATURENAME_SASA] = area
 
     @staticmethod
-    def _set_amino_acid_properties(graph: Graph, node_name_residues: Dict[str: Residue],
+    def _set_amino_acid_properties(graph: Graph, node_name_residues: Dict[str, Residue],
                                    variant_residue: Residue, wildtype_amino_acid: AminoAcid,
                                    variant_amino_acid: AminoAcid):
         for node_name, residue in node_name_residues.items():
