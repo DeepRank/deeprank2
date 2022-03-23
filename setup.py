@@ -46,9 +46,9 @@ setup(
         'torch-spline-conv', 'torch-geometric', 'tqdm', 'freesasa'
     ],
     extras_require={
-        'dev': ['prospector[with_pyroma]', 'yapf', 'isort'],
+        'dev': ['yapf', 'isort'],
         'doc': ['recommonmark', 'sphinx', 'sphinx_rtd_theme'],
         'test':
-        ['coverage', 'pycodestyle', 'pytest',
+        ['prospector[with_pyroma]', 'coverage', 'pycodestyle', 'pytest',
             'pytest-cov', 'pytest-runner', 'coveralls'],
     })
