@@ -29,7 +29,6 @@ jobs:
         conda-channels: anaconda
     - run: conda --version
     - run: which python
-    - name: install torch
 
     - name: install conda dependencies
       run: |
