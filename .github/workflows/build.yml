@@ -30,11 +30,11 @@ jobs:
     - run: conda --version
     - run: which python
     - name: install torch
-      run: pip install torch>=1.11.0
 
     - name: install conda dependencies
       run: |
         conda install -c bioconda msms
+        conda install pytorch -c pytorch
         conda install pyg -c pyg
 
     - name: Install the package
