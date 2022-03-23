@@ -32,8 +32,11 @@ jobs:
 
     - name: install conda dependencies
       run: |
-        conda install -c bioconda msms
+        # Only way to install msms is through conda
+        conda install -c bioconda msms 
+        # We install pytorch with conda because otherwise it breaks
         conda install pytorch -c pytorch
+        # This is the recommended way of installing pytorch-geometric
         conda install pyg -c pyg
 
     - name: Install the package
