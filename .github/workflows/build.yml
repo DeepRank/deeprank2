@@ -32,6 +32,9 @@ jobs:
     - name: install torch
       run: pip install torch>=1.11.0
 
+    - name: install conda dependencies
+      run: conda install -c bioconda msms
+
     - name: Install the package
       run: pip install .[test]
       env:
