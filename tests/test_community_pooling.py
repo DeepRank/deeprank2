@@ -9,8 +9,8 @@ from deeprank_gnn.community_pooling import community_detection, community_poolin
 class TestCommunity(unittest.TestCase):
 
     def setUp(self):
-        self.edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5],
-                                        [1, 0, 2, 1, 4, 3, 5, 4]], dtype=torch.long)
+        self.edge_index = torch.tensor(
+            [[0, 1, 1, 2, 3, 4, 4, 5], [1, 0, 2, 1, 4, 3, 5, 4]], dtype=torch.long)
 
         self.x = torch.tensor(
             [[0], [1], [2], [3], [4], [5]], dtype=torch.float)

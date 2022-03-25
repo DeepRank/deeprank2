@@ -15,7 +15,7 @@ class Structure:
         self._chains = {}
 
     def __eq__(self, other):
-        return type(self) == type(other) and self._id == other._id
+        return isinstance(self, type(other)) and self._id == other._id
 
     def __hash__(self):
         return hash(self._id)
@@ -85,7 +85,8 @@ class Chain:
         return self._residues
 
     def __eq__(self, other):
-        return type(self) == type(other) and self._model == other._model and self._id == other._id
+        return isinstance(
+            self, type(other)) and self._model == other._model and self._id == other._id
 
     def __hash__(self):
         return hash((self._model, self._id))
@@ -113,7 +114,7 @@ class Residue:
         self._atoms = []
 
     def __eq__(self, other):
-        return type(self) == type(other) and \
+        return isinstance(self, type(other)) and \
             self._chain == other._chain and \
             self._number == other._number and \
             self._insertion_code == other._insertion_code
@@ -208,7 +209,7 @@ class Atom:
         self._occupancy = occupancy
 
     def __eq__(self, other):
-        return type(self) == type(other) and \
+        return isinstance(self, type(other)) and \
             self._residue == other._residue and \
             self._name == other._name
 
@@ -243,5 +244,3 @@ class Atom:
     @property
     def residue(self):
         return self._residue
-
-

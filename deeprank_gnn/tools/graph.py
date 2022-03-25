@@ -26,7 +26,6 @@ HDF5KEY_GRAPH_EDGEFEATURES = "edge_data"
 HDF5KEY_GRAPH_INTERNALEDGEFEATURES = "internal_edge_data"
 
 
-
 def graph_has_nan(graph):
     for node_key, node_dict in graph.nodes.items():
         for feature_name, feature_value in node_dict.items():
@@ -72,9 +71,11 @@ def graph_to_hdf5(graph, hdf5_file):
     node_feature_names = list(first_node_data.keys())
     for node_feature_name in node_feature_names:
 
-        node_feature_data = [node_data[node_feature_name] for node_key, node_data in graph.nodes.items()]
+        node_feature_data = [node_data[node_feature_name]
+                             for node_key, node_data in graph.nodes.items()]
 
-        node_features_group.create_dataset(node_feature_name, data=node_feature_data)
+        node_features_group.create_dataset(
+            node_feature_name, data=node_feature_data)
 
     # store edges
     edge_indices = []
@@ -84,7 +85,8 @@ def graph_to_hdf5(graph, hdf5_file):
     internal_edge_names = []
 
     first_edge_data = list(graph.edges.values())[0]
-    edge_feature_names = list([name for name in first_edge_data.keys() if name != FEATURENAME_EDGETYPE])
+    edge_feature_names = list(
+        [name for name in first_edge_data.keys() if name != FEATURENAME_EDGETYPE])
 
     edge_feature_data = {name: [] for name in edge_feature_names}
     internal_edge_feature_data = {name: [] for name in edge_feature_names}
@@ -107,22 +109,34 @@ def graph_to_hdf5(graph, hdf5_file):
 
         for edge_feature_name in edge_feature_names:
             if edge_type == EDGETYPE_INTERFACE:
-                edge_feature_data[edge_feature_name].append(edge_data[edge_feature_name])
+                edge_feature_data[edge_feature_name].append(
+                    edge_data[edge_feature_name])
 
             elif edge_type == EDGETYPE_INTERNAL:
-                internal_edge_feature_data[edge_feature_name].append(edge_data[edge_feature_name])
+                internal_edge_feature_data[edge_feature_name].append(
+                    edge_data[edge_feature_name])
 
-    graph_group.create_dataset(HDF5KEY_GRAPH_EDGENAMES, data=numpy.array(edge_names).astype('S'))
-    graph_group.create_dataset(HDF5KEY_GRAPH_INTERNALEDGENAMES, data=numpy.array(internal_edge_names).astype('S'))
+    graph_group.create_dataset(
+        HDF5KEY_GRAPH_EDGENAMES,
+        data=numpy.array(edge_names).astype('S'))
+    graph_group.create_dataset(
+        HDF5KEY_GRAPH_INTERNALEDGENAMES,
+        data=numpy.array(internal_edge_names).astype('S'))
 
     graph_group.create_dataset(HDF5KEY_GRAPH_EDGEINDICES, data=edge_indices)
-    graph_group.create_dataset(HDF5KEY_GRAPH_INTERNALEDGEINDICES, data=internal_edge_indices)
+    graph_group.create_dataset(
+        HDF5KEY_GRAPH_INTERNALEDGEINDICES,
+        data=internal_edge_indices)
 
     edge_feature_group = graph_group.create_group(HDF5KEY_GRAPH_EDGEFEATURES)
-    internal_edge_feature_group = graph_group.create_group(HDF5KEY_GRAPH_INTERNALEDGEFEATURES)
+    internal_edge_feature_group = graph_group.create_group(
+        HDF5KEY_GRAPH_INTERNALEDGEFEATURES)
     for edge_feature_name in edge_feature_names:
-        edge_feature_group.create_dataset(edge_feature_name, data=edge_feature_data[edge_feature_name])
-        internal_edge_feature_group.create_dataset(edge_feature_name, data=internal_edge_feature_data[edge_feature_name])
+        edge_feature_group.create_dataset(
+            edge_feature_name,
+            data=edge_feature_data[edge_feature_name])
+        internal_edge_feature_group.create_dataset(
+            edge_feature_name, data=internal_edge_feature_data[edge_feature_name])
 
     # store targets
     score_group = graph_group.create_group(HDF5KEY_GRAPH_SCORE)
@@ -131,15 +145,15 @@ def graph_to_hdf5(graph, hdf5_file):
 
 
 def _get_node_key(value):
-    if type(value) == str:
+    if isinstance(value, str):
         return value
 
     key = ""
     for item in value:
-        if type(item) == bytes or type(item) == numpy.bytes_:
+        if isinstance(item, bytes) or isinstance(item, numpy.bytes_):
             key = item.decode()
 
-        elif type(item) == str:
+        elif isinstance(item, str):
             key += item
 
         else:
@@ -167,7 +181,8 @@ def hdf5_to_graph(graph_group):
     graph = Graph(graph_group.name, targets=targets)
 
     # read nodes
-    node_names = [_get_node_key(key) for key in graph_group[HDF5KEY_GRAPH_NODENAMES][()]]
+    node_names = [_get_node_key(key)
+                  for key in graph_group[HDF5KEY_GRAPH_NODENAMES][()]]
     node_features_group = graph_group[HDF5KEY_GRAPH_NODEFEATURES]
     node_features = {}
     node_feature_names = list(node_features_group.keys())
@@ -208,7 +223,7 @@ def hdf5_to_graph(graph_group):
 
 
 def _get_edge_type_name(value):
-    if type(value) == numpy.bytes_ or type(value) == bytes:
+    if isinstance(value, numpy.bytes_) or isinstance(value, bytes):
 
         return value.decode()
     else:
@@ -217,7 +232,6 @@ def _get_edge_type_name(value):
 
 def plotly_2d(graph, out=None, offline=False, iplot=True,
               disable_plot=False, method='louvain'):
-
     """Plots the interface graph in 2D
 
     Args:
@@ -234,7 +248,7 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
         import chart_studio.plotly as py
 
     import plotly.graph_objs as go
-    import matplotlib.pyplot as plt 
+    import matplotlib.pyplot as plt
 
     pos = numpy.array(
         [v.tolist() for _, v in networkx.get_node_attributes(graph, 'pos').items()])
@@ -268,11 +282,11 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
                 cluster[node_key[node]] = ic
 
     # get the colormap for the clsuter line
-    ncluster = numpy.max([v for _, v in cluster.items()])+1
+    ncluster = numpy.max([v for _, v in cluster.items()]) + 1
     cmap = plt.cm.nipy_spectral
     N = cmap.N
     cmap = [cmap(i) for i in range(N)]
-    cmap = cmap[::int(N/ncluster)]
+    cmap = cmap[::int(N / ncluster)]
     cmap = 'plasma'
 
     edge_trace_list, internal_edge_trace_list = [], []
@@ -282,12 +296,28 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
 
         edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]]['type'])
         if edge_type == EDGETYPE_INTERNAL:
-            trace = go.Scatter(x=[], y=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
-                               line=go.scatter.Line(color='rgb(110,110,110)', width=3))
+            trace = go.Scatter(
+                x=[],
+                y=[],
+                text=[],
+                mode='lines',
+                hoverinfo=None,
+                showlegend=False,
+                line=go.scatter.Line(
+                    color='rgb(110,110,110)',
+                    width=3))
 
         elif edge_type == EDGETYPE_INTERFACE:
-            trace = go.Scatter(x=[], y=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
-                               line=go.scatter.Line(color='rgb(210,210,210)', width=1))
+            trace = go.Scatter(
+                x=[],
+                y=[],
+                text=[],
+                mode='lines',
+                hoverinfo=None,
+                showlegend=False,
+                line=go.scatter.Line(
+                    color='rgb(210,210,210)',
+                    width=1))
         else:
             continue
 
@@ -308,13 +338,33 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
                 node_connect[edge[i]] = 1
             else:
                 node_connect[edge[i]] += 1
-    node_trace_A = go.Scatter(x=[], y=[], text=[], mode='markers', hoverinfo='text',
-                              marker=dict(color='rgb(227,28,28)', size=[],
-                                          line=dict(color=[], width=4, colorscale=cmap)))
+    node_trace_A = go.Scatter(
+        x=[],
+        y=[],
+        text=[],
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            color='rgb(227,28,28)',
+            size=[],
+            line=dict(
+                color=[],
+                width=4,
+                colorscale=cmap)))
     # 'rgb(227,28,28)'
-    node_trace_B = go.Scatter(x=[], y=[], text=[], mode='markers', hoverinfo='text',
-                              marker=dict(color='rgb(0,102,255)', size=[],
-                                          line=dict(color=[], width=4, colorscale=cmap)))
+    node_trace_B = go.Scatter(
+        x=[],
+        y=[],
+        text=[],
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            color='rgb(0,102,255)',
+            size=[],
+            line=dict(
+                color=[],
+                width=4,
+                colorscale=cmap)))
     # 'rgb(0,102,255)'
     node_trace = [node_trace_A, node_trace_B]
 
@@ -334,31 +384,54 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
 
         nc = node_connect[node]
         node_trace[index]['marker']['size'] += (
-            5 + 15*numpy.tanh(nc/5),)
+            5 + 15 * numpy.tanh(nc / 5),)
         node_trace[index]['marker']['line']['color'] += (
             cluster[node],)
 
-    fig = go.Figure(data=[*internal_edge_trace_list, *edge_trace_list, *node_trace],
-                    layout=go.Layout(
-        title='<br>tSNE connection graph for %s' % graph.id,
-        titlefont=dict(size=16),
-        showlegend=False,
-        hovermode='closest',
-        margin=dict(b=20, l=5, r=5, t=40),
-        annotations=[dict(
-            text="",
-            showarrow=False,
-            xref="paper", yref="paper",
-            x=0.005, y=-0.002)],
-        xaxis=dict(
-            showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
+    fig = go.Figure(
+        data=[
+            *
+            internal_edge_trace_list,
+            *
+            edge_trace_list,
+            *
+            node_trace],
+        layout=go.Layout(
+            title='<br>tSNE connection graph for %s' %
+            graph.id,
+            titlefont=dict(
+                size=16),
+            showlegend=False,
+            hovermode='closest',
+            margin=dict(
+                b=20,
+                l=5,
+                r=5,
+                t=40),
+            annotations=[
+                dict(
+                    text="",
+                    showarrow=False,
+                    xref="paper",
+                    yref="paper",
+                    x=0.005,
+                    y=-
+                    0.002)],
+            xaxis=dict(
+                showgrid=False,
+                zeroline=False,
+                showticklabels=False),
+            yaxis=dict(
+                showgrid=False,
+                zeroline=False,
+                showticklabels=False)))
 
     if not disable_plot:
         if iplot:
             py.iplot(fig, filename=out)
         else:
             py.plot(fig)
+
 
 def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
     """Plots interface graph in 3D
@@ -384,12 +457,30 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
 
         edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]]['type'])
         if edge_type == EDGETYPE_INTERNAL:
-            trace = go.Scatter3d(x=[], y=[], z=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
-                                 line=go.scatter3d.Line(color='rgb(110,110,110)', width=5))
+            trace = go.Scatter3d(
+                x=[],
+                y=[],
+                z=[],
+                text=[],
+                mode='lines',
+                hoverinfo=None,
+                showlegend=False,
+                line=go.scatter3d.Line(
+                    color='rgb(110,110,110)',
+                    width=5))
 
         elif edge_type == EDGETYPE_INTERFACE:
-            trace = go.Scatter3d(x=[], y=[], z=[], text=[], mode='lines', hoverinfo=None,  showlegend=False,
-                                 line=go.scatter3d.Line(color='rgb(210,210,210)', width=2))
+            trace = go.Scatter3d(
+                x=[],
+                y=[],
+                z=[],
+                text=[],
+                mode='lines',
+                hoverinfo=None,
+                showlegend=False,
+                line=go.scatter3d.Line(
+                    color='rgb(210,210,210)',
+                    width=2))
         else:
             continue
 
@@ -412,13 +503,35 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
             else:
                 node_connect[edge[i]] += 1
 
-    node_trace_A = go.Scatter3d(x=[], y=[], z=[], text=[], mode='markers', hoverinfo='text',
-                                marker=dict(color='rgb(227,28,28)', size=[], symbol='circle',
-                                            line=dict(color='rgb(50,50,50)', width=2)))
+    node_trace_A = go.Scatter3d(
+        x=[],
+        y=[],
+        z=[],
+        text=[],
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            color='rgb(227,28,28)',
+            size=[],
+            symbol='circle',
+            line=dict(
+                color='rgb(50,50,50)',
+                width=2)))
 
-    node_trace_B = go.Scatter3d(x=[], y=[], z=[], text=[], mode='markers', hoverinfo='text',
-                                marker=dict(color='rgb(0,102,255)', size=[], symbol='circle',
-                                            line=dict(color='rgb(50,50,50)', width=2)))
+    node_trace_B = go.Scatter3d(
+        x=[],
+        y=[],
+        z=[],
+        text=[],
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            color='rgb(0,102,255)',
+            size=[],
+            symbol='circle',
+            line=dict(
+                color='rgb(50,50,50)',
+                width=2)))
 
     node_trace = [node_trace_A, node_trace_B]
 
@@ -437,27 +550,48 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
         node_trace[index]['text'] += (' '.join(node),)
 
         nc = node_connect[node]
-        node_trace[index]['marker']['size'] += (5 + 15*numpy.tanh(nc/5), )
+        node_trace[index]['marker']['size'] += (5 + 15 * numpy.tanh(nc / 5), )
 
-    fig = go.Figure(data=[*node_trace, *internal_edge_trace_list, *edge_trace_list],
-                    layout=go.Layout(
-                    title='<br>Connection graph for %s' % graph.id,
-                    titlefont=dict(size=16),
-                    showlegend=False,
-                    hovermode='closest',
-                    margin=dict(b=20, l=5, r=5, t=40),
-                    annotations=[dict(
-                        text="",
-                        showarrow=False,
-                        xref="paper", yref="paper",
-                        x=0.005, y=-0.002)],
-                    xaxis=dict(
-                        showgrid=False, zeroline=False, showticklabels=False),
-                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
+    fig = go.Figure(
+        data=[
+            *
+            node_trace,
+            *
+            internal_edge_trace_list,
+            *
+            edge_trace_list],
+        layout=go.Layout(
+            title='<br>Connection graph for %s' %
+            graph.id,
+            titlefont=dict(
+                size=16),
+            showlegend=False,
+            hovermode='closest',
+            margin=dict(
+                b=20,
+                l=5,
+                r=5,
+                t=40),
+            annotations=[
+                dict(
+                    text="",
+                    showarrow=False,
+                    xref="paper",
+                    yref="paper",
+                    x=0.005,
+                    y=-
+                    0.002)],
+            xaxis=dict(
+                showgrid=False,
+                zeroline=False,
+                showticklabels=False),
+            yaxis=dict(
+                showgrid=False,
+                zeroline=False,
+                showticklabels=False)))
 
     if not disable_plot:
         if iplot:
             py.iplot(fig, filename=out)
         else:
             py.plot(fig)
-

@@ -14,7 +14,13 @@ from deeprank_gnn.simple_net import SimpleNetwork
 from deeprank_gnn.simple_ginet import SimpleGiNetwork
 
 
-def _model_base_test(work_directory, database, model, task='reg', target='irmsd', plot=False):
+def _model_base_test(
+        work_directory,
+        database,
+        model,
+        task='reg',
+        target='irmsd',
+        plot=False):
 
     NN = NeuralNet(database, model,
                    node_feature=['type', 'polarity', 'bsa',
@@ -44,7 +50,8 @@ def _model_base_test(work_directory, database, model, task='reg', target='irmsd'
 class TestNeuralNet(unittest.TestCase):
 
     def setUp(self):
-        f, self.database = tempfile.mkstemp(prefix="1ATN_residue.hdf5", suffix=".hdf5")
+        f, self.database = tempfile.mkstemp(
+            prefix="1ATN_residue.hdf5", suffix=".hdf5")
         os.close(f)
 
         self.work_directory = tempfile.mkdtemp()

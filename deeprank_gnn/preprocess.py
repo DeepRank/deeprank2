@@ -56,13 +56,16 @@ class _PreProcess(Process):
             try:
                 graph = query.build_graph()
                 if graph_has_nan(graph):
-                    _log.warning(f"skipping {query}, because of a generated NaN value in the graph")
+                    _log.warning(
+                        f"skipping {query}, because of a generated NaN value in the graph")
 
                 with h5py.File(self._output_path, 'a') as f5:
                     graph_to_hdf5(graph, f5)
 
-            except:
-                _log.exception("error adding {} to {}".format(query, self._output_path))
+            except BaseException:
+                _log.exception(
+                    "error adding {} to {}".format(
+                        query, self._output_path))
 
                 # Don't leave behind an unfinished hdf5 group.
                 if graph is not None:
@@ -91,8 +94,9 @@ class PreProcessor:
         if prefix is None:
             prefix = "preprocessed-data"
 
-        self._processes = [_PreProcess(self._queue, "{}-{}.hdf5".format(prefix, index))
-                           for index in range(process_count)]
+        self._processes = [_PreProcess(self._queue,
+                                       "{}-{}.hdf5".format(prefix,
+                                                           index)) for index in range(process_count)]
 
     def start(self):
         "start the workers"
@@ -101,7 +105,8 @@ class PreProcessor:
         for process in self._processes:
             process.start()
             if not process.is_alive():
-                raise RuntimeError(f"worker process {process.name} did not start")
+                raise RuntimeError(
+                    f"worker process {process.name} did not start")
 
     def wait(self):
         "wait for all graphs to be built"
@@ -132,7 +137,8 @@ class PreProcessor:
     def shutdown(self):
         "stop building graphs"
 
-        _log.info("shutting down {} worker processes..".format(len(self._processes)))
+        _log.info("shutting down {} worker processes..".format(
+            len(self._processes)))
 
         for process in self._processes:
             process.stop()
@@ -142,4 +148,3 @@ class PreProcessor:
 
         # clean up all the created subprocesses
         self.shutdown()
-

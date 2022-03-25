@@ -17,9 +17,11 @@ def get_all_scores(pdb_path, reference_pdb_path):
     scores = {}
 
     # Input pre-computed zone files
-    if os.path.exists(ref_name+'.lzone'):
-        scores['lrmsd'] = sim.compute_lrmsd_fast(method='svd', lzone=ref_name+'.lzone')
-        scores['irmsd'] = sim.compute_irmsd_fast(method='svd', izone=ref_name+'.izone')
+    if os.path.exists(ref_name + '.lzone'):
+        scores['lrmsd'] = sim.compute_lrmsd_fast(
+            method='svd', lzone=ref_name + '.lzone')
+        scores['irmsd'] = sim.compute_irmsd_fast(
+            method='svd', izone=ref_name + '.izone')
 
     # Compute zone files
     else:
@@ -27,7 +29,8 @@ def get_all_scores(pdb_path, reference_pdb_path):
         scores['irmsd'] = sim.compute_irmsd_fast(method='svd')
 
     scores['fnat'] = sim.compute_fnat_fast()
-    scores['dockQ'] = sim.compute_DockQScore(scores['fnat'], scores['lrmsd'], scores['irmsd'])
+    scores['dockQ'] = sim.compute_DockQScore(
+        scores['fnat'], scores['lrmsd'], scores['irmsd'])
     scores['bin_class'] = scores['irmsd'] < 4.0
 
     scores['capri_class'] = 5
@@ -36,4 +39,3 @@ def get_all_scores(pdb_path, reference_pdb_path):
             scores['capri_class'] = val
 
     return scores
-

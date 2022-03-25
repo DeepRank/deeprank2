@@ -24,13 +24,18 @@ def plot_graph(graph, cluster):
 
 def get_preloaded_cluster(cluster, batch):
 
-    nbatch = torch.max(batch)+1
+    nbatch = torch.max(batch) + 1
     for ib in range(1, nbatch):
-        cluster[batch == ib] += torch.max(cluster[batch == ib-1]) + 1
+        cluster[batch == ib] += torch.max(cluster[batch == ib - 1]) + 1
     return cluster
 
 
-def community_detection_per_batch(edge_index, batch, num_nodes, edge_attr=None, method='mcl'):
+def community_detection_per_batch(
+        edge_index,
+        batch,
+        num_nodes,
+        edge_attr=None,
+        method='mcl'):
     """Detects clusters of nodes based on the edge attributes (distances)
 
     Args:
@@ -56,7 +61,7 @@ def community_detection_per_batch(edge_index, batch, num_nodes, edge_attr=None, 
         else:
             g.add_edge(i, j, weight=edge_attr[iedge])
 
-    num_batch = max(batch)+1
+    num_batch = max(batch) + 1
     all_index = range(num_nodes)
     cluster, ncluster = [], 0
 
@@ -68,7 +73,7 @@ def community_detection_per_batch(edge_index, batch, num_nodes, edge_attr=None, 
         # detect the communities using Louvain method
         if method == 'louvain':
             c = community.best_partition(subg)
-            cluster += [v+ncluster for k, v in c.items()]
+            cluster += [v + ncluster for k, v in c.items()]
             ncluster = max(cluster)
 
         # detect communities using MCL
@@ -80,7 +85,7 @@ def community_detection_per_batch(edge_index, batch, num_nodes, edge_attr=None, 
 
             index = np.zeros(subg.number_of_nodes()).astype('int')
             for ic, c in enumerate(mc_clust):
-                index[list(c)] = ic+ncluster
+                index[list(c)] = ic + ncluster
             cluster += index.tolist()
             ncluster = max(cluster)
 

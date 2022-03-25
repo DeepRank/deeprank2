@@ -20,10 +20,10 @@ class sGraphAttentionLayer(torch.nn.Module):
 
     """
     This is a new layer that is similar to the graph attention network but simpler
-    z_i =  1 / Ni \Sum_j a_ij * [x_i || x_j] * W + b_i
+    z_i =  1 / Ni \\Sum_j a_ij * [x_i || x_j] * W + b_i
     || is the concatenation operator: [1,2,3] || [4,5,6] = [1,2,3,4,5,6]
     Ni is the number of neighbor of node i
-    \Sum_j runs over the neighbors of node i
+    \\Sum_j runs over the neighbors of node i
     a_ij is the edge attribute between node i and j
     Args:
         in_channels (int): Size of each input sample.
@@ -73,7 +73,7 @@ class sGraphAttentionLayer(torch.nn.Module):
         alpha = torch.mm(alpha, self.weight)
 
         # multiply each edge features with the corresponding dist
-        alpha = edge_attr*alpha
+        alpha = edge_attr * alpha
 
         # scatter the resulting edge feature to get node features
         out = torch.zeros(

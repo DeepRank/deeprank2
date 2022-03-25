@@ -89,7 +89,7 @@ class BSA(object):
 
         res = self.sql.get_contact_residues(cutoff=cutoff)
         keys = list(res.keys())
-        res = res[keys[0]]+res[keys[1]]
+        res = res[keys[0]] + res[keys[1]]
 
         for r in res:
 
@@ -105,13 +105,13 @@ class BSA(object):
                 select_str, self.chains[r[0]], self.result_chains[r[0]])['res']
 
             # define the bsa
-            bsa = asa_unbound-asa_complex
+            bsa = asa_unbound - asa_complex
 
             # define the xyz key : (chain,x,y,z)
             chain = {'A': 0, 'B': 1}[r[0]]
             xyz = np.mean(self.sql.get(
                 'x,y,z', resSeq=r[1], chainID=r[0]), 0)
-            xyzkey = tuple([chain]+xyz.tolist())
+            xyzkey = tuple([chain] + xyz.tolist())
 
             # put the data in dict
             self.bsa_data[r] = [bsa]

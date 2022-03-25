@@ -91,7 +91,7 @@ class GINet(torch.nn.Module):
             input_shape, 16, input_shape_edge)
         self.conv2_ext = GINetConvLayer(16, 32, input_shape_edge)
 
-        self.fc1 = nn.Linear(2*32, 128)
+        self.fc1 = nn.Linear(2 * 32, 128)
         self.fc2 = nn.Linear(128, output_shape)
         self.clustering = 'mcl'
         self.dropout = 0.4

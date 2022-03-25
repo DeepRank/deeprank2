@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from networkx import Graph as NetworkxGraph
 
+
 class Graph(NetworkxGraph):
     "this is a graph just like in networkx, but with an id and associated target values"
 

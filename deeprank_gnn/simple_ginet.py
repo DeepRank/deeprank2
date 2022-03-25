@@ -36,7 +36,8 @@ class SimpleGiMessageLayer(Module):
 
             # empty list of edges
 
-            return torch.zeros((node_features.shape[0], self._node_output_size))
+            return torch.zeros(
+                (node_features.shape[0], self._node_output_size))
 
         node0_indices, node1_indices = edge_node_indices
 
@@ -50,13 +51,17 @@ class SimpleGiMessageLayer(Module):
 
         edge_output = self._fe(edge_features)
 
-        attention_input = torch.cat([node0_output, node1_output, edge_output], dim=1)
+        attention_input = torch.cat(
+            [node0_output, node1_output, edge_output], dim=1)
         attention_output = self._fa(attention_input)
         attention = softmax(leaky_relu(attention_output), dim=1)
 
         attenuated_node_output = attention * node0_output
 
-        out = torch.zeros(count_nodes, self._node_output_size).to(attention.device)
+        out = torch.zeros(
+            count_nodes,
+            self._node_output_size).to(
+            attention.device)
         z = scatter_sum(attenuated_node_output, node0_indices, dim=0, out=out)
 
         return z
@@ -74,13 +79,19 @@ class SimpleGiNetwork(Module):
 
         super(SimpleGiNetwork, self).__init__()
 
-        self._internal_message_layer1 = SimpleGiMessageLayer(input_shape, input_shape_edge, 16)
-        self._internal_message_layer2 = SimpleGiMessageLayer(16, input_shape_edge, 16)
-        self._internal_message_layer3 = SimpleGiMessageLayer(16, input_shape_edge, 32)
+        self._internal_message_layer1 = SimpleGiMessageLayer(
+            input_shape, input_shape_edge, 16)
+        self._internal_message_layer2 = SimpleGiMessageLayer(
+            16, input_shape_edge, 16)
+        self._internal_message_layer3 = SimpleGiMessageLayer(
+            16, input_shape_edge, 32)
 
-        self._edge_message_layer1 = SimpleGiMessageLayer(input_shape, input_shape_edge, 16)
-        self._edge_message_layer2 = SimpleGiMessageLayer(16, input_shape_edge, 16)
-        self._edge_message_layer3 = SimpleGiMessageLayer(16, input_shape_edge, 32)
+        self._edge_message_layer1 = SimpleGiMessageLayer(
+            input_shape, input_shape_edge, 16)
+        self._edge_message_layer2 = SimpleGiMessageLayer(
+            16, input_shape_edge, 16)
+        self._edge_message_layer3 = SimpleGiMessageLayer(
+            16, input_shape_edge, 32)
 
         self._fc1 = Linear(64, 128)
         uniform(64, self._fc1.weight)
@@ -90,20 +101,50 @@ class SimpleGiNetwork(Module):
 
     def forward(self, data):
 
-        internal_updated1 = relu(self._internal_message_layer1(data.x, data.internal_edge_index, data.internal_edge_attr))
-        internal_updated2 = relu(self._internal_message_layer2(internal_updated1, data.internal_edge_index, data.internal_edge_attr))
-        internal_updated3 = relu(self._internal_message_layer3(internal_updated2, data.internal_edge_index, data.internal_edge_attr))
+        internal_updated1 = relu(
+            self._internal_message_layer1(
+                data.x,
+                data.internal_edge_index,
+                data.internal_edge_attr))
+        internal_updated2 = relu(
+            self._internal_message_layer2(
+                internal_updated1,
+                data.internal_edge_index,
+                data.internal_edge_attr))
+        internal_updated3 = relu(
+            self._internal_message_layer3(
+                internal_updated2,
+                data.internal_edge_index,
+                data.internal_edge_attr))
 
-        edge_updated1 = relu(self._edge_message_layer1(data.x, data.edge_index, data.edge_attr))
-        edge_updated2 = relu(self._edge_message_layer2(edge_updated1, data.edge_index, data.edge_attr))
-        edge_updated3 = relu(self._edge_message_layer3(edge_updated2, data.edge_index, data.edge_attr))
+        edge_updated1 = relu(
+            self._edge_message_layer1(
+                data.x,
+                data.edge_index,
+                data.edge_attr))
+        edge_updated2 = relu(
+            self._edge_message_layer2(
+                edge_updated1,
+                data.edge_index,
+                data.edge_attr))
+        edge_updated3 = relu(
+            self._edge_message_layer3(
+                edge_updated2,
+                data.edge_index,
+                data.edge_attr))
 
-        internal_updated_per_graph = scatter_mean(internal_updated3, data.batch, dim=0)
+        internal_updated_per_graph = scatter_mean(
+            internal_updated3, data.batch, dim=0)
         edge_updated_per_graph = scatter_mean(edge_updated3, data.batch, dim=0)
 
-        updated_per_graph = torch.cat([internal_updated_per_graph, edge_updated_per_graph], dim=1)
+        updated_per_graph = torch.cat(
+            [internal_updated_per_graph, edge_updated_per_graph], dim=1)
 
-        output1 = dropout(relu(self._fc1(updated_per_graph)), 0.4, training=self.training)
+        output1 = dropout(
+            relu(
+                self._fc1(updated_per_graph)),
+            0.4,
+            training=self.training)
 
         output2 = self._fc2(output1)
 

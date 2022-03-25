@@ -21,10 +21,17 @@ def test_preprocess():
 
         count_queries = 100
         for number in range(1, count_queries + 1):
-            query = SingleResidueVariantResidueQuery("tests/data/pdb/101M/101M.pdb", "A", number, None,
-                                                     alanine, phenylalanine,
-                                                     pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
-                                                     variant_conservation=0.0, wildtype_conservation=0.0)
+            query = SingleResidueVariantResidueQuery(
+                "tests/data/pdb/101M/101M.pdb",
+                "A",
+                number,
+                None,
+                alanine,
+                phenylalanine,
+                pssm_paths={
+                    "A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+                variant_conservation=0.0,
+                wildtype_conservation=0.0)
             preprocessor.add_query(query)
 
         preprocessor.wait()

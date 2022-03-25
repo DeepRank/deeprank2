@@ -36,7 +36,8 @@ class SimpleConvolutionalLayer(Module):
         node0_features = node_features[node0_indices]
         node1_features = node_features[node1_indices]
 
-        message_input = torch.cat([node0_features, node1_features, edge_features], dim=1)
+        message_input = torch.cat(
+            [node0_features, node1_features, edge_features], dim=1)
 
         messages_per_neighbour = self._edge_mlp(message_input)
 
@@ -54,10 +55,17 @@ class SimpleConvolutionalLayer(Module):
 
         node0_indices, node1_indices = edge_node_indices
 
-        messages_per_neighbour = self._edge_forward(node_features, edge_node_indices, edge_features)
+        messages_per_neighbour = self._edge_forward(
+            node_features, edge_node_indices, edge_features)
 
-        message_sums_per_node = torch.zeros(node_features.shape[0], messages_per_neighbour.shape[1])
-        scatter_sum(messages_per_neighbour, node0_indices, dim=0, out=message_sums_per_node)
+        message_sums_per_node = torch.zeros(
+            node_features.shape[0],
+            messages_per_neighbour.shape[1])
+        scatter_sum(
+            messages_per_neighbour,
+            node0_indices,
+            dim=0,
+            out=message_sums_per_node)
 
         output = self._node_forward(node_features, message_sums_per_node)
 
@@ -81,8 +89,10 @@ class SimpleNetwork(Module):
         self._internal_convolutional_layers = []
         self._external_convolutional_layers = []
         for layer_index in range(layer_count):
-            self._internal_convolutional_layers.append(SimpleConvolutionalLayer(input_shape, input_shape_edge))
-            self._external_convolutional_layers.append(SimpleConvolutionalLayer(input_shape, input_shape_edge))
+            self._internal_convolutional_layers.append(
+                SimpleConvolutionalLayer(input_shape, input_shape_edge))
+            self._external_convolutional_layers.append(
+                SimpleConvolutionalLayer(input_shape, input_shape_edge))
 
         hidden_size = 32
 
@@ -92,11 +102,19 @@ class SimpleNetwork(Module):
                                      SiLU())
 
     @staticmethod
-    def _update(node_features, edge_indices, edge_features, convolutional_layers):
+    def _update(
+            node_features,
+            edge_indices,
+            edge_features,
+            convolutional_layers):
 
         updated_node_features = node_features.clone().detach()
         for layer_index in range(len(convolutional_layers)):
-            updated_node_features = silu(convolutional_layers[layer_index](updated_node_features, edge_indices, edge_features))
+            updated_node_features = silu(
+                convolutional_layers[layer_index](
+                    updated_node_features,
+                    edge_indices,
+                    edge_features))
 
         return updated_node_features
 
@@ -109,13 +127,24 @@ class SimpleNetwork(Module):
 
     def forward(self, data):
 
-        updated_internal = self._update(data.x, data.internal_edge_index, data.internal_edge_attr, self._internal_convolutional_layers)
-        updated_external = self._update(data.x, data.edge_index, data.edge_attr, self._external_convolutional_layers)
+        updated_internal = self._update(
+            data.x,
+            data.internal_edge_index,
+            data.internal_edge_attr,
+            self._internal_convolutional_layers)
+        updated_external = self._update(
+            data.x,
+            data.edge_index,
+            data.edge_attr,
+            self._external_convolutional_layers)
 
         graph_indices = data.batch
-        means_per_graph_internal = scatter_mean(updated_internal, graph_indices, dim=0)
-        means_per_graph_external = scatter_mean(updated_external, graph_indices, dim=0)
+        means_per_graph_internal = scatter_mean(
+            updated_internal, graph_indices, dim=0)
+        means_per_graph_external = scatter_mean(
+            updated_external, graph_indices, dim=0)
 
-        output = self._graph_forward(means_per_graph_internal, means_per_graph_external)
+        output = self._graph_forward(
+            means_per_graph_internal,
+            means_per_graph_external)
         return output
-

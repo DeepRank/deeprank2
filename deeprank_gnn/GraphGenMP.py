@@ -17,9 +17,19 @@ from .tools.score import get_all_scores
 
 class GraphHDF5(object):
 
-    def __init__(self, pdb_path, ref_path=None, graph_type='residue', pssm_path=None,
-                 select=None, outfile='graph.hdf5', nproc=1, use_tqdm=True, tmpdir='./',
-                 limit=None, biopython=False):
+    def __init__(
+            self,
+            pdb_path,
+            ref_path=None,
+            graph_type='residue',
+            pssm_path=None,
+            select=None,
+            outfile='graph.hdf5',
+            nproc=1,
+            use_tqdm=True,
+            tmpdir='./',
+            limit=None,
+            biopython=False):
         """Master class from which graphs are computed
         Args:
             pdb_path (str): path to the docking models
@@ -68,7 +78,7 @@ class GraphHDF5(object):
         if ref_path is None:
             ref = None
         else:
-            ref = os.path.join(ref_path, base_name+'.pdb')
+            ref = os.path.join(ref_path, base_name + '.pdb')
 
         # compute all the graphs on 1 core and directly
         # store the graphs the HDF5 file
@@ -82,7 +92,11 @@ class GraphHDF5(object):
 
             pool = mp.Pool(nproc)
             part_process = partial(
-                self._pickle_one_graph, pssm_paths=pssm_paths, ref=ref, tmpdir=tmpdir, biopython=biopython)
+                self._pickle_one_graph,
+                pssm_paths=pssm_paths,
+                ref=ref,
+                tmpdir=tmpdir,
+                biopython=biopython)
             pool.map(part_process, pdbs)
 
             # get the graph names
@@ -92,7 +106,10 @@ class GraphHDF5(object):
                 filter(lambda x: x.endswith('.pkl'), graph_names))
             if select is not None:
                 graph_names = list(
-                    filter(lambda x: x.startswith(tmpdir+select), graph_names))
+                    filter(
+                        lambda x: x.startswith(
+                            tmpdir + select),
+                        graph_names))
 
             # transfer them to the hdf5
             with h5py.File(outfile, 'w') as f5:
@@ -116,7 +133,14 @@ class GraphHDF5(object):
         for f in rmfiles:
             os.remove(f)
 
-    def get_all_graphs(self, pdbs, pssm_paths, ref, outfile, use_tqdm=True, biopython=False):
+    def get_all_graphs(
+            self,
+            pdbs,
+            pssm_paths,
+            ref,
+            outfile,
+            use_tqdm=True,
+            biopython=False):
 
         graphs = []
         if use_tqdm:
@@ -142,7 +166,12 @@ class GraphHDF5(object):
                     traceback.print_exc()
 
     @staticmethod
-    def _pickle_one_graph(pdb_path, pssm_paths, ref, tmpdir='./', biopython=False):
+    def _pickle_one_graph(
+            pdb_path,
+            pssm_paths,
+            ref,
+            tmpdir='./',
+            biopython=False):
 
         # get the graph
         try:
@@ -151,8 +180,13 @@ class GraphHDF5(object):
             if ref is not None:
                 targets = get_all_scores(pdb_path, ref)
 
-            q = ProteinProteinInterfaceResidueQuery(pdb_path, "A", "B", pssm_paths=pssm_paths,
-                                                    targets=targets, use_biopython=biopython)
+            q = ProteinProteinInterfaceResidueQuery(
+                pdb_path,
+                "A",
+                "B",
+                pssm_paths=pssm_paths,
+                targets=targets,
+                use_biopython=biopython)
 
             g = q.build_graph()
 
@@ -176,8 +210,13 @@ class GraphHDF5(object):
 
         # get the graph
 
-        q = ProteinProteinInterfaceResidueQuery(pdb_path, "A", "B", pssm_paths=pssm_paths,
-                                                targets=targets, use_biopython=biopython)
+        q = ProteinProteinInterfaceResidueQuery(
+            pdb_path,
+            "A",
+            "B",
+            pssm_paths=pssm_paths,
+            targets=targets,
+            use_biopython=biopython)
 
         g = q.build_graph()
 

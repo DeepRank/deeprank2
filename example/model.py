@@ -20,32 +20,30 @@ from wgat_conv import WGATConv
 
 
 index = np.arange(400)
-#np.random.shuffle(index)
+# np.random.shuffle(index)
 
 index_train = index[0:50]
 index_test = index[350:]
 batch_size = 2
 
 
-
 h5train = '1AK4_residue.hdf5'
 h5test = '1AK4_residue.hdf5'
 
 target = 'irmsd'
-node_feature = ['type','polarity','bsa']
+node_feature = ['type', 'polarity', 'bsa']
 edge_attr = ['dist']
 
-train_dataset = HDF5DataSet(root='./',database=h5train,index=index_train,
-                            node_feature=node_feature,edge_feature=edge_attr,
+train_dataset = HDF5DataSet(root='./', database=h5train, index=index_train,
+                            node_feature=node_feature, edge_feature=edge_attr,
                             target=target)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
 d = train_dataset.get(0)
 
-test_dataset = HDF5DataSet(root='./',database=h5test,index=index_test,
-                           node_feature=node_feature,edge_feature=edge_attr,
+test_dataset = HDF5DataSet(root='./', database=h5test, index=index_test,
+                           node_feature=node_feature, edge_feature=edge_attr,
                            target=target)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
 
 
 class Net(torch.nn.Module):
@@ -53,7 +51,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         self.conv1 = WGATConv(d.num_features, 16)
-        self.conv2 = WGATConv(16 , 32)
+        self.conv2 = WGATConv(16, 32)
         #self.conv3 = WGATConv(32 , 32)
 
         self.fc1 = torch.nn.Linear(32, 64)
@@ -65,12 +63,19 @@ class Net(torch.nn.Module):
         act = F.relu
         #act = nn.LeakyReLU(0.25)
 
-        data.x = act(self.conv1(data.x, data.edge_index,data.edge_attr))
-        cluster = community_detection(data.internal_edge_index,data.num_nodes,edge_attr=None,batches=data.batches)
+        data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))
+        cluster = community_detection(
+            data.internal_edge_index,
+            data.num_nodes,
+            edge_attr=None,
+            batches=data.batches)
         data = community_pooling(cluster, data)
 
-        data.x = act(self.conv2(data.x, data.edge_index,data.edge_attr))
-        cluster = community_detection(data.internal_edge_index,data.num_nodes,edge_attr=None)
+        data.x = act(self.conv2(data.x, data.edge_index, data.edge_attr))
+        cluster = community_detection(
+            data.internal_edge_index,
+            data.num_nodes,
+            edge_attr=None)
         x, batch = max_pool_x(cluster, data.x, data.batch)
 
         x = scatter_mean(x, batch, dim=0)
@@ -79,13 +84,14 @@ class Net(torch.nn.Module):
         #x = F.dropout(x, training=self.training)
 
         return x
-        #return F.relu(x)
+        # return F.relu(x)
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = Net().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 loss = MSELoss()
+
 
 def train(epoch):
     model.train()
@@ -114,7 +120,7 @@ def test():
     for data in test_loader:
         data = data.to(device)
         pred = model(data).reshape(-1)
-        loss_val += loss_func(pred,data.y)
+        loss_val += loss_func(pred, data.y)
     return loss_val
 
 
@@ -135,7 +141,7 @@ for data in test_loader:
     data = data.to(device)
     test_truth += data.y.tolist()
     test_pred += model(data).reshape(-1).tolist()
-plt.scatter(truth,pred,c='blue')
-plt.scatter(test_truth,test_pred,c='red')
-#plt.plot([0,1],[0,1])
+plt.scatter(truth, pred, c='blue')
+plt.scatter(test_truth, test_pred, c='red')
+# plt.plot([0,1],[0,1])
 plt.show()

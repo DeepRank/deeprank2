@@ -30,7 +30,7 @@ def DivideDataSet(dataset, percent=[0.8, 0.2], shuffle=True):
     if shuffle:
         np.random.shuffle(index)
 
-    size1 = int(percent[0]*size)
+    size1 = int(percent[0] * size)
     index1, index2 = index[:size1], index[size1:]
 
     dataset1 = copy.deepcopy(dataset)
@@ -60,7 +60,7 @@ def PreCluster(dataset, method):
             try:
                 print('deleting {}'.format(mol))
                 del f5[mol]
-            except:
+            except BaseException:
                 print('{} not found'.format(mol))
             f5.close()
             continue
@@ -92,10 +92,19 @@ def PreCluster(dataset, method):
 
 class HDF5DataSet(Dataset):
 
-    def __init__(self, root='./', database=None, transform=None, pre_transform=None,
-                 dict_filter=None, target=None, tqdm=True, index=None,
-                 node_feature='all', edge_feature=['dist'], clustering_method='mcl',
-                 edge_feature_transform=lambda x: np.tanh(-x/2+2)+1):
+    def __init__(self,
+                 root='./',
+                 database=None,
+                 transform=None,
+                 pre_transform=None,
+                 dict_filter=None,
+                 target=None,
+                 tqdm=True,
+                 index=None,
+                 node_feature='all',
+                 edge_feature=['dist'],
+                 clustering_method='mcl',
+                 edge_feature_transform=lambda x: np.tanh(-x / 2 + 2) + 1):
         """Class from which the hdf5 datasets are loaded.
 
         Args:
@@ -194,7 +203,7 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.database[0], 'r')
         mol_key = list(f.keys())[0]
         self.available_node_feature = list(
-            f[mol_key+'/node_data/'].keys())
+            f[mol_key + '/node_data/'].keys())
         f.close()
 
         if self.node_feature == 'all':
@@ -203,7 +212,9 @@ class HDF5DataSet(Dataset):
             for feat in self.node_feature:
                 if feat not in self.available_node_feature:
                     print(
-                        feat, ' node feature not found in the file', self.database[0])
+                        feat,
+                        ' node feature not found in the file',
+                        self.database[0])
                     print('Possible node feature : ')
                     print('\n'.join(self.available_node_feature))
                     #raise ValueError('Feature Not found')
@@ -215,7 +226,7 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.database[0], 'r')
         mol_key = list(f.keys())[0]
         self.available_edge_feature = list(
-            f[mol_key+'/edge_data/'].keys())
+            f[mol_key + '/edge_data/'].keys())
         f.close()
 
         if self.edge_feature == 'all':
@@ -224,7 +235,9 @@ class HDF5DataSet(Dataset):
             for feat in self.edge_feature:
                 if feat not in self.available_edge_feature:
                     print(
-                        feat, ' edge attribute not found in the file', self.database[0])
+                        feat,
+                        ' edge attribute not found in the file',
+                        self.database[0])
                     print('Possible edge attribute : ')
                     print('\n'.join(self.available_edge_feature))
                     #raise ValueError('Feature Not found')
@@ -243,7 +256,7 @@ class HDF5DataSet(Dataset):
         f5 = h5py.File(fname, 'r')
         try:
             grp = f5[mol]
-        except:
+        except BaseException:
             f5.close()
             return None
 
@@ -251,13 +264,13 @@ class HDF5DataSet(Dataset):
         data = ()
         try:
             for feat in self.node_feature:
-                vals = grp['node_data/'+feat][()]
+                vals = grp['node_data/' + feat][()]
                 if vals.ndim == 1:
                     vals = vals.reshape(-1, 1)
                 data += (vals,)
             x = torch.tensor(np.hstack(data), dtype=torch.float)
 
-        except:
+        except BaseException:
             print('node attributes not found in the file',
                   self.database[0])
             f5.close()
@@ -275,7 +288,7 @@ class HDF5DataSet(Dataset):
             data = ()
             if self.edge_feature is not None:
                 for feat in self.edge_feature:
-                    vals = grp['edge_data/'+feat][()]
+                    vals = grp['edge_data/' + feat][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
                     data += (vals,)
@@ -299,7 +312,7 @@ class HDF5DataSet(Dataset):
             data = ()
             if self.edge_feature is not None:
                 for feat in self.edge_feature:
-                    vals = grp['internal_edge_data/'+feat][()]
+                    vals = grp['internal_edge_data/' + feat][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
                     data += (vals,)
@@ -312,7 +325,7 @@ class HDF5DataSet(Dataset):
             else:
                 internal_edge_attr = None
 
-        except:
+        except BaseException:
             traceback.print_exc()
             f5.close()
             return None
@@ -322,9 +335,9 @@ class HDF5DataSet(Dataset):
             y = None
 
         else:
-            if grp['score/'+self.target][()] is not None:
+            if grp['score/' + self.target][()] is not None:
                 y = torch.tensor(
-                    [grp['score/'+self.target][()]], dtype=torch.float).contiguous()
+                    [grp['score/' + self.target][()]], dtype=torch.float).contiguous()
             else:
                 y = None
 
@@ -351,7 +364,7 @@ class HDF5DataSet(Dataset):
                 if ('depth_0' in grp['clustering/{}'.format(self.clustering_method)].keys() and
                         'depth_1' in grp['clustering/{}'.format(
                             self.clustering_method)].keys()
-                    ):
+                        ):
                     data.cluster0 = torch.tensor(
                         grp['clustering/' + self.clustering_method + '/depth_0'][()], dtype=torch.long)
                     data.cluster1 = torch.tensor(
@@ -440,7 +453,7 @@ class HDF5DataSet(Dataset):
                 ops = ['>', '<', '==']
                 new_cond_vals = cond_vals
                 for o in ops:
-                    new_cond_vals = new_cond_vals.replace(o, 'val'+o)
+                    new_cond_vals = new_cond_vals.replace(o, 'val' + o)
 
                 if not eval(new_cond_vals):
                     return False

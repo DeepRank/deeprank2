@@ -17,7 +17,8 @@ def pssm_3dcons_to_deeprank(pssm_file):
 
         if firstline is True:
             firstline = False
-            new_pssm.write('pdbresi pdbresn seqresi seqresn    A    R    N    D    C    Q    E\
+            new_pssm.write(
+                'pdbresi pdbresn seqresi seqresn    A    R    N    D    C    Q    E\
     G    H    I    L    K    M    F    P    S    T    W    Y    V   IC\n')
 
         if len(line.split()) == 44:
@@ -46,5 +47,5 @@ python 3dcons_to_deeprank_pssm.py [path_to_pssm]
             pssm_path = sys.argv[1]
             for pssm_file in glob.glob('{}/*.pssm'.format(pssm_path)):
                 pssm_3dcons_to_deeprank(pssm_file)
-        except:
+        except BaseException:
             print('You must provide the path to the pssm files')

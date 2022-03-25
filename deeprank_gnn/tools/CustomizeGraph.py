@@ -66,10 +66,10 @@ def add_target(graph_path, target_name, target_list, sep=' '):
                     # Create the target
                     group[target_name] = target_dict[model]
 
-                except:
+                except BaseException:
                     print('no graph for {}'.format(model))
 
             f5.close()
 
-        except:
+        except BaseException:
             print('no graph for {}'.format(hdf5))

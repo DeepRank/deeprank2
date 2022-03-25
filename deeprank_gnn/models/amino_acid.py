@@ -4,7 +4,15 @@ import numpy
 class AminoAcid:
     "a value to represent one of the amino acids"
 
-    def __init__(self, name, three_letter_code, one_letter_code, charge=None, polarity=None, size=None, index=None):
+    def __init__(
+            self,
+            name,
+            three_letter_code,
+            one_letter_code,
+            charge=None,
+            polarity=None,
+            size=None,
+            index=None):
         """
             Args:
                 name(str): unique name for the amino acid
@@ -40,9 +48,12 @@ class AminoAcid:
     @property
     def onehot(self):
         if self._index is None:
-            raise ValueError("amino acid {} index is not set, thus no onehot can be computed".format(self._name))
+            raise ValueError(
+                "amino acid {} index is not set, thus no onehot can be computed".format(
+                    self._name))
 
-        a = numpy.zeros(20)  # assumed that there are only 20 different amino acids
+        # assumed that there are only 20 different amino acids
+        a = numpy.zeros(20)
         a[self._index] = 1.0
 
         return a
@@ -63,7 +74,7 @@ class AminoAcid:
         return hash(self.name)
 
     def __eq__(self, other):
-        return type(other) == type(self) and other.name == self.name
+        return isinstance(other, type(self)) and other.name == self.name
 
     def __repr__(self):
         return self._name

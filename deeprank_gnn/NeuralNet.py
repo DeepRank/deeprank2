@@ -21,13 +21,34 @@ _log = logging.getLogger(__name__)
 
 class NeuralNet(object):
 
-    def __init__(self, database, Net,
-                 node_feature=['type', 'polarity', 'bsa'],
-                 edge_feature=['dist'], target='irmsd', lr=0.01,
-                 batch_size=32, percent=[1.0, 0.0],
-                 database_eval=None, index=None, class_weights=None, task=None,
-                 classes=[0, 1], threshold=None,
-                 pretrained_model=None, shuffle=True, outdir='./', cluster_nodes='mcl', transform_sigmoid=False):
+    def __init__(
+            self,
+            database,
+            Net,
+            node_feature=[
+                'type',
+                'polarity',
+                'bsa'],
+            edge_feature=['dist'],
+            target='irmsd',
+            lr=0.01,
+            batch_size=32,
+            percent=[
+                1.0,
+                0.0],
+        database_eval=None,
+        index=None,
+        class_weights=None,
+        task=None,
+        classes=[
+                0,
+                1],
+            threshold=None,
+            pretrained_model=None,
+            shuffle=True,
+            outdir='./',
+            cluster_nodes='mcl',
+            transform_sigmoid=False):
         """Class from which the network is trained, evaluated and tested
 
         Args:
@@ -65,7 +86,7 @@ class NeuralNet(object):
                 if k not in ['self', 'database', 'Net', 'database_eval']:
                     self.__setattr__(k, v)
 
-            if self.task == None:
+            if self.task is None:
                 if self.target in ['irmsd', 'lrmsd', 'fnat', 'dockQ']:
                     self.task = 'reg'
                 elif self.target in ['bin_class', 'capri_classes']:
@@ -81,10 +102,12 @@ class NeuralNet(object):
                         f"                  shuffle=True,"
                         f"                  percent=[0.8, 0.2])")
 
-            if self.task == 'class' and self.threshold == None:
-                print('the threshold for accuracy computation is set to {}'.format(self.classes[1]))
+            if self.task == 'class' and self.threshold is None:
+                print(
+                    'the threshold for accuracy computation is set to {}'.format(
+                        self.classes[1]))
                 self.threshold = self.classes[1]
-            if self.task == 'reg' and self.threshold == None:
+            if self.task == 'reg' and self.threshold is None:
                 print('the threshold for accuracy computation is set to 0.3')
                 self.threshold = 0.3
             self.load_model(database, Net, database_eval)
@@ -103,9 +126,13 @@ class NeuralNet(object):
             Net (function): neural network
         """
         # Load the test set
-        test_dataset = HDF5DataSet(root='./', database=database,
-                                   node_feature=self.node_feature, edge_feature=self.edge_feature,
-                                   target=self.target, clustering_method=self.cluster_nodes)
+        test_dataset = HDF5DataSet(
+            root='./',
+            database=database,
+            node_feature=self.node_feature,
+            edge_feature=self.edge_feature,
+            target=self.target,
+            clustering_method=self.cluster_nodes)
         self.test_loader = DataLoader(
             test_dataset)
         PreCluster(test_dataset, method=self.cluster_nodes)
@@ -136,11 +163,16 @@ class NeuralNet(object):
             ValueError: Invalid node clustering method.
         """
         # dataset
-        dataset = HDF5DataSet(root='./', database=database, index=self.index,
-                              node_feature=self.node_feature, edge_feature=self.edge_feature,
-                              target=self.target, clustering_method=self.cluster_nodes)
+        dataset = HDF5DataSet(
+            root='./',
+            database=database,
+            index=self.index,
+            node_feature=self.node_feature,
+            edge_feature=self.edge_feature,
+            target=self.target,
+            clustering_method=self.cluster_nodes)
 
-        if self.cluster_nodes != None:
+        if self.cluster_nodes is not None:
             if self.cluster_nodes == 'mcl' or self.cluster_nodes == 'louvain':
                 print("Loading clusters")
                 PreCluster(dataset, method=self.cluster_nodes)
@@ -160,22 +192,31 @@ class NeuralNet(object):
 
         if self.percent[1] > 0.0:
             self.valid_loader = DataLoader(
-                valid_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
+                valid_dataset,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle)
             print('Evaluation set loaded')
 
         # independent validation dataset
         if database_eval is not None:
             print('Loading independent evaluation dataset...')
-            valid_dataset = HDF5DataSet(root='./', database=database_eval, index=self.index,
-                                        node_feature=self.node_feature, edge_feature=self.edge_feature,
-                                        target=self.target, clustering_method=self.cluster_nodes)
+            valid_dataset = HDF5DataSet(
+                root='./',
+                database=database_eval,
+                index=self.index,
+                node_feature=self.node_feature,
+                edge_feature=self.edge_feature,
+                target=self.target,
+                clustering_method=self.cluster_nodes)
 
             if self.cluster_nodes == 'mcl' or self.cluster_nodes == 'louvain':
                 print('Loading clusters for the evaluation set.')
                 PreCluster(valid_dataset, method=self.cluster_nodes)
 
             self.valid_loader = DataLoader(
-                valid_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
+                valid_dataset,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle)
             print('Independent validation set loaded !')
 
         else:
@@ -211,7 +252,7 @@ class NeuralNet(object):
         self.device = torch.device(
             'cuda' if torch.cuda.is_available() else 'cpu')
 
-        print ('device set to :', self.device)
+        print('device set to :', self.device)
         if self.device.type == 'cuda':
             print(torch.cuda.get_device_name(0))
 
@@ -230,9 +271,12 @@ class NeuralNet(object):
                                    i in enumerate(self.classes)}
             self.output_shape = len(self.classes)
             try:
-                self.model = Net(dataset.get(
-                    0).num_features, self.output_shape, self.num_edge_features).to(self.device)
-            except:
+                self.model = Net(
+                    dataset.get(0).num_features,
+                    self.output_shape,
+                    self.num_edge_features).to(
+                    self.device)
+            except BaseException:
                 raise ValueError(
                     f"The loaded model does not accept output_shape = {self.output_shape} argument \n\t"
                     f"Check your input or adapt the model\n\t"
@@ -249,7 +293,7 @@ class NeuralNet(object):
 
             # assign weights to each class in case of unbalanced dataset
             self.weights = None
-            if self.class_weights == True:
+            if self.class_weights:
                 targets_all = []
                 for batch in self.train_loader:
                     targets_all.append(batch.y)
@@ -266,7 +310,14 @@ class NeuralNet(object):
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction='mean')
 
-    def train(self, nepoch=1, validate=False, save_model='last', hdf5='train_data.hdf5', save_epoch='intermediate', save_every=5):
+    def train(
+            self,
+            nepoch=1,
+            validate=False,
+            save_model='last',
+            hdf5='train_data.hdf5',
+            save_epoch='intermediate',
+            save_every=5):
         """
         Trains the model
 
@@ -286,7 +337,7 @@ class NeuralNet(object):
 
         # Loop over epochs
         self.data = {}
-        for epoch in range(1, nepoch+1):
+        for epoch in range(1, nepoch + 1):
 
             # Train the model
             self.model.train()
@@ -323,15 +374,20 @@ class NeuralNet(object):
                 self.log_epoch_data(
                     'valid', epoch, _val_loss, _val_acc, t)
 
-                # save the best model (i.e. lowest loss value on validation data)
+                # save the best model (i.e. lowest loss value on validation
+                # data)
                 if save_model == 'best':
 
                     if min(self.valid_loss) == _val_loss:
-                        self.save_model(filename='t{}_y{}_b{}_e{}_lr{}_{}.pth.tar'.format(
-                            self.task, self.target, str(self.batch_size), str(nepoch), str(self.lr), str(epoch)))
+                        self.save_model(
+                            filename='t{}_y{}_b{}_e{}_lr{}_{}.pth.tar'.format(
+                                self.task, self.target, str(
+                                    self.batch_size), str(nepoch), str(
+                                    self.lr), str(epoch)))
 
             else:
-                # if no validation set, saves the best performing model on the traing set
+                # if no validation set, saves the best performing model on the
+                # traing set
                 if save_model == 'best':
                     if min(self.train_loss) == _loss:
                         print(
@@ -340,8 +396,11 @@ class NeuralNet(object):
                             'this may lead to training set data overfitting.')
                         print(
                             'We advice you to use an external validation set.')
-                        self.save_model(filename='t{}_y{}_b{}_e{}_lr{}_{}.pth.tar'.format(
-                            self.task, self.target, str(self.batch_size), str(nepoch), str(self.lr), str(epoch)))
+                        self.save_model(
+                            filename='t{}_y{}_b{}_e{}_lr{}_{}.pth.tar'.format(
+                                self.task, self.target, str(
+                                    self.batch_size), str(nepoch), str(
+                                    self.lr), str(epoch)))
 
             # Save epoch data
             if (save_epoch == 'all') or (epoch == nepoch):
@@ -354,9 +413,11 @@ class NeuralNet(object):
 
         # Save the last model
         if save_model == 'last':
-            self.save_model(filename='t{}_y{}_b{}_e{}_lr{}.pth.tar'.format(
-                self.task, self.target, str(self.batch_size), str(nepoch), str(self.lr)))
-
+            self.save_model(
+                filename='t{}_y{}_b{}_e{}_lr{}.pth.tar'.format(
+                    self.task, self.target, str(
+                        self.batch_size), str(nepoch), str(
+                        self.lr)))
 
     def test(self, database_test=None, threshold=4, hdf5='test_data.hdf5'):
         """
@@ -373,9 +434,13 @@ class NeuralNet(object):
         # Loads the test dataset if provided
         if database_test is not None:
             # Load the test set
-            test_dataset = HDF5DataSet(root='./', database=database_test,
-                                       node_feature=self.node_feature, edge_feature=self.edge_feature,
-                                       target=self.target, clustering_method=self.cluster_nodes)
+            test_dataset = HDF5DataSet(
+                root='./',
+                database=database_test,
+                node_feature=self.node_feature,
+                edge_feature=self.edge_feature,
+                target=self.target,
+                clustering_method=self.cluster_nodes)
             print('Test set loaded')
             PreCluster(test_dataset, method='mcl')
 
@@ -383,7 +448,7 @@ class NeuralNet(object):
                 test_dataset)
 
         else:
-            if self.load_pretrained_model == None:
+            if self.load_pretrained_model is None:
                 raise ValueError(
                     "You need to upload a test dataset \n\t"
                     "\n\t"
@@ -414,7 +479,6 @@ class NeuralNet(object):
 
         with h5py.File(data_hdf5_path, 'a') as data_hdf5_file:
             self._export_epoch_hdf5(0, self.data, data_hdf5_file)
-
 
     def eval(self, loader):
         """
@@ -561,7 +625,7 @@ class NeuralNet(object):
             if len(self.test_out) == 0:
                 print('No test set has been provided')
 
-            if self.test_y == None:
+            if self.test_y is None:
                 print(
                     'You must provide ground truth target values to compute the metrics')
 
@@ -603,18 +667,20 @@ class NeuralNet(object):
         else:
             acc_str = '%1.4e' % acc
 
-        _log.info('Epoch [%04d] : %s loss %e | accuracy %s | time %1.2e sec.' % (epoch, stage, loss, acc_str, time))
+        _log.info(
+            'Epoch [%04d] : %s loss %e | accuracy %s | time %1.2e sec.' %
+            (epoch, stage, loss, acc_str, time))
 
     def format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
-        if self.task == 'class' :
+        if self.task == 'class':
             #pred = F.softmax(pred, dim=1)
 
             if target is not None:
                 target = torch.tensor(
                     [self.classes_to_idx[int(x)] for x in target])
 
-        elif self.transform_sigmoid is True :
+        elif self.transform_sigmoid is True:
             pred = torch.sigmoid(pred.reshape(-1))
 
         else:
@@ -661,17 +727,20 @@ class NeuralNet(object):
         import matplotlib.pyplot as plt
 
         if len(valid_loss) > 1:
-            plt.plot(range(1, nepoch+1), valid_loss,
+            plt.plot(range(1, nepoch + 1), valid_loss,
                      c='red', label='valid')
 
         if len(train_loss) > 1:
-            plt.plot(range(1, nepoch+1), train_loss,
+            plt.plot(range(1, nepoch + 1), train_loss,
                      c='blue', label='train')
             plt.title("Loss/ epoch")
             plt.xlabel("Number of epoch")
             plt.ylabel("Total loss")
             plt.legend()
-            plt.savefig(os.path.join(self.outdir, 'loss_epoch{}.png'.format(name)))
+            plt.savefig(
+                os.path.join(
+                    self.outdir,
+                    'loss_epoch{}.png'.format(name)))
             plt.close()
 
     def plot_acc(self, name=''):
@@ -688,20 +757,28 @@ class NeuralNet(object):
         import matplotlib.pyplot as plt
 
         if len(valid_acc) > 1:
-            plt.plot(range(1, nepoch+1), valid_acc,
+            plt.plot(range(1, nepoch + 1), valid_acc,
                      c='red', label='valid')
 
         if len(train_acc) > 1:
-            plt.plot(range(1, nepoch+1), train_acc,
+            plt.plot(range(1, nepoch + 1), train_acc,
                      c='blue', label='train')
             plt.title("Accuracy/ epoch")
             plt.xlabel("Number of epoch")
             plt.ylabel("Accuracy")
             plt.legend()
-            plt.savefig(os.path.join(self.outdir, 'acc_epoch{}.png'.format(name)))
+            plt.savefig(
+                os.path.join(
+                    self.outdir,
+                    'acc_epoch{}.png'.format(name)))
             plt.close()
 
-    def plot_hit_rate(self, data='eval', threshold=4, mode='percentage', name=''):
+    def plot_hit_rate(
+            self,
+            data='eval',
+            threshold=4,
+            mode='percentage',
+            name=''):
         """
         Plots the hitrate as a function of the models' rank
 
@@ -727,10 +804,13 @@ class NeuralNet(object):
             plt.xlabel("Number of models")
             plt.ylabel("Hit Rate")
             plt.legend()
-            plt.savefig(os.path.join(self.outdir, 'hitrate{}.png'.format(name)))
+            plt.savefig(
+                os.path.join(
+                    self.outdir,
+                    'hitrate{}.png'.format(name)))
             plt.close()
 
-        except:
+        except BaseException:
             print('No hit rate plot could be generated for you {} task'.format(
                 self.task))
 
