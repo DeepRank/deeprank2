@@ -14,7 +14,6 @@ class TestBioWrappers(unittest.TestCase):
         model = get_bio_model(self.pdb)
         _ = get_hse(model)
 
-    @unittest.expectedFailure
     def test_depth_res(self):
         model = get_bio_model(self.pdb)
         _ = get_depth_res(model)
