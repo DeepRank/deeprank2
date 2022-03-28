@@ -3,7 +3,7 @@
 
 [![Build Status](https://github.com/DeepRank/DeepRank-GNN/workflows/build/badge.svg)](https://github.com/DeepRank/DeepRank-GNN/actions)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/DeepRank-GNN?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/DeepRank-GNN&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-gnn-2/badge.svg?branch=fix-pytest)](https://coveralls.io/github/DeepRank/deeprank-gnn-2?branch=fix-pytest)
+[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-gnn-2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-gnn-2?branch=main)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5705564.svg)](https://doi.org/10.5281/zenodo.5705564)
 
 ![alt-text](./deeprank_gnn.png)
