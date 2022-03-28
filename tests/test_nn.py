@@ -61,7 +61,7 @@ class TestNeuralNet(unittest.TestCase):
         try:
             with open(target_path, 'w') as f:
                 for i in range(1, 5):
-                    f.write('1ATN_%dw:A-B %d\n' % (i, i % 2 == 0))
+                    f.write('residue-ppi-1ATN_%dw:A-B %d\n' % (i, i % 2 == 0))
 
             add_target(self.database, "bin_class", target_path)
         finally:

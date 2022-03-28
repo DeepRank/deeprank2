@@ -1,13 +1,6 @@
-name: test
+name: build
 
-on:
-  # Trigger analysis when pushing in master or pull requests, and when creating
-  # a pull request.
-  push:
-    branches:
-      - main
-  pull_request:
-      types: [opened, synchronize, reopened]
+on: [push]
 
 jobs:
   build:
@@ -17,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [3.7, 3.8]
+        version: [3.8]
 
     steps:
     - name: Cancel Previous Runs
@@ -55,6 +48,15 @@ jobs:
         pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
         pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH_GEO}+cpu.html
         pip install torch-geometric
+
+    - name: install conda dependencies
+      run: |
+        # Only way to install msms is through conda
+        conda install -c bioconda msms 
+        # We install pytorch with conda because otherwise it breaks
+        conda install pytorch -c pytorch
+        # This is the recommended way of installing pytorch-geometric
+        conda install pyg -c pyg
 
     - name: Install the package
       run: pip install .[test]
