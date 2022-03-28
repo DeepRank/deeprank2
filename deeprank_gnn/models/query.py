@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict, List, Iterator
+from typing import Dict, List, Iterator, Optional
 
 import freesasa
 import numpy
@@ -64,9 +64,9 @@ class SingleResidueVariantResidueQuery(Query):
 
     def __init__(self, pdb_path: str, chain_id: str, residue_number: int, insertion_code: str,
                  wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid,
-                 pssm_paths: Dict[str, str] = None, wildtype_conservation: float = None,
-                 variant_conservation: float = None, radius: float = 10.0,
-                 external_distance_cutoff: float = 4.5, targets: Dict[str, float] = None):
+                 pssm_paths: Optional[Dict[str, str]] = None, wildtype_conservation: Optional[float] = None,
+                 variant_conservation: Optional[float] = None, radius: Optional[float] = 10.0,
+                 external_distance_cutoff: Optional[float] = 4.5, targets: Optional[Dict[str, float]] = None):
 
         """
             Args:
@@ -329,9 +329,10 @@ class SingleResidueVariantAtomicQuery(Query):
 
     def __init__(self, pdb_path: str, chain_id: str, residue_number: int, insertion_code: str,
                  wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid,
-                 pssm_paths: Dict[str, str] = None, wildtype_conservation: float = None,
-                 variant_conservation: float = None, radius: float = 10.0, external_distance_cutoff: float = 4.5,
-                 internal_distance_cutoff: float = 3.0, targets: Dict[str, float] = None):
+                 pssm_paths: Optional[Dict[str, str]] = None, wildtype_conservation: Optional[float] = None,
+                 variant_conservation: Optional[float] = None, radius: Optional[float] = 10.0,
+                 external_distance_cutoff: Optional[float] = 4.5,
+                 internal_distance_cutoff: Optional[float] = 3.0, targets: Optional[Dict[str, float]] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file
@@ -689,9 +690,9 @@ class SingleResidueVariantAtomicQuery(Query):
 class ProteinProteinInterfaceAtomicQuery(Query):
     "a query that builds atom-based graphs, using the residues at a protein-protein interface"
 
-    def __init__(self, pdb_path: str, chain_id1: str, chain_id2: str, pssm_paths: Dict[str, str] = None,
-                 interface_distance_cutoff: float = 8.5, internal_distance_cutoff: float = 3.0,
-                 targets: Dict[str, float] = None):
+    def __init__(self, pdb_path: str, chain_id1: str, chain_id2: str, pssm_paths: Optional[Dict[str, str]] = None,
+                 interface_distance_cutoff: Optional[float] = 8.5, internal_distance_cutoff: Optional[float] = 3.0,
+                 targets: Optional[Dict[str, float]] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file
@@ -893,9 +894,9 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
 
-    def __init__(self, pdb_path: str, chain_id1: str, chain_id2: str, pssm_paths: Dict[str, str] = None,
-                 interface_distance_cutoff: float = 8.5, internal_distance_cutoff:float = 3.0,
-                 use_biopython: bool = False, targets: Dict[str, float] = None):
+    def __init__(self, pdb_path: str, chain_id1: str, chain_id2: str, pssm_paths: Optional[Dict[str, str]] = None,
+                 interface_distance_cutoff: float = 8.5, internal_distance_cutoff: float = 3.0,
+                 use_biopython: bool = False, targets: Optional[Dict[str, float]] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy
 
@@ -11,7 +11,7 @@ from deeprank_gnn.models.conservation import ConservationRow
 class Structure:
     "represents one entire pdb structure"
 
-    def __init__(self, id_: str = None):
+    def __init__(self, id_: Optional[str] = None):
         """
             Args:
                 id_(str): an unique identifier for this structure, can be the pdb accession code.
@@ -54,7 +54,7 @@ class Structure:
 class Chain:
     "represents one pdb chain"
 
-    def __init__(self, model: Structure, id_: str):
+    def __init__(self, model: Structure, id_: Optional[str]):
         """
         Args:
             model(deeprank structure object): the model that this chain is part of
@@ -102,7 +102,8 @@ class Chain:
 class Residue:
     "represents a pdb residue"
 
-    def __init__(self, chain: Chain, number: int, amino_acid: AminoAcid = None, insertion_code: str = None):
+    def __init__(self, chain: Chain, number: int, amino_acid: Optional[AminoAcid] = None,
+                 insertion_code: Optional[str] = None):
         """
         Args:
             chain(deeprank chain object): the chain that this residue belongs to

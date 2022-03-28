@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy
 
 from deeprank_gnn.models.polarity import Polarity
@@ -6,8 +8,8 @@ from deeprank_gnn.models.polarity import Polarity
 class AminoAcid:
     "a value to represent one of the amino acids"
 
-    def __init__(self, name: str, three_letter_code: str, one_letter_code: str, charge: float = None,
-                 polarity: Polarity = None, size: int = None, index: int = None):
+    def __init__(self, name: str, three_letter_code: str, one_letter_code: str, charge: Optional[float] = None,
+                 polarity: Optional[Polarity] = None, size: Optional[int] = None, index: Optional[int] = None):
         """
             Args:
                 name(str): unique name for the amino acid
