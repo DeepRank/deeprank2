@@ -34,7 +34,7 @@ def add_target(graph_path, target_name, target_list, sep=' '):
 
     # if a directory is provided
     if os.path.isdir(graph_path):
-        graphs = glob.glob('{}/*.hdf5'.format(graph_path))
+        graphs = glob.glob(f'{graph_path}/*.hdf5')
 
     # if a single file is provided
     elif os.path.isfile(graph_path):
@@ -52,12 +52,12 @@ def add_target(graph_path, target_name, target_list, sep=' '):
 
             for model in f5.keys():
                 try:
-                    model_gp = f5['{}'.format(model)]
+                    model_gp = f5[f'{model}']
 
                     if 'score' not in model_gp:
                         model_gp.create_group('score')
 
-                    group = f5['{}/score/'.format(model)]
+                    group = f5[f'{model}/score/']
 
                     if target_name in group.keys():
                         # Delete the target if it already existed
@@ -67,9 +67,9 @@ def add_target(graph_path, target_name, target_list, sep=' '):
                     group[target_name] = target_dict[model]
 
                 except BaseException:
-                    print('no graph for {}'.format(model))
+                    print(f'no graph for {model}')
 
             f5.close()
 
         except BaseException:
-            print('no graph for {}'.format(hdf5))
+            print(f'no graph for {hdf5}')

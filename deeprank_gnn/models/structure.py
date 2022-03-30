@@ -28,7 +28,7 @@ class Structure:
 
     def add_chain(self, chain):
         if chain.id in self._chains:
-            raise ValueError("duplicate chain: {}".format(chain.id))
+            raise ValueError(f"duplicate chain: {chain.id}")
 
         self._chains[chain.id] = chain
 
@@ -92,7 +92,7 @@ class Chain:
         return hash((self._model, self._id))
 
     def __repr__(self):
-        return "{} {}".format(self._model, self._id)
+        return f"{self._model} {self._id}"
 
 
 class Residue:
@@ -129,7 +129,7 @@ class Residue:
 
         pssm = self._chain.pssm
         if pssm is None:
-            raise ValueError("pssm not set on {}".format(self._chain))
+            raise ValueError(f"pssm not set on {self._chain}")
 
         return pssm[self]
 
@@ -154,7 +154,7 @@ class Residue:
         "contains both the number and the insertion code (if any)"
 
         if self._insertion_code is not None:
-            return "{}{}".format(self._number, self._insertion_code)
+            return f"{self._number}{self._insertion_code}"
         else:
             return str(self._number)
 
@@ -170,7 +170,7 @@ class Residue:
         self._atoms.append(atom)
 
     def __repr__(self):
-        return "{} {}".format(self._chain, self.number_string)
+        return f"{self._chain} {self.number_string}"
 
 
 class AtomicElement(Enum):
@@ -217,7 +217,7 @@ class Atom:
         return hash((self._residue, self._name))
 
     def __repr__(self):
-        return "{} {}".format(self._residue, self._name)
+        return f"{self._residue} {self._name}"
 
     def change_altloc(self, alternative_atom):
         "replace the atom's location by another atom's location"

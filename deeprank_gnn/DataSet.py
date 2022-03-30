@@ -58,10 +58,10 @@ def PreCluster(dataset, method):
         if data is None:
             f5 = h5py.File(fname, 'a')
             try:
-                print('deleting {}'.format(mol))
+                print(f'deleting {mol}')
                 del f5[mol]
             except BaseException:
-                print('{} not found'.format(mol))
+                print(f'{mol} not found')
             f5.close()
             continue
 
@@ -71,8 +71,7 @@ def PreCluster(dataset, method):
         clust_grp = grp.require_group('clustering')
 
         if method.lower() in clust_grp:
-            print('Deleting previous data for mol %s method %s' %
-                  (mol, method))
+            print(f'Deleting previous data for mol {mol} method {method}')
             del clust_grp[method.lower()]
 
         method_grp = clust_grp.create_group(method.lower())
@@ -186,12 +185,12 @@ class HDF5DataSet(Dataset):
                 f = h5py.File(fname, 'r')
                 mol_names = list(f.keys())
                 if len(mol_names) == 0:
-                    print('    -> %s is empty ' % fname)
+                    print(f'    -> {fname} is empty ')
                     remove_file.append(fname)
                 f.close()
             except Exception as e:
                 print(e)
-                print('    -> %s is corrupted ' % fname)
+                print(f'    -> {fname} is corrupted ')
                 remove_file.append(fname)
 
         for name in remove_file:
@@ -361,9 +360,8 @@ class HDF5DataSet(Dataset):
         # cluster
         if 'clustering' in grp.keys():
             if self.clustering_method in grp['clustering'].keys():
-                if ('depth_0' in grp['clustering/{}'.format(self.clustering_method)].keys() and
-                        'depth_1' in grp['clustering/{}'.format(
-                            self.clustering_method)].keys()
+                if ('depth_0' in grp[f'clustering/{self.clustering_method}'].keys() and
+                        'depth_1' in grp[f'clustering/{self.clustering_method}'].keys()
                         ):
                     data.cluster0 = torch.tensor(
                         grp['clustering/' + self.clustering_method + '/depth_0'][()], dtype=torch.long)
@@ -389,7 +387,7 @@ class HDF5DataSet(Dataset):
 
         self.index_complexes = []
 
-        desc = '{:25s}'.format('   Train dataset')
+        desc = f"{'   Train dataset':25s}"
         if self.tqdm:
             data_tqdm = tqdm(
                 self.database, desc=desc, file=sys.stdout)
@@ -441,8 +439,7 @@ class HDF5DataSet(Dataset):
             try:
                 val = molgrp['score'][cond_name][()]
             except KeyError:
-                print('   :Filter %s not found for mol %s' %
-                      (cond_name, molgrp))
+                print(f'   :Filter {cond_name} not found for mol {molgrp}')
                 print('   :Filter options are')
                 for k in molgrp['score'].keys():
                     print('   : ', k)

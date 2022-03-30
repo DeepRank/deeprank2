@@ -68,7 +68,7 @@ class AtomicForcefield:
         atom_name = atom.name
 
         if atom.residue.amino_acid is None:
-            raise UnknownAtomError("no amino acid for {}".format(atom))
+            raise UnknownAtomError(f"no amino acid for {atom}")
 
         residue_name = atom.residue.amino_acid.three_letter_code
 
@@ -90,7 +90,7 @@ class AtomicForcefield:
 
         if type_ is None:
             raise UnknownAtomError(
-                "not mentioned in top or patch: {}".format(top_key))
+                f"not mentioned in top or patch: {top_key}")
 
         return type_
 
@@ -123,7 +123,7 @@ class AtomicForcefield:
 
         if charge is None:
             raise UnknownAtomError(
-                "not mentioned in top or patch: {}".format(top_key))
+                f"not mentioned in top or patch: {top_key}")
 
         return charge
 

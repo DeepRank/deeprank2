@@ -64,8 +64,7 @@ class _PreProcess(Process):
 
             except BaseException:
                 _log.exception(
-                    "error adding {} to {}".format(
-                        query, self._output_path))
+                    f"error adding {query} to {self._output_path}")
 
                 # Don't leave behind an unfinished hdf5 group.
                 if graph is not None:
@@ -101,7 +100,7 @@ class PreProcessor:
     def start(self):
         "start the workers"
 
-        _log.info("starting {} worker processes".format(len(self._processes)))
+        _log.info(f"starting {len(self._processes)} worker processes")
         for process in self._processes:
             process.start()
             if not process.is_alive():
@@ -137,8 +136,7 @@ class PreProcessor:
     def shutdown(self):
         "stop building graphs"
 
-        _log.info("shutting down {} worker processes..".format(
-            len(self._processes)))
+        _log.info(f"shutting down {len(self._processes)} worker processes..")
 
         for process in self._processes:
             process.stop()

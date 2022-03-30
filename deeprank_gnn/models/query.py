@@ -58,7 +58,7 @@ class Query:
         return self._targets
 
     def __repr__(self):
-        return "{}({})".format(type(self), self.get_query_id())
+        return f"{type(self)}({self.get_query_id()})"
 
 
 class SingleResidueVariantResidueQuery(Query):
@@ -118,7 +118,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         if self._insertion_code is not None:
 
-            return "{}{}".format(self._residue_number, self._insertion_code)
+            return f"{self._residue_number}{self._insertion_code}"
         else:
             return str(self._residue_number)
 
@@ -184,8 +184,7 @@ class SingleResidueVariantResidueQuery(Query):
 
             if numpy.isnan(area):
                 raise ValueError(
-                    "freesasa returned {} for {}:{}".format(
-                        area, pdb_path, residue))
+                    f"freesasa returned {area} for {pdb_path}:{residue}")
 
             graph.nodes[node_name][FEATURENAME_SASA] = area
 
@@ -472,7 +471,7 @@ class SingleResidueVariantAtomicQuery(Query):
         "string representation of the residue number and insertion code"
 
         if self._insertion_code is not None:
-            return "{}{}".format(self._residue_number, self._insertion_code)
+            return f"{self._residue_number}{self._insertion_code}"
         else:
             return str(self._residue_number)
 
@@ -765,8 +764,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
             if numpy.isnan(area):
                 raise ValueError(
-                    "freesasa returned {} for {}:{}".format(
-                        area, pdb_path, atom))
+                    f"freesasa returned {area} for {pdb_path}:{atom}")
 
             graph.nodes[node_name][FEATURENAME_SASA] = area
 
@@ -916,8 +914,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         self._internal_distance_cutoff = internal_distance_cutoff
 
     def get_query_id(self):
-        return "atom-ppi-{}:{}-{}".format(self.model_id,
-                                          self._chain_id1, self._chain_id2)
+        return f"atom-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
 
     def __eq__(self, other):
         return isinstance(
@@ -935,7 +932,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             return False
 
         if residue not in residue.chain.pssm:
-            _log.debug("{} not in pssm".format(residue))
+            _log.debug(f"{residue} not in pssm")
             return False
 
         return True
@@ -1179,8 +1176,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._use_biopython = use_biopython
 
     def get_query_id(self):
-        return "residue-ppi-{}:{}-{}".format(
-            self.model_id, self._chain_id1, self._chain_id2)
+        return f"residue-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
 
     def __eq__(self, other):
         return isinstance(
@@ -1198,7 +1194,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             return False
 
         if residue not in residue.chain.pssm:
-            _log.debug("{} not in pssm".format(residue))
+            _log.debug(f"{residue} not in pssm")
             return False
 
         return True

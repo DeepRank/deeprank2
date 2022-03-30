@@ -14,7 +14,7 @@ class ResidueClassParser:
         for line in file_:
             match = ResidueClassParser._RESIDUE_CLASS_PATTERN.match(line)
             if not match:
-                raise ValueError("unparsable line: '{}'".format(line))
+                raise ValueError(f"unparsable line: '{line}'")
 
             class_name = match.group(1)
             amino_acid_names = ResidueClassParser._parse_amino_acids(match.group(2))

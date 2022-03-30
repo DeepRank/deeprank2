@@ -20,7 +20,7 @@ class TopParser:
             # parse the line
             m = TopParser._LINE_PATTERN.match(line)
             if not m:
-                raise ValueError("Unmatched top line: {}".format(line))
+                raise ValueError(f"Unmatched top line: {line}")
 
             residue_name = m.group(1).upper()
             atom_name = m.group(2).upper()

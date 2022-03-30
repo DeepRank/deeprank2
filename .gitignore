@@ -7,6 +7,14 @@
 #Byte-compiled / optimized
 *__pycache__*
 
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
 # distribution
 deeprank_gnn.egg-info
 DeepRank_GNN.egg-info

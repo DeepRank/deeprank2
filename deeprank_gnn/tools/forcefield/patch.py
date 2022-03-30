@@ -14,7 +14,7 @@ class PatchParser:
             if type_.name == s:
                 return type_
 
-        raise ValueError("unmatched residue action: {}".format(repr(s)))
+        raise ValueError(f"unmatched residue action: {repr(s)}")
 
     @staticmethod
     def parse(file_):
@@ -25,7 +25,7 @@ class PatchParser:
 
             m = PatchParser.ACTION_PATTERN.match(line)
             if not m:
-                raise ValueError("Unmatched patch action: {}".format(repr(line)))
+                raise ValueError(f"Unmatched patch action: {repr(line)}")
 
             residue_type = m.group(1)
             action_type = PatchParser._parse_action_type(m.group(2))

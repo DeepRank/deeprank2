@@ -63,7 +63,7 @@ class BSA(object):
             atomdata = self.sql.get(
                 'name,resName,resSeq,chainID,x,y,z')
             for atomName, residueName, residueNumber, chainLabel, x, y, z in atomdata:
-                atomName = '{:>2}'.format(atomName[0])
+                atomName = f'{atomName[0]:>2}'
                 self.complex.addAtom(
                     atomName, residueName, residueNumber, chainLabel, x, y, z)
         self.result_complex = freesasa.calc(self.complex)
@@ -75,7 +75,7 @@ class BSA(object):
             atomdata = self.sql.get(
                 'name,resName,resSeq,chainID,x,y,z', chainID=label)
             for atomName, residueName, residueNumber, chainLabel, x, y, z in atomdata:
-                atomName = '{:>2}'.format(atomName[0])
+                atomName = f'{atomName[0]:>2}'
                 self.chains[label].addAtom(
                     atomName, residueName, residueNumber, chainLabel, x, y, z)
             self.result_chains[label] = freesasa.calc(

@@ -113,7 +113,7 @@ class GraphHDF5(object):
 
             # transfer them to the hdf5
             with h5py.File(outfile, 'w') as f5:
-                desc = '{:25s}'.format('   Store in HDF5')
+                desc = f"{'   Store in HDF5':25s}"
 
                 for name in graph_names:
                     f = open(name, 'rb')
@@ -144,7 +144,7 @@ class GraphHDF5(object):
 
         graphs = []
         if use_tqdm:
-            desc = '{:25s}'.format('   Create HDF5')
+            desc = f"{'   Create HDF5':25s}"
             lst = tqdm(pdbs, desc=desc, file=sys.stdout)
         else:
             lst = pdbs
@@ -191,7 +191,7 @@ class GraphHDF5(object):
             g = q.build_graph()
 
             # pickle it
-            fname = os.path.join(tmpdir, '{}.pkl'.format(g.id))
+            fname = os.path.join(tmpdir, f'{g.id}.pkl')
 
             f = open(fname, 'wb')
             pickle.dump(g, f)
@@ -223,5 +223,5 @@ class GraphHDF5(object):
         return g
 
     def _get_pssm_paths(self, pssm_path, pdb_ac):
-        return {"A": os.path.join(pssm_path, "{}.A.pdb.pssm".format(pdb_ac)),
-                "B": os.path.join(pssm_path, "{}.B.pdb.pssm".format(pdb_ac))}
+        return {"A": os.path.join(pssm_path, f"{pdb_ac}.A.pdb.pssm"),
+                "B": os.path.join(pssm_path, f"{pdb_ac}.B.pdb.pssm")}

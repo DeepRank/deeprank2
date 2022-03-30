@@ -9,7 +9,7 @@ def pssm_3dcons_to_deeprank(pssm_file):
         pssm = f.readlines()
 
     pssm_name = pssm_file.rsplit('.', 1)[0]
-    new_pssm = open('{}.deeprank.pssm'.format(pssm_name), 'w')
+    new_pssm = open(f'{pssm_name}.deeprank.pssm', 'w')
 
     firstline = True
 
@@ -45,7 +45,7 @@ python 3dcons_to_deeprank_pssm.py [path_to_pssm]
     else:
         try:
             pssm_path = sys.argv[1]
-            for pssm_file in glob.glob('{}/*.pssm'.format(pssm_path)):
+            for pssm_file in glob.glob(f'{pssm_path}/*.pssm'):
                 pssm_3dcons_to_deeprank(pssm_file)
         except BaseException:
             print('You must provide the path to the pssm files')

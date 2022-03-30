@@ -93,9 +93,7 @@ class sGraphAttentionLayer(torch.nn.Module):
         return out
 
     def __repr__(self):
-        return '{}({}, {})'.format(self.__class__.__name__,
-                                   self.in_channels,
-                                   self.out_channels)
+        return f'{self.__class__.__name__}({self.in_channels}, {self.out_channels})'
 
 
 class sGAT(torch.nn.Module):

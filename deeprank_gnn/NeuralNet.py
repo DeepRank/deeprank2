@@ -302,10 +302,10 @@ class NeuralNet(object):
                     targets_all).squeeze().tolist()
                 self.weights = torch.tensor(
                     [targets_all.count(i) for i in self.classes], dtype=torch.float32)
-                print('class occurences: {}'.format(self.weights))
+                print(f'class occurences: {self.weights}')
                 self.weights = 1.0 / self.weights
                 self.weights = self.weights / self.weights.sum()
-                print('class weights: {}'.format(self.weights))
+                print(f'class weights: {self.weights}')
 
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction='mean')
@@ -644,10 +644,10 @@ class NeuralNet(object):
         targets_all = torch.cat(targets_all).squeeze().tolist()
         weights = torch.tensor([targets_all.count(i)
                                 for i in self.classes], dtype=torch.float32)
-        print('class occurences: {}'.format(weights))
+        print(f'class occurences: {weights}')
         weights = 1.0 / weights
         weights = weights / weights.sum()
-        print('class weights: {}'.format(weights))
+        print(f'class weights: {weights}')
         return weights
 
     @staticmethod
@@ -665,7 +665,7 @@ class NeuralNet(object):
         if acc is None:
             acc_str = 'None'
         else:
-            acc_str = '%1.4e' % acc
+            acc_str = f'{acc:1.4e}'
 
         _log.info(
             'Epoch [%04d] : %s loss %e | accuracy %s | time %1.2e sec.' %
@@ -708,7 +708,7 @@ class NeuralNet(object):
         # If file exists, change its name with a number
         while os.path.exists(fname):
             count += 1
-            hdf5 = '{}_{:03d}.hdf5'.format(hdf5_name, count)
+            hdf5 = f'{hdf5_name}_{count:03d}.hdf5'
             fname = os.path.join(outdir, hdf5)
 
         return fname
@@ -740,7 +740,7 @@ class NeuralNet(object):
             plt.savefig(
                 os.path.join(
                     self.outdir,
-                    'loss_epoch{}.png'.format(name)))
+                    f'loss_epoch{name}.png'))
             plt.close()
 
     def plot_acc(self, name=''):
@@ -770,7 +770,7 @@ class NeuralNet(object):
             plt.savefig(
                 os.path.join(
                     self.outdir,
-                    'acc_epoch{}.png'.format(name)))
+                    f'acc_epoch{name}.png'))
             plt.close()
 
     def plot_hit_rate(
@@ -807,12 +807,11 @@ class NeuralNet(object):
             plt.savefig(
                 os.path.join(
                     self.outdir,
-                    'hitrate{}.png'.format(name)))
+                    f'hitrate{name}.png'))
             plt.close()
 
         except BaseException:
-            print('No hit rate plot could be generated for you {} task'.format(
-                self.task))
+            print(f'No hit rate plot could be generated for you {self.task} task')
 
     def plot_scatter(self):
         """Scatters plot of the results."""

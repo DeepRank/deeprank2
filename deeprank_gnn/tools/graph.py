@@ -56,7 +56,7 @@ def graph_to_hdf5(graph, hdf5_file):
     """
 
     if len(graph.nodes) == 0:
-        raise ValueError("Empty graph {}".format(graph.id))
+        raise ValueError(f"Empty graph {graph.id}")
 
     graph_group = hdf5_file.create_group(graph.id)
 
@@ -397,8 +397,7 @@ def plotly_2d(graph, out=None, offline=False, iplot=True,
             *
             node_trace],
         layout=go.Layout(
-            title='<br>tSNE connection graph for %s' %
-            graph.id,
+            title=f'<br>tSNE connection graph for {graph.id}',
             titlefont=dict(
                 size=16),
             showlegend=False,
@@ -561,8 +560,7 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
             *
             edge_trace_list],
         layout=go.Layout(
-            title='<br>Connection graph for %s' %
-            graph.id,
+            title=f'<br>Connection graph for {graph.id}',
             titlefont=dict(
                 size=16),
             showlegend=False,
