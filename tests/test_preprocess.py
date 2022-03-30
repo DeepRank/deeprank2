@@ -28,10 +28,10 @@ def test_preprocess():
                 None,
                 alanine,
                 phenylalanine,
-                pssm_paths={
-                    "A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+                pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
                 variant_conservation=0.0,
-                wildtype_conservation=0.0)
+                wildtype_conservation=0.0,
+            )
             preprocessor.add_query(query)
 
         preprocessor.wait()
@@ -40,7 +40,7 @@ def test_preprocess():
 
         count_graphs = 0
         for path in preprocessor.output_paths:
-            with h5py.File(path, 'r') as f5:
+            with h5py.File(path, "r") as f5:
                 count_graphs += len(f5.keys())
 
         assert count_queries == count_graphs, f"{count_queries} != {count_graphs}"

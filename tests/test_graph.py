@@ -9,20 +9,19 @@ from deeprank_gnn.tools.score import get_all_scores
 
 
 class TestGraph(unittest.TestCase):
-
     def setUp(self):
-        with h5py.File('tests/hdf5/1ATN_residue.hdf5', 'r') as f5:
-            self.graph = hdf5_to_graph(f5['1ATN_1w'])
+        with h5py.File("tests/hdf5/1ATN_residue.hdf5", "r") as f5:
+            self.graph = hdf5_to_graph(f5["1ATN_1w"])
 
-        self.pdb_path = 'tests/data/pdb/1ATN/1ATN_1w.pdb'
-        self.reference_path = 'tests/data/pdb/1ATN/1ATN_2w.pdb'
+        self.pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
+        self.reference_path = "tests/data/pdb/1ATN/1ATN_2w.pdb"
 
     def test_nx2h5(self):
         f, hdf5_path = tempfile.mkstemp()
         os.close(f)
 
         try:
-            with h5py.File(hdf5_path, 'w') as f5:
+            with h5py.File(hdf5_path, "w") as f5:
                 graph_to_hdf5(self.graph, f5)
         finally:
             os.remove(hdf5_path)
@@ -31,10 +30,10 @@ class TestGraph(unittest.TestCase):
         scores = get_all_scores(self.pdb_path, self.reference_path)
 
     def test_plot_2d(self):
-        plotly_2d(self.graph, '1ATN', disable_plot=True)
+        plotly_2d(self.graph, "1ATN", disable_plot=True)
 
     def test_plot_3d(self):
-        plotly_3d(self.graph, '1ATN', disable_plot=True)
+        plotly_3d(self.graph, "1ATN", disable_plot=True)
 
 
 if __name__ == "__main__":

@@ -15,30 +15,27 @@ from deeprank_gnn.simple_ginet import SimpleGiNetwork
 
 
 def _model_base_test(
-        work_directory,
+    work_directory, database, model, task="reg", target="irmsd", plot=False
+):
+
+    NN = NeuralNet(
         database,
         model,
-        task='reg',
-        target='irmsd',
-        plot=False):
-
-    NN = NeuralNet(database, model,
-                   node_feature=['type', 'polarity', 'bsa',
-                                 'depth', 'hse', 'ic', 'pssm'],
-                   edge_feature=['dist'],
-                   target=target,
-                   index=None,
-                   task=task,
-                   batch_size=64,
-                   percent=[0.8, 0.2],
-                   outdir=work_directory)
+        node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+        edge_feature=["dist"],
+        target=target,
+        index=None,
+        task=task,
+        batch_size=64,
+        percent=[0.8, 0.2],
+        outdir=work_directory,
+    )
 
     NN.train(nepoch=5, validate=True)
 
-    NN.save_model('test.pth.tar')
+    NN.save_model("test.pth.tar")
 
-    NN_cpy = NeuralNet(database, model,
-                       pretrained_model='test.pth.tar')
+    NN_cpy = NeuralNet(database, model, pretrained_model="test.pth.tar")
 
     if plot:
         NN.plot_scatter()
@@ -48,27 +45,30 @@ def _model_base_test(
 
 
 class TestNeuralNet(unittest.TestCase):
-
     def setUp(self):
-        f, self.database = tempfile.mkstemp(
-            prefix="1ATN_residue.hdf5", suffix=".hdf5")
+        f, self.database = tempfile.mkstemp(prefix="1ATN_residue.hdf5", suffix=".hdf5")
         os.close(f)
 
         self.work_directory = tempfile.mkdtemp()
 
-        GraphHDF5(pdb_path='./tests/data/pdb/1ATN/',
-                  pssm_path='./tests/data/pssm/1ATN/',
-                  ref_path='./tests/data/ref/1ATN/',
-                  graph_type='residue', outfile=self.database,
-                  nproc=1, tmpdir=self.work_directory, biopython=True)
+        GraphHDF5(
+            pdb_path="./tests/data/pdb/1ATN/",
+            pssm_path="./tests/data/pssm/1ATN/",
+            ref_path="./tests/data/ref/1ATN/",
+            graph_type="residue",
+            outfile=self.database,
+            nproc=1,
+            tmpdir=self.work_directory,
+            biopython=True,
+        )
 
         f, target_path = tempfile.mkstemp()
         os.close(f)
 
         try:
-            with open(target_path, 'w') as f:
+            with open(target_path, "w") as f:
                 for i in range(1, 5):
-                    f.write('residue-ppi-1ATN_%dw:A-B %d\n' % (i, i % 2 == 0))
+                    f.write("residue-ppi-1ATN_%dw:A-B %d\n" % (i, i % 2 == 0))
 
             add_target(self.database, "bin_class", target_path)
         finally:
@@ -82,8 +82,9 @@ class TestNeuralNet(unittest.TestCase):
         _model_base_test(self.work_directory, self.database, GINet, plot=True)
 
     def test_ginet_class(self):
-        _model_base_test(self.work_directory, self.database, GINet,
-                         task='class', target='bin_class')
+        _model_base_test(
+            self.work_directory, self.database, GINet, task="class", target="bin_class"
+        )
 
     def test_fout(self):
         _model_base_test(self.work_directory, self.database, FoutNet)

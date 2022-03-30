@@ -25,27 +25,34 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
     os.close(f)
 
     try:
-        with h5py.File(tmp_path, 'w') as f5:
+        with h5py.File(tmp_path, "w") as f5:
             graph_to_hdf5(g, f5)
 
-        with h5py.File(tmp_path, 'r') as f5:
+        with h5py.File(tmp_path, "r") as f5:
             entry_group = f5[list(f5.keys())[0]]
 
             for feature_name in node_feature_names:
-                assert entry_group["node_data/{}".format(
-                    feature_name)][()].size > 0, f"no {feature_name} feature"
+                assert (
+                    entry_group["node_data/{}".format(feature_name)][()].size > 0
+                ), f"no {feature_name} feature"
 
-                assert len(numpy.nonzero(
-                    entry_group[f"node_data/{feature_name}"][()])) > 0, f"{feature_name}: all zero"
+                assert (
+                    len(numpy.nonzero(entry_group[f"node_data/{feature_name}"][()])) > 0
+                ), f"{feature_name}: all zero"
 
-            assert entry_group["internal_edge_index"][(
-            )].shape[1] == 2, "wrong internal edge index shape"
+            assert (
+                entry_group["internal_edge_index"][()].shape[1] == 2
+            ), "wrong internal edge index shape"
 
-            assert entry_group["internal_edge_index"].shape[0] > 0, "no internal edge indices"
+            assert (
+                entry_group["internal_edge_index"].shape[0] > 0
+            ), "no internal edge indices"
 
             for feature_name in edge_feature_names:
-                assert entry_group[f"internal_edge_data/{feature_name}"][(
-                )].shape[0] == entry_group["internal_edge_index"].shape[0], f"not enough internal edge {feature_name} feature values"
+                assert (
+                    entry_group[f"internal_edge_data/{feature_name}"][()].shape[0]
+                    == entry_group["internal_edge_index"].shape[0]
+                ), f"not enough internal edge {feature_name} feature values"
 
             count_edges_hdf5 = entry_group["internal_edge_index"].shape[0]
 
@@ -55,12 +62,16 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
         # expecting twice as many edges, because torch is directional
         count_edges_torch = torch_data_entry.internal_edge_index.shape[1]
-        assert count_edges_torch == 2 * \
-            count_edges_hdf5, f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
+        assert (
+            count_edges_torch == 2 * count_edges_hdf5
+        ), f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
 
         count_edge_features_torch = torch_data_entry.internal_edge_attr.shape[0]
-        assert count_edge_features_torch == count_edges_torch, "got {} edge feature sets, but {} edge indices".format(
-            count_edge_features_torch, count_edges_torch)
+        assert (
+            count_edge_features_torch == count_edges_torch
+        ), "got {} edge feature sets, but {} edge indices".format(
+            count_edge_features_torch, count_edges_torch
+        )
     finally:
         os.remove(tmp_path)
 
@@ -72,17 +83,23 @@ def test_interface_graph_residue():
         "B",
         {
             "A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
-            "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
+            "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm",
+        },
+    )
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g,
-                             [FEATURENAME_POSITION,
-                              FEATURENAME_CHARGE,
-                              FEATURENAME_POLARITY,
-                              FEATURENAME_PSSM,
-                              FEATURENAME_INFORMATIONCONTENT],
-                             [FEATURENAME_EDGEDISTANCE])
+    _check_graph_makes_sense(
+        g,
+        [
+            FEATURENAME_POSITION,
+            FEATURENAME_CHARGE,
+            FEATURENAME_POLARITY,
+            FEATURENAME_PSSM,
+            FEATURENAME_INFORMATIONCONTENT,
+        ],
+        [FEATURENAME_EDGEDISTANCE],
+    )
 
 
 def test_interface_graph_atomic():
@@ -92,17 +109,23 @@ def test_interface_graph_atomic():
         "B",
         {
             "A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
-            "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
+            "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm",
+        },
+    )
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g,
-                             [FEATURENAME_POSITION,
-                              FEATURENAME_CHARGE,
-                              FEATURENAME_PSSM,
-                              FEATURENAME_BURIEDSURFACEAREA,
-                              FEATURENAME_INFORMATIONCONTENT],
-                             [FEATURENAME_EDGEDISTANCE])
+    _check_graph_makes_sense(
+        g,
+        [
+            FEATURENAME_POSITION,
+            FEATURENAME_CHARGE,
+            FEATURENAME_PSSM,
+            FEATURENAME_BURIEDSURFACEAREA,
+            FEATURENAME_INFORMATIONCONTENT,
+        ],
+        [FEATURENAME_EDGEDISTANCE],
+    )
 
 
 def test_variant_graph_101M():
@@ -113,27 +136,32 @@ def test_variant_graph_101M():
         None,
         asparagine,
         phenylalanine,
-        {
-            "A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         1.0,
         0.0,
-        targets={
-            "bin_class": 0},
+        targets={"bin_class": 0},
         radius=20.0,
-        external_distance_cutoff=20.0)
+        external_distance_cutoff=20.0,
+    )
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g,
-                             [FEATURENAME_POSITION,
-                              FEATURENAME_SASA,
-                              FEATURENAME_AMINOACID,
-                              FEATURENAME_VARIANTAMINOACID,
-                              FEATURENAME_PSSMDIFFERENCE],
-                             [FEATURENAME_EDGEDISTANCE,
-                              FEATURENAME_EDGEVANDERWAALS,
-                              FEATURENAME_EDGESAMECHAIN,
-                              FEATURENAME_EDGECOULOMB])
+    _check_graph_makes_sense(
+        g,
+        [
+            FEATURENAME_POSITION,
+            FEATURENAME_SASA,
+            FEATURENAME_AMINOACID,
+            FEATURENAME_VARIANTAMINOACID,
+            FEATURENAME_PSSMDIFFERENCE,
+        ],
+        [
+            FEATURENAME_EDGEDISTANCE,
+            FEATURENAME_EDGEVANDERWAALS,
+            FEATURENAME_EDGESAMECHAIN,
+            FEATURENAME_EDGECOULOMB,
+        ],
+    )
 
     # Two negative nodes should result in positive coulomb potential
     # and less positive at longer distances:
@@ -141,42 +169,65 @@ def test_variant_graph_101M():
     node_negative2 = "101M A 27 OD2"
     node_negative3 = "101M A 20 OD1"
 
-    coulomb_close = g.edges[node_negative1,
-                            node_negative2][FEATURENAME_EDGECOULOMB]
-    coulomb_far = g.edges[node_negative2,
-                          node_negative3][FEATURENAME_EDGECOULOMB]
+    coulomb_close = g.edges[node_negative1, node_negative2][FEATURENAME_EDGECOULOMB]
+    coulomb_far = g.edges[node_negative2, node_negative3][FEATURENAME_EDGECOULOMB]
 
-    assert coulomb_close > 0, "two negative charges have been given negative coulomb potential"
-    assert coulomb_far > 0, "two negative charges have been given negative coulomb potential"
-    assert coulomb_close > coulomb_far, "two far away charges were given stronger coulomb potential than two close ones"
+    assert (
+        coulomb_close > 0
+    ), "two negative charges have been given negative coulomb potential"
+    assert (
+        coulomb_far > 0
+    ), "two negative charges have been given negative coulomb potential"
+    assert (
+        coulomb_close > coulomb_far
+    ), "two far away charges were given stronger coulomb potential than two close ones"
 
     # Two nodes of opposing charge should result in negative coulomb potential
     # and less negative at longer distances:
     node_positive1 = "101M A 31 CZ"
 
-    coulomb_attract_close = g.edges[node_negative1,
-                                    node_positive1][FEATURENAME_EDGECOULOMB]
-    coulomb_attract_far = g.edges[node_negative3,
-                                  node_positive1][FEATURENAME_EDGECOULOMB]
+    coulomb_attract_close = g.edges[node_negative1, node_positive1][
+        FEATURENAME_EDGECOULOMB
+    ]
+    coulomb_attract_far = g.edges[node_negative3, node_positive1][
+        FEATURENAME_EDGECOULOMB
+    ]
 
-    assert coulomb_attract_close < 0, "two opposite charges were given positive coulomb potential"
-    assert coulomb_attract_far < 0, "two opposite charges were given positive coulomb potential"
-    assert coulomb_attract_close < coulomb_attract_far, "two far away charges were given stronger coulomb potential than two close ones"
+    assert (
+        coulomb_attract_close < 0
+    ), "two opposite charges were given positive coulomb potential"
+    assert (
+        coulomb_attract_far < 0
+    ), "two opposite charges were given positive coulomb potential"
+    assert (
+        coulomb_attract_close < coulomb_attract_far
+    ), "two far away charges were given stronger coulomb potential than two close ones"
 
     # If two atoms are really close together, then the LJ potential should be positive.
     # If two atoms are further away from each other than their sigma values, then the LJ potential
     # should be negative and less negative at further distances.
-    vanderwaals_bump = g.edges[node_negative1,
-                               node_negative2][FEATURENAME_EDGEVANDERWAALS]
-    vanderwaals_close = g.edges[node_negative1,
-                                node_positive1][FEATURENAME_EDGEVANDERWAALS]
-    vanderwaals_far = g.edges[node_negative3,
-                              node_positive1][FEATURENAME_EDGEVANDERWAALS]
+    vanderwaals_bump = g.edges[node_negative1, node_negative2][
+        FEATURENAME_EDGEVANDERWAALS
+    ]
+    vanderwaals_close = g.edges[node_negative1, node_positive1][
+        FEATURENAME_EDGEVANDERWAALS
+    ]
+    vanderwaals_far = g.edges[node_negative3, node_positive1][
+        FEATURENAME_EDGEVANDERWAALS
+    ]
 
-    assert vanderwaals_bump > 0, "vanderwaals potential is negative for two bumping atoms"
-    assert vanderwaals_close < 0, "vanderwaals potential is positive for two distant atoms"
-    assert vanderwaals_far < 0, "vanderwaals potential is positive for two distant atoms"
-    assert vanderwaals_close < vanderwaals_far, "two far atoms were given a stronger vanderwaals potential than two closer ones"
+    assert (
+        vanderwaals_bump > 0
+    ), "vanderwaals potential is negative for two bumping atoms"
+    assert (
+        vanderwaals_close < 0
+    ), "vanderwaals potential is positive for two distant atoms"
+    assert (
+        vanderwaals_far < 0
+    ), "vanderwaals potential is positive for two distant atoms"
+    assert (
+        vanderwaals_close < vanderwaals_far
+    ), "two far atoms were given a stronger vanderwaals potential than two closer ones"
 
 
 def test_variant_graph_1A0Z():
@@ -191,24 +242,31 @@ def test_variant_graph_1A0Z():
             "A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm",
             "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
             "C": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm",
-            "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm"},
+            "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
+        },
         1.0,
         0.0,
-        targets={
-            "bin_class": 1})
+        targets={"bin_class": 1},
+    )
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g,
-                             [FEATURENAME_POSITION,
-                              FEATURENAME_AMINOACID,
-                              FEATURENAME_VARIANTAMINOACID,
-                              FEATURENAME_SASA,
-                              FEATURENAME_PSSMDIFFERENCE],
-                             [FEATURENAME_EDGEDISTANCE,
-                              FEATURENAME_EDGEVANDERWAALS,
-                              FEATURENAME_EDGECOULOMB,
-                              FEATURENAME_EDGESAMECHAIN])
+    _check_graph_makes_sense(
+        g,
+        [
+            FEATURENAME_POSITION,
+            FEATURENAME_AMINOACID,
+            FEATURENAME_VARIANTAMINOACID,
+            FEATURENAME_SASA,
+            FEATURENAME_PSSMDIFFERENCE,
+        ],
+        [
+            FEATURENAME_EDGEDISTANCE,
+            FEATURENAME_EDGEVANDERWAALS,
+            FEATURENAME_EDGECOULOMB,
+            FEATURENAME_EDGESAMECHAIN,
+        ],
+    )
 
 
 def test_variant_graph_9API():
@@ -221,26 +279,33 @@ def test_variant_graph_9API():
         glutamate,
         {
             "A": "tests/data/pssm/9api/9api.A.pdb.pssm",
-            "B": "tests/data/pssm/9api/9api.B.pdb.pssm"},
+            "B": "tests/data/pssm/9api/9api.B.pdb.pssm",
+        },
         0.5,
         0.5,
-        targets={
-            "bin_class": 0},
+        targets={"bin_class": 0},
         external_distance_cutoff=5.0,
-        internal_distance_cutoff=5.0)
+        internal_distance_cutoff=5.0,
+    )
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g,
-                             [FEATURENAME_POSITION,
-                              FEATURENAME_AMINOACID,
-                              FEATURENAME_VARIANTAMINOACID,
-                              FEATURENAME_SASA,
-                              FEATURENAME_PSSMDIFFERENCE],
-                             [FEATURENAME_EDGEDISTANCE,
-                              FEATURENAME_EDGEVANDERWAALS,
-                              FEATURENAME_EDGECOULOMB,
-                              FEATURENAME_EDGESAMECHAIN])
+    _check_graph_makes_sense(
+        g,
+        [
+            FEATURENAME_POSITION,
+            FEATURENAME_AMINOACID,
+            FEATURENAME_VARIANTAMINOACID,
+            FEATURENAME_SASA,
+            FEATURENAME_PSSMDIFFERENCE,
+        ],
+        [
+            FEATURENAME_EDGEDISTANCE,
+            FEATURENAME_EDGEVANDERWAALS,
+            FEATURENAME_EDGECOULOMB,
+            FEATURENAME_EDGESAMECHAIN,
+        ],
+    )
 
 
 def test_variant_residue_graph_101M():
@@ -251,22 +316,24 @@ def test_variant_residue_graph_101M():
         None,
         glycine,
         alanine,
-        {
-            "A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         0.5,
         0.5,
-        targets={
-            "bin_class": 0})
+        targets={"bin_class": 0},
+    )
 
     g = query.build_graph()
 
-    _check_graph_makes_sense(g,
-                             [FEATURENAME_POSITION,
-                              FEATURENAME_SASA,
-                              FEATURENAME_PSSM,
-                              FEATURENAME_AMINOACID,
-                              FEATURENAME_VARIANTAMINOACID,
-                              FEATURENAME_CHARGE,
-                              FEATURENAME_POLARITY],
-                             [FEATURENAME_EDGEDISTANCE,
-                              FEATURENAME_EDGESAMECHAIN])
+    _check_graph_makes_sense(
+        g,
+        [
+            FEATURENAME_POSITION,
+            FEATURENAME_SASA,
+            FEATURENAME_PSSM,
+            FEATURENAME_AMINOACID,
+            FEATURENAME_VARIANTAMINOACID,
+            FEATURENAME_CHARGE,
+            FEATURENAME_POLARITY,
+        ],
+        [FEATURENAME_EDGEDISTANCE, FEATURENAME_EDGESAMECHAIN],
+    )

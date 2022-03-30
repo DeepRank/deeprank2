@@ -15,14 +15,12 @@ def test_atomic_forcefield():
         pdb._close()
 
     # The arginine C-zeta should get a positive charge
-    arg = [r for r in structure.get_chain(
-        "A").residues if r.amino_acid == arginine][0]
+    arg = [r for r in structure.get_chain("A").residues if r.amino_acid == arginine][0]
     cz = [a for a in arg.atoms if a.name == "CZ"][0]
     assert atomic_forcefield.get_charge(cz) == 0.640
 
     # The glutamate O-epsilon should get a negative charge
-    glu = [r for r in structure.get_chain(
-        "A").residues if r.amino_acid == glutamate][0]
+    glu = [r for r in structure.get_chain("A").residues if r.amino_acid == glutamate][0]
     oe2 = [a for a in glu.atoms if a.name == "OE2"][0]
     assert atomic_forcefield.get_charge(oe2) == -0.800
 
