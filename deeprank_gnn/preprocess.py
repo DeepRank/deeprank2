@@ -94,7 +94,7 @@ class PreProcessor:
             prefix = "preprocessed-data"
 
         self._processes = [
-            _PreProcess(self._queue, "{}-{}.hdf5".format(prefix, index))
+            _PreProcess(self._queue, f"{prefix}-{index}.hdf5")
             for index in range(process_count)
         ]
 

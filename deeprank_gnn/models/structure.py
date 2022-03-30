@@ -97,7 +97,7 @@ class Chain:
         return hash((self._model, self._id))
 
     def __repr__(self) -> str:
-        return "{} {}".format(self._model, self._id)
+        return f"{self._model} {self._id}"
 
 
 class Residue:
@@ -176,7 +176,7 @@ class Residue:
         self._atoms.append(atom)
 
     def __repr__(self) -> str:
-        return "{} {}".format(self._chain, self.number_string)
+        return f"{self._chain} {self.number_string}"
 
 
 class AtomicElement(Enum):
@@ -229,7 +229,7 @@ class Atom:
         return hash((self._residue, self._name))
 
     def __repr__(self) -> str:
-        return "{} {}".format(self._residue, self._name)
+        return f"{self._residue} {self._name}"
 
     def change_altloc(self, alternative_atom):
         "replace the atom's location by another atom's location"

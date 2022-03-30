@@ -52,8 +52,7 @@ def add_target(graph_path, target_name, target_list, sep=" "):
             for model in target_dict:
                 if model not in f5:
                     raise ValueError(
-                        "{} does not contain an entry named {}".format(
-                            hdf5, model))
+                        f"{hdf5} does not contain an entry named {model}")
 
                 try:
                     model_gp = f5[model]

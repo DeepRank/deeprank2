@@ -1063,8 +1063,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         self._internal_distance_cutoff = internal_distance_cutoff
 
     def get_query_id(self) -> str:
-        return "atom-ppi-{}:{}-{}".format(self.model_id,
-                                          self._chain_id1, self._chain_id2)
+        return f"atom-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
 
     def __eq__(self, other) -> bool:
         return isinstance(
@@ -1355,8 +1354,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._use_biopython = use_biopython
 
     def get_query_id(self) -> str:
-        return "residue-ppi-{}:{}-{}".format(
-            self.model_id, self._chain_id1, self._chain_id2)
+        return f"residue-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
 
     def __eq__(self, other) -> bool:
         return isinstance(

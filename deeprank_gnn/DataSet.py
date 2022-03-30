@@ -334,8 +334,7 @@ class HDF5DataSet(Dataset):
                                  dtype=torch.float).contiguous()
             else:
                 raise ValueError(
-                    "Target {} missing in {}".format(
-                        self.target, mol))
+                    f"Target {self.target} missing in {mol}")
 
         # pos
         pos = torch.tensor(grp["node_data/pos/"][()],
