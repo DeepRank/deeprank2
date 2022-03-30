@@ -223,8 +223,7 @@ class Alignment_GNN(SuperGNN):
         representations = self.runThroughNetwork(edges, edge_attr, node_attr)
         return representations
 
-
-if __name__ == "__maddin__":
+if __name__ == '__main__':
     #####################################
     #   Example of initializing a gnn   #
     #####################################

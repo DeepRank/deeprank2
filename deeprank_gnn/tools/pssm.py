@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from typing import TextIO
 
 from deeprank_gnn.models.structure import Residue, Chain
 from deeprank_gnn.models.conservation import ConservationRow, ConservationTable
@@ -10,8 +11,7 @@ amino_acids_by_letter = {
     amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids
 }
 
-
-def parse_pssm(file_, chain):
+def parse_pssm(file_: TextIO, chain: Chain) -> ConservationTable:
     """
     Read the PSSM data.
 

@@ -49,9 +49,12 @@ def add_target(graph_path, target_name, target_list, sep=" "):
         try:
             f5 = h5py.File(hdf5, "a")
 
-            for model in f5.keys():
+            for model in target_dict:
+                if model not in f5:
+                    raise ValueError("{} does not contain an entry named {}".format(hdf5, model))
+
                 try:
-                    model_gp = f5[f"{model}"]
+                    model_gp = f5[model]
 
                     if "score" not in model_gp:
                         model_gp.create_group("score")
@@ -63,7 +66,7 @@ def add_target(graph_path, target_name, target_list, sep=" "):
                         del group[target_name]
 
                     # Create the target
-                    group[target_name] = target_dict[model]
+                    group.create_dataset(target_name, data=target_dict[model])
 
                 except BaseException:
                     print(f"no graph for {model}")

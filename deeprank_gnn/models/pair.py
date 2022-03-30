@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class Pair:
     """A hashable, comparable object for any set of two inputs where order doesn't matter.
     Args:
@@ -5,7 +8,7 @@ class Pair:
         item2 (object): the pair's second object, must be convertable to string
     """
 
-    def __init__(self, item1, item2):
+    def __init__(self, item1: Any, item2: Any):
         self.item1 = item1
         self.item2 = item2
 
