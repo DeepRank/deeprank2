@@ -26,7 +26,8 @@ class PatchParser:
     def parse(file_):
         result = []
         for line in file_:
-            if line.startswith("#") or line.startswith("!") or len(line.strip()) == 0:
+            if line.startswith("#") or line.startswith(
+                    "!") or len(line.strip()) == 0:
                 continue
 
             m = PatchParser.ACTION_PATTERN.match(line)
@@ -45,7 +46,9 @@ class PatchParser:
 
             result.append(
                 PatchAction(
-                    action_type, PatchSelection(residue_type, atom_name), kwargs
-                )
-            )
+                    action_type,
+                    PatchSelection(
+                        residue_type,
+                        atom_name),
+                    kwargs))
         return result

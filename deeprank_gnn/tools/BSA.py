@@ -71,7 +71,8 @@ class BSA(object):
         self.result_chains = {}
         for label in self.chains_label:
             self.chains[label] = freesasa.Structure()
-            atomdata = self.sql.get("name,resName,resSeq,chainID,x,y,z", chainID=label)
+            atomdata = self.sql.get(
+                "name,resName,resSeq,chainID,x,y,z", chainID=label)
             for atomName, residueName, residueNumber, chainLabel, x, y, z in atomdata:
                 atomName = f"{atomName[0]:>2}"
                 self.chains[label].addAtom(

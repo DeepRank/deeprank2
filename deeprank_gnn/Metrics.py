@@ -113,7 +113,8 @@ class Metrics(object):
         print(f"Threshold set to {self.threshold}")
 
         if self.binary:
-            prediction_binary = get_binary(self.prediction, self.threshold, self.target)
+            prediction_binary = get_binary(
+                self.prediction, self.threshold, self.target)
             y_binary = get_binary(self.y, self.threshold, self.target)
             classes = [0, 1]
             (
@@ -228,8 +229,7 @@ class Metrics(object):
             except ValueError:
                 print(
                     "WARNING: Mean Squared Logarithmic Error cannot be used when "
-                    "targets contain negative values."
-                )
+                    "targets contain negative values.")
 
             # Median absolute error regression loss
             self.median_squared_log_error = metrics.median_absolute_error(

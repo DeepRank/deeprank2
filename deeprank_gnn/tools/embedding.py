@@ -6,7 +6,10 @@ def manifold_embedding(pos, method="tsne"):
     n_neighbors = 100
 
     if method == "tsne":
-        tsne = manifold.TSNE(n_components=n_components, init="pca", random_state=0)
+        tsne = manifold.TSNE(
+            n_components=n_components,
+            init="pca",
+            random_state=0)
         Y = tsne.fit_transform(pos)
     elif method == "spectral":
         se = manifold.SpectralEmbedding(

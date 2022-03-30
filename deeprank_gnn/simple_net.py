@@ -67,8 +67,10 @@ class SimpleConvolutionalLayer(Module):
             node_features.shape[0], messages_per_neighbour.shape[1]
         )
         scatter_sum(
-            messages_per_neighbour, node0_indices, dim=0, out=message_sums_per_node
-        )
+            messages_per_neighbour,
+            node0_indices,
+            dim=0,
+            out=message_sums_per_node)
 
         output = self._node_forward(node_features, message_sums_per_node)
 
@@ -108,7 +110,11 @@ class SimpleNetwork(Module):
         )
 
     @staticmethod
-    def _update(node_features, edge_indices, edge_features, convolutional_layers):
+    def _update(
+            node_features,
+            edge_indices,
+            edge_features,
+            convolutional_layers):
 
         updated_node_features = node_features.clone().detach()
         for layer_index in range(len(convolutional_layers)):
@@ -136,12 +142,18 @@ class SimpleNetwork(Module):
             self._internal_convolutional_layers,
         )
         updated_external = self._update(
-            data.x, data.edge_index, data.edge_attr, self._external_convolutional_layers
-        )
+            data.x,
+            data.edge_index,
+            data.edge_attr,
+            self._external_convolutional_layers)
 
         graph_indices = data.batch
-        means_per_graph_internal = scatter_mean(updated_internal, graph_indices, dim=0)
-        means_per_graph_external = scatter_mean(updated_external, graph_indices, dim=0)
+        means_per_graph_internal = scatter_mean(
+            updated_internal, graph_indices, dim=0)
+        means_per_graph_external = scatter_mean(
+            updated_external, graph_indices, dim=0)
 
-        output = self._graph_forward(means_per_graph_internal, means_per_graph_external)
+        output = self._graph_forward(
+            means_per_graph_internal,
+            means_per_graph_external)
         return output

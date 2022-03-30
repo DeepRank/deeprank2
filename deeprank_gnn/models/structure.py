@@ -20,7 +20,7 @@ class Structure:
         self._chains = {}
 
     def __eq__(self, other) -> bool:
-        return type(self) == type(other) and self._id == other._id
+        return isinstance(self, type(other)) and self._id == other._id
 
     def __hash__(self) -> hash:
         return hash(self._id)
@@ -90,7 +90,8 @@ class Chain:
         return self._residues
 
     def __eq__(self, other) -> bool:
-        return type(self) == type(other) and self._model == other._model and self._id == other._id
+        return isinstance(
+            self, type(other)) and self._model == other._model and self._id == other._id
 
     def __hash__(self) -> hash:
         return hash((self._model, self._id))
@@ -102,8 +103,12 @@ class Chain:
 class Residue:
     "represents a pdb residue"
 
-    def __init__(self, chain: Chain, number: int, amino_acid: Optional[AminoAcid] = None,
-                 insertion_code: Optional[str] = None):
+    def __init__(
+            self,
+            chain: Chain,
+            number: int,
+            amino_acid: Optional[AminoAcid] = None,
+            insertion_code: Optional[str] = None):
         """
         Args:
             chain(deeprank chain object): the chain that this residue belongs to
@@ -119,7 +124,7 @@ class Residue:
         self._atoms = []
 
     def __eq__(self, other) -> bool:
-        return type(self) == type(other) and \
+        return isinstance(self, type(other)) and \
             self._chain == other._chain and \
             self._number == other._number and \
             self._insertion_code == other._insertion_code
@@ -194,7 +199,13 @@ class AtomicElement(Enum):
 class Atom:
     "represents a pdb atom"
 
-    def __init__(self, residue: Residue, name: str, element: AtomicElement, position: numpy.array, occupancy: float):
+    def __init__(
+            self,
+            residue: Residue,
+            name: str,
+            element: AtomicElement,
+            position: numpy.array,
+            occupancy: float):
         """
         Args:
             residue(deeprank residue object): the residue that this atom belongs to
@@ -210,7 +221,7 @@ class Atom:
         self._occupancy = occupancy
 
     def __eq__(self, other) -> bool:
-        return type(self) == type(other) and \
+        return isinstance(self, type(other)) and \
             self._residue == other._residue and \
             self._name == other._name
 

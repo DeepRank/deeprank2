@@ -19,8 +19,7 @@ def pssm_3dcons_to_deeprank(pssm_file):
             firstline = False
             new_pssm.write(
                 "pdbresi pdbresn seqresi seqresn    A    R    N    D    C    Q    E\
-    G    H    I    L    K    M    F    P    S    T    W    Y    V   IC\n"
-            )
+    G    H    I    L    K    M    F    P    S    T    W    Y    V   IC\n")
 
         if len(line.split()) == 44:
             resid = line[0:6].strip()

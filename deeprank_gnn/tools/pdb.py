@@ -60,8 +60,8 @@ def get_structure(pdb, id_):
 
     # Iterate over the atom output from pdb2sql
     for row in pdb.get(
-        "x,y,z,rowID,name,altLoc,occ,element,chainID,resSeq,resName,iCode", model=0
-    ):
+        "x,y,z,rowID,name,altLoc,occ,element,chainID,resSeq,resName,iCode",
+            model=0):
 
         (
             x,
@@ -108,7 +108,11 @@ def get_structure(pdb, id_):
         residue_id = (chain_id, residue_number, insertion_code)
         if residue_id not in residues:
 
-            residue = Residue(chain, residue_number, amino_acid, insertion_code)
+            residue = Residue(
+                chain,
+                residue_number,
+                amino_acid,
+                insertion_code)
             residues[residue_id] = residue
             chain.add_residue(residue)
         else:
@@ -116,8 +120,11 @@ def get_structure(pdb, id_):
 
         # Init atom.
         atom = Atom(
-            residue, atom_name, elements_by_name[element], atom_position, occupancy
-        )
+            residue,
+            atom_name,
+            elements_by_name[element],
+            atom_position,
+            occupancy)
         _add_atom_to_residue(atom, residue)
 
     return structure
@@ -133,10 +140,15 @@ def get_residue_distance(residue1, residue2):
     Returns(float): the shortest distance
     """
 
-    residue1_atom_positions = numpy.array([atom.position for atom in residue1.atoms])
-    residue2_atom_positions = numpy.array([atom.position for atom in residue2.atoms])
+    residue1_atom_positions = numpy.array(
+        [atom.position for atom in residue1.atoms])
+    residue2_atom_positions = numpy.array(
+        [atom.position for atom in residue2.atoms])
 
-    distances = distance_matrix(residue1_atom_positions, residue2_atom_positions, p=2)
+    distances = distance_matrix(
+        residue1_atom_positions,
+        residue2_atom_positions,
+        p=2)
 
     return numpy.min(distances)
 
@@ -199,8 +211,7 @@ def get_residue_contact_pairs(
             )
 
         for residue_chain_id2, residue_number2, residue_name2 in contact_residues[
-            residue_key1
-        ]:
+                residue_key1]:
 
             chain2 = structure.get_chain(residue_chain_id2)
 
@@ -216,9 +227,10 @@ def get_residue_contact_pairs(
             else:
                 raise ValueError(
                     "Not found: {} {} {} {}".format(
-                        pdb_ac, residue_chain_id2, residue_number2, residue_name2
-                    )
-                )
+                        pdb_ac,
+                        residue_chain_id2,
+                        residue_number2,
+                        residue_name2))
 
             residue_pairs.add(Pair(residue1, residue2))
 
@@ -242,7 +254,10 @@ def get_surrounding_residues(structure, residue, radius):
     structure_atom_positions = [atom.position for atom in structure_atoms]
     residue_atom_positions = [atom.position for atom in residue_atoms]
 
-    distances = distance_matrix(structure_atom_positions, residue_atom_positions, p=2)
+    distances = distance_matrix(
+        structure_atom_positions,
+        residue_atom_positions,
+        p=2)
 
     close_residues = set([])
     for structure_atom_index in range(len(structure_atoms)):

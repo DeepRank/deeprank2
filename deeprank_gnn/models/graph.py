@@ -7,7 +7,8 @@ from networkx import Graph as NetworkxGraph
 class Graph(NetworkxGraph):
     "this is a graph just like in networkx, but with an id and associated target values"
 
-    def __init__(self, id_: Optional[str] = None, targets: Optional[Dict[str, float]] = None):
+    def __init__(self, id_: Optional[str] = None,
+                 targets: Optional[Dict[str, float]] = None):
         """
         Args:
             id_(str, optional): unique identifier for this graph, random by default

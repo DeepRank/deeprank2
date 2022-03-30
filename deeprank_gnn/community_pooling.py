@@ -223,8 +223,11 @@ def community_pooling(cluster, data):
     if hasattr(data, "batch"):
         batch = None if data.batch is None else pool_batch(perm, data.batch)
         data = Batch(
-            batch=batch, x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos
-        )
+            batch=batch,
+            x=x,
+            edge_index=edge_index,
+            edge_attr=edge_attr,
+            pos=pos)
 
         if has_internal_edges:
             data.internal_edge_index = internal_edge_index

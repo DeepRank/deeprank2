@@ -93,15 +93,12 @@ class NeuralNet(object):
                         f"                  target='physiological_assembly',"
                         f"                  task='class',"
                         f"                  shuffle=True,"
-                        f"                  percent=[0.8, 0.2])"
-                    )
+                        f"                  percent=[0.8, 0.2])")
 
             if self.task == "class" and self.threshold is None:
                 print(
                     "the threshold for accuracy computation is set to {}".format(
-                        self.classes[1]
-                    )
-                )
+                        self.classes[1]))
                 self.threshold = self.classes[1]
             if self.task == "reg" and self.threshold is None:
                 print("the threshold for accuracy computation is set to 0.3")
@@ -175,11 +172,11 @@ class NeuralNet(object):
             else:
                 raise ValueError(
                     f"Invalid node clustering method. \n\t"
-                    f"Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t"
-                )
+                    f"Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # divide the dataset
-        train_dataset, valid_dataset = DivideDataSet(dataset, percent=self.percent)
+        train_dataset, valid_dataset = DivideDataSet(
+            dataset, percent=self.percent)
 
         # dataloader
         self.train_loader = DataLoader(
@@ -244,7 +241,8 @@ class NeuralNet(object):
             ValueError: Incorrect output shape
         """
         # get the device
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
 
         print("device set to :", self.device)
         if self.device.type == "cuda":
@@ -254,14 +252,20 @@ class NeuralNet(object):
 
         # regression mode
         if self.task == "reg":
-            self.model = Net(dataset.get(0).num_features, 1, self.num_edge_features).to(
-                self.device
-            )
+            self.model = Net(
+                dataset.get(0).num_features,
+                1,
+                self.num_edge_features).to(
+                self.device)
 
         # classification mode
         elif self.task == "class":
-            self.classes_to_idx = {i: idx for idx, i in enumerate(self.classes)}
-            self.idx_to_classes = {idx: i for idx, i in enumerate(self.classes)}
+            self.classes_to_idx = {
+                i: idx for idx, i in enumerate(
+                    self.classes)}
+            self.idx_to_classes = {
+                idx: i for idx, i in enumerate(
+                    self.classes)}
             self.output_shape = len(self.classes)
             try:
                 self.model = Net(
@@ -275,8 +279,7 @@ class NeuralNet(object):
                     f"Check your input or adapt the model\n\t"
                     f"Example :\n\t"
                     f"def __init__(self, input_shape): --> def __init__(self, input_shape, output_shape) \n\t"
-                    f"self.fc2 = torch.nn.Linear(64, 1) --> self.fc2 = torch.nn.Linear(64, output_shape) \n\t"
-                )
+                    f"self.fc2 = torch.nn.Linear(64, 1) --> self.fc2 = torch.nn.Linear(64, output_shape) \n\t")
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
@@ -301,7 +304,8 @@ class NeuralNet(object):
                 self.weights = self.weights / self.weights.sum()
                 print(f"class weights: {self.weights}")
 
-            self.loss = nn.CrossEntropyLoss(weight=self.weights, reduction="mean")
+            self.loss = nn.CrossEntropyLoss(
+                weight=self.weights, reduction="mean")
 
     def train(
         self,
@@ -352,7 +356,8 @@ class NeuralNet(object):
             if validate is True:
 
                 t0 = time()
-                _out, _y, _val_loss, self.data["eval"] = self.eval(self.valid_loader)
+                _out, _y, _val_loss, self.data["eval"] = self.eval(
+                    self.valid_loader)
                 t = time() - t0
 
                 self.valid_loss.append(_val_loss)
@@ -458,8 +463,7 @@ class NeuralNet(object):
                     ">> model.test(test_dataset)\n\t"
                     "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t"
                     ">> model = NeuralNet(database_test, gnn, pretrained_model = model_saved, target=None)\n\t"
-                    ">> model.test()\n\t"
-                )
+                    ">> model.test()\n\t")
         self.data = {}
 
         # Run test
@@ -674,7 +678,8 @@ class NeuralNet(object):
             # pred = F.softmax(pred, dim=1)
 
             if target is not None:
-                target = torch.tensor([self.classes_to_idx[int(x)] for x in target])
+                target = torch.tensor(
+                    [self.classes_to_idx[int(x)] for x in target])
 
         elif self.transform_sigmoid is True:
             pred = torch.sigmoid(pred.reshape(-1))
@@ -759,7 +764,12 @@ class NeuralNet(object):
             plt.savefig(os.path.join(self.outdir, f"acc_epoch{name}.png"))
             plt.close()
 
-    def plot_hit_rate(self, data="eval", threshold=4, mode="percentage", name=""):
+    def plot_hit_rate(
+            self,
+            data="eval",
+            threshold=4,
+            mode="percentage",
+            name=""):
         """
         Plots the hitrate as a function of the models' rank
 
@@ -789,7 +799,8 @@ class NeuralNet(object):
             plt.close()
 
         except BaseException:
-            print(f"No hit rate plot could be generated for you {self.task} task")
+            print(
+                f"No hit rate plot could be generated for you {self.task} task")
 
     def plot_scatter(self):
         """Scatters plot of the results."""
@@ -851,7 +862,8 @@ class NeuralNet(object):
         Returns:
             [type]: [description]
         """
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
 
         state = torch.load(filename, map_location=torch.device(self.device))
 
@@ -910,7 +922,8 @@ class NeuralNet(object):
                     if data_name == "mol":
                         data_value = np.string_(data_value)
                         string_dt = h5py.special_dtype(vlen=str)
-                        sg.create_dataset(data_name, data=data_value, dtype=string_dt)
+                        sg.create_dataset(
+                            data_name, data=data_value, dtype=string_dt)
 
                     # output/target values
                     else:

@@ -71,11 +71,11 @@ def graph_to_hdf5(graph, hdf5_file):
     node_feature_names = list(first_node_data.keys())
     for node_feature_name in node_feature_names:
 
-        node_feature_data = [
-            node_data[node_feature_name] for node_key, node_data in graph.nodes.items()
-        ]
+        node_feature_data = [node_data[node_feature_name]
+                             for node_key, node_data in graph.nodes.items()]
 
-        node_features_group.create_dataset(node_feature_name, data=node_feature_data)
+        node_features_group.create_dataset(
+            node_feature_name, data=node_feature_data)
 
     # store edges
     edge_indices = []
@@ -141,8 +141,7 @@ def graph_to_hdf5(graph, hdf5_file):
             edge_feature_name, data=edge_feature_data[edge_feature_name]
         )
         internal_edge_feature_group.create_dataset(
-            edge_feature_name, data=internal_edge_feature_data[edge_feature_name]
-        )
+            edge_feature_name, data=internal_edge_feature_data[edge_feature_name])
 
     # store targets
     score_group = graph_group.create_group(HDF5KEY_GRAPH_SCORE)
@@ -255,8 +254,12 @@ def _get_edge_type_name(value):
 
 
 def plotly_2d(
-    graph, out=None, offline=False, iplot=True, disable_plot=False, method="louvain"
-):
+        graph,
+        out=None,
+        offline=False,
+        iplot=True,
+        disable_plot=False,
+        method="louvain"):
     """Plots the interface graph in 2D
 
     Args:

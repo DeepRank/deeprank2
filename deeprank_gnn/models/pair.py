@@ -13,7 +13,8 @@ class Pair:
         self.item2 = item2
 
     def __hash__(self):
-        # The hash should be solely based on the two paired items, not on their order.
+        # The hash should be solely based on the two paired items, not on their
+        # order.
 
         s1 = str(self.item1)
         s2 = str(self.item2)

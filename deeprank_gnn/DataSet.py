@@ -209,7 +209,10 @@ class HDF5DataSet(Dataset):
         else:
             for feat in self.node_feature:
                 if feat not in self.available_node_feature:
-                    print(feat, " node feature not found in the file", self.database[0])
+                    print(
+                        feat,
+                        " node feature not found in the file",
+                        self.database[0])
                     print("Possible node feature : ")
                     print("\n".join(self.available_node_feature))
                     # raise ValueError('Feature Not found')
@@ -228,8 +231,9 @@ class HDF5DataSet(Dataset):
             for feat in self.edge_feature:
                 if feat not in self.available_edge_feature:
                     print(
-                        feat, " edge attribute not found in the file", self.database[0]
-                    )
+                        feat,
+                        " edge attribute not found in the file",
+                        self.database[0])
                     print("Possible edge attribute : ")
                     print("\n".join(self.available_edge_feature))
                     # raise ValueError('Feature Not found')
@@ -294,7 +298,8 @@ class HDF5DataSet(Dataset):
             ind = grp["internal_edge_index"][()]
             if ind.ndim == 2:
                 ind = np.vstack((ind, np.flip(ind, 1))).T
-            internal_edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
+            internal_edge_index = torch.tensor(
+                ind, dtype=torch.long).contiguous()
 
             # internal edge feature
             data = ()
@@ -307,7 +312,8 @@ class HDF5DataSet(Dataset):
                 data = np.hstack(data)
                 data = np.vstack((data, data))
                 data = self.edge_feature_transform(data)
-                internal_edge_attr = torch.tensor(data, dtype=torch.float).contiguous()
+                internal_edge_attr = torch.tensor(
+                    data, dtype=torch.float).contiguous()
 
             else:
                 internal_edge_attr = None
@@ -324,16 +330,24 @@ class HDF5DataSet(Dataset):
         else:
             if self.target in grp['score']:
 
-                y = torch.tensor([grp['score/'+self.target][()]],
+                y = torch.tensor([grp['score/' + self.target][()]],
                                  dtype=torch.float).contiguous()
             else:
-                raise ValueError("Target {} missing in {}".format(self.target, mol))
+                raise ValueError(
+                    "Target {} missing in {}".format(
+                        self.target, mol))
 
         # pos
-        pos = torch.tensor(grp["node_data/pos/"][()], dtype=torch.float).contiguous()
+        pos = torch.tensor(grp["node_data/pos/"][()],
+                           dtype=torch.float).contiguous()
 
         # load
-        data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
+        data = Data(
+            x=x,
+            edge_index=edge_index,
+            edge_attr=edge_attr,
+            y=y,
+            pos=pos)
 
         data.internal_edge_index = internal_edge_index
         data.internal_edge_attr = internal_edge_attr
