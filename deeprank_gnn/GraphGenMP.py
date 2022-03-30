@@ -60,7 +60,7 @@ class GraphHDF5(object):
         pdbs = [os.path.join(pdb_path, name) for name in pdbs]
         if limit is not None:
             if isinstance(limit, list):
-                pdbs = pdbs[limit[0]: limit[1]]
+                pdbs = pdbs[limit[0] : limit[1]]
             else:
                 pdbs = pdbs[:limit]
 
@@ -102,16 +102,11 @@ class GraphHDF5(object):
 
             # get the graph names
             graph_names = [os.path.join(tmpdir, f) for f in os.listdir(tmpdir)]
-            graph_names = list(
-                filter(
-                    lambda x: x.endswith(".pkl"),
-                    graph_names))
+            graph_names = list(filter(lambda x: x.endswith(".pkl"), graph_names))
             if select is not None:
                 graph_names = list(
-                    filter(
-                        lambda x: x.startswith(
-                            tmpdir + select),
-                        graph_names))
+                    filter(lambda x: x.startswith(tmpdir + select), graph_names)
+                )
 
             # transfer them to the hdf5
             with h5py.File(outfile, "w") as f5:
@@ -129,8 +124,7 @@ class GraphHDF5(object):
                     os.remove(name)
 
         # clean up
-        rmfiles = glob.glob("*.izone") + \
-            glob.glob("*.lzone") + glob.glob("*.refpairs")
+        rmfiles = glob.glob("*.izone") + glob.glob("*.lzone") + glob.glob("*.refpairs")
         for f in rmfiles:
             os.remove(f)
 
@@ -147,12 +141,7 @@ class GraphHDF5(object):
 
         for pdb_path in lst:
             try:
-                graphs.append(
-                    self._get_one_graph(
-                        pdb_path,
-                        pssm_paths,
-                        ref,
-                        biopython))
+                graphs.append(self._get_one_graph(pdb_path, pssm_paths, ref, biopython))
             except Exception as e:
                 print("Issue encountered while computing graph ", pdb_path)
                 traceback.print_exc()
@@ -166,12 +155,7 @@ class GraphHDF5(object):
                     traceback.print_exc()
 
     @staticmethod
-    def _pickle_one_graph(
-            pdb_path,
-            pssm_paths,
-            ref,
-            tmpdir="./",
-            biopython=False):
+    def _pickle_one_graph(pdb_path, pssm_paths, ref, tmpdir="./", biopython=False):
 
         # get the graph
         try:

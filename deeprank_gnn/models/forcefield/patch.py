@@ -14,8 +14,7 @@ class PatchSelection:
 
 
 class PatchAction:
-    def __init__(self, type_: str, selection: PatchSelection,
-                 kwargs: Dict[str, Any]):
+    def __init__(self, type_: str, selection: PatchSelection, kwargs: Dict[str, Any]):
         self.type = type_
         self.selection = selection
         self.kwargs = kwargs

@@ -8,8 +8,7 @@ from deeprank_gnn.models.forcefield.residue import (
 
 
 class ResidueClassParser:
-    _RESIDUE_CLASS_PATTERN = re.compile(
-        r"([A-Z]{3,4}) *\: *name *\= *(all|[A-Z]{3})")
+    _RESIDUE_CLASS_PATTERN = re.compile(r"([A-Z]{3,4}) *\: *name *\= *(all|[A-Z]{3})")
     _RESIDUE_ATOMS_PATTERN = re.compile(r"(present|absent)\(([A-Z0-9\, ]+)\)")
 
     @staticmethod
@@ -21,16 +20,14 @@ class ResidueClassParser:
                 raise ValueError(f"unparsable line: '{line}'")
 
             class_name = match.group(1)
-            amino_acid_names = ResidueClassParser._parse_amino_acids(
-                match.group(2))
+            amino_acid_names = ResidueClassParser._parse_amino_acids(match.group(2))
 
             present_atom_names = []
             absent_atom_names = []
             for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(
-                line[match.end():]
+                line[match.end() :]
             ):
-                atom_names = [name.strip()
-                              for name in match.group(2).split(",")]
+                atom_names = [name.strip() for name in match.group(2).split(",")]
                 if match.group(1) == "present":
                     present_atom_names.extend(atom_names)
 
@@ -39,10 +36,9 @@ class ResidueClassParser:
 
             result.append(
                 ResidueClassCriterium(
-                    class_name,
-                    amino_acid_names,
-                    present_atom_names,
-                    absent_atom_names))
+                    class_name, amino_acid_names, present_atom_names, absent_atom_names
+                )
+            )
         return result
 
     @staticmethod

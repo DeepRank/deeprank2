@@ -20,12 +20,7 @@ from deeprank_gnn.DataSet import HDF5DataSet, PreCluster
 
 
 class GINetConvLayer(torch.nn.Module):
-    def __init__(
-            self,
-            in_channels,
-            out_channels,
-            number_edge_features=1,
-            bias=False):
+    def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
 
         super(GINetConvLayer, self).__init__()
 
@@ -52,8 +47,7 @@ class GINetConvLayer(torch.nn.Module):
 
         row, col = edge_index
         num_node = len(x)
-        edge_attr = edge_attr.unsqueeze(
-            -1) if edge_attr.dim() == 1 else edge_attr
+        edge_attr = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
 
         xcol = self.fc(x[col])
         xrow = self.fc(x[row])

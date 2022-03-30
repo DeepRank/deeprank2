@@ -9,14 +9,15 @@ class AminoAcid:
     "a value to represent one of the amino acids"
 
     def __init__(
-            self,
-            name: str,
-            three_letter_code: str,
-            one_letter_code: str,
-            charge: Optional[float] = None,
-            polarity: Optional[Polarity] = None,
-            size: Optional[int] = None,
-            index: Optional[int] = None):
+        self,
+        name: str,
+        three_letter_code: str,
+        one_letter_code: str,
+        charge: Optional[float] = None,
+        polarity: Optional[Polarity] = None,
+        size: Optional[int] = None,
+        index: Optional[int] = None,
+    ):
         """
         Args:
             name(str): unique name for the amino acid
@@ -54,7 +55,9 @@ class AminoAcid:
         if self._index is None:
             raise ValueError(
                 "amino acid {} index is not set, thus no onehot can be computed".format(
-                    self._name))
+                    self._name
+                )
+            )
 
         # assumed that there are only 20 different amino acids
         a = numpy.zeros(20)

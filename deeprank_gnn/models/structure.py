@@ -90,8 +90,11 @@ class Chain:
         return self._residues
 
     def __eq__(self, other) -> bool:
-        return isinstance(
-            self, type(other)) and self._model == other._model and self._id == other._id
+        return (
+            isinstance(self, type(other))
+            and self._model == other._model
+            and self._id == other._id
+        )
 
     def __hash__(self) -> hash:
         return hash((self._model, self._id))
@@ -104,11 +107,12 @@ class Residue:
     "represents a pdb residue"
 
     def __init__(
-            self,
-            chain: Chain,
-            number: int,
-            amino_acid: Optional[AminoAcid] = None,
-            insertion_code: Optional[str] = None):
+        self,
+        chain: Chain,
+        number: int,
+        amino_acid: Optional[AminoAcid] = None,
+        insertion_code: Optional[str] = None,
+    ):
         """
         Args:
             chain(deeprank chain object): the chain that this residue belongs to
@@ -124,17 +128,19 @@ class Residue:
         self._atoms = []
 
     def __eq__(self, other) -> bool:
-        return isinstance(self, type(other)) and \
-            self._chain == other._chain and \
-            self._number == other._number and \
-            self._insertion_code == other._insertion_code
+        return (
+            isinstance(self, type(other))
+            and self._chain == other._chain
+            and self._number == other._number
+            and self._insertion_code == other._insertion_code
+        )
 
     def __hash__(self) -> hash:
         return hash((self._chain, self._number, self._insertion_code))
 
     def get_pssm(self) -> ConservationRow:
-        """ if the residue's chain has pssm info linked to it,
-            then return the part that belongs to this residue
+        """if the residue's chain has pssm info linked to it,
+        then return the part that belongs to this residue
         """
 
         pssm = self._chain.pssm
@@ -200,12 +206,13 @@ class Atom:
     "represents a pdb atom"
 
     def __init__(
-            self,
-            residue: Residue,
-            name: str,
-            element: AtomicElement,
-            position: numpy.array,
-            occupancy: float):
+        self,
+        residue: Residue,
+        name: str,
+        element: AtomicElement,
+        position: numpy.array,
+        occupancy: float,
+    ):
         """
         Args:
             residue(deeprank residue object): the residue that this atom belongs to
@@ -221,9 +228,11 @@ class Atom:
         self._occupancy = occupancy
 
     def __eq__(self, other) -> bool:
-        return isinstance(self, type(other)) and \
-            self._residue == other._residue and \
-            self._name == other._name
+        return (
+            isinstance(self, type(other))
+            and self._residue == other._residue
+            and self._name == other._name
+        )
 
     def __hash__(self) -> hash:
         return hash((self._residue, self._name))

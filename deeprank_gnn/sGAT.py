@@ -58,8 +58,7 @@ class sGraphAttentionLayer(torch.nn.Module):
 
         row, col = edge_index
         num_node = len(x)
-        edge_attr = edge_attr.unsqueeze(
-            -1) if edge_attr.dim() == 1 else edge_attr
+        edge_attr = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
 
         # create edge feature by concatenating node feature
         alpha = torch.cat([x[row], x[col]], dim=-1)

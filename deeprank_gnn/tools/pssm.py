@@ -49,11 +49,7 @@ def parse_pssm(file_: TextIO, chain: Chain) -> ConservationTable:
             pdb_insertion_code = None
 
         # Build the residue, to match with the pssm row
-        residue = Residue(
-            chain,
-            pdb_residue_number,
-            amino_acid,
-            pdb_insertion_code)
+        residue = Residue(chain, pdb_residue_number, amino_acid, pdb_insertion_code)
 
         # Build the pssm row
         information_content = float(row[column_indices["IC"]])
@@ -62,7 +58,6 @@ def parse_pssm(file_: TextIO, chain: Chain) -> ConservationTable:
             for amino_acid in amino_acids
         }
 
-        conservation_rows[residue] = ConservationRow(
-            conservations, information_content)
+        conservation_rows[residue] = ConservationRow(conservations, information_content)
 
     return ConservationTable(conservation_rows)

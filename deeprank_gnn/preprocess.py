@@ -105,8 +105,7 @@ class PreProcessor:
         for process in self._processes:
             process.start()
             if not process.is_alive():
-                raise RuntimeError(
-                    f"worker process {process.name} did not start")
+                raise RuntimeError(f"worker process {process.name} did not start")
 
     def wait(self):
         "wait for all graphs to be built"
