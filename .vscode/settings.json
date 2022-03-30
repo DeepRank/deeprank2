@@ -1,0 +1,5 @@
+{
+    "python.linting.enabled": true,
+    "python.linting.prospectorEnabled": true,
+    "python.linting.prospectorArgs": ["-s", "medium"]
+}

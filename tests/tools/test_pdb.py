@@ -97,4 +97,4 @@ def test_neighbour_atoms():
         len(atoms)), "every two atoms were paired"
 
     for atom1, atom2 in atom_pairs:
-        assert atom1 != atom2, "atom {} was paired with itself".format(atom1)
+        assert atom1 != atom2, f"atom {atom1} was paired with itself"

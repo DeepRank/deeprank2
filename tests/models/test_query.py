@@ -33,10 +33,10 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             for feature_name in node_feature_names:
                 assert entry_group["node_data/{}".format(
-                    feature_name)][()].size > 0, "no {} feature".format(feature_name)
+                    feature_name)][()].size > 0, f"no {feature_name} feature"
 
                 assert len(numpy.nonzero(
-                    entry_group["node_data/{}".format(feature_name)][()])) > 0, "{}: all zero".format(feature_name)
+                    entry_group[f"node_data/{feature_name}"][()])) > 0, f"{feature_name}: all zero"
 
             assert entry_group["internal_edge_index"][(
             )].shape[1] == 2, "wrong internal edge index shape"
@@ -44,8 +44,8 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
             assert entry_group["internal_edge_index"].shape[0] > 0, "no internal edge indices"
 
             for feature_name in edge_feature_names:
-                assert entry_group["internal_edge_data/{}".format(feature_name)][(
-                )].shape[0] == entry_group["internal_edge_index"].shape[0], "not enough internal edge {} feature values".format(feature_name)
+                assert entry_group[f"internal_edge_data/{feature_name}"][(
+                )].shape[0] == entry_group["internal_edge_index"].shape[0], f"not enough internal edge {feature_name} feature values"
 
             count_edges_hdf5 = entry_group["internal_edge_index"].shape[0]
 
@@ -56,7 +56,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
         # expecting twice as many edges, because torch is directional
         count_edges_torch = torch_data_entry.internal_edge_index.shape[1]
         assert count_edges_torch == 2 * \
-            count_edges_hdf5, "got {} edges in output data, hdf5 has {}".format(count_edges_torch, count_edges_hdf5)
+            count_edges_hdf5, f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
 
         count_edge_features_torch = torch_data_entry.internal_edge_attr.shape[0]
         assert count_edge_features_torch == count_edges_torch, "got {} edge feature sets, but {} edge indices".format(
