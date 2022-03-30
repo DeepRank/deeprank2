@@ -29,32 +29,32 @@ COULOMB_CONSTANT = 332.0636
 
 class AtomicForcefield:
     def __init__(self):
-        top_path = os.path.join(
-            _forcefield_directory_path,
-            "protein-allhdg5-5_new.top")
-        with open(top_path, 'rt') as f:
-            self._top_rows = {(row.residue_name, row.atom_name): row for row in TopParser.parse(f)}
+        top_path = os.path.join(_forcefield_directory_path, "protein-allhdg5-5_new.top")
+        with open(top_path, "rt") as f:
+            self._top_rows = {
+                (row.residue_name, row.atom_name): row for row in TopParser.parse(f)
+            }
 
         patch_path = os.path.join(_forcefield_directory_path, "patch.top")
-        with open(patch_path, 'rt') as f:
+        with open(patch_path, "rt") as f:
             self._patch_actions = PatchParser.parse(f)
 
-        residue_class_path = os.path.join(
-            _forcefield_directory_path, "residue-classes")
-        with open(residue_class_path, 'rt') as f:
+        residue_class_path = os.path.join(_forcefield_directory_path, "residue-classes")
+        with open(residue_class_path, "rt") as f:
             self._residue_class_criteria = ResidueClassParser.parse(f)
 
         param_path = os.path.join(
-            _forcefield_directory_path,
-            "protein-allhdg5-4_new.param")
-        with open(param_path, 'rt') as f:
+            _forcefield_directory_path, "protein-allhdg5-4_new.param"
+        )
+        with open(param_path, "rt") as f:
             self._vanderwaals_parameters = ParamParser.parse(f)
 
     def _find_matching_residue_class(self, residue):
         for criterium in self._residue_class_criteria:
             if criterium.matches(
-                residue.amino_acid.three_letter_code, [
-                    atom.name for atom in residue.atoms]):
+                residue.amino_acid.three_letter_code,
+                [atom.name for atom in residue.atoms],
+            ):
                 return criterium.class_name
 
         return None
@@ -83,22 +83,24 @@ class AtomicForcefield:
         residue_class = self._find_matching_residue_class(atom.residue)
         if residue_class is not None:
             for action in self._patch_actions:
-                if action.type in [PatchActionType.MODIFY, PatchActionType.ADD] and \
-                        residue_class == action.selection.residue_type and "TYPE" in action:
+                if (
+                    action.type in [PatchActionType.MODIFY, PatchActionType.ADD]
+                    and residue_class == action.selection.residue_type
+                    and "TYPE" in action
+                ):
 
                     type_ = action["TYPE"]
 
         if type_ is None:
-            raise UnknownAtomError(
-                f"not mentioned in top or patch: {top_key}")
+            raise UnknownAtomError(f"not mentioned in top or patch: {top_key}")
 
         return type_
 
     def get_charge(self, atom):
         """
-            Args:
-                atom(Atom): the atom to get the charge for
-            Returns(float): the charge of the given atom
+        Args:
+            atom(Atom): the atom to get the charge for
+        Returns(float): the charge of the given atom
         """
 
         atom_name = atom.name
@@ -115,15 +117,15 @@ class AtomicForcefield:
         residue_class = self._find_matching_residue_class(atom.residue)
         if residue_class is not None:
             for action in self._patch_actions:
-                if action.type in [
-                        PatchActionType.MODIFY,
-                        PatchActionType.ADD] and residue_class == action.selection.residue_type:
+                if (
+                    action.type in [PatchActionType.MODIFY, PatchActionType.ADD]
+                    and residue_class == action.selection.residue_type
+                ):
 
                     charge = float(action["CHARGE"])
 
         if charge is None:
-            raise UnknownAtomError(
-                f"not mentioned in top or patch: {top_key}")
+            raise UnknownAtomError(f"not mentioned in top or patch: {top_key}")
 
         return charge
 

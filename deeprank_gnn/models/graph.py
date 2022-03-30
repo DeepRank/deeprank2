@@ -8,9 +8,9 @@ class Graph(NetworkxGraph):
 
     def __init__(self, id_=None, targets=None):
         """
-            Args:
-                id_(str, optional): unique identifier for this graph, random by default
-                targets(dict, optional): the target values, keys are the target names, values are numbers
+        Args:
+            id_(str, optional): unique identifier for this graph, random by default
+            targets(dict, optional): the target values, keys are the target names, values are numbers
         """
 
         NetworkxGraph.__init__(self)

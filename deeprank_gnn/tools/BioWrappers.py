@@ -9,7 +9,7 @@ from Bio import BiopythonWarning
 import tempfile
 
 with warnings.catch_warnings():
-    warnings.simplefilter('ignore', BiopythonWarning)
+    warnings.simplefilter("ignore", BiopythonWarning)
     from Bio import SearchIO
 
 from time import time
@@ -25,7 +25,7 @@ def get_bio_model(pdbfile):
         [type]: Bio object
     """
     parser = PDBParser()
-    structure = parser.get_structure('_tmp', pdbfile)
+    structure = parser.get_structure("_tmp", pdbfile)
     return structure[0]
 
 

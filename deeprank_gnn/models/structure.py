@@ -8,8 +8,8 @@ class Structure:
 
     def __init__(self, id_=None):
         """
-            Args:
-                id_(str): an unique identifier for this structure, can be the pdb accession code.
+        Args:
+            id_(str): an unique identifier for this structure, can be the pdb accession code.
         """
         self._id = id_
         self._chains = {}
@@ -85,8 +85,11 @@ class Chain:
         return self._residues
 
     def __eq__(self, other):
-        return isinstance(
-            self, type(other)) and self._model == other._model and self._id == other._id
+        return (
+            isinstance(self, type(other))
+            and self._model == other._model
+            and self._id == other._id
+        )
 
     def __hash__(self):
         return hash((self._model, self._id))
@@ -114,17 +117,19 @@ class Residue:
         self._atoms = []
 
     def __eq__(self, other):
-        return isinstance(self, type(other)) and \
-            self._chain == other._chain and \
-            self._number == other._number and \
-            self._insertion_code == other._insertion_code
+        return (
+            isinstance(self, type(other))
+            and self._chain == other._chain
+            and self._number == other._number
+            and self._insertion_code == other._insertion_code
+        )
 
     def __hash__(self):
         return hash((self._chain, self._number, self._insertion_code))
 
     def get_pssm(self):
-        """ if the residue's chain has pssm info linked to it,
-            then return the part that belongs to this residue
+        """if the residue's chain has pssm info linked to it,
+        then return the part that belongs to this residue
         """
 
         pssm = self._chain.pssm
@@ -195,12 +200,12 @@ class Atom:
 
     def __init__(self, residue, name, element, position, occupancy):
         """
-            Args:
-                residue(deeprank residue object): the residue that this atom belongs to
-                name(str): pdb atom name
-                element(deeprank atomic element enumeration): the chemical element
-                position(numpy array of length 3): pdb position xyz of this atom
-                occupancy(float): pdb occupancy value
+        Args:
+            residue(deeprank residue object): the residue that this atom belongs to
+            name(str): pdb atom name
+            element(deeprank atomic element enumeration): the chemical element
+            position(numpy array of length 3): pdb position xyz of this atom
+            occupancy(float): pdb occupancy value
         """
         self._residue = residue
         self._name = name
@@ -209,9 +214,11 @@ class Atom:
         self._occupancy = occupancy
 
     def __eq__(self, other):
-        return isinstance(self, type(other)) and \
-            self._residue == other._residue and \
-            self._name == other._name
+        return (
+            isinstance(self, type(other))
+            and self._residue == other._residue
+            and self._name == other._name
+        )
 
     def __hash__(self):
         return hash((self._residue, self._name))

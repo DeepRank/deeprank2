@@ -16,20 +16,20 @@ from .tools.score import get_all_scores
 
 
 class GraphHDF5(object):
-
     def __init__(
-            self,
-            pdb_path,
-            ref_path=None,
-            graph_type='residue',
-            pssm_path=None,
-            select=None,
-            outfile='graph.hdf5',
-            nproc=1,
-            use_tqdm=True,
-            tmpdir='./',
-            limit=None,
-            biopython=False):
+        self,
+        pdb_path,
+        ref_path=None,
+        graph_type="residue",
+        pssm_path=None,
+        select=None,
+        outfile="graph.hdf5",
+        nproc=1,
+        use_tqdm=True,
+        tmpdir="./",
+        limit=None,
+        biopython=False,
+    ):
         """Master class from which graphs are computed
         Args:
             pdb_path (str): path to the docking models
@@ -52,8 +52,7 @@ class GraphHDF5(object):
                           graph_type='residue', outfile='1AK4_residue.hdf5')
         """
         # get the list of PDB names
-        pdbs = list(filter(lambda x: x.endswith(
-            '.pdb'), os.listdir(pdb_path)))
+        pdbs = list(filter(lambda x: x.endswith(".pdb"), os.listdir(pdb_path)))
         if select is not None:
             pdbs = list(filter(lambda x: x.startswith(select), pdbs))
 
@@ -61,7 +60,7 @@ class GraphHDF5(object):
         pdbs = [os.path.join(pdb_path, name) for name in pdbs]
         if limit is not None:
             if isinstance(limit, list):
-                pdbs = pdbs[limit[0]:limit[1]]
+                pdbs = pdbs[limit[0] : limit[1]]
             else:
                 pdbs = pdbs[:limit]
 
@@ -70,7 +69,7 @@ class GraphHDF5(object):
         for p in pdbs:
             base = os.path.basename(p)
             mol_name = os.path.splitext(base)[0]
-            base_name = mol_name.split('_')[0]
+            base_name = mol_name.split("_")[0]
             if pssm_path is not None:
                 pssm_paths = self._get_pssm_paths(pssm_path, base_name)
 
@@ -78,13 +77,14 @@ class GraphHDF5(object):
         if ref_path is None:
             ref = None
         else:
-            ref = os.path.join(ref_path, base_name + '.pdb')
+            ref = os.path.join(ref_path, base_name + ".pdb")
 
         # compute all the graphs on 1 core and directly
         # store the graphs the HDF5 file
         if nproc == 1:
             graphs = self.get_all_graphs(
-                pdbs, pssm_paths, ref, outfile, use_tqdm, biopython)
+                pdbs, pssm_paths, ref, outfile, use_tqdm, biopython
+            )
 
         else:
             if not os.path.isdir(tmpdir):
@@ -96,51 +96,41 @@ class GraphHDF5(object):
                 pssm_paths=pssm_paths,
                 ref=ref,
                 tmpdir=tmpdir,
-                biopython=biopython)
+                biopython=biopython,
+            )
             pool.map(part_process, pdbs)
 
             # get the graph names
-            graph_names = [os.path.join(tmpdir, f)
-                           for f in os.listdir(tmpdir)]
-            graph_names = list(
-                filter(lambda x: x.endswith('.pkl'), graph_names))
+            graph_names = [os.path.join(tmpdir, f) for f in os.listdir(tmpdir)]
+            graph_names = list(filter(lambda x: x.endswith(".pkl"), graph_names))
             if select is not None:
                 graph_names = list(
-                    filter(
-                        lambda x: x.startswith(
-                            tmpdir + select),
-                        graph_names))
+                    filter(lambda x: x.startswith(tmpdir + select), graph_names)
+                )
 
             # transfer them to the hdf5
-            with h5py.File(outfile, 'w') as f5:
+            with h5py.File(outfile, "w") as f5:
                 desc = f"{'   Store in HDF5':25s}"
 
                 for name in graph_names:
-                    f = open(name, 'rb')
+                    f = open(name, "rb")
                     g = pickle.load(f)
                     try:
                         graph_to_hdf5(g, f5)
                     except Exception as e:
-                        print(
-                            'Issue encountered while computing graph ', name)
+                        print("Issue encountered while computing graph ", name)
                         print(e)
                     f.close()
                     os.remove(name)
 
         # clean up
-        rmfiles = glob.glob(
-            '*.izone') + glob.glob('*.lzone') + glob.glob('*.refpairs')
+        rmfiles = glob.glob("*.izone") + glob.glob("*.lzone") + glob.glob("*.refpairs")
         for f in rmfiles:
             os.remove(f)
 
     def get_all_graphs(
-            self,
-            pdbs,
-            pssm_paths,
-            ref,
-            outfile,
-            use_tqdm=True,
-            biopython=False):
+        self, pdbs, pssm_paths, ref, outfile, use_tqdm=True, biopython=False
+    ):
 
         graphs = []
         if use_tqdm:
@@ -151,27 +141,21 @@ class GraphHDF5(object):
 
         for pdb_path in lst:
             try:
-                graphs.append(self._get_one_graph(
-                    pdb_path, pssm_paths, ref, biopython))
+                graphs.append(self._get_one_graph(pdb_path, pssm_paths, ref, biopython))
             except Exception as e:
-                print('Issue encountered while computing graph ', pdb_path)
+                print("Issue encountered while computing graph ", pdb_path)
                 traceback.print_exc()
 
-        with h5py.File(outfile, 'w') as f5:
+        with h5py.File(outfile, "w") as f5:
             for g in graphs:
                 try:
                     graph_to_hdf5(g, f5)
                 except Exception as e:
-                    print('Issue encountered while storing graph ', g.id)
+                    print("Issue encountered while storing graph ", g.id)
                     traceback.print_exc()
 
     @staticmethod
-    def _pickle_one_graph(
-            pdb_path,
-            pssm_paths,
-            ref,
-            tmpdir='./',
-            biopython=False):
+    def _pickle_one_graph(pdb_path, pssm_paths, ref, tmpdir="./", biopython=False):
 
         # get the graph
         try:
@@ -186,19 +170,20 @@ class GraphHDF5(object):
                 "B",
                 pssm_paths=pssm_paths,
                 targets=targets,
-                use_biopython=biopython)
+                use_biopython=biopython,
+            )
 
             g = q.build_graph()
 
             # pickle it
-            fname = os.path.join(tmpdir, f'{g.id}.pkl')
+            fname = os.path.join(tmpdir, f"{g.id}.pkl")
 
-            f = open(fname, 'wb')
+            f = open(fname, "wb")
             pickle.dump(g, f)
             f.close()
 
         except Exception as e:
-            print('Issue encountered while storing graph ', pdb_path)
+            print("Issue encountered while storing graph ", pdb_path)
             traceback.print_exc()
 
     @staticmethod
@@ -216,12 +201,15 @@ class GraphHDF5(object):
             "B",
             pssm_paths=pssm_paths,
             targets=targets,
-            use_biopython=biopython)
+            use_biopython=biopython,
+        )
 
         g = q.build_graph()
 
         return g
 
     def _get_pssm_paths(self, pssm_path, pdb_ac):
-        return {"A": os.path.join(pssm_path, f"{pdb_ac}.A.pdb.pssm"),
-                "B": os.path.join(pssm_path, f"{pdb_ac}.B.pdb.pssm")}
+        return {
+            "A": os.path.join(pssm_path, f"{pdb_ac}.A.pdb.pssm"),
+            "B": os.path.join(pssm_path, f"{pdb_ac}.B.pdb.pssm"),
+        }

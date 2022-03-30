@@ -13,45 +13,32 @@ __author__ = "Daniel-Tobias Rademaker"
 
 class GNN_layer(nn.Module):
     def __init__(
-            self,
-            nmb_edge_projection,
-            nmb_hidden_attr,
-            nmb_output_features,
-            message_vector_length,
-            nmb_mlp_neurons,
-            act_fn=nn.SiLU(),
-            is_last_layer=True):
+        self,
+        nmb_edge_projection,
+        nmb_hidden_attr,
+        nmb_output_features,
+        message_vector_length,
+        nmb_mlp_neurons,
+        act_fn=nn.SiLU(),
+        is_last_layer=True,
+    ):
         super(GNN_layer, self).__init__()
         # The MLP that takes in atom-pairs and creates the Mij's
         self.edge_mlp = nn.Sequential(
-            nn.Linear(
-                nmb_edge_projection +
-                nmb_hidden_attr *
-                2,
-                nmb_mlp_neurons),
+            nn.Linear(nmb_edge_projection + nmb_hidden_attr * 2, nmb_mlp_neurons),
             act_fn,
-            nn.Linear(
-                nmb_mlp_neurons,
-                message_vector_length),
-            act_fn)
+            nn.Linear(nmb_mlp_neurons, message_vector_length),
+            act_fn,
+        )
 
         # The node-MLP, creates a new node-representation given the Mi's
         self.node_mlp = nn.Sequential(
-            nn.BatchNorm1d(
-                message_vector_length +
-                nmb_hidden_attr),
-            nn.Linear(
-                message_vector_length +
-                nmb_hidden_attr,
-                nmb_mlp_neurons),
+            nn.BatchNorm1d(message_vector_length + nmb_hidden_attr),
+            nn.Linear(message_vector_length + nmb_hidden_attr, nmb_mlp_neurons),
             act_fn,
-            nn.Linear(
-                nmb_mlp_neurons,
-                nmb_mlp_neurons),
+            nn.Linear(nmb_mlp_neurons, nmb_mlp_neurons),
             act_fn,
-            nn.Linear(
-                nmb_mlp_neurons,
-                nmb_hidden_attr),
+            nn.Linear(nmb_mlp_neurons, nmb_hidden_attr),
         )
 
         # Only last layer have attention and output modules
@@ -74,13 +61,10 @@ class GNN_layer(nn.Module):
     # MLP that takes in the node-attributes of nodes (source + target), the edge attributes
     # and node attributes in order to create a 'message vector'between those
     # nodes
-    def edge_model(
-            self,
-            edge_attr,
-            hidden_features_source,
-            hidden_features_target):
-        cat = torch.cat([edge_attr, hidden_features_source,
-                        hidden_features_target], dim=1)
+    def edge_model(self, edge_attr, hidden_features_source, hidden_features_target):
+        cat = torch.cat(
+            [edge_attr, hidden_features_source, hidden_features_target], dim=1
+        )
         output = self.edge_mlp(cat)
         return output
 
@@ -104,13 +88,17 @@ class GNN_layer(nn.Module):
     # Runs the GNN
     # steps is number of times it exanges info with neighbors
     def update_nodes(self, edges, edge_attr, hidden_features, steps=1):
-        row, col = edges  # a single edge is defined as the index of atom1 and the index of atom2
+        (
+            row,
+            col,
+        ) = edges  # a single edge is defined as the index of atom1 and the index of atom2
         h = hidden_features  # shortening the variable name
         # It is possible to run input through the same same layer multiple
         # times
         for step in range(steps):
             node_pair_messages = self.edge_model(
-                edge_attr, h[row], h[col])  # get all atom-pair messages
+                edge_attr, h[row], h[col]
+            )  # get all atom-pair messages
             # sum all messages per node to single message vector
             messages = self.sum_messages(edges, node_pair_messages, len(h))
             # Use the messages to update the node-attributes
@@ -130,9 +118,18 @@ class GNN_layer(nn.Module):
 #                      GNN super class                         #
 ################################################################
 class SuperGNN(nn.Module):
-    def __init__(self, nmb_edge_attr, nmb_node_attr, nmb_hidden_attr,
-                 nmb_mlp_neurons, nmb_edge_projection, nmb_gnn_layers,
-                 nmb_output_features, message_vector_length, act_fn=nn.SiLU()):
+    def __init__(
+        self,
+        nmb_edge_attr,
+        nmb_node_attr,
+        nmb_hidden_attr,
+        nmb_mlp_neurons,
+        nmb_edge_projection,
+        nmb_gnn_layers,
+        nmb_output_features,
+        message_vector_length,
+        act_fn=nn.SiLU(),
+    ):
         super(SuperGNN, self).__init__()
 
         # Since edge_atributes go into every layer, it might be betetr to learn
@@ -157,10 +154,18 @@ class SuperGNN(nn.Module):
         )
 
         self.modlist = nn.ModuleList(
-            [GNN_layer(nmb_edge_projection, nmb_hidden_attr, nmb_output_features,
-                       message_vector_length, nmb_mlp_neurons,
-                       is_last_layer=(gnn_layer == (nmb_gnn_layers - 1)))
-             for gnn_layer in range(nmb_gnn_layers)])
+            [
+                GNN_layer(
+                    nmb_edge_projection,
+                    nmb_hidden_attr,
+                    nmb_output_features,
+                    message_vector_length,
+                    nmb_mlp_neurons,
+                    is_last_layer=(gnn_layer == (nmb_gnn_layers - 1)),
+                )
+                for gnn_layer in range(nmb_gnn_layers)
+            ]
+        )
 
     # always use this function before running the GNN layers
     def preprocess(self, edge_attr, node_attr):
@@ -171,20 +176,17 @@ class SuperGNN(nn.Module):
     # Runs data through layers and return output. Potentially, attention can
     # also be returned
     def runThroughNetwork(
-            self,
-            edges,
-            edge_attr,
-            node_attr,
-            with_output_attention=False):
+        self, edges, edge_attr, node_attr, with_output_attention=False
+    ):
         edge_attr, node_attr = self.preprocess(edge_attr, node_attr)
         for layer in self.modlist:
             node_attr = layer.update_nodes(edges, edge_attr, node_attr)
         if with_output_attention:
-            representations, attention = self.modlist[-1].output(
-                node_attr, True)
+            representations, attention = self.modlist[-1].output(node_attr, True)
             return representations, attention
         representations = self.modlist[-1].output(node_attr, True)
         return representations
+
 
 ######################
 # The alignment GNN  #
@@ -192,12 +194,19 @@ class SuperGNN(nn.Module):
 
 
 class Alignment_GNN(SuperGNN):
-    def __init__(self, nmb_edge_attr, nmb_node_attr, nmb_output_features,
-                 nmb_hidden_attr, message_vector_length, nmb_mlp_neurons,
-                 nmb_gnn_layers, nmb_edge_projection, act_fn=nn.SiLU()):
-        super(
-            Alignment_GNN,
-            self).__init__(
+    def __init__(
+        self,
+        nmb_edge_attr,
+        nmb_node_attr,
+        nmb_output_features,
+        nmb_hidden_attr,
+        message_vector_length,
+        nmb_mlp_neurons,
+        nmb_gnn_layers,
+        nmb_edge_projection,
+        act_fn=nn.SiLU(),
+    ):
+        super(Alignment_GNN, self).__init__(
             nmb_edge_attr,
             nmb_node_attr,
             nmb_hidden_attr,
@@ -206,7 +215,8 @@ class Alignment_GNN(SuperGNN):
             nmb_gnn_layers,
             nmb_output_features,
             message_vector_length,
-            act_fn)
+            act_fn,
+        )
 
     # Run over all layers, and return the ouput vectors
     def forward(self, edges, edge_attr, node_attr):
@@ -214,7 +224,7 @@ class Alignment_GNN(SuperGNN):
         return representations
 
 
-if __name__ == '__maddin__':
+if __name__ == "__maddin__":
     #####################################
     #   Example of initializing a gnn   #
     #####################################
@@ -242,4 +252,5 @@ if __name__ == '__maddin__':
         message_vector_length=MESSAGE_VECTOR_LENGTH,
         nmb_mlp_neurons=NMB_MLP_NEURONS,
         nmb_hidden_attr=NMB_HIDDED_ATTRIBUTES,
-        nmb_edge_projection=NMB_EDGE_PROJECTION)
+        nmb_edge_projection=NMB_EDGE_PROJECTION,
+    )

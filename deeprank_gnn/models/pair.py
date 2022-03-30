@@ -1,10 +1,8 @@
-
-
 class Pair:
-    """ A hashable, comparable object for any set of two inputs where order doesn't matter.
-        Args:
-            item1 (object): the pair's first object, must be convertable to string
-            item2 (object): the pair's second object, must be convertable to string
+    """A hashable, comparable object for any set of two inputs where order doesn't matter.
+    Args:
+        item1 (object): the pair's first object, must be convertable to string
+        item2 (object): the pair's second object, must be convertable to string
     """
 
     def __init__(self, item1, item2):
@@ -25,11 +23,13 @@ class Pair:
     def __eq__(self, other):
         # Compare the pairs as sets, so the order doesn't matter.
 
-        return self.item1 == other.item1 and self.item2 == other.item2 or \
-               self.item1 == other.item2 and self.item2 == other.item1
+        return (
+            self.item1 == other.item1
+            and self.item2 == other.item2
+            or self.item1 == other.item2
+            and self.item2 == other.item1
+        )
 
     def __iter__(self):
         # Iterate over the two items in the pair.
         return iter([self.item1, self.item2])
-
-

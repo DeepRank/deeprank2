@@ -17,6 +17,7 @@ from time import time
 def plot_graph(graph, cluster):
 
     import matplotlib.pyplot as plt
+
     pos = nx.spring_layout(graph, iterations=200)
     nx.draw(graph, pos, node_color=cluster)
     plt.show()
@@ -31,11 +32,8 @@ def get_preloaded_cluster(cluster, batch):
 
 
 def community_detection_per_batch(
-        edge_index,
-        batch,
-        num_nodes,
-        edge_attr=None,
-        method='mcl'):
+    edge_index, batch, num_nodes, edge_attr=None, method="mcl"
+):
     """Detects clusters of nodes based on the edge attributes (distances)
 
     Args:
@@ -71,33 +69,32 @@ def community_detection_per_batch(
         subg = g.subgraph(index)
 
         # detect the communities using Louvain method
-        if method == 'louvain':
+        if method == "louvain":
             c = community.best_partition(subg)
             cluster += [v + ncluster for k, v in c.items()]
             ncluster = max(cluster)
 
         # detect communities using MCL
-        elif method == 'mcl':
+        elif method == "mcl":
             matrix = nx.to_scipy_sparse_matrix(subg)
             # run MCL with default parameters
             result = mc.run_mcl(matrix)
-            mc_clust = mc.get_clusters(result)    # get clusters
+            mc_clust = mc.get_clusters(result)  # get clusters
 
-            index = np.zeros(subg.number_of_nodes()).astype('int')
+            index = np.zeros(subg.number_of_nodes()).astype("int")
             for ic, c in enumerate(mc_clust):
                 index[list(c)] = ic + ncluster
             cluster += index.tolist()
             ncluster = max(cluster)
 
         else:
-            raise ValueError(
-                f'Clustering method {method} not supported')
+            raise ValueError(f"Clustering method {method} not supported")
     # return
     device = edge_index.device
     return torch.tensor(cluster).to(device)
 
 
-def community_detection(edge_index, num_nodes, edge_attr=None, method='mcl'):
+def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"):
     """Detects clusters of nodes based on the edge attributes (distances)
 
     Args:
@@ -139,28 +136,27 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method='mcl'):
     device = edge_index.device
 
     # detect the communities using Louvain detection
-    if method == 'louvain':
+    if method == "louvain":
         cluster = community.best_partition(g)
         return torch.tensor([v for k, v in cluster.items()]).to(device)
 
     # detect the communities using MCL detection
-    elif method == 'mcl':
+    elif method == "mcl":
 
         matrix = nx.to_scipy_sparse_matrix(g)
 
         # run MCL with default parameters
         result = mc.run_mcl(matrix)
 
-        clusters = mc.get_clusters(result)    # get clusters
+        clusters = mc.get_clusters(result)  # get clusters
 
-        index = np.zeros(num_nodes).astype('int')
+        index = np.zeros(num_nodes).astype("int")
         for ic, c in enumerate(clusters):
             index[list(c)] = ic
 
         return torch.tensor(index).to(device)
     else:
-        raise ValueError(
-            f'Clustering method {method} not supported')
+        raise ValueError(f"Clustering method {method} not supported")
 
 
 def community_pooling(cluster, data):
@@ -194,10 +190,10 @@ def community_pooling(cluster, data):
     """
 
     # determine what the batches has as attributes
-    has_internal_edges = hasattr(data, 'internal_edge_index')
-    has_pos2D = hasattr(data, 'pos2D')
-    has_pos = hasattr(data, 'pos')
-    has_cluster = hasattr(data, 'cluster0')
+    has_internal_edges = hasattr(data, "internal_edge_index")
+    has_pos2D = hasattr(data, "pos2D")
+    has_pos = hasattr(data, "pos")
+    has_cluster = hasattr(data, "cluster0")
 
     cluster, perm = consecutive_cluster(cluster)
     cluster = cluster.to(data.x.device)
@@ -206,13 +202,13 @@ def community_pooling(cluster, data):
     x, _ = scatter_max(data.x, cluster, dim=0)
 
     # pool the edges
-    edge_index, edge_attr = pool_edge(
-        cluster, data.edge_index, data.edge_attr)
+    edge_index, edge_attr = pool_edge(cluster, data.edge_index, data.edge_attr)
 
     # pool internal edges if necessary
     if has_internal_edges:
         internal_edge_index, internal_edge_attr = pool_edge(
-            cluster, data.internal_edge_index, data.internal_edge_attr)
+            cluster, data.internal_edge_index, data.internal_edge_attr
+        )
 
     # pool the pos
     if has_pos:
@@ -224,11 +220,11 @@ def community_pooling(cluster, data):
         c0, c1 = data.cluster0, data.cluster1
 
     # pool batch
-    if hasattr(data, 'batch'):
-        batch = None if data.batch is None else pool_batch(
-            perm, data.batch)
-        data = Batch(batch=batch, x=x, edge_index=edge_index,
-                     edge_attr=edge_attr, pos=pos)
+    if hasattr(data, "batch"):
+        batch = None if data.batch is None else pool_batch(perm, data.batch)
+        data = Batch(
+            batch=batch, x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos
+        )
 
         if has_internal_edges:
             data.internal_edge_index = internal_edge_index
@@ -239,8 +235,7 @@ def community_pooling(cluster, data):
             data.cluster1 = c1
 
     else:
-        data = Data(x=x, edge_index=edge_index,
-                    edge_attr=edge_attr, pos=pos)
+        data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos)
 
         if has_internal_edges:
             data.internal_edge_index = internal_edge_index

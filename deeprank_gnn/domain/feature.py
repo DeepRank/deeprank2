@@ -1,4 +1,3 @@
-
 # node features
 FEATURENAME_POSITION = "pos"
 FEATURENAME_AMINOACID = "type"

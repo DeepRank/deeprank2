@@ -26,10 +26,7 @@ class FoutLayer(torch.nn.Module):
             an additive bias. (default: :obj:`True`)
     """
 
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bias=True):
+    def __init__(self, in_channels, out_channels, bias=True):
 
         super(FoutLayer, self).__init__()
 
@@ -43,7 +40,7 @@ class FoutLayer(torch.nn.Module):
         if bias:
             self.bias = Parameter(torch.Tensor(out_channels))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
 
         self.reset_parameters()
 
@@ -66,8 +63,7 @@ class FoutLayer(torch.nn.Module):
 
         # gamma_i = 1/Ni Sum_j x_j * Wn
         # there might be a better way than looping over the nodes
-        gamma = torch.zeros(
-            num_node, self.out_channels).to(alpha.device)
+        gamma = torch.zeros(num_node, self.out_channels).to(alpha.device)
         for n in range(num_node):
             index = edge_index[:, edge_index[0, :] == n][1, :]
             gamma[n, :] = torch.mean(beta[index, :], dim=0)
@@ -82,11 +78,10 @@ class FoutLayer(torch.nn.Module):
         return alpha
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.in_channels}, {self.out_channels})'
+        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
 class FoutNet(torch.nn.Module):
-
     def __init__(self, input_shape, output_shape=1, input_shape_edge=None):
         super(FoutNet, self).__init__()
 
@@ -96,13 +91,13 @@ class FoutNet(torch.nn.Module):
         self.fc1 = torch.nn.Linear(32, 64)
         self.fc2 = torch.nn.Linear(64, output_shape)
 
-        self.clustering = 'mcl'
+        self.clustering = "mcl"
 
     def forward(self, data):
 
         act = nn.Tanhshrink()
         act = F.relu
-        #act = nn.LeakyReLU(0.25)
+        # act = nn.LeakyReLU(0.25)
 
         # first conv block
         data.x = act(self.conv1(data.x, data.edge_index))
@@ -118,7 +113,7 @@ class FoutNet(torch.nn.Module):
         x = scatter_mean(x, batch, dim=0)
         x = act(self.fc1(x))
         x = self.fc2(x)
-        #x = F.dropout(x, training=self.training)
+        # x = F.dropout(x, training=self.training)
 
         return x
         # return F.relu(x)

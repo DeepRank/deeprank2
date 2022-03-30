@@ -1,7 +1,10 @@
 import re
 
 
-from deeprank_gnn.models.forcefield.residue import ResidueClassCriterium, ALL_AMINO_ACIDS
+from deeprank_gnn.models.forcefield.residue import (
+    ResidueClassCriterium,
+    ALL_AMINO_ACIDS,
+)
 
 
 class ResidueClassParser:
@@ -21,21 +24,26 @@ class ResidueClassParser:
 
             present_atom_names = []
             absent_atom_names = []
-            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(line[match.end(): ]):
-                atom_names = [name.strip() for name in match.group(2).split(',')]
+            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(
+                line[match.end() :]
+            ):
+                atom_names = [name.strip() for name in match.group(2).split(",")]
                 if match.group(1) == "present":
                     present_atom_names.extend(atom_names)
 
                 elif match.group(1) == "absent":
                     absent_atom_names.extend(atom_names)
 
-            result.append(ResidueClassCriterium(class_name, amino_acid_names,
-                                                present_atom_names, absent_atom_names))
+            result.append(
+                ResidueClassCriterium(
+                    class_name, amino_acid_names, present_atom_names, absent_atom_names
+                )
+            )
         return result
 
     @staticmethod
     def _parse_amino_acids(string):
-        if string.strip()== "all":
+        if string.strip() == "all":
             return ALL_AMINO_ACIDS
         else:
-            return [name.strip() for name in string.split(',')]
+            return [name.strip() for name in string.split(",")]

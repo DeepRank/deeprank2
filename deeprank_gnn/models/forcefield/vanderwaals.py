@@ -1,5 +1,3 @@
-
-
 class VanderwaalsParam:
     def __init__(self, inter_epsilon, inter_sigma, intra_epsilon, intra_sigma):
         self.inter_epsilon = inter_epsilon

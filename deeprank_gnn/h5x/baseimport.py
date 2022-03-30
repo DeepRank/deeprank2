@@ -19,6 +19,7 @@ from deeprank_gnn.tools.graph import hdf5_to_graph, plotly_3d, plotly_2d
 def tsne_graph(grp, method):
 
     import plotly.offline as py
+
     py.init_notebook_mode(connected=True)
 
     g = hdf5_to_graph(grp)
@@ -29,6 +30,7 @@ def tsne_graph(grp, method):
 def graph3d(grp):
 
     import plotly.offline as py
+
     py.init_notebook_mode(connected=True)
 
     g = hdf5_to_graph(grp)

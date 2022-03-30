@@ -6,13 +6,12 @@ try:
     import freesasa
 
 except ImportError:
-    print('Freesasa not found')
+    print("Freesasa not found")
 
 
 class BSA(object):
-
-    def __init__(self, pdb_data, sqldb=None, chainA='A', chainB='B'):
-        '''Compute the burried surface area feature
+    def __init__(self, pdb_data, sqldb=None, chainA="A", chainB="B"):
+        """Compute the burried surface area feature
 
         Freesasa is required for this feature.
 
@@ -41,7 +40,7 @@ class BSA(object):
         >>> bsa.get_contact_residue_sasa()
         >>> bsa.sql.close()
 
-        '''
+        """
 
         self.pdb_data = pdb_data
         if sqldb is None:
@@ -60,26 +59,25 @@ class BSA(object):
             self.complex = freesasa.Structure(self.pdb_data)
         else:
             self.complex = freesasa.Structure()
-            atomdata = self.sql.get(
-                'name,resName,resSeq,chainID,x,y,z')
+            atomdata = self.sql.get("name,resName,resSeq,chainID,x,y,z")
             for atomName, residueName, residueNumber, chainLabel, x, y, z in atomdata:
-                atomName = f'{atomName[0]:>2}'
+                atomName = f"{atomName[0]:>2}"
                 self.complex.addAtom(
-                    atomName, residueName, residueNumber, chainLabel, x, y, z)
+                    atomName, residueName, residueNumber, chainLabel, x, y, z
+                )
         self.result_complex = freesasa.calc(self.complex)
 
         self.chains = {}
         self.result_chains = {}
         for label in self.chains_label:
             self.chains[label] = freesasa.Structure()
-            atomdata = self.sql.get(
-                'name,resName,resSeq,chainID,x,y,z', chainID=label)
+            atomdata = self.sql.get("name,resName,resSeq,chainID,x,y,z", chainID=label)
             for atomName, residueName, residueNumber, chainLabel, x, y, z in atomdata:
-                atomName = f'{atomName[0]:>2}'
+                atomName = f"{atomName[0]:>2}"
                 self.chains[label].addAtom(
-                    atomName, residueName, residueNumber, chainLabel, x, y, z)
-            self.result_chains[label] = freesasa.calc(
-                self.chains[label])
+                    atomName, residueName, residueNumber, chainLabel, x, y, z
+                )
+            self.result_chains[label] = freesasa.calc(self.chains[label])
 
     def get_contact_residue_sasa(self, cutoff=8.5):
         """Compute the feature value."""
@@ -94,23 +92,23 @@ class BSA(object):
         for r in res:
 
             # define the selection string and the bsa for the complex
-            select_str = ('res, (resi %d) and (chain %s)' %
-                          (r[1], r[0]),)
+            select_str = ("res, (resi %d) and (chain %s)" % (r[1], r[0]),)
             asa_complex = freesasa.selectArea(
-                select_str, self.complex, self.result_complex)['res']
+                select_str, self.complex, self.result_complex
+            )["res"]
 
             # define the selection string and the bsa for the isolated
-            select_str = ('res, resi %d' % r[1],)
+            select_str = ("res, resi %d" % r[1],)
             asa_unbound = freesasa.selectArea(
-                select_str, self.chains[r[0]], self.result_chains[r[0]])['res']
+                select_str, self.chains[r[0]], self.result_chains[r[0]]
+            )["res"]
 
             # define the bsa
             bsa = asa_unbound - asa_complex
 
             # define the xyz key : (chain,x,y,z)
-            chain = {'A': 0, 'B': 1}[r[0]]
-            xyz = np.mean(self.sql.get(
-                'x,y,z', resSeq=r[1], chainID=r[0]), 0)
+            chain = {"A": 0, "B": 1}[r[0]]
+            xyz = np.mean(self.sql.get("x,y,z", resSeq=r[1], chainID=r[0]), 0)
             xyzkey = tuple([chain] + xyz.tolist())
 
             # put the data in dict

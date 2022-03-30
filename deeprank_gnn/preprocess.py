@@ -57,18 +57,18 @@ class _PreProcess(Process):
                 graph = query.build_graph()
                 if graph_has_nan(graph):
                     _log.warning(
-                        f"skipping {query}, because of a generated NaN value in the graph")
+                        f"skipping {query}, because of a generated NaN value in the graph"
+                    )
 
-                with h5py.File(self._output_path, 'a') as f5:
+                with h5py.File(self._output_path, "a") as f5:
                     graph_to_hdf5(graph, f5)
 
             except BaseException:
-                _log.exception(
-                    f"error adding {query} to {self._output_path}")
+                _log.exception(f"error adding {query} to {self._output_path}")
 
                 # Don't leave behind an unfinished hdf5 group.
                 if graph is not None:
-                    with h5py.File(self._output_path, 'a') as f5:
+                    with h5py.File(self._output_path, "a") as f5:
                         if graph.id in f5:
                             del f5[graph.id]
 
@@ -93,9 +93,10 @@ class PreProcessor:
         if prefix is None:
             prefix = "preprocessed-data"
 
-        self._processes = [_PreProcess(self._queue,
-                                       "{}-{}.hdf5".format(prefix,
-                                                           index)) for index in range(process_count)]
+        self._processes = [
+            _PreProcess(self._queue, "{}-{}.hdf5".format(prefix, index))
+            for index in range(process_count)
+        ]
 
     def start(self):
         "start the workers"
@@ -104,8 +105,7 @@ class PreProcessor:
         for process in self._processes:
             process.start()
             if not process.is_alive():
-                raise RuntimeError(
-                    f"worker process {process.name} did not start")
+                raise RuntimeError(f"worker process {process.name} did not start")
 
     def wait(self):
         "wait for all graphs to be built"
@@ -130,8 +130,11 @@ class PreProcessor:
 
     @property
     def output_paths(self):
-        return [process.output_path for process in self._processes
-                if os.path.isfile(process.output_path)]
+        return [
+            process.output_path
+            for process in self._processes
+            if os.path.isfile(process.output_path)
+        ]
 
     def shutdown(self):
         "stop building graphs"

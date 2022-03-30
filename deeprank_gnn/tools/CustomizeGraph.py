@@ -5,7 +5,7 @@ import sys
 import numpy as np
 
 
-def add_target(graph_path, target_name, target_list, sep=' '):
+def add_target(graph_path, target_name, target_list, sep=" "):
     """Add a target to all the graphs contains in hdf5 files
 
     Args:
@@ -26,15 +26,14 @@ def add_target(graph_path, target_name, target_list, sep=' '):
 
     target_dict = {}
 
-    labels = np.loadtxt(target_list, delimiter=sep,
-                        usecols=[0], dtype=str)
+    labels = np.loadtxt(target_list, delimiter=sep, usecols=[0], dtype=str)
     values = np.loadtxt(target_list, delimiter=sep, usecols=[1])
     for label, value in zip(labels, values):
         target_dict[label] = value
 
     # if a directory is provided
     if os.path.isdir(graph_path):
-        graphs = glob.glob(f'{graph_path}/*.hdf5')
+        graphs = glob.glob(f"{graph_path}/*.hdf5")
 
     # if a single file is provided
     elif os.path.isfile(graph_path):
@@ -48,16 +47,16 @@ def add_target(graph_path, target_name, target_list, sep=' '):
     for hdf5 in graphs:
         print(hdf5)
         try:
-            f5 = h5py.File(hdf5, 'a')
+            f5 = h5py.File(hdf5, "a")
 
             for model in f5.keys():
                 try:
-                    model_gp = f5[f'{model}']
+                    model_gp = f5[f"{model}"]
 
-                    if 'score' not in model_gp:
-                        model_gp.create_group('score')
+                    if "score" not in model_gp:
+                        model_gp.create_group("score")
 
-                    group = f5[f'{model}/score/']
+                    group = f5[f"{model}/score/"]
 
                     if target_name in group.keys():
                         # Delete the target if it already existed
@@ -67,9 +66,9 @@ def add_target(graph_path, target_name, target_list, sep=' '):
                     group[target_name] = target_dict[model]
 
                 except BaseException:
-                    print(f'no graph for {model}')
+                    print(f"no graph for {model}")
 
             f5.close()
 
         except BaseException:
-            print(f'no graph for {hdf5}')
+            print(f"no graph for {hdf5}")

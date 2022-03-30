@@ -24,7 +24,7 @@ def get_binary(values, threshold, target):
     Returns:
         list: list of binary values
     """
-    inverse = ['fnat', 'bin_class']
+    inverse = ["fnat", "bin_class"]
     if target in inverse:
         values_binary = [1 if x > threshold else 0 for x in values]
     else:
@@ -68,7 +68,6 @@ def get_comparison(prediction, ground_truth, binary=True, classes=[0, 1]):
 
 
 class Metrics(object):
-
     def __init__(self, prediction, y, target, threshold=4, binary=True):
         """
         Master class from which all metrics are computed
@@ -111,26 +110,34 @@ class Metrics(object):
         self.target = target
         self.threshold = threshold
 
-        print(f'Threshold set to {self.threshold}')
+        print(f"Threshold set to {self.threshold}")
 
         if self.binary:
-            prediction_binary = get_binary(
-                self.prediction, self.threshold, self.target)
-            y_binary = get_binary(
-                self.y, self.threshold, self.target)
+            prediction_binary = get_binary(self.prediction, self.threshold, self.target)
+            y_binary = get_binary(self.y, self.threshold, self.target)
             classes = [0, 1]
-            false_positive, false_negative, true_positive, true_negative = get_comparison(
-                prediction_binary, y_binary, self.binary, classes=classes)
+            (
+                false_positive,
+                false_negative,
+                true_positive,
+                true_negative,
+            ) = get_comparison(
+                prediction_binary, y_binary, self.binary, classes=classes
+            )
 
         else:
-            if target == 'capri_class':
+            if target == "capri_class":
                 classes = [1, 2, 3, 4, 5]
-            elif target == 'bin_class':
+            elif target == "bin_class":
                 classes = [0, 1]
             else:
-                raise ValueError('target must be capri_class on bin_class')
-            false_positive, false_negative, true_positive, true_negative = get_comparison(
-                self.prediction, self.y, self.binary, classes=classes)
+                raise ValueError("target must be capri_class on bin_class")
+            (
+                false_positive,
+                false_negative,
+                true_positive,
+                true_negative,
+            ) = get_comparison(self.prediction, self.y, self.binary, classes=classes)
 
         try:
             # Sensitivity, hit rate, recall, or true positive rate
@@ -174,8 +181,9 @@ class Metrics(object):
         except BaseException:
             self.FDR = None
 
-        self.accuracy = (true_positive + true_negative) / \
-            (true_positive + false_positive + false_negative + true_negative)
+        self.accuracy = (true_positive + true_negative) / (
+            true_positive + false_positive + false_negative + true_negative
+        )
 
         # regression metrics
         self.explained_variance = None
@@ -187,39 +195,46 @@ class Metrics(object):
         self.median_squared_log_error = None
         self.r2_score = None
 
-        if target in ['fnat', 'irmsd', 'lrmsd']:
+        if target in ["fnat", "irmsd", "lrmsd"]:
 
             # Explained variance regression score function
             self.explained_variance = metrics.explained_variance_score(
-                self.y, self.prediction)
+                self.y, self.prediction
+            )
 
             # Max_error metric calculates the maximum residual error
             self.max_error = metrics.max_error(self.y, self.prediction)
 
             # Mean absolute error regression loss
             self.mean_absolute_error = metrics.mean_absolute_error(
-                self.y, self.prediction)
+                self.y, self.prediction
+            )
 
             # Mean squared error regression loss
             self.mean_squared_error = metrics.mean_squared_error(
-                self.y, self.prediction, squared=True)
+                self.y, self.prediction, squared=True
+            )
 
             # Root mean squared error regression loss
             self.root_mean_squared_error = metrics.mean_squared_error(
-                self.y, self.prediction, squared=False)
+                self.y, self.prediction, squared=False
+            )
 
             try:
                 # Mean squared logarithmic error regression loss
                 self.mean_squared_log_error = metrics.mean_squared_log_error(
-                    self.y, self.prediction)
+                    self.y, self.prediction
+                )
             except ValueError:
                 print(
                     "WARNING: Mean Squared Logarithmic Error cannot be used when "
-                    "targets contain negative values.")
+                    "targets contain negative values."
+                )
 
             # Median absolute error regression loss
             self.median_squared_log_error = metrics.median_absolute_error(
-                self.y, self.prediction)
+                self.y, self.prediction
+            )
 
             # R^2 (coefficient of determination) regression score function
             self.r2_score = metrics.r2_score(self.y, self.prediction)
@@ -237,12 +252,11 @@ class Metrics(object):
         """
         idx = np.argsort(self.prediction)
 
-        inverse = ['fnat', 'bin_class']
+        inverse = ["fnat", "bin_class"]
         if self.target in inverse:
             idx = idx[::-1]
 
-        ground_truth_bool = get_binary(
-            self.y, self.threshold, self.target)
+        ground_truth_bool = get_binary(self.y, self.threshold, self.target)
         ground_truth_bool = np.array(ground_truth_bool)
         return idx, ground_truth_bool
 

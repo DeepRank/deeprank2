@@ -9,7 +9,6 @@ _log = logging.getLogger(__name__)
 
 
 class SimpleConvolutionalLayer(Module):
-
     def __init__(self, count_node_features, count_edge_features):
 
         super(SimpleConvolutionalLayer, self).__init__()
@@ -18,16 +17,20 @@ class SimpleConvolutionalLayer(Module):
         hidden_size = 32
 
         edge_input_size = 2 * count_node_features + count_edge_features
-        self._edge_mlp = Sequential(Linear(edge_input_size, hidden_size),
-                                    SiLU(),
-                                    Linear(hidden_size, message_size),
-                                    SiLU())
+        self._edge_mlp = Sequential(
+            Linear(edge_input_size, hidden_size),
+            SiLU(),
+            Linear(hidden_size, message_size),
+            SiLU(),
+        )
 
         node_input_size = count_node_features + message_size
-        self._node_mlp = Sequential(Linear(node_input_size, hidden_size),
-                                    SiLU(),
-                                    Linear(hidden_size, count_node_features),
-                                    SiLU())
+        self._node_mlp = Sequential(
+            Linear(node_input_size, hidden_size),
+            SiLU(),
+            Linear(hidden_size, count_node_features),
+            SiLU(),
+        )
 
     def _edge_forward(self, node_features, edge_node_indices, edge_features):
 
@@ -37,7 +40,8 @@ class SimpleConvolutionalLayer(Module):
         node1_features = node_features[node1_indices]
 
         message_input = torch.cat(
-            [node0_features, node1_features, edge_features], dim=1)
+            [node0_features, node1_features, edge_features], dim=1
+        )
 
         messages_per_neighbour = self._edge_mlp(message_input)
 
@@ -56,16 +60,15 @@ class SimpleConvolutionalLayer(Module):
         node0_indices, node1_indices = edge_node_indices
 
         messages_per_neighbour = self._edge_forward(
-            node_features, edge_node_indices, edge_features)
+            node_features, edge_node_indices, edge_features
+        )
 
         message_sums_per_node = torch.zeros(
-            node_features.shape[0],
-            messages_per_neighbour.shape[1])
+            node_features.shape[0], messages_per_neighbour.shape[1]
+        )
         scatter_sum(
-            messages_per_neighbour,
-            node0_indices,
-            dim=0,
-            out=message_sums_per_node)
+            messages_per_neighbour, node0_indices, dim=0, out=message_sums_per_node
+        )
 
         output = self._node_forward(node_features, message_sums_per_node)
 
@@ -73,13 +76,12 @@ class SimpleConvolutionalLayer(Module):
 
 
 class SimpleNetwork(Module):
-
     def __init__(self, input_shape, output_shape, input_shape_edge):
         """
-            Args:
-                input_shape(int): number of node input features
-                output_shape(int): number of output value per graph
-                input_shape_edge(int): number of edge input features
+        Args:
+            input_shape(int): number of node input features
+            output_shape(int): number of output value per graph
+            input_shape_edge(int): number of edge input features
         """
 
         super(SimpleNetwork, self).__init__()
@@ -90,31 +92,31 @@ class SimpleNetwork(Module):
         self._external_convolutional_layers = []
         for layer_index in range(layer_count):
             self._internal_convolutional_layers.append(
-                SimpleConvolutionalLayer(input_shape, input_shape_edge))
+                SimpleConvolutionalLayer(input_shape, input_shape_edge)
+            )
             self._external_convolutional_layers.append(
-                SimpleConvolutionalLayer(input_shape, input_shape_edge))
+                SimpleConvolutionalLayer(input_shape, input_shape_edge)
+            )
 
         hidden_size = 32
 
-        self._graph_mlp = Sequential(Linear(2 * input_shape, hidden_size),
-                                     SiLU(),
-                                     Linear(hidden_size, output_shape),
-                                     SiLU())
+        self._graph_mlp = Sequential(
+            Linear(2 * input_shape, hidden_size),
+            SiLU(),
+            Linear(hidden_size, output_shape),
+            SiLU(),
+        )
 
     @staticmethod
-    def _update(
-            node_features,
-            edge_indices,
-            edge_features,
-            convolutional_layers):
+    def _update(node_features, edge_indices, edge_features, convolutional_layers):
 
         updated_node_features = node_features.clone().detach()
         for layer_index in range(len(convolutional_layers)):
             updated_node_features = silu(
                 convolutional_layers[layer_index](
-                    updated_node_features,
-                    edge_indices,
-                    edge_features))
+                    updated_node_features, edge_indices, edge_features
+                )
+            )
 
         return updated_node_features
 
@@ -131,20 +133,15 @@ class SimpleNetwork(Module):
             data.x,
             data.internal_edge_index,
             data.internal_edge_attr,
-            self._internal_convolutional_layers)
+            self._internal_convolutional_layers,
+        )
         updated_external = self._update(
-            data.x,
-            data.edge_index,
-            data.edge_attr,
-            self._external_convolutional_layers)
+            data.x, data.edge_index, data.edge_attr, self._external_convolutional_layers
+        )
 
         graph_indices = data.batch
-        means_per_graph_internal = scatter_mean(
-            updated_internal, graph_indices, dim=0)
-        means_per_graph_external = scatter_mean(
-            updated_external, graph_indices, dim=0)
+        means_per_graph_internal = scatter_mean(updated_internal, graph_indices, dim=0)
+        means_per_graph_external = scatter_mean(updated_external, graph_indices, dim=0)
 
-        output = self._graph_forward(
-            means_per_graph_internal,
-            means_per_graph_external)
+        output = self._graph_forward(means_per_graph_internal, means_per_graph_external)
         return output

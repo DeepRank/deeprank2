@@ -5,23 +5,24 @@ class AminoAcid:
     "a value to represent one of the amino acids"
 
     def __init__(
-            self,
-            name,
-            three_letter_code,
-            one_letter_code,
-            charge=None,
-            polarity=None,
-            size=None,
-            index=None):
+        self,
+        name,
+        three_letter_code,
+        one_letter_code,
+        charge=None,
+        polarity=None,
+        size=None,
+        index=None,
+    ):
         """
-            Args:
-                name(str): unique name for the amino acid
-                three_letter_code(str): code of the amino acid, as in PDB
-                one_letter_code(str): letter of the amino acid, as in fasta
-                charge(float, optional): the charge property of the amino acid
-                polarity(deeprank polarity enum, optional): the polarity property of the amino acid
-                size(int, optional): the number of heavy atoms in the side chain
-                index(int, optional): the rank of the amino acid, used for computing one-hot encoding
+        Args:
+            name(str): unique name for the amino acid
+            three_letter_code(str): code of the amino acid, as in PDB
+            one_letter_code(str): letter of the amino acid, as in fasta
+            charge(float, optional): the charge property of the amino acid
+            polarity(deeprank polarity enum, optional): the polarity property of the amino acid
+            size(int, optional): the number of heavy atoms in the side chain
+            index(int, optional): the rank of the amino acid, used for computing one-hot encoding
         """
 
         self._name = name
@@ -50,7 +51,9 @@ class AminoAcid:
         if self._index is None:
             raise ValueError(
                 "amino acid {} index is not set, thus no onehot can be computed".format(
-                    self._name))
+                    self._name
+                )
+            )
 
         # assumed that there are only 20 different amino acids
         a = numpy.zeros(20)

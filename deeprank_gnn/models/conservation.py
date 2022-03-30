@@ -1,5 +1,3 @@
-
-
 class ConservationRow:
     "holds data for one position-specific scoring matrix row"
 
@@ -35,4 +33,3 @@ class ConservationTable:
         "can be used to merge two non-overlapping scoring tables"
 
         self._rows.update(other._rows)
-
