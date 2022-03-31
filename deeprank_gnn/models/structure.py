@@ -171,6 +171,10 @@ class Residue:
     def __repr__(self):
         return "{} {}".format(self._chain, self.number_string)
 
+    @property
+    def position(self) -> numpy.array
+        return numpy.mean([atom.position for atom in self._atoms], axis=0)
+
 
 class AtomicElement(Enum):
     "value to represent the type of pdb atoms"

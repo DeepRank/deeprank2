@@ -103,6 +103,12 @@ def get_structure(pdb, id_):
     return structure
 
 
+def get_atom_distance(atom1: Atom, atom2: Atom) -> float:
+    "Calculate Euclidean distance between two atomic centers"
+
+    return numpy.sqrt(numpy.sum(numpy.square(atom1.position - atom2.position)))
+
+
 def get_residue_distance(residue1, residue2):
     """ Get the shortest distance between two atoms from two different given residues.
 
