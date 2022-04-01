@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Callable, Union, List
+from typing import Callable, Union, List, Dict, Optional
+from uuid import uuid4
 
 import numpy
 import h5py
@@ -9,7 +10,6 @@ from deeprank_gnn.models.contact import Contact
 from deeprank_gnn.tools.graph import graph_to_hdf5
 from deeprank_gnn.models.grid import MapMethod, Grid, GridSettings
 from deeprank_gnn.tools.grid import map_features, grid_to_hdf5
-
 
 
 class Edge:
