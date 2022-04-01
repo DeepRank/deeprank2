@@ -2,21 +2,26 @@ import tempfile
 import shutil
 import os
 
+import h5py
 from pdb2sql import pdb2sql
+import numpy
 
 from deeprank_gnn.models.grid import GridSettings, MapMethod
 from deeprank_gnn.models.graph import Graph, Edge, Node
 from deeprank_gnn.models.contact import ResidueContact
 from deeprank_gnn.tools.pdb import get_structure
 from deeprank_gnn.domain.amino_acid import *
-
+from deeprank_gnn.tools.grid import HDF5KEY_GRID_MAPPEDFEATURES, HDF5KEY_GRID_MAPPEDFEATURESVALUE
+from deeprank_gnn.tools.graph import HDF5KEY_GRAPH_NODEFEATURES, HDF5KEY_GRAPH_EDGEINDICES, HDF5KEY_GRAPH_EDGEFEATURES
 
 
 def test_graph_build_and_export():
 
+    entry_id = "test"
+
     pdb = pdb2sql("tests/data/pdb/101M/101M.pdb")
     try:
-        structure = get_structure(pdb, "101M-M0A")
+        structure = get_structure(pdb, entry_id)
     finally:
         pdb._close()
 
@@ -27,6 +32,13 @@ def test_graph_build_and_export():
     node0 = Node(residue0)
     node1 = Node(residue1)
     edge01 = Edge(contact01)
+
+    node_feature_name = "node_feature"
+    edge_feature_name = "edge_feature"
+
+    node0.features[node_feature_name] = numpy.array([0.1])
+    node1.features[node_feature_name] = numpy.array([1.0])
+    edge01.features[edge_feature_name] = numpy.array([2.0])
 
     grid_settings = GridSettings(20, 20.0)
     tmp_dir_path = tempfile.mkdtemp()
@@ -40,5 +52,34 @@ def test_graph_build_and_export():
 
         graph.to_hdf5_gnn()
         graph.to_hdf5_cnn(grid_settings, MapMethod.FAST_GAUSSIAN)
+
+        with h5py.File(hdf5_path, 'r') as f5:
+            entry_group = f5[entry_id]
+
+            # check for graph values
+            assert HDF5KEY_GRAPH_NODEFEATURES in entry_group
+            node_features_group = entry_group[HDF5KEY_GRAPH_NODEFEATURES]
+            assert node_feature_name in node_features_group
+            assert len(numpy.nonzero(node_features_group[node_feature_name][()])) > 0
+
+            assert HDF5KEY_GRAPH_EDGEINDICES in entry_group
+            assert len(numpy.nonzero(entry_group[HDF5KEY_GRAPH_EDGEINDICES][()])) > 0
+
+            assert HDF5KEY_GRAPH_EDGEFEATURES in entry_group
+            edge_features_group = entry_group[HDF5KEY_GRAPH_EDGEFEATURES]
+            assert edge_feature_name in edge_features_group
+            assert len(numpy.nonzero(edge_features_group[edge_feature_name][()])) > 0
+
+            # check for grid-mapped values
+            assert HDF5KEY_GRID_MAPPEDFEATURES in entry_group
+            mapped_group = entry_group[HDF5KEY_GRID_MAPPEDFEATURES]
+
+            for feature_name in (node_feature_name, edge_feature_name):
+                feature_name = f"{feature_name}_000"
+
+                assert feature_name in mapped_group, f"missing mapped feature {feature_name}"
+                assert HDF5KEY_GRID_MAPPEDFEATURESVALUE in mapped_group[feature_name]
+                data = mapped_group[feature_name][HDF5KEY_GRID_MAPPEDFEATURESVALUE][()]
+                assert len(numpy.nonzero(data)) > 0, f"{feature_name}: all zero"
     finally:
         shutil.rmtree(tmp_dir_path)

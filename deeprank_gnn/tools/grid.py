@@ -1,4 +1,5 @@
 from typing import Dict
+import logging
 
 import h5py
 import numpy
@@ -6,6 +7,9 @@ import itertools
 from scipy.signal import bspline
 
 from deeprank_gnn.models.grid import Grid, MapMethod
+
+
+_log = logging.getLogger(__name__)
 
 
 def map_feature_gaussian(grid: Grid, position: numpy.ndarray, value: float):
@@ -103,19 +107,29 @@ def map_features(grid: Grid, position: numpy.ndarray, feature_name: str, feature
         grid.add_feature_values(index_name, grid_data)
 
 
+HDF5KEY_GRID_POINTS = "grid_points"
+HDF5KEY_GRID_X = "x"
+HDF5KEY_GRID_Y = "y"
+HDF5KEY_GRID_Z = "z"
+HDF5KEY_GRID_CENTER = "center"
+HDF5KEY_GRID_MAPPEDFEATURES = "mapped_features"
+HDF5KEY_GRID_MAPPEDFEATURESVALUE = "value"
+
+
 def grid_to_hdf5(grid: Grid, hdf5_file: h5py.File):
 
     grid_group = hdf5_file.require_group(grid.id)
 
     # store grid points
-    points_group = grid_group.require_group("grid_points")
-    points_group.create_dataset("x", data=grid.xs)
-    points_group.create_dataset("y", data=grid.ys)
-    points_group.create_dataset("z", data=grid.zs)
-    points_group.create_dataset("center", data=grid.center)
+    points_group = grid_group.require_group(HDF5KEY_GRID_POINTS)
+    points_group.create_dataset(HDF5KEY_GRID_X, data=grid.xs)
+    points_group.create_dataset(HDF5KEY_GRID_Y, data=grid.ys)
+    points_group.create_dataset(HDF5KEY_GRID_Z, data=grid.zs)
+    points_group.create_dataset(HDF5KEY_GRID_CENTER, data=grid.center)
 
     # store grid features
-    features_group = grid_group.require_group("mapped_features")
+    features_group = grid_group.require_group(HDF5KEY_GRID_MAPPEDFEATURES)
     for feature_name, feature_data in grid.features.items():
+
         feature_group = features_group.require_group(feature_name)
-        feature_group.create_dataset("value", data=feature_data, compression="lzf", chunks=True)
+        feature_group.create_dataset(HDF5KEY_GRID_MAPPEDFEATURESVALUE, data=feature_data, compression="lzf", chunks=True)

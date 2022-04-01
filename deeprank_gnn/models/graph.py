@@ -51,8 +51,11 @@ class Node:
         else:
             raise TypeError(type(self.id))
 
-    def add_feature(self, feature_name: str, feature_function: Callable[[Union[Atom, Residue]], float]):
+    def add_feature(self, feature_name: str, feature_function: Callable[[Union[Atom, Residue]], numpy.ndarray]):
         feature_value = feature_function(self.id)
+
+        if len(feature_value.shape) != 1:
+            raise ValueError("Expected a 1-dimensional array for feature {}, but got {}".format(feature_name, 'x'.join(feature_value.shape)))
 
         self.features[feature_name] = feature_value
 
