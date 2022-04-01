@@ -9,7 +9,6 @@ import markov_clustering
 from deeprank_gnn.tools.embedding import manifold_embedding
 from deeprank_gnn.domain.feature import FEATURENAME_EDGETYPE
 from deeprank_gnn.domain.graph import EDGETYPE_INTERFACE, EDGETYPE_INTERNAL
-from deeprank_gnn.models.graph import Graph
 
 
 _log = logging.getLogger(__name__)
@@ -62,72 +61,48 @@ def graph_to_hdf5(graph, hdf5_file):
     graph_group = hdf5_file.create_group(graph.id)
 
     # store node names
-    node_names = numpy.array([str(node) for node in graph.nodes]).astype('S')
+    node_names = numpy.array([str(node.id) for node in graph.nodes]).astype('S')
     graph_group.create_dataset(HDF5KEY_GRAPH_NODENAMES, data=node_names)
 
     # store node features
     node_features_group = graph_group.create_group(HDF5KEY_GRAPH_NODEFEATURES)
-    node_key_list = list(graph.nodes.keys())
-    first_node_data = graph.nodes[node_key_list[0]]
+    node_key_list = list([node.id for node in graph.nodes])
+    first_node_data = graph.nodes[0].features
     node_feature_names = list(first_node_data.keys())
     for node_feature_name in node_feature_names:
 
-        node_feature_data = [node_data[node_feature_name] for node_key, node_data in graph.nodes.items()]
+        node_feature_data = [node.features[node_feature_name] for node in graph.nodes]
 
         node_features_group.create_dataset(node_feature_name, data=node_feature_data)
 
     # store edges
     edge_indices = []
-    internal_edge_indices = []
-
     edge_names = []
-    internal_edge_names = []
 
-    first_edge_data = list(graph.edges.values())[0]
-    edge_feature_names = list([name for name in first_edge_data.keys() if name != FEATURENAME_EDGETYPE])
+    first_edge_data = graph.edges[0].features
+    edge_feature_names = list(first_edge_data.keys())
 
     edge_feature_data = {name: [] for name in edge_feature_names}
-    internal_edge_feature_data = {name: [] for name in edge_feature_names}
 
-    for edge_key, edge_data in graph.edges.items():
+    for edge in graph.edges:
 
-        node1, node2 = edge_key
-        edge_type = edge_data[FEATURENAME_EDGETYPE]
+        id1, id2 = edge.id
+        node_index1 = node_key_list.index(id1)
+        node_index2 = node_key_list.index(id2)
 
-        node_index1 = node_key_list.index(node1)
-        node_index2 = node_key_list.index(node2)
-
-        if edge_type == EDGETYPE_INTERFACE:
-            edge_indices.append((node_index1, node_index2))
-            edge_names.append(str(edge_key))
-
-        elif edge_type == EDGETYPE_INTERNAL:
-            internal_edge_indices.append((node_index1, node_index2))
-            internal_edge_names.append(str(edge_key))
+        edge_indices.append((node_index1, node_index2))
+        edge_names.append(f"{id1}-{id2}")
 
         for edge_feature_name in edge_feature_names:
-            if edge_type == EDGETYPE_INTERFACE:
-                edge_feature_data[edge_feature_name].append(edge_data[edge_feature_name])
-
-            elif edge_type == EDGETYPE_INTERNAL:
-                internal_edge_feature_data[edge_feature_name].append(edge_data[edge_feature_name])
+            edge_feature_data[edge_feature_name].append(edge.features[edge_feature_name])
 
     graph_group.create_dataset(HDF5KEY_GRAPH_EDGENAMES, data=numpy.array(edge_names).astype('S'))
-    graph_group.create_dataset(HDF5KEY_GRAPH_INTERNALEDGENAMES, data=numpy.array(internal_edge_names).astype('S'))
 
     graph_group.create_dataset(HDF5KEY_GRAPH_EDGEINDICES, data=edge_indices)
-    graph_group.create_dataset(HDF5KEY_GRAPH_INTERNALEDGEINDICES, data=internal_edge_indices)
 
     edge_feature_group = graph_group.create_group(HDF5KEY_GRAPH_EDGEFEATURES)
-    internal_edge_feature_group = graph_group.create_group(HDF5KEY_GRAPH_INTERNALEDGEFEATURES)
     for edge_feature_name in edge_feature_names:
         edge_feature_group.create_dataset(edge_feature_name, data=edge_feature_data[edge_feature_name])
-        internal_edge_feature_group.create_dataset(edge_feature_name, data=internal_edge_feature_data[edge_feature_name])
-
-    # store targets
-    score_group = graph_group.create_group(HDF5KEY_GRAPH_SCORE)
-    for target_name, target_value in graph.targets.items():
-        score_group.create_dataset(target_name, data=target_value)
 
 
 def _get_node_key(value):
@@ -163,6 +138,8 @@ def hdf5_to_graph(graph_group):
         score_group = graph_group[HDF5KEY_GRAPH_SCORE]
         for target_name in score_group.keys():
             targets[target_name] = score_group[target_name][()]
+
+    from deeprank_gnn.models.graph import Graph
 
     graph = Graph(graph_group.name, targets=targets)
 

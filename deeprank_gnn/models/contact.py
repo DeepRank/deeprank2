@@ -25,7 +25,7 @@ class ResidueContact(Contact):
         self._residue1 = residue1
         self._residue2 = residue2
 
-        Pair.__init__(residue1, residue2)
+        Pair.__init__(self, residue1, residue2)
 
     @property
     def distance(self) -> float:
@@ -55,7 +55,7 @@ class AtomicContact(Contact):
         self._atom1 = atom1
         self._atom2 = atom2
 
-        Pair.__init__(atom1, atom2)
+        Pair.__init__(self, atom1, atom2)
 
     @property
     def distance(self) -> float:

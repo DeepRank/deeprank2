@@ -1,15 +1,14 @@
 from enum import Enum
-from typing import Callable, Union
+from typing import Callable, Union, List
 
 import numpy
 import h5py
 
-from deeprank_gnn.models.feature import PointFeature
 from deeprank_gnn.models.structure import Atom, Residue
 from deeprank_gnn.models.contact import Contact
 from deeprank_gnn.tools.graph import graph_to_hdf5
 from deeprank_gnn.models.grid import MapMethod, Grid, GridSettings
-from deeprank_gnn.tools.grid import map_feature, grid_to_hdf5
+from deeprank_gnn.tools.grid import map_features, grid_to_hdf5
 
 
 
@@ -47,7 +46,7 @@ class Node:
         if type(self.id) == Atom:
             return NodeType.ATOM
 
-        elif type(self.id) == Residue
+        elif type(self.id) == Residue:
             return NodeType.RESIDUE
         else:
             raise TypeError(type(self.id))
@@ -70,32 +69,39 @@ class Graph:
         self._nodes = {}
         self._edges = {}
 
-    def add_node(self, node):
+    def add_node(self, node: Node):
         self._nodes[node.id] = node
 
-    def add_edge(self, egde):
+    def get_node(self, id_: Union[Atom, Residue]) -> Node:
+        return self._nodes[id_]
+
+    def add_edge(self, edge: Edge):
         self._edges[edge.id] = edge
+
+    def get_edge(self, id_: Contact) -> Edge:
+        return self._edges[edge.id]
+
+    @property
+    def nodes(self) -> List[Node]:
+        return list(self._nodes.values())
+
+    @property
+    def edges(self) -> List[Node]:
+        return list(self._edges.values())
 
     def map_to_grid(self, grid: Grid, method: MapMethod):
 
-        edge_feature_names = list(self._edges.features.keys())
-        node_feature_names = list(self._nodes.features.keys())
+        for edge in self._edges.values():
+            for feature_name, feature_value in edge.features.items():
+                map_features(grid, edge.position1, feature_name, feature_value, method)
+                map_features(grid, edge.position2, feature_name, feature_value, method)
 
-        for feature_name in edge_feature_names:
-            point_features = []
-            for edge in self._edges.values():
-                point_features.append(PointFeature(edge.position1, edge.features[feature_name]))
-                point_features.append(PointFeature(edge.position2, edge.features[feature_name]))
-            map_feature(grid, feature_name, point_features, method)
-
-        for feature_name in node_feature_names:
-            point_features = []
-            for node in self._nodes.values():
-                point_features.append(PointFeature(node.position, node.features[feature_name]))
-            map_feature(grid, feature_name, point_features, method)
+        for node in self._nodes.values():
+            for feature_name, feature_value in node.features.items():
+                map_features(grid, node.position, feature_name, feature_value, method)
 
     def to_hdf5_gnn(self) -> str:
-        with h5py.File(self._hdf5_path) as f5:
+        with h5py.File(self._hdf5_path, 'a') as f5:
             graph_to_hdf5(self, f5)
 
         return self._hdf5_path
@@ -103,11 +109,11 @@ class Graph:
     def to_hdf5_cnn(self, settings: GridSettings, method: MapMethod) -> str:
 
         center = numpy.mean([node.position for node in self._nodes], axis=0)
-        grid = Grid(settings, center)
+        grid = Grid(self.id, settings, center)
 
         self.map_to_grid(grid, method)
 
-        with h5py.File(self._hdf5_path) as f5:
-            grid_to_hdf5(self, f5)
+        with h5py.File(self._hdf5_path, 'a') as f5:
+            grid_to_hdf5(grid, f5)
 
         return self._hdf5_path

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Dict
 
 import numpy
 
@@ -22,7 +23,9 @@ class GridSettings:
 
 
 class Grid:
-    def __init__(self, settings: GridSettings, center: numpy.array):
+    def __init__(self, id_:str, settings: GridSettings, center: numpy.array):
+        self.id = id_
+
         self._settings = settings
         self._center = center
 
@@ -46,20 +49,50 @@ class Grid:
         max_z = center[2] + half_size
         self._zs = numpy.linspace(min_z, max_z, num=settings.points_count)
 
+        self._ygrid, self._xgrid, self._zgrid = numpy.meshgrid(self._ys, self._xs, self._zs)
+
     @property
     def xs(self) -> numpy.array:
         return self._xs
+
+    @property
+    def xgrid(self) -> numpy.array:
+        return self._xgrid
 
     @property
     def ys(self) -> numpy.array:
         return self._ys
 
     @property
+    def ygrid(self) -> numpy.array:
+        return self._ygrid
+
+    @property
     def zs(self) -> numpy.array:
         return self._zs
 
-    def add_feature(self, name: str, data: numpy.array):
-        self._features[name] = data
+    @property
+    def zgrid(self) -> numpy.array:
+        return self._zgrid
+
+    @property
+    def center(self) -> numpy.array:
+        return self._center
+
+    @property
+    def features(self) -> Dict[str, numpy.array]:
+        return self._features
+
+    def add_feature_values(self, key: str, data: numpy.ndarray):
+        """ Makes sure feature values per grid point get stored.
+
+            This method may be called repeatedly to add on to existing grid point values.
+        """
+
+        if key not in self._features:
+            self._features[key] = data
+        else:
+            self._features[key] += data
 
 
 class MapMethod(Enum):
