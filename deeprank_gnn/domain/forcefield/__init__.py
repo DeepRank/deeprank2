@@ -133,7 +133,7 @@ def get_electrostatic_potential(atom1: Atom, atom2: Atom) -> float:
 
 
 def get_vanderwaals_potential(atom1: Atom, atom2: Atom) -> float:
-    "Caluclated the vanderwaals potential between two atoms"
+    "Calculates the vanderwaals potential between two atoms"
 
     parameters1 = atomic_forcefield.get_vanderwaals_parameters(atom1)
     parameters2 = atomic_forcefield.get_vanderwaals_parameters(atom2)
