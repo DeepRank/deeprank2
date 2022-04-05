@@ -52,18 +52,18 @@ def test_graph_build_and_export():
     hdf5_path = os.path.join(tmp_dir_path, "101m.hdf5")
     try:
         # init the graph
-        graph = Graph(structure.id, hdf5_path)
+        graph = Graph(structure.id)
 
         graph.add_node(node0)
         graph.add_node(node1)
         graph.add_edge(edge01)
 
         # export graph to hdf5
-        graph.write_graph_to_hdf5()
+        graph.write_graph_to_hdf5(hdf5_path)
 
         # export grid to hdf5
         grid_settings = GridSettings(20, 20.0)
-        graph.write_grid_to_hdf5(grid_settings, MapMethod.FAST_GAUSSIAN)
+        graph.write_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
 
         # check the contents of the hdf5 file
         with h5py.File(hdf5_path, 'r') as f5:

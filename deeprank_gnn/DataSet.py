@@ -289,15 +289,18 @@ class HDF5DataSet(Dataset):
                 edge_attr = None
 
             # internal edges
-            ind = grp['internal_edge_index'][()]
-            if ind.ndim == 2:
-                ind = np.vstack((ind, np.flip(ind, 1))).T
-            internal_edge_index = torch.tensor(
-                ind, dtype=torch.long).contiguous()
+            if 'internal_edge_index' in grp:
+                ind = grp['internal_edge_index'][()]
+                if ind.ndim == 2:
+                    ind = np.vstack((ind, np.flip(ind, 1))).T
+                internal_edge_index = torch.tensor(
+                    ind, dtype=torch.long).contiguous()
+            else:
+                internal_edge_index = torch.tensor([[]], dtype=torch.long)
 
             # internal edge feature
             data = ()
-            if self.edge_feature is not None:
+            if self.edge_feature is not None and 'internal_edge_data' in grp:
                 for feat in self.edge_feature:
                     vals = grp['internal_edge_data/'+feat][()]
                     if vals.ndim == 1:
@@ -310,7 +313,7 @@ class HDF5DataSet(Dataset):
                     data, dtype=torch.float).contiguous()
 
             else:
-                internal_edge_attr = None
+                internal_edge_attr = torch.tensor([[]], dtype=torch.float)
 
         except:
             traceback.print_exc()

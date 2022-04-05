@@ -123,10 +123,6 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
     potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
                  * COULOMB_CONSTANT / (EPSILON0 * distances)
 
-    _log.debug(f"distances {distances}")
-    _log.debug(f"charges {charges}")
-    _log.debug(f"potentials {potentials}")
-
     return potentials
 
 
@@ -180,7 +176,8 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
 
 
 def get_atomic_contacts(atoms: List[Atom]) -> List[AtomicContact]:
-    """ Computes all the contacts between a given list of residues.
+    """ Computes all the contacts between a given list of atoms.
+        It doesn't pair atoms with themselves, so no zero divisions are expected.
 
         Warning: do not call this on all atoms in the structure, since this can lead to
                  excessive memory consumption! Be sure to use queries to make a selection.
@@ -215,6 +212,7 @@ def get_atomic_contacts(atoms: List[Atom]) -> List[AtomicContact]:
 
 def get_residue_contacts(residues: List[Residue]) -> List[ResidueContact]:
     """ Computes all the contacts between a given list of residues.
+        It doesn't pair residues with themselves, so no zero divisions are expected.
 
         Warning: do not call this on all residues in the structure, since this can lead to
                  excessive memory consumption! Be sure to use queries to make a selection.

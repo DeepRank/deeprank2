@@ -69,9 +69,8 @@ class Node:
 
 
 class Graph:
-    def __init__(self, id_: str, hdf5_path: str):
+    def __init__(self, id_: str):
         self.id = id_
-        self._hdf5_path = hdf5_path
 
         self._nodes = {}
         self._edges = {}
@@ -107,20 +106,20 @@ class Graph:
             for feature_name, feature_value in node.features.items():
                 map_features(grid, node.position, feature_name, feature_value, method)
 
-    def write_graph_to_hdf5(self) -> str:
-        with h5py.File(self._hdf5_path, 'a') as f5:
+    def write_graph_to_hdf5(self, hdf5_path) -> str:
+        with h5py.File(hdf5_path, 'a') as f5:
             graph_to_hdf5(self, f5)
 
-        return self._hdf5_path
+        return hdf5_path
 
-    def write_grid_to_hdf5(self, settings: GridSettings, method: MapMethod) -> str:
+    def write_grid_to_hdf5(self, hdf5_path, settings: GridSettings, method: MapMethod) -> str:
 
         center = numpy.mean([node.position for node in self._nodes], axis=0)
         grid = Grid(self.id, settings, center)
 
         self.map_to_grid(grid, method)
 
-        with h5py.File(self._hdf5_path, 'a') as f5:
+        with h5py.File(hdf5_path, 'a') as f5:
             grid_to_hdf5(grid, f5)
 
-        return self._hdf5_path
+        return hdf5_path
