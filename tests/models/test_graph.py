@@ -27,7 +27,7 @@ def test_graph_build_and_export():
 
     residue0 = structure.chains[0].residues[0]
     residue1 = structure.chains[0].residues[1]
-    contact01 = ResidueContact(residue0, residue1)
+    contact01 = ResidueContact(residue0, residue1, 1.0, 0.0, 0.0)
 
     node0 = Node(residue0)
     node1 = Node(residue1)

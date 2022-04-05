@@ -2,8 +2,6 @@ import numpy
 
 from deeprank_gnn.models.pair import Pair
 from deeprank_gnn.models.structure import Residue, Atom
-from deeprank_gnn.domain.forcefield import get_vanderwaals_potential, get_electrostatic_potential
-from deeprank_gnn.tools.pdb import get_residue_distance, get_atom_distance
 
 
 class Contact(Pair):
@@ -21,50 +19,72 @@ class Contact(Pair):
 
 
 class ResidueContact(Contact):
-    def __init__(self, residue1: Residue, residue2: Residue):
+    def __init__(self, residue1: Residue, residue2: Residue,
+                 distance: float,
+                 electrostatic_potential: float,
+                 vanderwaals_potential: float):
+
         self._residue1 = residue1
         self._residue2 = residue2
 
         Pair.__init__(self, residue1, residue2)
 
+        self._distance = distance
+        self._electrostatic_potential = electrostatic_potential
+        self._vanderwaals_potential = vanderwaals_potential
+
     @property
     def distance(self) -> float:
-        return get_residue_distance(self._residue1, self._residue2)
+        return self._distance
 
     @property
     def electrostatic_potential(self) -> float:
-        potential = 0.0
-        for atom1 in self._residue1.atoms:
-            for atom2 in self._residue2.atoms:
-                potential += get_electrostatic_potential(atom1, atom2)
-
-        return potential
+        return self._electrostatic_potential
 
     @property
     def vanderwaals_potential(self) -> float:
-        potential = 0.0
-        for atom1 in self._residue1.atoms:
-            for atom2 in self._residue2.atoms:
-                potential += get_vanderwaals_potential(atom1, atom2)
+        return self._vanderwaals_potential
 
-        return potential
+    @property
+    def residue1(self):
+        return self.item1
+
+    @property
+    def residue2(self):
+        return self.item2
 
 
 class AtomicContact(Contact):
-    def __init__(self, atom1: Atom, atom2: Atom):
+    def __init__(self, atom1: Atom, atom2: Atom,
+                 distance: float,
+                 electrostatic_potential: float,
+                 vanderwaals_potential: float):
+
         self._atom1 = atom1
         self._atom2 = atom2
 
         Pair.__init__(self, atom1, atom2)
 
+        self._distance = distance
+        self._electrostatic_potential = electrostatic_potential
+        self._vanderwaals_potential = vanderwaals_potential
+
     @property
     def distance(self) -> float:
-        return get_atom_distance(self._atom1, self._atom2)
+        return self._distance
 
     @property
     def electrostatic_potential(self) -> float:
-        return get_electrostatic_potential(self._atom1, self._atom2)
+        return self._electrostatic_potential
 
     @property
     def vanderwaals_potential(self) -> float:
-        return get_vanderwaals_potential(self._atom1, self._atom2)
+        return self._vanderwaals_potential
+
+    @property
+    def atom1(self):
+        return self.item1
+
+    @property
+    def atom2(self):
+        return self.item2
