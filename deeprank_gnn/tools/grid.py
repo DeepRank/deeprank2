@@ -1,3 +1,7 @@
+"""
+This module holds the functions that operate on a 3D grid.
+"""
+
 from typing import Dict
 import logging
 

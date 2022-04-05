@@ -19,6 +19,8 @@ class Contact(Pair):
 
 
 class ResidueContact(Contact):
+    "A contact between two residues from a structure"
+
     def __init__(self, residue1: Residue, residue2: Residue,
                  distance: float,
                  electrostatic_potential: float,
@@ -55,6 +57,8 @@ class ResidueContact(Contact):
 
 
 class AtomicContact(Contact):
+    "A contact between two atoms from a structure"
+
     def __init__(self, atom1: Atom, atom2: Atom,
                  distance: float,
                  electrostatic_potential: float,

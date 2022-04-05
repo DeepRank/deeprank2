@@ -16,23 +16,30 @@ from deeprank_gnn.tools.graph import HDF5KEY_GRAPH_NODEFEATURES, HDF5KEY_GRAPH_E
 
 
 def test_graph_build_and_export():
+    """ Build a simple graph of two nodes and one edge in between them.
+        Test that the export methods can be called without failure.
+    """
 
     entry_id = "test"
 
+    # load the structure
     pdb = pdb2sql("tests/data/pdb/101M/101M.pdb")
     try:
         structure = get_structure(pdb, entry_id)
     finally:
         pdb._close()
 
+    # build a contact from two residues
     residue0 = structure.chains[0].residues[0]
     residue1 = structure.chains[0].residues[1]
     contact01 = ResidueContact(residue0, residue1, 1.0, 0.0, 0.0)
 
+    # build two nodes and an edge
     node0 = Node(residue0)
     node1 = Node(residue1)
     edge01 = Edge(contact01)
 
+    # add features to the nodes and edge
     node_feature_name = "node_feature"
     edge_feature_name = "edge_feature"
 
@@ -40,19 +47,25 @@ def test_graph_build_and_export():
     node1.features[node_feature_name] = numpy.array([1.0])
     edge01.features[edge_feature_name] = numpy.array([2.0])
 
-    grid_settings = GridSettings(20, 20.0)
+    # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
     hdf5_path = os.path.join(tmp_dir_path, "101m.hdf5")
     try:
+        # init the graph
         graph = Graph(structure.id, hdf5_path)
 
         graph.add_node(node0)
         graph.add_node(node1)
         graph.add_edge(edge01)
 
-        graph.to_hdf5_gnn()
-        graph.to_hdf5_cnn(grid_settings, MapMethod.FAST_GAUSSIAN)
+        # export graph to hdf5
+        graph.write_graph_to_hdf5()
 
+        # export grid to hdf5
+        grid_settings = GridSettings(20, 20.0)
+        graph.write_grid_to_hdf5(grid_settings, MapMethod.FAST_GAUSSIAN)
+
+        # check the contents of the hdf5 file
         with h5py.File(hdf5_path, 'r') as f5:
             entry_group = f5[entry_id]
 
@@ -82,4 +95,4 @@ def test_graph_build_and_export():
                 data = mapped_group[feature_name][HDF5KEY_GRID_MAPPEDFEATURESVALUE][()]
                 assert len(numpy.nonzero(data)) > 0, f"{feature_name}: all zero"
     finally:
-        shutil.rmtree(tmp_dir_path)
+        shutil.rmtree(tmp_dir_path)  # clean up after the test

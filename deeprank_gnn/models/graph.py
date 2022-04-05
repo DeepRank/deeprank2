@@ -38,24 +38,28 @@ class NodeType(Enum):
 
 class Node:
     def __init__(self, id_: Union[Atom, Residue]):
+        if type(id_) == Atom:
+            self._type = NodeType.ATOM
+
+        elif type(id_) == Residue:
+            self._type = NodeType.RESIDUE
+        else:
+            raise TypeError(type(id_))
+
         self.id = id_
+
         self.features = {}
 
     @property
     def type(self):
-        if type(self.id) == Atom:
-            return NodeType.ATOM
-
-        elif type(self.id) == Residue:
-            return NodeType.RESIDUE
-        else:
-            raise TypeError(type(self.id))
+        return self._type
 
     def add_feature(self, feature_name: str, feature_function: Callable[[Union[Atom, Residue]], numpy.ndarray]):
         feature_value = feature_function(self.id)
 
         if len(feature_value.shape) != 1:
-            raise ValueError("Expected a 1-dimensional array for feature {}, but got {}".format(feature_name, 'x'.join(feature_value.shape)))
+            shape_s = 'x'.join(feature_value.shape)
+            raise ValueError(f"Expected a 1-dimensional array for feature {feature_name}, but got {shape_s}")
 
         self.features[feature_name] = feature_value
 
@@ -103,13 +107,13 @@ class Graph:
             for feature_name, feature_value in node.features.items():
                 map_features(grid, node.position, feature_name, feature_value, method)
 
-    def to_hdf5_gnn(self) -> str:
+    def write_graph_to_hdf5(self) -> str:
         with h5py.File(self._hdf5_path, 'a') as f5:
             graph_to_hdf5(self, f5)
 
         return self._hdf5_path
 
-    def to_hdf5_cnn(self, settings: GridSettings, method: MapMethod) -> str:
+    def write_grid_to_hdf5(self, settings: GridSettings, method: MapMethod) -> str:
 
         center = numpy.mean([node.position for node in self._nodes], axis=0)
         grid = Grid(self.id, settings, center)

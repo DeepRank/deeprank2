@@ -16,7 +16,7 @@ from deeprank_gnn.domain.forcefield import (atomic_forcefield,
 from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
 from deeprank_gnn.models.error import UnknownAtomError
 from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
-from deeprank_gnn.models.graph import Graph
+from deeprank_gnn.models.graph import Graph, Edge, Node
 from deeprank_gnn.models.structure import Residue, Atom
 from deeprank_gnn.tools import BioWrappers, BSA
 from deeprank_gnn.tools.pdb import (get_residue_contact_pairs, get_residue_distance, get_surrounding_residues,
