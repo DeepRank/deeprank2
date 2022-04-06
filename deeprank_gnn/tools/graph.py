@@ -140,6 +140,9 @@ def hdf5_to_graph(graph_group):
         for target_name in score_group.keys():
             targets[target_name] = score_group[target_name][()]
 
+    # CB:
+    # To prevent circular dependencies, this import was placed here.
+    # It's a temporary solution. We will probably change this method again.
     from deeprank_gnn.models.graph import Graph
 
     graph = Graph(graph_group.name, targets=targets)
