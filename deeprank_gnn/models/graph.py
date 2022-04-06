@@ -75,6 +75,9 @@ class Graph:
         self._nodes = {}
         self._edges = {}
 
+        # targets are optional and may be set later
+        self.targets = {}
+
     def add_node(self, node: Node):
         self._nodes[node.id] = node
 

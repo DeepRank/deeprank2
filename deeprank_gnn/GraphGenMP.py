@@ -1,4 +1,5 @@
 import os
+import logging
 import traceback
 import sys
 import glob
@@ -13,6 +14,9 @@ from .models.graph import Graph
 from .models.query import ProteinProteinInterfaceResidueQuery
 from .tools.graph import graph_to_hdf5
 from .tools.score import get_all_scores
+
+
+_log = logging.getLogger(__name__)
 
 
 class GraphHDF5(object):
@@ -68,7 +72,7 @@ class GraphHDF5(object):
         if ref_path is None:
             ref = None
         else:
-            ref = os.path.join(ref_path, base_name+'.pdb')
+            ref = os.path.join(ref_path, base_name + '.pdb')
 
         # compute all the graphs on 1 core and directly
         # store the graphs the HDF5 file
@@ -164,8 +168,7 @@ class GraphHDF5(object):
             f.close()
 
         except Exception as e:
-            print('Issue encountered while storing graph ', pdb_path)
-            traceback.print_exc()
+            _log.exception(f"Issue encountered while storing graph for {pdb_path}")
 
     @staticmethod
     def _get_one_graph(pdb_path, pssm_paths, ref, biopython):

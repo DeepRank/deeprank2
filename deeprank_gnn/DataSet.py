@@ -296,7 +296,7 @@ class HDF5DataSet(Dataset):
                 internal_edge_index = torch.tensor(
                     ind, dtype=torch.long).contiguous()
             else:
-                internal_edge_index = torch.empty((0, 2), dtype=torch.long)
+                internal_edge_index = torch.empty((2, 0), dtype=torch.long)
 
             # internal edge feature
             data = ()

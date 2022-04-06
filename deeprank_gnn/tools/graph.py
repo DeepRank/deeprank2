@@ -105,6 +105,11 @@ def graph_to_hdf5(graph, hdf5_file):
     for edge_feature_name in edge_feature_names:
         edge_feature_group.create_dataset(edge_feature_name, data=edge_feature_data[edge_feature_name])
 
+    # store target values
+    score_group = graph_group.create_group(HDF5KEY_GRAPH_SCORE)
+    for target_name, target_data in graph.targets.items():
+        score_group.create_dataset(target_name, data=target_data)
+
 
 def _get_node_key(value):
     if type(value) == str:

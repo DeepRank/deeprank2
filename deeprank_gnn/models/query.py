@@ -67,6 +67,12 @@ class Query:
 
         return graph
 
+    def _set_graph_targets(self, graph: Graph):
+        "simply copies target data from query to graph"
+
+        for target_name, target_data in self._targets.items():
+            graph.targets[target_name] = target_data
+
     @property
     def model_id(self) -> str:
         return self._model_id
@@ -279,6 +285,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         # build the graph
         graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._external_distance_cutoff)
+        self._set_graph_targets(graph)
 
         # add edge features
         for edge in graph.edges:
@@ -409,6 +416,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         # build the graph
         graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._external_distance_cutoff)
+        self._set_graph_targets(graph)
 
         # set edge features
         for edge in graph.edges:
@@ -578,6 +586,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         # build the graph
         graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._interface_distance_cutoff)
+        self._set_graph_targets(graph)
 
         model = contacts[0].atom1.residue.chain.model
         chain1 = model.get_chain(self._chain_id1)
@@ -737,6 +746,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         # build graph from residues
         contacts = get_residue_contacts(residues_selected)
         graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._interface_distance_cutoff)
+        self._set_graph_targets(graph)
 
         model = contacts[0].residue1.chain.model
         chain1 = model.get_chain(self._chain_id1)
