@@ -36,7 +36,7 @@ def test_preprocess():
             with h5py.File(path, 'r') as f5:
                 count_graphs += len(f5.keys())
 
-        assert count_queries == count_graphs, f"{count_queries} != {count_graphs}"
+        assert count_queries == count_graphs, f"the number of hdf5 graphs doesn't match the number of queries: {count_graphs} != {count_queries}"
 
     finally:
         rmtree(output_directory)

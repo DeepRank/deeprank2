@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import traceback
 from multiprocessing import Queue, Process, Pipe, cpu_count
 from queue import Empty as EmptyQueueError
 import logging
@@ -18,11 +19,13 @@ _log = logging.getLogger(__name__)
 
 
 class _PreProcess(Process):
-    def __init__(self, queue, output_path):
+    def __init__(self, input_queue, output_path, error_queue):
         Process.__init__(self)
         self.daemon = True
 
-        self._queue = queue
+        self._input_queue = input_queue
+        self._error_queue = error_queue,
+
         self._output_path = output_path
 
         self._receiver, self._sender = Pipe(duplex=False)
@@ -45,24 +48,30 @@ class _PreProcess(Process):
         return self._receiver.poll()
 
     def run(self):
+        count_queries = 0
+        count_writes = 0
         while not self._should_stop():
             try:
-                query = self._queue.get_nowait()
+                query = self._input_queue.get_nowait()
 
             except EmptyQueueError:
                 continue
+
+            count_queries += 1
 
             graph = None
             try:
                 graph = query.build_graph()
                 if graph_has_nan(graph):
-                    _log.warning(f"skipping {query}, because of a generated NaN value in the graph")
+                    self._error_queue.put(f"skipping {query}, because of a generated NaN value in the graph")
 
                 with h5py.File(self._output_path, 'a') as f5:
                     graph_to_hdf5(graph, f5)
 
+                count_writes += 1
+
             except:
-                _log.exception("error adding {} to {}".format(query, self._output_path))
+                self._exceptions_queue.put(traceback.format_exc())
 
                 # Don't leave behind an unfinished hdf5 group.
                 if graph is not None:
@@ -70,7 +79,7 @@ class _PreProcess(Process):
                         if graph.id in f5:
                             del f5[graph.id]
 
-        _log.info("reached the end of a subproces")
+        _log.info(f"reached the end of a subproces after {count_queries} passed and {count_writes} written")
 
 
 class PreProcessor:
@@ -83,7 +92,8 @@ class PreProcessor:
             process_count(int, optional): how many subprocesses will I run simultaneously, by default takes all available cpu cores.
         """
 
-        self._queue = Queue()
+        self._input_queue = Queue()
+        self._error_queue = Queue()
 
         if process_count is None:
             process_count = cpu_count()
@@ -91,7 +101,7 @@ class PreProcessor:
         if prefix is None:
             prefix = "preprocessed-data"
 
-        self._processes = [_PreProcess(self._queue, "{}-{}.hdf5".format(prefix, index))
+        self._processes = [_PreProcess(self._input_queue, "{}-{}.hdf5".format(prefix, index), self._error_queue)
                            for index in range(process_count)]
 
     def start(self):
@@ -108,21 +118,26 @@ class PreProcessor:
 
         try:
             _log.info("waiting for the queue to be empty..")
-            while not self._queue.empty():
+            while not self._input_queue.empty():
                 sleep(1.0)
         finally:
             self.shutdown()
 
+        # log all errors in the subprocesses
+        while not self._error_queue.empty():
+            error_s = self._error_queue.get()
+            _log.error(error_s)
+
     def add_query(self, query):
         "add a single graph building query"
 
-        self._queue.put(query)
+        self._input_queue.put(query)
 
     def add_queries(self, queries):
         "add multiple graph building queries"
 
         for query in queries:
-            self._queue.put(query)
+            self._input_queue.put(query)
 
     @property
     def output_paths(self):

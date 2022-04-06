@@ -28,15 +28,15 @@ HDF5KEY_GRAPH_INTERNALEDGEFEATURES = "internal_edge_data"
 
 
 def graph_has_nan(graph):
-    for node_key, node_dict in graph.nodes.items():
-        for feature_name, feature_value in node_dict.items():
+    for node in graph.nodes:
+        for feature_name, feature_value in node.features.items():
 
             if numpy.any(numpy.isnan(feature_value)):
                 _log.debug(f"node {node_key} {feature_name} has NaN")
                 return True
 
-    for edge_key, edge_dict in graph.edges.items():
-        for feature_name, feature_value in edge_dict.items():
+    for edge in graph.edges:
+        for feature_name, feature_value in edge.features.items():
 
             if feature_name == FEATURENAME_EDGETYPE:
                 continue  # is expected to be string
