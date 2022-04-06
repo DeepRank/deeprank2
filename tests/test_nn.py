@@ -10,8 +10,6 @@ from deeprank_gnn.NeuralNet import NeuralNet
 from deeprank_gnn.ginet import GINet
 from deeprank_gnn.foutnet import FoutNet
 from deeprank_gnn.sGAT import sGAT
-from deeprank_gnn.simple_net import SimpleNetwork
-from deeprank_gnn.simple_ginet import SimpleGiNetwork
 
 
 def _model_base_test(work_directory, hdf5_path, model, task='reg', target='irmsd', plot=False):
