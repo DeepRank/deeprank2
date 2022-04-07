@@ -138,19 +138,18 @@ def hdf5_to_graph(graph_group):
         Returns(deeprank graph object): the graph stored in the hdf5 group, node and edge keys will be strings
     """
 
-    # read targets
-    targets = {}
-    if HDF5KEY_GRAPH_SCORE in graph_group:
-        score_group = graph_group[HDF5KEY_GRAPH_SCORE]
-        for target_name in score_group.keys():
-            targets[target_name] = score_group[target_name][()]
-
     # CB:
     # To prevent circular dependencies, this import was placed here.
     # It's a temporary solution. We will probably change this method again.
-    from deeprank_gnn.models.graph import Graph
+    from deeprank_gnn.models.graph import Graph, Node, Edge
 
     graph = Graph(graph_group.name, targets=targets)
+
+    # read targets
+    if HDF5KEY_GRAPH_SCORE in graph_group:
+        score_group = graph_group[HDF5KEY_GRAPH_SCORE]
+        for target_name in score_group.keys():
+            graph.targets[target_name] = score_group[target_name][()]
 
     # read nodes
     node_names = [_get_node_key(key) for key in graph_group[HDF5KEY_GRAPH_NODENAMES][()]]
@@ -161,6 +160,8 @@ def hdf5_to_graph(graph_group):
         node_features[node_feature_name] = node_features_group[node_feature_name][()]
 
     for node_index, node_name in enumerate(node_names):
+        node = Node
+
         graph.add_node(node_name)
         graph.nodes[node_name]
         for node_feature_name in node_feature_names:
