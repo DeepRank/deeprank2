@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from typing import Optional
 import traceback
 from multiprocessing import Queue, Process, Pipe, cpu_count
 from queue import Empty as EmptyQueueError
@@ -39,24 +40,18 @@ class _PreProcess(Process):
 
     def stop(self):
         self._sender.send(1)
-
         self.join()
-        self.terminate()
 
     def _should_stop(self):
         return self._receiver.poll()
 
     def run(self):
-        count_queries = 0
-        count_writes = 0
         while not self._should_stop():
             try:
                 query = self._input_queue.get_nowait()
 
             except EmptyQueueError:
                 continue
-
-            count_queries += 1
 
             graph = None
             try:
@@ -65,9 +60,6 @@ class _PreProcess(Process):
                     self._error_queue.put(f"skipping {query}, because of a generated NaN value in the graph")
 
                 graph.write_to_hdf5(self._output_path)
-
-                count_writes += 1
-
             except:
                 self._error_queue.put(traceback.format_exc())
 
@@ -77,13 +69,11 @@ class _PreProcess(Process):
                         if graph.id in f5:
                             del f5[graph.id]
 
-        _log.info(f"reached the end of a subproces after {count_queries} passed and {count_writes} written")
-
 
 class PreProcessor:
     "preprocesses a series of graph building operations (represented by queries)"
 
-    def __init__(self, prefix=None, process_count=None):
+    def __init__(self, prefix: Optional[str] = None, process_count: Optional[int] = None):
         """
         Args:
             prefix(str, optional): prefix for the output files, ./preprocessed-data- by default
@@ -116,7 +106,7 @@ class PreProcessor:
 
         try:
             _log.info("waiting for the queue to be empty..")
-            while not self._input_queue.empty():
+            while self._input_queue.qsize() > 0:  # qsize seems to be more reliable than the empty method
                 sleep(1.0)
         finally:
             self.shutdown()

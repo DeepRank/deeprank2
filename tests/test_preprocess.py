@@ -15,28 +15,32 @@ def test_preprocess():
 
     prefix = os.path.join(output_directory, "test-preprocess")
 
-    preprocessor = PreProcessor(prefix)
+    preprocessor = PreProcessor(prefix, 10)
     try:
         preprocessor.start()
 
         count_queries = 100
+        queries = []
         for number in range(1, count_queries + 1):
             query = SingleResidueVariantResidueQuery("tests/data/pdb/101M/101M.pdb", "A", number, None,
                                                      alanine, phenylalanine,
                                                      pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
                                                      variant_conservation=0.0, wildtype_conservation=0.0)
             preprocessor.add_query(query)
+            queries.append(query)
 
         preprocessor.wait()
 
         assert len(preprocessor.output_paths) > 0
 
-        count_graphs = 0
+        graph_names = []
         for path in preprocessor.output_paths:
             with h5py.File(path, 'r') as f5:
-                count_graphs += len(f5.keys())
+                graph_names += list(f5.keys())
 
-        assert count_queries == count_graphs, f"the number of hdf5 graphs doesn't match the number of queries: {count_graphs} != {count_queries}"
+        for query in queries:
+            query_id = query.get_query_id()
+            assert query_id in graph_names, f"missing in output: {query_id}"
 
     finally:
         rmtree(output_directory)
