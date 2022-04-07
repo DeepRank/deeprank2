@@ -1,21 +1,25 @@
+from abc import ABC, abstractmethod
+
 import numpy
 
 from deeprank_gnn.models.pair import Pair
 from deeprank_gnn.models.structure import Residue, Atom
 
 
-class Contact(Pair):
+class Contact(Pair, ABC):
     @property
+    @abstractmethod
     def distance(self) -> float:
-        raise TypeError("called unimplemented method on interface class: Contact")
+        pass
 
     @property
+    @abstractmethod
     def electrostatic_potential(self) -> float:
-        raise TypeError("called unimplemented method on interface class: Contact")
+        pass
 
     @property
     def vanderwaals_potential(self) -> float:
-        raise TypeError("called unimplemented method on interface class: Contact")
+        pass
 
 
 class ResidueContact(Contact):
