@@ -7,6 +7,20 @@ from enum import Enum
 from typing import Dict
 
 import numpy
+import h5py
+
+from deeprank_gnn.domain.storage import *
+
+
+class MapMethod(Enum):
+    """ This holds the value of either one of 4 grid mapping methods.
+        A mapping method determines how feature point values are divided over the grid points.
+    """
+
+    GAUSSIAN = 1
+    FAST_GAUSSIAN = 2
+    BSP_LINE = 3
+    NEAREST_NEIGHBOURS = 4
 
 
 class GridSettings:
@@ -114,13 +128,118 @@ class Grid:
         else:
             self._features[feature_name] += data
 
+    def _get_mapped_feature_gaussian(self, position: numpy.ndarray, value: float) -> numpy.ndarray:
 
-class MapMethod(Enum):
-    """ This holds the value of either one of 4 grid mapping methods.
-        A mapping method determines how feature point values are divided over the grid points.
-    """
+        beta = 1.0
 
-    GAUSSIAN = 1
-    FAST_GAUSSIAN = 2
-    BSP_LINE = 3
-    NEAREST_NEIGHBOURS = 4
+        fx, fy, fz = position
+        distances = numpy.sqrt((self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2)
+
+        return value * numpy.exp(-beta * distances)
+
+
+    def _get_mapped_feature_fast_gaussian(self, position: numpy.ndarray, value: float) -> numpy.ndarray:
+
+        beta = 1.0
+        cutoff = 5.0 * beta
+
+        fx, fy, fz = position
+        distances = numpy.sqrt((self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2)
+
+        data = numpy.zeros(distances.shape)
+
+        data[distances < cutoff] = value * numpy.exp(-beta * distances[distances < cutoff])
+
+        return data
+
+    def _get_mapped_feature_bsp_line(self, position: numpy.ndarray, value: float) -> numpy.ndarray:
+
+        order = 4
+
+        fx, fy, fz = position
+        bsp_data = (bspline((self.xgrid - fx) / self.resolution, order) *
+                    bspline((self.ygrid - fy) / self.resolution, order) *
+                    bspline((self.zgrid - fz) / self.resolution, order))
+
+        return value * bsp_data
+
+    def _get_mapped_feature_nearest_neighbour(self, position: numpy.ndarray, value: float) -> numpy.ndarray:
+
+        fx, fy, fz = position
+        distances_x = numpy.abs(self.xs - fx)
+        distances_y = numpy.abs(self.ys - fx)
+        distances_z = numpy.abs(self.zs - fx)
+
+        indices_x = numpy.argsort(distances_x)[:2]
+        indices_y = numpy.argsort(distances_y)[:2]
+        indices_z = numpy.argsort(distances_z)[:2]
+
+        sorted_x = distances_x[indices_x]
+        weights_x = sorted_x / numpy.sum(sorted_x)
+
+        sorted_y = distances_y[indices_y]
+        weights_y = sorted_y / numpy.sum(sorted_y)
+
+        sorted_z = distances_z[indices_z]
+        weights_z = sorted_z / numpy.sum(sorted_z)
+
+        indices = [indices_x, indices_y, indices_z]
+        points = list(itertools.product(*indices))
+
+        weight_products = list(itertools.product(weights_x, weights_y, weights_z))
+        weights = [numpy.sum(p) for p in weight_products]
+
+        neighbour_data = numpy.zeros((self.xs.shape[0], self.ys.shape[0], self.zs.shape[0]))
+
+        for point_index, point in enumerate(points):
+            weight = weights[point_index]
+
+            neighbour_data[point] = weight * value
+
+        return neighbour_data
+
+    def map_feature(self, position: numpy.ndarray, feature_name: str, feature_value: numpy.ndarray, method: MapMethod):
+        "Maps point feature data at a given position to the grid, using the given method."
+
+        for index, value in enumerate(feature_value):
+
+            index_name = "{}_{:03d}".format(feature_name, index)
+
+            if method == MapMethod.GAUSSIAN:
+                grid_data = self._get_mapped_feature_gaussian(position, value)
+
+            elif method == MapMethod.FAST_GAUSSIAN:
+                grid_data = self._get_mapped_feature_fast_gaussian(position, value)
+
+            elif method == MapMethod.BSP_LINE:
+                grid_data = self._get_mapped_feature_bsp_line(position, value)
+
+            elif method == MapMethod.NEAREST_NEIGHBOUR:
+                grid_data = self._get_mapped_feature_nearest_neighbour(position, value)
+
+            # set to grid
+            self.add_feature_values(index_name, grid_data)
+
+    def to_hdf5(self, hdf5_path: str):
+        "Write the grid data to hdf5, according to deeprank standards."
+
+        with h5py.File(hdf5_path, 'a') as hdf5_file:
+
+            # create a group to hold everything
+            grid_group = hdf5_file.require_group(self.id)
+
+            # store grid points
+            points_group = grid_group.create_group(HDF5KEY_GRID_POINTS)
+            points_group.create_dataset(HDF5KEY_GRID_X, data=self.xs)
+            points_group.create_dataset(HDF5KEY_GRID_Y, data=self.ys)
+            points_group.create_dataset(HDF5KEY_GRID_Z, data=self.zs)
+            points_group.create_dataset(HDF5KEY_GRID_CENTER, data=self.center)
+
+            # store grid features
+            features_group = grid_group.require_group(HDF5KEY_GRID_MAPPEDFEATURES)
+            for feature_name, feature_data in self.features.items():
+
+                feature_group = features_group.require_group(feature_name)
+                feature_group.create_dataset(HDF5KEY_GRID_MAPPEDFEATURESVALUE, data=feature_data, compression="lzf", chunks=True)
+
+

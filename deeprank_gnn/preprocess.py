@@ -11,7 +11,6 @@ from time import sleep
 import h5py
 
 from deeprank_gnn.domain.amino_acid import amino_acids
-from deeprank_gnn.tools.graph import graph_to_hdf5, graph_has_nan
 from deeprank_gnn.models.query import SingleResidueVariantAtomicQuery
 
 
@@ -24,7 +23,7 @@ class _PreProcess(Process):
         self.daemon = True
 
         self._input_queue = input_queue
-        self._error_queue = error_queue,
+        self._error_queue = error_queue
 
         self._output_path = output_path
 
@@ -62,16 +61,15 @@ class _PreProcess(Process):
             graph = None
             try:
                 graph = query.build_graph()
-                if graph_has_nan(graph):
+                if graph.has_nan():
                     self._error_queue.put(f"skipping {query}, because of a generated NaN value in the graph")
 
-                with h5py.File(self._output_path, 'a') as f5:
-                    graph_to_hdf5(graph, f5)
+                graph.write_to_hdf5(self._output_path)
 
                 count_writes += 1
 
             except:
-                self._exceptions_queue.put(traceback.format_exc())
+                self._error_queue.put(traceback.format_exc())
 
                 # Don't leave behind an unfinished hdf5 group.
                 if graph is not None:

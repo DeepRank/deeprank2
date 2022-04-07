@@ -13,7 +13,6 @@ from deeprank_gnn.domain.forcefield import (atomic_forcefield,
                                             VANDERWAALS_DISTANCE_ON, VANDERWAALS_DISTANCE_OFF,
                                             SQUARED_VANDERWAALS_DISTANCE_ON, SQUARED_VANDERWAALS_DISTANCE_OFF,
                                             EPSILON0, COULOMB_CONSTANT)
-from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
 from deeprank_gnn.models.error import UnknownAtomError
 from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
 from deeprank_gnn.models.graph import Graph, Edge, Node

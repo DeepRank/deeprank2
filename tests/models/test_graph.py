@@ -11,8 +11,7 @@ from deeprank_gnn.models.graph import Graph, Edge, Node
 from deeprank_gnn.models.contact import ResidueContact
 from deeprank_gnn.tools.pdb import get_structure
 from deeprank_gnn.domain.amino_acid import *
-from deeprank_gnn.tools.grid import HDF5KEY_GRID_MAPPEDFEATURES, HDF5KEY_GRID_MAPPEDFEATURESVALUE
-from deeprank_gnn.tools.graph import HDF5KEY_GRAPH_NODEFEATURES, HDF5KEY_GRAPH_EDGEINDICES, HDF5KEY_GRAPH_EDGEFEATURES
+from deeprank_gnn.domain.storage import *
 
 
 def test_graph_build_and_export():
@@ -59,11 +58,11 @@ def test_graph_build_and_export():
         graph.add_edge(edge01)
 
         # export graph to hdf5
-        graph.write_graph_to_hdf5(hdf5_path)
+        graph.write_to_hdf5(hdf5_path)
 
         # export grid to hdf5
         grid_settings = GridSettings(20, 20.0)
-        graph.write_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
+        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
 
         # check the contents of the hdf5 file
         with h5py.File(hdf5_path, 'r') as f5:

@@ -13,7 +13,6 @@ import pickle
 from .preprocess import PreProcessor
 from .models.graph import Graph
 from .models.query import ProteinProteinInterfaceResidueQuery
-from .tools.graph import graph_to_hdf5
 from .tools.score import get_all_scores
 
 
@@ -106,13 +105,11 @@ class GraphHDF5(object):
                 print('Issue encountered while computing graph ', pdb_path)
                 traceback.print_exc()
 
-        with h5py.File(outfile, 'w') as f5:
-            for g in graphs:
-                try:
-                    graph_to_hdf5(g, f5)
-                except Exception as e:
-                    print('Issue encountered while storing graph ', g.id)
-                    traceback.print_exc()
+        for g in graphs:
+            try:
+                g.write_to_hdf5(outfile)
+            except Exception as e:
+                _log.exception(f"issue encountered while storing graph {g.id}")
 
     @staticmethod
     def preprocess_async(nproc, outfile, pdb_paths, ref_path, pssm_paths, biopython):

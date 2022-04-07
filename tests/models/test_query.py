@@ -9,7 +9,6 @@ from deeprank_gnn.domain.amino_acid import *
 from deeprank_gnn.models.query import *
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.domain.feature import *
-from deeprank_gnn.tools.graph import graph_to_hdf5
 from deeprank_gnn.DataSet import HDF5DataSet
 
 
@@ -25,8 +24,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
     os.close(f)
 
     try:
-        with h5py.File(tmp_path, 'w') as f5:
-            graph_to_hdf5(g, f5)
+        g.write_to_hdf5(tmp_path)
 
         with h5py.File(tmp_path, 'r') as f5:
             entry_group = f5[list(f5.keys())[0]]

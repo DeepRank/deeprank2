@@ -13,7 +13,7 @@ import numpy as np
 
 from torch_geometric.data import Data
 from deeprank_gnn.community_pooling import *
-from deeprank_gnn.tools.graph import hdf5_to_graph, plotly_3d, plotly_2d
+from deeprank_gnn.tools.visualization import hdf5_to_networkx, plotly_3d, plotly_2d
 
 
 def tsne_graph(grp, method):
@@ -21,7 +21,7 @@ def tsne_graph(grp, method):
     import plotly.offline as py
     py.init_notebook_mode(connected=True)
 
-    g = hdf5_to_graph(grp)
+    g = hdf5_to_networkx(grp)
 
     plotly_2d(g, offline=True, iplot=False, method=method)
 
@@ -31,6 +31,6 @@ def graph3d(grp):
     import plotly.offline as py
     py.init_notebook_mode(connected=True)
 
-    g = hdf5_to_graph(grp)
+    g = hdf5_to_networkx(grp)
 
     plotly_3d(g, offline=True, iplot=False)
