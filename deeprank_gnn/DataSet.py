@@ -1,7 +1,7 @@
 import sys
 import os
 import traceback
-
+from ast import literal_eval
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
@@ -13,7 +13,7 @@ import copy
 from .community_pooling import community_detection, community_pooling
 
 
-def DivideDataSet(dataset, percent=[0.8, 0.2], shuffle=True):
+def DivideDataSet(dataset, percent=None, shuffle=True):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
@@ -24,6 +24,10 @@ def DivideDataSet(dataset, percent=[0.8, 0.2], shuffle=True):
     Returns:
         [type]: [description]
     """
+
+    if percent is None:
+        percent = [0.8, 0.2]
+
     size = dataset.__len__()
     index = np.arange(size)
 
@@ -90,6 +94,7 @@ def PreCluster(dataset, method):
 
 
 class HDF5DataSet(Dataset):
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         root="./",
@@ -101,7 +106,7 @@ class HDF5DataSet(Dataset):
         tqdm=True,
         index=None,
         node_feature="all",
-        edge_feature=["dist"],
+        edge_feature=None,
         clustering_method="mcl",
         edge_feature_transform=lambda x: np.tanh(-x / 2 + 2) + 1,
     ):
@@ -109,16 +114,30 @@ class HDF5DataSet(Dataset):
 
         Args:
             root (str, optional): [description]. Defaults to './'.
+
             database (str, optional): Path to hdf5 file(s). Defaults to None.
-            transform (callable, optional): A function/transform that takes in an torch_geometric.data.Data object and returns a transformed version. The data object will be transformed before every access. Defaults to None.
-            pre_transform (callable, optional):  A function/transform that takes in an torch_geometric.data.Data object and returns a transformed version. The data object will be transformed before being saved to disk.. Defaults to None.
+
+            transform (callable, optional): A function/transform that takes in an torch_geometric.data.Data object and returns a transformed version.
+            The data object will be transformed before every access. Defaults to None.
+
+            pre_transform (callable, optional):  A function/transform that takes in an torch_geometric.data.Data object and returns a transformed version.
+            The data object will be transformed before being saved to disk.. Defaults to None.
+
             dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules. Defaults to None.
+
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
+
             tqdm (bool, optional): Show progress bar. Defaults to True.
+
             index (int, optional): index of a molecule. Defaults to None.
-            node_feature (str or list, optional): consider all pre-computed node features ('all') or some defined node features (provide a list). Defaults to 'all'.
+
+            node_feature (str or list, optional): consider all pre-computed node features ('all') or some defined node features (provide a list).
+            Defaults to 'all'.
+
             edge_feature (list, optional): only distances are available in this version of DeepRank-GNN. Defaults to ['dist'].
+
             clustering_method (str, optional): 'mcl' (Markov Clustering) or 'louvain'. Defaults to 'mcl'.
+
             edge_feature_transform (function, optional): transformation applied to the edge features. Defaults to lambdax:np.tanh(-x/2+2)+1.
         """
         super().__init__(root, transform, pre_transform)
@@ -133,7 +152,10 @@ class HDF5DataSet(Dataset):
         self.tqdm = tqdm
         self.index = index
         self.node_feature = node_feature
-        self.edge_feature = edge_feature
+        if edge_feature is None:
+            self.edge_feature = ["dist"]
+        else:
+            self.edge_feature = edge_feature
 
         self.edge_feature_transform = edge_feature_transform
 
@@ -213,7 +235,7 @@ class HDF5DataSet(Dataset):
                     print("Possible node feature : ")
                     print("\n".join(self.available_node_feature))
                     # raise ValueError('Feature Not found')
-                    exit()
+                    sys.exit()
 
     def check_edge_feature(self):
         """Checks if the required edge features exist"""
@@ -233,7 +255,7 @@ class HDF5DataSet(Dataset):
                     print("Possible edge attribute : ")
                     print("\n".join(self.available_edge_feature))
                     # raise ValueError('Feature Not found')
-                    exit()
+                    sys.exit()
 
     def load_one_graph(self, fname, mol):
         """Loads one graph
@@ -243,8 +265,12 @@ class HDF5DataSet(Dataset):
             mol (str): name of the molecule
 
         Returns:
-            Data object or None: torch_geometric Data object containing the node features, the internal and external edge features, the target and the xyz coordinates. Return None if features cannot be loaded.
+            Data object or None: torch_geometric Data object containing the node features, the internal and external edge features,
+            the target and the xyz coordinates. Return None if features cannot be loaded.
         """
+
+        # pylint: disable=too-many-locals
+
         f5 = h5py.File(fname, "r")
         try:
             grp = f5[mol]
@@ -425,7 +451,7 @@ class HDF5DataSet(Dataset):
         for cond_name, cond_vals in self.dict_filter.items():
 
             try:
-                val = molgrp["score"][cond_name][()]
+                molgrp["score"][cond_name][()]
             except KeyError:
                 print(f"   :Filter {cond_name} not found for mol {molgrp}")
                 print("   :Filter options are")
@@ -440,7 +466,7 @@ class HDF5DataSet(Dataset):
                 for o in ops:
                     new_cond_vals = new_cond_vals.replace(o, "val" + o)
 
-                if not eval(new_cond_vals):
+                if not literal_eval(new_cond_vals):
                     return False
             else:
                 raise ValueError("Conditions not supported", cond_vals)

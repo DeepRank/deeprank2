@@ -1,14 +1,10 @@
 import torch
 from torch.nn import Parameter
 import torch.nn.functional as F
-import torch.nn as nn
-
-from torch_scatter import scatter_add, scatter_mean
-from torch_geometric.utils import remove_self_loops, add_self_loops, softmax
-
+from otrch import nn
+from torch_scatter import scatter_mean
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
-
 from .community_pooling import get_preloaded_cluster, community_pooling
 
 
@@ -28,7 +24,7 @@ class FoutLayer(torch.nn.Module):
 
     def __init__(self, in_channels, out_channels, bias=True):
 
-        super(FoutLayer, self).__init__()
+        super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -52,7 +48,6 @@ class FoutLayer(torch.nn.Module):
 
     def forward(self, x, edge_index):
 
-        row, col = edge_index
         num_node = len(x)
 
         # alpha = x * Wc
@@ -82,8 +77,8 @@ class FoutLayer(torch.nn.Module):
 
 
 class FoutNet(torch.nn.Module):
-    def __init__(self, input_shape, output_shape=1, input_shape_edge=None):
-        super(FoutNet, self).__init__()
+    def __init__(self, input_shape, output_shape=1):
+        super().__init__()
 
         self.conv1 = FoutLayer(input_shape, 16)
         self.conv2 = FoutLayer(16, 32)

@@ -22,22 +22,24 @@ class ResidueClassCriterium:
 
         # check the amino acid name
         if self.amino_acid_names != ALL_AMINO_ACIDS:
+
             if not any(
-                [
-                    amino_acid_name == crit_amino_acid_name
-                    for crit_amino_acid_name in self.amino_acid_names
-                ]
-            ):
+                amino_acid_name == crit_amino_acid_name
+                for crit_amino_acid_name in self.amino_acid_names):
 
                 return False
 
         # check the atom names that should be absent
-        if any([atom_name in self.absent_atom_names for atom_name in atom_names]):
+        if any(
+            atom_name in self.absent_atom_names
+            for atom_name in atom_names):
 
             return False
 
         # check the atom names that should be present
-        if not all([atom_name in atom_names for atom_name in self.present_atom_names]):
+        if not all(
+            atom_name in atom_names
+            for atom_name in self.present_atom_names):
 
             return False
 

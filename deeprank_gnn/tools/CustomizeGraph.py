@@ -1,7 +1,6 @@
 import glob
 import h5py
 import os
-import sys
 import numpy as np
 
 
@@ -23,6 +22,7 @@ def add_target(graph_path, target_name, target_list, sep=" "):
         1ATN_xxx-3 0
         1ATN_xxx-4 0
     """
+    # pylint: disable=consider-using-dict-items
 
     target_dict = {}
 

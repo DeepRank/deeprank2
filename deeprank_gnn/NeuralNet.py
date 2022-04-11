@@ -6,7 +6,7 @@ import logging
 
 # torch import
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.data import DataLoader
@@ -15,32 +15,33 @@ from torch_geometric.data import DataLoader
 from .DataSet import HDF5DataSet, DivideDataSet, PreCluster
 from .Metrics import Metrics
 
+import matplotlib.pyplot as plt
 
 _log = logging.getLogger(__name__)
 
 
-class NeuralNet(object):
+class NeuralNet():
     def __init__(
         self,
         database,
         Net,
-        node_feature=["type", "polarity", "bsa"],
-        edge_feature=["dist"],
-        target="irmsd",
-        lr=0.01,
-        batch_size=32,
-        percent=[1.0, 0.0],
+        # node_feature=["type", "polarity", "bsa"],
+        # edge_feature=["dist"],
+        # target="irmsd",
+        # lr=0.01,
+        # batch_size=32,
+        # percent=[1.0, 0.0],
         database_eval=None,
-        index=None,
-        class_weights=None,
-        task=None,
-        classes=[0, 1],
-        threshold=None,
+        # index=None,
+        # class_weights=None,
+        # task=None,
+        # classes=[0, 1],
+        # threshold=None,
         pretrained_model=None,
-        shuffle=True,
+        # shuffle=True,
         outdir="./",
-        cluster_nodes="mcl",
-        transform_sigmoid=False,
+        # cluster_nodes="mcl",
+        # transform_sigmoid=False,
     ):
         """Class from which the network is trained, evaluated and tested
 
@@ -74,6 +75,9 @@ class NeuralNet(object):
         # load the input data or a pretrained model
         # each named arguments is stored in a member vairable
         # i.e. self.node_feature = node_feature
+
+        # pylint: disable=too-many-arguments
+
         if pretrained_model is None:
             for k, v in dict(locals()).items():
                 if k not in ["self", "database", "Net", "database_eval"]:
@@ -86,21 +90,19 @@ class NeuralNet(object):
                     self.task = "class"
                 else:
                     raise ValueError(
-                        f"User target detected -> The task argument is required ('class' or 'reg'). \n\t"
-                        f"Example: \n\t"
-                        f""
-                        f"model = NeuralNet(database, GINet,"
-                        f"                  target='physiological_assembly',"
-                        f"                  task='class',"
-                        f"                  shuffle=True,"
-                        f"                  percent=[0.8, 0.2])"
+                        "User target detected -> The task argument is required ('class' or 'reg'). \n\t"
+                        "Example: \n\t"
+                        ""
+                        "model = NeuralNet(database, GINet,"
+                        "                  target='physiological_assembly',"
+                        "                  task='class',"
+                        "                  shuffle=True,"
+                        "                  percent=[0.8, 0.2])"
                     )
 
             if self.task == "class" and self.threshold is None:
                 print(
-                    "the threshold for accuracy computation is set to {}".format(
-                        self.classes[1]
-                    )
+                    f"the threshold for accuracy computation is set to {self.classes[1]}"
                 )
                 self.threshold = self.classes[1]
             if self.task == "reg" and self.threshold is None:
@@ -169,13 +171,13 @@ class NeuralNet(object):
         )
 
         if self.cluster_nodes is not None:
-            if self.cluster_nodes == "mcl" or self.cluster_nodes == "louvain":
+            if self.cluster_nodes in ("mcl", "louvain"):
                 print("Loading clusters")
                 PreCluster(dataset, method=self.cluster_nodes)
             else:
                 raise ValueError(
-                    f"Invalid node clustering method. \n\t"
-                    f"Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t"
+                    "Invalid node clustering method. \n\t"
+                    "Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t"
                 )
 
         # divide the dataset
@@ -206,7 +208,7 @@ class NeuralNet(object):
                 clustering_method=self.cluster_nodes,
             )
 
-            if self.cluster_nodes == "mcl" or self.cluster_nodes == "louvain":
+            if self.cluster_nodes in ("mcl", "louvain"):
                 print("Loading clusters for the evaluation set.")
                 PreCluster(valid_dataset, method=self.cluster_nodes)
 
@@ -261,7 +263,7 @@ class NeuralNet(object):
         # classification mode
         elif self.task == "class":
             self.classes_to_idx = {i: idx for idx, i in enumerate(self.classes)}
-            self.idx_to_classes = {idx: i for idx, i in enumerate(self.classes)}
+            self.idx_to_classes = dict(enumerate(self.classes))
             self.output_shape = len(self.classes)
             try:
                 self.model = Net(
@@ -269,14 +271,14 @@ class NeuralNet(object):
                     self.output_shape,
                     self.num_edge_features,
                 ).to(self.device)
-            except BaseException:
-                raise ValueError(
+            except BaseException as e:
+                raise ValueError (
                     f"The loaded model does not accept output_shape = {self.output_shape} argument \n\t"
                     f"Check your input or adapt the model\n\t"
                     f"Example :\n\t"
                     f"def __init__(self, input_shape): --> def __init__(self, input_shape, output_shape) \n\t"
                     f"self.fc2 = torch.nn.Linear(64, 1) --> self.fc2 = torch.nn.Linear(64, output_shape) \n\t"
-                )
+                ) from e
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
@@ -323,6 +325,8 @@ class NeuralNet(object):
             save_epoch (all, intermediate, optional)
             save_every (int, optional): save data every n epoch if save_epoch == 'intermediate'. Defaults to 5
         """
+        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-locals
         # Output file name
         data_hdf5_path = self.update_name(hdf5, self.outdir)
 
@@ -337,7 +341,7 @@ class NeuralNet(object):
             self.model.train()
 
             t0 = time()
-            _out, _y, _loss, self.data["train"] = self._epoch(epoch)
+            _out, _y, _loss, self.data["train"] = self._epoch()
             t = time() - t0
             self.train_loss.append(_loss)
             self.train_out = _out
@@ -370,14 +374,7 @@ class NeuralNet(object):
 
                     if min(self.valid_loss) == _val_loss:
                         self.save_model(
-                            filename="t{}_y{}_b{}_e{}_lr{}_{}.pth.tar".format(
-                                self.task,
-                                self.target,
-                                str(self.batch_size),
-                                str(nepoch),
-                                str(self.lr),
-                                str(epoch),
-                            )
+                            filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar"
                         )
 
             else:
@@ -391,14 +388,7 @@ class NeuralNet(object):
                         print("this may lead to training set data overfitting.")
                         print("We advice you to use an external validation set.")
                         self.save_model(
-                            filename="t{}_y{}_b{}_e{}_lr{}_{}.pth.tar".format(
-                                self.task,
-                                self.target,
-                                str(self.batch_size),
-                                str(nepoch),
-                                str(self.lr),
-                                str(epoch),
-                            )
+                            filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar"
                         )
 
             # Save epoch data
@@ -413,13 +403,7 @@ class NeuralNet(object):
         # Save the last model
         if save_model == "last":
             self.save_model(
-                filename="t{}_y{}_b{}_e{}_lr{}.pth.tar".format(
-                    self.task,
-                    self.target,
-                    str(self.batch_size),
-                    str(nepoch),
-                    str(self.lr),
-                )
+                filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}.pth.tar"
             )
 
     def test(self, database_test=None, threshold=4, hdf5="test_data.hdf5"):
@@ -535,7 +519,7 @@ class NeuralNet(object):
 
         return out, y, loss_val, data
 
-    def _epoch(self, epoch):
+    def _epoch(self):
         """
         Runs a single epoch
 
@@ -663,6 +647,8 @@ class NeuralNet(object):
         else:
             acc_str = f"{acc:1.4e}"
 
+        # pylint: disable=logging-not-lazy
+        # pylint: disable=consider-using-f-string
         _log.info(
             "Epoch [%04d] : %s loss %e | accuracy %s | time %1.2e sec."
             % (epoch, stage, loss, acc_str, time)
@@ -720,8 +706,6 @@ class NeuralNet(object):
         train_loss = self.train_loss
         valid_loss = self.valid_loss
 
-        import matplotlib.pyplot as plt
-
         if len(valid_loss) > 1:
             plt.plot(range(1, nepoch + 1), valid_loss, c="red", label="valid")
 
@@ -745,8 +729,6 @@ class NeuralNet(object):
         train_acc = self.train_acc
         valid_acc = self.valid_acc
 
-        import matplotlib.pyplot as plt
-
         if len(valid_acc) > 1:
             plt.plot(range(1, nepoch + 1), valid_acc, c="red", label="valid")
 
@@ -768,7 +750,6 @@ class NeuralNet(object):
             threshold (int, optional): defines the value to split into a hit (1) or a non-hit (0). Defaults to 4.
             mode (str, optional): displays the hitrate as a number of hits ('count') or as a percentage ('percantage') . Defaults to 'percentage'.
         """
-        import matplotlib.pyplot as plt
 
         try:
 
@@ -793,7 +774,6 @@ class NeuralNet(object):
 
     def plot_scatter(self):
         """Scatters plot of the results."""
-        import matplotlib.pyplot as plt
 
         self.model.eval()
 
@@ -886,7 +866,7 @@ class NeuralNet(object):
             data (dict): data of the epoch
         """
         # create a group
-        grp_name = "epoch_%04d" % epoch
+        grp_name = f"epoch_{epoch}"
         grp = data_hdf5_file.create_group(grp_name)
 
         grp.attrs["task"] = self.task
@@ -916,5 +896,5 @@ class NeuralNet(object):
                     else:
                         sg.create_dataset(data_name, data=data_value)
 
-            except TypeError:
-                raise ValueError("Error in export epoch to hdf5")
+            except TypeError as e:
+                raise ValueError("Error in export epoch to hdf5") from e

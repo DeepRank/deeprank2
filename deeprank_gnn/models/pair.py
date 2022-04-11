@@ -21,8 +21,7 @@ class Pair:
 
         if s1 < s2:
             return hash(s1 + s2)
-        else:
-            return hash(s2 + s1)
+        return hash(s2 + s1)
 
     def __eq__(self, other):
         # Compare the pairs as sets, so the order doesn't matter.

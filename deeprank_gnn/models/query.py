@@ -70,7 +70,7 @@ class Query:
 
 class SingleResidueVariantResidueQuery(Query):
     "creates a residue graph from a single residue variant in a pdb file"
-
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         pdb_path: str,
@@ -127,17 +127,11 @@ class SingleResidueVariantResidueQuery(Query):
         if self._insertion_code is not None:
 
             return f"{self._residue_number}{self._insertion_code}"
-        else:
-            return str(self._residue_number)
+        
+        return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        return "residue-graph-{}:{}:{}:{}->{}".format(
-            self.model_id,
-            self._chain_id,
-            self.residue_id,
-            self._wildtype_amino_acid.name,
-            self._variant_amino_acid.name,
-        )
+        return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
     @staticmethod
     def _get_residue_node_key(residue: Residue) -> str:
@@ -175,7 +169,7 @@ class SingleResidueVariantResidueQuery(Query):
             ):
                 return True
 
-            elif (
+            if (
                 atom2.name == "C"
                 and atom1.name == "N"
                 and SingleResidueVariantResidueQuery._is_next_residue_number(
@@ -185,7 +179,7 @@ class SingleResidueVariantResidueQuery(Query):
                 return True
 
             # disulfid bonds
-            elif atom1.name == "SG" and atom2.name == "SG":
+            if atom1.name == "SG" and atom2.name == "SG":
                 return True
 
         return False
@@ -199,8 +193,7 @@ class SingleResidueVariantResidueQuery(Query):
         for node_name, residue in node_name_residues.items():
 
             select_str = (
-                "residue, (resi %s) and (chain %s)"
-                % (residue.number_string, residue.chain.id),
+                f"residue, (resi {residue.number_string}) and (chain {residue.chain.id})"
             )
 
             area = freesasa.selectArea(select_str, structure, result)["residue"]
@@ -344,6 +337,8 @@ class SingleResidueVariantResidueQuery(Query):
             graph.nodes[node_name][FEATURENAME_CONSERVATIONDIFFERENCE] = difference
 
     def build_graph(self) -> Graph:
+        # pylint: disable=too-many-locals
+        # pylint: disable=protected-access
         # load pdb strucure
         pdb = pdb2sql.pdb2sql(self._pdb_path)
 
@@ -358,7 +353,7 @@ class SingleResidueVariantResidueQuery(Query):
                 if chain.id in self._pssm_paths:
                     pssm_path = self._pssm_paths[chain.id]
 
-                    with open(pssm_path, "rt") as f:
+                    with open(pssm_path, "rt", encoding = "utf-8") as f:
                         chain.pssm = parse_pssm(f, chain)
 
         # find the variant residue
@@ -370,9 +365,7 @@ class SingleResidueVariantResidueQuery(Query):
         ]
         if len(variant_residues) == 0:
             raise ValueError(
-                "Residue {}:{} not found in {}".format(
-                    self._chain_id, self.residue_id, self._pdb_path
-                )
+                "Residue {self._chain_id}:{self.residue_id} not found in {self._pdb_path}"
             )
         variant_residue = variant_residues[0]
 
@@ -483,6 +476,7 @@ class SingleResidueVariantResidueQuery(Query):
 
 class SingleResidueVariantAtomicQuery(Query):
     "creates an atomic graph for a single residue variant in a pdb file"
+    # pylint: disable=too-many-arguments
 
     def __init__(
         self,
@@ -503,17 +497,31 @@ class SingleResidueVariantAtomicQuery(Query):
         """
         Args:
             pdb_path(str): the path to the pdb file
+
             chain_id(str): the pdb chain identifier of the variant residue
+
             residue_number(int): the number of the variant residue
+
             insertion_code(str): the insertion code of the variant residue, set to None if not applicable
+
             wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
+
             variant_amino_acid(deeprank amino acid object): the variant amino acid
+
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+
             wildtype_conservation(float): conservation value for the wildtype
+
             variant_conservation(float): conservation value for the variant
+
             radius(float): in Ångström, determines how many residues will be included in the graph
-            external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
-            internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an internal edge in the graph (must be shorter than external)
+
+            external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider
+            them as an external edge in the graph
+
+            internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider
+            them as an internal edge in the graph (must be shorter than external)
+
             targets(dict(str,float)): named target values associated with this query
         """
 
@@ -548,17 +556,11 @@ class SingleResidueVariantAtomicQuery(Query):
 
         if self._insertion_code is not None:
             return f"{self._residue_number}{self._insertion_code}"
-        else:
-            return str(self._residue_number)
+        
+        return str(self._residue_number)
 
     def get_query_id(self):
-        return "{}:{}:{}:{}->{}".format(
-            self.model_id,
-            self._chain_id,
-            self.residue_id,
-            self._wildtype_amino_acid.name,
-            self._variant_amino_acid.name,
-        )
+        return f"{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
     def __eq__(self, other):
         return (
@@ -590,6 +592,9 @@ class SingleResidueVariantAtomicQuery(Query):
         return str(atom)
 
     def build_graph(self) -> Graph:
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-statements
+        # pylint: disable=protected-access
 
         # load pdb strucure
         pdb = pdb2sql.pdb2sql(self._pdb_path)
@@ -605,7 +610,7 @@ class SingleResidueVariantAtomicQuery(Query):
                 if chain.id in self._pssm_paths:
                     pssm_path = self._pssm_paths[chain.id]
 
-                    with open(pssm_path, "rt") as f:
+                    with open(pssm_path, "rt", encoding = "utf-8") as f:
                         chain.pssm = parse_pssm(f, chain)
 
         # find the variant residue
@@ -617,9 +622,7 @@ class SingleResidueVariantAtomicQuery(Query):
         ]
         if len(variant_residues) == 0:
             raise ValueError(
-                "Residue {}:{} not found in {}".format(
-                    self._chain_id, self.residue_id, self._pdb_path
-                )
+                "Residue {self._chain_id}:{self.residue_id} not found in {self._pdb_path}"
             )
         variant_residue = variant_residues[0]
 
@@ -885,8 +888,7 @@ class SingleResidueVariantAtomicQuery(Query):
                 area = 0.0
             else:
                 select_str = (
-                    "atom, (name %s) and (resi %s) and (chain %s)"
-                    % (atom.name, atom.residue.number_string, atom.residue.chain.id),
+                    f"atom, (name {atom.name}) and (resi {atom.residue.number_string}) and (chain {atom.residue.chain.id})"
                 )
                 area = freesasa.selectArea(select_str, structure, result)["atom"]
 
@@ -910,6 +912,7 @@ class SingleResidueVariantAtomicQuery(Query):
         charges: Dict[Atom, float],
         max_interatomic_distance: float,
     ):
+    # pylint: disable=too-many-locals
 
         # get the edges
         edge_keys = []
@@ -955,6 +958,7 @@ class SingleResidueVariantAtomicQuery(Query):
         node_name_atoms: Dict[str, Atom],
         vanderwaals_parameters: Dict[Atom, VanderwaalsParam],
     ):
+    # pylint: disable=too-many-locals
 
         edge_keys = []
         edge_count = len(graph.edges)
@@ -1026,6 +1030,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
 class ProteinProteinInterfaceAtomicQuery(Query):
     "a query that builds atom-based graphs, using the residues at a protein-protein interface"
+    # pylint: disable=too-many-arguments
 
     def __init__(
         self,
@@ -1082,7 +1087,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             return False
 
         if residue not in residue.chain.pssm:
-            _log.debug(f"{residue} not in pssm")
+            _log.debug("%s not in pssm", residue)
             return False
 
         return True
@@ -1262,8 +1267,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             node[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
 
             select_str = (
-                "atom, (name %s) and (resi %s) and (chain %s)"
-                % (atom.name, residue.number_string, residue.chain.id),
+                f"atom, (name {atom.name}) and (resi {residue.number_string}) and (chain {residue.chain.id})"
             )
             area_unbound = freesasa.selectArea(
                 select_str, sasa_structures[residue.chain], sasa_results[residue.chain]
@@ -1308,6 +1312,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface"
+    # pylint: disable=too-many-arguments
 
     def __init__(
         self,
@@ -1368,7 +1373,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             return False
 
         if residue not in residue.chain.pssm:
-            _log.debug(f"{residue} not in pssm")
+            _log.debug("%s not in pssm", residue)
             return False
 
         return True
@@ -1388,7 +1393,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         Returns(deeprank graph object): the resulting graph
         """
-
+        # pylint: disable=too-many-locals
+        # mccabe: disable=MC0001
         # get residues from the pdb
 
         interface_pairs = get_residue_contact_pairs(
@@ -1412,7 +1418,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             for chain in (chain1, chain2):
                 pssm_path = self._pssm_paths[chain.id]
 
-                with open(pssm_path, "rt") as f:
+                with open(pssm_path, "rt", encoding = "utf-8") as f:
                     chain.pssm = parse_pssm(f, chain)
 
         # separate residues by chain

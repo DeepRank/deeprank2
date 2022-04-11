@@ -30,23 +30,23 @@ COULOMB_CONSTANT = 332.0636
 class AtomicForcefield:
     def __init__(self):
         top_path = os.path.join(_forcefield_directory_path, "protein-allhdg5-5_new.top")
-        with open(top_path, "rt") as f:
+        with open(top_path, "rt", encoding = "utf8") as f:
             self._top_rows = {
                 (row.residue_name, row.atom_name): row for row in TopParser.parse(f)
             }
 
         patch_path = os.path.join(_forcefield_directory_path, "patch.top")
-        with open(patch_path, "rt") as f:
+        with open(patch_path, "rt", encoding = "utf8") as f:
             self._patch_actions = PatchParser.parse(f)
 
         residue_class_path = os.path.join(_forcefield_directory_path, "residue-classes")
-        with open(residue_class_path, "rt") as f:
+        with open(residue_class_path, "rt", encoding = "utf8") as f:
             self._residue_class_criteria = ResidueClassParser.parse(f)
 
         param_path = os.path.join(
             _forcefield_directory_path, "protein-allhdg5-4_new.param"
         )
-        with open(param_path, "rt") as f:
+        with open(param_path, "rt", encoding = "utf8") as f:
             self._vanderwaals_parameters = ParamParser.parse(f)
 
     def _find_matching_residue_class(self, residue):

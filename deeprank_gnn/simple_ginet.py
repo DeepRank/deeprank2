@@ -1,7 +1,7 @@
 import logging
 
 import torch
-from torch.nn import Parameter, Module, Linear
+from torch.nn import Module, Linear
 from torch.nn.functional import softmax, leaky_relu, relu, dropout
 from torch_scatter import scatter_mean, scatter_sum
 from torch_geometric.nn.inits import uniform
@@ -12,7 +12,7 @@ _log = logging.getLogger(__name__)
 class SimpleGiMessageLayer(Module):
     def __init__(self, count_node_features, count_edge_features, node_output_size):
 
-        super(SimpleGiMessageLayer, self).__init__()
+        super().__init__()
 
         self._node_output_size = node_output_size
         self._edge_output_size = count_edge_features
@@ -28,6 +28,8 @@ class SimpleGiMessageLayer(Module):
         uniform(self._attention_input_size, self._fa.weight)
 
     def forward(self, node_features, edge_node_indices, edge_features):
+
+        # pylint: disable=too-many-locals
 
         if edge_node_indices.shape[0] != 2:
 
@@ -68,7 +70,7 @@ class SimpleGiNetwork(Module):
             input_shape_edge(int): number of edge input features
         """
 
-        super(SimpleGiNetwork, self).__init__()
+        super().__init__()
 
         self._internal_message_layer1 = SimpleGiMessageLayer(
             input_shape, input_shape_edge, 16

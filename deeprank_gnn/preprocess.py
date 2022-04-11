@@ -3,15 +3,10 @@
 from multiprocessing import Queue, Process, Pipe, cpu_count
 from queue import Empty as EmptyQueueError
 import logging
-import sys
 import os
 from time import sleep
-
 import h5py
-
-from deeprank_gnn.domain.amino_acid import amino_acids
 from deeprank_gnn.tools.graph import graph_to_hdf5, graph_has_nan
-from deeprank_gnn.models.query import SingleResidueVariantAtomicQuery
 
 
 _log = logging.getLogger(__name__)
@@ -57,13 +52,14 @@ class _PreProcess(Process):
                 graph = query.build_graph()
                 if graph_has_nan(graph):
                     _log.warning(
-                        f"skipping {query}, because of a generated NaN value in the graph"
+                        "skipping %s, because of a generated NaN value in the graph", query
                     )
 
                 with h5py.File(self._output_path, "a") as f5:
                     graph_to_hdf5(graph, f5)
 
             except BaseException:
+                # pylint: disable=logging-fstring-interpolation
                 _log.exception(f"error adding {query} to {self._output_path}")
 
                 # Don't leave behind an unfinished hdf5 group.
@@ -101,7 +97,7 @@ class PreProcessor:
     def start(self):
         "start the workers"
 
-        _log.info(f"starting {len(self._processes)} worker processes")
+        _log.info("starting %d worker processes", len(self._processes))
         for process in self._processes:
             process.start()
             if not process.is_alive():
@@ -139,7 +135,7 @@ class PreProcessor:
     def shutdown(self):
         "stop building graphs"
 
-        _log.info(f"shutting down {len(self._processes)} worker processes..")
+        _log.info("shutting down %d worker processes..", len(self._processes))
 
         for process in self._processes:
             process.stop()

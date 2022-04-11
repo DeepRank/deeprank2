@@ -9,7 +9,7 @@ class ParamParser:
             if line.startswith("#"):
                 continue
 
-            elif line.startswith("NONBonded "):
+            if line.startswith("NONBonded "):
                 (
                     _,
                     type_,

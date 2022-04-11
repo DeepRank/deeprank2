@@ -1,4 +1,3 @@
-from PyQt5 import QtWidgets
 from h5xplorer.menu_tools import *
 from h5xplorer.menu_plot import *
 

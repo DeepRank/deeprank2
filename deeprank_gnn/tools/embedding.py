@@ -1,4 +1,4 @@
-from sklearn import manifold, datasets
+from sklearn import manifold
 
 
 def manifold_embedding(pos, method="tsne"):

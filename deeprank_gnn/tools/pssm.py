@@ -1,7 +1,4 @@
-import os
-import numpy as np
 from typing import TextIO
-
 from deeprank_gnn.models.structure import Residue, Chain
 from deeprank_gnn.models.conservation import ConservationRow, ConservationTable
 from deeprank_gnn.domain.amino_acid import amino_acids

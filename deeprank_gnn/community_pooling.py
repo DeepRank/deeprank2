@@ -2,21 +2,14 @@ import community
 import markov_clustering as mc
 import networkx as nx
 import torch
-
 from torch_scatter import scatter_max, scatter_mean
-from torch_geometric.nn.pool.pool import pool_edge, pool_batch, pool_pos
+from torch_geometric.nn.pool.pool import pool_edge, pool_batch
 from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.data import Batch, Data
-
-
 import numpy as np
-
-from time import time
-
+import matplotlib.pyplot as plt
 
 def plot_graph(graph, cluster):
-
-    import matplotlib.pyplot as plt
 
     pos = nx.spring_layout(graph, iterations=200)
     nx.draw(graph, pos, node_color=cluster)
@@ -48,6 +41,8 @@ def community_detection_per_batch(
     Returns:
         cluster Tensor
     """
+
+    # pylint: disable=too-many-locals
 
     # make the networkX graph
     g = nx.Graph()
@@ -122,6 +117,9 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"):
         >>> data.pos = torch.tensor(np.random.rand(data.num_nodes, 3))
         >>> c = community_detection(data.edge_index, data.num_nodes)
     """
+
+    # pylint: disable=too-many-locals
+
     # make the networkX graph
     g = nx.Graph()
     g.add_nodes_from(range(num_nodes))
@@ -141,7 +139,7 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"):
         return torch.tensor([v for k, v in cluster.items()]).to(device)
 
     # detect the communities using MCL detection
-    elif method == "mcl":
+    if method == "mcl":
 
         matrix = nx.to_scipy_sparse_matrix(g)
 
@@ -155,8 +153,8 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"):
             index[list(c)] = ic
 
         return torch.tensor(index).to(device)
-    else:
-        raise ValueError(f"Clustering method {method} not supported")
+
+    raise ValueError(f"Clustering method {method} not supported")
 
 
 def community_pooling(cluster, data):
@@ -188,6 +186,8 @@ def community_pooling(cluster, data):
         >>> cluster = community_detection(batch.edge_index, batch.num_nodes)
         >>> new_batch = community_pooling(cluster, batch)
     """
+
+    # pylint: disable=too-many-locals
 
     # determine what the batches has as attributes
     has_internal_edges = hasattr(data, "internal_edge_index")

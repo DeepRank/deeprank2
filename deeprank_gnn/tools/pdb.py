@@ -1,11 +1,7 @@
-from time import time
 import logging
-
 from scipy.spatial import distance_matrix
 import numpy
-import torch
 from pdb2sql import pdb2sql, interface as get_interface
-
 from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement
 from deeprank_gnn.domain.amino_acid import amino_acids
 from deeprank_gnn.models.pair import Pair
@@ -45,7 +41,7 @@ def get_structure(pdb, id_):
         id (str): unique id for the pdb structure
     Returns (Structure): the structure object, giving access to chains, residues, atoms
     """
-
+    # pylint: disable=too-many-locals
     amino_acids_by_code = {
         amino_acid.three_letter_code: amino_acid for amino_acid in amino_acids
     }
@@ -67,7 +63,7 @@ def get_structure(pdb, id_):
             x,
             y,
             z,
-            atom_number,
+            _,
             atom_name,
             altloc,
             occupancy,
@@ -155,13 +151,13 @@ def get_residue_contact_pairs(
 
     Returns: (list of deeprank residue pairs): the contacting residues
     """
-
+    # pylint: disable=too-many-locals
     # load the structure
     pdb = pdb2sql(pdb_path)
     try:
         structure = get_structure(pdb, model_id)
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     # Find out which residues are pairs
     interface = get_interface(pdb_path)
@@ -173,7 +169,7 @@ def get_residue_contact_pairs(
             return_contact_pairs=True,
         )
     finally:
-        interface._close()
+        interface._close() # pylint: disable=protected-access
 
     # Map to residue objects
     residue_pairs = set([])
@@ -193,9 +189,7 @@ def get_residue_contact_pairs(
                 break
         else:
             raise ValueError(
-                "Not found: {} {} {} {}".format(
-                    pdb_ac, residue_chain_id1, residue_number1, residue_name1
-                )
+                f"Not found: {pdb_path} {residue_chain_id1} {residue_number1} {residue_name1}"
             )
 
         for residue_chain_id2, residue_number2, residue_name2 in contact_residues[
@@ -215,9 +209,7 @@ def get_residue_contact_pairs(
                     break
             else:
                 raise ValueError(
-                    "Not found: {} {} {} {}".format(
-                        pdb_ac, residue_chain_id2, residue_number2, residue_name2
-                    )
+                    f"Not found: {pdb_path} {residue_chain_id2} {residue_number2} {residue_name2}"
                 )
 
             residue_pairs.add(Pair(residue1, residue2))
@@ -245,7 +237,7 @@ def get_surrounding_residues(structure, residue, radius):
     distances = distance_matrix(structure_atom_positions, residue_atom_positions, p=2)
 
     close_residues = set([])
-    for structure_atom_index in range(len(structure_atoms)):
+    for structure_atom_index, _ in enumerate(structure_atoms):
 
         shortest_distance = numpy.min(distances[structure_atom_index, :])
 
@@ -267,8 +259,6 @@ def find_neighbour_atoms(atoms, max_distance):
 
     Returns: (a set of deeprank atom object pairs): the paired atoms
     """
-
-    atom_count = len(atoms)
 
     atom_positions = [atom.position for atom in atoms]
 

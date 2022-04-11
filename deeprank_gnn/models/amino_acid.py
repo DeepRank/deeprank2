@@ -1,14 +1,12 @@
 from typing import Optional
-
 import numpy
-
 from deeprank_gnn.models.polarity import Polarity
 
 
 class AminoAcid:
     "a value to represent one of the amino acids"
-
-    def __init__(
+    # pylint: disable=too-many-arguments
+    def __init__( 
         self,
         name: str,
         three_letter_code: str,
@@ -54,9 +52,7 @@ class AminoAcid:
     def onehot(self):
         if self._index is None:
             raise ValueError(
-                "amino acid {} index is not set, thus no onehot can be computed".format(
-                    self._name
-                )
+                f"amino acid {self._name} index is not set, thus no onehot can be computed"
             )
 
         # assumed that there are only 20 different amino acids

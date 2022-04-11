@@ -1,18 +1,10 @@
-import os
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import ResidueDepth, get_surface, residue_depth
 from Bio.PDB.HSExposure import HSExposureCA
-
-import warnings
 from Bio import BiopythonWarning
-
-import tempfile
-
+import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonWarning)
-    from Bio import SearchIO
-
-from time import time
 
 
 def get_bio_model(pdbfile):
@@ -41,7 +33,6 @@ def get_depth_res(model):
     rd = ResidueDepth(model)
 
     data = {}
-    t0 = time()
     for k in list(rd.keys()):
         new_key = (k[0], k[1][1])
         data[new_key] = rd[k][0]

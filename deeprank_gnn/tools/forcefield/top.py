@@ -44,5 +44,5 @@ class TopParser:
 
         if TopParser._NUMBER_PATTERN.match(s):
             return float(s)
-        else:
-            return s
+        
+        return s

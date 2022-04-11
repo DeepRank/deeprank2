@@ -1,17 +1,12 @@
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_scatter import scatter_mean
-from torch_geometric.datasets import MNISTSuperpixels
-import torch_geometric.transforms as T
 from torch_geometric.data import DataLoader
-from torch_geometric.utils import normalized_cut
-from torch_geometric.nn import GCNConv, ChebConv, SplineConv, NNConv, GATConv
-from torch_geometric.nn import graclus, max_pool, max_pool_x
+from torch_geometric.nn import max_pool_x
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 from DataSet import HDF5DataSet
 from community_pooling import *
@@ -58,7 +53,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 class Net(torch.nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
+        super().__init__()
 
         self.conv1 = WGATConv(d.num_features, 16)
         self.conv2 = WGATConv(16, 32)

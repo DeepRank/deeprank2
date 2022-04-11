@@ -1,10 +1,11 @@
 import sys
 import h5py
 import pandas as pd
-import numpy as np
 
 
 def hdf5_to_csv(hdf5_path):
+
+    # pylint: disable=too-many-locals
 
     hdf5 = h5py.File(hdf5_path, "r+")
     name = hdf5_path.split(".")[0]
@@ -36,9 +37,8 @@ def hdf5_to_csv(hdf5_path):
                         "raw_prediction_0",
                         "raw_prediction_1",
                     ]
-                    output_file = open(f"{name}.csv", "w")
-                    output_file.write("," + ",".join(header) + "\n")
-                    output_file.close()
+                    with open(f"{name}.csv", "w", encoding = "utf-8") as output_file:
+                        output_file.write("," + ",".join(header) + "\n")
                     first = False
                 # probability of getting 0
                 outputs_0 = hdf5[f"{epoch}/{dataset}/raw_output"][()][:, 0]
@@ -62,9 +62,8 @@ def hdf5_to_csv(hdf5_path):
             else:
                 if first:
                     header = ["epoch", "set", "model", "targets", "prediction"]
-                    output_file = open(f"{name}.csv", "w")
-                    output_file.write("," + ",".join(header) + "\n")
-                    output_file.close()
+                    with open(f"{name}.csv", "w", encoding = "utf-8") as output_file:
+                        output_file.write("," + ",".join(header) + "\n")
                     first = False
                 dataset_df = pd.DataFrame(
                     list(zip(epoch_lst, dataset_lst, mol, targets, outputs)),

@@ -1,5 +1,3 @@
-import os
-import numpy as np
 from pdb2sql.interface import interface
 
 try:
@@ -9,7 +7,7 @@ except ImportError:
     print("Freesasa not found")
 
 
-class BSA(object):
+class BSA():
     def __init__(self, pdb_data, sqldb=None, chainA="A", chainB="B"):
         """Compute the burried surface area feature
 
@@ -92,13 +90,13 @@ class BSA(object):
         for r in res:
 
             # define the selection string and the bsa for the complex
-            select_str = ("res, (resi %d) and (chain %s)" % (r[1], r[0]),)
+            select_str = (f"res, (resi {r[1]}) and (chain {r[0]})")
             asa_complex = freesasa.selectArea(
                 select_str, self.complex, self.result_complex
             )["res"]
 
             # define the selection string and the bsa for the isolated
-            select_str = ("res, resi %d" % r[1],)
+            select_str = (f"res, resi {r[1]}")
             asa_unbound = freesasa.selectArea(
                 select_str, self.chains[r[0]], self.result_chains[r[0]]
             )["res"]
@@ -107,9 +105,9 @@ class BSA(object):
             bsa = asa_unbound - asa_complex
 
             # define the xyz key : (chain,x,y,z)
-            chain = {"A": 0, "B": 1}[r[0]]
-            xyz = np.mean(self.sql.get("x,y,z", resSeq=r[1], chainID=r[0]), 0)
-            xyzkey = tuple([chain] + xyz.tolist())
+            #chain = {"A": 0, "B": 1}[r[0]]
+            #xyz = np.mean(self.sql.get("x,y,z", resSeq=r[1], chainID=r[0]), 0)
+            #xyzkey = tuple([chain] + xyz.tolist())
 
             # put the data in dict
             self.bsa_data[r] = [bsa]

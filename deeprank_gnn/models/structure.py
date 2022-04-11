@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 import numpy
 
@@ -171,8 +171,8 @@ class Residue:
 
         if self._insertion_code is not None:
             return f"{self._number}{self._insertion_code}"
-        else:
-            return str(self._number)
+
+        return str(self._number)
 
     @property
     def insertion_code(self) -> str:
@@ -187,6 +187,7 @@ class Residue:
 
 class AtomicElement(Enum):
     "value to represent the type of pdb atoms"
+    # pycodestyle: disable=E741
 
     C = 1
     O = 2
@@ -204,6 +205,7 @@ class AtomicElement(Enum):
 
 class Atom:
     "represents a pdb atom"
+    # pylint: disable=too-many-arguments
 
     def __init__(
         self,

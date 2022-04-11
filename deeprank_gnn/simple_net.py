@@ -1,8 +1,8 @@
 import logging
 
 import torch
-from torch.nn import Parameter, Module, Linear, Sequential, ReLU, Softmax, SiLU
-from torch.nn.functional import relu, silu
+from torch.nn import Module, Linear, Sequential, SiLU
+from torch.nn.functional import silu
 from torch_scatter import scatter_mean, scatter_sum
 
 _log = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ _log = logging.getLogger(__name__)
 class SimpleConvolutionalLayer(Module):
     def __init__(self, count_node_features, count_edge_features):
 
-        super(SimpleConvolutionalLayer, self).__init__()
+        super().__init__()
 
         message_size = 4
         hidden_size = 32
@@ -57,7 +57,7 @@ class SimpleConvolutionalLayer(Module):
 
     def forward(self, node_features, edge_node_indices, edge_features):
 
-        node0_indices, node1_indices = edge_node_indices
+        node0_indices, _ = edge_node_indices
 
         messages_per_neighbour = self._edge_forward(
             node_features, edge_node_indices, edge_features
@@ -84,13 +84,13 @@ class SimpleNetwork(Module):
             input_shape_edge(int): number of edge input features
         """
 
-        super(SimpleNetwork, self).__init__()
+        super().__init__()
 
         layer_count = 2
 
         self._internal_convolutional_layers = []
         self._external_convolutional_layers = []
-        for layer_index in range(layer_count):
+        for _ in range(layer_count):
             self._internal_convolutional_layers.append(
                 SimpleConvolutionalLayer(input_shape, input_shape_edge)
             )
@@ -111,7 +111,7 @@ class SimpleNetwork(Module):
     def _update(node_features, edge_indices, edge_features, convolutional_layers):
 
         updated_node_features = node_features.clone().detach()
-        for layer_index in range(len(convolutional_layers)):
+        for layer_index, _ in enumerate(convolutional_layers):
             updated_node_features = silu(
                 convolutional_layers[layer_index](
                     updated_node_features, edge_indices, edge_features

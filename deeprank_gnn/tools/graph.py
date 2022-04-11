@@ -1,11 +1,9 @@
 import logging
 from copy import deepcopy
-
 import numpy
 import networkx
 import community
 import markov_clustering
-
 from deeprank_gnn.tools.embedding import manifold_embedding
 from deeprank_gnn.domain.feature import FEATURENAME_EDGETYPE
 from deeprank_gnn.domain.graph import EDGETYPE_INTERFACE, EDGETYPE_INTERNAL
@@ -31,7 +29,7 @@ def graph_has_nan(graph):
         for feature_name, feature_value in node_dict.items():
 
             if numpy.any(numpy.isnan(feature_value)):
-                _log.debug(f"node {node_key} {feature_name} has NaN")
+                _log.debug("node %s %s has NaN", node_key, feature_name)
                 return True
 
     for edge_key, edge_dict in graph.edges.items():
@@ -41,7 +39,7 @@ def graph_has_nan(graph):
                 continue  # is expected to be string
 
             if numpy.any(numpy.isnan(feature_value)):
-                _log.debug(f"edge {edge_key} {feature_name} has NaN")
+                _log.debug("edge %s %s has NaN", edge_key, feature_name)
                 return True
 
     return False
@@ -54,7 +52,8 @@ def graph_to_hdf5(graph, hdf5_file):
         graph (deeprank graph object): the input graph to write to the file
         hdf5_file (h5py file object): the output hdf5 file
     """
-
+    # pylint: disable=too-many-locals
+    # pylint: disable=consider-using-generator
     if len(graph.nodes) == 0:
         raise ValueError(f"Empty graph {graph.id}")
 
@@ -156,7 +155,7 @@ def _get_node_key(value):
 
     key = ""
     for item in value:
-        if isinstance(item, bytes) or isinstance(item, numpy.bytes_):
+        if isinstance(item, (bytes, numpy.bytes_)):
             key = item.decode()
 
         elif isinstance(item, str):
@@ -176,7 +175,7 @@ def hdf5_to_graph(graph_group):
 
     Returns(deeprank graph object): the graph stored in the hdf5 group, node and edge keys will be strings
     """
-
+    # pylint: disable=too-many-locals
     # read targets
     targets = {}
     if HDF5KEY_GRAPH_SCORE in graph_group:
@@ -198,7 +197,7 @@ def hdf5_to_graph(graph_group):
 
     for node_index, node_name in enumerate(node_names):
         graph.add_node(node_name)
-        graph.nodes[node_name]
+        graph.nodes[node_name] # pylint: disable=pointless-statement
         for node_feature_name in node_feature_names:
             graph.nodes[node_name][node_feature_name] = node_features[
                 node_feature_name
@@ -230,7 +229,7 @@ def hdf5_to_graph(graph_group):
                 ()
             ]
 
-        for edge_index, edge_name in enumerate(edge_names):
+        for edge_index, _ in enumerate(edge_names):
             node1_index, node2_index = edge_node_indices[edge_index]
             node1_name = node_names[node1_index]
             node2_name = node_names[node2_index]
@@ -247,11 +246,11 @@ def hdf5_to_graph(graph_group):
 
 
 def _get_edge_type_name(value):
-    if isinstance(value, numpy.bytes_) or isinstance(value, bytes):
+    if isinstance(value, (numpy.bytes_, bytes)):
 
         return value.decode()
-    else:
-        return value
+
+    return value
 
 
 def plotly_2d(
@@ -267,6 +266,10 @@ def plotly_2d(
         method (str, optional): 'mcl' of 'louvain'. Defaults to 'louvain'.
     """
 
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    # mccabe: disable=MC0001
+    # pylint: disable=import-outside-toplevel
     if offline:
         import plotly.offline as py
     else:
@@ -279,7 +282,7 @@ def plotly_2d(
         [v.tolist() for _, v in networkx.get_node_attributes(graph, "pos").items()]
     )
     pos2D = manifold_embedding(pos)
-    dict_pos = {n: p for n, p in zip(graph.nodes, pos2D)}
+    dict_pos = dict(zip(graph.nodes, pos2D))
     networkx.set_node_attributes(graph, dict_pos, "pos2D")
 
     # remove interface edges for clustering
@@ -448,7 +451,9 @@ def plotly_3d(graph, out=None, offline=False, iplot=True, disable_plot=False):
         offline (bool, optional): [description]. Defaults to False.
         iplot (bool, optional): [description]. Defaults to True.
     """
-
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    # pylint: disable=import-outside-toplevel
     if offline:
         import plotly.offline as py
     else:

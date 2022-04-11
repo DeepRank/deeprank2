@@ -1,8 +1,5 @@
-import torch.nn.functional as F
-import torch.nn as nn
-import numpy as np
+from torch import nn
 import torch
-import os
 
 __author__ = "Daniel-Tobias Rademaker"
 
@@ -12,6 +9,7 @@ __author__ = "Daniel-Tobias Rademaker"
 
 
 class GNN_layer(nn.Module):
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         nmb_edge_projection,
@@ -22,7 +20,7 @@ class GNN_layer(nn.Module):
         act_fn=nn.SiLU(),
         is_last_layer=True,
     ):
-        super(GNN_layer, self).__init__()
+        super().__init__()
         # The MLP that takes in atom-pairs and creates the Mij's
         self.edge_mlp = nn.Sequential(
             nn.Linear(nmb_edge_projection + nmb_hidden_attr * 2, nmb_mlp_neurons),
@@ -78,7 +76,7 @@ class GNN_layer(nn.Module):
     # Sums the individual sub-messages (multiple per node) into singel message
     # vector per node
     def sum_messages(self, edges, messages, nmb_nodes):
-        row, col = edges
+        row, _ = edges
         summed_messages_shape = (nmb_nodes, messages.size(1))
         result = messages.new_full(summed_messages_shape, 0)
         row = row.unsqueeze(-1).expand(-1, messages.size(1))
@@ -96,7 +94,7 @@ class GNN_layer(nn.Module):
         h = hidden_features  # shortening the variable name
         # It is possible to run input through the same same layer multiple
         # times
-        for step in range(steps):
+        for _ in range(steps):
             node_pair_messages = self.edge_model(
                 edge_attr, h[row], h[col]
             )  # get all atom-pair messages
@@ -119,6 +117,7 @@ class GNN_layer(nn.Module):
 #                      GNN super class                         #
 ################################################################
 class SuperGNN(nn.Module):
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         nmb_edge_attr,
@@ -131,7 +130,7 @@ class SuperGNN(nn.Module):
         message_vector_length,
         act_fn=nn.SiLU(),
     ):
-        super(SuperGNN, self).__init__()
+        super().__init__()
 
         # Since edge_atributes go into every layer, it might be betetr to learn
         # a better/smarter representation of them first
@@ -195,6 +194,7 @@ class SuperGNN(nn.Module):
 
 
 class Alignment_GNN(SuperGNN):
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         nmb_edge_attr,
@@ -207,7 +207,7 @@ class Alignment_GNN(SuperGNN):
         nmb_edge_projection,
         act_fn=nn.SiLU(),
     ):
-        super(Alignment_GNN, self).__init__(
+        super().__init__(
             nmb_edge_attr,
             nmb_node_attr,
             nmb_hidden_attr,

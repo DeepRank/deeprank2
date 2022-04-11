@@ -1,8 +1,4 @@
-import sys
-import os
-import torch
 import numpy as np
-
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score
@@ -33,7 +29,7 @@ def get_binary(values, threshold, target):
     return values_binary
 
 
-def get_comparison(prediction, ground_truth, binary=True, classes=[0, 1]):
+def get_comparison(prediction, ground_truth, binary=True, classes=None):
     """
     Computes the confusion matrix to get the number of:
 
@@ -53,6 +49,9 @@ def get_comparison(prediction, ground_truth, binary=True, classes=[0, 1]):
     Returns:
         int: false_positive, false_negative, true_positive, true_negative
     """
+    if classes is None:
+        classes = [0, 1]
+
     CM = confusion_matrix(ground_truth, prediction, labels=classes)
 
     false_positive = CM.sum(axis=0) - np.diag(CM)
@@ -63,11 +62,10 @@ def get_comparison(prediction, ground_truth, binary=True, classes=[0, 1]):
     if binary:
         return false_positive[1], false_negative[1], true_positive[1], true_negative[1]
 
-    else:
-        return false_positive, false_negative, true_positive, true_negative
+    return false_positive, false_negative, true_positive, true_negative
 
 
-class Metrics(object):
+class Metrics():
     def __init__(self, prediction, y, target, threshold=4, binary=True):
         """
         Master class from which all metrics are computed
@@ -104,6 +102,7 @@ class Metrics(object):
             binary (bool, optional): transform the data in binary vectors. Defaults to True.
             threshold (int, optional): threshold used to split the data into a binary vector. Defaults to 4.
         """
+        # pylint: disable=too-many-arguments
         self.prediction = prediction
         self.y = y
         self.binary = binary

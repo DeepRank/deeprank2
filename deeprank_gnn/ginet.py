@@ -1,28 +1,19 @@
 import torch
-from torch.nn import Parameter
 import torch.nn.functional as F
-import torch.nn as nn
-
+from torch import nn
 from torch_scatter import scatter_mean
 from torch_scatter import scatter_sum
-
-from torch_geometric.utils import remove_self_loops, add_self_loops, softmax
-
 # torch_geometric import
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
-from torch_geometric.data import DataLoader
-
 # deeprank_gnn import
 from deeprank_gnn.community_pooling import get_preloaded_cluster, community_pooling
-from deeprank_gnn.NeuralNet import NeuralNet
-from deeprank_gnn.DataSet import HDF5DataSet, PreCluster
 
 
 class GINetConvLayer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
 
-        super(GINetConvLayer, self).__init__()
+        super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -75,7 +66,7 @@ class GINet(torch.nn.Module):
     # output_shape -> number of output value per graph
     # input_shape_edge -> number of edge input features
     def __init__(self, input_shape, output_shape=1, input_shape_edge=1):
-        super(GINet, self).__init__()
+        super().__init__()
         self.conv1 = GINetConvLayer(input_shape, 16, input_shape_edge)
         self.conv2 = GINetConvLayer(16, 32, input_shape_edge)
 
