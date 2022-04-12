@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import Optional
+from typing import Optional, List
 import traceback
 from multiprocessing import Queue, Process, Pipe, cpu_count
 from queue import Empty as EmptyQueueError
@@ -12,14 +12,14 @@ from time import sleep
 import h5py
 
 from deeprank_gnn.domain.amino_acid import amino_acids
-from deeprank_gnn.models.query import SingleResidueVariantAtomicQuery
+from deeprank_gnn.models.query import Query
 
 
 _log = logging.getLogger(__name__)
 
 
 class _PreProcess(Process):
-    def __init__(self, input_queue, output_path, error_queue):
+    def __init__(self, input_queue: Queue, output_path: str, error_queue: Queue):
         Process.__init__(self)
         self.daemon = True
 
@@ -31,10 +31,10 @@ class _PreProcess(Process):
         self._receiver, self._sender = Pipe(duplex=False)
 
     @property
-    def output_path(self):
+    def output_path(self) -> str:
         return self._output_path
 
-    def is_running(self):
+    def is_running(self) -> bool:
         with self._running_lock:
             return self._running
 
@@ -42,7 +42,7 @@ class _PreProcess(Process):
         self._sender.send(1)
         self.join()
 
-    def _should_stop(self):
+    def _should_stop(self) -> bool:
         return self._receiver.poll()
 
     def run(self):
@@ -116,19 +116,19 @@ class PreProcessor:
             error_s = self._error_queue.get()
             _log.error(error_s)
 
-    def add_query(self, query):
+    def add_query(self, query: Query):
         "add a single graph building query"
 
         self._input_queue.put(query)
 
-    def add_queries(self, queries):
+    def add_queries(self, queries: List[Query]):
         "add multiple graph building queries"
 
         for query in queries:
             self._input_queue.put(query)
 
     @property
-    def output_paths(self):
+    def output_paths(self) -> List[str]:
         return [process.output_path for process in self._processes
                 if os.path.isfile(process.output_path)]
 
@@ -141,8 +141,6 @@ class PreProcessor:
             process.stop()
 
     def __del__(self):
-        _log.debug("del called on preprocessor")
-
         # clean up all the created subprocesses
         self.shutdown()
 

@@ -143,7 +143,7 @@ class Graph:
             for feature_name, feature_value in node.features.items():
                 grid.map_feature(node.position, feature_name, feature_value, method)
 
-    def write_to_hdf5(self, hdf5_path):
+    def write_to_hdf5(self, hdf5_path: str):
         "Write a featured graph to an hdf5 file, according to deeprank standards."
 
         with h5py.File(hdf5_path, 'a') as hdf5_file:
@@ -200,7 +200,7 @@ class Graph:
             for target_name, target_data in self.targets.items():
                 score_group.create_dataset(target_name, data=target_data)
 
-    def write_as_grid_to_hdf5(self, hdf5_path, settings: GridSettings, method: MapMethod) -> str:
+    def write_as_grid_to_hdf5(self, hdf5_path: str, settings: GridSettings, method: MapMethod) -> str:
 
         center = numpy.mean([node.position for node in self._nodes], axis=0)
         grid = Grid(self.id, settings, center)

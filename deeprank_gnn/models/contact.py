@@ -52,11 +52,11 @@ class ResidueContact(Contact):
         return self._vanderwaals_potential
 
     @property
-    def residue1(self):
+    def residue1(self) -> Residue:
         return self.item1
 
     @property
-    def residue2(self):
+    def residue2(self) -> Residue:
         return self.item2
 
 
@@ -90,9 +90,9 @@ class AtomicContact(Contact):
         return self._vanderwaals_potential
 
     @property
-    def atom1(self):
+    def atom1(self) -> Atom:
         return self.item1
 
     @property
-    def atom2(self):
+    def atom2(self) -> Atom:
         return self.item2
