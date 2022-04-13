@@ -1,7 +1,7 @@
 import torch
 from torch.nn import Parameter
 import torch.nn.functional as F
-from otrch import nn
+from torch import nn
 from torch_scatter import scatter_mean
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x

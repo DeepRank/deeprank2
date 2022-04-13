@@ -8,8 +8,6 @@ import logging
 import os
 from time import sleep
 import h5py
-
-from deeprank_gnn.domain.amino_acid import amino_acids
 from deeprank_gnn.models.query import Query
 
 
@@ -55,10 +53,12 @@ class _PreProcess(Process):
             try:
                 graph = query.build_graph()
                 if graph.has_nan():
-                    self._error_queue.put(f"skipping {query}, because of a generated NaN value in the graph")
+                    self._error_queue.put(
+                        f"skipping {query}, because of a generated NaN value in the graph"
+                        )
 
                 graph.write_to_hdf5(self._output_path)
-            except:
+            except Exception:
                 self._error_queue.put(traceback.format_exc())
 
                 # Don't leave behind an unfinished hdf5 group.
@@ -75,7 +75,8 @@ class PreProcessor:
         """
         Args:
             prefix(str, optional): prefix for the output files, ./preprocessed-data- by default
-            process_count(int, optional): how many subprocesses will I run simultaneously, by default takes all available cpu cores.
+            process_count(int, optional): how many subprocesses will I run simultaneously,
+            by default takes all available cpu cores.
         """
 
         self._input_queue = Queue()
@@ -87,8 +88,10 @@ class PreProcessor:
         if prefix is None:
             prefix = "preprocessed-data"
 
-        self._processes = [_PreProcess(self._input_queue, "{}-{}.hdf5".format(prefix, index), self._error_queue)
-                           for index in range(process_count)]
+        self._processes = [
+            _PreProcess(
+                self._input_queue, f"{prefix}-{index}.hdf5", self._error_queue
+                ) for index in range(process_count)]
 
     def start(self):
         "start the workers"
@@ -104,7 +107,8 @@ class PreProcessor:
 
         try:
             _log.info("waiting for the queue to be empty..")
-            while self._input_queue.qsize() > 0:  # qsize seems to be more reliable than the empty method
+            # qsize seems to be more reliable than the empty method
+            while self._input_queue.qsize() > 0: 
                 sleep(1.0)
         finally:
             self.shutdown()

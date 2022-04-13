@@ -117,13 +117,16 @@ class HDF5DataSet(Dataset):
 
             database (str, optional): Path to hdf5 file(s). Defaults to None.
 
-            transform (callable, optional): A function/transform that takes in an torch_geometric.data.Data object and returns a transformed version.
+            transform (callable, optional): A function/transform that takes in an 
+            torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before every access. Defaults to None.
 
-            pre_transform (callable, optional):  A function/transform that takes in an torch_geometric.data.Data object and returns a transformed version.
-            The data object will be transformed before being saved to disk.. Defaults to None.
+            pre_transform (callable, optional):  A function/transform that takes in an
+            torch_geometric.data.Data object and returns a transformed version.
+            The data object will be transformed before being saved to disk. Defaults to None.
 
-            dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules. Defaults to None.
+            dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules.
+            Defaults to None.
 
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
 
@@ -131,14 +134,17 @@ class HDF5DataSet(Dataset):
 
             index (int, optional): index of a molecule. Defaults to None.
 
-            node_feature (str or list, optional): consider all pre-computed node features ('all') or some defined node features (provide a list).
+            node_feature (str or list, optional): consider all pre-computed node features ('all') or some
+            defined node features (provide a list).
             Defaults to 'all'.
 
-            edge_feature (list, optional): only distances are available in this version of DeepRank-GNN. Defaults to ['dist'].
+            edge_feature (list, optional): only distances are available in this version of DeepRank-GNN.
+            Defaults to ['dist'].
 
             clustering_method (str, optional): 'mcl' (Markov Clustering) or 'louvain'. Defaults to 'mcl'.
 
-            edge_feature_transform (function, optional): transformation applied to the edge features. Defaults to lambdax:np.tanh(-x/2+2)+1.
+            edge_feature_transform (function, optional): transformation applied to the edge features.
+            Defaults to lambdax:np.tanh(-x/2+2)+1.
         """
         super().__init__(root, transform, pre_transform)
 
@@ -186,7 +192,7 @@ class HDF5DataSet(Dataset):
     def _process(self):
         pass
 
-    def get(self, index):
+    def get(self, idx):
         """Gets one item from its unique index.
 
         Args:
@@ -195,7 +201,7 @@ class HDF5DataSet(Dataset):
             dict: {'mol':[fname,mol],'feature':feature,'target':target}
         """
 
-        fname, mol = self.index_complexes[index]
+        fname, mol = self.index_complexes[idx]
         data = self.load_one_graph(fname, mol)
         return data
 
@@ -257,7 +263,7 @@ class HDF5DataSet(Dataset):
                     # raise ValueError('Feature Not found')
                     sys.exit()
 
-    def load_one_graph(self, fname, mol):
+    def load_one_graph(self, fname, mol): # noqa: MC0001
         """Loads one graph
 
         Args:
@@ -265,7 +271,8 @@ class HDF5DataSet(Dataset):
             mol (str): name of the molecule
 
         Returns:
-            Data object or None: torch_geometric Data object containing the node features, the internal and external edge features,
+            Data object or None: torch_geometric Data object containing the node features,
+            the internal and external edge features,
             the target and the xyz coordinates. Return None if features cannot be loaded.
         """
 

@@ -66,7 +66,7 @@ def get_comparison(prediction, ground_truth, binary=True, classes=None):
 
 
 class Metrics():
-    def __init__(self, prediction, y, target, threshold=4, binary=True):
+    def __init__(self, prediction, y, target, threshold=4, binary=True): # noqa: MC0001
         """
         Master class from which all metrics are computed
 

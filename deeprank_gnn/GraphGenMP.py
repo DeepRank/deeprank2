@@ -5,12 +5,7 @@ import sys
 import glob
 import h5py
 from tqdm import tqdm
-import multiprocessing as mp
-from functools import partial
-import pickle
-
 from .preprocess import PreProcessor
-from .models.graph import Graph
 from .models.query import ProteinProteinInterfaceResidueQuery
 from .tools.score import get_all_scores
 
@@ -18,20 +13,17 @@ from .tools.score import get_all_scores
 _log = logging.getLogger(__name__)
 
 
-class GraphHDF5(object):
+class GraphHDF5():
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
     def __init__(
         self,
         pdb_path,
         ref_path=None,
-        graph_type='residue',
         pssm_path=None,
         select=None,
         outfile='graph.hdf5',
         nproc=1,
-        use_tqdm=True,
-        tmpdir='./',
         limit=None,
         biopython=False):
         """Master class from which graphs are computed
@@ -42,7 +34,6 @@ class GraphHDF5(object):
             select (str, optional): filter files that starts with 'input'. Defaults to None.
             outfile (str, optional): Defaults to 'graph.hdf5'.
             nproc (int, optional): number of processors. Default to 1.
-            tmpdir (str, optional): Default to `./`.
             limit (int, optional): Default to None.
 
 
@@ -50,7 +41,8 @@ class GraphHDF5(object):
             >>> pssm_path = './data/pssm/1ATN/'
             >>> ref = './data/ref/1ATN/'
 
-            >>> GraphHDF5(pdb_path=pdb_path, ref_path=ref, pssm_path=pssm_path, outfile='1AK4_residue.hdf5')
+            >>> GraphHDF5(pdb_path=pdb_path, ref_path=ref, pssm_path=pssm_path,
+                        outfile='1AK4_residue.hdf5')
         """
         # get the list of PDB names
         pdbs = list(filter(lambda x: x.endswith(".pdb"), os.listdir(pdb_path)))
@@ -82,10 +74,7 @@ class GraphHDF5(object):
 
         # compute all the graphs on 1 core and directly
         # store the graphs the HDF5 file
-        if nproc == 1:
-            graphs = self.get_all_graphs(
-                pdbs, pssm_paths, ref, outfile, use_tqdm, biopython)
-        else:
+        if nproc != 1:
             self.preprocess_async(nproc, outfile, pdbs, ref, pssm_paths, biopython)
 
         # clean up
@@ -114,8 +103,8 @@ class GraphHDF5(object):
         for g in graphs:
             try:
                 g.write_to_hdf5(outfile)
-            except Exception as e:
-                _log.exception(f"issue encountered while storing graph {g.id}")
+            except Exception:
+                _log.exception("issue encountered while storing graph %s", g.id)
 
     @staticmethod
     def preprocess_async(nproc, outfile, pdb_paths, ref_path, pssm_paths, biopython):
@@ -149,17 +138,17 @@ class GraphHDF5(object):
     @staticmethod
     def _copy_hdf5(input_, key, output_):
 
-        if type(input_[key]) == h5py.Group:
+        if type(input_[key]) == h5py.Group: # pylint: disable=unidiomatic-typecheck
 
             out_group = output_.require_group(key)
 
             for child_key in input_[key]:
                 GraphHDF5._copy_hdf5(input_[key], child_key, out_group)
 
-            for key, value in input_[key].attrs.items():
-                out_group.attrs[key] = value
+            for k, v in input_[key].attrs.items():
+                out_group.attrs[k] = v
 
-        elif type(input_[key]) == h5py.Dataset:
+        elif type(input_[key]) == h5py.Dataset: # pylint: disable=unidiomatic-typecheck
 
             output_.create_dataset(key, data=input_[key][()])
         else:
