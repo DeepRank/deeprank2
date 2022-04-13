@@ -1,4 +1,9 @@
-from h5xplorer.menu_tools import get_current_item, get_current_hdf5_group, get_current_hdf5_group, get_multilevel_actions, send_dict_to_console, get_group_data
+from h5xplorer.menu_tools import (
+    get_current_item,
+    get_current_hdf5_group,
+    get_multilevel_actions,
+    send_dict_to_console,
+    get_group_data)
 from h5xplorer.menu_plot import plot_histogram, plot_line, plot2d
 
 

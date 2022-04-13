@@ -133,7 +133,7 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
     charge_count = len(charges)
     if charge_count != distances.shape[0] or charge_count != distances.shape[1]:
         raise ValueError("Cannot calculate distances between {} charges and {} distances"
-                         .format(charge_count, "x".join(distances.shape)))
+                         .format(charge_count, "x".join(distances.shape))) # pylint: disable=consider-using-f-string
 
     # calculate the potentials
     potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
@@ -144,7 +144,8 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
 
 def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
                                  vanderwaals_parameters: List[VanderwaalsParam]) -> numpy.ndarray:
-    """ Calculate Lennard-Jones potentials, given a distance matrix and a list of atoms with vanderwaals parameters of equal size.
+    """ Calculate Lennard-Jones potentials, given a distance matrix and a list of atoms
+    with vanderwaals parameters of equal size.
 
          Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
     """
@@ -152,11 +153,11 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
     # check for the correct data shapes
     atom_count = len(atoms)
     if atom_count != len(vanderwaals_parameters):
-        raise ValueError("The number of atoms ({}) does not match the number of vanderwaals parameters ({})"
-                         .format(atom_count, len(vanderwaals_parameters)))
+        raise ValueError(
+            f"The number of atoms ({atom_count}) does not match the number of vanderwaals parameters ({len(vanderwaals_parameters)})")
     if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
         raise ValueError("Cannot calculate distances between {} atoms and {} distances"
-                         .format(atom_count, "x".join(distances.shape)))
+                         .format(atom_count, "x".join(distances.shape))) # pylint: disable=consider-using-f-string
 
     # collect parameters
     sigmas1 = numpy.empty((atom_count, atom_count))
@@ -210,14 +211,16 @@ def get_atomic_contacts(atoms: List[Atom]) -> List[AtomicContact]:
 
     # calculate potentials
     interatomic_electrostatic_potentials = get_coulomb_potentials(interatomic_distances, atom_charges)
-    interatomic_vanderwaals_potentials = get_lennard_jones_potentials(interatomic_distances, atoms, atom_vanderwaals_parameters)
+    interatomic_vanderwaals_potentials = get_lennard_jones_potentials(
+        interatomic_distances, atoms, atom_vanderwaals_parameters)
 
     # build contacts
     contacts = []
 
     count_atoms = len(atoms)
     for atom1_index in range(count_atoms):
-        for atom2_index in range(atom1_index + 1, count_atoms):  # don't make the same contact twice and don't pair an atom with itself
+        # don't make the same contact twice and don't pair an atom with itself
+        for atom2_index in range(atom1_index + 1, count_atoms): 
 
             contacts.append(AtomicContact(atoms[atom1_index], atoms[atom2_index],
                                           interatomic_distances[atom1_index][atom2_index],
@@ -268,7 +271,7 @@ def get_residue_contacts(residues: List[Residue]) -> List[ResidueContact]:
 
     # convert to residue contacts
     residue_contacts = []
-    for residue_pair, distance in residue_minimum_distances.items():
+    for residue_pair, _ in residue_minimum_distances.items():
         residue_contacts.append(ResidueContact(residue_pair.item1, residue_pair.item2,
                                                residue_minimum_distances[residue_pair],
                                                residue_electrostatic_potential_sums[residue_pair],

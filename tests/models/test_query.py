@@ -4,11 +4,37 @@ from tempfile import mkstemp
 import numpy
 import h5py
 
-from deeprank_gnn.models.structure import Residue, Atom, AtomicElement
-from deeprank_gnn.domain.amino_acid import *
-from deeprank_gnn.models.query import *
-from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.domain.feature import *
+from deeprank_gnn.domain.amino_acid import (
+    alanine,
+    arginine,
+    asparagine,
+    glutamate,
+    glycine,
+    leucine,
+    lysine,
+    phenylalanine,
+)
+from deeprank_gnn.models.query import (
+    SingleResidueVariantResidueQuery,
+    SingleResidueVariantAtomicQuery,
+    ProteinProteinInterfaceAtomicQuery,
+    ProteinProteinInterfaceResidueQuery
+)
+from deeprank_gnn.domain.feature import (
+    FEATURENAME_POSITION,
+    FEATURENAME_AMINOACID,
+    FEATURENAME_VARIANTAMINOACID,
+    FEATURENAME_POLARITY,
+    FEATURENAME_BURIEDSURFACEAREA,
+    FEATURENAME_PSSM,
+    FEATURENAME_INFORMATIONCONTENT,
+    FEATURENAME_PSSMDIFFERENCE,
+    FEATURENAME_SASA,
+    FEATURENAME_EDGECOULOMB,
+    FEATURENAME_EDGEVANDERWAALS,
+    FEATURENAME_EDGEDISTANCE
+)
+
 from deeprank_gnn.DataSet import HDF5DataSet
 
 

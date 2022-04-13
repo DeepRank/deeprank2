@@ -1,6 +1,4 @@
 import unittest
-import h5py
-
 from deeprank_gnn.tools.BioWrappers import (
     get_bio_model,
     get_depth_res,

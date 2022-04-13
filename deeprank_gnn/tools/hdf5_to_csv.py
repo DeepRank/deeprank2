@@ -23,7 +23,8 @@ def hdf5_to_csv(hdf5_path):
                 targets = "n" * len(mol)
 
             # This section is specific to the binary class
-            # it adds the raw output, i.e. probabilities to belong to the class 0 and the class 1, to the prediction hdf5
+            # it adds the raw output, i.e. probabilities to belong to the class 0 and the class 1,
+            # to the prediction hdf5
             # This way, binary information can be transformed back to
             # continuous data and used for ranking
             if "raw_output" in hdf5[f"{epoch}/{dataset}"].keys():

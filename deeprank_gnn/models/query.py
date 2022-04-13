@@ -49,9 +49,7 @@ from deeprank_gnn.domain.feature import (
     FEATURENAME_EDGECOULOMB,
     FEATURENAME_EDGEVANDERWAALS,
     FEATURENAME_EDGEDISTANCE,
-    FEATURENAME_EDGETYPE,
-    EDGETYPE_INTERNAL,
-    EDGETYPE_INTERFACE
+    FEATURENAME_EDGETYPE
     )
 from deeprank_gnn.domain.forcefield import atomic_forcefield
 from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
@@ -206,7 +204,7 @@ class SingleResidueVariantResidueQuery(Query):
         return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
+        return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}" # noqa: pycodestyle
 
     @staticmethod
     def _get_residue_node_key(residue: Residue) -> str:
@@ -295,15 +293,35 @@ class SingleResidueVariantResidueQuery(Query):
                 node.features[FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
                 node.features[FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
                 node.features[FEATURENAME_SIZEDIFFERENCE] = variant_amino_acid.size - wildtype_amino_acid.size
-                node.features[FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - wildtype_amino_acid.polarity.onehot
+                node.features[FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot \
+                    - wildtype_amino_acid.polarity.onehot
             else:
                 node.features[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
                 node.features[FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(residue.amino_acid.onehot))
                 node.features[FEATURENAME_SIZEDIFFERENCE] = 0
                 node.features[FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(residue.amino_acid.polarity.onehot))
 
-    amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
-                        leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
+    amino_acid_order = [
+        alanine,
+        arginine,
+        asparagine,
+        aspartate,
+        cysteine,
+        glutamine,
+        glutamate,
+        glycine,
+        histidine,
+        isoleucine,
+        leucine,
+        lysine,
+        methionine,
+        phenylalanine,
+        proline,
+        serine,
+        threonine,
+        tryptophan,
+        tyrosine,
+        valine]
 
     @staticmethod
     def _set_pssm(graph: Graph, variant_residue: Residue,
@@ -379,7 +397,8 @@ class SingleResidueVariantResidueQuery(Query):
         contacts = get_residue_contacts(residues)
 
         # build the graph
-        graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._external_distance_cutoff)
+        graph = self._build_graph_from_contacts(
+            self.get_query_id(), contacts, self._external_distance_cutoff)
         self._set_graph_targets(graph)
 
         # add edge features
@@ -392,9 +411,11 @@ class SingleResidueVariantResidueQuery(Query):
             edge.features[FEATURENAME_EDGECOULOMB] = contact.electrostatic_potential
 
         # set the node features
-        self._set_amino_acid_properties(graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
+        self._set_amino_acid_properties(
+            graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
         self._set_sasa(graph, self._pdb_path)
-        self._set_pssm(graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
+        self._set_pssm(
+            graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
 
         return graph
 
@@ -402,12 +423,14 @@ class SingleResidueVariantResidueQuery(Query):
 class SingleResidueVariantAtomicQuery(Query):
     "creates an atomic graph for a single residue variant in a pdb file"
 
-    def __init__(self, pdb_path: str, chain_id: str, residue_number: int, insertion_code: str,
-                 wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid,
-                 pssm_paths: Optional[Dict[str, str]] = None,
-                 radius: Optional[float] = 10.0,
-                 external_distance_cutoff: Optional[float] = 4.5,
-                 internal_distance_cutoff: Optional[float] = 3.0, targets: Optional[Dict[str, float]] = None):
+    def __init__(
+        self, pdb_path: str, chain_id: str, residue_number: int,insertion_code: str,
+        wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid,
+        pssm_paths: Optional[Dict[str, str]] = None,
+        radius: Optional[float] = 10.0,
+        external_distance_cutoff: Optional[float] = 4.5,
+        internal_distance_cutoff: Optional[float] = 3.0,
+        targets: Optional[Dict[str, float]] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file
@@ -416,21 +439,24 @@ class SingleResidueVariantAtomicQuery(Query):
 
                 residue_number(int): the number of the variant residue
 
-                insertion_code(str): the insertion code of the variant residue, set to None if not applicable
+                insertion_code(str): the insertion code of the variant residue,
+                set to None if not applicable
 
                 wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
 
                 variant_amino_acid(deeprank amino acid object): the variant amino acid
 
-                pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+                pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain
+                identifier
 
-                radius(float): in Ångström, determines how many residues will be included in the graph
+                radius(float): in Ångström, determines how many residues will be included
+                in the graph
 
                 external_distance_cutoff(float): max distance in Ångström between a pair of atoms to
                 consider them as an external edge in the graph
 
-                internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider
-                them as an internal edge in the graph (must be shorter than external)
+                internal_distance_cutoff(float): max distance in Ångström between a pair of atoms
+                to consider them as an internal edge in the graph (must be shorter than external)
 
                 targets(dict(str,float)): named target values associated with this query
         """
@@ -468,7 +494,7 @@ class SingleResidueVariantAtomicQuery(Query):
         return str(self._residue_number)
 
     def get_query_id(self):
-        return f"{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
+        return f"{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}" # noqa: pycodestyle
 
     def __eq__(self, other):
         return (
@@ -605,12 +631,14 @@ class SingleResidueVariantAtomicQuery(Query):
                 node.features[FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
                 node.features[FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
                 node.features[FEATURENAME_SIZEDIFFERENCE] = variant_amino_acid.size - wildtype_amino_acid.size
-                node.features[FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - wildtype_amino_acid.polarity.onehot
+                node.features[FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - \
+                    wildtype_amino_acid.polarity.onehot
             else:
                 node.features[FEATURENAME_AMINOACID] = atom.residue.amino_acid.onehot
                 node.features[FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(atom.residue.amino_acid.onehot))
                 node.features[FEATURENAME_SIZEDIFFERENCE] = 0
-                node.features[FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(atom.residue.amino_acid.polarity.onehot))
+                node.features[FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(
+                    atom.residue.amino_acid.polarity.onehot))
 
     @staticmethod
     def _set_pssm(graph: Graph, variant_residue: Residue,
@@ -651,7 +679,7 @@ class SingleResidueVariantAtomicQuery(Query):
                 area = 0.0
             else:
                 select_str = (
-                    f"atom, (name {atom.name}) and (resi {atom.residue.number_string}) and (chain {atom.residue.chain.id})"
+                    f"atom, (name {atom.name}) and (resi {atom.residue.number_string}) and (chain {atom.residue.chain.id})" # noqa: pycodestyle
                 )
                 area = freesasa.selectArea(select_str, structure, result)["atom"]
 
@@ -761,7 +789,8 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         contacts = get_atomic_contacts(atoms_selected)
 
         # build the graph
-        graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._interface_distance_cutoff)
+        graph = self._build_graph_from_contacts(
+            self.get_query_id(), contacts, self._interface_distance_cutoff)
         self._set_graph_targets(graph)
 
         model = contacts[0].atom1.residue.chain.model
@@ -831,8 +860,10 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             node.features[FEATURENAME_CHARGE] = atomic_forcefield.get_charge(atom)
             node.features[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
 
-            select_str = ('atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, residue.number_string, residue.chain.id),)
-            area_unbound = freesasa.selectArea(select_str, sasa_structures[residue.chain], sasa_results[residue.chain])['atom']
+            select_str = (
+                'atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, residue.number_string, residue.chain.id),) # noqa: pycodestyle
+            area_unbound = freesasa.selectArea(
+                select_str, sasa_structures[residue.chain], sasa_results[residue.chain])['atom']
             area_bound = freesasa.selectArea(select_str, sasa_structure_both, sasa_result_both)['atom']
             node.features[FEATURENAME_BURIEDSURFACEAREA] = area_unbound - area_bound
 
@@ -865,7 +896,6 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         tyrosine,
         valine,
     ]
-
 
 class ProteinProteinInterfaceResidueQuery(Query):
     "a query that builds residue-based graphs, using the residues at a protein-protein interface" # noqa: pycodestyle
@@ -924,7 +954,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
     def __eq__(self, other) -> bool:
         return (
-            isinstance(self, type(other))
+            isinstance(self, other)
             and self.model_id == other.model_id
             and {self._chain_id1, self._chain_id2}
             == {other._chain_id1, other._chain_id2}
@@ -945,9 +975,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
         return True
 
     def build_graph(self) -> Graph:
-        """Builds the residue graph.
-
-        Returns(deeprank graph object): the resulting graph
+        """ Builds the residue graph.
+            Returns(deeprank graph object): the resulting graph
         """
         # pylint: disable=too-many-locals
         # mccabe: disable=MC0001
@@ -960,6 +989,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             self._chain_id2,
             self._interface_distance_cutoff,
         )
+
         if len(interface_pairs) == 0:
             raise ValueError("no interface residues found")
 
@@ -1007,7 +1037,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
                         residue.number,
                         residue.amino_acid.three_letter_code,
                     )
-                    for residue in residues_by_node.values()
+                    for residue in residues_selected.values()
                 ],
             )
             hse = BioWrappers.get_hse(bio_model)
@@ -1082,7 +1112,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
         tyrosine,
         valine,
     ]
-
 
 class QueryDataset:
     "represents a collection of data queries"

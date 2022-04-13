@@ -249,6 +249,10 @@ class Grid:
             for feature_name, feature_data in self.features.items():
 
                 feature_group = features_group.require_group(feature_name)
-                feature_group.create_dataset(HDF5KEY_GRID_MAPPEDFEATURESVALUE, data=feature_data, compression="lzf", chunks=True)
+                feature_group.create_dataset(
+                    HDF5KEY_GRID_MAPPEDFEATURESVALUE,
+                    data=feature_data,
+                    compression="lzf",
+                    chunks=True)
 
 

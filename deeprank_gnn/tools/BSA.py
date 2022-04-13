@@ -1,3 +1,5 @@
+# pylint: disable=c-extension-no-member
+
 from pdb2sql.interface import interface
 
 try:
