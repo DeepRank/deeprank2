@@ -13,14 +13,14 @@ from deeprank_gnn.domain.forcefield import (atomic_forcefield,
                                             VANDERWAALS_DISTANCE_ON, VANDERWAALS_DISTANCE_OFF,
                                             SQUARED_VANDERWAALS_DISTANCE_ON, SQUARED_VANDERWAALS_DISTANCE_OFF,
                                             EPSILON0, COULOMB_CONSTANT)
-from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
 from deeprank_gnn.models.error import UnknownAtomError
 from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
-from deeprank_gnn.models.graph import Graph
+from deeprank_gnn.models.graph import Graph, Edge, Node
+from deeprank_gnn.models.contact import Contact
 from deeprank_gnn.models.structure import Residue, Atom
 from deeprank_gnn.tools import BioWrappers, BSA
 from deeprank_gnn.tools.pdb import (get_residue_contact_pairs, get_residue_distance, get_surrounding_residues,
-                                    get_structure)
+                                    get_structure, get_atomic_contacts, get_residue_contacts)
 from deeprank_gnn.tools.pssm import parse_pssm
 
 _log = logging.getLogger(__name__)
@@ -46,6 +46,31 @@ class Query:
             self._targets = {}
         else:
             self._targets = targets
+
+    @staticmethod
+    def _build_graph_from_contacts(graph_id: str, contacts: List[Contact], distance_cutoff: float) -> Graph:
+        """ The most basic method to build a graph.
+            It simply connects all contacts as edges.
+            The contacted atoms/residues become nodes.
+        """
+
+        graph = Graph(graph_id)
+        for contact in contacts:
+            if contact.distance < distance_cutoff:
+
+                graph.add_edge(Edge(contact))
+
+                # add the nodes, as the edge doesn't add them automatically
+                graph.add_node(Node(contact.item1))
+                graph.add_node(Node(contact.item2))
+
+        return graph
+
+    def _set_graph_targets(self, graph: Graph):
+        "simply copies target data from query to graph"
+
+        for target_name, target_data in self._targets.items():
+            graph.targets[target_name] = target_data
 
     @property
     def model_id(self) -> str:
@@ -152,12 +177,13 @@ class SingleResidueVariantResidueQuery(Query):
         return False
 
     @staticmethod
-    def _set_sasa(graph: Graph, node_name_residues: Dict[str, Residue], pdb_path: str):
+    def _set_sasa(graph: Graph, pdb_path: str):
 
         structure = freesasa.Structure(pdb_path)
         result = freesasa.calc(structure)
 
-        for node_name, residue in node_name_residues.items():
+        for node in graph.nodes:
+            residue = node.id
 
             select_str = ('residue, (resi %s) and (chain %s)' % (residue.number_string, residue.chain.id),)
 
@@ -166,69 +192,59 @@ class SingleResidueVariantResidueQuery(Query):
             if numpy.isnan(area):
                 raise ValueError("freesasa returned {} for {}:{}".format(area, pdb_path, residue))
 
-            graph.nodes[node_name][FEATURENAME_SASA] = area
+            node.features[FEATURENAME_SASA] = area
 
     @staticmethod
-    def _set_amino_acid_properties(graph: Graph, node_name_residues: Dict[str, Residue],
-                                   variant_residue: Residue, wildtype_amino_acid: AminoAcid,
-                                   variant_amino_acid: AminoAcid):
-        for node_name, residue in node_name_residues.items():
-            graph.nodes[node_name][FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
-            graph.nodes[node_name][FEATURENAME_CHARGE] = residue.amino_acid.charge
-            graph.nodes[node_name][FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
-            graph.nodes[node_name][FEATURENAME_SIZE] = residue.amino_acid.size
+    def _set_amino_acid_properties(graph: Graph, variant_residue: Residue,
+                                   wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid):
+
+        for node in graph.nodes:
+            residue = node.id
+
+            node.features[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
+            node.features[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+            node.features[FEATURENAME_SIZE] = residue.amino_acid.size
 
             if residue == variant_residue:
 
-                graph.nodes[node_name][FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
-                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
-                graph.nodes[node_name][FEATURENAME_SIZEDIFFERENCE] = variant_amino_acid.size - wildtype_amino_acid.size
-                graph.nodes[node_name][FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - wildtype_amino_acid.polarity.onehot
+                node.features[FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
+                node.features[FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
+                node.features[FEATURENAME_SIZEDIFFERENCE] = variant_amino_acid.size - wildtype_amino_acid.size
+                node.features[FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - wildtype_amino_acid.polarity.onehot
             else:
-                graph.nodes[node_name][FEATURENAME_AMINOACID] = residue.amino_acid.onehot
-                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(residue.amino_acid.onehot))
-                graph.nodes[node_name][FEATURENAME_SIZEDIFFERENCE] = 0
-                graph.nodes[node_name][FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(residue.amino_acid.polarity.onehot))
+                node.features[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+                node.features[FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(residue.amino_acid.onehot))
+                node.features[FEATURENAME_SIZEDIFFERENCE] = 0
+                node.features[FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(residue.amino_acid.polarity.onehot))
 
     amino_acid_order = [alanine, arginine, asparagine, aspartate, cysteine, glutamine, glutamate, glycine, histidine, isoleucine,
                         leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
 
     @staticmethod
-    def _set_pssm(graph: Graph, node_name_residues: Dict[str, Residue], variant_residue: Residue,
+    def _set_pssm(graph: Graph, variant_residue: Residue,
                   wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid):
 
-        for node_name, residue in node_name_residues.items():
+        for node in graph.nodes:
+            residue = node.id
+
             pssm_row = residue.get_pssm()
 
             pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in SingleResidueVariantResidueQuery.amino_acid_order]
 
             if residue == variant_residue:
 
-                graph.nodes[node_name][FEATURENAME_PSSMDIFFERENCE] = pssm_row.get_conservation(variant_amino_acid) - \
+                node.features[FEATURENAME_PSSMDIFFERENCE] = pssm_row.get_conservation(variant_amino_acid) - \
                                                                      pssm_row.get_conservation(wildtype_amino_acid)
 
-                graph.nodes[node_name][FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(wildtype_amino_acid)
-                graph.nodes[node_name][FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(variant_amino_acid)
+                node.features[FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(wildtype_amino_acid)
+                node.features[FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(variant_amino_acid)
             else:
-                graph.nodes[node_name][FEATURENAME_PSSMDIFFERENCE] = 0.0
-                graph.nodes[node_name][FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(residue.amino_acid)
-                graph.nodes[node_name][FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(residue.amino_acid)
+                node.features[FEATURENAME_PSSMDIFFERENCE] = 0.0
+                node.features[FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(residue.amino_acid)
+                node.features[FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(residue.amino_acid)
 
-            graph.nodes[node_name][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
-            graph.nodes[node_name][FEATURENAME_PSSM] = pssm_value
-
-    @staticmethod
-    def _set_conservation(graph: Graph, node_name_residues: Dict[str, Residue],
-                          variant_residue: Residue, wildtype_conservation: float, variant_conservation: float):
-
-        for node_name, residue in node_name_residues.items():
-
-            if residue == variant_residue:
-                difference = variant_conservation - wildtype_conservation
-            else:
-                difference = 0.0
-
-            graph.nodes[node_name][FEATURENAME_CONSERVATIONDIFFERENCE] = difference
+            node.features[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+            node.features[FEATURENAME_PSSM] = pssm_value
 
     def build_graph(self) -> Graph:
         # load pdb strucure
@@ -263,63 +279,26 @@ class SingleResidueVariantResidueQuery(Query):
             if residue.amino_acid is not None:
                 atoms.extend(residue.atoms)
 
-        # build a graph and keep track of how we named the nodes
-        node_name_residues = {}
-        graph = Graph(self.get_query_id(), self.targets)
+        # get the contacts
+        contacts = get_residue_contacts(residues)
 
-        # find neighbouring atoms
-        atom_positions = [atom.position for atom in atoms]
-        distances = distance_matrix(atom_positions, atom_positions, p=2)
-        neighbours = numpy.logical_and(distances < self._external_distance_cutoff,
-                                       distances > 0.0)
+        # build the graph
+        graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._external_distance_cutoff)
+        self._set_graph_targets(graph)
 
-        # iterate over every pair of neighbouring atoms
-        for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
-            if atom1_index != atom2_index:  # do not pair an atom with itself
+        # add edge features
+        for edge in graph.edges:
 
-                atom_distance = distances[atom1_index, atom2_index]
+            contact = edge.id
 
-                atom1 = atoms[atom1_index]
-                atom2 = atoms[atom2_index]
-
-                if atom1.residue != atom2.residue:  # do not connect a residue to itself
-
-                    residue1 = atom1.residue
-                    residue2 = atom2.residue
-
-                    residue1_key = self._get_residue_node_key(residue1)
-                    residue2_key = self._get_residue_node_key(residue2)
-
-                    node_name_residues[residue1_key] = residue1
-                    node_name_residues[residue2_key] = residue2
-
-                    # add the edge if not already
-                    if not graph.has_edge(residue1_key, residue2_key):
-                        graph.add_edge(residue1_key, residue2_key)
-                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
-
-                    # covalent bond overrided non-covalent
-                    if self._is_covalent_bond(atom1, atom2, atom_distance):
-                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
-
-                    # feature to hold whether the two residues are of the same chain
-                    graph.edges[residue1_key, residue2_key][FEATURENAME_EDGESAMECHAIN] = float(atom1.residue.chain == atom2.residue.chain)
-
-                    # Make sure we take the shortest distance
-                    if FEATURENAME_EDGEDISTANCE not in graph.edges[residue1_key, residue2_key]:
-                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGEDISTANCE] = atom_distance
-
-                    elif graph.edges[residue1_key, residue2_key][FEATURENAME_EDGEDISTANCE] > atom_distance:
-                        graph.edges[residue1_key, residue2_key][FEATURENAME_EDGEDISTANCE] = atom_distance
+            edge.features[FEATURENAME_EDGEDISTANCE] = contact.distance
+            edge.features[FEATURENAME_EDGEVANDERWAALS] = contact.vanderwaals_potential
+            edge.features[FEATURENAME_EDGECOULOMB] = contact.electrostatic_potential
 
         # set the node features
-        self._set_amino_acid_properties(graph, node_name_residues, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
-        self._set_sasa(graph, node_name_residues, self._pdb_path)
-
-        self._set_pssm(graph, node_name_residues, variant_residue,
-                       self._wildtype_amino_acid, self._variant_amino_acid)
-        self._set_conservation(graph, node_name_residues, variant_residue,
-                               self._wildtype_conservation, self._variant_conservation)
+        self._set_amino_acid_properties(graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
+        self._set_sasa(graph, self._pdb_path)
+        self._set_pssm(graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
 
         return graph
 
@@ -329,8 +308,8 @@ class SingleResidueVariantAtomicQuery(Query):
 
     def __init__(self, pdb_path: str, chain_id: str, residue_number: int, insertion_code: str,
                  wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid,
-                 pssm_paths: Optional[Dict[str, str]] = None, wildtype_conservation: Optional[float] = None,
-                 variant_conservation: Optional[float] = None, radius: Optional[float] = 10.0,
+                 pssm_paths: Optional[Dict[str, str]] = None,
+                 radius: Optional[float] = 10.0,
                  external_distance_cutoff: Optional[float] = 4.5,
                  internal_distance_cutoff: Optional[float] = 3.0, targets: Optional[Dict[str, float]] = None):
         """
@@ -342,8 +321,6 @@ class SingleResidueVariantAtomicQuery(Query):
                 wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
                 variant_amino_acid(deeprank amino acid object): the variant amino acid
                 pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-                wildtype_conservation(float): conservation value for the wildtype
-                variant_conservation(float): conservation value for the variant
                 radius(float): in Ångström, determines how many residues will be included in the graph
                 external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
                 internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an internal edge in the graph (must be shorter than external)
@@ -352,8 +329,6 @@ class SingleResidueVariantAtomicQuery(Query):
 
         self._pdb_path = pdb_path
         self._pssm_paths = pssm_paths
-        self._wildtype_conservation = wildtype_conservation
-        self._variant_conservation = variant_conservation
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
@@ -435,81 +410,30 @@ class SingleResidueVariantAtomicQuery(Query):
             if residue.amino_acid is not None:
                 atoms.extend(residue.atoms)
 
-        # build a graph and keep track of how we named the nodes
-        node_name_atoms = {}
-        graph = Graph(self.get_query_id(), self.targets)
+        # get the contacts
+        contacts = get_atomic_contacts(atoms)
 
-        # find neighbouring atoms
-        atom_positions = [atom.position for atom in atoms]
-        distances = distance_matrix(atom_positions, atom_positions, p=2)
-        neighbours = numpy.logical_and(distances < self._external_distance_cutoff,
-                                       distances > 0.0)
+        # build the graph
+        graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._external_distance_cutoff)
+        self._set_graph_targets(graph)
 
-        # initialize these recording dictionaries
-        atom_vanderwaals_parameters = {}
-        atom_charges = {}
-        chain_codes = {}
+        # set edge features
+        for edge in graph.edges:
+            contact = edge.id
+            atom1 = contact.atom1
+            atom2 = contact.atom2
 
-        # give every chain a code
-        for chain in structure.chains:
-            chain_codes[chain] = len(chain_codes)
+            edge.features[FEATURENAME_EDGEDISTANCE] = contact.distance
+            edge.features[FEATURENAME_EDGEVANDERWAALS] = contact.vanderwaals_potential
+            edge.features[FEATURENAME_EDGECOULOMB] = contact.electrostatic_potential
 
-        # iterate over every pair of neighbouring atoms
-        for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
-            if atom1_index != atom2_index:  # do not pair an atom with itself
-
-                distance = distances[atom1_index, atom2_index]
-
-                atom1 = atoms[atom1_index]
-                atom2 = atoms[atom2_index]
-
-                try:
-                    for atom in [atom1, atom2]:
-                        atom_vanderwaals_parameters[atom] = atomic_forcefield.get_vanderwaals_parameters(atom)
-                        atom_charges[atom] = atomic_forcefield.get_charge(atom)
-
-                except UnknownAtomError as e:
-                    # if one of the atoms has no forcefield parameters, do not include this edge
-                    _log.warning(str(e))
-                    continue
-
-                atom1_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom1)
-                atom2_key = SingleResidueVariantAtomicQuery._get_atom_node_key(atom2)
-
-                # connect the atoms and set the distance
-                graph.add_edge(atom1_key, atom2_key)
-
-                if distance < self._internal_distance_cutoff:
-                    graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
-                else:
-                    graph.edges[atom1_key, atom2_key][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
-
-                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGEDISTANCE] = distance
-
-                graph.edges[atom1_key, atom2_key][FEATURENAME_EDGESAMECHAIN] = float(atom1.residue.chain == atom2.residue.chain)
-
-                # set the positions of the atoms
-                graph.nodes[atom1_key][FEATURENAME_POSITION] = atom1.position
-                graph.nodes[atom2_key][FEATURENAME_POSITION] = atom2.position
-                graph.nodes[atom1_key][FEATURENAME_CHAIN] = chain_codes[atom1.residue.chain]
-                graph.nodes[atom2_key][FEATURENAME_CHAIN] = chain_codes[atom2.residue.chain]
-
-                node_name_atoms[atom1_key] = atom1
-                node_name_atoms[atom2_key] = atom2
-
-        # set additional features
-        SingleResidueVariantAtomicQuery._set_charges(graph, node_name_atoms, atom_charges)
-        SingleResidueVariantAtomicQuery._set_coulomb(graph, node_name_atoms, atom_charges, self._external_distance_cutoff)
-        SingleResidueVariantAtomicQuery._set_vanderwaals(graph, node_name_atoms, atom_vanderwaals_parameters)
-
-        SingleResidueVariantAtomicQuery._set_pssm(graph, node_name_atoms, variant_residue,
+        # set node features
+        SingleResidueVariantAtomicQuery._set_pssm(graph, variant_residue,
                                                   self._wildtype_amino_acid, self._variant_amino_acid)
-        SingleResidueVariantAtomicQuery._set_conservation(graph, node_name_atoms, variant_residue,
-                                                          self._wildtype_conservation, self._variant_conservation)
 
-        SingleResidueVariantAtomicQuery._set_sasa(graph, node_name_atoms, self._pdb_path)
+        SingleResidueVariantAtomicQuery._set_sasa(graph, self._pdb_path)
 
-        SingleResidueVariantAtomicQuery._set_amino_acid(graph, node_name_atoms, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
+        SingleResidueVariantAtomicQuery._set_amino_acid(graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
 
         return graph
 
@@ -517,69 +441,60 @@ class SingleResidueVariantAtomicQuery(Query):
                         leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine]
 
     @staticmethod
-    def _set_amino_acid(graph: Graph, node_name_atoms: Dict[str, Atom], variant_residue: Residue,
+    def _set_amino_acid(graph: Graph, variant_residue: Residue,
                         wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid):
 
-        for node_name, atom in node_name_atoms.items():
+        for node in graph.nodes:
+            atom = node.id
+
+            node.features[FEATURENAME_POSITION] = atom.position
 
             if atom.residue == variant_residue:
 
-                graph.nodes[node_name][FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
-                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
-                graph.nodes[node_name][FEATURENAME_SIZEDIFFERENCE] = variant_amino_acid.size - wildtype_amino_acid.size
-                graph.nodes[node_name][FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - wildtype_amino_acid.polarity.onehot
+                node.features[FEATURENAME_AMINOACID] = wildtype_amino_acid.onehot
+                node.features[FEATURENAME_VARIANTAMINOACID] = variant_amino_acid.onehot
+                node.features[FEATURENAME_SIZEDIFFERENCE] = variant_amino_acid.size - wildtype_amino_acid.size
+                node.features[FEATURENAME_POLARITYDIFFERENCE] = variant_amino_acid.polarity.onehot - wildtype_amino_acid.polarity.onehot
             else:
-                graph.nodes[node_name][FEATURENAME_AMINOACID] = atom.residue.amino_acid.onehot
-                graph.nodes[node_name][FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(atom.residue.amino_acid.onehot))
-                graph.nodes[node_name][FEATURENAME_SIZEDIFFERENCE] = 0
-                graph.nodes[node_name][FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(atom.residue.amino_acid.polarity.onehot))
-
+                node.features[FEATURENAME_AMINOACID] = atom.residue.amino_acid.onehot
+                node.features[FEATURENAME_VARIANTAMINOACID] = numpy.zeros(len(atom.residue.amino_acid.onehot))
+                node.features[FEATURENAME_SIZEDIFFERENCE] = 0
+                node.features[FEATURENAME_POLARITYDIFFERENCE] = numpy.zeros(len(atom.residue.amino_acid.polarity.onehot))
 
     @staticmethod
-    def _set_pssm(graph: Graph, node_name_atoms: Dict[str, Atom], variant_residue: Residue,
+    def _set_pssm(graph: Graph, variant_residue: Residue,
                   wildtype_amino_acid: AminoAcid, variant_amino_acid: AminoAcid):
 
-        for node_name, atom in node_name_atoms.items():
-            pssm_row = atom.residue.get_pssm()
+        for node in graph.nodes:
+            atom = node.id
 
+            pssm_row = atom.residue.get_pssm()
             pssm_value = [pssm_row.conservations[amino_acid]
                           for amino_acid in SingleResidueVariantAtomicQuery.amino_acid_order]
 
             if atom.residue == variant_residue:
 
-                graph.nodes[node_name][FEATURENAME_PSSMDIFFERENCE] = pssm_row.get_conservation(variant_amino_acid) - \
-                                                                     pssm_row.get_conservation(wildtype_amino_acid)
+                node.features[FEATURENAME_PSSMDIFFERENCE] = pssm_row.get_conservation(variant_amino_acid) - \
+                                                            pssm_row.get_conservation(wildtype_amino_acid)
 
-                graph.nodes[node_name][FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(wildtype_amino_acid)
-                graph.nodes[node_name][FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(variant_amino_acid)
+                node.features[FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(wildtype_amino_acid)
+                node.features[FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(variant_amino_acid)
             else:
-                graph.nodes[node_name][FEATURENAME_PSSMDIFFERENCE] = 0.0
-                graph.nodes[node_name][FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(atom.residue.amino_acid)
-                graph.nodes[node_name][FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(atom.residue.amino_acid)
+                node.features[FEATURENAME_PSSMDIFFERENCE] = 0.0
+                node.features[FEATURENAME_PSSMWILDTYPE] = pssm_row.get_conservation(atom.residue.amino_acid)
+                node.features[FEATURENAME_PSSMVARIANT] = pssm_row.get_conservation(atom.residue.amino_acid)
 
-            graph.nodes[node_name][FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
-            graph.nodes[node_name][FEATURENAME_PSSM] = pssm_value
+            node.features[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+            node.features[FEATURENAME_PSSM] = pssm_value
 
     @staticmethod
-    def _set_conservation(graph: Graph, node_name_atoms: Dict[str, Atom], variant_residue: Residue,
-                          wildtype_conservation: float, variant_conservation: float):
-
-        for node_name, atom in node_name_atoms.items():
-
-            if atom.residue == variant_residue:
-                difference = variant_conservation - wildtype_conservation
-            else:
-                difference = 0.0
-
-            graph.nodes[node_name][FEATURENAME_CONSERVATIONDIFFERENCE] = difference
-
-    @staticmethod
-    def _set_sasa(graph: Graph, node_name_atoms: Dict[str, Atom], pdb_path: str):
+    def _set_sasa(graph: Graph, pdb_path: str):
 
         structure = freesasa.Structure(pdb_path)
         result = freesasa.calc(structure)
 
-        for node_name, atom in node_name_atoms.items():
+        for node in graph.nodes:
+            atom = node.id
 
             if atom.element == "H":  # freeSASA doesn't have these
                 area = 0.0
@@ -590,101 +505,7 @@ class SingleResidueVariantAtomicQuery(Query):
             if numpy.isnan(area):
                 raise ValueError("freesasa returned {} for {}:{}".format(area, pdb_path, atom))
 
-            graph.nodes[node_name][FEATURENAME_SASA] = area
-
-    @staticmethod
-    def _set_charges(graph: Graph, node_name_atoms: Dict[str, Atom], charges: Dict[Atom, float]):
-        for node_name in graph.nodes:
-            atom = node_name_atoms[node_name]
-            graph.nodes[node_name][FEATURENAME_CHARGE] = charges[atom]
-
-
-    @staticmethod
-    def _set_coulomb(graph: Graph, node_name_atoms: Dict[str, Atom], charges: Dict[Atom, float],
-                     max_interatomic_distance: float):
-
-        # get the edges
-        edge_keys = []
-        edge_count = len(graph.edges)
-        charges1 = numpy.empty(edge_count)
-        charges2 = numpy.empty(edge_count)
-        edge_distances = numpy.empty(edge_count)
-        for edge_index, ((atom1_name, atom2_name), edge) in enumerate(graph.edges.items()):
-            atom1 = node_name_atoms[atom1_name]
-            atom2 = node_name_atoms[atom2_name]
-            edge_keys.append((atom1_name, atom2_name))
-
-            charges1[edge_index] = charges[atom1]
-            charges2[edge_index] = charges[atom2]
-
-            edge_distances[edge_index] = edge[FEATURENAME_EDGEDISTANCE]
-
-        # calculate coulomb potentials
-        coulomb_constant_factor = COULOMB_CONSTANT / EPSILON0
-
-        coulomb_radius_factors = numpy.square(numpy.ones(edge_count) - numpy.square(edge_distances / max_interatomic_distance))
-
-        coulomb_potentials = charges1 * charges2 * coulomb_constant_factor / edge_distances * coulomb_radius_factors
-
-        # set the values to the edges
-        for index, potential in enumerate(coulomb_potentials):
-            graph.edges[edge_keys[index]][FEATURENAME_EDGECOULOMB] = potential
-
-    @staticmethod
-    def _set_vanderwaals(graph: Graph, node_name_atoms: Dict[str, Atom],
-                         vanderwaals_parameters: Dict[Atom, VanderwaalsParam]):
-
-        edge_keys = []
-        edge_count = len(graph.edges)
-        sigmas = numpy.empty(edge_count)
-        epsilons = numpy.empty(edge_count)
-        edge_distances = numpy.empty(edge_count)
-        for edge_index, ((atom1_name, atom2_name), edge) in enumerate(graph.edges.items()):
-            atom1 = node_name_atoms[atom1_name]
-            atom2 = node_name_atoms[atom2_name]
-            edge_keys.append((atom1_name, atom2_name))
-
-            vanderwaals_parameters1 = vanderwaals_parameters[atom1]
-            vanderwaals_parameters2 = vanderwaals_parameters[atom2]
-
-            if atom1.residue.chain != atom2.residue.chain:
-
-                # intermolecular
-                sigma1 = vanderwaals_parameters1.inter_sigma
-                sigma2 = vanderwaals_parameters2.inter_sigma
-                epsilon1 = vanderwaals_parameters1.inter_epsilon
-                epsilon2 = vanderwaals_parameters2.inter_epsilon
-            else:
-                # intramolecular
-                sigma1 = vanderwaals_parameters1.intra_sigma
-                sigma2 = vanderwaals_parameters2.intra_sigma
-                epsilon1 = vanderwaals_parameters1.intra_epsilon
-                epsilon2 = vanderwaals_parameters2.intra_epsilon
-
-            sigmas[edge_index] = 0.5 * (sigma1 + sigma2)
-            epsilons[edge_index] = numpy.sqrt(epsilon1 * epsilon2)
-
-            edge_distances[edge_index] = edge[FEATURENAME_EDGEDISTANCE]
-
-        # calculate potentials
-        vanderwaals_constant_factor = (SQUARED_VANDERWAALS_DISTANCE_OFF - SQUARED_VANDERWAALS_DISTANCE_ON) ** 3
-
-        indices_tooclose = numpy.nonzero(edge_distances < VANDERWAALS_DISTANCE_ON)
-        indices_toofar = numpy.nonzero(edge_distances > VANDERWAALS_DISTANCE_OFF)
-
-        squared_distances = numpy.square(edge_distances)
-
-        vanderwaals_prefactors = (((SQUARED_VANDERWAALS_DISTANCE_OFF - squared_distances) ** 2) *
-                                  (SQUARED_VANDERWAALS_DISTANCE_OFF - squared_distances - 3 *
-                                  (SQUARED_VANDERWAALS_DISTANCE_ON - squared_distances)) / vanderwaals_constant_factor)
-        vanderwaals_prefactors[indices_tooclose] = 0.0
-        vanderwaals_prefactors[indices_toofar] = 1.0
-
-        vanderwaals_potentials = 4.0 * epsilons * (((sigmas / edge_distances) ** 12) - ((sigmas / edge_distances) ** 6)) * vanderwaals_prefactors
-
-        # set the values to the edges
-        for index, potential in enumerate(vanderwaals_potentials):
-            graph.edges[edge_keys[index]][FEATURENAME_EDGEVANDERWAALS] = potential
+            node.features[FEATURENAME_SASA] = area
 
 
 class ProteinProteinInterfaceAtomicQuery(Query):
@@ -739,15 +560,6 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         return True
 
-    @staticmethod
-    def _get_atom_node_key(atom: Atom) -> str:
-        """ Pickle has trouble serializing a graph if the keys are atom objects, so
-            we map the residues to string identifiers
-        """
-
-        # this should include everything to identify the atom: structure, chain, residue number, insertion_code, atom name
-        return str(atom)
-
     def build_graph(self) -> Graph:
         """ Builds the residue graph.
 
@@ -761,7 +573,21 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         if len(interface_pairs) == 0:
             raise ValueError("no interface residues found")
 
-        model = list(interface_pairs)[0].item1.chain.model
+        # get all atoms in the selection
+        atoms_selected = set([])
+        for residue1, residue2 in interface_pairs:
+            atoms_selected |= set(residue1.atoms)
+            atoms_selected |= set(residue2.atoms)
+        atoms_selected = list(atoms_selected)
+
+        # get the contacts between the atoms
+        contacts = get_atomic_contacts(atoms_selected)
+
+        # build the graph
+        graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._interface_distance_cutoff)
+        self._set_graph_targets(graph)
+
+        model = contacts[0].atom1.residue.chain.model
         chain1 = model.get_chain(self._chain_id1)
         chain2 = model.get_chain(self._chain_id2)
 
@@ -773,117 +599,68 @@ class ProteinProteinInterfaceAtomicQuery(Query):
                 with open(pssm_path, 'rt') as f:
                     chain.pssm = parse_pssm(f, chain)
 
-        # Create an empty graph
-        graph = Graph(self.get_query_id(), self.targets)
-
-        # Keep track of the node-names that each atom was given
-        node_atoms = {}
-
-        # Pair the atoms at the interface.
-        atoms_chain1 = []
-        atoms_chain2 = []
-        for residue1, residue2 in interface_pairs:
-            atoms_residue1 = list(residue1.atoms)
-            atoms_residue2 = list(residue2.atoms)
-
-            atoms_chain1.extend(atoms_residue1)
-            atoms_chain2.extend(atoms_residue2)
-
-            distances = distance_matrix([atom.position for atom in atoms_residue1],
-                                        [atom.position for atom in atoms_residue2], p=2)
-
-            neighbours = numpy.logical_and(distances < self._interface_distance_cutoff,
-                                           distances > 0.0)
-
-            for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
-
-                atom1 = atoms_residue1[atom1_index]
-                atom2 = atoms_residue2[atom2_index]
-                distance = distances[atom1_index, atom2_index]
-
-                key1 = self._get_atom_node_key(atom1)
-                key2 = self._get_atom_node_key(atom2)
-
-                graph.add_edge(key1, key2)
-                graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
-                graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
-
-                node_atoms[key1] = atom1
-                node_atoms[key2] = atom2
-
-        # Pair the atoms within the two proteins
-        for atoms_in_chain in (atoms_chain1, atoms_chain2):
-            atom_positions = [atom.position for atom in atoms_in_chain]
-
-            distances = distance_matrix(atom_positions, atom_positions, p=2)
-
-            neighbours = numpy.logical_and(distances < self._internal_distance_cutoff,
-                                           distances > 0.0)
-
-            for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
-
-                atom1 = atoms_in_chain[atom1_index]
-                atom2 = atoms_in_chain[atom2_index]
-                distance = distances[atom1_index, atom2_index]
-
-                key1 = self._get_atom_node_key(atom1)
-                key2 = self._get_atom_node_key(atom2)
-
-                graph.add_edge(key1, key2)
-                graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
-                graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
-
-                node_atoms[key1] = atom1
-                node_atoms[key2] = atom2
-
         # build sasa structures
         sasa_structures = {chain1: freesasa.Structure(),
                            chain2: freesasa.Structure()}
         sasa_structure_both = freesasa.Structure()
-        for atom in atoms_chain1:
-            sasa_structures[chain1].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+        for residue in chain1.residues:
+            for atom in residue.atoms:
+                sasa_structures[chain1].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+                                                atom.residue.number, atom.residue.chain.id,
+                                                atom.position[0], atom.position[1], atom.position[2])
+                sasa_structure_both.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
                                             atom.residue.number, atom.residue.chain.id,
                                             atom.position[0], atom.position[1], atom.position[2])
-            sasa_structure_both.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
-                                        atom.residue.number, atom.residue.chain.id,
-                                        atom.position[0], atom.position[1], atom.position[2])
 
-        for atom in atoms_chain2:
-            sasa_structures[chain2].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+        for residue in chain2.residues:
+            for atom in residue.atoms:
+                sasa_structures[chain2].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
+                                                atom.residue.number, atom.residue.chain.id,
+                                                atom.position[0], atom.position[1], atom.position[2])
+                sasa_structure_both.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
                                             atom.residue.number, atom.residue.chain.id,
                                             atom.position[0], atom.position[1], atom.position[2])
-            sasa_structure_both.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
-                                        atom.residue.number, atom.residue.chain.id,
-                                        atom.position[0], atom.position[1], atom.position[2])
 
         sasa_results = {chain1: freesasa.calc(sasa_structures[chain1]),
                         chain2: freesasa.calc(sasa_structures[chain2])}
         sasa_result_both = freesasa.calc(sasa_structure_both)
 
-        # Add the node features
+        # give each chain a numerical value
         chain_codes = {chain1: 0.0, chain2: 1.0}
-        for node_key, node in graph.nodes.items():
-            atom = node_atoms[node_key]
+
+        # add edge features
+        for edge in graph.edges:
+            contact = edge.id
+            if contact.atom1.residue.chain == contact.atom2.residue.chain:
+                edge.features[FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+            else:
+                edge.features[FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
+
+            edge.features[FEATURENAME_EDGEDISTANCE] = contact.distance
+
+        # add the node features
+        for node in graph.nodes:
+            atom = node.id
             residue = atom.residue
 
             pssm_row = residue.get_pssm()
             pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in self.amino_acid_order]
 
-            node[FEATURENAME_CHAIN] = chain_codes[residue.chain]
-            node[FEATURENAME_POSITION] = atom.position
-            node[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
-            node[FEATURENAME_CHARGE] = atomic_forcefield.get_charge(atom)
-            node[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+            node.features[FEATURENAME_CHAIN] = chain_codes[residue.chain]
+            node.features[FEATURENAME_POSITION] = atom.position
+            node.features[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+            node.features[FEATURENAME_CHARGE] = atomic_forcefield.get_charge(atom)
+            node.features[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
 
             select_str = ('atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, residue.number_string, residue.chain.id),)
             area_unbound = freesasa.selectArea(select_str, sasa_structures[residue.chain], sasa_results[residue.chain])['atom']
             area_bound = freesasa.selectArea(select_str, sasa_structure_both, sasa_result_both)['atom']
-            node[FEATURENAME_BURIEDSURFACEAREA] = area_unbound - area_bound
+            node.features[FEATURENAME_BURIEDSURFACEAREA] = area_unbound - area_bound
 
             if self._pssm_paths is not None:
-                node[FEATURENAME_PSSM] = pssm_value
-                node[FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
-                node[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+                node.features[FEATURENAME_PSSM] = pssm_value
+                node.features[FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
+                node.features[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
 
         return graph
 
@@ -946,32 +723,31 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         return True
 
-    @staticmethod
-    def _get_residue_node_key(residue: Residue) -> str:
-        """ Pickle has trouble serializing a graph if the keys are residue objects, so
-            we map the residues to string identifiers
-        """
-
-        # this should include everything to identify the residue: structure, chain, number, insertion_code
-        return str(residue)
-
     def build_graph(self) -> Graph:
         """ Builds the residue graph.
 
             Returns(deeprank graph object): the resulting graph
         """
 
-        # get residues from the pdb
-
+        # select residues from the pdb
         interface_pairs = get_residue_contact_pairs(self._pdb_path, self.model_id,
                                                     self._chain_id1, self._chain_id2,
                                                     self._interface_distance_cutoff)
         if len(interface_pairs) == 0:
             raise ValueError("no interface residues found")
 
-        interface_pairs_list = list(interface_pairs)
+        residues_selected = set([])
+        for residue1, residue2 in interface_pairs:
+            residues_selected.add(residue1)
+            residues_selected.add(residue2)
+        residues_selected = list(residues_selected)
 
-        model = interface_pairs_list[0].item1.chain.model
+        # build graph from residues
+        contacts = get_residue_contacts(residues_selected)
+        graph = self._build_graph_from_contacts(self.get_query_id(), contacts, self._interface_distance_cutoff)
+        self._set_graph_targets(graph)
+
+        model = contacts[0].residue1.chain.model
         chain1 = model.get_chain(self._chain_id1)
         chain2 = model.get_chain(self._chain_id2)
 
@@ -982,67 +758,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
                 with open(pssm_path, 'rt') as f:
                     chain.pssm = parse_pssm(f, chain)
-
-        # separate residues by chain
-        residues_from_chain1 = set([])
-        residues_from_chain2 = set([])
-        for residue1, residue2 in interface_pairs:
-
-            if self._residue_is_valid(residue1):
-                if residue1.chain.id == self._chain_id1:
-                    residues_from_chain1.add(residue1)
-
-                elif residue1.chain.id == self._chain_id2:
-                    residues_from_chain2.add(residue1)
-
-            if self._residue_is_valid(residue2):
-                if residue2.chain.id == self._chain_id1:
-                    residues_from_chain1.add(residue2)
-
-                elif residue2.chain.id == self._chain_id2:
-                    residues_from_chain2.add(residue2)
-
-        # create the graph
-        graph = Graph(self.get_query_id(), self.targets)
-
-        # These will not be stored in the graph, but we need them to get features.
-        residues_by_node = {}
-
-        # interface edges
-        for pair in interface_pairs:
-
-            residue1, residue2 = pair
-            if self._residue_is_valid(residue1) and self._residue_is_valid(residue2):
-
-                distance = get_residue_distance(residue1, residue2)
-
-                key1 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue1)
-                key2 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue2)
-
-                residues_by_node[key1] = residue1
-                residues_by_node[key2] = residue2
-
-                graph.add_edge(key1, key2)
-                graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
-                graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
-
-        # internal edges
-        for residue_set in (residues_from_chain1, residues_from_chain2):
-            residue_list = list(residue_set)
-            for index, residue1 in enumerate(residue_list):
-                for residue2 in residue_list[index + 1:]:
-                    distance = get_residue_distance(residue1, residue2)
-
-                    if distance < self._internal_distance_cutoff:
-                        key1 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue1)
-                        key2 = ProteinProteinInterfaceResidueQuery._get_residue_node_key(residue2)
-
-                        residues_by_node[key1] = residue1
-                        residues_by_node[key2] = residue2
-
-                        graph.add_edge(key1, key2)
-                        graph.edges[key1, key2][FEATURENAME_EDGEDISTANCE] = distance
-                        graph.edges[key1, key2][FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
 
         # get bsa
         pdb = pdb2sql.interface(self._pdb_path)
@@ -1059,13 +774,25 @@ class ProteinProteinInterfaceResidueQuery(Query):
             bio_model = BioWrappers.get_bio_model(self._pdb_path)
             residue_depths = BioWrappers.get_depth_contact_res(bio_model,
                                                                [(residue.chain.id, residue.number, residue.amino_acid.three_letter_code)
-                                                                for residue in residues_by_node.values()])
+                                                                for residue in residues_selected])
             hse = BioWrappers.get_hse(bio_model)
 
-        # add node features
+        # add edge features
+        for edge in graph.edges:
+            contact = edge.id
+            if contact.residue1.chain == contact.residue2.chain:
+                edge.features[FEATURENAME_EDGETYPE] = EDGETYPE_INTERNAL
+            else:
+                edge.features[FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
+
+            edge.features[FEATURENAME_EDGEDISTANCE] = contact.distance
+
+        # define a numerical value for each chain
         chain_codes = {chain1: 0.0, chain2: 1.0}
-        for node_key, node in graph.nodes.items():
-            residue = residues_by_node[node_key]
+
+        # add node features
+        for node in graph.nodes:
+            residue = node.id
 
             bsa_key = (residue.chain.id, residue.number, residue.amino_acid.three_letter_code)
             bio_key = (residue.chain.id, residue.number)
@@ -1073,21 +800,21 @@ class ProteinProteinInterfaceResidueQuery(Query):
             pssm_row = residue.get_pssm()
             pssm_value = [pssm_row.conservations[amino_acid] for amino_acid in self.amino_acid_order]
 
-            node[FEATURENAME_CHAIN] = chain_codes[residue.chain]
-            node[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
-            node[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
-            node[FEATURENAME_CHARGE] = residue.amino_acid.charge
-            node[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
-            node[FEATURENAME_BURIEDSURFACEAREA] = bsa_data[bsa_key]
+            node.features[FEATURENAME_CHAIN] = chain_codes[residue.chain]
+            node.features[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue.atoms], axis=0)
+            node.features[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
+            node.features[FEATURENAME_CHARGE] = residue.amino_acid.charge
+            node.features[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+            node.features[FEATURENAME_BURIEDSURFACEAREA] = bsa_data[bsa_key]
 
             if self._pssm_paths is not None:
-                node[FEATURENAME_PSSM] = pssm_value
-                node[FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
-                node[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
+                node.features[FEATURENAME_PSSM] = pssm_value
+                node.features[FEATURENAME_CONSERVATION] = pssm_row.conservations[residue.amino_acid]
+                node.features[FEATURENAME_INFORMATIONCONTENT] = pssm_row.information_content
 
             if self._use_biopython:
-                node[FEATURENAME_RESIDUEDEPTH] = residue_depths[residue] if residue in residue_depths else 0.0
-                node[FEATURENAME_HALFSPHEREEXPOSURE] = hse[bio_key] if bio_key in hse else (0.0, 0.0, 0.0)
+                node.features[FEATURENAME_RESIDUEDEPTH] = residue_depths[residue] if residue in residue_depths else 0.0
+                node.features[FEATURENAME_HALFSPHEREEXPOSURE] = hse[bio_key] if bio_key in hse else (0.0, 0.0, 0.0)
 
         return graph
 

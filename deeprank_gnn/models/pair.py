@@ -33,4 +33,5 @@ class Pair:
         # Iterate over the two items in the pair.
         return iter([self.item1, self.item2])
 
-
+    def __repr__(self):
+        return (str(self.item1), str(self.item2))
