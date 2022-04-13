@@ -36,7 +36,6 @@ setup(
         'Natural Language :: English', 'Programming Language :: Python :: 3.7',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    test_suite='tests',
 
     setup_requires=['torch>=1.11.0'],
 
