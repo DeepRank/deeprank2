@@ -125,25 +125,30 @@ class HDF5DataSet(Dataset):
             torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before being saved to disk. Defaults to None.
 
-            dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules.
+            dict_filter dictionnary, optional): Dictionnary of type [name: cond]
+            to filter the molecules.
             Defaults to None.
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ.
+            Defaults to None.
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
             index (int, optional): index of a molecule. Defaults to None.
 
-            node_feature (str or list, optional): consider all pre-computed node features ('all') or some
-            defined node features (provide a list).
+            node_feature (str or list, optional): consider all pre-computed node
+            features ('all') or some defined node features (provide a list).
             Defaults to 'all'.
 
-            edge_feature (list, optional): only distances are available in this version of DeepRank-GNN.
+            edge_feature (list, optional): only distances are available
+            in this version of DeepRank-GNN.
             Defaults to ['dist'].
 
-            clustering_method (str, optional): 'mcl' (Markov Clustering) or 'louvain'. Defaults to 'mcl'.
+            clustering_method (str, optional): 'mcl' (Markov Clustering) or 'louvain'.
+            Defaults to 'mcl'.
 
-            edge_feature_transform (function, optional): transformation applied to the edge features.
+            edge_feature_transform (function, optional): transformation applied to
+            the edge features.
             Defaults to lambdax:np.tanh(-x/2+2)+1.
         """
         super().__init__(root, transform, pre_transform)

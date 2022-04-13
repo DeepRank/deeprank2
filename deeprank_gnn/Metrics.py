@@ -41,8 +41,10 @@ def get_comparison(prediction, ground_truth, binary=True, classes=None):
     Args:
         prediction (list): list of predicted values
         ground_truth (list): list of target values (y)
-        binary (bool, optional): If binary is True, the function will return a single value for each FP/FN/TP/TN variable.
-                                 If binary is False, the function will return a vector of n values for each FP/FN/TP/TN
+        binary (bool, optional): If binary is True, the function will return
+                                 a single value for each FP/FN/TP/TN variable.
+                                 If binary is False, the function will return
+                                 a vector of n values for each FP/FN/TP/TN
                                  Defaults to True.
         classes (list, optional): Array-like of shape (n_classes). Defaults to [0, 1].
 
@@ -100,7 +102,8 @@ class Metrics():
             y (list): list of target values
             target (string): irmsd, fnat, capri_class, bin_class
             binary (bool, optional): transform the data in binary vectors. Defaults to True.
-            threshold (int, optional): threshold used to split the data into a binary vector. Defaults to 4.
+            threshold (int, optional): threshold used to split the data into a binary vector.
+            Defaults to 4.
         """
         # pylint: disable=too-many-arguments
         self.prediction = prediction

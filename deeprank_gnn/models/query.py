@@ -1,33 +1,67 @@
 import logging
 import os
 from typing import Dict, List, Iterator, Optional
-
 import freesasa
 import numpy
 import pdb2sql
-from scipy.spatial import distance_matrix
-
-from deeprank_gnn.domain.amino_acid import *
-from deeprank_gnn.domain.feature import *
-from deeprank_gnn.domain.forcefield import (
-    atomic_forcefield,
-    VANDERWAALS_DISTANCE_ON,
-    VANDERWAALS_DISTANCE_OFF,
-    SQUARED_VANDERWAALS_DISTANCE_ON,
-    SQUARED_VANDERWAALS_DISTANCE_OFF,
-    EPSILON0,
-    COULOMB_CONSTANT,
-)
+from deeprank_gnn.domain.amino_acid import (
+    alanine,
+    arginine,
+    asparagine,
+    aspartate,
+    cysteine,
+    glutamate,
+    glutamine,
+    glycine,
+    histidine,
+    isoleucine,
+    leucine,
+    lysine,
+    methionine,
+    phenylalanine,
+    proline,
+    serine,
+    threonine,
+    tryptophan,
+    tyrosine,
+    valine
+    )
+from deeprank_gnn.domain.feature import (
+    FEATURENAME_POSITION,
+    FEATURENAME_AMINOACID,
+    FEATURENAME_VARIANTAMINOACID,
+    FEATURENAME_CHAIN,
+    FEATURENAME_CHARGE,
+    FEATURENAME_POLARITY,
+    FEATURENAME_SIZE,
+    FEATURENAME_BURIEDSURFACEAREA,
+    FEATURENAME_HALFSPHEREEXPOSURE,
+    FEATURENAME_PSSM,
+    FEATURENAME_CONSERVATION,
+    FEATURENAME_INFORMATIONCONTENT,
+    FEATURENAME_RESIDUEDEPTH,
+    FEATURENAME_PSSMDIFFERENCE,
+    FEATURENAME_PSSMWILDTYPE,
+    FEATURENAME_PSSMVARIANT,
+    FEATURENAME_SASA,
+    FEATURENAME_SIZEDIFFERENCE,
+    FEATURENAME_POLARITYDIFFERENCE,
+    FEATURENAME_EDGECOULOMB,
+    FEATURENAME_EDGEVANDERWAALS,
+    FEATURENAME_EDGEDISTANCE,
+    FEATURENAME_EDGETYPE,
+    EDGETYPE_INTERNAL,
+    EDGETYPE_INTERFACE
+    )
+from deeprank_gnn.domain.forcefield import atomic_forcefield
 from deeprank_gnn.domain.graph import EDGETYPE_INTERNAL, EDGETYPE_INTERFACE
-from deeprank_gnn.models.error import UnknownAtomError
-from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
 from deeprank_gnn.models.graph import Graph, Edge, Node
+from deeprank_gnn.models.amino_acid import AminoAcid
 from deeprank_gnn.models.contact import Contact
 from deeprank_gnn.models.structure import Residue, Atom
 from deeprank_gnn.tools import BioWrappers, BSA
 from deeprank_gnn.tools.pdb import (
     get_residue_contact_pairs,
-    get_residue_distance,
     get_surrounding_residues,
     get_structure,
     get_atomic_contacts,
@@ -117,16 +151,29 @@ class SingleResidueVariantResidueQuery(Query):
         """
         Args:
             pdb_path(str): the path to the pdb file
+
             chain_id(str): the pdb chain identifier of the variant residue
+
             residue_number(int): the number of the variant residue
-            insertion_code(str): the insertion code of the variant residue, set to None if not applicable
+
+            insertion_code(str): the insertion code of the variant residue, set to None
+            if not applicable
+
             wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
+
             variant_amino_acid(deeprank amino acid object): the variant amino acid
+
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+
             wildtype_conservation(float): conservation value for the wildtype
+
             variant_conservation(float): conservation value for the variant
+
             radius(float): in Ångström, determines how many residues will be included in the graph
-            external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
+
+            external_distance_cutoff(float): max distance in Ångström between a pair of atoms
+            to consider them as an external edge in the graph
+
             targets(dict(str,float)): named target values associated with this query
         """
 
@@ -364,15 +411,27 @@ class SingleResidueVariantAtomicQuery(Query):
         """
             Args:
                 pdb_path(str): the path to the pdb file
+
                 chain_id(str): the pdb chain identifier of the variant residue
+
                 residue_number(int): the number of the variant residue
+
                 insertion_code(str): the insertion code of the variant residue, set to None if not applicable
+
                 wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
+
                 variant_amino_acid(deeprank amino acid object): the variant amino acid
+
                 pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+
                 radius(float): in Ångström, determines how many residues will be included in the graph
-                external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
-                internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an internal edge in the graph (must be shorter than external)
+
+                external_distance_cutoff(float): max distance in Ångström between a pair of atoms to
+                consider them as an external edge in the graph
+
+                internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider
+                them as an internal edge in the graph (must be shorter than external)
+
                 targets(dict(str,float)): named target values associated with this query
         """
 
@@ -393,7 +452,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         if external_distance_cutoff < internal_distance_cutoff:
             raise ValueError(
-                "this query is not supported with internal distance cutoff shorter than external distance cutoff"
+                "this query is not supported with internal distance cutoff shorter than external distance cutoff" # noqa: pycodestyle
             )
 
         self._external_distance_cutoff = external_distance_cutoff
@@ -493,8 +552,6 @@ class SingleResidueVariantAtomicQuery(Query):
         # set edge features
         for edge in graph.edges:
             contact = edge.id
-            atom1 = contact.atom1
-            atom2 = contact.atom2
 
             edge.features[FEATURENAME_EDGEDISTANCE] = contact.distance
             edge.features[FEATURENAME_EDGEVANDERWAALS] = contact.vanderwaals_potential
@@ -506,7 +563,8 @@ class SingleResidueVariantAtomicQuery(Query):
 
         SingleResidueVariantAtomicQuery._set_sasa(graph, self._pdb_path)
 
-        SingleResidueVariantAtomicQuery._set_amino_acid(graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
+        SingleResidueVariantAtomicQuery._set_amino_acid(
+            graph, variant_residue, self._wildtype_amino_acid, self._variant_amino_acid)
 
         return graph
 
@@ -620,11 +678,19 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         """
         Args:
             pdb_path(str): the path to the pdb file
+
             chain_id1(str): the pdb chain identifier of the first protein of interest
+
             chain_id2(str): the pdb chain identifier of the second protein of interest
+
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
-            internal_distance_cutoff(float): max distance in Ångström between two interacting residues within the same protein
+            
+            interface_distance_cutoff(float): max distance in Ångström between two interacting
+            residues of the two proteins
+
+            internal_distance_cutoff(float): max distance in Ångström between two interacting
+            residues within the same protein
+
             targets(dict, optional): named target values associated with this query
         """
 
@@ -802,7 +868,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
 
 class ProteinProteinInterfaceResidueQuery(Query):
-    "a query that builds residue-based graphs, using the residues at a protein-protein interface"
+    "a query that builds residue-based graphs, using the residues at a protein-protein interface" # noqa: pycodestyle
     # pylint: disable=too-many-arguments
 
     def __init__(
@@ -819,12 +885,21 @@ class ProteinProteinInterfaceResidueQuery(Query):
         """
         Args:
             pdb_path(str): the path to the pdb file
+
             chain_id1(str): the pdb chain identifier of the first protein of interest
+
             chain_id2(str): the pdb chain identifier of the second protein of interest
+
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
-            internal_distance_cutoff(float): max distance in Ångström between two interacting residues within the same protein
+
+            interface_distance_cutoff(float): max distance in Ångström between two interacting
+            residues of the two proteins
+
+            internal_distance_cutoff(float): max distance in Ångström between two interacting
+            residues within the same protein
+
             use_biopython(bool): whether or not to use biopython tools
+
             targets(dict, optional): named target values associated with this query
         """
 

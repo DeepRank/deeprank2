@@ -198,7 +198,7 @@ class AtomicElement(Enum):
     # pycodestyle: disable=E741
 
     C = 1
-    O = 2
+    O = 2 # noqa: pycodestyle
     N = 3
     S = 4
     P = 5

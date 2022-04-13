@@ -3,7 +3,6 @@ import logging
 
 import numpy
 
-from deeprank_gnn.models.structure import Atom
 from deeprank_gnn.models.forcefield.patch import PatchActionType
 from deeprank_gnn.tools.forcefield.top import TopParser
 from deeprank_gnn.tools.forcefield.patch import PatchParser

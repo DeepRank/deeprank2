@@ -1,16 +1,19 @@
 from enum import Enum
-from typing import Callable, Union, List, Dict, Optional
-from uuid import uuid4
+from typing import Callable, Union, List
 import logging
-
 import numpy
 import h5py
-
 from deeprank_gnn.models.structure import Atom, Residue
 from deeprank_gnn.models.contact import Contact
 from deeprank_gnn.models.grid import MapMethod, Grid, GridSettings
-from deeprank_gnn.domain.storage import *
-
+from deeprank_gnn.domain.storage import (
+    HDF5KEY_GRAPH_SCORE,
+    HDF5KEY_GRAPH_NODENAMES,
+    HDF5KEY_GRAPH_NODEFEATURES,
+    HDF5KEY_GRAPH_EDGENAMES,
+    HDF5KEY_GRAPH_EDGEINDICES,
+    HDF5KEY_GRAPH_EDGEFEATURES
+    )
 
 _log = logging.getLogger(__name__)
 
@@ -109,7 +112,7 @@ class Graph:
         self._edges[edge.id] = edge
 
     def get_edge(self, id_: Contact) -> Edge:
-        return self._edges[edge.id]
+        return self._edges[id_]
 
     @property
     def nodes(self) -> List[Node]:

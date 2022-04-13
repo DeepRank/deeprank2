@@ -2,14 +2,23 @@
 This module holds the classes that are used when working with a 3D grid.
 """
 
-
 from enum import Enum
 from typing import Dict
-
 import numpy
 import h5py
+import itertools
+import bspline
 
-from deeprank_gnn.domain.storage import *
+from deeprank_gnn.domain.storage import (
+    HDF5KEY_GRID_POINTS,
+    HDF5KEY_GRID_X,
+    HDF5KEY_GRID_Y,
+    HDF5KEY_GRID_Z,
+    HDF5KEY_GRID_CENTER,
+    HDF5KEY_GRID_MAPPEDFEATURES,
+    HDF5KEY_GRID_MAPPEDFEATURESVALUE
+    )
+
 
 
 class MapMethod(Enum):

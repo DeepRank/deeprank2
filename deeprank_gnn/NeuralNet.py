@@ -124,7 +124,8 @@ class NeuralNet():
                     self.task = "class"
                 else:
                     raise ValueError(
-                        "User target detected -> The task argument is required ('class' or 'reg'). \n\t"
+                        "User target detected"
+                        "-> The task argument is required ('class' or 'reg'). \n\t"
                         "Example: \n\t"
                         ""
                         "model = NeuralNet(database, GINet,"
@@ -311,15 +312,15 @@ class NeuralNet():
                 ).to(self.device)
             except BaseException as e:
                 raise ValueError(
-                    f"The loaded model does not accept output_shape = {self.output_shape} argument \n\t"
+                    f"The loaded model does not accept output_shape = {self.output_shape} argument \n\t" # noqa: pycodestyle
                     f"Check your input or adapt the model\n\t"
                     f"Example :\n\t"
-                    f"def __init__(self, input_shape): --> def __init__(self, input_shape, output_shape) \n\t"
-                    f"self.fc2 = torch.nn.Linear(64, 1) --> self.fc2 = torch.nn.Linear(64, output_shape) \n\t"
+                    f"def __init__(self, input_shape): --> def __init__(self, input_shape, output_shape) \n\t" # noqa: pycodestyle
+                    f"self.fc2 = torch.nn.Linear(64, 1) --> self.fc2 = torch.nn.Linear(64, output_shape) \n\t" # noqa: pycodestyle
                 ) from e
 
     def set_loss(self):
-        """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
+        """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification).""" # noqa: pycodestyle
         if self.task == "reg":
             self.loss = MSELoss()
 
@@ -422,7 +423,7 @@ class NeuralNet():
 
                     if min(self.valid_loss) == _val_loss:
                         self.save_model(
-                            filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar")
+                            filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar") # noqa: pycodestyle
 
             else:
                 # if no validation set, saves the best performing model on the
@@ -430,12 +431,12 @@ class NeuralNet():
                 if save_model == "best":
                     if min(self.train_loss) == _loss:
                         print(
-                            "WARNING: The training set is used both for learning and model selection."
+                            "WARNING: The training set is used both for learning and model selection." # noqa: pycodestyle
                         )
                         print("this may lead to training set data overfitting.")
                         print("We advice you to use an external validation set.")
                         self.save_model(
-                            filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar")
+                            filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar") # noqa: pycodestyle
 
             # Save epoch data
             if (save_epoch == "all") or (epoch == nepoch):
@@ -449,7 +450,7 @@ class NeuralNet():
         # Save the last model
         if save_model == "last":
             self.save_model(
-                filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}.pth.tar")
+                filename=f"t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}.pth.tar") # noqa: pycodestyle
 
     def test(self, database_test=None, threshold=4, hdf5="test_data.hdf5"):
         """
@@ -457,7 +458,10 @@ class NeuralNet():
 
         Args:
             database_test ([type], optional): test database
-            threshold (int, optional): threshold use to tranform data into binary values. Defaults to 4.
+
+            threshold (int, optional): threshold use to tranform data into binary values.
+            Defaults to 4.
+
             hdf5 (str, optional): output hdf5 file. Defaults to 'test_data.hdf5'.
         """
         # Output file name
@@ -485,8 +489,8 @@ class NeuralNet():
                     "You need to upload a test dataset \n\t"
                     "\n\t"
                     ">> model.test(test_dataset)\n\t"
-                    "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t"
-                    ">> model = NeuralNet(database_test, gnn, pretrained_model = model_saved, target=None)\n\t"
+                    "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t" # noqa: pycodestyle
+                    ">> model = NeuralNet(database_test, gnn, pretrained_model = model_saved, target=None)\n\t" # noqa: pycodestyle
                     ">> model.test()\n\t")
         self.data = {}
 

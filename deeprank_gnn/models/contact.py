@@ -1,7 +1,4 @@
 from abc import ABC, abstractmethod
-
-import numpy
-
 from deeprank_gnn.models.pair import Pair
 from deeprank_gnn.models.structure import Residue, Atom
 
