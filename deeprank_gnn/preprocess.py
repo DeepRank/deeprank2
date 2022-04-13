@@ -1,48 +1,52 @@
 #!/usr/bin/env python
 
+from typing import Optional, List
+import traceback
 from multiprocessing import Queue, Process, Pipe, cpu_count
 from queue import Empty as EmptyQueueError
 import logging
 import os
 from time import sleep
 import h5py
-from deeprank_gnn.tools.graph import graph_to_hdf5, graph_has_nan
+
+from deeprank_gnn.domain.amino_acid import amino_acids
+from deeprank_gnn.models.query import Query
 
 
 _log = logging.getLogger(__name__)
 
 
 class _PreProcess(Process):
-    def __init__(self, queue, output_path):
+    def __init__(self, input_queue: Queue, output_path: str, error_queue: Queue):
         Process.__init__(self)
         self.daemon = True
 
-        self._queue = queue
+        self._input_queue = input_queue
+        self._error_queue = error_queue
+
         self._output_path = output_path
 
         self._receiver, self._sender = Pipe(duplex=False)
 
     @property
-    def output_path(self):
+    def output_path(self) -> str:
         return self._output_path
 
-    def is_running(self):
+    def is_running(self) -> bool:
         with self._running_lock:
             return self._running
 
     def stop(self):
         self._sender.send(1)
-
         self.join()
-        self.terminate()
 
-    def _should_stop(self):
+    def _should_stop(self) -> bool:
         return self._receiver.poll()
 
     def run(self):
         while not self._should_stop():
             try:
-                query = self._queue.get_nowait()
+                query = self._input_queue.get_nowait()
 
             except EmptyQueueError:
                 continue
@@ -50,17 +54,12 @@ class _PreProcess(Process):
             graph = None
             try:
                 graph = query.build_graph()
-                if graph_has_nan(graph):
-                    _log.warning(
-                        "skipping %s, because of a generated NaN value in the graph", query
-                    )
+                if graph.has_nan():
+                    self._error_queue.put(f"skipping {query}, because of a generated NaN value in the graph")
 
-                with h5py.File(self._output_path, "a") as f5:
-                    graph_to_hdf5(graph, f5)
-
-            except BaseException:
-                # pylint: disable=logging-fstring-interpolation
-                _log.exception(f"error adding {query} to {self._output_path}")
+                graph.write_to_hdf5(self._output_path)
+            except:
+                self._error_queue.put(traceback.format_exc())
 
                 # Don't leave behind an unfinished hdf5 group.
                 if graph is not None:
@@ -68,20 +67,19 @@ class _PreProcess(Process):
                         if graph.id in f5:
                             del f5[graph.id]
 
-        _log.info("reached the end of a subproces")
-
 
 class PreProcessor:
     "preprocesses a series of graph building operations (represented by queries)"
 
-    def __init__(self, prefix=None, process_count=None):
+    def __init__(self, prefix: Optional[str] = None, process_count: Optional[int] = None):
         """
         Args:
             prefix(str, optional): prefix for the output files, ./preprocessed-data- by default
             process_count(int, optional): how many subprocesses will I run simultaneously, by default takes all available cpu cores.
         """
 
-        self._queue = Queue()
+        self._input_queue = Queue()
+        self._error_queue = Queue()
 
         if process_count is None:
             process_count = cpu_count()
@@ -89,10 +87,8 @@ class PreProcessor:
         if prefix is None:
             prefix = "preprocessed-data"
 
-        self._processes = [
-            _PreProcess(self._queue, f"{prefix}-{index}.hdf5")
-            for index in range(process_count)
-        ]
+        self._processes = [_PreProcess(self._input_queue, "{}-{}.hdf5".format(prefix, index), self._error_queue)
+                           for index in range(process_count)]
 
     def start(self):
         "start the workers"
@@ -108,24 +104,29 @@ class PreProcessor:
 
         try:
             _log.info("waiting for the queue to be empty..")
-            while not self._queue.empty():
+            while self._input_queue.qsize() > 0:  # qsize seems to be more reliable than the empty method
                 sleep(1.0)
         finally:
             self.shutdown()
 
-    def add_query(self, query):
+        # log all errors in the subprocesses
+        while not self._error_queue.empty():
+            error_s = self._error_queue.get()
+            _log.error(error_s)
+
+    def add_query(self, query: Query):
         "add a single graph building query"
 
-        self._queue.put(query)
+        self._input_queue.put(query)
 
-    def add_queries(self, queries):
+    def add_queries(self, queries: List[Query]):
         "add multiple graph building queries"
 
         for query in queries:
-            self._queue.put(query)
+            self._input_queue.put(query)
 
     @property
-    def output_paths(self):
+    def output_paths(self) -> List[str]:
         return [
             process.output_path
             for process in self._processes
@@ -141,7 +142,5 @@ class PreProcessor:
             process.stop()
 
     def __del__(self):
-        _log.debug("del called on preprocessor")
-
         # clean up all the created subprocesses
         self.shutdown()

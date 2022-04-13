@@ -1,10 +1,14 @@
 import logging
+from typing import List
 from scipy.spatial import distance_matrix
 import numpy
 from pdb2sql import pdb2sql, interface as get_interface
 from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement
 from deeprank_gnn.domain.amino_acid import amino_acids
 from deeprank_gnn.models.pair import Pair
+from deeprank_gnn.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0
+from deeprank_gnn.models.contact import ResidueContact, AtomicContact
+from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
 
 
 _log = logging.getLogger(__name__)
@@ -117,6 +121,160 @@ def get_structure(pdb, id_):
         _add_atom_to_residue(atom, residue)
 
     return structure
+
+
+def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> numpy.ndarray:
+    """ Calculate the Coulomb potentials, given a distance matrix and a list of charges of equal size.
+
+        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
+    """
+
+    # check for the correct matrix shape
+    charge_count = len(charges)
+    if charge_count != distances.shape[0] or charge_count != distances.shape[1]:
+        raise ValueError("Cannot calculate distances between {} charges and {} distances"
+                         .format(charge_count, "x".join(distances.shape)))
+
+    # calculate the potentials
+    potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
+                 * COULOMB_CONSTANT / (EPSILON0 * distances)
+
+    return potentials
+
+
+def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
+                                 vanderwaals_parameters: List[VanderwaalsParam]) -> numpy.ndarray:
+    """ Calculate Lennard-Jones potentials, given a distance matrix and a list of atoms with vanderwaals parameters of equal size.
+
+         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
+    """
+
+    # check for the correct data shapes
+    atom_count = len(atoms)
+    if atom_count != len(vanderwaals_parameters):
+        raise ValueError("The number of atoms ({}) does not match the number of vanderwaals parameters ({})"
+                         .format(atom_count, len(vanderwaals_parameters)))
+    if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
+        raise ValueError("Cannot calculate distances between {} atoms and {} distances"
+                         .format(atom_count, "x".join(distances.shape)))
+
+    # collect parameters
+    sigmas1 = numpy.empty((atom_count, atom_count))
+    sigmas2 = numpy.empty((atom_count, atom_count))
+    epsilons1 = numpy.empty((atom_count, atom_count))
+    epsilons2 = numpy.empty((atom_count, atom_count))
+    for atom1_index in range(atom_count):
+        for atom2_index in range(atom_count):
+            atom1 = atoms[atom1_index]
+            atom2 = atoms[atom2_index]
+
+            # Which parameter we take, depends on whether the contact is intra- or intermolecular.
+            if atom1.residue != atom2.residue:
+
+                sigmas1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].inter_sigma
+                sigmas2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].inter_sigma
+
+                epsilons1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].inter_epsilon
+                epsilons2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].inter_epsilon
+            else:
+                sigmas1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].intra_sigma
+                sigmas2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].intra_sigma
+
+                epsilons1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].intra_epsilon
+                epsilons2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].intra_epsilon
+
+    # calculate potentials
+    sigmas = 0.5 * (sigmas1 + sigmas2)
+    epsilons = numpy.sqrt(sigmas1 * sigmas2)
+    potentials = 4.0 * epsilons * ((sigmas / distances) ** 12 - (sigmas / distances) ** 6)
+
+    return potentials
+
+
+def get_atomic_contacts(atoms: List[Atom]) -> List[AtomicContact]:
+    """ Computes all the contacts between a given list of atoms.
+        It doesn't pair atoms with themselves, so no zero divisions are expected.
+
+        Warning: do not call this on all atoms in the structure, since this can lead to
+                 excessive memory consumption! Be sure to use queries to make a selection.
+    """
+
+    atom_postions = [atom.position for atom in atoms]
+
+    # calculate distance matrix
+    interatomic_distances = distance_matrix(atom_postions, atom_postions, p=2)
+
+    # get forcefield parameters
+    atom_charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
+    atom_vanderwaals_parameters = [atomic_forcefield.get_vanderwaals_parameters(atom) for atom in atoms]
+
+    # calculate potentials
+    interatomic_electrostatic_potentials = get_coulomb_potentials(interatomic_distances, atom_charges)
+    interatomic_vanderwaals_potentials = get_lennard_jones_potentials(interatomic_distances, atoms, atom_vanderwaals_parameters)
+
+    # build contacts
+    contacts = []
+
+    count_atoms = len(atoms)
+    for atom1_index in range(count_atoms):
+        for atom2_index in range(atom1_index + 1, count_atoms):  # don't make the same contact twice and don't pair an atom with itself
+
+            contacts.append(AtomicContact(atoms[atom1_index], atoms[atom2_index],
+                                          interatomic_distances[atom1_index][atom2_index],
+                                          interatomic_electrostatic_potentials[atom1_index][atom2_index],
+                                          interatomic_vanderwaals_potentials[atom1_index][atom2_index]))
+    return contacts
+
+
+def get_residue_contacts(residues: List[Residue]) -> List[ResidueContact]:
+    """ Computes all the contacts between a given list of residues.
+        It doesn't pair residues with themselves, so no zero divisions are expected.
+
+        Warning: do not call this on all residues in the structure, since this can lead to
+                 excessive memory consumption! Be sure to use queries to make a selection.
+    """
+
+    atoms = []
+    for residue in residues:
+        atoms += residue.atoms
+
+    atomic_contacts = get_atomic_contacts(atoms)
+
+    # start with empty dictionaries, to hold the distance and energies per contact
+    residue_minimum_distances = {}
+    residue_electrostatic_potential_sums = {}
+    residue_vanderwaals_potential_sums = {}
+
+    # iterate over all interatomic contacts
+    for atomic_contact in atomic_contacts:
+        if atomic_contact.atom1.residue != atomic_contact.atom2.residue:  # don't pair a residue with itself
+
+            residue1 = atomic_contact.atom1.residue
+            residue2 = atomic_contact.atom2.residue
+
+            residue_pair = Pair(residue1, residue2)
+
+            if residue_pair not in residue_minimum_distances:
+
+                # initialize distance and energies per residue contact
+                residue_minimum_distances[residue_pair] = 1e99
+                residue_electrostatic_potential_sums[residue_pair] = 0.0
+                residue_vanderwaals_potential_sums[residue_pair] = 0.0
+
+            # aggregate
+            residue_minimum_distances[residue_pair] = min(residue_minimum_distances[residue_pair], atomic_contact.distance)
+            residue_electrostatic_potential_sums[residue_pair] += atomic_contact.electrostatic_potential
+            residue_vanderwaals_potential_sums[residue_pair] += atomic_contact.vanderwaals_potential
+
+    # convert to residue contacts
+    residue_contacts = []
+    for residue_pair, distance in residue_minimum_distances.items():
+        residue_contacts.append(ResidueContact(residue_pair.item1, residue_pair.item2,
+                                               residue_minimum_distances[residue_pair],
+                                               residue_electrostatic_potential_sums[residue_pair],
+                                               residue_vanderwaals_potential_sums[residue_pair]))
+    return residue_contacts
+
 
 
 def get_residue_distance(residue1, residue2):

@@ -50,6 +50,10 @@ class Structure:
 
         return atoms
 
+    @property
+    def id(self) -> str:
+        return self._id
+
 
 class Chain:
     "represents one pdb chain"
@@ -183,6 +187,10 @@ class Residue:
 
     def __repr__(self) -> str:
         return f"{self._chain} {self.number_string}"
+
+    @property
+    def position(self) -> numpy.array:
+        return numpy.mean([atom.position for atom in self._atoms], axis=0)
 
 
 class AtomicElement(Enum):
