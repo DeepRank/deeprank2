@@ -10,18 +10,18 @@ from deeprank_gnn.foutnet import FoutNet
 from deeprank_gnn.sGAT import sGAT
 
 
-def _model_base_test(
+def _model_base_test( # pylint: disable=too-many-arguments
     work_directory,
     hdf5_path,
     model,
     task='reg',
     target='irmsd',
-    plot=False): # pylint: disable=too-many-arguments
+    plot=False):
 
     NN = NeuralNet(hdf5_path, model,
                    # node_feature=['type', 'polarity', 'bsa',
                    #               'depth', 'hse', 'ic', 'pssm'],
-                   edge_feature=['dist'],
+                   # edge_feature=['dist'],
                    target=target,
                    index=None,
                    task=task,

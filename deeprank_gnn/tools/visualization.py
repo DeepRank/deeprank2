@@ -98,8 +98,8 @@ def _get_edge_type_name(value):
 
     return value
 
-def plotly_2d(graph: networkx.Graph, out: Optional[str] = None, offline: bool = False, iplot: bool = True,
-              disable_plot: bool = False, method: str = 'louvain'): # noqa: MC0001
+def plotly_2d(graph: networkx.Graph, out: Optional[str] = None, offline: bool = False, iplot: bool = True, # noqa: MC0001
+              disable_plot: bool = False, method: str = 'louvain'):
     """Plots the interface graph in 2D
     """
 
