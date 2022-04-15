@@ -91,3 +91,12 @@ def test_add_features():
     contact = ResidueContact(structure.chains[0].residues[0], structure.chains[0].residues[1])
     edge = Edge(contact)
     add_features(pdb_path, [edge])
+    assert not numpy.isnan(edge.features[FEATURENAME_EDGEDISTANCE]) > 0.0
+    assert edge.features[FEATURENAME_EDGEDISTANCE] > 0.0
+    assert edge.features[FEATURENAME_EDGEDISTANCE] < 1e5
+
+    assert not numpy.isnan(edge.features[FEATURENAME_EDGECOULOMB])
+    assert edge.features[FEATURENAME_EDGECOULOMB] != 0.0, edge.features[FEATURENAME_EDGECOULOMB]
+
+    assert not numpy.isnan(edge.features[FEATURENAME_EDGEVANDERWAALS])
+    assert edge.features[FEATURENAME_EDGEVANDERWAALS] != 0.0, edge.features[FEATURENAME_EDGEVANDERWAALS]

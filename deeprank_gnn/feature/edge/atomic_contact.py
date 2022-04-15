@@ -154,14 +154,14 @@ def add_features_for_residues(edges: List[Edge]):
                 atom1_index = atom_indices[atom1]
                 atom2_index = atom_indices[atom2]
 
-                edge.features[FEATURENAME_EDGEDISTANCE] = min(edge.features.get(FEATURENAME_EDGEDISTANCE, 0.0),
+                edge.features[FEATURENAME_EDGEDISTANCE] = min(edge.features.get(FEATURENAME_EDGEDISTANCE, 1e99),
                                                               interatomic_distances[atom1_index, atom2_index])
 
                 edge.features[FEATURENAME_EDGEVANDERWAALS] = (edge.features.get(FEATURENAME_EDGEVANDERWAALS, 0.0) +
-                                                              interatomic_vanderwaals_potentials)
+                                                              interatomic_vanderwaals_potentials[atom1_index, atom2_index])
 
                 edge.features[FEATURENAME_EDGECOULOMB] = (edge.features.get(FEATURENAME_EDGECOULOMB, 0.0) +
-                                                          interatomic_electrostatic_potentials)
+                                                          interatomic_electrostatic_potentials[atom1_index, atom2_index])
 
 
 def add_features(pdb_path: str, edges: List[Edge]) -> Dict[str, numpy.ndarray]:
