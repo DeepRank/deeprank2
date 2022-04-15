@@ -15,7 +15,8 @@ def parse_pssm(file_: TextIO, chain: Chain) -> ConservationTable:
 
     Args:
         file_(python text file object): the pssm file
-        chain(deeprank Chain object): the chain that the pssm file represents, residues from this chain must match the pssm file
+        chain(deeprank Chain object): the chain that the pssm file represents,
+        residues from this chain must match the pssm file
 
     Returns(ConservationTable): the position-specific scoring table, parsed from the pssm file
     """

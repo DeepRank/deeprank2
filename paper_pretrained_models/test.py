@@ -1,8 +1,5 @@
 import glob
-import sys
 import time
-import datetime
-import numpy as np
 
 from deeprank_gnn.GraphGenMP import GraphHDF5
 from deeprank_gnn.NeuralNet import NeuralNet
@@ -14,8 +11,11 @@ pdb_path = '../tests/data/pdb/1ATN/'
 # path to the pssm files
 pssm_path = '../tests/data/pssm/1ATN/'
 
-GraphHDF5(pdb_path=pdb_path, pssm_path=pssm_path,
-          graph_type='residue', outfile='1ATN_residue.hdf5', nproc=4)
+GraphHDF5(
+    pdb_path=pdb_path,
+    pssm_path=pssm_path,
+    outfile='1ATN_residue.hdf5',
+    nproc=4)
 
 # Prediction section
 pretrained_model = 'fold6_treg_yfnat_b128_e20_lr0.001_4.pt'

@@ -69,7 +69,8 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
             assert entry_group["edge_index"].shape[0] > 0, "no edge indices"
 
             for feature_name in edge_feature_names:
-                assert entry_group["edge_data/{}".format(feature_name)][()].shape[0] == entry_group["edge_index"].shape[0], \
+                assert entry_group[
+                    "edge_data/{}".format(feature_name)][()].shape[0] == entry_group["edge_index"].shape[0], \
                     "not enough edge {} feature values".format(feature_name)
 
             count_edges_hdf5 = entry_group["edge_index"].shape[0]
@@ -80,10 +81,10 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
         # expecting twice as many edges, because torch is directional
         count_edges_torch = torch_data_entry.edge_index.shape[1]
-        assert count_edges_torch == 2 * count_edges_hdf5, "got {} edges in output data, hdf5 has {}".format(count_edges_torch, count_edges_hdf5)
+        assert count_edges_torch == 2 * count_edges_hdf5, f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
 
         count_edge_features_torch = torch_data_entry.edge_attr.shape[0]
-        assert count_edge_features_torch == count_edges_torch, "got {} edge feature sets, but {} edge indices".format(count_edge_features_torch, count_edges_torch)
+        assert count_edge_features_torch == count_edges_torch, f"got {count_edge_features_torch} edge feature sets, but {count_edges_torch} edge indices"
     finally:
         os.remove(tmp_path)
 
@@ -149,10 +150,17 @@ def test_variant_graph_101M():
 
 
 def test_variant_graph_1A0Z():
-    query = SingleResidueVariantAtomicQuery("tests/data/pdb/1A0Z/1A0Z.pdb", "A", 125, None, leucine, arginine,
-                                            {"A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm", "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
-                                             "C": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm", "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm"},
-                                            targets={"bin_class": 1})
+    query = SingleResidueVariantAtomicQuery(
+        "tests/data/pdb/1A0Z/1A0Z.pdb","A",
+        125,
+        None,
+        leucine,
+        arginine,
+        {"A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm",
+        "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
+        "C": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm",
+        "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm"},
+        targets={"bin_class": 1})
 
     g = query.build_graph()
 
@@ -168,9 +176,18 @@ def test_variant_graph_1A0Z():
 
 
 def test_variant_graph_9API():
-    query = SingleResidueVariantAtomicQuery("tests/data/pdb/9api/9api.pdb", "A", 310, None, lysine, glutamate,
-                                            {"A": "tests/data/pssm/9api/9api.A.pdb.pssm", "B": "tests/data/pssm/9api/9api.B.pdb.pssm"},
-                                            targets={"bin_class": 0}, external_distance_cutoff=5.0, internal_distance_cutoff=5.0)
+    query = SingleResidueVariantAtomicQuery(
+        "tests/data/pdb/9api/9api.pdb",
+        "A",
+        310,
+        None,
+        lysine,
+        glutamate,
+        {"A": "tests/data/pssm/9api/9api.A.pdb.pssm",
+        "B": "tests/data/pssm/9api/9api.B.pdb.pssm"},
+        targets={"bin_class": 0},
+        external_distance_cutoff=5.0,
+        internal_distance_cutoff=5.0)
 
     g = query.build_graph()
 

@@ -8,8 +8,11 @@ from torch_geometric.data import DataLoader
 from torch_geometric.nn import max_pool_x
 import matplotlib.pyplot as plt
 
-from DataSet import HDF5DataSet
-from community_pooling import *
+from ..deeprank_gnn.DataSet import HDF5DataSet
+from ..deeprank_gnn.community_pooling import (
+    community_detection,
+    community_pooling
+)
 
 from wgat_conv import WGATConv
 

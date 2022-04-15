@@ -59,10 +59,10 @@ class TestCreateGraph(unittest.TestCase):
             pdb_path=self.pdb_path,
             ref_path=self.ref,
             pssm_path=self.pssm_path,
-            graph_type="residue",
+            # graph_type="residue",
             outfile=self._make_output_file(),
             nproc=2,
-            tmpdir=self._make_work_directory(),
+            # tmpdir=self._make_work_directory(),
             biopython=False,
         )
 

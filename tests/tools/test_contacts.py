@@ -1,6 +1,5 @@
 import numpy
 from pdb2sql import pdb2sql
-
 from deeprank_gnn.tools.pdb import get_structure, get_atomic_contacts, get_residue_contacts
 
 
@@ -47,10 +46,12 @@ def test_atomic_contacts():
     assert not numpy.isnan(far_contact.vanderwaals_potential)
     assert far_contact.vanderwaals_potential < 0.0, far_contact.vanderwaals_potential
 
-    # MET 0 N - PHE 138 CG, intermediate distance, should have more negative vanderwaals energy than the war interactions
+    # MET 0 N - PHE 138 CG, intermediate distance,
+    # should have more negative vanderwaals energy than the war interactions
     intermediate_contact = _get_atomic_contact(structure, 0, "N", 138, "CG")
     assert not numpy.isnan(intermediate_contact.vanderwaals_potential)
-    assert intermediate_contact.vanderwaals_potential < far_contact.vanderwaals_potential, intermediate_contact.vanderwaals_potential
+    assert intermediate_contact.vanderwaals_potential < far_contact.vanderwaals_potential, \
+        intermediate_contact.vanderwaals_potential
 
     # ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy
     close_attractive_contact = _get_atomic_contact(structure, 139, "CZ", 136, "OE2")

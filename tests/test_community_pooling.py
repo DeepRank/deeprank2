@@ -32,7 +32,7 @@ class TestCommunity(unittest.TestCase):
         community_detection(self.data.edge_index, self.data.num_nodes, method="xxx")
 
     def test_detection_per_batch_mcl(self):
-        batch = Batch().from_data_list([self.data, self.data])
+        Batch().from_data_list([self.data, self.data])
         community_detection_per_batch(
             self.data.edge_index,
             torch.as_tensor([0, 1, 2, 3, 4, 5]),

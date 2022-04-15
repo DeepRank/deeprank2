@@ -1,22 +1,33 @@
 import logging
 from copy import deepcopy
-from typing import List, Optional
+from typing import Optional
 
 import h5py
 import numpy
 import networkx
 import community
 import markov_clustering
-from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.tools.embedding import manifold_embedding
-from deeprank_gnn.domain.feature import *
-from deeprank_gnn.domain.storage import *
+from deeprank_gnn.domain.feature import (
+    FEATURENAME_POSITION,
+    FEATURENAME_CHAIN,
+    FEATURENAME_EDGETYPE,
+    EDGETYPE_INTERNAL,
+    EDGETYPE_INTERFACE
+)
 
+from deeprank_gnn.domain.storage import (
+    HDF5KEY_GRAPH_NODENAMES,
+    HDF5KEY_GRAPH_NODEFEATURES,
+    HDF5KEY_GRAPH_EDGENAMES,
+    HDF5KEY_GRAPH_EDGEINDICES,
+    HDF5KEY_GRAPH_EDGEFEATURES
+)
 
 _log = logging.getLogger(__name__)
 
-
 def _get_node_key(value):
+    # pylint: disable=too-many-locals
     if isinstance(value, str):
         return value
 
@@ -66,7 +77,7 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph:
     for edge_feature_name in edge_feature_names:
         edge_features[edge_feature_name] = edge_features_group[edge_feature_name][()]
 
-    for edge_index, edge_name in enumerate(edge_names):
+    for edge_index, _ in enumerate(edge_names):
         node1_index, node2_index = edge_node_indices[edge_index]
         node1_name = node_names[node1_index]
         node2_name = node_names[node2_index]
@@ -94,7 +105,7 @@ def plotly_2d(graph: networkx.Graph, out: Optional[str] = None, offline: bool = 
 
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
-    # mccabe: disable=MC0001
+    # noqa: MC0001
     # pylint: disable=import-outside-toplevel
     if offline:
         import plotly.offline as py

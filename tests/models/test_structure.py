@@ -7,7 +7,7 @@ from deeprank_gnn.tools.pdb import get_structure
 
 
 def test_element():
-    value = AtomicElement.C.onehot
+    AtomicElement.C.onehot
 
 
 def test_pickle():
@@ -21,4 +21,4 @@ def test_pickle():
 
     s = pickle.dumps(structure)
 
-    loaded_structure = pickle.loads(s)
+    pickle.loads(s)

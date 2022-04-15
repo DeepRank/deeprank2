@@ -132,8 +132,9 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
     # check for the correct matrix shape
     charge_count = len(charges)
     if charge_count != distances.shape[0] or charge_count != distances.shape[1]:
+        # pylint: disable=consider-using-f-string
         raise ValueError("Cannot calculate distances between {} charges and {} distances"
-                         .format(charge_count, "x".join(distances.shape))) # pylint: disable=consider-using-f-string
+                         .format(charge_count, "x".join(distances.shape)))
 
     # calculate the potentials
     potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
@@ -153,11 +154,12 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
     # check for the correct data shapes
     atom_count = len(atoms)
     if atom_count != len(vanderwaals_parameters):
+        # pylint: disable=consider-using-f-string
         raise ValueError(
             f"The number of atoms ({atom_count}) does not match the number of vanderwaals parameters ({len(vanderwaals_parameters)})")
     if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
         raise ValueError("Cannot calculate distances between {} atoms and {} distances"
-                         .format(atom_count, "x".join(distances.shape))) # pylint: disable=consider-using-f-string
+                         .format(atom_count, "x".join(distances.shape)))
 
     # collect parameters
     sigmas1 = numpy.empty((atom_count, atom_count))
@@ -250,7 +252,8 @@ def get_residue_contacts(residues: List[Residue]) -> List[ResidueContact]:
 
     # iterate over all interatomic contacts
     for atomic_contact in atomic_contacts:
-        if atomic_contact.atom1.residue != atomic_contact.atom2.residue:  # don't pair a residue with itself
+        if atomic_contact.atom1.residue != atomic_contact.atom2.residue:
+            # don't pair a residue with itself
 
             residue1 = atomic_contact.atom1.residue
             residue2 = atomic_contact.atom2.residue
@@ -265,7 +268,8 @@ def get_residue_contacts(residues: List[Residue]) -> List[ResidueContact]:
                 residue_vanderwaals_potential_sums[residue_pair] = 0.0
 
             # aggregate
-            residue_minimum_distances[residue_pair] = min(residue_minimum_distances[residue_pair], atomic_contact.distance)
+            residue_minimum_distances[residue_pair] = min(
+                residue_minimum_distances[residue_pair], atomic_contact.distance)
             residue_electrostatic_potential_sums[residue_pair] += atomic_contact.electrostatic_potential
             residue_vanderwaals_potential_sums[residue_pair] += atomic_contact.vanderwaals_potential
 

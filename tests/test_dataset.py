@@ -7,7 +7,7 @@ class TestDataSet(unittest.TestCase):
         self.database = "tests/hdf5/1ATN_residue.hdf5"
 
     def test_dataset(self):
-        dataset = HDF5DataSet(
+        HDF5DataSet(
             database=self.database,
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
@@ -16,7 +16,7 @@ class TestDataSet(unittest.TestCase):
         )
 
     def test_dataset_filter(self):
-        dataset = HDF5DataSet(
+        HDF5DataSet(
             database=self.database,
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
