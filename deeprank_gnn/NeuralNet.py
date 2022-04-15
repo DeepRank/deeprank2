@@ -18,21 +18,21 @@ _log = logging.getLogger(__name__)
 
 
 class NeuralNet():
-    def __init__(
+    def __init__( # pylint: disable=too-many-locals
         self,
         database,
         Net,
-        node_feature=["type", "polarity", "bsa"],
-        edge_feature=["dist"],
+        node_feature=None,
+        edge_feature=None,
         target="irmsd",
         lr=0.01,
         batch_size=32,
-        percent=[1.0, 0.0],
+        percent=None,
         database_eval=None,
         index=None,
         class_weights=None,
         task=None,
-        classes=[0, 1],
+        classes=None,
         threshold=None,
         pretrained_model=None,
         shuffle=True,
@@ -111,6 +111,15 @@ class NeuralNet():
         # i.e. self.node_feature = node_feature
 
         # pylint: disable=too-many-arguments
+
+        if node_feature is None:
+            node_feature = ["type", "polarity", "bsa"]
+        if edge_feature is None:
+            edge_feature = ["dist"]
+        if percent is None:
+            percent = [1.0, 0.0]
+        if classes is None:
+            classes = [0, 1]
 
         if pretrained_model is None:
 
