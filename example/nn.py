@@ -7,13 +7,13 @@ database = "./1ATN_residue.hdf5"
 NN = NeuralNet(
     database,
     GINet,
-    # node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-    # edge_feature=["dist"],
-    # target="irmsd",
-    # index=None,
-    # task="reg",
-    # batch_size=64,
-    # percent=[0.8, 0.2],
+    node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+    edge_feature=["dist"],
+    target="irmsd",
+    index=None,
+    task="reg",
+    batch_size=64,
+    percent=[0.8, 0.2],
 )
 
 NN.train(nepoch=250, validate=False)
