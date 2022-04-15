@@ -27,7 +27,6 @@ from deeprank_gnn.domain.storage import (
 _log = logging.getLogger(__name__)
 
 def _get_node_key(value):
-    # pylint: disable=too-many-locals
     if isinstance(value, str):
         return value
 
@@ -46,6 +45,7 @@ def _get_node_key(value):
 
 
 def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph:
+    # pylint: disable=too-many-locals
     """ Read a hdf5 group into a networkx graph
     """
 
@@ -99,13 +99,12 @@ def _get_edge_type_name(value):
     return value
 
 def plotly_2d(graph: networkx.Graph, out: Optional[str] = None, offline: bool = False, iplot: bool = True,
-              disable_plot: bool = False, method: str = 'louvain'):
+              disable_plot: bool = False, method: str = 'louvain'): # noqa: MC0001
     """Plots the interface graph in 2D
     """
 
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
-    # noqa: MC0001
     # pylint: disable=import-outside-toplevel
     if offline:
         import plotly.offline as py

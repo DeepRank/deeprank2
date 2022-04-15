@@ -81,10 +81,12 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
         # expecting twice as many edges, because torch is directional
         count_edges_torch = torch_data_entry.edge_index.shape[1]
-        assert count_edges_torch == 2 * count_edges_hdf5, f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
+        assert count_edges_torch == 2 * count_edges_hdf5, \
+            f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
 
         count_edge_features_torch = torch_data_entry.edge_attr.shape[0]
-        assert count_edge_features_torch == count_edges_torch, f"got {count_edge_features_torch} edge feature sets, but {count_edges_torch} edge indices"
+        assert count_edge_features_torch == count_edges_torch, \
+            f"got {count_edge_features_torch} edge feature sets, but {count_edges_torch} edge indices"
     finally:
         os.remove(tmp_path)
 

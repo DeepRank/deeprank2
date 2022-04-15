@@ -10,7 +10,13 @@ from deeprank_gnn.foutnet import FoutNet
 from deeprank_gnn.sGAT import sGAT
 
 
-def _model_base_test(work_directory, hdf5_path, model, task='reg', target='irmsd', plot=False): # pylint: disable=too-many-arguments
+def _model_base_test(
+    work_directory,
+    hdf5_path,
+    model,
+    task='reg',
+    target='irmsd',
+    plot=False): # pylint: disable=too-many-arguments
 
     NN = NeuralNet(hdf5_path, model,
                    # node_feature=['type', 'polarity', 'bsa',

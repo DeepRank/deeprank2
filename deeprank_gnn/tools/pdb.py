@@ -154,10 +154,10 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
     # check for the correct data shapes
     atom_count = len(atoms)
     if atom_count != len(vanderwaals_parameters):
-        # pylint: disable=consider-using-f-string
         raise ValueError(
-            f"The number of atoms ({atom_count}) does not match the number of vanderwaals parameters ({len(vanderwaals_parameters)})")
+            f"The number of atoms ({atom_count}) does not match the number of vanderwaals parameters ({len(vanderwaals_parameters)})") # noqa: pycodestyle
     if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
+        # pylint: disable=consider-using-f-string
         raise ValueError("Cannot calculate distances between {} atoms and {} distances"
                          .format(atom_count, "x".join(distances.shape)))
 
@@ -276,6 +276,7 @@ def get_residue_contacts(residues: List[Residue]) -> List[ResidueContact]:
     # convert to residue contacts
     residue_contacts = []
     for residue_pair, _ in residue_minimum_distances.items():
+        # pylint: disable=unnecessary-dict-index-lookup
         residue_contacts.append(ResidueContact(residue_pair.item1, residue_pair.item2,
                                                residue_minimum_distances[residue_pair],
                                                residue_electrostatic_potential_sums[residue_pair],
@@ -338,7 +339,7 @@ def get_residue_contact_pairs(
 
     # Map to residue objects
     residue_pairs = set([])
-    for residue_key1 in contact_residues:
+    for residue_key1 in contact_residues: # pylint: disable=consider-using-dict-items
         residue_chain_id1, residue_number1, residue_name1 = residue_key1
 
         chain1 = structure.get_chain(residue_chain_id1)
