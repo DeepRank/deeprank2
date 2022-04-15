@@ -124,8 +124,8 @@ def add_features_for_residues(edges: List[Edge]):
     atoms = set([])
     for edge in edges:
         contact = edge.id
-        atoms |= contact.residue1.atoms
-        atoms |= contact.residue2.atoms
+        for atom in (contact.residue1.atoms + contact.residue2.atoms):
+            atoms.add(atom)
     atoms = list(atoms)
 
     # get the positions of those atoms (and map atoms back to their index for quick lookup)

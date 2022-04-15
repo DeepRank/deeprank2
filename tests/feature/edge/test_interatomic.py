@@ -2,7 +2,7 @@ from pdb2sql import pdb2sql
 import numpy
 
 from deeprank_gnn.models.structure import Chain, Atom
-from deeprank_gnn.models.contact import AtomicContact
+from deeprank_gnn.models.contact import AtomicContact, ResidueContact
 from deeprank_gnn.models.graph import Edge
 from deeprank_gnn.tools.pdb import get_structure
 from deeprank_gnn.feature.edge.atomic_contact import add_features
@@ -55,6 +55,12 @@ def test_add_features():
     assert edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS] < edge_far.features[FEATURENAME_EDGEVANDERWAALS], "{} >= {}".format(edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS],
                                                                                                                                        edge_far.features[FEATURENAME_EDGEVANDERWAALS])
 
+    # Check the distances
+    assert edge_close.features[FEATURENAME_EDGEDISTANCE] < edge_intermediate.features[FEATURENAME_EDGEDISTANCE], "{} >= {}".format(edge_close.features[FEATURENAME_EDGEDISTANCE],
+                                                                                                                                   edge_intermediate.features[FEATURENAME_EDGEDISTANCE])
+    assert edge_far.features[FEATURENAME_EDGEDISTANCE] > edge_intermediate.features[FEATURENAME_EDGEDISTANCE], "{} <= {}".format(edge_far.features[FEATURENAME_EDGEDISTANCE],
+                                                                                                                                 edge_intermediate.features[FEATURENAME_EDGEDISTANCE])
+
     # ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy
     contact = AtomicContact(_get_atom(structure.chains[0], 139, "CZ"),
                             _get_atom(structure.chains[0], 136, "OE2"))
@@ -80,3 +86,8 @@ def test_add_features():
     add_features(pdb_path, [opposing_edge])
     assert not numpy.isnan(opposing_edge.features[FEATURENAME_EDGECOULOMB])
     assert opposing_edge.features[FEATURENAME_EDGECOULOMB] > 0.0, opposing_edge.features[FEATURENAME_EDGECOULOMB]
+
+    # check that we can calculate residue contacts
+    contact = ResidueContact(structure.chains[0].residues[0], structure.chains[0].residues[1])
+    edge = Edge(contact)
+    add_features(pdb_path, [edge])
