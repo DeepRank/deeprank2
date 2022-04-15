@@ -22,23 +22,23 @@ class NeuralNet():
         self,
         database,
         Net,
-        # node_feature=["type", "polarity", "bsa"],
-        # edge_feature=["dist"],
-        # target="irmsd",
-        # lr=0.01,
-        # batch_size=32,
-        # percent=[1.0, 0.0],
+        node_feature=["type", "polarity", "bsa"],
+        edge_feature=["dist"],
+        target="irmsd",
+        lr=0.01,
+        batch_size=32,
+        percent=[1.0, 0.0],
         database_eval=None,
-        # index=None,
-        # class_weights=None,
-        # task=None,
-        # classes=[0, 1],
-        # threshold=None,
+        index=None,
+        class_weights=None,
+        task=None,
+        classes=[0, 1],
+        threshold=None,
         pretrained_model=None,
-        # shuffle=True,
+        shuffle=True,
         outdir="./",
-        # cluster_nodes="mcl",
-        # transform_sigmoid=False,
+        cluster_nodes="mcl",
+        transform_sigmoid=False,
     ):
         """Class from which the network is trained, evaluated and tested
 
@@ -113,9 +113,26 @@ class NeuralNet():
         # pylint: disable=too-many-arguments
 
         if pretrained_model is None:
-            for k, v in dict(locals()).items():
-                if k not in ["self", "database", "Net", "database_eval"]:
-                    self.__setattr__(k, v)
+
+            self.database = database
+            self.Net = Net
+            self.node_feature = node_feature
+            self.edge_feature = edge_feature
+            self.target = target
+            self.lr = lr
+            self.batch_size = batch_size
+            self.percent = percent
+            self.database_eval = database_eval
+            self.index = index
+            self.class_weights = class_weights
+            self.task = task
+            self.classes = classes
+            self.threshold = threshold
+            self.pretrained_model = pretrained_model
+            self.shuffle = shuffle
+            self.outdir = outdir
+            self.cluster_nodes = cluster_nodes
+            self.transform_sigmoid = transform_sigmoid
 
             if self.task is None:
                 if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
