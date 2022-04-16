@@ -4,8 +4,7 @@ import numpy
 from scipy.spatial import distance_matrix
 
 from deeprank_gnn.models.structure import Structure, Atom
-from deeprank_gnn.models.graph import Edge
-from deeprank_gnn.feature.edge import EdgeFeatureProvider
+from deeprank_gnn.models.graph import Graph, Edge
 from deeprank_gnn.models.contact import ResidueContact, AtomicContact
 from deeprank_gnn.domain.feature import FEATURENAME_EDGEDISTANCE, FEATURENAME_EDGEVANDERWAALS, FEATURENAME_EDGECOULOMB
 from deeprank_gnn.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0
@@ -164,13 +163,13 @@ def add_features_for_residues(edges: List[Edge]):
                                                           interatomic_electrostatic_potentials[atom1_index, atom2_index])
 
 
-def add_features(pdb_path: str, edges: List[Edge]) -> Dict[str, numpy.ndarray]:
+def add_features(pdb_path: str, graph: Graph) -> Dict[str, numpy.ndarray]:
 
-    if type(edges[0].id) == ResidueContact:
-        return add_features_for_residues(edges)
+    if type(graph.edges[0].id) == ResidueContact:
+        return add_features_for_residues(graph.edges)
 
-    elif type(edges[0].id) == AtomicContact:
-        return add_features_for_atoms(edges)
+    elif type(graph.edges[0].id) == AtomicContact:
+        return add_features_for_atoms(graph.edges)
     else:
         raise TypeError(type(edges[0].id))
 
