@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 import numpy
 from scipy.spatial import distance_matrix
@@ -163,13 +163,13 @@ def add_features_for_residues(edges: List[Edge]):
                                                           interatomic_electrostatic_potentials[atom1_index, atom2_index])
 
 
-def add_features(pdb_path: str, graph: Graph) -> Dict[str, numpy.ndarray]:
+def add_features(pdb_path: str, graph: Graph):
 
     if type(graph.edges[0].id) == ResidueContact:
-        return add_features_for_residues(graph.edges)
+        add_features_for_residues(graph.edges)
 
     elif type(graph.edges[0].id) == AtomicContact:
-        return add_features_for_atoms(graph.edges)
+        add_features_for_atoms(graph.edges)
     else:
         raise TypeError(type(edges[0].id))
 
