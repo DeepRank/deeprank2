@@ -6,6 +6,7 @@ from scipy.spatial import distance_matrix
 from deeprank_gnn.models.graph import Graph, Node, Edge
 from deeprank_gnn.models.structure import Atom, Residue
 from deeprank_gnn.models.contact import AtomicContact, ResidueContact
+from deeprank_gnn.domain.feature import FEATURENAME_POSITION
 
 
 def build_atomic_graph(atoms: List[Atom], graph_id: str, edge_distance_cutoff: float) -> Graph:
@@ -28,8 +29,13 @@ def build_atomic_graph(atoms: List[Atom], graph_id: str, edge_distance_cutoff: f
             atom2 = atoms[atom2_index]
             contact = AtomicContact(atom1, atom2)
 
-            graph.add_node(Node(atom1))
-            graph.add_node(Node(atom2))
+            node1 = Node(atom1)
+            node2 = Node(atom2)
+            node1.features[FEATURENAME_POSITION] = atom1.position
+            node2.features[FEATURENAME_POSITION] = atom2.position
+
+            graph.add_node(node1)
+            graph.add_node(node2)
             graph.add_edge(Edge(contact))
 
     return graph
@@ -67,8 +73,16 @@ def build_residue_graph(residues: List[Residue], graph_id: str, edge_distance_cu
 
             contact = ResidueContact(residue1, residue2)
 
-            graph.add_node(Node(residue1))
-            graph.add_node(Node(residue2))
+            node1 = Node(residue1)
+            node2 = Node(residue2)
+
+            node1.features[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue1.atoms], axis=0)
+            node2.features[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue2.atoms], axis=0)
+
+            # The same residue will be added  multiple times as a node,
+            # but the Graph class fixes this.
+            graph.add_node(node1)
+            graph.add_node(node2)
             graph.add_edge(Edge(contact))
 
     return graph
