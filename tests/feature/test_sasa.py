@@ -1,6 +1,8 @@
 import numpy
 from pdb2sql import pdb2sql
 
+from deeprank_gnn.domain.amino_acid import alanine
+from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.graph import Graph, Node
 from deeprank_gnn.models.structure import Chain, Residue
 from deeprank_gnn.feature.sasa import add_features
@@ -46,12 +48,13 @@ def test_add_features_to_residues():
         pdb._close()
 
     residue = _get_residue(structure.chains[0], 108)
+    variant = SingleResidueVariant(residue, alanine)
 
     residues = get_surrounding_residues(structure, residue, 10.0)
     assert len(residues) > 0
 
     graph = build_residue_graph(residues, "101M-108-res", 4.5)
-    add_features(pdb_path, graph)
+    add_features(pdb_path, graph, variant)
 
     # check for NaN
     assert not any([numpy.isnan(node.features[FEATURENAME_SASA])
@@ -77,6 +80,7 @@ def test_add_features_to_atoms():
         pdb._close()
 
     residue = _get_residue(structure.chains[0], 108)
+    variant = SingleResidueVariant(residue, alanine)
 
     residues = get_surrounding_residues(structure, residue, 10.0)
     atoms = set([])
@@ -87,7 +91,7 @@ def test_add_features_to_atoms():
     assert len(atoms) > 0
 
     graph = build_atomic_graph(atoms, "101M-108-atom", 4.5)
-    add_features(pdb_path, graph)
+    add_features(pdb_path, graph, variant)
 
     # check for NaN
     assert not any([numpy.isnan(node.features[FEATURENAME_SASA])

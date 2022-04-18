@@ -1,8 +1,9 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy
 import freesasa
 
+from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.structure import Residue, Atom
 from deeprank_gnn.models.graph import Node, Graph
 from deeprank_gnn.domain.feature import FEATURENAME_SASA
@@ -42,7 +43,7 @@ def add_features_for_atoms(structure: freesasa.Structure,
         node.features[FEATURENAME_SASA] = area
 
 
-def add_features(pdb_path: str, graph: Graph):
+def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
 
     structure = freesasa.Structure(pdb_path)
     result = freesasa.calc(structure)
@@ -53,4 +54,4 @@ def add_features(pdb_path: str, graph: Graph):
     elif type(graph.nodes[0].id) == Atom:
         return add_features_for_atoms(structure, result, graph.nodes)
     else:
-        raise TypeError(type(nodes[0].id))
+        raise TypeError("Unexpected node type: {}".format(type(nodes[0].id)))

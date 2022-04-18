@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 import numpy
 from scipy.spatial import distance_matrix
 
+from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.structure import Structure, Atom
 from deeprank_gnn.models.graph import Graph, Edge
 from deeprank_gnn.models.contact import ResidueContact, AtomicContact
@@ -163,7 +164,7 @@ def add_features_for_residues(edges: List[Edge]):
                                                           interatomic_electrostatic_potentials[atom1_index, atom2_index])
 
 
-def add_features(pdb_path: str, graph: Graph):
+def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
 
     if type(graph.edges[0].id) == ResidueContact:
         add_features_for_residues(graph.edges)
@@ -171,7 +172,7 @@ def add_features(pdb_path: str, graph: Graph):
     elif type(graph.edges[0].id) == AtomicContact:
         add_features_for_atoms(graph.edges)
     else:
-        raise TypeError(type(edges[0].id))
+        raise TypeError("Unexpected edge type: {}".format(type(edges[0].id)))
 
 
 
