@@ -27,6 +27,8 @@ SQUARED_VANDERWAALS_DISTANCE_ON = numpy.square(VANDERWAALS_DISTANCE_ON)
 EPSILON0 = 1.0
 COULOMB_CONSTANT = 332.0636
 
+MAX_COVALENT_DISTANCE = 3.0
+
 class AtomicForcefield:
     def __init__(self):
         top_path = os.path.join(_forcefield_directory_path, "protein-allhdg5-5_new.top")

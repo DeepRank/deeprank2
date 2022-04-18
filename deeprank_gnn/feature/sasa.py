@@ -43,7 +43,7 @@ def add_features_for_atoms(structure: freesasa.Structure,
         node.features[FEATURENAME_SASA] = area
 
 
-def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     structure = freesasa.Structure(pdb_path)
     result = freesasa.calc(structure)

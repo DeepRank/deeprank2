@@ -7,8 +7,9 @@ from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.structure import Structure, Atom
 from deeprank_gnn.models.graph import Graph, Edge
 from deeprank_gnn.models.contact import ResidueContact, AtomicContact
-from deeprank_gnn.domain.feature import FEATURENAME_EDGEDISTANCE, FEATURENAME_EDGEVANDERWAALS, FEATURENAME_EDGECOULOMB
-from deeprank_gnn.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0
+from deeprank_gnn.domain.feature import (FEATURENAME_EDGEDISTANCE, FEATURENAME_EDGEVANDERWAALS,
+                                         FEATURENAME_EDGECOULOMB, FEATURENAME_COVALENT)
+from deeprank_gnn.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0, MAX_COVALENT_DISTANCE
 from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
 
 
@@ -108,6 +109,9 @@ def add_features_for_atoms(edges: List[Edge]):
     interatomic_electrostatic_potentials = get_coulomb_potentials(interatomic_distances, atom_charges)
     interatomic_vanderwaals_potentials = get_lennard_jones_potentials(interatomic_distances, atoms, atom_vanderwaals_parameters)
 
+    # determine which atoms are close enough to form a covalent bond
+    covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
+
     # set the features
     for edge_index, edge in enumerate(edges):
         contact = edge.id
@@ -117,6 +121,11 @@ def add_features_for_atoms(edges: List[Edge]):
         edge.features[FEATURENAME_EDGEDISTANCE] = interatomic_distances[atom1_index, atom2_index]
         edge.features[FEATURENAME_EDGEVANDERWAALS] = interatomic_vanderwaals_potentials[atom1_index, atom2_index]
         edge.features[FEATURENAME_EDGECOULOMB] = interatomic_electrostatic_potentials[atom1_index, atom2_index]
+
+        if covalent_neighbours[atom1_index, atom2_index]:
+            edge.features[FEATURENAME_COVALENT] = 1.0
+        else:
+            edge.features[FEATURENAME_COVALENT] = 0.0
 
 
 def add_features_for_residues(edges: List[Edge]):
@@ -146,6 +155,9 @@ def add_features_for_residues(edges: List[Edge]):
     interatomic_electrostatic_potentials = get_coulomb_potentials(interatomic_distances, atom_charges)
     interatomic_vanderwaals_potentials = get_lennard_jones_potentials(interatomic_distances, atoms, atom_vanderwaals_parameters)
 
+    # determine which atoms are close enough to form a covalent bond
+    covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
+
     # set the features
     for edge_index, edge in enumerate(edges):
         contact = edge.id
@@ -163,8 +175,13 @@ def add_features_for_residues(edges: List[Edge]):
                 edge.features[FEATURENAME_EDGECOULOMB] = (edge.features.get(FEATURENAME_EDGECOULOMB, 0.0) +
                                                           interatomic_electrostatic_potentials[atom1_index, atom2_index])
 
+                if covalent_neighbours[atom1_index, atom2_index]:
+                    edge.features[FEATURENAME_COVALENT] = 1.0
 
-def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
+                elif FEATURENAME_COVALENT not in edge.features:
+                    edge.features[FEATURENAME_COVALENT] = 0.0
+
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     if type(graph.edges[0].id) == ResidueContact:
         add_features_for_residues(graph.edges)

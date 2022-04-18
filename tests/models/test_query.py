@@ -9,6 +9,7 @@ from deeprank_gnn.domain.amino_acid import *
 from deeprank_gnn.models.query import *
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.domain.feature import *
+from deeprank_gnn.feature import sasa, atomic_contact, bsa, pssm, amino_acid, biopython
 from deeprank_gnn.DataSet import HDF5DataSet
 
 
@@ -63,7 +64,7 @@ def test_interface_graph_residue():
                                                 {"A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
                                                  "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
 
-    g = query.build_graph()
+    g = query.build_graph([bsa, amino_acid, pssm, atomic_contact])
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
@@ -78,7 +79,7 @@ def test_interface_graph_atomic():
                                                {"A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
                                                 "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
 
-    g = query.build_graph()
+    g = query.build_graph([bsa, amino_acid, pssm, atomic_contact])
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
@@ -93,7 +94,7 @@ def test_variant_graph_101M():
                                             {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
                                             targets={"bin_class": 0}, radius=20.0, external_distance_cutoff=20.0)
 
-    g = query.build_graph()
+    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
@@ -112,7 +113,7 @@ def test_variant_graph_1A0Z():
                                              "C": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm", "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm"},
                                             targets={"bin_class": 1})
 
-    g = query.build_graph()
+    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
@@ -128,9 +129,9 @@ def test_variant_graph_1A0Z():
 def test_variant_graph_9API():
     query = SingleResidueVariantAtomicQuery("tests/data/pdb/9api/9api.pdb", "A", 310, None, lysine, glutamate,
                                             {"A": "tests/data/pssm/9api/9api.A.pdb.pssm", "B": "tests/data/pssm/9api/9api.B.pdb.pssm"},
-                                            targets={"bin_class": 0}, external_distance_cutoff=5.0, internal_distance_cutoff=5.0)
+                                            targets={"bin_class": 0}, external_distance_cutoff=5.0)
 
-    g = query.build_graph()
+    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,
@@ -148,7 +149,7 @@ def test_variant_residue_graph_101M():
                                              {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
                                              targets={"bin_class": 0})
 
-    g = query.build_graph()
+    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
 
     _check_graph_makes_sense(g,
                              [FEATURENAME_POSITION,

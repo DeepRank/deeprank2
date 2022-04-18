@@ -28,6 +28,14 @@ def is_xray(pdb_file):
     return False
 
 
+def add_hydrogens(input_pdb_path, output_pdb_path):
+    "this requires reduce: https://github.com/rlabduke/reduce"
+
+    with open(output_pdb_path, 'wt') as f:
+        p = subprocess.run(["reduce", input_pdb_path], stdout=subprocess.PIPE)
+        for line in p.stdout.decode().split('\n'):
+            f.write(line.replace("   new", "") + "\n")
+
 
 def _add_atom_to_residue(atom, residue):
 
