@@ -24,7 +24,7 @@ def add_features(pdb_path: str, graph: Graph,
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError("Unexpected node type: {}".format(type(node.id))) 
+            raise TypeError("Unexpected node type: {}".format(type(node.id)))
 
         pssm_row = residue.get_pssm()
 
