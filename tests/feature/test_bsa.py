@@ -1,8 +1,6 @@
 import numpy
 from pdb2sql import pdb2sql
 
-from deeprank_gnn.domain.amino_acid import alanine
-from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.graph import Graph, Node
 from deeprank_gnn.models.structure import Chain, Residue
 from deeprank_gnn.feature.bsa import add_features
