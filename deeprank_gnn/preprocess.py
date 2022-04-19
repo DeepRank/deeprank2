@@ -105,7 +105,7 @@ class PreProcessor:
         """
         Returns whether queue is empty.
 
-        Note: This implementation is not reliable, especially not on Mac OSX .qsize() seems to be more reliable than
+        Note: This implementation is not reliable, especially not on Mac OSX. .qsize() seems to be more reliable than
         .empty(), however qsize relies on sem_getvalue() which is not implemented on Mac OSX.
         """
         try:
