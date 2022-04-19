@@ -356,14 +356,6 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         chain1 = model.get_chain(self._chain_id1)
         chain2 = model.get_chain(self._chain_id2)
 
-        # read the pssm
-        if self._pssm_paths is not None:
-            for chain in (chain1, chain2):
-                pssm_path = self._pssm_paths[chain.id]
-
-                with open(pssm_path, 'rt') as f:
-                    chain.pssm = parse_pssm(f, chain)
-
         # build the graph
         graph = build_atomic_graph(atoms_selected, self.get_query_id(), self._interface_distance_cutoff)
 
@@ -405,7 +397,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._pssm_paths = pssm_paths
 
         self._interface_distance_cutoff = interface_distance_cutoff
-        self._internal_distance_cutoff = internal_distance_cutoff
 
         self._use_biopython = use_biopython
 
@@ -441,26 +432,20 @@ class ProteinProteinInterfaceResidueQuery(Query):
         residues_selected = list(residues_selected)
 
         # find the two chains
-        model = contacts[0].residue1.chain.model
+        model = residues_selected[0].chain.model
         chain1 = model.get_chain(self._chain_id1)
         chain2 = model.get_chain(self._chain_id2)
 
-        # read the pssm
-        if self._pssm_paths is not None:
-            for chain in (chain1, chain2):
-                pssm_path = self._pssm_paths[chain.id]
-
-                with open(pssm_path, 'rt') as f:
-                    chain.pssm = parse_pssm(f, chain)
-
         # build the graph
-        graph = build_residue_graph(residues, self.get_query_id(), self._interface_distance_cutoff)
+        graph = build_residue_graph(residues_selected, self.get_query_id(), self._interface_distance_cutoff)
 
         # add data to the graph
         self._set_graph_targets(graph)
 
         for feature_module in feature_modules:
             feature_module.add_features(self._pdb_path, graph)
+
+        return graph
 
 
 class QueryDataset:

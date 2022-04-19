@@ -1,4 +1,5 @@
 from typing import List, Optional
+import logging
 
 import numpy
 from scipy.spatial import distance_matrix
@@ -11,6 +12,10 @@ from deeprank_gnn.domain.feature import (FEATURENAME_EDGEDISTANCE, FEATURENAME_E
                                          FEATURENAME_EDGECOULOMB, FEATURENAME_COVALENT)
 from deeprank_gnn.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0, MAX_COVALENT_DISTANCE
 from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
+from deeprank_gnn.models.error import UnknownAtomError
+
+
+_log = logging.getLogger(__name__)
 
 
 def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> numpy.ndarray:
@@ -22,8 +27,8 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
     # check for the correct matrix shape
     charge_count = len(charges)
     if charge_count != distances.shape[0] or charge_count != distances.shape[1]:
-        raise ValueError("Cannot calculate distances between {} charges and {} distances"
-                         .format(charge_count, "x".join(distances.shape)))
+        raise ValueError("Cannot calculate potentials between {} charges and {} distances"
+                         .format(charge_count, "x".join([str(d) for d in distances.shape])))
 
     # calculate the potentials
     potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
@@ -45,8 +50,8 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
         raise ValueError("The number of atoms ({}) does not match the number of vanderwaals parameters ({})"
                          .format(atom_count, len(vanderwaals_parameters)))
     if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
-        raise ValueError("Cannot calculate distances between {} atoms and {} distances"
-                         .format(atom_count, "x".join(distances.shape)))
+        raise ValueError("Cannot calculate potentials between {} atoms and {} distances"
+                         .format(atom_count, "x".join([str(d) for d in distances.shape])))
 
     # collect parameters
     sigmas1 = numpy.empty((atom_count, atom_count))
@@ -91,19 +96,32 @@ def add_features_for_atoms(edges: List[Edge]):
         atoms.add(contact.atom2)
     atoms = list(atoms)
 
-    # get the positions of those atoms (and map atoms back to their index for quick lookup)
+    # get all atomic parameters
     atom_indices = {}
-    positions = numpy.empty((len(atoms), 3))
+    positions = []
+    atom_charges = []
+    atom_vanderwaals_parameters = []
     for atom_index, atom in enumerate(atoms):
-        positions[atom_index] = atom.position
+        try:
+            charge = atomic_forcefield.get_charge(atom)
+            vanderwaals = atomic_forcefield.get_vanderwaals_parameters(atom)
+
+            position = atom.position
+
+        except UnknownAtomError:
+            _log.warning(f"Ignoring atom {atom}, because it's unknown to the forcefield")
+
+            # set parameters to zero, so that the potential becomes zero
+            charge = 0.0
+            vanderwaals = VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
+
+        atom_charges.append(charge)
+        atom_vanderwaals_parameters.append(vanderwaals)
+        positions.append(position)
         atom_indices[atom] = atom_index
 
     # calculate the distance matrix for those atoms
     interatomic_distances = distance_matrix(positions, positions, p=2)
-
-    # get forcefield parameters
-    atom_charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
-    atom_vanderwaals_parameters = [atomic_forcefield.get_vanderwaals_parameters(atom) for atom in atoms]
 
     # calculate potentials
     interatomic_electrostatic_potentials = get_coulomb_potentials(interatomic_distances, atom_charges)
@@ -137,19 +155,32 @@ def add_features_for_residues(edges: List[Edge]):
             atoms.add(atom)
     atoms = list(atoms)
 
-    # get the positions of those atoms (and map atoms back to their index for quick lookup)
+    # get all atomic parameters
     atom_indices = {}
-    positions = numpy.empty((len(atoms), 3))
+    positions = []
+    atom_charges = []
+    atom_vanderwaals_parameters = []
     for atom_index, atom in enumerate(atoms):
-        positions[atom_index] = atom.position
+        try:
+            charge = atomic_forcefield.get_charge(atom)
+            vanderwaals = atomic_forcefield.get_vanderwaals_parameters(atom)
+
+            position = atom.position
+
+        except UnknownAtomError:
+            _log.warning(f"Ignoring atom {atom}, because it's unknown to the forcefield")
+
+            # set parameters to zero, so that the potential becomes zero
+            charge = 0.0
+            vanderwaals = VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
+
+        atom_charges.append(charge)
+        atom_vanderwaals_parameters.append(vanderwaals)
+        positions.append(position)
         atom_indices[atom] = atom_index
 
     # calculate the distance matrix for those atoms
     interatomic_distances = distance_matrix(positions, positions, p=2)
-
-    # get forcefield parameters
-    atom_charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
-    atom_vanderwaals_parameters = [atomic_forcefield.get_vanderwaals_parameters(atom) for atom in atoms]
 
     # calculate potentials
     interatomic_electrostatic_potentials = get_coulomb_potentials(interatomic_distances, atom_charges)
@@ -163,6 +194,7 @@ def add_features_for_residues(edges: List[Edge]):
         contact = edge.id
         for atom1 in contact.residue1.atoms:
             for atom2 in contact.residue2.atoms:
+
                 atom1_index = atom_indices[atom1]
                 atom2_index = atom_indices[atom2]
 
@@ -180,6 +212,7 @@ def add_features_for_residues(edges: List[Edge]):
 
                 elif FEATURENAME_COVALENT not in edge.features:
                     edge.features[FEATURENAME_COVALENT] = 0.0
+
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
