@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Dict, List, Iterator, Optional
+import tempfile
 
 import freesasa
 import numpy
@@ -12,7 +13,7 @@ from deeprank_gnn.domain.feature import *
 from deeprank_gnn.models.graph import Graph, Edge, Node
 from deeprank_gnn.models.structure import Residue, Atom
 from deeprank_gnn.tools.pdb import (get_residue_contact_pairs, get_residue_distance, get_surrounding_residues,
-                                    get_structure, get_atomic_contacts, get_residue_contacts)
+                                    get_structure, get_atomic_contacts, get_residue_contacts, add_hydrogens)
 from deeprank_gnn.tools.pssm import parse_pssm
 from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
 from deeprank_gnn.models.variant import SingleResidueVariant
@@ -46,6 +47,38 @@ class Query:
 
         for target_name, target_data in self._targets.items():
             graph.targets[target_name] = target_data
+
+    def _load_structure(self, pdb_path: str, pssm_paths: Optional[Dict[str, str]] = None):
+        "A helper function, to build the structure from pdb and pssm files."
+
+        # make a copy of the pdb, with hydrogens
+        pdb_name = os.path.basename(pdb_path)
+        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(prefix="hydrogenated-", suffix=pdb_name)
+        os.close(hydrogen_pdb_file)
+
+        add_hydrogens(pdb_path, hydrogen_pdb_path)
+
+        # read the pdb copy
+        try:
+            pdb = pdb2sql.pdb2sql(hydrogen_pdb_path)
+        finally:
+            os.remove(hydrogen_pdb_path)
+
+        try:
+            structure = get_structure(pdb, self.model_id)
+        finally:
+            pdb._close()
+
+        # read the pssm
+        if pssm_paths is not None:
+            for chain in structure.chains:
+                if chain.id in pssm_paths:
+                    pssm_path = pssm_paths[chain.id]
+
+                    with open(pssm_path, 'rt') as f:
+                        chain.pssm = parse_pssm(f, chain)
+
+        return structure
 
     @property
     def model_id(self) -> str:
@@ -118,21 +151,7 @@ class SingleResidueVariantResidueQuery(Query):
     def build_graph(self, feature_modules: List) -> Graph:
 
         # load pdb structure
-        pdb = pdb2sql.pdb2sql(self._pdb_path)
-
-        try:
-            structure = get_structure(pdb, self.model_id)
-        finally:
-            pdb._close()
-
-        # read the pssm
-        if self._pssm_paths is not None:
-            for chain in structure.chains:
-                if chain.id in self._pssm_paths:
-                    pssm_path = self._pssm_paths[chain.id]
-
-                    with open(pssm_path, 'rt') as f:
-                        chain.pssm = parse_pssm(f, chain)
+        structure = self._load_structure(self._pdb_path, self._pssm_paths)
 
         # find the variant residue
         variant_residue = None
@@ -233,22 +252,8 @@ class SingleResidueVariantAtomicQuery(Query):
 
     def build_graph(self, feature_modules: List) -> Graph:
 
-        # load pdb strucure
-        pdb = pdb2sql.pdb2sql(self._pdb_path)
-
-        try:
-            structure = get_structure(pdb, self.model_id)
-        finally:
-            pdb._close()
-
-        # read the pssm
-        if self._pssm_paths is not None:
-            for chain in structure.chains:
-                if chain.id in self._pssm_paths:
-                    pssm_path = self._pssm_paths[chain.id]
-
-                    with open(pssm_path, 'rt') as f:
-                        chain.pssm = parse_pssm(f, chain)
+        # load pdb structure
+        structure = self._load_structure(self._pdb_path, self._pssm_paths)
 
         # find the variant residue
         variant_residue = None
@@ -329,8 +334,11 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             Returns(deeprank graph object): the resulting graph
         """
 
-        # get residues from the pdb
-        interface_pairs = get_residue_contact_pairs(self._pdb_path, self.model_id,
+        # load pdb structure
+        structure = self._load_structure(self._pdb_path, self._pssm_paths)
+
+        # get the contact residues
+        interface_pairs = get_residue_contact_pairs(self._pdb_path, structure,
                                                     self._chain_id1, self._chain_id2,
                                                     self._interface_distance_cutoff)
         if len(interface_pairs) == 0:
@@ -413,14 +421,16 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
     def build_graph(self, feature_modules: List) -> Graph:
         """ Builds the residue graph.
-
-            Returns(deeprank graph object): the resulting graph
         """
 
-        # select residues from the pdb
-        interface_pairs = get_residue_contact_pairs(self._pdb_path, self.model_id,
+        # load pdb structure
+        structure = self._load_structure(self._pdb_path, self._pssm_paths)
+
+        # get the contact residues
+        interface_pairs = get_residue_contact_pairs(self._pdb_path, structure,
                                                     self._chain_id1, self._chain_id2,
                                                     self._interface_distance_cutoff)
+
         if len(interface_pairs) == 0:
             raise ValueError("no interface residues found")
 

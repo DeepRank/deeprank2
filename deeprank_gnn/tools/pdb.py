@@ -1,6 +1,7 @@
 from time import time
 import logging
 from typing import List
+import subprocess
 
 from scipy.spatial import distance_matrix
 import numpy
@@ -34,7 +35,7 @@ def add_hydrogens(input_pdb_path, output_pdb_path):
     with open(output_pdb_path, 'wt') as f:
         p = subprocess.run(["reduce", input_pdb_path], stdout=subprocess.PIPE)
         for line in p.stdout.decode().split('\n'):
-            f.write(line.replace("   new", "") + "\n")
+            f.write(line.replace("   new", "").replace("   std", "") + "\n")
 
 
 def _add_atom_to_residue(atom, residue):
@@ -219,25 +220,18 @@ def get_residue_distance(residue1, residue2):
     return numpy.min(distances)
 
 
-def get_residue_contact_pairs(pdb_path, model_id, chain_id1, chain_id2, distance_cutoff):
+def get_residue_contact_pairs(pdb_path: str, structure: Structure, chain_id1: str, chain_id2: str, distance_cutoff: float) -> List[Pair]:
     """ Get the residues that contact each other at a protein-protein interface.
 
         Args:
-            pdb_path(str): path to the pdb file
-            model_id(str): unique identifier for the structure
-            chain_id1(str): first protein chain identifier
-            chain_id2(str): second protein chain identifier
-            distance_cutoff(float): max distance between two interacting residues
+            pdb_path: the path of the pdb file, that the structure was built from
+            structure: from which to take the residues
+            chain_id1: first protein chain identifier
+            chain_id2: second protein chain identifier
+            distance_cutoff: max distance between two interacting residues
 
-        Returns: (list of deeprank residue pairs): the contacting residues
+        Returns: the pairs of contacting residues
     """
-
-    # load the structure
-    pdb = pdb2sql(pdb_path)
-    try:
-        structure = get_structure(pdb, model_id)
-    finally:
-        pdb._close()
 
     # Find out which residues are pairs
     interface = get_interface(pdb_path)
