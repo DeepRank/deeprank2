@@ -98,8 +98,8 @@ class BSA():
             )["res"]
 
             # define the selection string and the bsa for the isolated
-            select_str = ('res, (resi %d) and (chain %s)' %
-                          (r[1], r[0]),) # pylint: disable=consider-using-f-string
+            select_str = ('res, (resi %d) and (chain %s)' % # pylint: disable=consider-using-f-string
+                          (r[1], r[0]),)
             asa_unbound = freesasa.selectArea(
                 select_str, self.chains[r[0]], self.result_chains[r[0]]
             )["res"]
