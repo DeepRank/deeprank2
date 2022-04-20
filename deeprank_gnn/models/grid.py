@@ -7,7 +7,7 @@ from typing import Dict
 import numpy
 import h5py
 import itertools
-import bspline
+# import bspline
 
 from deeprank_gnn.domain.storage import (
     HDF5KEY_GRID_POINTS,
@@ -28,7 +28,7 @@ class MapMethod(Enum):
 
     GAUSSIAN = 1
     FAST_GAUSSIAN = 2
-    BSP_LINE = 3
+    # BSP_LINE = 3
     NEAREST_NEIGHBOURS = 4
 
 
@@ -161,16 +161,16 @@ class Grid:
 
         return data
 
-    def _get_mapped_feature_bsp_line(self, position: numpy.ndarray, value: float) -> numpy.ndarray:
+    # def _get_mapped_feature_bsp_line(self, position: numpy.ndarray, value: float) -> numpy.ndarray:
 
-        order = 4
+    #     order = 4
 
-        fx, fy, fz = position
-        bsp_data = (bspline((self.xgrid - fx) / self.resolution, order) *
-                    bspline((self.ygrid - fy) / self.resolution, order) *
-                    bspline((self.zgrid - fz) / self.resolution, order))
+    #     fx, fy, fz = position
+    #     bsp_data = (bspline((self.xgrid - fx) / self.resolution, order) *
+    #                 bspline((self.ygrid - fy) / self.resolution, order) *
+    #                 bspline((self.zgrid - fz) / self.resolution, order))
 
-        return value * bsp_data
+    #     return value * bsp_data
 
     def _get_mapped_feature_nearest_neighbour(self, position: numpy.ndarray, value: float) -> numpy.ndarray:
 
@@ -220,8 +220,8 @@ class Grid:
             elif method == MapMethod.FAST_GAUSSIAN:
                 grid_data = self._get_mapped_feature_fast_gaussian(position, value)
 
-            elif method == MapMethod.BSP_LINE:
-                grid_data = self._get_mapped_feature_bsp_line(position, value)
+            # elif method == MapMethod.BSP_LINE:
+            #     grid_data = self._get_mapped_feature_bsp_line(position, value)
 
             elif method == MapMethod.NEAREST_NEIGHBOUR:
                 grid_data = self._get_mapped_feature_nearest_neighbour(position, value)

@@ -61,7 +61,7 @@ class BSA():
             self.complex = freesasa.Structure()
             atomdata = self.sql.get("name,resName,resSeq,chainID,x,y,z")
             for atomName, residueName, residueNumber, chainLabel, x, y, z in atomdata:
-                atomName = f"{atomName[0]:>2}"
+                atomName = "{:>2}".format(atomName[0]) # pylint: disable=consider-using-f-string
                 self.complex.addAtom(
                     atomName, residueName, residueNumber, chainLabel, x, y, z
                 )
@@ -98,7 +98,8 @@ class BSA():
             )["res"]
 
             # define the selection string and the bsa for the isolated
-            select_str = (f"res, resi {r[1]}")
+            select_str = ('res, (resi %d) and (chain %s)' %
+                          (r[1], r[0]),) # pylint: disable=consider-using-f-string
             asa_unbound = freesasa.selectArea(
                 select_str, self.chains[r[0]], self.result_chains[r[0]]
             )["res"]
