@@ -8,12 +8,16 @@ from tqdm import tqdm
 import time
 import multiprocessing as mp
 from functools import partial
-import pickle
 
 from .preprocess import PreProcessor
 from .models.graph import Graph
 from .models.query import ProteinProteinInterfaceResidueQuery
 from .tools.score import get_all_scores
+import deeprank_gnn.feature.amino_acid
+import deeprank_gnn.feature.atomic_contact
+import deeprank_gnn.feature.biopython
+import deeprank_gnn.feature.bsa
+import deeprank_gnn.feature.pssm
 
 
 _log = logging.getLogger(__name__)
@@ -45,6 +49,16 @@ class GraphHDF5(object):
             >>> GraphHDF5(pdb_path=pdb_path, ref_path=ref, pssm_path=pssm_path,
                           graph_type='residue', outfile='1AK4_residue.hdf5')
         """
+
+        self._feature_modules = [deeprank_gnn.feature.amino_acid,
+                                 deeprank_gnn.feature.atomic_contact,
+                                 deeprank_gnn.feature.bsa]
+        if pssm_path is not None:
+            self._feature_modules.append(deeprank_gnn.feature.pssm)
+        if biopython:
+            self._feature_modules.append(deeprank_gnn.feature.biopython)
+
+
         # get the list of PDB names
         pdbs = list(filter(lambda x: x.endswith(
             '.pdb'), os.listdir(pdb_path)))
@@ -78,9 +92,9 @@ class GraphHDF5(object):
         # store the graphs the HDF5 file
         if nproc == 1:
             graphs = self.get_all_graphs(
-                pdbs, pssm_paths, ref, outfile, use_tqdm, biopython)
+                pdbs, pssm_paths, ref, outfile, use_tqdm)
         else:
-            self.preprocess_async(nproc, outfile, pdbs, ref, pssm_paths, biopython)
+            self.preprocess_async(nproc, outfile, pdbs, ref, pssm_paths, self._feature_modules)
 
         # clean up
         rmfiles = glob.glob(
@@ -88,7 +102,7 @@ class GraphHDF5(object):
         for f in rmfiles:
             os.remove(f)
 
-    def get_all_graphs(self, pdbs, pssm_paths, ref, outfile, use_tqdm=True, biopython=False):
+    def get_all_graphs(self, pdbs, pssm_paths, ref, outfile, use_tqdm=True):
 
         graphs = []
         if use_tqdm:
@@ -100,7 +114,7 @@ class GraphHDF5(object):
         for pdb_path in lst:
             try:
                 graphs.append(self._get_one_graph(
-                    pdb_path, pssm_paths, ref, biopython))
+                    pdb_path, pssm_paths, ref, self._feature_modules))
             except Exception as e:
                 print('Issue encountered while computing graph ', pdb_path)
                 traceback.print_exc()
@@ -112,10 +126,10 @@ class GraphHDF5(object):
                 _log.exception(f"issue encountered while storing graph {g.id}")
 
     @staticmethod
-    def preprocess_async(nproc, outfile, pdb_paths, ref_path, pssm_paths, biopython):
+    def preprocess_async(nproc, outfile, pdb_paths, ref_path, pssm_paths, feature_modules):
 
         prefix = os.path.splitext(outfile)[0] + "-"
-        preprocessor = PreProcessor(prefix, nproc)
+        preprocessor = PreProcessor(feature_modules, prefix, nproc)
         preprocessor.start()
         for pdb_path in pdb_paths:
             targets = {}
@@ -123,7 +137,7 @@ class GraphHDF5(object):
                 targets = get_all_scores(pdb_path, ref_path)
 
             q = ProteinProteinInterfaceResidueQuery(pdb_path, "A", "B", pssm_paths=pssm_paths,
-                                                    targets=targets, use_biopython=biopython)
+                                                    targets=targets)
             preprocessor.add_query(q)
         preprocessor.wait()
 
@@ -160,7 +174,7 @@ class GraphHDF5(object):
             raise TypeError(type(input_[key]))
 
     @staticmethod
-    def _get_one_graph(pdb_path, pssm_paths, ref, biopython):
+    def _get_one_graph(pdb_path, pssm_paths, ref, feature_modules):
 
         targets = {}
         if ref is not None:
@@ -169,9 +183,9 @@ class GraphHDF5(object):
         # get the graph
 
         q = ProteinProteinInterfaceResidueQuery(pdb_path, "A", "B", pssm_paths=pssm_paths,
-                                                targets=targets, use_biopython=biopython)
+                                                targets=targets)
 
-        g = q.build_graph()
+        g = q.build_graph(feature_modules)
 
         return g
 

@@ -12,8 +12,14 @@ from deeprank_gnn.domain.feature import FEATURENAME_HALFSPHEREEXPOSURE, FEATUREN
 def test_add_features():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
 
+    pdb = pdb2sql(pdb_path)
+    try:
+        structure = get_structure(pdb, "1ATN_1w")
+    finally:
+        pdb._close()
+
     residues = set([])
-    for residue1, residue2 in get_residue_contact_pairs(pdb_path, "1ATN_1w", "A", "B", 8.5):
+    for residue1, residue2 in get_residue_contact_pairs(pdb_path, structure, "A", "B", 8.5):
         residues.add(residue1)
         residues.add(residue2)
 

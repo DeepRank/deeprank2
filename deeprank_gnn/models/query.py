@@ -17,6 +17,13 @@ from deeprank_gnn.tools.pdb import (get_residue_contact_pairs, get_residue_dista
 from deeprank_gnn.tools.pssm import parse_pssm
 from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
 from deeprank_gnn.models.variant import SingleResidueVariant
+import deeprank_gnn.feature.amino_acid
+import deeprank_gnn.feature.atomic_contact
+import deeprank_gnn.feature.biopython
+import deeprank_gnn.feature.bsa
+import deeprank_gnn.feature.pssm
+import deeprank_gnn.feature.sasa
+
 
 _log = logging.getLogger(__name__)
 
@@ -28,11 +35,13 @@ class Query:
         objects of this class should be created before any model is loaded
     """
 
-    def __init__(self, model_id: str, targets: Dict[str, float] = None):
+    def __init__(self, model_id: str, targets: Optional[Dict[str, float]] = None):
+
         """
             Args:
-                model_id(str): the id of the model to load, usually a pdb accession code
-                targets(dict, optional): target values associated with this query
+                model_id: the id of the model to load, usually a pdb accession code
+                targets: target values associated with this query
+                pssm_paths: the paths of the pssm files, per protein(chain) id
         """
 
         self._model_id = model_id
@@ -149,6 +158,10 @@ class SingleResidueVariantResidueQuery(Query):
         return "residue-graph-{}:{}:{}:{}->{}".format(self.model_id, self._chain_id, self.residue_id, self._wildtype_amino_acid.name, self._variant_amino_acid.name)
 
     def build_graph(self, feature_modules: List) -> Graph:
+        """ Builds the graph from the pdb structure.
+            Args:
+                feature_modules (list of modules): each must implement the add_features function.
+        """
 
         # load pdb structure
         structure = self._load_structure(self._pdb_path, self._pssm_paths)
@@ -251,6 +264,10 @@ class SingleResidueVariantAtomicQuery(Query):
         return str(atom)
 
     def build_graph(self, feature_modules: List) -> Graph:
+        """ Builds the graph from the pdb structure.
+            Args:
+                feature_modules (list of modules): each must implement the add_features function.
+        """
 
         # load pdb structure
         structure = self._load_structure(self._pdb_path, self._pssm_paths)
@@ -272,10 +289,12 @@ class SingleResidueVariantAtomicQuery(Query):
         # get the residues and atoms involved
         residues = get_surrounding_residues(structure, variant_residue, self._radius)
         residues.add(variant_residue)
-        atoms = []
+        atoms = set([])
         for residue in residues:
             if residue.amino_acid is not None:
-                atoms.extend(residue.atoms)
+                for atom in residue.atoms:
+                    atoms.add(atom)
+        atoms = list(atoms)
 
         # build the graph
         graph = build_atomic_graph(atoms, self.get_query_id(), self._external_distance_cutoff)
@@ -329,9 +348,9 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
     def build_graph(self, feature_modules: List) -> Graph:
-        """ Builds the residue graph.
-
-            Returns(deeprank graph object): the resulting graph
+        """ Builds the graph from the pdb structure.
+            Args:
+                feature_modules (list of modules): each must implement the add_features function.
         """
 
         # load pdb structure
@@ -344,17 +363,11 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         if len(interface_pairs) == 0:
             raise ValueError("no interface residues found")
 
-        # get all atoms in the selection
         atoms_selected = set([])
         for residue1, residue2 in interface_pairs:
-            atoms_selected |= set(residue1.atoms)
-            atoms_selected |= set(residue2.atoms)
+            for atom in (residue1.atoms + residue2.atoms):
+                atoms_selected.add(atom)
         atoms_selected = list(atoms_selected)
-
-        # find the two chains
-        model = atoms_selected[0].residue.chain.model
-        chain1 = model.get_chain(self._chain_id1)
-        chain2 = model.get_chain(self._chain_id2)
 
         # build the graph
         graph = build_atomic_graph(atoms_selected, self.get_query_id(), self._interface_distance_cutoff)
@@ -373,7 +386,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
     def __init__(self, pdb_path: str, chain_id1: str, chain_id2: str, pssm_paths: Optional[Dict[str, str]] = None,
                  interface_distance_cutoff: float = 8.5,
-                 use_biopython: bool = False, targets: Optional[Dict[str, float]] = None):
+                 targets: Optional[Dict[str, float]] = None):
         """
             Args:
                 pdb_path(str): the path to the pdb file
@@ -381,7 +394,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
                 chain_id2(str): the pdb chain identifier of the second protein of interest
                 pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
                 interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
-                use_biopython(bool): whether or not to use biopython tools
                 targets(dict, optional): named target values associated with this query
         """
 
@@ -398,8 +410,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         self._interface_distance_cutoff = interface_distance_cutoff
 
-        self._use_biopython = use_biopython
-
     def get_query_id(self) -> str:
         return "residue-ppi-{}:{}-{}".format(self.model_id, self._chain_id1, self._chain_id2)
 
@@ -411,7 +421,9 @@ class ProteinProteinInterfaceResidueQuery(Query):
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
     def build_graph(self, feature_modules: List) -> Graph:
-        """ Builds the residue graph.
+        """ Builds the graph from the pdb structure.
+            Args:
+                feature_modules (list of modules): each must implement the add_features function.
         """
 
         # load pdb structure
@@ -430,11 +442,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
             residues_selected.add(residue1)
             residues_selected.add(residue2)
         residues_selected = list(residues_selected)
-
-        # find the two chains
-        model = residues_selected[0].chain.model
-        chain1 = model.get_chain(self._chain_id1)
-        chain2 = model.get_chain(self._chain_id2)
 
         # build the graph
         graph = build_residue_graph(residues_selected, self.get_query_id(), self._interface_distance_cutoff)

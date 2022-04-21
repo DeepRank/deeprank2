@@ -3,7 +3,7 @@ import logging
 
 import numpy
 
-from deeprank_gnn.models.structure import Atom
+from deeprank_gnn.models.structure import Atom, Residue
 from deeprank_gnn.models.forcefield.patch import PatchActionType
 from deeprank_gnn.tools.forcefield.top import TopParser
 from deeprank_gnn.tools.forcefield.patch import PatchParser
@@ -47,19 +47,19 @@ class AtomicForcefield:
         with open(param_path, 'rt') as f:
             self._vanderwaals_parameters = ParamParser.parse(f)
 
-    def _find_matching_residue_class(self, residue):
+    def _find_matching_residue_class(self, residue: Residue):
         for criterium in self._residue_class_criteria:
             if criterium.matches(residue.amino_acid.three_letter_code, [atom.name for atom in residue.atoms]):
                 return criterium.class_name
 
         return None
 
-    def get_vanderwaals_parameters(self, atom):
+    def get_vanderwaals_parameters(self, atom: Atom):
         type_ = self._get_type(atom)
 
         return self._vanderwaals_parameters[type_]
 
-    def _get_type(self, atom):
+    def _get_type(self, atom: Atom):
         atom_name = atom.name
 
         if atom.residue.amino_acid is None:
@@ -88,7 +88,7 @@ class AtomicForcefield:
 
         return type_
 
-    def get_charge(self, atom):
+    def get_charge(self, atom: Atom):
         """
             Args:
                 atom(Atom): the atom to get the charge for

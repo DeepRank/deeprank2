@@ -19,7 +19,7 @@ _log = logging.getLogger(__name__)
 
 
 class _PreProcess(Process):
-    def __init__(self, input_queue: Queue, output_path: str, error_queue: Queue):
+    def __init__(self, input_queue: Queue, output_path: str, error_queue: Queue, feature_modules: List):
         Process.__init__(self)
         self.daemon = True
 
@@ -29,6 +29,8 @@ class _PreProcess(Process):
         self._output_path = output_path
 
         self._receiver, self._sender = Pipe(duplex=False)
+
+        self._feature_modules = feature_modules
 
     @property
     def output_path(self) -> str:
@@ -55,7 +57,7 @@ class _PreProcess(Process):
 
             graph = None
             try:
-                graph = query.build_graph()
+                graph = query.build_graph(self._feature_modules)
                 if graph.has_nan():
                     self._error_queue.put(f"skipping {query}, because of a generated NaN value in the graph")
 
@@ -73,11 +75,12 @@ class _PreProcess(Process):
 class PreProcessor:
     "preprocesses a series of graph building operations (represented by queries)"
 
-    def __init__(self, prefix: Optional[str] = None, process_count: Optional[int] = None):
+    def __init__(self, feature_modules: List, prefix: Optional[str] = None, process_count: Optional[int] = None):
         """
         Args:
-            prefix(str, optional): prefix for the output files, ./preprocessed-data- by default
-            process_count(int, optional): how many subprocesses will I run simultaneously, by default takes all available cpu cores.
+            prefix: prefix for the output files, ./preprocessed-data- by default
+            process_count: how many subprocesses will I run simultaneously, by default takes all available cpu cores.
+            feature_modules: the feature modules used to generate features, each must implement the add_features function
         """
 
         self._input_queue = Queue()
@@ -89,7 +92,7 @@ class PreProcessor:
         if prefix is None:
             prefix = "preprocessed-data"
 
-        self._processes = [_PreProcess(self._input_queue, "{}-{}.hdf5".format(prefix, index), self._error_queue)
+        self._processes = [_PreProcess(self._input_queue, "{}-{}.hdf5".format(prefix, index), self._error_queue, feature_modules)
                            for index in range(process_count)]
 
     def start(self):
