@@ -104,12 +104,24 @@ class PreProcessor:
             if not process.is_alive():
                 raise RuntimeError(f"worker process {process.name} did not start")
 
+    def _queue_empty(self):
+        """
+        Returns whether queue is empty.
+
+        Note: This implementation is not reliable, especially not on Mac OSX. .qsize() seems to be more reliable than
+        .empty(), however qsize relies on sem_getvalue() which is not implemented on Mac OSX.
+        """
+        try:
+            return self._input_queue.qsize() == 0
+        except NotImplementedError:
+            return self._input_queue.empty()
+
     def wait(self):
         "wait for all graphs to be built"
 
         try:
             _log.info("waiting for the queue to be empty..")
-            while self._input_queue.qsize() > 0:  # qsize seems to be more reliable than the empty method
+            while not self._queue_empty():
                 sleep(1.0)
         finally:
             self.shutdown()
