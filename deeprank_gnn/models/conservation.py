@@ -1,5 +1,3 @@
-
-
 class ConservationRow:
     "holds data for one position-specific scoring matrix row"
 
@@ -22,8 +20,11 @@ class ConservationRow:
 class ConservationTable:
     "holds data for one position-specific scoring table"
 
-    def __init__(self, rows={}):
-        self._rows = rows
+    def __init__(self, rows=None):
+        if rows is None:
+            rows = {}
+        else:
+            self._rows = rows
 
     def __contains__(self, residue):
         return residue in self._rows
@@ -34,5 +35,4 @@ class ConservationTable:
     def update(self, other):
         "can be used to merge two non-overlapping scoring tables"
 
-        self._rows.update(other._rows)
-
+        self._rows.update(other._rows) # pylint: disable = protected-access

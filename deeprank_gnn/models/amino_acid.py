@@ -2,23 +2,31 @@ from typing import Optional
 
 import numpy
 
-from deeprank_gnn.models.polarity import Polarity
+from .polarity import Polarity
 
 
 class AminoAcid:
     "a value to represent one of the amino acids"
 
-    def __init__(self, name: str, three_letter_code: str, one_letter_code: str, charge: Optional[float] = None,
-                 polarity: Optional[Polarity] = None, size: Optional[int] = None, index: Optional[int] = None):
+    def __init__( # pylint: disable=too-many-arguments
+        self,
+        name: str,
+        three_letter_code: str,
+        one_letter_code: str,
+        charge: Optional[float] = None,
+        polarity: Optional[Polarity] = None,
+        size: Optional[int] = None,
+        index: Optional[int] = None,
+    ):
         """
-            Args:
-                name(str): unique name for the amino acid
-                three_letter_code(str): code of the amino acid, as in PDB
-                one_letter_code(str): letter of the amino acid, as in fasta
-                charge(float, optional): the charge property of the amino acid
-                polarity(deeprank polarity enum, optional): the polarity property of the amino acid
-                size(int, optional): the number of heavy atoms in the side chain
-                index(int, optional): the rank of the amino acid, used for computing one-hot encoding
+        Args:
+            name(str): unique name for the amino acid
+            three_letter_code(str): code of the amino acid, as in PDB
+            one_letter_code(str): letter of the amino acid, as in fasta
+            charge(float, optional): the charge property of the amino acid
+            polarity(deeprank polarity enum, optional): the polarity property of the amino acid
+            size(int, optional): the number of heavy atoms in the side chain
+            index(int, optional): the rank of the amino acid, used for computing one-hot encoding
         """
 
         self._name = name
@@ -45,9 +53,12 @@ class AminoAcid:
     @property
     def onehot(self):
         if self._index is None:
-            raise ValueError("amino acid {} index is not set, thus no onehot can be computed".format(self._name))
+            raise ValueError(
+                "amino acid {self._name} index is not set, thus no onehot can be computed"
+            )
 
-        a = numpy.zeros(20)  # assumed that there are only 20 different amino acids
+        # assumed that there are only 20 different amino acids
+        a = numpy.zeros(20)
         a[self._index] = 1.0
 
         return a
@@ -68,7 +79,7 @@ class AminoAcid:
         return hash(self.name)
 
     def __eq__(self, other):
-        return type(other) == type(self) and other.name == self.name
+        return isinstance(other, type(self)) and other.name == self.name
 
     def __repr__(self):
         return self._name
