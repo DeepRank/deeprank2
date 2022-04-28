@@ -3,12 +3,12 @@ import numpy as np
 from typing import TextIO
 
 from deeprank_gnn.models.structure import Residue, Chain
-from deeprank_gnn.models.conservation import ConservationRow, ConservationTable
+from deeprank_gnn.models.pssm import PssmRow, PssmTable
 from deeprank_gnn.domain.amino_acid import amino_acids
 
 amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids}
 
-def parse_pssm(file_: TextIO, chain: Chain) -> ConservationTable:
+def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
     """
         Read the PSSM data.
 
@@ -48,6 +48,6 @@ def parse_pssm(file_: TextIO, chain: Chain) -> ConservationTable:
         information_content = float(row[column_indices["IC"]])
         conservations = {amino_acid: float(row[column_indices[amino_acid.one_letter_code]]) for amino_acid in amino_acids}
 
-        conservation_rows[residue] = ConservationRow(conservations, information_content)
+        conservation_rows[residue] = PssmRow(conservations, information_content)
 
-    return ConservationTable(conservation_rows)
+    return PssmTable(conservation_rows)

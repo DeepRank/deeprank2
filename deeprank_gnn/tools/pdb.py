@@ -1,6 +1,7 @@
 from time import time
 import logging
 from typing import List
+import subprocess
 
 from scipy.spatial import distance_matrix
 import numpy
@@ -27,6 +28,14 @@ def is_xray(pdb_file):
 
     return False
 
+
+def add_hydrogens(input_pdb_path, output_pdb_path):
+    "this requires reduce: https://github.com/rlabduke/reduce"
+
+    with open(output_pdb_path, 'wt') as f:
+        p = subprocess.run(["reduce", input_pdb_path], stdout=subprocess.PIPE)
+        for line in p.stdout.decode().split('\n'):
+            f.write(line.replace("   new", "").replace("   std", "") + "\n")
 
 
 def _add_atom_to_residue(atom, residue):
@@ -105,74 +114,6 @@ def get_structure(pdb, id_):
         _add_atom_to_residue(atom, residue)
 
     return structure
-
-
-def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> numpy.ndarray:
-    """ Calculate the Coulomb potentials, given a distance matrix and a list of charges of equal size.
-
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
-    """
-
-    # check for the correct matrix shape
-    charge_count = len(charges)
-    if charge_count != distances.shape[0] or charge_count != distances.shape[1]:
-        raise ValueError("Cannot calculate distances between {} charges and {} distances"
-                         .format(charge_count, "x".join(distances.shape)))
-
-    # calculate the potentials
-    potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
-                 * COULOMB_CONSTANT / (EPSILON0 * distances)
-
-    return potentials
-
-
-def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
-                                 vanderwaals_parameters: List[VanderwaalsParam]) -> numpy.ndarray:
-    """ Calculate Lennard-Jones potentials, given a distance matrix and a list of atoms with vanderwaals parameters of equal size.
-
-         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
-    """
-
-    # check for the correct data shapes
-    atom_count = len(atoms)
-    if atom_count != len(vanderwaals_parameters):
-        raise ValueError("The number of atoms ({}) does not match the number of vanderwaals parameters ({})"
-                         .format(atom_count, len(vanderwaals_parameters)))
-    if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
-        raise ValueError("Cannot calculate distances between {} atoms and {} distances"
-                         .format(atom_count, "x".join(distances.shape)))
-
-    # collect parameters
-    sigmas1 = numpy.empty((atom_count, atom_count))
-    sigmas2 = numpy.empty((atom_count, atom_count))
-    epsilons1 = numpy.empty((atom_count, atom_count))
-    epsilons2 = numpy.empty((atom_count, atom_count))
-    for atom1_index in range(atom_count):
-        for atom2_index in range(atom_count):
-            atom1 = atoms[atom1_index]
-            atom2 = atoms[atom2_index]
-
-            # Which parameter we take, depends on whether the contact is intra- or intermolecular.
-            if atom1.residue != atom2.residue:
-
-                sigmas1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].inter_sigma
-                sigmas2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].inter_sigma
-
-                epsilons1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].inter_epsilon
-                epsilons2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].inter_epsilon
-            else:
-                sigmas1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].intra_sigma
-                sigmas2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].intra_sigma
-
-                epsilons1[atom1_index][atom2_index] = vanderwaals_parameters[atom1_index].intra_epsilon
-                epsilons2[atom1_index][atom2_index] = vanderwaals_parameters[atom2_index].intra_epsilon
-
-    # calculate potentials
-    sigmas = 0.5 * (sigmas1 + sigmas2)
-    epsilons = numpy.sqrt(sigmas1 * sigmas2)
-    potentials = 4.0 * epsilons * ((sigmas / distances) ** 12 - (sigmas / distances) ** 6)
-
-    return potentials
 
 
 def get_atomic_contacts(atoms: List[Atom]) -> List[AtomicContact]:
@@ -279,25 +220,18 @@ def get_residue_distance(residue1, residue2):
     return numpy.min(distances)
 
 
-def get_residue_contact_pairs(pdb_path, model_id, chain_id1, chain_id2, distance_cutoff):
+def get_residue_contact_pairs(pdb_path: str, structure: Structure, chain_id1: str, chain_id2: str, distance_cutoff: float) -> List[Pair]:
     """ Get the residues that contact each other at a protein-protein interface.
 
         Args:
-            pdb_path(str): path to the pdb file
-            model_id(str): unique identifier for the structure
-            chain_id1(str): first protein chain identifier
-            chain_id2(str): second protein chain identifier
-            distance_cutoff(float): max distance between two interacting residues
+            pdb_path: the path of the pdb file, that the structure was built from
+            structure: from which to take the residues
+            chain_id1: first protein chain identifier
+            chain_id2: second protein chain identifier
+            distance_cutoff: max distance between two interacting residues
 
-        Returns: (list of deeprank residue pairs): the contacting residues
+        Returns: the pairs of contacting residues
     """
-
-    # load the structure
-    pdb = pdb2sql(pdb_path)
-    try:
-        structure = get_structure(pdb, model_id)
-    finally:
-        pdb._close()
 
     # Find out which residues are pairs
     interface = get_interface(pdb_path)
