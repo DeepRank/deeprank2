@@ -47,7 +47,7 @@ pip install DeepRank-GNN
 Alternatively you can get all the new developments by cloning the repo and installing the code with
 
 ```
-git clone https://github.com/DeepRank/Deeprank-GNN 
+git clone https://github.com/DeepRank/Deeprank-GNN
 cd DeepRank-GNN
 pip install -e ./
 ```
@@ -61,13 +61,20 @@ The process of generating graphs is called preprocessing. In order to do so, one
 ```python
 from deeprank_gnn.preprocess import PreProcessor
 from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
+from deeprank_gnn.feature import bsa, pssm, amino_acid, biopython
 
-preprocessor = PreProcessor("train-data")
+feature_modules = [bsa, pssm, amino_acid, biopython]
 
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B")
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B")
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B")
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B")
+preprocessor = PreProcessor(feature_modules, "train-data")
+
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
+preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
 
 preprocessor.start()  # start builfing graphs from the queries
 
