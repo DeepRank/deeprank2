@@ -16,7 +16,25 @@ Before installing DeepRank-GNN you need to install:
 
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
  * [pytorch_geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg` (recommended).
+ * [pytorch_cluster](https://github.com/rusty1s/pytorch_cluster) `conda install pytorch-cluster -c pyg`
+ * [pytorch_sparse](https://github.com/rusty1s/pytorch_sparse) `conda install pytorch-sparse -c pyg`
+ * [pytorch_scatter](https://github.com/rusty1s/pytorch_scatter) `conda install pytorch-scatter -c pyg`
+ * [torch_spline_conv](https://github.com/rusty1s/pytorch_spline_conv) `conda install pytorch-spline-conv -c pyg`
+ * [numpy](https://numpy.org) `conda install numpy`
+ * [scipy](https://scipy.org) `conda install -c anaconda scipy`
+ * [h5py](https://docs.h5py.org) `conda install -c anaconda h5py`
+ * [networkx](https://networkx.org) `conda install -c anaconda networkx`
+ * [matplotlib](https://matplotlib.org) `conda install -c conda-forge matplotlib`
+ * [pdb2sql](https://pdb2sql.readthedocs.io) `pip install pdb2sql`
+ * [sklearn](https://scikit-learn.org) `conda install -c anaconda scikit-learn`
+ * [chart-studio](https://help.plot.ly) `conda install -c conda-forge chart-studio`
+ * [BioPython](https://biopython.org) `conda install -c conda-forge biopython`
+ * [python-louvain](https://github.com/taynaud/python-louvain) `conda install -c conda-forge python-louvain`
+ * [markov-clustering](https://github.com/guyallard/markov_clustering) `pip install markov-clustering`
+ * [tqdm](https://pypi.python.org/pypi/tqdm) `conda install -c conda-forge tqdm`
+ * [freesasa](https://github.com/mittinatten/freesasa) `conda install -c hydroid freesasa`
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html). 
+ * [reduce](https://github.com/rlabduke/reduce) Follow the instructions in the README
 
 ### DeepRank-GNN installation
 
