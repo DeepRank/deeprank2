@@ -9,9 +9,11 @@ from deeprank_gnn.models.contact import AtomicContact, ResidueContact
 from deeprank_gnn.domain.feature import FEATURENAME_POSITION
 
 
-def build_atomic_graph(atoms: List[Atom], graph_id: str, edge_distance_cutoff: float) -> Graph:
-    """ Builds a graph, using the atoms as nodes.
-        The edge distance cutoff is in Ångströms.
+def build_atomic_graph( # pylint: disable=too-many-locals
+    atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
+) -> Graph:
+    """Builds a graph, using the atoms as nodes.
+    The edge distance cutoff is in Ångströms.
     """
 
     positions = numpy.empty((len(atoms), 3))
@@ -41,10 +43,12 @@ def build_atomic_graph(atoms: List[Atom], graph_id: str, edge_distance_cutoff: f
     return graph
 
 
-def build_residue_graph(residues: List[Residue], graph_id: str, edge_distance_cutoff: float) -> Graph:
-    """ Builds a graph, using the residues as nodes.
-        The edge distance cutoff is in Ångströms.
-        It's the shortest interatomic distance between two residues.
+def build_residue_graph( # pylint: disable=too-many-locals
+    residues: List[Residue], graph_id: str, edge_distance_cutoff: float
+) -> Graph:
+    """Builds a graph, using the residues as nodes.
+    The edge distance cutoff is in Ångströms.
+    It's the shortest interatomic distance between two residues.
     """
 
     # collect the set of atoms
@@ -76,8 +80,12 @@ def build_residue_graph(residues: List[Residue], graph_id: str, edge_distance_cu
             node1 = Node(residue1)
             node2 = Node(residue2)
 
-            node1.features[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue1.atoms], axis=0)
-            node2.features[FEATURENAME_POSITION] = numpy.mean([atom.position for atom in residue2.atoms], axis=0)
+            node1.features[FEATURENAME_POSITION] = numpy.mean(
+                [atom.position for atom in residue1.atoms], axis=0
+            )
+            node2.features[FEATURENAME_POSITION] = numpy.mean(
+                [atom.position for atom in residue2.atoms], axis=0
+            )
 
             # The same residue will be added  multiple times as a node,
             # but the Graph class fixes this.
