@@ -10,7 +10,7 @@ from deeprank_gnn.tools.score import get_all_scores
 class TestGraph(unittest.TestCase):
 
     def setUp(self):
-        with h5py.File('tests/hdf5/1ATN_residue.hdf5', 'r') as f5:
+        with h5py.File('tests/hdf5/1ATN_ppi.hdf5', 'r') as f5:
             self.networkx_graph = hdf5_to_networkx(f5['1ATN_1w'])
 
         self.pdb_path = 'tests/data/pdb/1ATN/1ATN_1w.pdb'
