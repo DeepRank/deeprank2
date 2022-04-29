@@ -41,12 +41,13 @@ jobs:
     - name: install conda dependencies
       run: |
         # install reduce from git
-        git https://github.com/rlabduke/reduce
+        git clone https://github.com/rlabduke/reduce
         mkdir -p ./reduce/build
         cd ./reduce/build
         cmake ..
         make
         make install
+        cd ../..
         # Only way to install msms is through conda
         conda install -c bioconda msms 
         # We install pytorch with conda because otherwise it breaks
