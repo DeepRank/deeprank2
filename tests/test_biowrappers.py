@@ -8,7 +8,7 @@ from deeprank_gnn.tools.BioWrappers import get_bio_model, get_depth_res, get_dep
 class TestBioWrappers(unittest.TestCase):
 
     def setUp(self):
-        self.pdb = 'tests/data/pdb/1ATN/1ATN_1w.pdb'
+        self.pdb = 'tests/data/pdb/1CRN/1CRN.pdb'
 
     def test_hse(self):
         model = get_bio_model(self.pdb)
