@@ -38,21 +38,21 @@ Before installing DeepRank-GNN you need to install:
 
 ### DeepRank-GNN installation
 
-Once the dependencies installed, you can install the latest release of DeepRank-GNN using the PyPi package manager:
+[//]: # (Once the dependencies installed, you can install the latest release of DeepRank-GNN using the PyPi package manager:)
+
+[//]: # (```)
+[//]: # (pip install DeepRank-GNN)
+[//]: # (```)
+
+You can get all the new developments by cloning the repo and installing the code with
 
 ```
-pip install DeepRank-GNN
-```
-
-Alternatively you can get all the new developments by cloning the repo and installing the code with
-
-```
-git clone https://github.com/DeepRank/Deeprank-GNN
-cd DeepRank-GNN
+git clone https://github.com/DeepRank/deeprank-gnn-2
+cd deeprank-gnn-2
 pip install -e ./
 ```
 
-The documentation can be found here : https://deeprank-gnn.readthedocs.io/ 
+[//]: # (The documentation can be found here : https://deeprank-gnn.readthedocs.io/)
 
 ## Generate Graphs
 
