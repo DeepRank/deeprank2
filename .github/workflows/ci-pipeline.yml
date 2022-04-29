@@ -39,6 +39,8 @@ jobs:
     - run: which python
 
     - name: install dependencies
+      env:
+        CMAKE_INSTALL_PREFIX: /usr/local
       run: |
         # install reduce from git
         git clone https://github.com/rlabduke/reduce
@@ -46,7 +48,7 @@ jobs:
         cd ./reduce/build
         cmake ..
         make
-        make install/local
+        make install
         cd ../..
         # Only way to install msms is through conda
         conda install -c bioconda msms 
