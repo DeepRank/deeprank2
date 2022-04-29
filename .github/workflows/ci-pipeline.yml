@@ -40,7 +40,7 @@ jobs:
 
     - name: install dependencies
       env:
-        CMAKE_INSTALL_PREFIX: /usr/local
+        CMAKE_INSTALL_PREFIX: .local
       run: |
         # install reduce from git
         git clone https://github.com/rlabduke/reduce
