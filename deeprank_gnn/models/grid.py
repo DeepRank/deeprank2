@@ -8,6 +8,7 @@ from typing import Dict
 import numpy
 import h5py
 import itertools
+from scipy.signal import bspline
 from ..domain.storage import (
     HDF5KEY_GRID_POINTS,
     HDF5KEY_GRID_X,
@@ -170,20 +171,20 @@ class Grid:
 
         return data
 
-    # def _get_mapped_feature_bsp_line(
-    #     self, position: numpy.ndarray, value: float
-    # ) -> numpy.ndarray:
+    def _get_mapped_feature_bsp_line(
+        self, position: numpy.ndarray, value: float
+    ) -> numpy.ndarray:
 
-    #     order = 4
+        order = 4
 
-    #     fx, fy, fz = position
-    #     bsp_data = (
-    #         bspline((self.xgrid - fx) / self.resolution, order)
-    #         * bspline((self.ygrid - fy) / self.resolution, order)
-    #         * bspline((self.zgrid - fz) / self.resolution, order)
-    #     )
+        fx, fy, fz = position
+        bsp_data = (
+            bspline((self.xgrid - fx) / self.resolution, order)
+            * bspline((self.ygrid - fy) / self.resolution, order)
+            * bspline((self.zgrid - fz) / self.resolution, order)
+        )
 
-    #     return value * bsp_data
+        return value * bsp_data
 
     def _get_mapped_feature_nearest_neighbour( # pylint: disable=too-many-locals
         self, position: numpy.ndarray, value: float

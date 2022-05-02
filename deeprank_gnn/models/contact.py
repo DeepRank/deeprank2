@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from .pair import Pair
 from .structure import Residue, Atom
 
-
 class Contact(Pair, ABC):
+
     @property
     @abstractmethod
     def distance(self) -> float:
@@ -31,11 +31,10 @@ class ResidueContact(Contact):
         vanderwaals_potential: float,
     ):
 
+        super().__init__(residue1, residue2)
+
         self._residue1 = residue1
         self._residue2 = residue2
-
-        # Pair.__init__(self, residue1, residue2)
-
         self._distance = distance
         self._electrostatic_potential = electrostatic_potential
         self._vanderwaals_potential = vanderwaals_potential
@@ -54,11 +53,11 @@ class ResidueContact(Contact):
 
     @property
     def residue1(self) -> Residue:
-        return self.residue1
+        return self.item1
 
     @property
     def residue2(self) -> Residue:
-        return self.residue2
+        return self.item2
 
 
 class AtomicContact(Contact):
@@ -76,7 +75,7 @@ class AtomicContact(Contact):
         self._atom1 = atom1
         self._atom2 = atom2
 
-        # Pair.__init__(self, atom1, atom2)
+        super().__init__(atom1, atom2)
 
         self._distance = distance
         self._electrostatic_potential = electrostatic_potential
@@ -96,8 +95,8 @@ class AtomicContact(Contact):
 
     @property
     def atom1(self) -> Atom:
-        return self.atom1
+        return self.item1
 
     @property
     def atom2(self) -> Atom:
-        return self.atom2
+        return self.item2
