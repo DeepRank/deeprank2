@@ -1,14 +1,13 @@
 from pdb2sql import pdb2sql
-
 from deeprank_gnn.domain.amino_acid import serine
 from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.models.graph import Graph, Node
-from deeprank_gnn.models.structure import Chain, Residue
 from deeprank_gnn.feature.sasa import add_features
-from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
+from deeprank_gnn.tools.graph import build_residue_graph
 from deeprank_gnn.tools.pdb import get_structure, get_surrounding_residues
-from deeprank_gnn.domain.feature import FEATURENAME_HYDROGENBONDDONORSDIFFERENCE, FEATURENAME_SIZEDIFFERENCE
-from deeprank_gnn.feature.amino_acid import add_features
+from deeprank_gnn.domain.feature import (
+    FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
+    FEATURENAME_SIZEDIFFERENCE,
+)
 
 
 def test_add_features():
@@ -18,7 +17,7 @@ def test_add_features():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close()# pylint: disable=protected-access
 
     residue = structure.chains[0].residues[25]
     variant = SingleResidueVariant(residue, serine)  # GLY -> SER
@@ -32,5 +31,5 @@ def test_add_features():
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
-            node.features[FEATURENAME_SIZEDIFFERENCE] > 0
-            node.features[FEATURENAME_HYDROGENBONDDONORSDIFFERENCE] > 0
+            node.features[FEATURENAME_SIZEDIFFERENCE] > 0 # pylint: disable=pointless-statement
+            node.features[FEATURENAME_HYDROGENBONDDONORSDIFFERENCE] > 0 # pylint: disable=pointless-statement

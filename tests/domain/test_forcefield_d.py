@@ -1,10 +1,7 @@
-import numpy
 from pdb2sql import pdb2sql
-
 from deeprank_gnn.domain.forcefield import atomic_forcefield
 from deeprank_gnn.tools.pdb import get_structure
 from deeprank_gnn.domain.amino_acid import arginine, glutamate
-
 
 def test_atomic_forcefield():
 
@@ -12,7 +9,7 @@ def test_atomic_forcefield():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     # The arginine C-zeta should get a positive charge
     arg = [r for r in structure.get_chain("A").residues if r.amino_acid == arginine][0]

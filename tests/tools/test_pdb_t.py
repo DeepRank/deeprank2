@@ -1,9 +1,16 @@
 import numpy
 
 from pdb2sql import pdb2sql
-from deeprank_gnn.tools.pdb import get_structure, get_residue_contact_pairs, get_surrounding_residues, find_neighbour_atoms
+from deeprank_gnn.tools.pdb import (
+    get_structure,
+    get_residue_contact_pairs,
+    get_surrounding_residues,
+    find_neighbour_atoms,
+)
 from deeprank_gnn.domain.amino_acid import valine
 from deeprank_gnn.models.structure import AtomicElement
+
+# pylint: disable=protected-access
 
 
 def test_get_structure_complete():
@@ -50,7 +57,8 @@ def test_get_structure_from_nmr_with_dna():
 
 def test_residue_contact_pairs():
 
-    #get_residue_contact_pairs(pdb_path: str, structure: Structure, chain_id1: str, chain_id2: str, distance_cutoff: float)
+    # get_residue_contact_pairs(pdb_path: str, structure: Structure,
+    # chain_id1: str, chain_id2: str, distance_cutoff: float)
 
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
 
@@ -105,4 +113,4 @@ def test_neighbour_atoms():
     assert len(atom_pairs) < numpy.square(len(atoms)), "every two atoms were paired"
 
     for atom1, atom2 in atom_pairs:
-        assert atom1 != atom2, "atom {} was paired with itself".format(atom1)
+        assert atom1 != atom2, f"atom {atom1} was paired with itself"

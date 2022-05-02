@@ -7,12 +7,11 @@ from deeprank_gnn.GraphGenMP import GraphHDF5
 
 
 class TestCreateGraph(unittest.TestCase):
-
     def setUp(self):
 
-        self.pdb_path = './tests/data/pdb/1ATN/'
-        self.pssm_path = './tests/data/pssm/1ATN/'
-        self.ref = './tests/data/ref/1ATN/'
+        self.pdb_path = "./tests/data/pdb/1ATN/"
+        self.pssm_path = "./tests/data/pssm/1ATN/"
+        self.ref = "./tests/data/ref/1ATN/"
 
         self._output_files = []
         self._work_directories = []
@@ -36,19 +35,40 @@ class TestCreateGraph(unittest.TestCase):
         return path
 
     def test_create_serial_with_bio(self):
-        GraphHDF5(pdb_path=self.pdb_path, ref_path=self.ref, pssm_path=self.pssm_path,
-                  graph_type='residue', outfile=self._make_output_file(),
-                  nproc=1, tmpdir=self._make_work_directory(), biopython=True)
+        GraphHDF5(
+            pdb_path=self.pdb_path,
+            ref_path=self.ref,
+            pssm_path=self.pssm_path,
+            graph_type="residue",
+            outfile=self._make_output_file(),
+            nproc=1,
+            tmpdir=self._make_work_directory(),
+            biopython=True,
+        )
 
     def test_create_serial(self):
-        GraphHDF5(pdb_path=self.pdb_path, ref_path=self.ref, pssm_path=self.pssm_path,
-                  graph_type='residue', outfile=self._make_output_file(),
-                  nproc=1, tmpdir=self._make_work_directory(), biopython=False)
+        GraphHDF5(
+            pdb_path=self.pdb_path,
+            ref_path=self.ref,
+            pssm_path=self.pssm_path,
+            graph_type="residue",
+            outfile=self._make_output_file(),
+            nproc=1,
+            tmpdir=self._make_work_directory(),
+            biopython=False,
+        )
 
     def test_create_mp(self):
-        GraphHDF5(pdb_path=self.pdb_path, ref_path=self.ref, pssm_path=self.pssm_path,
-                  graph_type='residue', outfile=self._make_output_file(),
-                  nproc=2, tmpdir=self._make_work_directory(), biopython=False)
+        GraphHDF5(
+            pdb_path=self.pdb_path,
+            ref_path=self.ref,
+            pssm_path=self.pssm_path,
+            graph_type="residue",
+            outfile=self._make_output_file(),
+            nproc=2,
+            tmpdir=self._make_work_directory(),
+            biopython=False,
+        )
 
 
 if __name__ == "__main__":
