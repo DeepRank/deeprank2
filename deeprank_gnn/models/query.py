@@ -23,6 +23,7 @@ import deeprank_gnn.feature.biopython
 import deeprank_gnn.feature.bsa
 import deeprank_gnn.feature.pssm
 import deeprank_gnn.feature.sasa
+import pickle
 
 
 _log = logging.getLogger(__name__)
@@ -456,7 +457,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
 
 class QueryDataset:
-    "represents a collection of data queries"
+    "Represents the collection of data queries. Queries can be saved as a dictionary to easily navigate through their data "
 
     def __init__(self):
         self._queries = []
@@ -464,6 +465,10 @@ class QueryDataset:
     def add(self, query: Query):
         self._queries.append(query)
 
+    def export_dict(self, dataset_path: str):
+        with open(dataset_path, "wb") as pkl_file:
+            pickle.dump(self, pkl_file)    
+            
     @property
     def queries(self) -> List[Query]:
         return self._queries
