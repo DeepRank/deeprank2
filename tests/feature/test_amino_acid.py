@@ -32,5 +32,5 @@ def test_add_features():
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
-            node.features[FEATURENAME_SIZEDIFFERENCE] > 0
-            node.features[FEATURENAME_HYDROGENBONDDONORSDIFFERENCE] > 0
+            assert node.features[FEATURENAME_SIZEDIFFERENCE] > 0
+            assert node.features[FEATURENAME_HYDROGENBONDDONORSDIFFERENCE] > 0
