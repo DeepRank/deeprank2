@@ -44,9 +44,9 @@ jobs:
       run: |
         # install reduce from git
         git clone https://github.com/rlabduke/reduce
-        mkdir -p ~/build/reduce
-        cd ~/build/reduce
-        cmake ~/reduce
+        mkdir -p build/reduce
+        cd build/reduce
+        cmake ../../reduce
         make
         sudo make install
         cd ../..
