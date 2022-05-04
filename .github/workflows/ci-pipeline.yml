@@ -46,7 +46,7 @@ jobs:
         git clone https://github.com/rlabduke/reduce
         mkdir -p ~/build/reduce
         cd ~/build/reduce
-        cmake ~/src/reduce
+        cmake ~/reduce
         make
         sudo make install
         cd ../..
