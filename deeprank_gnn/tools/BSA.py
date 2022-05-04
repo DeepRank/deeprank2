@@ -88,17 +88,18 @@ class BSA():
         res = res[keys[0]] + res[keys[1]]
 
         for r in res:
+            chain_id, residue_number, _ = r
 
             # define the selection string and the bsa for the complex
-            select_str = (f"res, (resi {r[1]}) and (chain {r[0]})")
+            select_str = (f"res, (resi {residue_number}) and (chain {chain_id})",)
             asa_complex = freesasa.selectArea( # pylint: disable=c-extension-no-member
                 select_str, self.complex, self.result_complex
             )["res"]
 
             # define the selection string and the bsa for the isolated
-            select_str = (f"res, resi {r[1]}")
+            select_str = (f"res, resi {residue_number}",)
             asa_unbound = freesasa.selectArea( # pylint: disable=c-extension-no-member
-                select_str, self.chains[r[0]], self.result_chains[r[0]]
+                select_str, self.chains[chain_id], self.result_chains[chain_id]
             )["res"]
 
             # define the bsa
