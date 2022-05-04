@@ -106,8 +106,6 @@ def add_features_for_atoms(edges: List[Edge]):
             charge = atomic_forcefield.get_charge(atom)
             vanderwaals = atomic_forcefield.get_vanderwaals_parameters(atom)
 
-            position = atom.position
-
         except UnknownAtomError:
             _log.warning(f"Ignoring atom {atom}, because it's unknown to the forcefield")
 
@@ -117,7 +115,7 @@ def add_features_for_atoms(edges: List[Edge]):
 
         atom_charges.append(charge)
         atom_vanderwaals_parameters.append(vanderwaals)
-        positions.append(position)
+        positions.append(atom.position)
         atom_indices[atom] = atom_index
 
     # calculate the distance matrix for those atoms

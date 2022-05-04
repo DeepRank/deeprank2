@@ -38,8 +38,18 @@ jobs:
     - run: conda --version
     - run: which python
 
-    - name: install conda dependencies
+    - name: install dependencies
+      env:
+        CMAKE_INSTALL_PREFIX: .local
       run: |
+        # install reduce from git
+        git clone https://github.com/rlabduke/reduce
+        mkdir -p build/reduce
+        cd build/reduce
+        cmake ../../reduce
+        make
+        sudo make install
+        cd ../..
         # Only way to install msms is through conda
         conda install -c bioconda msms 
         # We install pytorch with conda because otherwise it breaks

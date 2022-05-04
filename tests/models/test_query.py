@@ -60,9 +60,9 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
 
 def test_interface_graph_residue():
-    query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/1ATN/1ATN_1w.pdb", "A", "B",
-                                                {"A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
-                                                 "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"})
+    query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/3C8P/3C8P.pdb", "A", "B",
+                                                {"A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+                                                 "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm"})
 
     g = query.build_graph([bsa, amino_acid, pssm, atomic_contact])
 
@@ -75,9 +75,9 @@ def test_interface_graph_residue():
 
 
 def test_interface_graph_atomic():
-    query = ProteinProteinInterfaceAtomicQuery("tests/data/pdb/1ATN/1ATN_1w.pdb", "A", "B",
-                                               {"A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
-                                                "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"},
+    query = ProteinProteinInterfaceAtomicQuery("tests/data/pdb/3C8P/3C8P.pdb", "A", "B",
+                                               {"A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+                                                "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm"},
                                                interface_distance_cutoff=4.5)
 
     # using a small cutoff here, because atomic graphs are big
