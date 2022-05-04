@@ -31,5 +31,5 @@ def test_add_features():
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
-            node.features[FEATURENAME_SIZEDIFFERENCE] > 0 # pylint: disable=pointless-statement
-            node.features[FEATURENAME_HYDROGENBONDDONORSDIFFERENCE] > 0 # pylint: disable=pointless-statement
+            assert node.features[FEATURENAME_SIZEDIFFERENCE] > 0
+            assert node.features[FEATURENAME_HYDROGENBONDDONORSDIFFERENCE] > 0
