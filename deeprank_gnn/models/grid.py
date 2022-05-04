@@ -27,7 +27,7 @@ class MapMethod(Enum):
 
     GAUSSIAN = 1
     FAST_GAUSSIAN = 2
-    # BSP_LINE = 3
+    BSP_LINE = 3
     NEAREST_NEIGHBOURS = 4
 
 
