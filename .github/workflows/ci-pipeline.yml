@@ -44,11 +44,11 @@ jobs:
       run: |
         # install reduce from git
         git clone https://github.com/rlabduke/reduce
-        mkdir -p ./reduce/build
-        cd ./reduce/build
-        cmake ..
+        mkdir -p ~/build/reduce
+        cd ~/build/reduce
+        cmake ~/src/reduce
         make
-        make install
+        sudo make install
         cd ../..
         # Only way to install msms is through conda
         conda install -c bioconda msms 
