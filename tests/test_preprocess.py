@@ -28,7 +28,7 @@ def test_preprocess():
     try:
         preprocessor.start()
 
-        count_queries = 100
+        count_queries = 10
         queries = []
         for number in range(1, count_queries + 1):
             query = SingleResidueVariantResidueQuery(

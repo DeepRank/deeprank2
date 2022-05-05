@@ -4,7 +4,11 @@ from deeprank_gnn.DataSet import HDF5DataSet
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
+<<<<<<< HEAD
         self.database = "tests/hdf5/1ATN_residue.hdf5"
+=======
+        self.database = 'tests/hdf5/1ATN_ppi.hdf5'
+>>>>>>> main
 
     def test_dataset(self):
         HDF5DataSet(
