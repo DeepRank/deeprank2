@@ -2,7 +2,7 @@ from typing import Optional
 import numpy
 from enum import Enum
 from deeprank_gnn.models.amino_acid import AminoAcid
-from deeprank_gnn.models.conservation import ConservationRow
+from deeprank_gnn.models.pssm import PssmRow
 
 
 class Structure:
@@ -72,11 +72,11 @@ class Chain:
         return self._model
 
     @property
-    def pssm(self) -> ConservationRow:
+    def pssm(self) -> PssmRow:
         return self._pssm
 
     @pssm.setter
-    def pssm(self, pssm: ConservationRow):
+    def pssm(self, pssm: PssmRow):
         self._pssm = pssm
 
     def add_residue(self, residue):
@@ -139,9 +139,9 @@ class Residue:
     def __hash__(self) -> hash:
         return hash((self._chain, self._number, self._insertion_code))
 
-    def get_pssm(self) -> ConservationRow:
-        """if the residue's chain has pssm info linked to it,
-        then return the part that belongs to this residue
+    def get_pssm(self) -> PssmRow:
+        """ if the residue's chain has pssm info linked to it,
+            then return the part that belongs to this residue
         """
 
         pssm = self._chain.pssm

@@ -1,7 +1,6 @@
 from ..models.amino_acid import AminoAcid
 from ..models.polarity import Polarity
 
-
 alanine = AminoAcid(
     "Alanine",
     "ALA",
@@ -9,15 +8,21 @@ alanine = AminoAcid(
     charge=-0.37,
     polarity=Polarity.APOLAR,
     size=1,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=0)
+
 cysteine = AminoAcid(
     "Cysteine",
     "CYS",
     "C",
     charge=-0.64,
     polarity=Polarity.POLAR,
-    size=2,
+    size=2, 
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=1)
+
 aspartate = AminoAcid(
     "Aspartate",
     "ASP",
@@ -25,7 +30,10 @@ aspartate = AminoAcid(
     charge=-1.37,
     polarity=Polarity.NEGATIVE_CHARGE,
     size=4,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=4,
     index=2)
+
 glutamate = AminoAcid(
     "Glutamate",
     "GLU",
@@ -33,7 +41,10 @@ glutamate = AminoAcid(
     charge=-1.37,
     polarity=Polarity.NEGATIVE_CHARGE,
     size=5,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=4,
     index=3)
+
 phenylalanine = AminoAcid(
     "Phenylalanine",
     "PHE",
@@ -41,7 +52,10 @@ phenylalanine = AminoAcid(
     charge=-0.37,
     polarity=Polarity.APOLAR,
     size=7,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=4)
+
 glycine = AminoAcid(
     "Glycine",
     "GLY",
@@ -49,23 +63,31 @@ glycine = AminoAcid(
     charge=-0.37,
     polarity=Polarity.APOLAR,
     size=0,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=5)
+
 histidine = AminoAcid(
     "Histidine",
-    "HIS",
+    "HIS", 
     "H",
     charge=-0.29,
     polarity=Polarity.POLAR,
     size=6,
+    count_hydrogen_bond_donors=2,
+    count_hydrogen_bond_acceptors=2,
     index=6)
+
 isoleucine = AminoAcid(
     "Isoleucine",
-    "ILE",
+    "ILE", 
     "I",
     charge=-0.37,
     polarity=Polarity.APOLAR,
-    size=4,
+    size=4, count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=7)
+
 leucine = AminoAcid(
     "Leucine",
     "LEU",
@@ -73,7 +95,10 @@ leucine = AminoAcid(
     charge=-0.37,
     polarity=Polarity.APOLAR,
     size=4,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=8)
+
 lysine = AminoAcid(
     "Lysine",
     "LYS",
@@ -81,7 +106,10 @@ lysine = AminoAcid(
     charge=-0.36,
     polarity=Polarity.POSITIVE_CHARGE,
     size=5,
+    count_hydrogen_bond_donors=3,
+    count_hydrogen_bond_acceptors=0,
     index=9)
+
 methionine = AminoAcid(
     "Methionine",
     "MET",
@@ -89,7 +117,10 @@ methionine = AminoAcid(
     charge=-0.37,
     polarity=Polarity.APOLAR,
     size=4,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=10)
+
 proline = AminoAcid(
     "Proline",
     "PRO",
@@ -97,7 +128,10 @@ proline = AminoAcid(
     charge=0.0,
     polarity=Polarity.APOLAR,
     size=3,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=11)
+
 serine = AminoAcid(
     "Serine",
     "SER",
@@ -105,7 +139,10 @@ serine = AminoAcid(
     charge=-0.80,
     polarity=Polarity.POLAR,
     size=2,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=2,
     index=12)
+
 threonine = AminoAcid(
     "Threonine",
     "THR",
@@ -113,7 +150,10 @@ threonine = AminoAcid(
     charge=-0.80,
     polarity=Polarity.POLAR,
     size=3,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=2,
     index=13)
+
 tryptophan = AminoAcid(
     "Tryptophan",
     "TRP",
@@ -121,7 +161,10 @@ tryptophan = AminoAcid(
     charge=-0.79,
     polarity=Polarity.POLAR,
     size=10,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=0,
     index=14)
+
 tyrosine = AminoAcid(
     "Tyrosine",
     "TYR",
@@ -129,7 +172,10 @@ tyrosine = AminoAcid(
     charge=-0.80,
     polarity=Polarity.POLAR,
     size=8,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=1,
     index=15)
+
 valine = AminoAcid(
     "Valine",
     "VAL",
@@ -137,9 +183,32 @@ valine = AminoAcid(
     charge=-0.37,
     polarity=Polarity.APOLAR,
     size=3,
+    count_hydrogen_bond_donors=0,
+    count_hydrogen_bond_acceptors=0,
     index=16)
-selenocysteine = AminoAcid("Selenocysteine", "SEC", "U")
-pyrrolysine = AminoAcid("Pyrrolysine", "PYL", "O")
+
+selenocysteine = AminoAcid(
+    "Selenocysteine",
+    "SEC",
+    "U",
+    charge=0.0,
+    polarity=Polarity.POLAR,
+    size=2,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=2,
+    index=cysteine.index)
+
+pyrrolysine = AminoAcid(
+    "Pyrrolysine",
+    "PYL",
+    "O",
+    charge=0.0,
+    polarity=Polarity.POLAR,
+    size=13,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=4,
+    index=lysine.index)
+
 arginine = AminoAcid(
     "Arginine",
     "ARG",
@@ -147,6 +216,8 @@ arginine = AminoAcid(
     charge=-1.65,
     polarity=Polarity.POSITIVE_CHARGE,
     size=7,
+    count_hydrogen_bond_donors=5,
+    count_hydrogen_bond_acceptors=0,
     index=17)
 asparagine = AminoAcid(
     "Asparagine",
@@ -155,7 +226,10 @@ asparagine = AminoAcid(
     charge=-1.22,
     polarity=Polarity.POLAR,
     size=4,
+    count_hydrogen_bond_donors=2,
+    count_hydrogen_bond_acceptors=2,
     index=18)
+
 glutamine = AminoAcid(
     "Glutamine",
     "GLN",
@@ -163,8 +237,9 @@ glutamine = AminoAcid(
     charge=-1.22,
     polarity=Polarity.POLAR,
     size=5,
+    count_hydrogen_bond_donors=2,
+    count_hydrogen_bond_acceptors=2,
     index=19)
-
 
 amino_acids = [
     alanine,

@@ -1,15 +1,13 @@
 import os
 import logging
-
 import numpy
-
+from ...models.structure import Atom, Residue
 from ...models.forcefield.patch import PatchActionType
 from ...tools.forcefield.top import TopParser
 from ...tools.forcefield.patch import PatchParser
 from ...tools.forcefield.residue import ResidueClassParser
 from ...tools.forcefield.param import ParamParser
 from ...models.error import UnknownAtomError
-
 
 _log = logging.getLogger(__name__)
 
@@ -25,7 +23,7 @@ SQUARED_VANDERWAALS_DISTANCE_ON = numpy.square(VANDERWAALS_DISTANCE_ON)
 
 EPSILON0 = 1.0
 COULOMB_CONSTANT = 332.0636
-
+MAX_COVALENT_DISTANCE = 3.0
 
 class AtomicForcefield:
     def __init__(self):
@@ -50,7 +48,7 @@ class AtomicForcefield:
         with open(param_path, 'rt', encoding = 'utf-8') as f:
             self._vanderwaals_parameters = ParamParser.parse(f)
 
-    def _find_matching_residue_class(self, residue):
+    def _find_matching_residue_class(self, residue: Residue):
         for criterium in self._residue_class_criteria:
             if criterium.matches(
                 residue.amino_acid.three_letter_code, [
@@ -59,12 +57,12 @@ class AtomicForcefield:
 
         return None
 
-    def get_vanderwaals_parameters(self, atom):
+    def get_vanderwaals_parameters(self, atom: Atom):
         type_ = self._get_type(atom)
 
         return self._vanderwaals_parameters[type_]
 
-    def _get_type(self, atom):
+    def _get_type(self, atom: Atom):
         atom_name = atom.name
 
         if atom.residue.amino_acid is None:
@@ -94,7 +92,7 @@ class AtomicForcefield:
 
         return type_
 
-    def get_charge(self, atom):
+    def get_charge(self, atom: Atom):
         """
             Args:
                 atom(Atom): the atom to get the charge for
