@@ -18,11 +18,7 @@ class TestTools(unittest.TestCase):
         self.ref = "./tests/data/ref/1ATN/"
         self.h5_train_ref = "tests/data/train_ref/train_data.hdf5"
 
-<<<<<<< HEAD
-        self.h5_graphs = "tests/hdf5/1ATN_residue.hdf5"
-=======
         self.h5_graphs = 'tests/hdf5/1ATN_ppi.hdf5'
->>>>>>> main
 
     def test_pssm_convert(self):
         pssm_3dcons_to_deeprank(self.pssm_path)
