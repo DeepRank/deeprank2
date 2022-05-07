@@ -29,7 +29,7 @@ class NeuralNet(object):
                  batch_size=32, percent=[1.0, 0.0],
                  database_eval=None, index=None, class_weights=None, task=None,
                  classes=[0, 1], threshold=None,
-                 pretrained_model=None, shuffle=True, outdir='./', cluster_nodes='mcl', transform_sigmoid=False,
+                 pretrained_model=None, shuffle=True, cluster_nodes='mcl', transform_sigmoid=False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
@@ -57,7 +57,6 @@ class NeuralNet(object):
             threshold (int, optional): threshold to compute binary classification metrics. Defaults to 4.0.
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the training set. Defaults to True.
-            outdir (str, optional): output directory. Defaults to ./
             cluster_nodes (bool, optional): perform node clustering ('mcl' or 'louvain' algorithm). Default to 'mcl'.
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
@@ -95,7 +94,6 @@ class NeuralNet(object):
 
         else:
             self.load_params(pretrained_model)
-            self.outdir = outdir
             self.load_pretrained_model(database, Net)
 
         if metrics_exporters is not None:
@@ -278,9 +276,6 @@ class NeuralNet(object):
 
         with self._metrics_exporters:
 
-            # Output file name
-            data_hdf5_path = self.update_name(hdf5, self.outdir)
-
             # Number of epochs
             self.nepoch = nepoch
 
@@ -342,9 +337,6 @@ class NeuralNet(object):
         """
 
         with self._metrics_exporters:
-
-            # Output file name
-            data_hdf5_path = self.update_name(hdf5, self.outdir)
 
             # Loads the test dataset if provided
             if database_test is not None:
