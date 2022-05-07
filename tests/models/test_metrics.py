@@ -5,6 +5,7 @@ import shutil
 from tempfile import mkdtemp
 import logging
 
+import unittest
 from unittest.mock import patch
 
 from deeprank_gnn.models.metrics import (MetricsExporterCollection,
@@ -14,7 +15,7 @@ from deeprank_gnn.models.metrics import (MetricsExporterCollection,
 _log = logging.getLogger(__name__)
 
 
-class TestMetrics:
+class TestMetrics(unittest.TestCase):
     def setUp(self):
         self._work_dir = mkdtemp()
 
