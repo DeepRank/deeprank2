@@ -47,7 +47,8 @@ setup(
         'networkx == 2.6.3', 'matplotlib >= 3.5.1', 'pdb2sql >= 0.5.1', 'sklearn',
         'chart-studio >= 1.1.0', 'BioPython >= 1.79', 'python-louvain >= 0.16',
         'markov-clustering >= 0.0.6.dev0',
-        'tqdm >= 4.63.0', 'freesasa >= 2.1.0'
+        'tqdm >= 4.63.0', 'freesasa >= 2.1.0',
+        'tensorboard >= 2.9.0', 'torchvision >= 0.12.0'
     ],
     extras_require={
         'dev': ['prospector[with_pyroma]', 'yapf', 'isort'],
