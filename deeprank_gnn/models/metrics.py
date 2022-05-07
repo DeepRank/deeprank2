@@ -3,11 +3,15 @@ import os
 import csv
 from typing import List, Tuple, Any
 from math import sqrt
+import logging
 
 from torch import argmax, tensor
 from torch.nn.functional import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import roc_auc_score
+
+
+_log = logging.getLogger(__name__)
 
 
 class MetricsExporter:
@@ -112,8 +116,10 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
         accuracy = (tp + tn) / (tp + tn + fp + fn)
         self._writer.add_scalar(f"{pass_name} accuracy", accuracy, epoch_number)
 
-        roc_auc = roc_auc_score(target_values, probabilities)
-        self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
+        # for ROC curves to work, we need both class values in the set
+        if len(set(target_values)) == 2:
+            roc_auc = roc_auc_score(target_values, probabilities)
+            self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
 
 
 class OutputExporter(MetricsExporter):
