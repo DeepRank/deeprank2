@@ -53,7 +53,6 @@ setup(
     extras_require={
         'dev': ['prospector[with_pyroma]', 'yapf', 'isort'],
         'doc': ['recommonmark', 'sphinx', 'sphinx_rtd_theme'],
-        'test':
-        ['coverage', 'pycodestyle', 'pytest',
-            'pytest-cov', 'pytest-runner', 'coveralls'],
+        'test': ['coverage', 'pycodestyle', 'pytest', 'unittest',
+                 'pytest-cov', 'pytest-runner', 'coveralls'],
     })

@@ -79,8 +79,8 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         "write to tensorboard"
 
-        loss = cross_entropy(tensor(output_values), tensor(target_values))
-        self._writer.add_scalar(f"{pass_name} loss", loss, epoch_number)
+        loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
+        self._writer.add_scalar(f"{pass_name} cross entropy loss", loss, epoch_number)
 
         probabilities = []
         fp, fn, tp, tn = 0, 0, 0, 0
@@ -105,7 +105,7 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
 
         mcc_numerator = tn * tp - fp * fn
         if mcc_numerator == 0.0:
-             self._writer.add_scalar(f"{pass_name} MCC", 0.0, epoch_number)
+            self._writer.add_scalar(f"{pass_name} MCC", 0.0, epoch_number)
         else:
             mcc_denominator = sqrt((tn + fn) * (fp + tp) * (tn + fp) * (fn + tp))
 
