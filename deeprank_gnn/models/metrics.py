@@ -60,7 +60,7 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
         Outputs are done per epoch.
     """
 
-    def __init__(self, directory_path):
+    def __init__(self, directory_path: str):
         self._directory_path = directory_path
         self._writer = SummaryWriter(log_dir=directory_path)
 
@@ -117,15 +117,19 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
 
 
 class OutputExporter(MetricsExporter):
-    """ A metrics exporter that writes output tables, containing every single data point
+    """ A metrics exporter that writes CSV output tables, containing every single data point
 
         Included are:
             - entry names
             - output values
             - target values
+
+        The user can use these output tables to make a scatter plot for a particular epoch.
+
+        Outputs are done per epoch.
     """
 
-    def __init__(self, directory_path):
+    def __init__(self, directory_path: str):
         self._directory_path = directory_path
 
     def get_filename(self, pass_name, epoch_number):
