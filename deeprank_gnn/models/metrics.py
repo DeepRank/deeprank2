@@ -146,13 +146,15 @@ class OutputExporter(MetricsExporter):
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         "write the output to the table"
 
-        with lzma.open(self.get_filename(pass_name, epoch_number), 'wt') as f:
-            w = csv.writer(f)
+        with lzma.open(self.get_filename(pass_name, epoch_number), 'wt', newline='\n') as f:
+            w = csv.writer(f, delimiter=',')
 
             w.writerow(["entry", "output", "target"])
 
             for entry_index, entry_name in enumerate(entry_names):
                 output_value = output_values[entry_index]
                 target_value = target_values[entry_index]
+
+                _log.debug(f"writerow [{entry_name}, {output_value}, {target_value}]")
 
                 w.writerow([entry_name, str(output_value), str(target_value)])
