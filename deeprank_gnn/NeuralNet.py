@@ -15,7 +15,6 @@ from sklearn.metrics import roc_auc_score
 # deeprank_gnn import
 from .models.metrics import MetricsExporter, MetricsExporterCollection
 from .DataSet import HDF5DataSet, DivideDataSet, PreCluster
-from .Metrics import Metrics
 
 
 _log = logging.getLogger(__name__)
