@@ -1,10 +1,12 @@
 import lzma
 import os
 import csv
-from typing import List, Tuple, Any
+from typing import List, Tuple, Any, Dict
 from math import sqrt
 import logging
+import random
 
+from matplotlib import pyplot
 from torch import argmax, tensor
 from torch.nn.functional import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
@@ -123,14 +125,14 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
 
 
 class OutputExporter(MetricsExporter):
-    """ A metrics exporter that writes CSV output tables, containing every single data point
+    """ A metrics exporter that writes CSV output tables, containing every single data point.
 
         Included are:
             - entry names
             - output values
             - target values
 
-        The user can use these output tables to make a scatter plot for a particular epoch.
+        The user can load these output tables in excel.
 
         Outputs are done per epoch.
     """
@@ -158,3 +160,77 @@ class OutputExporter(MetricsExporter):
                 _log.debug(f"writerow [{entry_name}, {output_value}, {target_value}]")
 
                 w.writerow([entry_name, str(output_value), str(target_value)])
+
+
+class ScatterPlotExporter(MetricsExporter):
+    """ A metrics exporter that ocasionally makes scatter plots, containing every single data point.
+
+        On the X-axis: targets values
+        On the Y-axis: output values
+    """
+
+    def __init__(self, directory_path: str, epoch_interval: int = 1):
+        """ Args:
+                directory_path: where to store the plots
+                epoch_interval: how often to make a plot, 5 means: every 5 epochs
+        """
+
+        self._epoch_interval = epoch_interval
+        self._directory_path = directory_path
+
+    def __enter__(self):
+        self._plot_data = {}
+        return self
+
+    def __exit__(self, exception_type, exception, traceback):
+        self._plot_data.clear()
+
+    def get_filename(self, epoch_number):
+        "returns the filename for the table"
+        return os.path.join(self._directory_path, f"scatter-{epoch_number}.png")
+
+    @staticmethod
+    def _get_color(pass_name):
+
+        pass_name = pass_name.lower().strip()
+
+        if pass_name in ("train", "training"):
+            return "blue"
+
+        elif pass_name in ("eval", "valid", "validation"):
+            return "red"
+
+        elif pass_name == ("test", "testing"):
+            return "green"
+        else:
+            return random.choice(["yellow", "cyan", "magenta"])
+
+
+    @staticmethod
+    def _plot(epoch_number: int, data: Dict[str, Tuple[List[float], List[float]]], png_path: str):
+
+        pyplot.title(f"Epoch {epoch_number}")
+
+        for pass_name, (truth_values, prediction_values) in data.items():
+            pyplot.scatter(truth_values, prediction_values, color=ScatterPlotExporter._get_color(pass_name), label=pass_name)
+
+        pyplot.xlabel("truth")
+        pyplot.ylabel("prediction")
+
+        pyplot.legend()
+        pyplot.savefig(png_path)
+        pyplot.close()
+
+    def process(self, pass_name: str, epoch_number: int,
+                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+        "make the plot, if the epoch matches with the interval"
+
+        if epoch_number % self._epoch_interval == 0:
+
+            if epoch_number not in self._plot_data:
+                self._plot_data[epoch_number] = {}
+
+            self._plot_data[epoch_number][pass_name] = (target_values, output_values)
+
+            path = self.get_filename(epoch_number)
+            self._plot(epoch_number, self._plot_data[epoch_number], path)
