@@ -3,17 +3,14 @@ from torch.nn import Parameter
 import torch.nn.functional as F
 import torch.nn as nn
 
-from torch_scatter import scatter_add
 from torch_scatter import scatter_mean
-
-from torch_geometric.utils import remove_self_loops, add_self_loops, softmax
 
 # torch_geometric import
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
 
 # deeprank_gnn import
-from .community_pooling import get_preloaded_cluster, community_pooling
+from deeprank_gnn.community_pooling import get_preloaded_cluster, community_pooling
 
 
 class sGraphAttentionLayer(torch.nn.Module):

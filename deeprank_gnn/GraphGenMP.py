@@ -5,14 +5,10 @@ import sys
 import glob
 import h5py
 from tqdm import tqdm
-import time
-import multiprocessing as mp
-from functools import partial
 
-from .preprocess import PreProcessor
-from .models.graph import Graph
-from .models.query import ProteinProteinInterfaceResidueQuery
-from .tools.score import get_all_scores
+from deeprank_gnn.preprocess import PreProcessor
+from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
+from deeprank_gnn.tools.score import get_all_scores
 import deeprank_gnn.feature.amino_acid
 import deeprank_gnn.feature.atomic_contact
 import deeprank_gnn.feature.biopython

@@ -9,7 +9,7 @@ import numpy
 import h5py
 import itertools
 from scipy.signal import bspline
-from ..domain.storage import (
+from deeprank_gnn.domain.storage import (
     HDF5KEY_GRID_POINTS,
     HDF5KEY_GRID_X,
     HDF5KEY_GRID_Y,

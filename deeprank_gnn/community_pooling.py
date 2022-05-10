@@ -4,7 +4,7 @@ import networkx as nx
 import torch
 
 from torch_scatter import scatter_max, scatter_mean
-from torch_geometric.nn.pool.pool import pool_edge, pool_batch, pool_pos
+from torch_geometric.nn.pool.pool import pool_edge, pool_batch
 from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.data import Batch, Data
 

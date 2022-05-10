@@ -5,13 +5,11 @@ import traceback
 from multiprocessing import Queue, Process, Pipe, cpu_count
 from queue import Empty as EmptyQueueError
 import logging
-import sys
 import os
 from time import sleep
 
 import h5py
 
-from deeprank_gnn.domain.amino_acid import amino_acids
 from deeprank_gnn.models.query import Query
 
 

@@ -10,7 +10,7 @@ from tqdm import tqdm
 import h5py
 import copy
 
-from .community_pooling import community_detection, community_pooling
+from deeprank_gnn.community_pooling import community_detection, community_pooling
 
 
 def DivideDataSet(dataset, percent=[0.8, 0.2], shuffle=True):

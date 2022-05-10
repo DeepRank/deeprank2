@@ -1,8 +1,5 @@
-import torch.nn.functional as F
 import torch.nn as nn
-import numpy as np
 import torch
-import os
 
 __author__ = "Daniel-Tobias Rademaker"
 
