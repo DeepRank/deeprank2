@@ -25,20 +25,20 @@ class NeuralNet():
                  Net,
                  node_feature=None,
                  edge_feature=None,
-                 target='irmsd', # noqa
-                 lr=0.01, # noqa
-                 batch_size=32, # noqa
+                 target='irmsd',  # pylint: disable=unused-argument
+                 lr=0.01, # pylint: disable=unused-argument
+                 batch_size=32, # pylint: disable=unused-argument
                  percent=None,
                  database_eval=None,
-                 index=None, # noqa
-                 class_weights=None, # noqa
-                 task=None, # noqa
+                 index=None, # pylint: disable=unused-argument
+                 class_weights=None, # pylint: disable=unused-argument
+                 task=None, # pylint: disable=unused-argument
                  classes=None,
-                 threshold=None, # noqa
+                 threshold=None, # pylint: disable=unused-argument
                  pretrained_model=None,
-                 shuffle=True, # noqa
-                 cluster_nodes='mcl', # noqa
-                 transform_sigmoid=False, # noqa
+                 shuffle=True, # pylint: disable=unused-argument
+                 cluster_nodes='mcl', # pylint: disable=unused-argument
+                 transform_sigmoid=False, # pylint: disable=unused-argument
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
@@ -307,8 +307,7 @@ class NeuralNet():
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
-    def train(self, nepoch=1, validate=False, save_model='last',
-              hdf5='train_data.hdf5'): # noqa
+    def train(self, nepoch=1, validate=False, save_model='last'):
         """
         Trains the model
 
@@ -345,9 +344,7 @@ class NeuralNet():
                 # Validate the model
                 if validate:
 
-                    # t0 = time()
                     loss_ = self.eval(self.valid_loader, epoch, "validation")
-                    # t = time() - t0
 
                     valid_losses.append(loss_)
 
@@ -355,14 +352,14 @@ class NeuralNet():
                     # data)
                     if save_model == 'best':
 
-                        if min(valid_losses) == _val_loss: # noqa
+                        if min(valid_losses) == loss_:
                             self.save_model(
                                 filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar')
                 else:
                     # if no validation set, saves the best performing model on
                     # the traing set
                     if save_model == 'best':
-                        if min(train_losses) == _loss: # noqa
+                        if min(train_losses) == loss_: # noqa
                             _log.warning(
                                 """The training set is used both for learning and model selection.
                                             This may lead to training set data overfitting.
@@ -376,7 +373,7 @@ class NeuralNet():
                 self.save_model(
                     filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}.pth.tar')
 
-    def test(self, database_test=None, threshold=4, hdf5='test_data.hdf5'): # noqa
+    def test(self, database_test=None):
         """
         Tests the model
 
@@ -442,7 +439,6 @@ class NeuralNet():
         outputs = []
         entry_names = []
 
-        # batch_count = len(loader)
         sum_of_losses = 0
         count_predictions = 0
 
@@ -503,8 +499,6 @@ class NeuralNet():
         targets = []
         outputs = []
         entry_names = []
-
-        # batch_count = len(self.train_loader)
 
         t0 = time()
         for _, data_batch in enumerate(self.train_loader):
