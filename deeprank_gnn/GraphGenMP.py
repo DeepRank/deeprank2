@@ -24,13 +24,11 @@ class GraphHDF5():
         self,
         pdb_path,
         ref_path=None,
-        graph_type="residue", # pylint: disable=unused-argument
         pssm_path=None,
         select=None,
         outfile="graph.hdf5",
         nproc=1,
         use_tqdm=True,
-        tmpdir="./", # pylint: disable=unused-argument
         limit=None,
         biopython=False,
     ):
