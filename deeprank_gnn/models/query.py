@@ -3,9 +3,9 @@ import os
 from typing import Dict, List, Optional, Iterator
 import tempfile
 import pdb2sql
-from .graph import Graph
-from .amino_acid import AminoAcid
-from ..tools.pdb import (
+from deeprank_gnn.models.graph import Graph
+from deeprank_gnn.models.amino_acid import AminoAcid
+from deeprank_gnn.tools.pdb import (
     get_residue_contact_pairs,
     get_surrounding_residues,
     get_structure,
