@@ -89,7 +89,7 @@ class TestMetrics(unittest.TestCase):
         outputs = [[0.2, 0.1], [0.3, 0.8], [0.8, 0.9]]
         targets = [0, 1, 1]
 
-        def _check_scalar(name, scalar):
+        def _check_scalar(name, scalar, timestep): # pylint: disable=unused-argument
             if name == f"{pass_name} cross entropy loss":
                 assert scalar < 1.0
             else:
