@@ -1,11 +1,7 @@
 import tempfile
 import shutil
 import os
-
 import unittest
-
-from deeprank_gnn.tools.CustomizeGraph import add_target
-from deeprank_gnn.GraphGenMP import GraphHDF5
 from deeprank_gnn.NeuralNet import NeuralNet
 from deeprank_gnn.ginet import GINet
 from deeprank_gnn.foutnet import FoutNet
@@ -16,7 +12,7 @@ from deeprank_gnn.models.metrics import (
 )
 
 
-def _model_base_test(
+def _model_base_test( # pylint: disable=too-many-arguments
     hdf5_path,
     model_class,
     node_features,
@@ -43,7 +39,7 @@ def _model_base_test(
 
     NN.save_model("test.pth.tar")
 
-    NN_cpy = NeuralNet(hdf5_path, model_class, pretrained_model="test.pth.tar")
+    NeuralNet(hdf5_path, model_class, pretrained_model="test.pth.tar")
 
 
 class TestNeuralNet(unittest.TestCase):

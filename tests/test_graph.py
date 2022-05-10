@@ -1,8 +1,5 @@
-import os
-import tempfile
 import unittest
 import h5py
-
 from deeprank_gnn.tools.visualization import hdf5_to_networkx, plotly_2d, plotly_3d
 from deeprank_gnn.tools.score import get_all_scores
 
@@ -16,7 +13,7 @@ class TestGraph(unittest.TestCase):
         self.reference_path = "tests/data/pdb/1ATN/1ATN_2w.pdb"
 
     def test_score(self):
-        scores = get_all_scores(self.pdb_path, self.reference_path)
+        get_all_scores(self.pdb_path, self.reference_path)
 
     def test_plot_2d(self):
         plotly_2d(self.networkx_graph, "1ATN", disable_plot=True)

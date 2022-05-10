@@ -8,7 +8,7 @@ from deeprank_gnn.models.contact import AtomicContact, ResidueContact
 from deeprank_gnn.models.graph import Edge, Graph
 from deeprank_gnn.tools.pdb import get_structure
 from deeprank_gnn.feature.atomic_contact import add_features
-from deeprank_gnn.domain.amino_acid import *
+from deeprank_gnn.domain.amino_acid import alanine
 from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.domain.feature import (
     FEATURENAME_EDGEDISTANCE,
@@ -44,7 +44,7 @@ def test_add_features():
     try:
         structure = get_structure(pdb, "101m")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     variant = SingleResidueVariant(structure.chains[0].residues[10], alanine)
 
@@ -82,26 +82,17 @@ def test_add_features():
     assert (
         edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS]
         < edge_far.features[FEATURENAME_EDGEVANDERWAALS]
-    ), "{} >= {}".format(
-        edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS],
-        edge_far.features[FEATURENAME_EDGEVANDERWAALS],
-    )
+    ), f"{edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS]} >= {edge_far.features[FEATURENAME_EDGEVANDERWAALS]}"
 
     # Check the distances
     assert (
         edge_close.features[FEATURENAME_EDGEDISTANCE]
         < edge_intermediate.features[FEATURENAME_EDGEDISTANCE]
-    ), "{} >= {}".format(
-        edge_close.features[FEATURENAME_EDGEDISTANCE],
-        edge_intermediate.features[FEATURENAME_EDGEDISTANCE],
-    )
+    ), f"{edge_close.features[FEATURENAME_EDGEDISTANCE]} >= {edge_intermediate.features[FEATURENAME_EDGEDISTANCE]}"
     assert (
         edge_far.features[FEATURENAME_EDGEDISTANCE]
         > edge_intermediate.features[FEATURENAME_EDGEDISTANCE]
-    ), "{} <= {}".format(
-        edge_far.features[FEATURENAME_EDGEDISTANCE],
-        edge_intermediate.features[FEATURENAME_EDGEDISTANCE],
-    )
+    ), f"{edge_far.features[FEATURENAME_EDGEDISTANCE]} <= {edge_intermediate.features[FEATURENAME_EDGEDISTANCE]}"
 
     # ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy
     contact = AtomicContact(
@@ -129,10 +120,7 @@ def test_add_features():
     assert (
         far_attracting_edge.features[FEATURENAME_EDGECOULOMB]
         > close_attracting_edge.features[FEATURENAME_EDGECOULOMB]
-    ), "{} <= {}".format(
-        far_attracting_edge.features[FEATURENAME_EDGECOULOMB],
-        close_attracting_edge.features[FEATURENAME_EDGECOULOMB],
-    )
+    ), f"{far_attracting_edge.features[FEATURENAME_EDGECOULOMB]} <= {close_attracting_edge.features[FEATURENAME_EDGECOULOMB]}"
 
     # GLU 109 OE2 - GLU 105 OE1, repulsive electrostatic energy
     contact = AtomicContact(

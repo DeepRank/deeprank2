@@ -1,15 +1,38 @@
-import os
 from tempfile import mkstemp
-
 import numpy
+import os
 import h5py
-
-from deeprank_gnn.models.structure import Residue, Atom, AtomicElement
-from deeprank_gnn.domain.amino_acid import *
-from deeprank_gnn.models.query import *
-from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.domain.feature import *
-from deeprank_gnn.feature import sasa, atomic_contact, bsa, pssm, amino_acid, biopython
+from deeprank_gnn.domain.amino_acid import (
+    alanine,
+    arginine,
+    asparagine,
+    glutamate,
+    glycine,
+    leucine,
+    lysine,
+    phenylalanine
+)
+from deeprank_gnn.models.query import (
+    SingleResidueVariantResidueQuery,
+    SingleResidueVariantAtomicQuery,
+    ProteinProteinInterfaceAtomicQuery,
+    ProteinProteinInterfaceResidueQuery
+)
+from deeprank_gnn.domain.feature import (
+    FEATURENAME_POSITION,
+    FEATURENAME_AMINOACID,
+    FEATURENAME_VARIANTAMINOACID,
+    FEATURENAME_POLARITY,
+    FEATURENAME_BURIEDSURFACEAREA,
+    FEATURENAME_PSSM,
+    FEATURENAME_INFORMATIONCONTENT,
+    FEATURENAME_PSSMDIFFERENCE,
+    FEATURENAME_SASA,
+    FEATURENAME_EDGECOULOMB,
+    FEATURENAME_EDGEVANDERWAALS,
+    FEATURENAME_EDGEDISTANCE
+)
+from deeprank_gnn.feature import sasa, atomic_contact, bsa, pssm, amino_acid
 from deeprank_gnn.DataSet import HDF5DataSet
 
 
@@ -69,9 +92,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
         count_edge_features_torch = torch_data_entry.edge_attr.shape[0]
         assert (
             count_edge_features_torch == count_edges_torch
-        ), "got {} edge feature sets, but {} edge indices".format(
-            count_edge_features_torch, count_edges_torch
-        )
+        ), f"got {count_edge_features_torch} edge feature sets, but {count_edges_torch} edge indices"
     finally:
         os.remove(tmp_path)
 

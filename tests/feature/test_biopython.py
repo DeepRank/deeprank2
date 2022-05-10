@@ -1,8 +1,5 @@
 import numpy
 from pdb2sql import pdb2sql
-
-from deeprank_gnn.models.graph import Graph, Node
-from deeprank_gnn.models.structure import Chain, Residue
 from deeprank_gnn.feature.biopython import add_features
 from deeprank_gnn.tools.graph import build_residue_graph
 from deeprank_gnn.tools.pdb import get_structure, get_residue_contact_pairs
@@ -19,7 +16,7 @@ def test_add_features():
     try:
         structure = get_structure(pdb, "1ATN_1w")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     residues = set([])
     for residue1, residue2 in get_residue_contact_pairs(

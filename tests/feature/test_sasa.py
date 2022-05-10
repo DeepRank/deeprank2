@@ -1,6 +1,5 @@
 import numpy
 from pdb2sql import pdb2sql
-
 from deeprank_gnn.domain.amino_acid import alanine
 from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.graph import Graph, Node
@@ -45,7 +44,7 @@ def test_add_features_to_residues():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     residue = _get_residue(structure.chains[0], 108)
     variant = SingleResidueVariant(residue, alanine)
@@ -58,7 +57,7 @@ def test_add_features_to_residues():
 
     # check for NaN
     assert not any(
-        [numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes]
+        numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes
     )
 
     # surface residues should have large area
@@ -80,7 +79,7 @@ def test_add_features_to_atoms():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     residue = _get_residue(structure.chains[0], 108)
     variant = SingleResidueVariant(residue, alanine)
@@ -98,7 +97,7 @@ def test_add_features_to_atoms():
 
     # check for NaN
     assert not any(
-        [numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes]
+        numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes
     )
 
     # surface atoms should have large area

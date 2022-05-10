@@ -1,11 +1,10 @@
 from pdb2sql import pdb2sql
 import numpy
-
 from deeprank_gnn.domain.amino_acid import alanine
 from deeprank_gnn.tools.pssm import parse_pssm
 from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.feature.pssm import add_features
-from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
+from deeprank_gnn.tools.graph import build_atomic_graph
 from deeprank_gnn.tools.pdb import get_structure, get_surrounding_residues
 from deeprank_gnn.domain.feature import (
     FEATURENAME_PSSM,
@@ -24,10 +23,10 @@ def test_add_features():
     try:
         structure = get_structure(pdb, "101m")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     chain = structure.get_chain("A")
-    with open("tests/data/pssm/101M/101M.A.pdb.pssm", "rt") as f:
+    with open("tests/data/pssm/101M/101M.A.pdb.pssm", "rt", encoding="utf-8") as f:
         chain.pssm = parse_pssm(f, chain)
 
     variant_residue = chain.residues[25]

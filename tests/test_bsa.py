@@ -1,5 +1,4 @@
 import unittest
-from deeprank_gnn.DataSet import HDF5DataSet, DivideDataSet, PreCluster
 from deeprank_gnn.tools.BSA import BSA
 
 

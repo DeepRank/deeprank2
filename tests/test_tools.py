@@ -1,7 +1,6 @@
 import tempfile
 import os
 import shutil
-
 import unittest
 import numpy as np
 from deeprank_gnn.tools.pssm_3dcons_to_deeprank import pssm_3dcons_to_deeprank
@@ -37,9 +36,9 @@ class TestTools(unittest.TestCase):
         try:
             target_list = ""
             for i in range(1, 11):
-                target_list += "1ATN_%dw %d\n" % (i, i)
+                target_list += f"1ATN_{i}w {i}\n"
 
-            with open(target_path, "w") as f:
+            with open(target_path, "w", encoding="utf-8") as f:
                 f.write(target_list)
 
             shutil.copy(self.h5_graphs, graph_path)

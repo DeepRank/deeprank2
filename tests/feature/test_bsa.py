@@ -1,8 +1,5 @@
-import numpy
 from pdb2sql import pdb2sql
-
-from deeprank_gnn.models.graph import Graph, Node
-from deeprank_gnn.models.structure import Chain, Residue, Structure
+from deeprank_gnn.models.structure import Structure
 from deeprank_gnn.feature.bsa import add_features
 from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
 from deeprank_gnn.tools.pdb import get_structure, get_residue_contact_pairs
@@ -39,7 +36,7 @@ def _load_pdb_structure(pdb_path: str, id_: str) -> Structure:
     try:
         return get_structure(pdb, id_)
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
 
 def test_add_features_residue():

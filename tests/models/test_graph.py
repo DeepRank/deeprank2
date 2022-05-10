@@ -1,20 +1,24 @@
 import tempfile
 import shutil
 import os
-
 import h5py
 from pdb2sql import pdb2sql
 import numpy
-
 from deeprank_gnn.models.grid import GridSettings, MapMethod
 from deeprank_gnn.models.graph import Graph, Edge, Node
 from deeprank_gnn.models.contact import ResidueContact
 from deeprank_gnn.tools.pdb import get_structure
-from deeprank_gnn.domain.amino_acid import *
-from deeprank_gnn.domain.storage import *
+from deeprank_gnn.domain.storage import (
+    HDF5KEY_GRAPH_NODEFEATURES,
+    HDF5KEY_GRAPH_EDGEINDICES,
+    HDF5KEY_GRAPH_EDGEFEATURES,
+    HDF5KEY_GRID_MAPPEDFEATURES,
+    HDF5KEY_GRID_MAPPEDFEATURESVALUE
+
+)
 
 
-def test_graph_build_and_export():
+def test_graph_build_and_export(): # pylint: disable=too-many-locals
     """Build a simple graph of two nodes and one edge in between them.
     Test that the export methods can be called without failure.
     """
@@ -26,7 +30,7 @@ def test_graph_build_and_export():
     try:
         structure = get_structure(pdb, entry_id)
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     # build a contact from two residues
     residue0 = structure.chains[0].residues[0]

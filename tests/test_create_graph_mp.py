@@ -1,7 +1,6 @@
 import tempfile
 import shutil
 import os
-
 import unittest
 from deeprank_gnn.GraphGenMP import GraphHDF5
 

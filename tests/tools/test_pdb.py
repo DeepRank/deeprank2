@@ -1,5 +1,4 @@
 import numpy
-
 from pdb2sql import pdb2sql
 from deeprank_gnn.tools.pdb import (
     get_structure,
@@ -18,7 +17,7 @@ def test_get_structure_complete():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     assert structure is not None
 
@@ -47,7 +46,7 @@ def test_get_structure_from_nmr_with_dna():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     assert structure is not None
     assert structure.chains[0].residues[0].amino_acid is None  # DNA
@@ -64,7 +63,7 @@ def test_residue_contact_pairs():
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     residue_pairs = get_residue_contact_pairs(pdb_path, structure, "A", "B", 8.5)
 
@@ -79,7 +78,7 @@ def test_surrounding_residues():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     all_residues = structure.get_chain("A").residues
 
@@ -101,7 +100,7 @@ def test_neighbour_atoms():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     atoms = structure.get_atoms()
 

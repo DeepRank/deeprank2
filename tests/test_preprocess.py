@@ -1,9 +1,7 @@
 from tempfile import mkdtemp
 from shutil import rmtree
 import os
-
 import h5py
-
 from deeprank_gnn.preprocess import PreProcessor
 from deeprank_gnn.models.query import SingleResidueVariantResidueQuery
 from deeprank_gnn.domain.amino_acid import alanine, phenylalanine

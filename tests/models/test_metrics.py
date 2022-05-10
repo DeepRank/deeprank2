@@ -15,7 +15,7 @@ from deeprank_gnn.models.metrics import (
     ScatterPlotExporter,
 )
 
-_log = logging.getLogger(__name__)
+logging.getLogger(__name__)
 
 
 class TestMetrics(unittest.TestCase):
@@ -89,7 +89,7 @@ class TestMetrics(unittest.TestCase):
         outputs = [[0.2, 0.1], [0.3, 0.8], [0.8, 0.9]]
         targets = [0, 1, 1]
 
-        def _check_scalar(name, scalar, timestep):
+        def _check_scalar(name, scalar):
             if name == f"{pass_name} cross entropy loss":
                 assert scalar < 1.0
             else:
