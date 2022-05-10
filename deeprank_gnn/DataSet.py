@@ -11,7 +11,7 @@ import h5py
 import copy
 from ast import literal_eval
 
-from .community_pooling import community_detection, community_pooling
+from deeprank_gnn.community_pooling import community_detection, community_pooling
 
 
 def DivideDataSet(dataset, percent=None, shuffle=True):

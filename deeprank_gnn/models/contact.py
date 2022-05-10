@@ -1,6 +1,6 @@
 from abc import ABC
-from .pair import Pair
-from .structure import Residue, Atom
+from deeprank_gnn.models.pair import Pair
+from deeprank_gnn.models.structure import Residue, Atom
 
 class Contact(Pair, ABC):
     pass

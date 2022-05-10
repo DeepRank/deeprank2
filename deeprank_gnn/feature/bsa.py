@@ -1,12 +1,9 @@
-from typing import Optional
 import logging
 
 import freesasa
-import numpy
 
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.models.structure import Residue, Atom
-from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.domain.feature import FEATURENAME_BURIEDSURFACEAREA
 
 
