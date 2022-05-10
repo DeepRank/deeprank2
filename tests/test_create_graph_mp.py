@@ -37,13 +37,13 @@ class TestCreateGraph(unittest.TestCase):
 
     def test_create_serial_with_bio(self):
         GraphHDF5(pdb_path=self.pdb_path, ref_path=self.ref, pssm_path=self.pssm_path,
-                  graph_type='residue', outfile=self._make_output_file(),
-                  nproc=2, tmpdir=self._make_work_directory(), biopython=True)
+                  outfile=self._make_output_file(),
+                  nproc=2, biopython=True)
 
     def test_create_serial(self):
         GraphHDF5(pdb_path=self.pdb_path, ref_path=self.ref, pssm_path=self.pssm_path,
-                  graph_type='residue', outfile=self._make_output_file(),
-                  nproc=2, tmpdir=self._make_work_directory(), biopython=False)
+                  outfile=self._make_output_file(),
+                  nproc=2, biopython=False)
 
 
 if __name__ == "__main__":
