@@ -23,8 +23,11 @@ def _find_atom_node(graph, chain_id, residue_number, atom_name):
     for node in graph.nodes:
         atom = node.id
 
-        if atom.residue.chain.id == chain_id and atom.residue.number == residue_number and \
-                atom.name == atom_name:
+        if (
+            atom.residue.chain.id == chain_id
+            and atom.residue.number == residue_number
+            and atom.name == atom_name
+        ):
 
             return node
 
@@ -38,13 +41,16 @@ def _load_pdb_structure(pdb_path: str, id_: str) -> Structure:
     finally:
         pdb._close()
 
+
 def test_add_features_residue():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
 
     structure = _load_pdb_structure(pdb_path, "1ATN_1w")
 
     residues = set([])
-    for residue1, residue2 in get_residue_contact_pairs(pdb_path, structure, "A", "B", 8.5):
+    for residue1, residue2 in get_residue_contact_pairs(
+        pdb_path, structure, "A", "B", 8.5
+    ):
         residues.add(residue1)
         residues.add(residue2)
 
@@ -64,7 +70,9 @@ def test_add_features_atom():
     structure = _load_pdb_structure(pdb_path, "1ATN_1w")
 
     atoms = set([])
-    for residue1, residue2 in get_residue_contact_pairs(pdb_path, structure, "A", "B", 8.5):
+    for residue1, residue2 in get_residue_contact_pairs(
+        pdb_path, structure, "A", "B", 8.5
+    ):
         for atom in residue1.atoms:
             atoms.add(atom)
         for atom in residue2.atoms:

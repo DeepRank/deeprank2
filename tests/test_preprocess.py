@@ -32,10 +32,16 @@ def test_preprocess():
         queries = []
         for number in range(1, count_queries + 1):
             query = SingleResidueVariantResidueQuery(
-                str(PATH_TEST / "data/pdb/101M/101M.pdb"), "A", number, None,
-                alanine, phenylalanine,
+                str(PATH_TEST / "data/pdb/101M/101M.pdb"),
+                "A",
+                number,
+                None,
+                alanine,
+                phenylalanine,
                 pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
-                variant_conservation=0.0, wildtype_conservation=0.0)
+                variant_conservation=0.0,
+                wildtype_conservation=0.0,
+            )
             preprocessor.add_query(query)
             queries.append(query)
 
@@ -45,7 +51,7 @@ def test_preprocess():
 
         graph_names = []
         for path in preprocessor.output_paths:
-            with h5py.File(path, 'r') as f5:
+            with h5py.File(path, "r") as f5:
                 graph_names += list(f5.keys())
 
         for query in queries:

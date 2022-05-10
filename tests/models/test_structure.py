@@ -8,4 +8,3 @@ from deeprank_gnn.tools.pdb import get_structure
 
 def test_element():
     value = AtomicElement.C.onehot
-

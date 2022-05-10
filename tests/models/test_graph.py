@@ -15,8 +15,8 @@ from deeprank_gnn.domain.storage import *
 
 
 def test_graph_build_and_export():
-    """ Build a simple graph of two nodes and one edge in between them.
-        Test that the export methods can be called without failure.
+    """Build a simple graph of two nodes and one edge in between them.
+    Test that the export methods can be called without failure.
     """
 
     entry_id = "test"
@@ -65,7 +65,7 @@ def test_graph_build_and_export():
         graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
 
         # check the contents of the hdf5 file
-        with h5py.File(hdf5_path, 'r') as f5:
+        with h5py.File(hdf5_path, "r") as f5:
             entry_group = f5[entry_id]
 
             # check for graph values
@@ -89,7 +89,9 @@ def test_graph_build_and_export():
             for feature_name in (node_feature_name, edge_feature_name):
                 feature_name = f"{feature_name}_000"
 
-                assert feature_name in mapped_group, f"missing mapped feature {feature_name}"
+                assert (
+                    feature_name in mapped_group
+                ), f"missing mapped feature {feature_name}"
                 assert HDF5KEY_GRID_MAPPEDFEATURESVALUE in mapped_group[feature_name]
                 data = mapped_group[feature_name][HDF5KEY_GRID_MAPPEDFEATURESVALUE][()]
                 assert len(numpy.nonzero(data)) > 0, f"{feature_name}: all zero"
