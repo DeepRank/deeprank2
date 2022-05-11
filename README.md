@@ -162,7 +162,8 @@ nn = NeuralNet(database, CustomNet,
                target='irmsd',
                index=range(400),
                batch_size=64,
-               percent=[0.8, 0.2])
+               percent=[0.8, 0.2],
+               device=device)
 nn.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 nn.loss = MSELoss()
 
