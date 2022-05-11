@@ -207,7 +207,7 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
                     edge.features[FEATURENAME_COVALENT] = 0.0
 
 
-def add_features(pdb_path: str, graph: Graph):
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     if isinstance(graph.edges[0].id, ResidueContact):
         add_features_for_residues(graph.edges)

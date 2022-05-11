@@ -76,8 +76,10 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
     def __exit__(self, exception_type, exception, traceback):
         self._writer.__exit__(exception_type, exception, traceback)
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments, too-many-locals
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+    def process( # pylint: disable=too-many-arguments, too-many-locals
+        self, pass_name: str, epoch_number: int,
+        entry_names: List[str], output_values: List[Any],
+        target_values: List[Any]):
         "write to tensorboard"
 
         loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
@@ -220,8 +222,10 @@ class ScatterPlotExporter(MetricsExporter):
         pyplot.savefig(png_path)
         pyplot.close()
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+    def process( # pylint: disable=too-many-arguments
+        self, pass_name: str, epoch_number: int, 
+        entry_names: List[str], output_values: List[Any],
+        target_values: List[Any]):
         "make the plot, if the epoch matches with the interval"
 
         if epoch_number % self._epoch_interval == 0:

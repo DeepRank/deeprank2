@@ -50,8 +50,8 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
             raise TypeError(f"Unexpected node type: {type(node.id)}")
 
     sasa_complete_result = freesasa.calc(sasa_complete_structure) # pylint: disable=c-extension-no-member
-    sasa_chain_results = {chain_id: freesasa.calc(structure) # pylint: disable=c-extension-no-member
-                          for chain_id, structure in sasa_chain_structures.items()}
+    sasa_chain_results = {chain_id: freesasa.calc(structure)
+                          for chain_id, structure in sasa_chain_structures.items()} # pylint: disable=c-extension-no-member
 
     for node in graph.nodes:
         if isinstance(node.id, Residue):
