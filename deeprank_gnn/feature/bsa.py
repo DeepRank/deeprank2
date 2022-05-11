@@ -14,7 +14,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     "calculates the buried surface area (BSA): the area of the protein, that only gets exposed in monomeric state"
 
-    sasa_complete_structure = freesasa.Structure()
+    sasa_complete_structure = freesasa.Structure() # pylint: disable=c-extension-no-member
     sasa_chain_structures = {}
 
     for node in graph.nodes:
@@ -22,7 +22,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
             residue = node.id
             chain_id = residue.chain.id
             if chain_id not in sasa_chain_structures:
-                sasa_chain_structures[chain_id] = freesasa.Structure()
+                sasa_chain_structures[chain_id] = freesasa.Structure() # pylint: disable=c-extension-no-member
 
             for atom in residue.atoms:
                 sasa_chain_structures[chain_id].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
@@ -37,7 +37,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
             residue = atom.residue
             chain_id = residue.chain.id
             if chain_id not in sasa_chain_structures:
-                sasa_chain_structures[chain_id] = freesasa.Structure()
+                sasa_chain_structures[chain_id] = freesasa.Structure() # pylint: disable=c-extension-no-member
 
             sasa_chain_structures[chain_id].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
                                                     atom.residue.number, atom.residue.chain.id,
@@ -49,10 +49,10 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
             area_key = "atom"
             selection = ('atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, atom.residue.number_string, atom.residue.chain.id),)
         else:
-            raise TypeError("Unexpected node type: {}".format(type(node.id)))
+            raise TypeError(f"Unexpected node type: {type(node.id)}")
 
-    sasa_complete_result = freesasa.calc(sasa_complete_structure)
-    sasa_chain_results = {chain_id: freesasa.calc(structure)
+    sasa_complete_result = freesasa.calc(sasa_complete_structure) # pylint: disable=c-extension-no-member
+    sasa_chain_results = {chain_id: freesasa.calc(structure) # pylint: disable=c-extension-no-member
                           for chain_id, structure in sasa_chain_structures.items()}
 
     for node in graph.nodes:
@@ -68,9 +68,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
             area_key = "atom"
             selection = ('atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, atom.residue.number_string, atom.residue.chain.id),)
 
-        area_monomer = freesasa.selectArea(selection, sasa_chain_structures[chain_id], sasa_chain_results[chain_id])[area_key]
-        area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key]
+        area_monomer = freesasa.selectArea(selection, sasa_chain_structures[chain_id], sasa_chain_results[chain_id])[area_key] # pylint: disable=c-extension-no-member
+        area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key] # pylint: disable=c-extension-no-member
 
         node.features[FEATURENAME_BURIEDSURFACEAREA] = area_monomer - area_multimer
-
-

@@ -1,9 +1,7 @@
 from typing import List
 import logging
-
 import numpy
 from scipy.spatial import distance_matrix
-
 from deeprank_gnn.models.structure import Atom
 from deeprank_gnn.models.graph import Graph, Edge
 from deeprank_gnn.models.contact import ResidueContact, AtomicContact
@@ -27,7 +25,7 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
     charge_count = len(charges)
     if charge_count != distances.shape[0] or charge_count != distances.shape[1]:
         raise ValueError("Cannot calculate potentials between {} charges and {} distances"
-                         .format(charge_count, "x".join([str(d) for d in distances.shape])))
+                         .format(charge_count, "x".join([str(d) for d in distances.shape]))) # pylint: disable=consider-using-f-string
 
     # calculate the potentials
     potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
@@ -47,10 +45,10 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
     atom_count = len(atoms)
     if atom_count != len(vanderwaals_parameters):
         raise ValueError("The number of atoms ({}) does not match the number of vanderwaals parameters ({})"
-                         .format(atom_count, len(vanderwaals_parameters)))
+                         .format(atom_count, len(vanderwaals_parameters))) # pylint: disable=consider-using-f-string
     if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
         raise ValueError("Cannot calculate potentials between {} atoms and {} distances"
-                         .format(atom_count, "x".join([str(d) for d in distances.shape])))
+                         .format(atom_count, "x".join([str(d) for d in distances.shape]))) # pylint: disable=consider-using-f-string
 
     # collect parameters
     sigmas1 = numpy.empty((atom_count, atom_count))
@@ -219,7 +217,3 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
         add_features_for_atoms(graph.edges)
     else:
         raise TypeError("Unexpected edge type: {}".format(type(edges[0].id)))
-
-
-
-

@@ -38,7 +38,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
         elif type(node.id) == Residue:
             residue = node.id
         else:
-            raise TypeError("Unexpected node type: {}".format(type(node)))
+            raise TypeError(f"Unexpected node type: {type(node)}")
 
         # These can only be calculated per residue, not per atom.
         # So for atomic graphs, every atom gets its residue's value.

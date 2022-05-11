@@ -1,7 +1,6 @@
 from typing import Optional
 
 import numpy
-
 from deeprank_gnn.models.graph import Graph
 from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.structure import Atom, Residue
@@ -11,8 +10,9 @@ from deeprank_gnn.domain.feature import (FEATURENAME_AMINOACID, FEATURENAME_VARI
                                          FEATURENAME_HYDROGENBONDDONORS, FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
                                          FEATURENAME_HYDROGENBONDACCEPTORS, FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE)
 
-def add_features(pdb_path: str, graph: Graph,
-                 single_amino_acid_variant: Optional[SingleResidueVariant] = None):
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None):
 
     for node in graph.nodes:
         if type(node.id) == Residue:
@@ -22,7 +22,7 @@ def add_features(pdb_path: str, graph: Graph,
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError("Unexpected node type: {}".format(type(node.id))) 
+            raise TypeError(f"Unexpected node type: {type(node.id)}") 
 
         node.features[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
         node.features[FEATURENAME_SIZE] = residue.amino_acid.size

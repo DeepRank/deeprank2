@@ -30,9 +30,9 @@ def test_add_features():
     add_features(pdb_path, graph)
 
     assert numpy.any(
-        [node.features[FEATURENAME_HALFSPHEREEXPOSURE] != 0.0 for node in graph.nodes]
+        node.features[FEATURENAME_HALFSPHEREEXPOSURE] != 0.0 for node in graph.nodes
     )
 
     assert numpy.any(
-        [node.features[FEATURENAME_RESIDUEDEPTH] != 0.0 for node in graph.nodes]
+        node.features[FEATURENAME_RESIDUEDEPTH] != 0.0 for node in graph.nodes
     )
