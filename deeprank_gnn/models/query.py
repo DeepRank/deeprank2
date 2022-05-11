@@ -106,8 +106,6 @@ class SingleResidueVariantResidueQuery(Query):
         wildtype_amino_acid: AminoAcid,
         variant_amino_acid: AminoAcid,
         pssm_paths: Optional[Dict[str, str]] = None,
-        wildtype_conservation: Optional[float] = None,
-        variant_conservation: Optional[float] = None,
         radius: Optional[float] = 10.0,
         external_distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
@@ -121,8 +119,6 @@ class SingleResidueVariantResidueQuery(Query):
             wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
             variant_amino_acid(deeprank amino acid object): the variant amino acid
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            wildtype_conservation(float): conservation value for the wildtype
-            variant_conservation(float): conservation value for the variant
             radius(float): in Ångström, determines how many residues will be included in the graph
             external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
             targets(dict(str,float)): named target values associated with this query
@@ -130,8 +126,6 @@ class SingleResidueVariantResidueQuery(Query):
 
         self._pdb_path = pdb_path
         self._pssm_paths = pssm_paths
-        self._wildtype_conservation = wildtype_conservation
-        self._variant_conservation = variant_conservation
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
