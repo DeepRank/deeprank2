@@ -84,14 +84,14 @@ def PreCluster(dataset, method):
         method_grp = clust_grp.create_group(method.lower())
 
         cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
+            data.internal_edge_index, data.num_nodes, method=method
         )
         method_grp.create_dataset("depth_0", data=cluster)
 
         data = community_pooling(cluster, data)
 
         cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
+            data.internal_edge_index, data.num_nodes, method=method
         )
         method_grp.create_dataset("depth_1", data=cluster)
 
