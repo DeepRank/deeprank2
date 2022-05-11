@@ -53,7 +53,7 @@ def test_add_features():
         _get_atom(structure.chains[0], 0, "N"), _get_atom(structure.chains[0], 0, "CA")
     )
     edge_close = Edge(contact)
-    add_features(_wrap_in_graph(edge_close))
+    add_features(pdb_path, _wrap_in_graph(edge_close), variant)
     assert not numpy.isnan(edge_close.features[FEATURENAME_EDGEVANDERWAALS])
     assert edge_close.features[FEATURENAME_EDGEVANDERWAALS] > 0.0, edge_close.features[
         FEATURENAME_EDGEVANDERWAALS
@@ -64,7 +64,7 @@ def test_add_features():
         _get_atom(structure.chains[0], 0, "N"), _get_atom(structure.chains[0], 27, "CB")
     )
     edge_far = Edge(contact)
-    add_features(_wrap_in_graph(edge_far))
+    add_features(pdb_path, _wrap_in_graph(edge_far), variant)
     assert not numpy.isnan(edge_far.features[FEATURENAME_EDGEVANDERWAALS])
     assert edge_far.features[FEATURENAME_EDGEVANDERWAALS] < 0.0, edge_far.features[
         FEATURENAME_EDGEVANDERWAALS
@@ -77,7 +77,7 @@ def test_add_features():
         _get_atom(structure.chains[0], 138, "CG"),
     )
     edge_intermediate = Edge(contact)
-    add_features(_wrap_in_graph(edge_intermediate))
+    add_features(pdb_path, _wrap_in_graph(edge_intermediate), variant)
     assert not numpy.isnan(edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS])
     assert (
         edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS]
@@ -100,7 +100,7 @@ def test_add_features():
         _get_atom(structure.chains[0], 136, "OE2"),
     )
     close_attracting_edge = Edge(contact)
-    add_features(_wrap_in_graph(close_attracting_edge))
+    add_features(pdb_path, _wrap_in_graph(close_attracting_edge), variant)
     assert not numpy.isnan(close_attracting_edge.features[FEATURENAME_EDGECOULOMB])
     assert (
         close_attracting_edge.features[FEATURENAME_EDGECOULOMB] < 0.0
@@ -112,7 +112,7 @@ def test_add_features():
         _get_atom(structure.chains[0], 20, "OD2"),
     )
     far_attracting_edge = Edge(contact)
-    add_features(_wrap_in_graph(far_attracting_edge))
+    add_features(pdb_path, _wrap_in_graph(far_attracting_edge), variant)
     assert not numpy.isnan(far_attracting_edge.features[FEATURENAME_EDGECOULOMB])
     assert (
         far_attracting_edge.features[FEATURENAME_EDGECOULOMB] < 0.0
@@ -128,7 +128,7 @@ def test_add_features():
         _get_atom(structure.chains[0], 105, "OE1"),
     )
     opposing_edge = Edge(contact)
-    add_features(_wrap_in_graph(opposing_edge))
+    add_features(pdb_path, _wrap_in_graph(opposing_edge), variant)
     assert not numpy.isnan(opposing_edge.features[FEATURENAME_EDGECOULOMB])
     assert (
         opposing_edge.features[FEATURENAME_EDGECOULOMB] > 0.0
@@ -139,7 +139,7 @@ def test_add_features():
         structure.chains[0].residues[0], structure.chains[0].residues[1]
     )
     edge = Edge(contact)
-    add_features(_wrap_in_graph(edge))
+    add_features(pdb_path, _wrap_in_graph(edge), variant)
     assert not numpy.isnan(edge.features[FEATURENAME_EDGEDISTANCE]) > 0.0
     assert edge.features[FEATURENAME_EDGEDISTANCE] > 0.0
     assert edge.features[FEATURENAME_EDGEDISTANCE] < 1e5

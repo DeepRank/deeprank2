@@ -28,7 +28,7 @@ def test_add_features():
 
     graph = build_residue_graph(residues, "101m-25", 4.5)
 
-    add_features(graph, variant)
+    add_features(pdb_path, graph, variant)
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER

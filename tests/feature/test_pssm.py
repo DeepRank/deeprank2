@@ -42,7 +42,7 @@ def test_add_features():
     assert len(atoms) > 0
 
     graph = build_atomic_graph(atoms, "101M-25-atom", 4.5)
-    add_features(graph, variant)
+    add_features(pdb_path, graph, variant)
 
     for feature_name in (
         FEATURENAME_PSSM,

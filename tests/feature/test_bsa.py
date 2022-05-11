@@ -53,7 +53,7 @@ def test_add_features_residue():
 
     graph = build_residue_graph(residues, "1ATN-1w", 8.5)
 
-    add_features(graph)
+    add_features(pdb_path, graph)
 
     # chain B ASP 93, at interface
     node = _find_residue_node(graph, "B", 93)
@@ -78,7 +78,7 @@ def test_add_features_atom():
 
     graph = build_atomic_graph(atoms, "1ATN-1w", 8.5)
 
-    add_features(graph)
+    add_features(pdb_path, graph)
 
     # chain B ASP 93, at interface
     node = _find_atom_node(graph, "B", 93, "OD1")

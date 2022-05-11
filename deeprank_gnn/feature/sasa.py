@@ -16,7 +16,7 @@ def add_features_for_residues(structure: freesasa.Structure, # pylint: disable=c
 
         selection = (f"residue, (resi {residue.number_string}) and (chain {residue.chain.id})")
 
-        area = freesasa.selectArea(selection, structure, result)['residue']
+        area = freesasa.selectArea(selection, structure, result)['residue'] # pylint: disable=c-extension-no-member
         if numpy.isnan(area):
             raise ValueError(f"freesasa returned {area} for {residue}")
 
@@ -40,7 +40,7 @@ def add_features_for_atoms(structure: freesasa.Structure, # pylint: disable=c-ex
         node.features[FEATURENAME_SASA] = area
 
 
-def add_features(pdb_path: str, graph: Graph):
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member
     result = freesasa.calc(structure) # pylint: disable=c-extension-no-member
@@ -48,7 +48,7 @@ def add_features(pdb_path: str, graph: Graph):
     if isinstance(graph.nodes[0].id, Residue):
         return add_features_for_residues(structure, result, graph.nodes)
 
-    elif isinstance(graph.nodes[0].id, Atom):
+    if isinstance(graph.nodes[0].id, Atom):
         return add_features_for_atoms(structure, result, graph.nodes)
-    else:
-        raise TypeError("Unexpected node type: {}".format(type(graph.nodes[0].id)))
+    
+    raise TypeError(f"Unexpected node type: {type(graph.nodes[0].id)}")

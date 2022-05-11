@@ -11,7 +11,7 @@ from deeprank_gnn.domain.feature import (FEATURENAME_PSSM, FEATURENAME_PSSMDIFFE
 profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.one_letter_code)
 
 
-def add_features(graph: Graph,
+def add_features(pdb_path: str, graph: Graph,
                  single_amino_acid_variant: Optional[SingleResidueVariant] = None):
 
     for node in graph.nodes:

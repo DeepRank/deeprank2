@@ -20,7 +20,7 @@ def space_if_none(value):
     return value
 
 
-def add_features(pdb_path: str, graph: Graph):
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     parser = PDBParser()
     structure = parser.get_structure('_tmp', pdb_path)

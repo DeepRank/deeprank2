@@ -8,7 +8,7 @@ from deeprank_gnn.domain.feature import FEATURENAME_BURIEDSURFACEAREA
 logging.getLogger(__name__)
 
 
-def add_features(graph: Graph):
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     "calculates the buried surface area (BSA): the area of the protein, that only gets exposed in monomeric state"
 

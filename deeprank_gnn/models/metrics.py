@@ -5,7 +5,6 @@ from typing import List, Tuple, Any, Dict
 from math import sqrt
 import logging
 import random
-
 from matplotlib import pyplot
 from torch import argmax, tensor
 from torch.nn.functional import cross_entropy
@@ -25,12 +24,12 @@ class MetricsExporter:
 
     def __exit__(self, exception_type, exception, traceback):
         "overridable"
-        pass
+        pass # pylint: disable=unnecessary-pass 
 
-    def process(self, pass_name: str, epoch_number: int,
+    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments 
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         "the entry_names, output_values, target_values MUST have the same length"
-        pass
+        pass # pylint: disable=unnecessary-pass
 
 
 class MetricsExporterCollection:
@@ -49,7 +48,7 @@ class MetricsExporterCollection:
         for metrics_exporter in self._metrics_exporters:
             metrics_exporter.__exit__(exception_type, exception, traceback)
 
-    def process(self, pass_name: str, epoch_number: int,
+    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         for metrics_exporter in self._metrics_exporters:
             metrics_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values)
@@ -77,7 +76,7 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
     def __exit__(self, exception_type, exception, traceback):
         self._writer.__exit__(exception_type, exception, traceback)
 
-    def process(self, pass_name: str, epoch_number: int,
+    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments, too-many-locals
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         "write to tensorboard"
 
@@ -86,7 +85,7 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
 
         probabilities = []
         fp, fn, tp, tn = 0, 0, 0, 0
-        for entry_index, entry_name in enumerate(entry_names):
+        for entry_index, _ in enumerate(entry_names):
             probability = output_values[entry_index][1]
             probabilities.append(probability)
 
@@ -221,7 +220,7 @@ class ScatterPlotExporter(MetricsExporter):
         pyplot.savefig(png_path)
         pyplot.close()
 
-    def process(self, pass_name: str, epoch_number: int,
+    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         "make the plot, if the epoch matches with the interval"
 

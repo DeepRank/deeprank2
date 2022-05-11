@@ -2,12 +2,9 @@ import torch
 from torch.nn import Parameter
 import torch.nn.functional as F
 from torch import nn
-
 from torch_scatter import scatter_mean
-
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
-
 from deeprank_gnn.community_pooling import get_preloaded_cluster, community_pooling
 
 
@@ -80,7 +77,7 @@ class FoutLayer(torch.nn.Module):
 
 
 class FoutNet(torch.nn.Module):
-    def __init__(self, input_shape, output_shape=1, input_shape_edge=None):
+    def __init__(self, input_shape, output_shape=1, input_shape_edge=None): # pylint: disable=unused-argument
         super().__init__()
 
         self.conv1 = FoutLayer(input_shape, 16)
