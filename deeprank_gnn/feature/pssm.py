@@ -16,10 +16,10 @@ def add_features( # pylint: disable=unused-argument
     single_amino_acid_variant: Optional[SingleResidueVariant] = None):
 
     for node in graph.nodes:
-        if type(node.id) == Residue:
+        if isinstance(node.id, Residue):
             residue = node.id
 
-        elif type(node.id) == Atom:
+        elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
         else:

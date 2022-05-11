@@ -24,8 +24,8 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
     # check for the correct matrix shape
     charge_count = len(charges)
     if charge_count != distances.shape[0] or charge_count != distances.shape[1]:
-        raise ValueError("Cannot calculate potentials between {} charges and {} distances"
-                         .format(charge_count, "x".join([str(d) for d in distances.shape]))) # pylint: disable=consider-using-f-string
+        raise ValueError("Cannot calculate potentials between {} charges and {} distances" # pylint: disable=consider-using-f-string
+                         .format(charge_count, "x".join([str(d) for d in distances.shape])))
 
     # calculate the potentials
     potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
@@ -44,11 +44,10 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
     # check for the correct data shapes
     atom_count = len(atoms)
     if atom_count != len(vanderwaals_parameters):
-        raise ValueError("The number of atoms ({}) does not match the number of vanderwaals parameters ({})"
-                         .format(atom_count, len(vanderwaals_parameters))) # pylint: disable=consider-using-f-string
+        raise ValueError(f"The number of atoms ({atom_count}) does not match the number of vanderwaals parameters ({len(vanderwaals_parameters)})")
     if atom_count != distances.shape[0] or atom_count != distances.shape[1]:
-        raise ValueError("Cannot calculate potentials between {} atoms and {} distances"
-                         .format(atom_count, "x".join([str(d) for d in distances.shape]))) # pylint: disable=consider-using-f-string
+        raise ValueError("Cannot calculate potentials between {} atoms and {} distances" # pylint: disable=consider-using-f-string
+                         .format(atom_count, "x".join([str(d) for d in distances.shape])))
 
     # collect parameters
     sigmas1 = numpy.empty((atom_count, atom_count))
@@ -83,7 +82,7 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
     return potentials
 
 
-def add_features_for_atoms(edges: List[Edge]):
+def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
 
     # get a set of all the atoms involved
     atoms = set([])
@@ -104,7 +103,7 @@ def add_features_for_atoms(edges: List[Edge]):
             vanderwaals = atomic_forcefield.get_vanderwaals_parameters(atom)
 
         except UnknownAtomError:
-            _log.warning(f"Ignoring atom {atom}, because it's unknown to the forcefield")
+            _log.warning("Ignoring atom %s, because it's unknown to the forcefield", atom)
 
             # set parameters to zero, so that the potential becomes zero
             charge = 0.0
@@ -126,7 +125,7 @@ def add_features_for_atoms(edges: List[Edge]):
     covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
 
     # set the features
-    for edge_index, edge in enumerate(edges):
+    for _, edge in enumerate(edges):
         contact = edge.id
         atom1_index = atom_indices[contact.atom1]
         atom2_index = atom_indices[contact.atom2]
@@ -141,7 +140,7 @@ def add_features_for_atoms(edges: List[Edge]):
             edge.features[FEATURENAME_COVALENT] = 0.0
 
 
-def add_features_for_residues(edges: List[Edge]):
+def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-locals
     # get a set of all the atoms involved
     atoms = set([])
     for edge in edges:
@@ -162,7 +161,7 @@ def add_features_for_residues(edges: List[Edge]):
             vanderwaals = atomic_forcefield.get_vanderwaals_parameters(atom)
 
         except UnknownAtomError:
-            _log.warning(f"Ignoring atom {atom}, because it's unknown to the forcefield")
+            _log.warning("Ignoring atom %s, because it's unknown to the forcefield", atom)
 
             # set parameters to zero, so that the potential becomes zero
             charge = 0.0
@@ -184,7 +183,7 @@ def add_features_for_residues(edges: List[Edge]):
     covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
 
     # set the features
-    for edge_index, edge in enumerate(edges):
+    for _, edge in enumerate(edges):
         contact = edge.id
         for atom1 in contact.residue1.atoms:
             for atom2 in contact.residue2.atoms:
@@ -208,12 +207,12 @@ def add_features_for_residues(edges: List[Edge]):
                     edge.features[FEATURENAME_COVALENT] = 0.0
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
 
-    if type(graph.edges[0].id) == ResidueContact:
+    if isinstance(graph.edges[0].id, ResidueContact):
         add_features_for_residues(graph.edges)
 
-    elif type(graph.edges[0].id) == AtomicContact:
+    elif isinstance(graph.edges[0].id, AtomicContact):
         add_features_for_atoms(graph.edges)
     else:
-        raise TypeError("Unexpected edge type: {}".format(type(edges[0].id)))
+        raise TypeError(f"Unexpected edge type: {type(graph.edges[0].id)}")

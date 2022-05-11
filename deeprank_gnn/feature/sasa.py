@@ -14,7 +14,7 @@ def add_features_for_residues(structure: freesasa.Structure, # pylint: disable=c
 
         residue = node.id
 
-        selection = ("residue, (resi %s) and (chain %s)" % (residue.number_string, residue.chain.id),)
+        selection = ("residue, (resi %s) and (chain %s)" % (residue.number_string, residue.chain.id),) # pylint: disable=consider-using-f-string
 
         area = freesasa.selectArea(selection, structure, result)['residue'] # pylint: disable=c-extension-no-member
         if numpy.isnan(area):
@@ -31,7 +31,8 @@ def add_features_for_atoms(structure: freesasa.Structure, # pylint: disable=c-ex
 
         atom = node.id
 
-        selection = ('atom, (name %s) and (resi %s) and (chain %s)' % (atom.name, atom.residue.number_string, atom.residue.chain.id),)
+        selection = ("atom, (name %s) and (resi %s) and (chain %s)" % \
+            (atom.name, atom.residue.number_string, atom.residue.chain.id),) # pylint: disable=consider-using-f-string
 
         area = freesasa.selectArea(selection, structure, result)['atom'] # pylint: disable=c-extension-no-member
         if numpy.isnan(area):
@@ -45,10 +46,10 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
     structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member
     result = freesasa.calc(structure) # pylint: disable=c-extension-no-member
 
-    if type(graph.nodes[0].id) == Residue:
+    if isinstance(graph.nodes[0].id, Residue):
         return add_features_for_residues(structure, result, graph.nodes)
 
-    elif type(graph.nodes[0].id) == Atom:
+    if isinstance(graph.nodes[0].id, Atom):
         return add_features_for_atoms(structure, result, graph.nodes)
-    else:
-        raise TypeError("Unexpected node type: {}".format(type(nodes[0].id)))
+
+    raise TypeError(f"Unexpected node type: {type(graph.nodes[0].id)}")
