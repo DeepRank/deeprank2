@@ -53,7 +53,7 @@ def test_add_features_to_residues():
     assert len(residues) > 0
 
     graph = build_residue_graph(residues, "101M-108-res", 4.5)
-    add_features(pdb_path, graph, variant)
+    add_features(pdb_path, graph)
 
     # check for NaN
     assert not any(
@@ -93,7 +93,7 @@ def test_add_features_to_atoms():
     assert len(atoms) > 0
 
     graph = build_atomic_graph(atoms, "101M-108-atom", 4.5)
-    add_features(pdb_path, graph, variant)
+    add_features(pdb_path, graph)
 
     # check for NaN
     assert not any(

@@ -2,14 +2,13 @@ from pdb2sql import pdb2sql
 
 from deeprank_gnn.domain.amino_acid import serine
 from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.feature.sasa import add_features
 from deeprank_gnn.tools.graph import build_residue_graph
 from deeprank_gnn.tools.pdb import get_structure, get_surrounding_residues
 from deeprank_gnn.domain.feature import (
     FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
     FEATURENAME_SIZEDIFFERENCE,
 )
-from deeprank_gnn.feature.amino_acid import add_features # noqa
+from deeprank_gnn.feature.amino_acid import add_features
 
 
 def test_add_features():
@@ -29,7 +28,7 @@ def test_add_features():
 
     graph = build_residue_graph(residues, "101m-25", 4.5)
 
-    add_features(pdb_path, graph, variant)
+    add_features(graph, variant)
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER

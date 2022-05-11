@@ -20,7 +20,7 @@ def space_if_none(value):
     return value
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
+def add_features(pdb_path: str, graph: Graph):
 
     parser = PDBParser()
     structure = parser.get_structure('_tmp', pdb_path)
@@ -31,14 +31,14 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs):
 
     for node in graph.nodes:
 
-        if type(node.id) == Atom:
+        if isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
 
-        elif type(node.id) == Residue:
+        elif isinstance(node.id, Residue):
             residue = node.id
         else:
-            raise TypeError("Unexpected node type: {}".format(type(node)))
+            raise TypeError(f"Unexpected node type: {type(node)}")
 
         # These can only be calculated per residue, not per atom.
         # So for atomic graphs, every atom gets its residue's value.
