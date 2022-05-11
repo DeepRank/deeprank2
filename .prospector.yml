@@ -17,7 +17,7 @@ pyroma:
 pycodestyle:
     full: true
     options:
-      max-line-length: 120
+      max-line-length: 159
 
 pydocstyle:
     disable: [
