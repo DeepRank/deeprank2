@@ -1,7 +1,6 @@
 import sys
 import os
 import traceback
-
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
@@ -10,7 +9,6 @@ from tqdm import tqdm
 import h5py
 import copy
 from ast import literal_eval
-
 from deeprank_gnn.community_pooling import community_detection, community_pooling
 
 
