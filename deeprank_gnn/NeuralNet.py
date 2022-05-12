@@ -11,9 +11,8 @@ import torch.nn.functional as F
 from torch_geometric.data import DataLoader
 
 # deeprank_gnn import
-from deeprank_gnn.models.metrics import MetricsExporter, MetricsExporterCollection
+from deeprank_gnn.models.metrics import MetricsExporterCollection, MetricsExporter
 from deeprank_gnn.DataSet import HDF5DataSet, DivideDataSet, PreCluster
-
 
 _log = logging.getLogger(__name__)
 
@@ -477,6 +476,7 @@ class NeuralNet():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, targets)
+
         self.log_epoch_data(pass_name, epoch_number, eval_loss, dt)
 
         return eval_loss
@@ -513,6 +513,7 @@ class NeuralNet():
             self.optimizer.step()
 
             count_predictions += pred.shape[0]
+
             # convert mean back to sum
             sum_of_losses += loss_.detach().item() * pred.shape[0]
 
