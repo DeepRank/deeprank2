@@ -51,8 +51,8 @@ setup(
         'tensorboard >= 2.9.0', 'torchvision >= 0.12.0'
     ],
     extras_require={
-        'dev': ['prospector[with_pyroma]', 'yapf', 'isort'],
+        'dev': ['yapf', 'isort'],
         'doc': ['recommonmark', 'sphinx', 'sphinx_rtd_theme'],
-        'test': ['coverage', 'pycodestyle', 'pytest',
+        'test': ['prospector[with_pyroma]', 'coverage', 'pycodestyle', 'pytest',
                  'pytest-cov', 'pytest-runner', 'coveralls'],
     })

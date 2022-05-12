@@ -1,8 +1,7 @@
 import sys
 import os
-import traceback
-import logging
 
+import logging
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
@@ -11,7 +10,6 @@ from tqdm import tqdm
 import h5py
 import copy
 from ast import literal_eval
-
 from deeprank_gnn.community_pooling import community_detection, community_pooling
 
 
@@ -353,7 +351,7 @@ class HDF5DataSet(Dataset):
                 if "score" in grp and self.target in grp["score"]:
                     y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous()
                 else:
-                    raise ValueError("Target {} missing in {}".format(self.target, mol))
+                    raise ValueError(f"Target {self.target} missing in {mol}")
 
             # positions
             pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous()
@@ -363,14 +361,16 @@ class HDF5DataSet(Dataset):
             cluster1 = None
             if self.clustering_method is not None:
                 if 'clustering' in grp.keys():
-                    if self.clustering_method in grp['clustering'].keys():
-                        if ('depth_0' in grp['clustering/{}'.format(self.clustering_method)].keys() and
-                            'depth_1' in grp['clustering/{}'.format(self.clustering_method)].keys()):
+                    if self.clustering_method in grp["clustering"].keys():
+                        if (
+                            "depth_0" in grp[f"clustering/{self.clustering_method}"].keys() and
+                            "depth_1" in grp[f"clustering/{self.clustering_method}"].keys()
+                            ):
 
                             cluster0 = torch.tensor(
-                                grp['clustering/' + self.clustering_method + '/depth_0'][()], dtype=torch.long)
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long)
                             cluster1 = torch.tensor(
-                                grp['clustering/' + self.clustering_method + '/depth_1'][()], dtype=torch.long)
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long)
                         else:
                             _log.warning("no clusters detected")
                     else:

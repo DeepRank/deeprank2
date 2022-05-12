@@ -11,8 +11,8 @@ import torch.nn.functional as F
 from torch_geometric.data import DataLoader
 
 # deeprank_gnn import
-from .models.metrics import MetricsExporterCollection, MetricsExporter
-from .DataSet import HDF5DataSet, DivideDataSet, PreCluster
+from deeprank_gnn.models.metrics import MetricsExporterCollection, MetricsExporter
+from deeprank_gnn.DataSet import HDF5DataSet, DivideDataSet, PreCluster
 
 _log = logging.getLogger(__name__)
 

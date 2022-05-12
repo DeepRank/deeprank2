@@ -29,6 +29,7 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.version }}
+        
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
       with:
@@ -61,6 +62,9 @@ jobs:
       run: pip install .[test]
       env:
         CONDA_PREFIX: /usr/share/miniconda
+        
+    - name: Check style against standards using prospector
+      run: prospector
 
     - name: Test with pytest
       env:
