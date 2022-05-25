@@ -466,9 +466,9 @@ class QueryDataset:
         self._queries = []
 
     def add(self, query: Query):
-        """ Adds new queries to the colection of all generated queries.
+        """ Adds new query to the colection of all generated queries.
             Args:
-                query (Query): must be either a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
+                query (Query): must be a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
         """
         self._queries.append(query)
 
