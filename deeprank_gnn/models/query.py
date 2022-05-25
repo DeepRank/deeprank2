@@ -457,15 +457,26 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
 
 class QueryDataset:
-    "Represents the collection of data queries. Queries can be saved as a dictionary to easily navigate through their data "
+    """
+    Represents the collection of data queries. Queries can be saved as a dictionary to easily navigate through their data 
+    
+    """
 
     def __init__(self):
         self._queries = []
 
     def add(self, query: Query):
+        """ Adds new queries to the colection of all generated queries.
+            Args:
+                query (Query): must be either a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
+        """
         self._queries.append(query)
 
     def export_dict(self, dataset_path: str):
+        """ Exports the colection of all queries to a dictionary file
+            Args:
+                dataset_path (str): the new path where the list of queries be saved to.
+        """
         with open(dataset_path, "wb") as pkl_file:
             pickle.dump(self, pkl_file)    
             
