@@ -9,15 +9,15 @@ def test_add_pssm():
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     for chain in structure.chains:
-        with open("tests/data/pssm/1ATN/1ATN.{}.pdb.pssm".format(chain.id), 'rt') as f:
+        with open(f"tests/data/pssm/1ATN/1ATN.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
             chain.pssm = parse_pssm(f, chain)
 
     # Verify that each residue is present and that the data makes sense:
     for chain in structure.chains:
         for residue in chain.residues:
             assert residue in chain.pssm
-            assert type(chain.pssm[residue].information_content) == float
-            assert type(chain.pssm[residue].conservations[alanine]) == float
+            assert isinstance(chain.pssm[residue].information_content, float)
+            assert isinstance(chain.pssm[residue].conservations[alanine], float)

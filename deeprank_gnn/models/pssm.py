@@ -40,5 +40,4 @@ class PssmTable:
     def update(self, other):
         "can be used to merge two non-overlapping scoring tables"
 
-        self._rows.update(other._rows)
-
+        self._rows.update(other._rows) # pylint: disable=protected-access

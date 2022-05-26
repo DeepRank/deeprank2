@@ -1,7 +1,5 @@
-from typing import List, Optional
-
+from typing import Optional
 import numpy
-
 from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.domain.amino_acid import amino_acids
 from deeprank_gnn.models.structure import Residue, Atom
@@ -13,18 +11,19 @@ from deeprank_gnn.domain.feature import (FEATURENAME_PSSM, FEATURENAME_PSSMDIFFE
 profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.one_letter_code)
 
 
-def add_features(pdb_path: str, graph: Graph,
-                 single_amino_acid_variant: Optional[SingleResidueVariant] = None):
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None):
 
     for node in graph.nodes:
-        if type(node.id) == Residue:
+        if isinstance(node.id, Residue):
             residue = node.id
 
-        elif type(node.id) == Atom:
+        elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError("Unexpected node type: {}".format(type(node.id)))
+            raise TypeError(f"Unexpected node type: {type(node.id)}")
 
         pssm_row = residue.get_pssm()
 
@@ -50,5 +49,3 @@ def add_features(pdb_path: str, graph: Graph,
                 node.features[FEATURENAME_PSSMWILDTYPE] = 0.0
                 node.features[FEATURENAME_PSSMVARIANT] = 0.0
                 node.features[FEATURENAME_PSSMDIFFERENCE] = 0.0
-
-

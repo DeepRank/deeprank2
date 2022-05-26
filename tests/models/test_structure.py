@@ -1,11 +1,5 @@
-import pickle
-
-from pdb2sql import pdb2sql
-
-from deeprank_gnn.models.structure import AtomicElement
-from deeprank_gnn.tools.pdb import get_structure
+# from deeprank_gnn.models.structure import AtomicElement
 
 
-def test_element():
-    value = AtomicElement.C.onehot
-
+# def test_element():
+#     AtomicElement.C.onehot

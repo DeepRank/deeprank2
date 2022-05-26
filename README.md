@@ -1,7 +1,6 @@
 # DeepRank-GNN
 
-
-[![Build Status](https://github.com/DeepRank/DeepRank-GNN/workflows/build/badge.svg)](https://github.com/DeepRank/DeepRank-GNN/actions)
+[![Build Status](https://github.com/DeepRank/deeprank-gnn-2/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/DeepRank/deeprank-gnn-2/actions)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/DeepRank-GNN?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/DeepRank-GNN&utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-gnn-2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-gnn-2?branch=main)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5705564.svg)](https://doi.org/10.5281/zenodo.5705564)
@@ -68,13 +67,13 @@ feature_modules = [bsa, pssm, amino_acid, biopython]
 preprocessor = PreProcessor(feature_modules, "train-data")
 
 preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
 preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
 preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
 preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"})
+                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
 
 preprocessor.start()  # start builfing graphs from the queries
 
@@ -95,20 +94,25 @@ Using the graph interaction network is rather simple :
 ```python
 from deeprank_gnn.NeuralNet import NeuralNet
 from deeprank_gnn.ginet import GINet
+from deeprank_gnn.models.metrics import OutputExporter, ScatterPlotExporter
 
 database = './hdf5/1ACB_residue.hdf5'
 
-NN = NeuralNet(database, GINet,
+metrics_output_directory = "./metrics"
+metrics_exporters = [OutputExporter(metrics_output_directory),
+                     ScatterPlotExporter(metrics_output_directory, 5)]
+
+nn = NeuralNet(database, GINet,
                node_feature=['type', 'polarity', 'bsa',
                              'depth', 'hse', 'ic', 'pssm'],
                edge_feature=['dist'],
                target='irmsd',
                index=range(400),
                batch_size=64,
-               percent=[0.8, 0.2])
+               percent=[0.8, 0.2],
+               metrics_exporters=metrics_exporters)
 
-NN.train(nepoch=250, validate=False)
-NN.plot_scatter()
+nn.train(nepoch=50, validate=False)
 ```
 
 ## Custom GNN
@@ -150,19 +154,19 @@ class CustomNet(torch.nn.Module):
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = NeuralNet(database, CustomNet,
+nn = NeuralNet(database, CustomNet,
                node_feature=['type', 'polarity', 'bsa',
                              'depth', 'hse', 'ic', 'pssm'],
                edge_feature=['dist'],
                target='irmsd',
                index=range(400),
                batch_size=64,
-               percent=[0.8, 0.2])
-model.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-model.loss = MSELoss()
+               percent=[0.8, 0.2],
+               device=device)
+nn.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+nn.loss = MSELoss()
 
-model.train(nepoch=50)
-
+nn.train(nepoch=50)
 ```
 
 ## h5x support

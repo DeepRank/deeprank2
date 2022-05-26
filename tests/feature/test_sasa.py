@@ -1,6 +1,5 @@
 import numpy
 from pdb2sql import pdb2sql
-
 from deeprank_gnn.domain.amino_acid import alanine
 from deeprank_gnn.models.variant import SingleResidueVariant
 from deeprank_gnn.models.graph import Graph, Node
@@ -45,7 +44,7 @@ def test_add_features_to_residues():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     residue = _get_residue(structure.chains[0], 108)
     variant = SingleResidueVariant(residue, alanine)
@@ -57,8 +56,9 @@ def test_add_features_to_residues():
     add_features(pdb_path, graph, variant)
 
     # check for NaN
-    assert not any([numpy.isnan(node.features[FEATURENAME_SASA])
-                    for node in graph.nodes])
+    assert not any(
+        numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes
+    )
 
     # surface residues should have large area
     surface_residue_node = _get_residue_node(graph, 105)
@@ -66,7 +66,9 @@ def test_add_features_to_residues():
 
     # buried residues should have small area
     buried_residue_node = _get_residue_node(graph, 72)
-    assert buried_residue_node.features[FEATURENAME_SASA] < 25.0, buried_residue_node.features[FEATURENAME_SASA]
+    assert (
+        buried_residue_node.features[FEATURENAME_SASA] < 25.0
+    ), buried_residue_node.features[FEATURENAME_SASA]
 
 
 def test_add_features_to_atoms():
@@ -77,7 +79,7 @@ def test_add_features_to_atoms():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close() # pylint: disable=protected-access
 
     residue = _get_residue(structure.chains[0], 108)
     variant = SingleResidueVariant(residue, alanine)
@@ -94,8 +96,9 @@ def test_add_features_to_atoms():
     add_features(pdb_path, graph, variant)
 
     # check for NaN
-    assert not any([numpy.isnan(node.features[FEATURENAME_SASA])
-                    for node in graph.nodes])
+    assert not any(
+        numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes
+    )
 
     # surface atoms should have large area
     surface_atom_node = _get_atom_node(graph, 105, "OE2")
@@ -103,4 +106,6 @@ def test_add_features_to_atoms():
 
     # buried atoms should have small area
     buried_atom_node = _get_atom_node(graph, 72, "CG")
-    assert buried_atom_node.features[FEATURENAME_SASA] == 0.0, buried_atom_node.features[FEATURENAME_SASA]
+    assert (
+        buried_atom_node.features[FEATURENAME_SASA] == 0.0
+    ), buried_atom_node.features[FEATURENAME_SASA]
