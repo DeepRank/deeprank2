@@ -19,7 +19,6 @@ import deeprank_gnn.feature.atomic_contact
 import deeprank_gnn.feature.biopython
 import deeprank_gnn.feature.bsa
 import deeprank_gnn.feature.pssm
-import deeprank_gnn.feature.sasa
 import pickle
 
 _log = logging.getLogger(__name__)
