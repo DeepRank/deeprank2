@@ -14,11 +14,6 @@ from deeprank_gnn.tools.pdb import (
 from deeprank_gnn.tools.pssm import parse_pssm
 from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
 from deeprank_gnn.models.variant import SingleResidueVariant
-import deeprank_gnn.feature.amino_acid
-import deeprank_gnn.feature.atomic_contact
-import deeprank_gnn.feature.biopython
-import deeprank_gnn.feature.bsa
-import deeprank_gnn.feature.pssm
 import pickle
 
 _log = logging.getLogger(__name__)
