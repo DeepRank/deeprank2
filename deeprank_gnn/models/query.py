@@ -14,6 +14,7 @@ from deeprank_gnn.tools.pdb import (
 from deeprank_gnn.tools.pssm import parse_pssm
 from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
 from deeprank_gnn.models.variant import SingleResidueVariant
+import pickle
 
 _log = logging.getLogger(__name__)
 
@@ -518,14 +519,29 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
 
 class QueryDataset:
-    "represents a collection of data queries"
+    """
+    Represents the collection of data queries. Queries can be saved as a dictionary to easily navigate through their data 
+    
+    """
 
     def __init__(self):
         self._queries = []
 
     def add(self, query: Query):
+        """ Adds new query to the colection of all generated queries.
+            Args:
+                query (Query): must be a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
+        """
         self._queries.append(query)
 
+    def export_dict(self, dataset_path: str):
+        """ Exports the colection of all queries to a dictionary file
+            Args:
+                dataset_path (str): the new path where the list of queries be saved to.
+        """
+        with open(dataset_path, "wb") as pkl_file:
+            pickle.dump(self, pkl_file)    
+            
     @property
     def queries(self) -> List[Query]:
         return self._queries
