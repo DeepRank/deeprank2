@@ -2,15 +2,11 @@
 
 from glob import glob
 from typing import Optional, List
-import traceback
 from functools import partial
-from multiprocessing import Pool
-from queue import Empty as EmptyQueueError
+from multiprocessing import Pool, cpu_count
 import logging
 import os
-from time import sleep
 
-import h5py
 import importlib
 
 from deeprank_gnn.models.query import Query
