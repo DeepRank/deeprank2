@@ -58,28 +58,28 @@ pip install -e ./
 The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
 
 ```python
-from deeprank_gnn.preprocess import PreProcessor
+from deeprank_gnn.preprocess import preprocess
 from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
 from deeprank_gnn.feature import bsa, pssm, amino_acid, biopython
 
 feature_modules = [bsa, pssm, amino_acid, biopython]
 
-preprocessor = PreProcessor(feature_modules, "train-data")
+queries = []
 
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
 
-preprocessor.start()  # start builfing graphs from the queries
+# run the preprocessing
+output_paths = preprocess(feature_modules, queries, "train-data")
 
-preprocessor.wait()  # wait for all jobs to complete
-
-print(preprocessor.output_paths)  # print the paths of the generated files
+# print the paths of the generated files
+print(output_paths)
 
 ```
 
