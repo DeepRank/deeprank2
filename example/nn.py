@@ -24,7 +24,7 @@ NN = NeuralNet(
     task="reg",
     batch_size=64,
     percent=[0.8, 0.2],
-    clustering_method='mcl'
+    cluster_nodes='mcl'
 )
 
 NN.train(nepoch=250, validate=False)
