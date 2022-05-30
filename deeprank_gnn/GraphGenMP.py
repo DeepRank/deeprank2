@@ -6,7 +6,7 @@ import glob
 import h5py
 from tqdm import tqdm
 
-from deeprank_gnn.preprocess import PreProcessor
+from deeprank_gnn.preprocess import preprocess
 from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
 from deeprank_gnn.tools.score import get_all_scores
 import deeprank_gnn.feature.amino_acid
@@ -138,8 +138,7 @@ class GraphHDF5():
     ):
 
         prefix = os.path.splitext(outfile)[0] + "-"
-        preprocessor = PreProcessor(feature_modules, prefix, nproc)
-        preprocessor.start()
+        queries = []
         for pdb_path in pdb_paths:
             targets = {}
             if ref_path is not None:
@@ -148,8 +147,9 @@ class GraphHDF5():
             q = ProteinProteinInterfaceResidueQuery(
                 pdb_path, "A", "B", pssm_paths=pssm_paths, targets=targets
             )
-            preprocessor.add_query(q)
-        preprocessor.wait()
+            queries.append(q)
+
+        preprocess(feature_modules, queries, prefix, nproc)
 
         GraphHDF5._combine_hdf5_files_with_prefix(prefix, outfile)
 
