@@ -40,13 +40,10 @@ class _PreProcess(Process):
     def output_path(self) -> str:
         return self._output_path
 
-    def is_running(self) -> bool:
-        with self._running_lock:
-            return self._running
-
     def stop(self):
         self._sender.send(1)
-        self.join()
+        if self.is_alive():
+            self.join()
 
     def _should_stop(self) -> bool:
         return self._receiver.poll()
