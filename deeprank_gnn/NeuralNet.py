@@ -37,7 +37,7 @@ class NeuralNet():
                  pretrained_model=None,
                  shuffle=True, # pylint: disable=unused-argument
                  cluster_nodes='mcl', # pylint: disable=unused-argument
-                 transform_sigmoid=False, # pylint: disable=unused-argument
+                 transform_sigmoid: Optional[bool] = False, # pylint: disable=unused-argument
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
@@ -66,6 +66,7 @@ class NeuralNet():
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the training set. Defaults to True.
             cluster_nodes (bool, optional): perform node clustering ('mcl' or 'louvain' algorithm). Default to 'mcl'.
+            transform_sigmoid: whether or not to apply a sigmoid transformation to the output. (for regression only) This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
         # load the input data or a pretrained model
@@ -585,6 +586,8 @@ class NeuralNet():
                                        for x in target]).to(self.device)
 
         elif self.transform_sigmoid is True:
+
+            # Sigmoid(x) = 1 / (1 + exp(-x))
             pred = torch.sigmoid(pred.reshape(-1))
 
         else:
