@@ -66,7 +66,8 @@ class NeuralNet():
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the training set. Defaults to True.
             cluster_nodes (bool, optional): perform node clustering ('mcl' or 'louvain' algorithm). Default to 'mcl'.
-            transform_sigmoid: whether or not to apply a sigmoid transformation to the output. (for regression only) This can speed up the optimization and puts the value between 0 and 1.
+            transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
+            This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
         # load the input data or a pretrained model
