@@ -19,7 +19,7 @@ _log = logging.getLogger(__name__)
 
 class NeuralNet():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals
                  dataset,
                  Net,
                  lr=0.01,
@@ -82,7 +82,7 @@ class NeuralNet():
             self.shuffle = shuffle
             self.train_valid_split = train_valid_split
             self.transform_sigmoid = transform_sigmoid
-            
+
             self.index = dataset.index
             self.node_feature = dataset.node_feature
             self.edge_feature = dataset.edge_feature
