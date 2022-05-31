@@ -22,41 +22,29 @@ class NeuralNet():
     def __init__(self, # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
                  dataset,
                  Net,
-                 node_feature=None,
-                 edge_feature=None,
-                 target='irmsd',  # pylint: disable=unused-argument
-                 lr=0.01, # pylint: disable=unused-argument
-                 batch_size=32, # pylint: disable=unused-argument
+                 lr=0.01,
+                 batch_size=32,
                  percent=None,
                  dataset_eval=None,
-                 index=None, # pylint: disable=unused-argument
-                 class_weights=None, # pylint: disable=unused-argument
-                 task=None, # pylint: disable=unused-argument
+                 class_weights=None,
+                 task=None,
                  classes=None,
-                 threshold=None, # pylint: disable=unused-argument
+                 threshold=None,
                  pretrained_model=None,
-                 shuffle=True, # pylint: disable=unused-argument
-                 cluster_nodes='mcl', # pylint: disable=unused-argument
-                 transform_sigmoid=False, # pylint: disable=unused-argument
+                 shuffle=True,
+                 train_valid_split=DivideDataSet,
+                 transform_sigmoid=False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
         Args:
             dataset (HDF5DataSet object, required)
             Net (function, required): neural network function (ex. GINet, Foutnet etc.)
-            node_feature (list, optional): type, charge, polarity, bsa (buried surface area), pssm,
-                    cons (pssm conservation information), ic (pssm information content), depth,
-                    hse (half sphere exposure).
-                    Defaults to ['type', 'polarity', 'bsa'].
-            edge_feature (list, optional): dist (distance). Defaults to ['dist'].
-            target (str, optional): irmsd, lrmsd, fnat, capri_class, bin_class, dockQ.
-                    Defaults to 'irmsd'.
             lr (float, optional): learning rate. Defaults to 0.01.
             batch_size (int, optional): defaults to 32.
             percent (list, optional): divides the input dataset into a training and an evaluation set.
                     Defaults to [1.0, 0.0].
             dataset_eval ([type], optional): independent evaluation HDF5DataSet object, optional. Defaults to None.
-            index ([type], optional): index of the molecules to consider. Defaults to None.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
@@ -65,29 +53,40 @@ class NeuralNet():
             threshold (int, optional): threshold to compute binary classification metrics. Defaults to 4.0.
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the training set. Defaults to True.
-            cluster_nodes (bool, optional): perform node clustering ('mcl' or 'louvain' algorithm). Default to 'mcl'.
+            train_valid_split (func, optional): split the dataset in training and validation set. If you want to implement
+            your own function to split the dataset, assign it to this parameter. Note that it has to take three parameters
+            as input (dataset, percent, and shuffle). Defaults to DivideDataSet func (splitting is done according to percent,
+            after having shuffled the dataset).
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
-        # load the input data or a pretrained model
-        # each named arguments is stored in a member vairable
-        # i.e. self.node_feature = node_feature
-
-        if node_feature is None:
-            node_feature = ["type", "polarity", "bsa"]
-
-        if edge_feature is None:
-            edge_feature = ["dist"]
-
-        if percent is None:
-            percent = [1.0, 0.0]
-
-        if classes is None:
-            classes = [0, 1]
 
         if pretrained_model is None:
-            for k, v in dict(locals()).items():
-                if k not in ["self", "dataset", "Net", "dataset_eval"]:
-                    self.__setattr__(k, v)
+            self.target = dataset.target # already defined in HDF5DatSet object
+            self.lr = lr
+            self.batch_size = batch_size
+
+            if percent is None:
+                self.percent = [1.0, 0.0]
+            else:
+                self.percent = percent
+
+            self.class_weights = class_weights
+            self.task = task
+
+            if classes is None:
+                self.classes = [0, 1]
+            else:
+                self.classes = classes
+
+            self.threshold = threshold
+            self.shuffle = shuffle
+            self.train_valid_split = train_valid_split
+            self.transform_sigmoid = transform_sigmoid
+            
+            self.index = dataset.index
+            self.node_feature = dataset.node_feature
+            self.edge_feature = dataset.edge_feature
+            self.cluster_nodes = dataset.clustering_method
 
             if self.task is None:
                 if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
@@ -171,7 +170,7 @@ class NeuralNet():
                     "Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # divide the dataset
-        train_dataset, valid_dataset = DivideDataSet(
+        train_dataset, valid_dataset = self.train_valid_split(
             dataset, percent=self.percent)
 
         # dataloader

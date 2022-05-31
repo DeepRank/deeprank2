@@ -17,14 +17,9 @@ dataset = HDF5DataSet(
 NN = NeuralNet(
     dataset,
     GINet,
-    node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-    edge_feature=["dist"],
-    target="irmsd",
-    index=None,
     task="reg",
     batch_size=64,
-    percent=[0.8, 0.2],
-    cluster_nodes='mcl'
+    percent=[0.8, 0.2]
 )
 
 NN.train(nepoch=250, validate=False)

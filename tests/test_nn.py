@@ -36,15 +36,10 @@ def _model_base_test( # pylint: disable=too-many-arguments
     NN = NeuralNet(
         dataset,
         model_class,
-        node_feature=node_features,
-        edge_feature=edge_features,
-        target=target,
-        index=None,
         task=task,
         batch_size=64,
         percent=[0.8, 0.2],
         metrics_exporters=metrics_exporters,
-        cluster_nodes='mcl',
     )
 
     NN.train(nepoch=10, validate=True)
