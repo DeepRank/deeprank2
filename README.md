@@ -191,15 +191,15 @@ class CustomNet(torch.nn.Module):
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-nn = NeuralNet(database, CustomNet,
-               node_feature=['type', 'polarity', 'bsa',
-                             'depth', 'hse', 'ic', 'pssm'],
-               edge_feature=['dist'],
-               target='irmsd',
-               index=range(400),
-               batch_size=64,
-               percent=[0.8, 0.2],
-               device=device)
+
+nn = NeuralNet(
+    dataset,
+    CustomNet,
+    batch_size = 64,
+    percent = [0.8, 0.2],
+    train_valid_split = UDF_DivideDataSet,
+    device=device
+)
 nn.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 nn.loss = MSELoss()
 

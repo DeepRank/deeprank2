@@ -137,13 +137,11 @@ class HDF5DataSet(Dataset):
             index (int, optional): index of a molecule. Defaults to None.
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
-            or some defined node features (provide a list, example: ["type", "polarity", "bsa"]):
-            type, charge, polarity, bsa (buried surface area), pssm, cons (pssm conservation
-            information), ic (pssm information content), depth, hse (half sphere exposure).
-            Defaults to "all".
+            or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
+            The complete list can be found in deeprank_gnn/domain/features.py
 
-            edge_feature (list, optional): only distances are available in this version of
-            DeepRank-GNN. Defaults to ["dist"], distance.
+            edge_feature (list, optional): the complete list can be found in deeprank_gnn/domain/features.py.
+            Defaults to ["dist"], distance.
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
             or 'louvain' algorithm). Defaults to "mcl".
