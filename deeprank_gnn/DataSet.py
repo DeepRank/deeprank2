@@ -31,7 +31,7 @@ def DivideDataSet(dataset, percent=None, shuffle=True):
     if percent is None:
         percent = [0.8, 0.2]
 
-    size = dataset.__len__()
+    size = len(dataset)
     index = np.arange(size)
 
     if shuffle:
