@@ -21,6 +21,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
     task,
     target,
     metrics_exporters,
+    transform_sigmoid,
 ):
 
     dataset = HDF5DataSet(
@@ -40,11 +41,12 @@ def _model_base_test( # pylint: disable=too-many-arguments
         batch_size=64,
         percent=[0.8, 0.2],
         metrics_exporters=metrics_exporters,
+        transform_sigmoid=transform_sigmoid,
     )
 
-    NN.train(nepoch=10, validate=True)
+    nn.train(nepoch=10, validate=True)
 
-    NN.save_model("test.pth.tar")
+    nn.save_model("test.pth.tar")
 
     NeuralNet(dataset, model_class, pretrained_model="test.pth.tar")
 
@@ -58,6 +60,18 @@ class TestNeuralNet(unittest.TestCase):
     def tearDownClass(class_):
         shutil.rmtree(class_.work_directory)
 
+    def test_ginet_sigmoid(self):
+        _model_base_test(
+            "tests/hdf5/1ATN_ppi.hdf5",
+            GINet,
+            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            ["dist"],
+            "reg",
+            "irmsd",
+            [OutputExporter(self.work_directory)],
+            True,
+        )
+
     def test_ginet(self):
         _model_base_test(
             "tests/hdf5/1ATN_ppi.hdf5",
@@ -67,6 +81,7 @@ class TestNeuralNet(unittest.TestCase):
             "reg",
             "irmsd",
             [OutputExporter(self.work_directory)],
+            False,
         )
 
         assert len(os.listdir(self.work_directory)) > 0
@@ -80,6 +95,7 @@ class TestNeuralNet(unittest.TestCase):
             "class",
             "bin_class",
             [TensorboardBinaryClassificationExporter(self.work_directory)],
+            False,
         )
 
         assert len(os.listdir(self.work_directory)) > 0
@@ -93,6 +109,7 @@ class TestNeuralNet(unittest.TestCase):
             "reg",
             "irmsd",
             [],
+            False,
         )
 
     def test_sgat(self):
@@ -104,6 +121,7 @@ class TestNeuralNet(unittest.TestCase):
             "reg",
             "irmsd",
             [],
+            False,
         )
 
 

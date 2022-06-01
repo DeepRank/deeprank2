@@ -33,7 +33,7 @@ class NeuralNet():
                  pretrained_model=None,
                  shuffle=True,
                  train_valid_split=DivideDataSet,
-                 transform_sigmoid=False,
+                 transform_sigmoid: Optional[bool] = False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
@@ -57,6 +57,8 @@ class NeuralNet():
             your own function to split the dataset, assign it to this parameter. Note that it has to take three parameters
             as input (dataset, percent, and shuffle). Defaults to DivideDataSet func (splitting is done according to percent,
             after having shuffled the dataset).
+            transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
+            This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
 
@@ -547,6 +549,8 @@ class NeuralNet():
                                        for x in target]).to(self.device)
 
         elif self.transform_sigmoid is True:
+
+            # Sigmoid(x) = 1 / (1 + exp(-x))
             pred = torch.sigmoid(pred.reshape(-1))
 
         else:
