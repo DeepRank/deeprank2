@@ -34,7 +34,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
         clustering_method='mcl',
     )
 
-    NN = NeuralNet(
+    nn = NeuralNet(
         dataset,
         model_class,
         task=task,
