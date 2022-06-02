@@ -12,51 +12,39 @@ from torch_geometric.data import DataLoader
 
 # deeprank_gnn import
 from deeprank_gnn.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprank_gnn.DataSet import HDF5DataSet, DivideDataSet, PreCluster
+from deeprank_gnn.DataSet import DivideDataSet, PreCluster
 
 _log = logging.getLogger(__name__)
 
 
 class NeuralNet():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
-                 database,
+    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals
+                 dataset,
                  Net,
-                 node_feature=None,
-                 edge_feature=None,
-                 target='irmsd',  # pylint: disable=unused-argument
-                 lr=0.01, # pylint: disable=unused-argument
-                 batch_size=32, # pylint: disable=unused-argument
+                 lr=0.01,
+                 batch_size=32,
                  percent=None,
-                 database_eval=None,
-                 index=None, # pylint: disable=unused-argument
-                 class_weights=None, # pylint: disable=unused-argument
-                 task=None, # pylint: disable=unused-argument
+                 dataset_eval=None,
+                 class_weights=None,
+                 task=None,
                  classes=None,
-                 threshold=None, # pylint: disable=unused-argument
+                 threshold=None,
                  pretrained_model=None,
-                 shuffle=True, # pylint: disable=unused-argument
-                 cluster_nodes='mcl', # pylint: disable=unused-argument
-                 transform_sigmoid: Optional[bool] = False, # pylint: disable=unused-argument
+                 shuffle=True,
+                 train_valid_split=DivideDataSet,
+                 transform_sigmoid: Optional[bool] = False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
         Args:
-            database (str, required): path(s) to hdf5 dataset(s). Unique hdf5 file or list of hdf5 files.
+            dataset (HDF5DataSet object, required)
             Net (function, required): neural network function (ex. GINet, Foutnet etc.)
-            node_feature (list, optional): type, charge, polarity, bsa (buried surface area), pssm,
-                    cons (pssm conservation information), ic (pssm information content), depth,
-                    hse (half sphere exposure).
-                    Defaults to ['type', 'polarity', 'bsa'].
-            edge_feature (list, optional): dist (distance). Defaults to ['dist'].
-            target (str, optional): irmsd, lrmsd, fnat, capri_class, bin_class, dockQ.
-                    Defaults to 'irmsd'.
             lr (float, optional): learning rate. Defaults to 0.01.
             batch_size (int, optional): defaults to 32.
             percent (list, optional): divides the input dataset into a training and an evaluation set.
                     Defaults to [1.0, 0.0].
-            database_eval ([type], optional): independent evaluation set. Defaults to None.
-            index ([type], optional): index of the molecules to consider. Defaults to None.
+            dataset_eval ([type], optional): independent evaluation HDF5DataSet object, optional. Defaults to None.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
@@ -65,31 +53,42 @@ class NeuralNet():
             threshold (int, optional): threshold to compute binary classification metrics. Defaults to 4.0.
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the training set. Defaults to True.
-            cluster_nodes (bool, optional): perform node clustering ('mcl' or 'louvain' algorithm). Default to 'mcl'.
+            train_valid_split (func, optional): split the dataset in training and validation set. If you want to implement
+            your own function to split the dataset, assign it to this parameter. Note that it has to take three parameters
+            as input (dataset, percent, and shuffle). Defaults to DivideDataSet func (splitting is done according to percent,
+            after having shuffled the dataset).
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
             This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
-        # load the input data or a pretrained model
-        # each named arguments is stored in a member vairable
-        # i.e. self.node_feature = node_feature
-
-        if node_feature is None:
-            node_feature = ["type", "polarity", "bsa"]
-
-        if edge_feature is None:
-            edge_feature = ["dist"]
-
-        if percent is None:
-            percent = [1.0, 0.0]
-
-        if classes is None:
-            classes = [0, 1]
 
         if pretrained_model is None:
-            for k, v in dict(locals()).items():
-                if k not in ["self", "database", "Net", "database_eval"]:
-                    self.__setattr__(k, v)
+            self.target = dataset.target # already defined in HDF5DatSet object
+            self.lr = lr
+            self.batch_size = batch_size
+
+            if percent is None:
+                self.percent = [1.0, 0.0]
+            else:
+                self.percent = percent
+
+            self.class_weights = class_weights
+            self.task = task
+
+            if classes is None:
+                self.classes = [0, 1]
+            else:
+                self.classes = classes
+
+            self.threshold = threshold
+            self.shuffle = shuffle
+            self.train_valid_split = train_valid_split
+            self.transform_sigmoid = transform_sigmoid
+
+            self.index = dataset.index
+            self.node_feature = dataset.node_feature
+            self.edge_feature = dataset.edge_feature
+            self.cluster_nodes = dataset.clustering_method
 
             if self.task is None:
                 if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
@@ -101,7 +100,7 @@ class NeuralNet():
                         "User target detected -> The task argument is required ('class' or 'reg'). \n\t"
                         "Example: \n\t"
                         ""
-                        "model = NeuralNet(database, GINet,"
+                        "model = NeuralNet(dataset, GINet,"
                         "                  target='physiological_assembly',"
                         "                  task='class',"
                         "                  shuffle=True,"
@@ -115,11 +114,11 @@ class NeuralNet():
             if self.task == "reg" and self.threshold is None:
                 print("the threshold for accuracy computation is set to 0.3")
                 self.threshold = 0.3
-            self.load_model(database, Net, database_eval)
+            self.load_model(dataset, Net, dataset_eval)
 
         else:
             self.load_params(pretrained_model)
-            self.load_pretrained_model(database, Net)
+            self.load_pretrained_model(dataset, Net)
 
         if metrics_exporters is not None:
             self._metrics_exporters = MetricsExporterCollection(
@@ -127,23 +126,14 @@ class NeuralNet():
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
-    def load_pretrained_model(self, database, Net):
+    def load_pretrained_model(self, test_dataset, Net):
         """
         Loads pretrained model
 
         Args:
-            database (str): path to hdf5 file(s)
+            dataset: HDF5DataSet object
             Net (function): neural network
         """
-        # Load the test set
-        test_dataset = HDF5DataSet(
-            root="./",
-            database=database,
-            node_feature=self.node_feature,
-            edge_feature=self.edge_feature,
-            target=self.target,
-            clustering_method=self.cluster_nodes,
-        )
         self.test_loader = DataLoader(test_dataset)
         PreCluster(test_dataset, method=self.cluster_nodes)
 
@@ -159,28 +149,18 @@ class NeuralNet():
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def load_model(self, database, Net, database_eval):
+    def load_model(self, dataset, Net, dataset_eval):
         """
         Loads model
 
         Args:
-            database (str): path to the hdf5 file(s) of the training set
+            dataset (str): HDF5DataSet object corresponding to the training set
             Net (function): neural network
-            database_eval (str): path to the hdf5 file(s) of the evaluation set
+            dataset_eval (str): HDF5DataSet object corresponding to the evaluation set
 
         Raises:
             ValueError: Invalid node clustering method.
         """
-        # dataset
-        dataset = HDF5DataSet(
-            root="./",
-            database=database,
-            index=self.index,
-            node_feature=self.node_feature,
-            edge_feature=self.edge_feature,
-            target=self.target,
-            clustering_method=self.cluster_nodes,
-        )
 
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
@@ -192,7 +172,7 @@ class NeuralNet():
                     "Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # divide the dataset
-        train_dataset, valid_dataset = DivideDataSet(
+        train_dataset, valid_dataset = self.train_valid_split(
             dataset, percent=self.percent)
 
         # dataloader
@@ -208,24 +188,15 @@ class NeuralNet():
             print("Evaluation set loaded")
 
         # independent validation dataset
-        if database_eval is not None:
+        if dataset_eval is not None:
             print("Loading independent evaluation dataset...")
-            valid_dataset = HDF5DataSet(
-                root="./",
-                database=database_eval,
-                index=self.index,
-                node_feature=self.node_feature,
-                edge_feature=self.edge_feature,
-                target=self.target,
-                clustering_method=self.cluster_nodes,
-            )
 
             if self.cluster_nodes in ('mcl', 'louvain'):
                 print("Loading clusters for the evaluation set.")
-                PreCluster(valid_dataset, method=self.cluster_nodes)
+                PreCluster(dataset_eval, method=self.cluster_nodes)
 
             self.valid_loader = DataLoader(
-                valid_dataset, batch_size=self.batch_size, shuffle=self.shuffle
+                dataset_eval, batch_size=self.batch_size, shuffle=self.shuffle
             )
             print("Independent validation set loaded !")
 
@@ -374,12 +345,12 @@ class NeuralNet():
                 self.save_model(
                     filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}.pth.tar')
 
-    def test(self, database_test=None):
+    def test(self, dataset_test=None):
         """
         Tests the model
 
         Args:
-            database_test ([type], optional): test database
+            dataset_test ([type], optional): HDF5DataSet object for testing
             threshold (int, optional): threshold use to tranform data into binary values. Defaults to 4.
             hdf5 (str, optional): output hdf5 file. Defaults to 'test_data.hdf5'.
         """
@@ -387,20 +358,11 @@ class NeuralNet():
         with self._metrics_exporters:
 
             # Loads the test dataset if provided
-            if database_test is not None:
+            if dataset_test is not None:
 
-                # Load the test set
-                test_dataset = HDF5DataSet(
-                    root='./',
-                    database=database_test,
-                    node_feature=self.node_feature,
-                    edge_feature=self.edge_feature,
-                    target=self.target,
-                    clustering_method=self.cluster_nodes)
+                PreCluster(dataset_test, method='mcl')
 
-                PreCluster(test_dataset, method='mcl')
-
-                self.test_loader = DataLoader(test_dataset)
+                self.test_loader = DataLoader(dataset_test)
 
             else:
                 if self.load_pretrained_model is None:
@@ -409,7 +371,7 @@ class NeuralNet():
                         "\n\t"
                         ">> model.test(test_dataset)\n\t"
                         "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t"
-                        ">> model = NeuralNet(database_test, gnn, pretrained_model = model_saved, target=None)\n\t"
+                        ">> model = NeuralNet(dataset_test, gnn, pretrained_model = model_saved, target=None)\n\t"
                         ">> model.test()\n\t")
             self.data = {}
 

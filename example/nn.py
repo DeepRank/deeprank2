@@ -1,19 +1,25 @@
 from deeprank_gnn.NeuralNet import NeuralNet
+from deeprank_gnn.DataSet import HDF5DataSet
 from deeprank_gnn.ginet import GINet
 
-database = "./hdf5/1ACB_residue.hdf5"
 database = "./1ATN_residue.hdf5"
 
-NN = NeuralNet(
-    database,
-    GINet,
+dataset = HDF5DataSet(
+    root="./",
+    database=database,
+    index=None,
     node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
     edge_feature=["dist"],
     target="irmsd",
-    index=None,
+    clustering_method='mcl',
+)
+
+NN = NeuralNet(
+    dataset,
+    GINet,
     task="reg",
     batch_size=64,
-    percent=[0.8, 0.2],
+    percent=[0.8, 0.2]
 )
 
 NN.train(nepoch=250, validate=False)

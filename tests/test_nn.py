@@ -3,6 +3,7 @@ import shutil
 import os
 import unittest
 from deeprank_gnn.NeuralNet import NeuralNet
+from deeprank_gnn.DataSet import HDF5DataSet
 from deeprank_gnn.ginet import GINet
 from deeprank_gnn.foutnet import FoutNet
 from deeprank_gnn.sGAT import sGAT
@@ -23,13 +24,19 @@ def _model_base_test( # pylint: disable=too-many-arguments
     transform_sigmoid,
 ):
 
-    nn = NeuralNet(
-        hdf5_path,
-        model_class,
+    dataset = HDF5DataSet(
+        root="./",
+        database=hdf5_path,
+        index=None,
         node_feature=node_features,
         edge_feature=edge_features,
         target=target,
-        index=None,
+        clustering_method='mcl',
+    )
+
+    nn = NeuralNet(
+        dataset,
+        model_class,
         task=task,
         batch_size=64,
         percent=[0.8, 0.2],
@@ -41,7 +48,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
 
     nn.save_model("test.pth.tar")
 
-    NeuralNet(hdf5_path, model_class, pretrained_model="test.pth.tar")
+    NeuralNet(dataset, model_class, pretrained_model="test.pth.tar")
 
 
 class TestNeuralNet(unittest.TestCase):

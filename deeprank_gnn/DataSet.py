@@ -31,7 +31,7 @@ def DivideDataSet(dataset, percent=None, shuffle=True):
     if percent is None:
         percent = [0.8, 0.2]
 
-    size = dataset.__len__()
+    size = len(dataset)
     index = np.arange(size)
 
     if shuffle:
@@ -115,7 +115,7 @@ class HDF5DataSet(Dataset):
         """Class from which the hdf5 datasets are loaded.
 
         Args:
-            root (str, optional): [description]. Defaults to './'.
+            root (str, optional): [description]. Defaults to "./".
 
             database (str, optional): Path to hdf5 file(s). Defaults to None.
 
@@ -136,14 +136,15 @@ class HDF5DataSet(Dataset):
 
             index (int, optional): index of a molecule. Defaults to None.
 
-            node_feature (str or list, optional): consider all pre-computed node features ('all')
-            or some defined node features (provide a list). Defaults to 'all'.
+            node_feature (str or list, optional): consider all pre-computed node features ("all")
+            or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
+            The complete list can be found in deeprank_gnn/domain/features.py
 
-            edge_feature (list, optional): only distances are available in this version of
-            DeepRank-GNN. Defaults to ['dist'].
+            edge_feature (list, optional): the complete list can be found in deeprank_gnn/domain/features.py.
+            Defaults to ["dist"], distance.
 
-            clustering_method (str, optional): 'mcl' (Markov Clustering) or 'louvain'.
-            Defaults to 'mcl'.
+            clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
+            or 'louvain' algorithm). Defaults to "mcl".
 
             edge_feature_transform (function, optional): transformation applied to the edge features.
             Defaults to lambdax:np.tanh(-x/2+2)+1.
@@ -159,7 +160,9 @@ class HDF5DataSet(Dataset):
         self.dict_filter = dict_filter
         self.tqdm = tqdm
         self.index = index
+
         self.node_feature = node_feature
+
         if edge_feature is None:
             self.edge_feature = ["dist"]
         else:

@@ -93,6 +93,7 @@ Using the graph interaction network is rather simple :
 
 ```python
 from deeprank_gnn.NeuralNet import NeuralNet
+from deeprank_gnn.DataSet import HDF5DataSet
 from deeprank_gnn.ginet import GINet
 from deeprank_gnn.models.metrics import OutputExporter, ScatterPlotExporter
 
@@ -102,17 +103,53 @@ metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory),
                      ScatterPlotExporter(metrics_output_directory, 5)]
 
-nn = NeuralNet(database, GINet,
-               node_feature=['type', 'polarity', 'bsa',
-                             'depth', 'hse', 'ic', 'pssm'],
-               edge_feature=['dist'],
-               target='irmsd',
-               index=range(400),
-               batch_size=64,
-               percent=[0.8, 0.2],
-               metrics_exporters=metrics_exporters)
+# creating HDF5DataSet object and selecting molecules, node/edge features, target, and clustering method:
+dataset = HDF5DataSet(
+    root = "./",
+    database = database,
+    index = range(400),
+    node_feature = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+    edge_feature = ["dist"],
+    target = "irmsd",
+    clustering_method = "mcl",
+)
 
-nn.train(nepoch=50, validate=False)
+# training a network using the above defined dataset
+nn = NeuralNet(
+    dataset,
+    GINet,
+    task = "reg",
+    batch_size = 64,
+    percent = [0.8, 0.2],
+    metrics_exporters = metrics_exporters
+)
+
+nn.train(nepoch = 50, validate = False)
+```
+## Custom Train-Validation split
+
+It is also possible to define a user-defined function for splitting the dataset in train and validation sets, for example if you want to perform the split according to the peptides clusters (the default split is done after shuffling, according to percent parameter):
+
+```python
+
+def UDF_DivideDataSet(dataset, percent, shuffle):
+    ...
+    return train_dataset, valid_dataset
+```
+
+Then, the user-defined function can be passed to NeuralNet class as parameter:
+
+```python
+
+nn = NeuralNet(
+    dataset,
+    GINet,
+    task = "reg",
+    batch_size = 64,
+    percent = [0.8, 0.2],
+    train_valid_split = UDF_DivideDataSet,
+    metrics_exporters = metrics_exporters
+)
 ```
 
 ## Custom GNN
@@ -154,15 +191,15 @@ class CustomNet(torch.nn.Module):
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-nn = NeuralNet(database, CustomNet,
-               node_feature=['type', 'polarity', 'bsa',
-                             'depth', 'hse', 'ic', 'pssm'],
-               edge_feature=['dist'],
-               target='irmsd',
-               index=range(400),
-               batch_size=64,
-               percent=[0.8, 0.2],
-               device=device)
+
+nn = NeuralNet(
+    dataset,
+    CustomNet,
+    batch_size = 64,
+    percent = [0.8, 0.2],
+    train_valid_split = UDF_DivideDataSet,
+    device=device
+)
 nn.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 nn.loss = MSELoss()
 
