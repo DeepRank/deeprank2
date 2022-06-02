@@ -86,6 +86,20 @@ class TestNeuralNet(unittest.TestCase):
 
         assert len(os.listdir(self.work_directory)) > 0
 
+    def test_ginet_without_internal_edges(self):
+        _model_base_test(
+            "tests/hdf5/1ATN_ppi_without_internal_edges.hdf5",
+            GINet,
+            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            ["dist"],
+            "reg",
+            "irmsd",
+            [OutputExporter(self.work_directory)],
+            False,
+        )
+
+        assert len(os.listdir(self.work_directory)) > 0
+
     def test_ginet_class(self):
         _model_base_test(
             "tests/hdf5/variants.hdf5",
