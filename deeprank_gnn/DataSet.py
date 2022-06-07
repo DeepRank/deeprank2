@@ -323,7 +323,7 @@ class HDF5DataSet(Dataset):
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
 
-            if any([key in grp for key in ("internal_edge_index", "internal_edge_data")]):
+            if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
                 warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
                               "with a more up to date version of this software.", DeprecationWarning)
 
