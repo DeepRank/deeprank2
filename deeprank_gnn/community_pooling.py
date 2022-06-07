@@ -1,3 +1,5 @@
+import warnings
+
 import community
 import markov_clustering as mc
 import networkx as nx
@@ -156,7 +158,7 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"): # 
     raise ValueError(f"Clustering method {method} not supported")
 
 
-def community_pooling(cluster, data): # pylint: disable=too-many-locals
+def community_pooling(cluster, data):
     """Pools features and edges of all cluster members
 
     All cluster members are pooled into a single node that is assigned:
@@ -192,6 +194,10 @@ def community_pooling(cluster, data): # pylint: disable=too-many-locals
     has_pos = hasattr(data, "pos")
     has_cluster = hasattr(data, "cluster0")
 
+    if has_internal_edges:
+        warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
+                      "with a more up to date version of this software.", DeprecationWarning)
+
     cluster, perm = consecutive_cluster(cluster)
     cluster = cluster.to(data.x.device)
 
@@ -200,12 +206,6 @@ def community_pooling(cluster, data): # pylint: disable=too-many-locals
 
     # pool the edges
     edge_index, edge_attr = pool_edge(cluster, data.edge_index, data.edge_attr)
-
-    # pool internal edges if necessary
-    if has_internal_edges:
-        internal_edge_index, internal_edge_attr = pool_edge(
-            cluster, data.internal_edge_index, data.internal_edge_attr
-        )
 
     # pool the pos
     if has_pos:
@@ -223,20 +223,12 @@ def community_pooling(cluster, data): # pylint: disable=too-many-locals
             batch=batch, x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos
         )
 
-        if has_internal_edges:
-            data.internal_edge_index = internal_edge_index
-            data.internal_edge_attr = internal_edge_attr
-
         if has_cluster:
             data.cluster0 = c0
             data.cluster1 = c1
 
     else:
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos)
-
-        if has_internal_edges:
-            data.internal_edge_index = internal_edge_index
-            data.internal_edge_attr = internal_edge_attr
 
         if has_pos2D:
             data.pos2D = pos2D

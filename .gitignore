@@ -36,4 +36,6 @@ docs/apidocs
 #pycharm
 .idea
 
+#macos
+*.DS_store
 
