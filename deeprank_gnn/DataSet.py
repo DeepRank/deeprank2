@@ -2,6 +2,8 @@ import sys
 import os
 
 import logging
+import warnings
+
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
@@ -82,14 +84,14 @@ def PreCluster(dataset, method):
         method_grp = clust_grp.create_group(method.lower())
 
         cluster = community_detection(
-            data.internal_edge_index, data.num_nodes, method=method
+            data.edge_index, data.num_nodes, method=method
         )
         method_grp.create_dataset("depth_0", data=cluster)
 
         data = community_pooling(cluster, data)
 
         cluster = community_detection(
-            data.internal_edge_index, data.num_nodes, method=method
+            data.edge_index, data.num_nodes, method=method
         )
         method_grp.create_dataset("depth_1", data=cluster)
 
@@ -321,31 +323,9 @@ class HDF5DataSet(Dataset):
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
 
-            # internal edge index (same issue as above)
-            if "internal_edge_index" in grp:
-                ind = grp['internal_edge_index'][()]
-                if ind.ndim == 2:
-                    ind = np.vstack((ind, np.flip(ind, 1))).T
-                internal_edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
-            else:
-                internal_edge_index = torch.empty((2, 0), dtype=torch.long)
-
-            # internal edge feature (same issue as above)
-            if self.edge_feature is not None and len(self.edge_feature) > 0 and \
-                "internal_edge_data" in grp:
-
-                edge_data = ()
-                for feat in self.edge_feature:
-                    vals = grp['internal_edge_data/'+feat][()]
-                    if vals.ndim == 1:
-                        vals = vals.reshape(-1, 1)
-                    edge_data += (vals,)
-                edge_data = np.hstack(edge_data)
-                edge_data = np.vstack((edge_data, edge_data))
-                edge_data = self.edge_feature_transform(edge_data)
-                internal_edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
-            else:
-                internal_edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
+            if any([key in grp for key in ("internal_edge_index", "internal_edge_data")]):
+                warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
+                              "with a more up to date version of this software.", DeprecationWarning)
 
             # target
             if self.target is None:
@@ -395,9 +375,6 @@ class HDF5DataSet(Dataset):
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
-
-        data.internal_edge_index = internal_edge_index
-        data.internal_edge_attr = internal_edge_attr
 
         data.cluster0 = cluster0
         data.cluster1 = cluster1
