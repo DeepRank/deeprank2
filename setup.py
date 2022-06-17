@@ -42,6 +42,9 @@ setup(
 
     # not sure if the install of torch-geometric will work ..
     install_requires=[
+        "torch@https://download.pytorch.org/whl/cu111/torch-1.8.0%2Bcu111-cp37-cp37m-linux_x86_64.whl",
+        "torchvision@https://download.pytorch.org/whl/cu111/torchvision-0.9.0%2Bcu111-cp37-cp37m-linux_x86_64.whl",
+        "torchaudio@https://download.pytorch.org/whl/torchaudio-0.8.0-cp36-cp36m-linux_x86_64.whl",
         'msm>=0.9.0',
         'torch>=1.5.0', 'torch-sparse', 'torch-scatter', 'torch-cluster', 'torch-spline-conv', 'torch-geometric',
         #'torchvision>=0.12.0', 'torch>=1.11.0', 'torch-cluster>=1.6.0',
