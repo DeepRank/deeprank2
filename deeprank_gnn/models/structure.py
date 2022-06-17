@@ -202,7 +202,7 @@ class AtomicElement(Enum):
 
     @property
     def onehot(self) -> numpy.array:
-        value = numpy.zeros(max([el.value for el in AtomicElement]))
+        value = numpy.zeros(max(el.value for el in AtomicElement))
         value[self.value - 1] = 1.0
         return value
 
