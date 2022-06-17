@@ -42,21 +42,13 @@ setup(
 
     # not sure if the install of torch-geometric will work ..
     install_requires=[
-        "torch@https://download.pytorch.org/whl/cu111/torch-1.8.0%2Bcu111-cp37-cp37m-linux_x86_64.whl",
-        "torchvision@https://download.pytorch.org/whl/cu111/torchvision-0.9.0%2Bcu111-cp37-cp37m-linux_x86_64.whl",
-        "torchaudio@https://download.pytorch.org/whl/torchaudio-0.8.0-cp36-cp36m-linux_x86_64.whl",
         'msm>=0.9.0',
-        'torch>=1.5.0', 'torch-sparse', 'torch-scatter', 'torch-cluster', 'torch-spline-conv', 'torch-geometric',
-        #'torchvision>=0.12.0', 'torch>=1.11.0', 'torch-cluster>=1.6.0',
-        #'torch-sparse>=0.6.13',
-        #'torch-geometric>=2.0.4', 'torch-scatter>=2.0.9', 'torch-spline-conv>=1.2.1',
         'numpy >= 1.21.5', 'scipy >= 1.7.3', 'h5py >= 3.6.0',
         'networkx == 2.6.3', 'matplotlib >= 3.5.1', 'pdb2sql >= 0.5.1', 'sklearn',
         'chart-studio >= 1.1.0', 'BioPython >= 1.79', 'python-louvain >= 0.16',
         'markov-clustering >= 0.0.6.dev0',
         'tqdm >= 4.63.0', 'freesasa >= 2.1.0',
         'tensorboard >= 2.9.0',
-        #'torchvision >= 0.12.0',
         'protobuf == 3.20.1'
     ],
 
