@@ -52,11 +52,11 @@ jobs:
         sudo make install
         cd ../..
         # Only way to install msms is through conda
-        conda install -c bioconda msms 
+        # conda install -c bioconda msms 
         # We install pytorch with conda because otherwise it breaks
-        conda install pytorch -c pytorch
+        # conda install pytorch -c pytorch
         # This is the recommended way of installing pytorch-geometric
-        conda install pyg -c pyg
+        # conda install pyg -c pyg
 
     - name: Install the package
       run: pip install .[test]
