@@ -1,13 +1,13 @@
 import os
 import logging
 import numpy
-from deeprank_gnn.models.structure import Atom, Residue
-from deeprank_gnn.models.forcefield.patch import PatchActionType
-from deeprank_gnn.tools.forcefield.top import TopParser
-from deeprank_gnn.tools.forcefield.patch import PatchParser
-from deeprank_gnn.tools.forcefield.residue import ResidueClassParser
-from deeprank_gnn.tools.forcefield.param import ParamParser
-from deeprank_gnn.models.error import UnknownAtomError
+from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.models.forcefield.patch import PatchActionType
+from deeprankcore.tools.forcefield.top import TopParser
+from deeprankcore.tools.forcefield.patch import PatchParser
+from deeprankcore.tools.forcefield.residue import ResidueClassParser
+from deeprankcore.tools.forcefield.param import ParamParser
+from deeprankcore.models.error import UnknownAtomError
 
 logging.getLogger(__name__)
 

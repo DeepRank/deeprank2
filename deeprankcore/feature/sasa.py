@@ -1,9 +1,9 @@
 from typing import List
 import numpy
 import freesasa
-from deeprank_gnn.models.structure import Residue, Atom
-from deeprank_gnn.models.graph import Node, Graph
-from deeprank_gnn.domain.feature import FEATURENAME_SASA
+from deeprankcore.models.structure import Residue, Atom
+from deeprankcore.models.graph import Node, Graph
+from deeprankcore.domain.feature import FEATURENAME_SASA
 
 
 def add_features_for_residues(structure: freesasa.Structure, # pylint: disable=c-extension-no-member

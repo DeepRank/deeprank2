@@ -3,10 +3,10 @@ import os
 import shutil
 import unittest
 import numpy as np
-from deeprank_gnn.tools.pssm_3dcons_to_deeprank import pssm_3dcons_to_deeprank
-from deeprank_gnn.tools.hdf5_to_csv import hdf5_to_csv
-from deeprank_gnn.tools.CustomizeGraph import add_target
-from deeprank_gnn.tools.embedding import manifold_embedding
+from deeprankcore.tools.pssm_3dcons_to_deeprank import pssm_3dcons_to_deeprank
+from deeprankcore.tools.hdf5_to_csv import hdf5_to_csv
+from deeprankcore.tools.CustomizeGraph import add_target
+from deeprankcore.tools.embedding import manifold_embedding
 
 
 class TestTools(unittest.TestCase):

@@ -3,9 +3,9 @@ import numpy
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import get_surface, residue_depth
 from Bio.PDB.HSExposure import HSExposureCA
-from deeprank_gnn.domain.feature import FEATURENAME_RESIDUEDEPTH, FEATURENAME_HALFSPHEREEXPOSURE
-from deeprank_gnn.models.structure import Atom, Residue
-from deeprank_gnn.models.graph import Graph
+from deeprankcore.domain.feature import FEATURENAME_RESIDUEDEPTH, FEATURENAME_HALFSPHEREEXPOSURE
+from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.models.graph import Graph
 
 
 logging.getLogger(__name__)

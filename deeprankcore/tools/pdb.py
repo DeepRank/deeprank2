@@ -6,12 +6,12 @@ from scipy.spatial import distance_matrix
 import numpy
 from pdb2sql import interface as get_interface
 
-from deeprank_gnn.models.structure import Atom, Residue, Chain, Structure, AtomicElement
-from deeprank_gnn.domain.amino_acid import amino_acids
-from deeprank_gnn.models.pair import Pair
-from deeprank_gnn.domain.forcefield import atomic_forcefield
-from deeprank_gnn.models.contact import ResidueContact, AtomicContact
-from deeprank_gnn.feature.atomic_contact import get_coulomb_potentials, get_lennard_jones_potentials
+from deeprankcore.models.structure import Atom, Residue, Chain, Structure, AtomicElement
+from deeprankcore.domain.amino_acid import amino_acids
+from deeprankcore.models.pair import Pair
+from deeprankcore.domain.forcefield import atomic_forcefield
+from deeprankcore.models.contact import ResidueContact, AtomicContact
+from deeprankcore.feature.atomic_contact import get_coulomb_potentials, get_lennard_jones_potentials
 
 
 _log = logging.getLogger(__name__)

@@ -1,6 +1,6 @@
 import re
 
-from deeprank_gnn.models.forcefield.patch import (
+from deeprankcore.models.forcefield.patch import (
     PatchActionType,
     PatchSelection,
     PatchAction,

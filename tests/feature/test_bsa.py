@@ -1,9 +1,9 @@
 from pdb2sql import pdb2sql
-from deeprank_gnn.models.structure import Structure
-from deeprank_gnn.feature.bsa import add_features
-from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
-from deeprank_gnn.tools.pdb import get_structure, get_residue_contact_pairs
-from deeprank_gnn.domain.feature import FEATURENAME_BURIEDSURFACEAREA
+from deeprankcore.models.structure import Structure
+from deeprankcore.feature.bsa import add_features
+from deeprankcore.tools.graph import build_residue_graph, build_atomic_graph
+from deeprankcore.tools.pdb import get_structure, get_residue_contact_pairs
+from deeprankcore.domain.feature import FEATURENAME_BURIEDSURFACEAREA
 
 
 def _find_residue_node(graph, chain_id, residue_number):

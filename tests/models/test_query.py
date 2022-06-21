@@ -2,7 +2,7 @@ from tempfile import mkstemp
 import numpy
 import os
 import h5py
-from deeprank_gnn.domain.amino_acid import (
+from deeprankcore.domain.amino_acid import (
     alanine,
     arginine,
     asparagine,
@@ -12,13 +12,13 @@ from deeprank_gnn.domain.amino_acid import (
     lysine,
     phenylalanine
 )
-from deeprank_gnn.models.query import (
+from deeprankcore.models.query import (
     SingleResidueVariantResidueQuery,
     SingleResidueVariantAtomicQuery,
     ProteinProteinInterfaceAtomicQuery,
     ProteinProteinInterfaceResidueQuery
 )
-from deeprank_gnn.domain.feature import (
+from deeprankcore.domain.feature import (
     FEATURENAME_POSITION,
     FEATURENAME_AMINOACID,
     FEATURENAME_VARIANTAMINOACID,
@@ -32,8 +32,8 @@ from deeprank_gnn.domain.feature import (
     FEATURENAME_EDGEVANDERWAALS,
     FEATURENAME_EDGEDISTANCE
 )
-from deeprank_gnn.feature import sasa, atomic_contact, bsa, pssm, amino_acid
-from deeprank_gnn.DataSet import HDF5DataSet
+from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
+from deeprankcore.DataSet import HDF5DataSet
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):

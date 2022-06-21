@@ -1,5 +1,5 @@
 import unittest
-from deeprank_gnn.tools.BSA import BSA
+from deeprankcore.tools.BSA import BSA
 
 
 class TestBSA(unittest.TestCase):

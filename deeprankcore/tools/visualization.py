@@ -10,15 +10,15 @@ import networkx
 import community
 import markov_clustering
 
-from deeprank_gnn.tools.embedding import manifold_embedding
-from deeprank_gnn.domain.feature import (
+from deeprankcore.tools.embedding import manifold_embedding
+from deeprankcore.domain.feature import (
     FEATURENAME_POSITION,
     FEATURENAME_CHAIN,
     FEATURENAME_EDGETYPE,
     EDGETYPE_INTERNAL,
     EDGETYPE_INTERFACE
 )
-from deeprank_gnn.domain.storage import (
+from deeprankcore.domain.storage import (
     HDF5KEY_GRAPH_NODENAMES,
     HDF5KEY_GRAPH_NODEFEATURES,
     HDF5KEY_GRAPH_EDGENAMES,

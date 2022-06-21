@@ -1,10 +1,10 @@
 from typing import Optional
 
 import numpy
-from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.models.structure import Atom, Residue
-from deeprank_gnn.domain.feature import (FEATURENAME_AMINOACID, FEATURENAME_VARIANTAMINOACID,
+from deeprankcore.models.graph import Graph
+from deeprankcore.models.variant import SingleResidueVariant
+from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.domain.feature import (FEATURENAME_AMINOACID, FEATURENAME_VARIANTAMINOACID,
                                          FEATURENAME_SIZE, FEATURENAME_POLARITY,
                                          FEATURENAME_SIZEDIFFERENCE, FEATURENAME_POLARITYDIFFERENCE,
                                          FEATURENAME_HYDROGENBONDDONORS, FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,

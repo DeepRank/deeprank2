@@ -1,6 +1,6 @@
 import re
 import logging
-from deeprank_gnn.models.forcefield.top import TopRowObject
+from deeprankcore.models.forcefield.top import TopRowObject
 
 logging.getLogger(__name__)
 

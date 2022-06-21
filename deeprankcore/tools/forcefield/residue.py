@@ -1,5 +1,5 @@
 import re
-from deeprank_gnn.models.forcefield.residue import (
+from deeprankcore.models.forcefield.residue import (
     ResidueClassCriterium,
     ALL_AMINO_ACIDS,
 )

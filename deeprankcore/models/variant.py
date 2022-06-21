@@ -1,6 +1,6 @@
 
-from deeprank_gnn.models.amino_acid import AminoAcid
-from deeprank_gnn.models.structure import Residue
+from deeprankcore.models.amino_acid import AminoAcid
+from deeprankcore.models.structure import Residue
 
 
 class SingleResidueVariant:

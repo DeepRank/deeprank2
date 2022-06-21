@@ -2,14 +2,14 @@ from typing import List
 import logging
 import numpy
 from scipy.spatial import distance_matrix
-from deeprank_gnn.models.structure import Atom
-from deeprank_gnn.models.graph import Graph, Edge
-from deeprank_gnn.models.contact import ResidueContact, AtomicContact
-from deeprank_gnn.domain.feature import (FEATURENAME_EDGEDISTANCE, FEATURENAME_EDGEVANDERWAALS,
+from deeprankcore.models.structure import Atom
+from deeprankcore.models.graph import Graph, Edge
+from deeprankcore.models.contact import ResidueContact, AtomicContact
+from deeprankcore.domain.feature import (FEATURENAME_EDGEDISTANCE, FEATURENAME_EDGEVANDERWAALS,
                                          FEATURENAME_EDGECOULOMB, FEATURENAME_COVALENT)
-from deeprank_gnn.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0, MAX_COVALENT_DISTANCE
-from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
-from deeprank_gnn.models.error import UnknownAtomError
+from deeprankcore.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0, MAX_COVALENT_DISTANCE
+from deeprankcore.models.forcefield.vanderwaals import VanderwaalsParam
+from deeprankcore.models.error import UnknownAtomError
 
 
 _log = logging.getLogger(__name__)

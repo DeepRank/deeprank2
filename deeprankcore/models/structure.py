@@ -1,8 +1,8 @@
 from typing import Optional
 import numpy
 from enum import Enum
-from deeprank_gnn.models.amino_acid import AminoAcid
-from deeprank_gnn.models.pssm import PssmRow
+from deeprankcore.models.amino_acid import AminoAcid
+from deeprankcore.models.pssm import PssmRow
 
 
 class Structure:

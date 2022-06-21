@@ -1,10 +1,10 @@
 from typing import Optional
 import numpy
-from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.domain.amino_acid import amino_acids
-from deeprank_gnn.models.structure import Residue, Atom
-from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.domain.feature import (FEATURENAME_PSSM, FEATURENAME_PSSMDIFFERENCE,
+from deeprankcore.models.variant import SingleResidueVariant
+from deeprankcore.domain.amino_acid import amino_acids
+from deeprankcore.models.structure import Residue, Atom
+from deeprankcore.models.graph import Graph
+from deeprankcore.domain.feature import (FEATURENAME_PSSM, FEATURENAME_PSSMDIFFERENCE,
                                          FEATURENAME_PSSMWILDTYPE, FEATURENAME_PSSMVARIANT,
                                          FEATURENAME_INFORMATIONCONTENT)
 

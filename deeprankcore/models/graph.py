@@ -5,10 +5,10 @@ import logging
 import numpy
 import h5py
 
-from deeprank_gnn.models.structure import Atom, Residue
-from deeprank_gnn.models.contact import Contact
-from deeprank_gnn.models.grid import MapMethod, Grid, GridSettings
-from deeprank_gnn.domain.storage import (
+from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.models.contact import Contact
+from deeprankcore.models.grid import MapMethod, Grid, GridSettings
+from deeprankcore.domain.storage import (
     HDF5KEY_GRAPH_SCORE,
     HDF5KEY_GRAPH_NODENAMES,
     HDF5KEY_GRAPH_NODEFEATURES,

@@ -1,5 +1,5 @@
-from deeprank_gnn.models.amino_acid import AminoAcid
-from deeprank_gnn.models.polarity import Polarity
+from deeprankcore.models.amino_acid import AminoAcid
+from deeprankcore.models.polarity import Polarity
 
 alanine = AminoAcid(
     "Alanine",

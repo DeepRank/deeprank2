@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List
 
-from deeprank_gnn.models.amino_acid import AminoAcid
+from deeprankcore.models.amino_acid import AminoAcid
 
 
 class PssmRow:

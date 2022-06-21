@@ -1,8 +1,8 @@
 import logging
 import freesasa
-from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.models.structure import Residue, Atom
-from deeprank_gnn.domain.feature import FEATURENAME_BURIEDSURFACEAREA
+from deeprankcore.models.graph import Graph
+from deeprankcore.models.structure import Residue, Atom
+from deeprankcore.domain.feature import FEATURENAME_BURIEDSURFACEAREA
 
 
 logging.getLogger(__name__)

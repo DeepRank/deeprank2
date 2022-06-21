@@ -6,14 +6,14 @@ import glob
 import h5py
 from tqdm import tqdm
 
-from deeprank_gnn.preprocess import preprocess
-from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
-from deeprank_gnn.tools.score import get_all_scores
-import deeprank_gnn.feature.amino_acid
-import deeprank_gnn.feature.atomic_contact
-import deeprank_gnn.feature.biopython
-import deeprank_gnn.feature.bsa
-import deeprank_gnn.feature.pssm
+from deeprankcore.preprocess import preprocess
+from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
+from deeprankcore.tools.score import get_all_scores
+import deeprankcore.feature.amino_acid
+import deeprankcore.feature.atomic_contact
+import deeprankcore.feature.biopython
+import deeprankcore.feature.bsa
+import deeprankcore.feature.pssm
 
 
 _log = logging.getLogger(__name__)
@@ -55,14 +55,14 @@ class GraphHDF5():
         """
 
         self._feature_modules = [
-            deeprank_gnn.feature.amino_acid,
-            deeprank_gnn.feature.atomic_contact,
-            deeprank_gnn.feature.bsa,
+            deeprankcore.feature.amino_acid,
+            deeprankcore.feature.atomic_contact,
+            deeprankcore.feature.bsa,
         ]
         if pssm_path is not None:
-            self._feature_modules.append(deeprank_gnn.feature.pssm)
+            self._feature_modules.append(deeprankcore.feature.pssm)
         if biopython:
-            self._feature_modules.append(deeprank_gnn.feature.biopython)
+            self._feature_modules.append(deeprankcore.feature.biopython)
 
         # get the list of PDB names
         pdbs = list(filter(lambda x: x.endswith(".pdb"), os.listdir(pdb_path)))

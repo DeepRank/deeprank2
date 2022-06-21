@@ -1,4 +1,4 @@
-from deeprank_gnn.models.forcefield.vanderwaals import VanderwaalsParam
+from deeprankcore.models.forcefield.vanderwaals import VanderwaalsParam
 
 
 class ParamParser:

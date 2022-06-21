@@ -1,15 +1,15 @@
 from pdb2sql import pdb2sql
 
-from deeprank_gnn.domain.amino_acid import serine
-from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.feature.sasa import add_features
-from deeprank_gnn.tools.graph import build_residue_graph
-from deeprank_gnn.tools.pdb import get_structure, get_surrounding_residues
-from deeprank_gnn.domain.feature import (
+from deeprankcore.domain.amino_acid import serine
+from deeprankcore.models.variant import SingleResidueVariant
+from deeprankcore.feature.sasa import add_features
+from deeprankcore.tools.graph import build_residue_graph
+from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
+from deeprankcore.domain.feature import (
     FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
     FEATURENAME_SIZEDIFFERENCE,
 )
-from deeprank_gnn.feature.amino_acid import add_features # noqa
+from deeprankcore.feature.amino_acid import add_features # noqa
 
 
 def test_add_features():

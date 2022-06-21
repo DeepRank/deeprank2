@@ -9,7 +9,7 @@
 
 # distribution
 deeprankcore.egg-info
-DeepRank_GNN.egg-info
+deeprank-core.egg-info
 build/*
 dist/*
 

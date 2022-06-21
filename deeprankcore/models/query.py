@@ -3,17 +3,17 @@ import os
 from typing import Dict, List, Optional, Iterator
 import tempfile
 import pdb2sql
-from deeprank_gnn.models.graph import Graph
-from deeprank_gnn.models.amino_acid import AminoAcid
-from deeprank_gnn.tools.pdb import (
+from deeprankcore.models.graph import Graph
+from deeprankcore.models.amino_acid import AminoAcid
+from deeprankcore.tools.pdb import (
     get_residue_contact_pairs,
     get_surrounding_residues,
     get_structure,
     add_hydrogens,
 )
-from deeprank_gnn.tools.pssm import parse_pssm
-from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
-from deeprank_gnn.models.variant import SingleResidueVariant
+from deeprankcore.tools.pssm import parse_pssm
+from deeprankcore.tools.graph import build_residue_graph, build_atomic_graph
+from deeprankcore.models.variant import SingleResidueVariant
 import pickle
 
 _log = logging.getLogger(__name__)

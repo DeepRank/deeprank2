@@ -3,10 +3,10 @@ from typing import List
 import numpy
 from scipy.spatial import distance_matrix
 
-from deeprank_gnn.models.graph import Graph, Node, Edge
-from deeprank_gnn.models.structure import Atom, Residue
-from deeprank_gnn.models.contact import AtomicContact, ResidueContact
-from deeprank_gnn.domain.feature import FEATURENAME_POSITION
+from deeprankcore.models.graph import Graph, Node, Edge
+from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.models.contact import AtomicContact, ResidueContact
+from deeprankcore.domain.feature import FEATURENAME_POSITION
 
 
 def build_atomic_graph( # pylint: disable=too-many-locals

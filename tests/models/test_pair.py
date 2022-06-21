@@ -1,4 +1,4 @@
-from deeprank_gnn.models.pair import Pair
+from deeprankcore.models.pair import Pair
 
 
 def test_order_independency():

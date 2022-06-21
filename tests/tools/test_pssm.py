@@ -1,7 +1,7 @@
 from pdb2sql import pdb2sql
-from deeprank_gnn.tools.pssm import parse_pssm
-from deeprank_gnn.tools.pdb import get_structure
-from deeprank_gnn.domain.amino_acid import alanine
+from deeprankcore.tools.pssm import parse_pssm
+from deeprankcore.tools.pdb import get_structure
+from deeprankcore.domain.amino_acid import alanine
 
 
 def test_add_pssm():
