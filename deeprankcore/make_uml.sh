@@ -7,7 +7,7 @@
 #  2. plantuml: https://formulae.brew.sh/formula/plantuml
 #
 # Notice:
-#  - Run the script in the `deeprank-gnn-2/deeprank_gnn`
+#  - Run the script in the `deeprank-core/deeprankcore`
 #  - Do keep .svg files in the same folder to view diagrams interactively
 ###############################################################################
 
@@ -31,8 +31,8 @@ eval "$(awk '
 # Add .svg link to .puml files
 # this will enable interactive viewing of UML
 for i in `awk '/^class/{print $4}END{print "classes_npl"}' classes_npl.puml`; do
-    awk '/^class \"deeprank_gnn/ { print $1, $2, $3, $4, "[[" $4 ".svg]]", $5}
-        !/^class \"deeprank_gnn/ {print}' $i.puml > $i.link.puml
+    awk '/^class \"deeprankcore/ { print $1, $2, $3, $4, "[[" $4 ".svg]]", $5}
+        !/^class \"deeprankcore/ {print}' $i.puml > $i.link.puml
     mv $i.link.puml $i.puml
 done
 
