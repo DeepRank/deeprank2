@@ -1,13 +1,13 @@
 import numpy
 from pdb2sql import pdb2sql
-from deeprank_gnn.domain.amino_acid import alanine
-from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.models.graph import Graph, Node
-from deeprank_gnn.models.structure import Chain, Residue
-from deeprank_gnn.feature.sasa import add_features
-from deeprank_gnn.tools.graph import build_residue_graph, build_atomic_graph
-from deeprank_gnn.tools.pdb import get_structure, get_surrounding_residues
-from deeprank_gnn.domain.feature import FEATURENAME_SASA
+from deeprankcore.domain.amino_acid import alanine
+from deeprankcore.models.variant import SingleResidueVariant
+from deeprankcore.models.graph import Graph, Node
+from deeprankcore.models.structure import Chain, Residue
+from deeprankcore.feature.sasa import add_features
+from deeprankcore.tools.graph import build_residue_graph, build_atomic_graph
+from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
+from deeprankcore.domain.feature import FEATURENAME_SASA
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:

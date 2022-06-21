@@ -1,12 +1,12 @@
 from pdb2sql import pdb2sql
 import numpy
-from deeprank_gnn.domain.amino_acid import alanine
-from deeprank_gnn.tools.pssm import parse_pssm
-from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.feature.pssm import add_features
-from deeprank_gnn.tools.graph import build_atomic_graph
-from deeprank_gnn.tools.pdb import get_structure, get_surrounding_residues
-from deeprank_gnn.domain.feature import (
+from deeprankcore.domain.amino_acid import alanine
+from deeprankcore.tools.pssm import parse_pssm
+from deeprankcore.models.variant import SingleResidueVariant
+from deeprankcore.feature.pssm import add_features
+from deeprankcore.tools.graph import build_atomic_graph
+from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
+from deeprankcore.domain.feature import (
     FEATURENAME_PSSM,
     FEATURENAME_PSSMDIFFERENCE,
     FEATURENAME_PSSMWILDTYPE,

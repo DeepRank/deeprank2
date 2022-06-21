@@ -3,14 +3,14 @@ from uuid import uuid4
 from pdb2sql import pdb2sql
 import numpy
 
-from deeprank_gnn.models.structure import Chain, Atom
-from deeprank_gnn.models.contact import AtomicContact, ResidueContact
-from deeprank_gnn.models.graph import Edge, Graph
-from deeprank_gnn.tools.pdb import get_structure
-from deeprank_gnn.feature.atomic_contact import add_features
-from deeprank_gnn.domain.amino_acid import alanine
-from deeprank_gnn.models.variant import SingleResidueVariant
-from deeprank_gnn.domain.feature import (
+from deeprankcore.models.structure import Chain, Atom
+from deeprankcore.models.contact import AtomicContact, ResidueContact
+from deeprankcore.models.graph import Edge, Graph
+from deeprankcore.tools.pdb import get_structure
+from deeprankcore.feature.atomic_contact import add_features
+from deeprankcore.domain.amino_acid import alanine
+from deeprankcore.models.variant import SingleResidueVariant
+from deeprankcore.domain.feature import (
     FEATURENAME_EDGEDISTANCE,
     FEATURENAME_EDGEVANDERWAALS,
     FEATURENAME_EDGECOULOMB,

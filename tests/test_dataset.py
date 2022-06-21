@@ -1,5 +1,5 @@
 import unittest
-from deeprank_gnn.DataSet import HDF5DataSet
+from deeprankcore.DataSet import HDF5DataSet
 
 
 class TestDataSet(unittest.TestCase):

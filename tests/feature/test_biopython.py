@@ -1,9 +1,9 @@
 import numpy
 from pdb2sql import pdb2sql
-from deeprank_gnn.feature.biopython import add_features
-from deeprank_gnn.tools.graph import build_residue_graph
-from deeprank_gnn.tools.pdb import get_structure, get_residue_contact_pairs
-from deeprank_gnn.domain.feature import (
+from deeprankcore.feature.biopython import add_features
+from deeprankcore.tools.graph import build_residue_graph
+from deeprankcore.tools.pdb import get_structure, get_residue_contact_pairs
+from deeprankcore.domain.feature import (
     FEATURENAME_HALFSPHEREEXPOSURE,
     FEATURENAME_RESIDUEDEPTH,
 )

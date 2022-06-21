@@ -1,49 +1,49 @@
-# DeepRank-GNN
+# deeprank-core
 
-[![Build Status](https://github.com/DeepRank/deeprank-gnn-2/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/DeepRank/deeprank-gnn-2/actions)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/DeepRank-GNN?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/DeepRank-GNN&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-gnn-2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-gnn-2?branch=main)
+[![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade)
+[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5705564.svg)](https://doi.org/10.5281/zenodo.5705564)
 
-![alt-text](./deeprank_gnn.png)
+![alt-text](./deeprankcore.png)
 
 ## Installation
 
 ### Dependencies
 
-Before installing DeepRank-GNN you need to install:
+Before installing deeprank-core you need to install:
 
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
  * [pytorch_geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg` (recommended).
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html). 
  * [reduce](https://github.com/rlabduke/reduce) Follow the instructions in the README
 
-### DeepRank-GNN installation
+### deeprank-core installation
 
-[//]: # (Once the dependencies installed, you can install the latest release of DeepRank-GNN using the PyPi package manager:)
+[//]: # (Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:)
 
 [//]: # (```)
-[//]: # (pip install DeepRank-GNN)
+[//]: # (pip install deeprankcore)
 [//]: # (```)
 
 You can get all the new developments by cloning the repo and installing the code with
 
 ```
-git clone https://github.com/DeepRank/deeprank-gnn-2
-cd deeprank-gnn-2
+git clone https://github.com/DeepRank/deeprank-core
+cd deeprankcore
 pip install -e ./
 ```
 
-[//]: # (The documentation can be found here : https://deeprank-gnn.readthedocs.io/)
+[//]: # (The documentation can be found here : https://deeprank-core.readthedocs.io/)
 
 ## Generate Graphs
 
 The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
 
 ```python
-from deeprank_gnn.preprocess import preprocess
-from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
-from deeprank_gnn.feature import bsa, pssm, amino_acid, biopython
+from deeprankcore.preprocess import preprocess
+from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
+from deeprankcore.feature import bsa, pssm, amino_acid, biopython
 
 feature_modules = [bsa, pssm, amino_acid, biopython]
 
@@ -75,10 +75,10 @@ Using the graph interaction network is rather simple :
 
 
 ```python
-from deeprank_gnn.NeuralNet import NeuralNet
-from deeprank_gnn.DataSet import HDF5DataSet
-from deeprank_gnn.ginet import GINet
-from deeprank_gnn.models.metrics import OutputExporter, ScatterPlotExporter
+from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.ginet import GINet
+from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
 database = './hdf5/1ACB_residue.hdf5'
 
@@ -191,6 +191,6 @@ nn.train(nepoch=50)
 
 ## h5x support
 
-After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprank_gnn/h5x/h5x.py` to explorer the connection graph used by DeepRank-GNN. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly` as shown below.
+After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprankcore/h5x/h5x.py` to explorer the connection graph used by deeprank-core. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly` as shown below.
 
-![alt-text](./h5_deeprank_gnn.png)
+![alt-text](./h5_deeprankcore.png)

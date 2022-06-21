@@ -92,7 +92,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'deeprank-gnn'
+project = 'deeprankcore'
 copyright = '2021, Manon Reau, Nicolas Renaud'
 author = 'Manon Reau, Nicolas Renaud'
 
@@ -207,7 +207,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'deeprank-gnn', 'DeepRank-GNN Documentation',
+    (master_doc, 'deeprankcore', 'deeprank-core Documentation',
      [author], 1)
 ]
 

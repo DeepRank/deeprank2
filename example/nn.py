@@ -1,6 +1,6 @@
-from deeprank_gnn.NeuralNet import NeuralNet
-from deeprank_gnn.DataSet import HDF5DataSet
-from deeprank_gnn.ginet import GINet
+from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.ginet import GINet
 
 database = "./1ATN_residue.hdf5"
 

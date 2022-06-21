@@ -2,12 +2,12 @@ import tempfile
 import shutil
 import os
 import unittest
-from deeprank_gnn.NeuralNet import NeuralNet
-from deeprank_gnn.DataSet import HDF5DataSet
-from deeprank_gnn.ginet import GINet
-from deeprank_gnn.foutnet import FoutNet
-from deeprank_gnn.sGAT import sGAT
-from deeprank_gnn.models.metrics import (
+from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.ginet import GINet
+from deeprankcore.foutnet import FoutNet
+from deeprankcore.sGAT import sGAT
+from deeprankcore.models.metrics import (
     OutputExporter,
     TensorboardBinaryClassificationExporter,
 )

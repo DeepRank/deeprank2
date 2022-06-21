@@ -1,13 +1,13 @@
 import numpy
 from pdb2sql import pdb2sql
-from deeprank_gnn.tools.pdb import (
+from deeprankcore.tools.pdb import (
     get_structure,
     get_residue_contact_pairs,
     get_surrounding_residues,
     find_neighbour_atoms,
 )
-from deeprank_gnn.domain.amino_acid import valine
-from deeprank_gnn.models.structure import AtomicElement
+from deeprankcore.domain.amino_acid import valine
+from deeprankcore.models.structure import AtomicElement
 
 
 def test_get_structure_complete():

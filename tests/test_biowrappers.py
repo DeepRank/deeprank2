@@ -1,5 +1,5 @@
 import unittest
-from deeprank_gnn.tools.BioWrappers import (
+from deeprankcore.tools.BioWrappers import (
     get_bio_model,
     get_depth_res,
     get_depth_contact_res,

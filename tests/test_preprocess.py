@@ -2,10 +2,10 @@ from tempfile import mkdtemp
 from shutil import rmtree
 import os
 import h5py
-from deeprank_gnn.preprocess import preprocess
-from deeprank_gnn.models.query import SingleResidueVariantResidueQuery
-from deeprank_gnn.domain.amino_acid import alanine, phenylalanine
-import deeprank_gnn.feature.sasa
+from deeprankcore.preprocess import preprocess
+from deeprankcore.models.query import SingleResidueVariantResidueQuery
+from deeprankcore.domain.amino_acid import alanine, phenylalanine
+import deeprankcore.feature.sasa
 from tests.utils import PATH_TEST
 
 
@@ -37,7 +37,7 @@ def test_preprocess():
             )
             queries.append(query)
 
-        output_paths = preprocess([deeprank_gnn.feature.sasa], queries, prefix, 10)
+        output_paths = preprocess([deeprankcore.feature.sasa], queries, prefix, 10)
         assert len(output_paths) > 0
 
         graph_names = []
