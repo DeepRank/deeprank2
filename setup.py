@@ -6,7 +6,7 @@ from setuptools import (find_packages, setup)
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-# To update the package version number, edit DeepRank-GNN/__version__.py
+# To update the package version number, edit deeprank-core/__version__.py
 version = {}
 with open(os.path.join(here, 'deeprankcore', '__version__.py')) as f:
     exec(f.read(), version)
@@ -24,7 +24,7 @@ setup(
     author_email='g.crocioni@esciencecenter.nl, Coos.Baakman@radboudumc.nl',
     url='https://github.com/DeepRank/deeprank-gnn-2',
     packages=find_packages(include=['deeprankcore']),
-    package_dir={'deeprankcore': 'deeprankcore'},
+    package_dir={'deeprank-gnn-2': 'deeprankcore'},
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,

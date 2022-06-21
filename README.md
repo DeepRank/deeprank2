@@ -11,19 +11,19 @@
 
 ### Dependencies
 
-Before installing DeepRank-GNN you need to install:
+Before installing deeprank-core you need to install:
 
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
  * [pytorch_geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg` (recommended).
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html). 
  * [reduce](https://github.com/rlabduke/reduce) Follow the instructions in the README
 
-### DeepRank-GNN installation
+### deeprank-core installation
 
-[//]: # (Once the dependencies installed, you can install the latest release of DeepRank-GNN using the PyPi package manager:)
+[//]: # (Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:)
 
 [//]: # (```)
-[//]: # (pip install DeepRank-GNN)
+[//]: # (pip install deeprankcore)
 [//]: # (```)
 
 You can get all the new developments by cloning the repo and installing the code with
