@@ -1,8 +1,8 @@
-# DeepRank-GNN
+# deeprank-core
 
-[![Build Status](https://github.com/DeepRank/deeprank-gnn-2/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/DeepRank/deeprank-gnn-2/actions)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/DeepRank-GNN?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/DeepRank-GNN&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-gnn-2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-gnn-2?branch=main)
+[![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade)
+[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5705564.svg)](https://doi.org/10.5281/zenodo.5705564)
 
 ![alt-text](./deeprankcore.png)
@@ -29,12 +29,12 @@ Before installing deeprank-core you need to install:
 You can get all the new developments by cloning the repo and installing the code with
 
 ```
-git clone https://github.com/DeepRank/deeprank-gnn-2
-cd deeprank-gnn-2
+git clone https://github.com/DeepRank/deeprank-core
+cd deeprankcore
 pip install -e ./
 ```
 
-[//]: # (The documentation can be found here : https://deeprank-gnn.readthedocs.io/)
+[//]: # (The documentation can be found here : https://deeprank-core.readthedocs.io/)
 
 ## Generate Graphs
 
@@ -191,6 +191,6 @@ nn.train(nepoch=50)
 
 ## h5x support
 
-After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprankcore/h5x/h5x.py` to explorer the connection graph used by DeepRank-GNN. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly` as shown below.
+After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprankcore/h5x/h5x.py` to explorer the connection graph used by deeprank-core. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly` as shown below.
 
 ![alt-text](./h5_deeprankcore.png)

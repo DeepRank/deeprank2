@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: DeepRank-GNN
+title: deeprank-core
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -21,11 +21,11 @@ authors:
 identifiers:
   - type: url
     value: ''
-    description: 'https://github.com/DeepRank/Deeprank-GNN'
-repository-code: 'https://github.com/DeepRank/Deeprank-GNN'
-url: 'https://deeprank-gnn.readthedocs.io/'
+    description: 'https://github.com/DeepRank/deeprank-core'
+repository-code: 'https://github.com/DeepRank/deeprank-core'
+url: 'https://deeprank-core.readthedocs.io/'
 abstract: >-
-  DeepRank-GNN allows ranking of Protein-protein
+  deeprank-core allows ranking of Protein-protein
   Interface using a graph representation of the
   contact residues. Graphs of such interfaces are
   used to train graph neural network for the
