@@ -1,7 +1,7 @@
 import unittest
 import h5py
-from deeprank_gnn.tools.visualization import hdf5_to_networkx, plotly_2d, plotly_3d
-from deeprank_gnn.tools.score import get_all_scores
+from deeprankcore.tools.visualization import hdf5_to_networkx, plotly_2d, plotly_3d
+from deeprankcore.tools.score import get_all_scores
 
 
 class TestGraph(unittest.TestCase):

@@ -8,8 +8,8 @@
 *__pycache__*
 
 # distribution
-deeprank_gnn.egg-info
-DeepRank_GNN.egg-info
+deeprankcore.egg-info
+deeprank-core.egg-info
 build/*
 dist/*
 
@@ -36,4 +36,6 @@ docs/apidocs
 #pycharm
 .idea
 
+#macos
+*.DS_store
 

@@ -4,11 +4,11 @@ import os
 import h5py
 from pdb2sql import pdb2sql
 import numpy
-from deeprank_gnn.models.grid import GridSettings, MapMethod
-from deeprank_gnn.models.graph import Graph, Edge, Node
-from deeprank_gnn.models.contact import ResidueContact
-from deeprank_gnn.tools.pdb import get_structure
-from deeprank_gnn.domain.storage import (
+from deeprankcore.models.grid import GridSettings, MapMethod
+from deeprankcore.models.graph import Graph, Edge, Node
+from deeprankcore.models.contact import ResidueContact
+from deeprankcore.tools.pdb import get_structure
+from deeprankcore.domain.storage import (
     HDF5KEY_GRAPH_NODEFEATURES,
     HDF5KEY_GRAPH_EDGEINDICES,
     HDF5KEY_GRAPH_EDGEFEATURES,

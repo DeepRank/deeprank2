@@ -1,85 +1,68 @@
-# DeepRank-GNN
+# deeprank-core
 
-[![Build Status](https://github.com/DeepRank/deeprank-gnn-2/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/DeepRank/deeprank-gnn-2/actions)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/DeepRank-GNN?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/DeepRank-GNN&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-gnn-2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-gnn-2?branch=main)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5705564.svg)](https://doi.org/10.5281/zenodo.5705564)
+[![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade)
+[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main)
+[![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)
 
-![alt-text](./deeprank_gnn.png)
+![alt-text](./deeprankcore.png)
 
 ## Installation
 
 ### Dependencies
 
-Before installing DeepRank-GNN you need to install:
+Before installing deeprank-core you need to install:
 
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
  * [pytorch_geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg` (recommended).
- * [pytorch_cluster](https://github.com/rusty1s/pytorch_cluster) `conda install pytorch-cluster -c pyg`
- * [pytorch_sparse](https://github.com/rusty1s/pytorch_sparse) `conda install pytorch-sparse -c pyg`
- * [pytorch_scatter](https://github.com/rusty1s/pytorch_scatter) `conda install pytorch-scatter -c pyg`
- * [torch_spline_conv](https://github.com/rusty1s/pytorch_spline_conv) `conda install pytorch-spline-conv -c pyg`
- * [numpy](https://numpy.org) `conda install numpy`
- * [scipy](https://scipy.org) `conda install -c anaconda scipy`
- * [h5py](https://docs.h5py.org) `conda install -c anaconda h5py`
- * [networkx](https://networkx.org) `conda install -c anaconda networkx`
- * [matplotlib](https://matplotlib.org) `conda install -c conda-forge matplotlib`
- * [pdb2sql](https://pdb2sql.readthedocs.io) `pip install pdb2sql`
- * [sklearn](https://scikit-learn.org) `conda install -c anaconda scikit-learn`
- * [chart-studio](https://help.plot.ly) `conda install -c conda-forge chart-studio`
- * [BioPython](https://biopython.org) `conda install -c conda-forge biopython`
- * [python-louvain](https://github.com/taynaud/python-louvain) `conda install -c conda-forge python-louvain`
- * [markov-clustering](https://github.com/guyallard/markov_clustering) `pip install markov-clustering`
- * [tqdm](https://pypi.python.org/pypi/tqdm) `conda install -c conda-forge tqdm`
- * [freesasa](https://github.com/mittinatten/freesasa) `conda install -c hydroid freesasa`
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html). 
  * [reduce](https://github.com/rlabduke/reduce) Follow the instructions in the README
 
-### DeepRank-GNN installation
+### deeprank-core installation
 
-[//]: # (Once the dependencies installed, you can install the latest release of DeepRank-GNN using the PyPi package manager:)
+[//]: # (Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:)
 
 [//]: # (```)
-[//]: # (pip install DeepRank-GNN)
+[//]: # (pip install deeprankcore)
 [//]: # (```)
 
 You can get all the new developments by cloning the repo and installing the code with
 
 ```
-git clone https://github.com/DeepRank/deeprank-gnn-2
-cd deeprank-gnn-2
+git clone https://github.com/DeepRank/deeprank-core
+cd deeprankcore
 pip install -e ./
 ```
 
-[//]: # (The documentation can be found here : https://deeprank-gnn.readthedocs.io/)
+[//]: # (The documentation can be found here : https://deeprank-core.readthedocs.io/)
 
 ## Generate Graphs
 
 The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
 
 ```python
-from deeprank_gnn.preprocess import PreProcessor
-from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
-from deeprank_gnn.feature import bsa, pssm, amino_acid, biopython
+from deeprankcore.preprocess import preprocess
+from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
+from deeprankcore.feature import bsa, pssm, amino_acid, biopython
 
 feature_modules = [bsa, pssm, amino_acid, biopython]
 
-preprocessor = PreProcessor(feature_modules, "train-data")
+queries = []
 
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-preprocessor.add_query(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
-                                                           pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
+                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
 
-preprocessor.start()  # start builfing graphs from the queries
+# run the preprocessing
+output_paths = preprocess(feature_modules, queries, "train-data")
 
-preprocessor.wait()  # wait for all jobs to complete
-
-print(preprocessor.output_paths)  # print the paths of the generated files
+# print the paths of the generated files
+print(output_paths)
 
 ```
 
@@ -92,9 +75,10 @@ Using the graph interaction network is rather simple :
 
 
 ```python
-from deeprank_gnn.NeuralNet import NeuralNet
-from deeprank_gnn.ginet import GINet
-from deeprank_gnn.models.metrics import OutputExporter, ScatterPlotExporter
+from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.ginet import GINet
+from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
 database = './hdf5/1ACB_residue.hdf5'
 
@@ -102,17 +86,53 @@ metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory),
                      ScatterPlotExporter(metrics_output_directory, 5)]
 
-nn = NeuralNet(database, GINet,
-               node_feature=['type', 'polarity', 'bsa',
-                             'depth', 'hse', 'ic', 'pssm'],
-               edge_feature=['dist'],
-               target='irmsd',
-               index=range(400),
-               batch_size=64,
-               percent=[0.8, 0.2],
-               metrics_exporters=metrics_exporters)
+# creating HDF5DataSet object and selecting molecules, node/edge features, target, and clustering method:
+dataset = HDF5DataSet(
+    root = "./",
+    database = database,
+    index = range(400),
+    node_feature = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+    edge_feature = ["dist"],
+    target = "irmsd",
+    clustering_method = "mcl",
+)
 
-nn.train(nepoch=50, validate=False)
+# training a network using the above defined dataset
+nn = NeuralNet(
+    dataset,
+    GINet,
+    task = "reg",
+    batch_size = 64,
+    percent = [0.8, 0.2],
+    metrics_exporters = metrics_exporters
+)
+
+nn.train(nepoch = 50, validate = False)
+```
+## Custom Train-Validation split
+
+It is also possible to define a user-defined function for splitting the dataset in train and validation sets, for example if you want to perform the split according to the peptides clusters (the default split is done after shuffling, according to percent parameter):
+
+```python
+
+def UDF_DivideDataSet(dataset, percent, shuffle):
+    ...
+    return train_dataset, valid_dataset
+```
+
+Then, the user-defined function can be passed to NeuralNet class as parameter:
+
+```python
+
+nn = NeuralNet(
+    dataset,
+    GINet,
+    task = "reg",
+    batch_size = 64,
+    percent = [0.8, 0.2],
+    train_valid_split = UDF_DivideDataSet,
+    metrics_exporters = metrics_exporters
+)
 ```
 
 ## Custom GNN
@@ -154,15 +174,15 @@ class CustomNet(torch.nn.Module):
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-nn = NeuralNet(database, CustomNet,
-               node_feature=['type', 'polarity', 'bsa',
-                             'depth', 'hse', 'ic', 'pssm'],
-               edge_feature=['dist'],
-               target='irmsd',
-               index=range(400),
-               batch_size=64,
-               percent=[0.8, 0.2],
-               device=device)
+
+nn = NeuralNet(
+    dataset,
+    CustomNet,
+    batch_size = 64,
+    percent = [0.8, 0.2],
+    train_valid_split = UDF_DivideDataSet,
+    device=device
+)
 nn.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 nn.loss = MSELoss()
 
@@ -171,6 +191,6 @@ nn.train(nepoch=50)
 
 ## h5x support
 
-After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprank_gnn/h5x/h5x.py` to explorer the connection graph used by DeepRank-GNN. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly` as shown below.
+After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprankcore/h5x/h5x.py` to explorer the connection graph used by deeprank-core. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly` as shown below.
 
-![alt-text](./h5_deeprank_gnn.png)
+![alt-text](./h5_deeprankcore.png)

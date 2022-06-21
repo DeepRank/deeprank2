@@ -2,7 +2,7 @@ import tempfile
 import shutil
 import os
 import unittest
-from deeprank_gnn.GraphGenMP import GraphHDF5
+from deeprankcore.GraphGenMP import GraphHDF5
 
 
 class TestCreateGraph(unittest.TestCase):
