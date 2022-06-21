@@ -8,7 +8,7 @@
 *__pycache__*
 
 # distribution
-deeprank_gnn.egg-info
+deeprankcore.egg-info
 DeepRank_GNN.egg-info
 build/*
 dist/*

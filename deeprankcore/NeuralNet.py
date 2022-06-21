@@ -10,9 +10,9 @@ from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.data import DataLoader
 
-# deeprank_gnn import
-from deeprank_gnn.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprank_gnn.DataSet import DivideDataSet, PreCluster
+# deeprankcore import
+from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
+from deeprankcore.DataSet import DivideDataSet, PreCluster
 
 _log = logging.getLogger(__name__)
 

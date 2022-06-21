@@ -41,9 +41,9 @@ pip install -e ./
 The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
 
 ```python
-from deeprank_gnn.preprocess import preprocess
-from deeprank_gnn.models.query import ProteinProteinInterfaceResidueQuery
-from deeprank_gnn.feature import bsa, pssm, amino_acid, biopython
+from deeprankcore.preprocess import preprocess
+from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
+from deeprankcore.feature import bsa, pssm, amino_acid, biopython
 
 feature_modules = [bsa, pssm, amino_acid, biopython]
 
@@ -75,10 +75,10 @@ Using the graph interaction network is rather simple :
 
 
 ```python
-from deeprank_gnn.NeuralNet import NeuralNet
-from deeprank_gnn.DataSet import HDF5DataSet
-from deeprank_gnn.ginet import GINet
-from deeprank_gnn.models.metrics import OutputExporter, ScatterPlotExporter
+from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.ginet import GINet
+from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
 database = './hdf5/1ACB_residue.hdf5'
 

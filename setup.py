@@ -8,7 +8,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # To update the package version number, edit DeepRank-GNN/__version__.py
 version = {}
-with open(os.path.join(here, 'deeprank_gnn', '__version__.py')) as f:
+with open(os.path.join(here, 'deeprankcore', '__version__.py')) as f:
     exec(f.read(), version)
 
 with open('README.md') as readme_file:
@@ -23,12 +23,12 @@ setup(
     author=["Giulia Crocioni", "Coos Baakman", "Daniel Rademaker", "Gayatri Ramakrishnan", "Sven van der Burg", "Li Xue", "Daniil Lepikhov"],
     author_email='g.crocioni@esciencecenter.nl, Coos.Baakman@radboudumc.nl',
     url='https://github.com/DeepRank/deeprank-gnn-2',
-    packages=find_packages(include=['deeprank_gnn']),
-    package_dir={'deeprank_gnn': 'deeprank_gnn'},
+    packages=find_packages(include=['deeprankcore']),
+    package_dir={'deeprankcore': 'deeprankcore'},
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords='deeprank_gnn',
+    keywords='deeprankcore',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',

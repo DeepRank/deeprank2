@@ -12,7 +12,7 @@ from tqdm import tqdm
 import h5py
 import copy
 from ast import literal_eval
-from deeprank_gnn.community_pooling import community_detection, community_pooling
+from deeprankcore.community_pooling import community_detection, community_pooling
 
 
 _log = logging.getLogger(__name__)
@@ -140,9 +140,9 @@ class HDF5DataSet(Dataset):
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
             or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
-            The complete list can be found in deeprank_gnn/domain/features.py
+            The complete list can be found in deeprankcore/domain/features.py
 
-            edge_feature (list, optional): the complete list can be found in deeprank_gnn/domain/features.py.
+            edge_feature (list, optional): the complete list can be found in deeprankcore/domain/features.py.
             Defaults to ["dist"], distance.
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,

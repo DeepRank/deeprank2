@@ -9,8 +9,8 @@ from torch_scatter import scatter_sum
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
 
-# deeprank_gnn import
-from deeprank_gnn.community_pooling import get_preloaded_cluster, community_pooling
+# deeprankcore import
+from deeprankcore.community_pooling import get_preloaded_cluster, community_pooling
 
 
 class GINetConvLayer(torch.nn.Module):
