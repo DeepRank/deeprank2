@@ -48,7 +48,7 @@ test = [
     "coverage",
     "pycodestyle",
     "pytest",
-    "vpytest-cov",
+    "pytest-cov",
     "pytest-runner",
     "coveralls"
 ]
