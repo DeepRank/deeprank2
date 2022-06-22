@@ -6,9 +6,9 @@ from setuptools import (find_packages, setup)
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-# To update the package version number, edit deeprank-core/__version__.py
+# To update the package version number, bumpver update --minor or --patch or --major
 version = {}
-with open(os.path.join(here, 'deeprankcore', '__version__.py')) as f:
+with open(os.path.join(here, 'deeprankcore', '__init__.py')) as f:
     exec(f.read(), version)
 
 with open('README.md') as readme_file:
@@ -16,7 +16,7 @@ with open('README.md') as readme_file:
 
 setup(
     name='deeprankcore',
-    version=version['__version__'],
+    version=version['__doc__'],
     description='Graph Neural network Scoring of protein-protein conformations',
     long_description=readme + '\n\n',
     long_description_content_type='text/markdown',
