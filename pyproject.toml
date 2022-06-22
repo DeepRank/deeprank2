@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deeprankcore"
-version = "0.1.0"
+version = "0.1.1"
 description = "deeprank-core allows to train graph neural networks to classify protein-protein interface with a greater flexibility for the user."
 readme = "README.md"
 authors = [{ name = "Giulia Crocioni", email = "g.crocioni@esciencecenter.nl" }]
@@ -57,7 +57,7 @@ test = [
 Homepage = "https://github.com/DeepRank/deeprank-core"
 
 [tool.bumpver]
-current_version = "0.1.0"
+current_version = "0.1.1"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "Bump version {old_version} -> {new_version}"
 commit = true
