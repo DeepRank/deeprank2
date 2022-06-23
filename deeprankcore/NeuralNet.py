@@ -62,6 +62,12 @@ class NeuralNet():
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
 
+        if metrics_exporters is not None:
+            self._metrics_exporters = MetricsExporterCollection(
+                *metrics_exporters)
+        else:
+            self._metrics_exporters = MetricsExporterCollection()
+
         if pretrained_model is None:
             self.target = dataset.target # already defined in HDF5DatSet object
             self.lr = lr
@@ -119,12 +125,6 @@ class NeuralNet():
         else:
             self.load_params(pretrained_model)
             self.load_pretrained_model(dataset, Net)
-
-        if metrics_exporters is not None:
-            self._metrics_exporters = MetricsExporterCollection(
-                *metrics_exporters)
-        else:
-            self._metrics_exporters = MetricsExporterCollection()
 
     def load_pretrained_model(self, test_dataset, Net):
         """
@@ -231,16 +231,27 @@ class NeuralNet():
 
         self.num_edge_features = len(self.edge_feature)
 
+        # the target values are optional
+        if dataset.get(0).y is not None:
+
+            target_shape = dataset.get(0).y.shape
+        else:
+            target_shape = None
+
         # regression mode
         if self.task == "reg":
+
+            self.output_shape = 1
+
             self.model = Net(
                 dataset.get(0).num_features,
-                1,
+                self.output_shape,
                 self.num_edge_features).to(
                 self.device)
 
         # classification mode
         elif self.task == "class":
+
             self.classes_to_idx = {
                 i: idx for idx, i in enumerate(
                     self.classes)}
@@ -252,6 +263,13 @@ class NeuralNet():
                 self.output_shape,
                 self.num_edge_features).to(
                 self.device)
+
+        # check for compatibility
+        for metrics_exporter in self._metrics_exporters:
+            if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
+                raise ValueError(f"metrics exporter of type {type(metrics_exporter)} "
+                                 f"is not compatible with output shape {self.output_shape} "
+                                 f"and target shape {target_shape}")
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
