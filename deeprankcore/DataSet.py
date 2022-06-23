@@ -146,7 +146,8 @@ class HDF5DataSet(Dataset):
             Defaults to ["dist"], distance.
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
-            or 'louvain' algorithm). Defaults to "mcl".
+            or 'louvain' algorithm). Note that this parameter can be None only if the neural
+            network doesn't expects clusters (e.g. naive_gnn). Defaults to "mcl".
 
             edge_feature_transform (function, optional): transformation applied to the edge features.
             Defaults to lambdax:np.tanh(-x/2+2)+1.
