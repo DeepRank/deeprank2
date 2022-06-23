@@ -4,6 +4,9 @@
 requires      = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [project]
 name = "deeprankcore"
 version = "0.1.1"
