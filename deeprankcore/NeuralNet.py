@@ -234,7 +234,7 @@ class NeuralNet():
         # the target values are optional
         if dataset.get(0).y is not None:
 
-            target_shape = dataset.get(0).y.shape
+            target_shape = dataset.get(0).y.shape[0]
         else:
             target_shape = None
 
