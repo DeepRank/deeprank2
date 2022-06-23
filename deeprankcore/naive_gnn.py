@@ -8,7 +8,7 @@ from torch_scatter import scatter_mean, scatter_sum
 class NaiveConvolutionalLayer(Module):
 
     def __init__(self, count_node_features, count_edge_features):
-        super(NaiveConvolutionalLayer, self).__init__()
+        super().__init__()
         message_size = 32
         edge_input_size = 2 * count_node_features + count_edge_features
         self._edge_mlp = Sequential(Linear(edge_input_size, message_size), ReLU())
@@ -39,7 +39,7 @@ class NaiveNetwork(Module):
                 output_shape(int): number of output value per graph
                 input_shape_edge(int): number of edge input features
         """
-        super(NaiveNetwork, self).__init__()
+        super().__init__()
         self._external1 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
         self._external2 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
         hidden_size = 128
