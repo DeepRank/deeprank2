@@ -44,6 +44,12 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
     assert len(g.edges) > 0, "no edges"
     assert FEATURENAME_EDGEDISTANCE in g.edges[0].features
 
+    for edge in g.edges:
+        if edge.id.item1 == edge.id.item2:
+            raise ValueError(f"an edge pairs {edge.id.item1} with itself")
+
+    assert not g.has_nan()
+
     f, tmp_path = mkstemp(suffix=".hdf5")
     os.close(f)
 
@@ -289,3 +295,13 @@ def test_variant_residue_graph_101M():
         ],
         [FEATURENAME_EDGEDISTANCE],
     )
+
+
+def test_res_ppi():
+
+    query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/3MRC/3MRC.pdb",
+                                                "M", "P")
+
+    g = query.build_graph([sasa, atomic_contact])
+
+    _check_graph_makes_sense(g, [FEATURENAME_SASA], [FEATURENAME_EDGECOULOMB])
