@@ -135,9 +135,12 @@ class NeuralNet():
             Net (function): neural network
         """
         self.test_loader = DataLoader(test_dataset)
-        PreCluster(test_dataset, method=self.cluster_nodes)
+
+        if self.cluster_nodes is not None: 
+            PreCluster(test_dataset, method=self.cluster_nodes)
 
         print("Test set loaded")
+        
         self.put_model_to_device(test_dataset, Net)
 
         self.set_loss()

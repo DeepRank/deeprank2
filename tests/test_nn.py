@@ -7,6 +7,7 @@ from deeprankcore.NeuralNet import NeuralNet
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
 from deeprankcore.foutnet import FoutNet
+from deeprankcore.naive_gnn import NaiveNetwork
 from deeprankcore.sGAT import sGAT
 from deeprankcore.models.metrics import (
     OutputExporter,
@@ -24,6 +25,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
     target,
     metrics_exporters,
     transform_sigmoid,
+    clustering_method
 ):
 
     dataset = HDF5DataSet(
@@ -33,7 +35,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
         node_feature=node_features,
         edge_feature=edge_features,
         target=target,
-        clustering_method='mcl',
+        clustering_method=clustering_method,
     )
 
     nn = NeuralNet(
@@ -72,6 +74,7 @@ class TestNeuralNet(unittest.TestCase):
             "irmsd",
             [OutputExporter(self.work_directory)],
             True,
+            "mcl",
         )
 
     def test_ginet(self):
@@ -84,6 +87,7 @@ class TestNeuralNet(unittest.TestCase):
             "irmsd",
             [OutputExporter(self.work_directory)],
             False,
+            "mcl",
         )
 
         assert len(os.listdir(self.work_directory)) > 0
@@ -98,6 +102,7 @@ class TestNeuralNet(unittest.TestCase):
             "bin_class",
             [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
+            "mcl",
         )
 
         assert len(os.listdir(self.work_directory)) > 0
@@ -112,6 +117,7 @@ class TestNeuralNet(unittest.TestCase):
             "irmsd",
             [],
             False,
+            "mcl",
         )
 
     def test_sgat(self):
@@ -124,6 +130,20 @@ class TestNeuralNet(unittest.TestCase):
             "irmsd",
             [],
             False,
+            "mcl",
+        )
+
+    def test_naive(self):
+        _model_base_test(
+            "tests/hdf5/1ATN_ppi.hdf5",
+            NaiveNetwork,
+            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            ["dist"],
+            "reg",
+            "irmsd",
+            [OutputExporter(self.work_directory)],
+            False,
+            None,
         )
 
     def test_incompatible_regression(self):
@@ -137,6 +157,7 @@ class TestNeuralNet(unittest.TestCase):
                 "irmsd",
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
                 False,
+                "mcl",
             )
 
     def test_incompatible_classification(self):
@@ -150,6 +171,7 @@ class TestNeuralNet(unittest.TestCase):
                 "bin_class",
                 [ScatterPlotExporter(self.work_directory)],
                 False,
+                "mcl",
             )
 
 
