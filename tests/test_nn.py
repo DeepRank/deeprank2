@@ -2,6 +2,7 @@ import tempfile
 import shutil
 import os
 import unittest
+import pytest
 from deeprankcore.NeuralNet import NeuralNet
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
@@ -10,6 +11,7 @@ from deeprankcore.sGAT import sGAT
 from deeprankcore.models.metrics import (
     OutputExporter,
     TensorboardBinaryClassificationExporter,
+    ScatterPlotExporter,
 )
 
 
@@ -123,6 +125,32 @@ class TestNeuralNet(unittest.TestCase):
             [],
             False,
         )
+
+    def test_incompatible_regression(self):
+        with pytest.raises(ValueError):
+            _model_base_test(
+                "tests/hdf5/1ATN_ppi.hdf5",
+                sGAT,
+                ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+                ["dist"],
+                "reg",
+                "irmsd",
+                [TensorboardBinaryClassificationExporter(self.work_directory)],
+                False,
+            )
+
+    def test_incompatible_classification(self):
+        with pytest.raises(ValueError):
+            _model_base_test(
+                "tests/hdf5/variants.hdf5",
+                GINet,
+                ["size", "polarity", "sasa", "ic", "pssm"],
+                ["dist"],
+                "class",
+                "bin_class",
+                [ScatterPlotExporter(self.work_directory)],
+                False,
+            )
 
 
 if __name__ == "__main__":

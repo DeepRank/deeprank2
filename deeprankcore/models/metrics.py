@@ -1,7 +1,7 @@
 import lzma
 import os
 import csv
-from typing import List, Tuple, Any, Dict
+from typing import List, Tuple, Any, Dict, Optional
 from math import sqrt
 import logging
 import random
@@ -31,6 +31,11 @@ class MetricsExporter:
         "the entry_names, output_values, target_values MUST have the same length"
         pass # pylint: disable=unnecessary-pass
 
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+        "true if this exporter can work with the given data shapes"
+
+        return True
+
 
 class MetricsExporterCollection:
     "allows a series of metrics exporters to be used at the same time"
@@ -52,6 +57,9 @@ class MetricsExporterCollection:
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         for metrics_exporter in self._metrics_exporters:
             metrics_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values)
+
+    def __iter__(self):
+        return iter(self._metrics_exporters)
 
 
 class TensorboardBinaryClassificationExporter(MetricsExporter):
@@ -121,6 +129,11 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
         if len(set(target_values)) == 2:
             roc_auc = roc_auc_score(target_values, probabilities)
             self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
+
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+        "for regression, target data is needed and output data must be a list of two-dimensional values"
+
+        return output_data_shape == 2 and target_data_shape == 1
 
 
 class OutputExporter(MetricsExporter):
@@ -233,3 +246,9 @@ class ScatterPlotExporter(MetricsExporter):
 
             path = self.get_filename(epoch_number)
             self._plot(epoch_number, self._plot_data[epoch_number], path)
+
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+        "for regression, target data is needed and output data must be a list of one-dimensional values"
+
+        return output_data_shape == 1 and target_data_shape == 1
+
