@@ -157,6 +157,7 @@ class TestNeuralNet(unittest.TestCase):
                 "irmsd",
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
                 False,
+                "mcl",
             )
 
     def test_incompatible_classification(self):
@@ -170,6 +171,7 @@ class TestNeuralNet(unittest.TestCase):
                 "bin_class",
                 [ScatterPlotExporter(self.work_directory)],
                 False,
+                "mcl",
             )
 
 
