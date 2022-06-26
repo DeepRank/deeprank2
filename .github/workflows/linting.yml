@@ -20,19 +20,28 @@ jobs:
         version: [3.9]
 
     steps:
-      - name: Setup conda
-        uses: s-weigand/setup-conda@v1
-        with:
-          update-conda: true
-          python-version: ${{ matrix.version }}
-          conda-channels: anaconda
-      - run: conda --version
-      - run: which python
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.4.0
+      with:
+          access_token: ${{ github.token }}
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.version }}
+        
+    - name: Setup conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        update-conda: true
+        python-version: ${{ matrix.version }}
+        conda-channels: anaconda
+    - run: conda --version
+    - run: which python
 
-      - name: Install the package
-        run: pip install .[test]
-        env:
-          CONDA_PREFIX: /usr/share/miniconda
+    - name: Install the package
+      run: pip install .[test]
+      env:
+        CONDA_PREFIX: /usr/share/miniconda
 
-      - name: Check style against standards using prospector
-        run: prospector
+    - name: Check style against standards using prospector
+      run: prospector
