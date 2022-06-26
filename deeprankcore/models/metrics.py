@@ -26,7 +26,7 @@ class MetricsExporter:
         "overridable"
         pass # pylint: disable=unnecessary-pass
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
+    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments, unused-argument
                 entry_names: List[str], output_values: List[Any], target_values: List[Any]):
         "the entry_names, output_values, target_values MUST have the same length"
         pass # pylint: disable=unnecessary-pass

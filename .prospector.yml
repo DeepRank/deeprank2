@@ -12,6 +12,7 @@ member-warnings: false
 ignore-paths:
   - docs
   - reduce
+  - setup.py
 pyroma:
     run: true
 
