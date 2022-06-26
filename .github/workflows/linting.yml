@@ -1,0 +1,24 @@
+name: linting
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+
+    name: Linting build
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-python-and-package
+      - name: Check style against standards using prospector
+        run: prospector
