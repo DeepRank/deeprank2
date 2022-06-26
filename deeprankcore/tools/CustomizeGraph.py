@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 
-def add_target(graph_path, target_name, target_list, sep=" "):
+def add_target(graph_path, target_name, target_list, sep=" "): # pylint: disable=too-many-locals
     """Add a target to all the graphs contains in hdf5 files
 
     Args:

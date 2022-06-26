@@ -158,7 +158,7 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"): # 
     raise ValueError(f"Clustering method {method} not supported")
 
 
-def community_pooling(cluster, data):
+def community_pooling(cluster, data): # pylint: disable=too-many-locals
     """Pools features and edges of all cluster members
 
     All cluster members are pooled into a single node that is assigned:
