@@ -38,8 +38,27 @@ jobs:
     - run: conda --version
     - run: which python
 
-    - name: Install prospector
-      run: pip install prospector[with_pyroma]
+    - name: install dependencies
+      env:
+        CMAKE_INSTALL_PREFIX: .local
+      run: |
+        # install reduce from git
+        git clone https://github.com/rlabduke/reduce
+        mkdir -p build/reduce
+        cd build/reduce
+        cmake ../../reduce
+        make
+        sudo make install
+        cd ../..
+        # Only way to install msms is through conda
+        conda install -c bioconda msms
+        # We install pytorch with conda because otherwise it breaks
+        conda install pytorch -c pytorch
+        # This is the recommended way of installing pytorch-geometric
+        conda install pyg -c pyg
+
+    - name: Install the package
+      run: pip install .[test]
       env:
         CONDA_PREFIX: /usr/share/miniconda
 
