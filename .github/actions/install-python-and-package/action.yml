@@ -31,14 +31,15 @@ runs:
         cache-dependency-path: setup.cfg
 
     - name: Setup conda
-      shell: bash {0}
       uses: s-weigand/setup-conda@v1
       with:
         update-conda: true
         python-version: ${{ inputs.python-version }}
         conda-channels: anaconda
     - run: conda --version
+      shell: bash {0}
     - run: which python
+      shell: bash {0}
 
     - name: Upgrade pip and install dependencies
       shell: bash {0}
