@@ -1,17 +1,16 @@
-name: Python Continuous Integration pipeline
+name: linting
 
 on:
-  # Trigger analysis when pushing in master or pull requests, and when creating
-  # a pull request. 
   push:
     branches:
-      - main
+    - main
   pull_request:
-      types: [opened, synchronize, reopened]
-
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
+
+    name: Linting build
 
     runs-on: ubuntu-latest
 
@@ -29,7 +28,7 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.version }}
-        
+
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
       with:
@@ -63,15 +62,5 @@ jobs:
       env:
         CONDA_PREFIX: /usr/share/miniconda
 
-    - name: Test with pytest
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
-      run: |
-        pytest --cov-config setup.cfg
-
-    - name: Coveralls
-      env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
-        COVERALLS_FLAG_NAME: python-${{ matrix.version }}
-      run: |
-        coveralls --service=github
+    - name: Check style against standards using prospector
+      run: prospector

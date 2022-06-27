@@ -14,9 +14,9 @@
 Before installing deeprank-core you need to install:
 
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
- * [pytorch_geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg` (recommended).
+ * [pytorch_geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg` (recommended). *For MacOS with M1 chip users*: you can follow [these instructions](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html). 
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html). 
- * [reduce](https://github.com/rlabduke/reduce) Follow the instructions in the README
+ * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
 
 ### deeprank-core installation
 
@@ -30,7 +30,7 @@ You can get all the new developments by cloning the repo and installing the code
 
 ```
 git clone https://github.com/DeepRank/deeprank-core
-cd deeprankcore
+cd deeprank-core
 pip install -e ./
 ```
 

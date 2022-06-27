@@ -31,7 +31,7 @@ class MetricsExporter:
         "the entry_names, output_values, target_values MUST have the same length"
         pass # pylint: disable=unnecessary-pass
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:  # pylint: disable=unused-argument
         "true if this exporter can work with the given data shapes"
 
         return True
@@ -251,4 +251,3 @@ class ScatterPlotExporter(MetricsExporter):
         "for regression, target data is needed and output data must be a list of one-dimensional values"
 
         return output_data_shape == 1 and target_data_shape == 1
-
