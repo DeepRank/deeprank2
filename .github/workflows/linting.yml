@@ -20,49 +20,7 @@ jobs:
         version: [3.9]
 
     steps:
-    - name: Cancel Previous Runs
-      uses: styfle/cancel-workflow-action@0.4.0
-      with:
-          access_token: ${{ github.token }}
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.version }}
-
-    - name: Setup conda
-      uses: s-weigand/setup-conda@v1
-      with:
-        update-conda: true
-        python-version: ${{ matrix.version }}
-        conda-channels: anaconda
-    - run: conda --version
-    - run: which python
-
-    - name: install dependencies
-      env:
-        CMAKE_INSTALL_PREFIX: .local
-      run: |
-        # install reduce from git
-        git clone https://github.com/rlabduke/reduce
-        mkdir -p build/reduce
-        cd build/reduce
-        cmake ../../reduce
-        make
-        sudo make install
-        cd ../..
-        # Only way to install msms is through conda
-        conda install -c bioconda msms
-        # We install pytorch with conda because otherwise it breaks
-        conda install pytorch -c pytorch
-        # This is the recommended way of installing pytorch-geometric
-        conda install pyg -c pyg
-        # h5xplorer
-        pip install git+https://github.com/DeepRank/h5xplorer.git@master
-
-    - name: Install the package
-      run: pip install .[test]
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
-
+    - uses: actions/checkout@v3
+    - uses: ./.github/actions/install-python-and-package
     - name: Check style against standards using prospector
       run: prospector
