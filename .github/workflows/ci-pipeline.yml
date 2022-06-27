@@ -57,6 +57,8 @@ jobs:
         conda install pytorch -c pytorch
         # This is the recommended way of installing pytorch-geometric
         conda install pyg -c pyg
+        # h5xplorer
+        pip install git+https://github.com/DeepRank/h5xplorer.git@master
 
     - name: Install the package
       run: pip install .[test]
