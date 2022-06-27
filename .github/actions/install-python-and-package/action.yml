@@ -31,6 +31,7 @@ runs:
         cache-dependency-path: setup.cfg
 
     - name: Setup conda
+      shell: bash {0}
       uses: s-weigand/setup-conda@v1
       with:
         update-conda: true
@@ -40,6 +41,7 @@ runs:
     - run: which python
 
     - name: Upgrade pip and install dependencies
+      shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
       run: |
@@ -62,6 +64,7 @@ runs:
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
 
     - name: Install the package
+      shell: bash {0}
       run: python3 -m pip install .[${{ inputs.extras-require }}]
       env:
         CONDA_PREFIX: /usr/share/miniconda
