@@ -4,17 +4,3 @@ build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
-[tool.bumpver]
-current_version = "0.1.1"
-version_pattern = "MAJOR.MINOR.PATCH"
-commit_message = "Bump version {old_version} -> {new_version}"
-commit = true
-tag = true
-push = false
-
-[tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'current_version = "{version}"', 'version = "{version}"'
-]
-"deeprankcore/__init__.py" = ["{version}"]
