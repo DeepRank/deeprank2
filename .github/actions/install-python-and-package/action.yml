@@ -59,6 +59,8 @@ runs:
         conda install -c bioconda msms
         # We install pytorch with conda because otherwise it breaks
         conda install pytorch -c pytorch
+        # In the future, release h5xplorer on PyPI
+        pip install git+https://github.com/DeepRank/h5xplorer.git@master
 
     - name: Install the package
       shell: bash {0}
