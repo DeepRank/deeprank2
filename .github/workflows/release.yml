@@ -30,7 +30,7 @@ jobs:
 
   upload_test_pypi:
     needs: [build]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/download-artifact@v3
@@ -45,7 +45,7 @@ jobs:
 
   upload_pypi:
     needs: [build]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v3
