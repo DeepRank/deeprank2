@@ -458,12 +458,9 @@ class HDF5DataSet(Dataset):
 
                 ops = [">", "<", "=="]
                 new_cond_vals = cond_vals
-                for op in ops:
-                    new_cond_vals = new_cond_vals.replace(op, "val" + op)
+                for o in ops:
+                    new_cond_vals = new_cond_vals.replace(o, "val" + o)
 
-                _log.debug(f"filter: '{cond_vals}' became '{new_cond_vals}'")
-
-                ast.parse('val<10', mode='eval')
                 if not literal_eval(new_cond_vals):
                     return False
             else:
