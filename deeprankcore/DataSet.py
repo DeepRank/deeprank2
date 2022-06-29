@@ -122,12 +122,12 @@ class HDF5DataSet(Dataset):
             database (str, optional): Path to hdf5 file(s). Defaults to None.
 
             transform (callable, optional): A function/transform that takes in
-            antorch_geometric.data.Data object and returns a transformed version.
+            a torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before every access. Defaults to None.
 
             pre_transform (callable, optional):  A function/transform that takes in
-            an torch_geometric.data.Data object and returns a transformed version.
-            The data object will be transformed before being saved to disk.. Defaults to None.
+            a torch_geometric.data.Data object and returns a transformed version.
+            The data object will be transformed before being saved to disk. Defaults to None.
 
             dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules.
             Defaults to None.
@@ -172,6 +172,7 @@ class HDF5DataSet(Dataset):
             self.edge_feature = edge_feature
 
         self.edge_feature_transform = edge_feature_transform
+        self._transform = transform
 
         self.clustering_method = clustering_method
 
@@ -383,6 +384,10 @@ class HDF5DataSet(Dataset):
         # mol name
         data.mol = mol
 
+        # apply transformation
+        if self._transform is not None:
+            data = self._transform(data)
+
         return data
 
     def create_index_molecules(self):
@@ -391,7 +396,7 @@ class HDF5DataSet(Dataset):
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
         This allows to refer to one complex with its index in the list
         """
-        print("   Processing data set")
+        _log.debug(f"Processing data set with hdf5 files: {self.database}")
 
         self.index_complexes = []
 
@@ -416,9 +421,8 @@ class HDF5DataSet(Dataset):
                     if self.filter(fh5[k]):
                         self.index_complexes += [(fdata, k)]
                 fh5.close()
-            except Exception as inst:
-                print("\t\t--> Ignore File : " + fdata)
-                print(inst)
+            except Exception:
+                _log.exception(f"on {fdata}")
 
         self.ntrain = len(self.index_complexes)
         self.index_train = list(range(self.ntrain))
