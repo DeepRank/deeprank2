@@ -16,7 +16,6 @@ Before installing deeprank-core you need to install:
  * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
- * [h5xplorer](https://github.com/DeepRank/h5xplorer): `pip install git+https://github.com/DeepRank/h5xplorer.git@master`.
 
 ### deeprank-core installation
 
