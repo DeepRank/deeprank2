@@ -420,7 +420,7 @@ class HDF5DataSet(Dataset):
                     if self.filter(fh5[k]):
                         self.index_complexes += [(fdata, k)]
                 fh5.close()
-            except:
+            except Exception:
                 _log.exception(f"on {fdata}")
 
         self.ntrain = len(self.index_complexes)
