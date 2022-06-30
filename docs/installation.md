@@ -10,11 +10,11 @@ Before installing deeprank-core you need to install:
 
 ## deeprankcore installation
 
-[//]: # (Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:)
+Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:
 
-[//]: # (```)
-[//]: # (pip install deeprankcore)
-[//]: # (```)
+```
+pip install deeprankcore
+```
 
 You can get all the new developments by cloning the repo and installing the code with
 
