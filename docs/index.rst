@@ -3,31 +3,22 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to DeepRank-GNN's documentation!
+Welcome to deeprankcore documentation!
 ========================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: DeepRank-GNN:
+   :caption: deeprankcore:
    
-   overview
    installation
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Tutorial:
-
-   tutorial.generate_graph
-   tutorial.train_model
-   tutorial.advanced
+   quickstart
    
 .. toctree::
    :maxdepth: 2
    :caption: API
 
-   api.graph_generator
-   api.graph_network
-   api.neural_network
+   reference/modules
+
 
 Indices and tables
 ==================

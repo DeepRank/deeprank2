@@ -1,43 +1,4 @@
-# deeprank-core
-
-[![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main)
-[![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)
-[![Documentation Status](https://readthedocs.org/projects/deeprankcore/badge/?version=latest)](https://deeprankcore.readthedocs.io/en/latest/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore)
-
-![alt-text](./deeprankcore.png)
-
-## Installation
-
-### Dependencies
-
-Before installing deeprank-core you need to install:
-
- * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
- * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
- * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
-
-### deeprank-core installation
-
-Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:
-
-```
-pip install deeprankcore
-```
-
-You can get all the new developments by cloning the repo and installing the code with
-
-```
-git clone https://github.com/DeepRank/deeprank-core
-cd deeprank-core
-pip install -e ./
-```
-
-## Documentation
-The documentation can be found here : https://deeprankcore.rtfd.io/
-
+# Quick start
 ## Generate Graphs
 
 The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
