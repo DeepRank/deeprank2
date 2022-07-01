@@ -48,7 +48,8 @@ class Query:
             graph.targets[target_name] = target_data
 
     def _load_structure(
-        self, pdb_path: str, pssm_paths: Optional[Dict[str, str]] = None
+        self, pdb_path: str, pssm_paths: Optional[Dict[str, str]],
+        include_hydrogens: bool
     ):
         "A helper function, to build the structure from pdb and pssm files."
 
@@ -59,13 +60,16 @@ class Query:
         )
         os.close(hydrogen_pdb_file)
 
-        add_hydrogens(pdb_path, hydrogen_pdb_path)
+        if include_hydrogens:
+            add_hydrogens(pdb_path, hydrogen_pdb_path)
 
-        # read the pdb copy
-        try:
-            pdb = pdb2sql.pdb2sql(hydrogen_pdb_path)
-        finally:
-            os.remove(hydrogen_pdb_path)
+            # read the pdb copy
+            try:
+                pdb = pdb2sql.pdb2sql(hydrogen_pdb_path)
+            finally:
+                os.remove(hydrogen_pdb_path)
+        else:
+            pdb = pdb2sql.pdb2sql(pdb_path)
 
         try:
             structure = get_structure(pdb, self.model_id)
@@ -154,14 +158,14 @@ class SingleResidueVariantResidueQuery(Query):
     def get_query_id(self) -> str:
         return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
-    def build_graph(self, feature_modules: List) -> Graph:
+    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
         """
 
         # load pdb structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths)
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # find the variant residue
         variant_residue = None
@@ -288,14 +292,14 @@ class SingleResidueVariantAtomicQuery(Query):
         # This should include the model, chain, residue and atom
         return str(atom)
 
-    def build_graph(self, feature_modules: List) -> Graph:
+    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
         """
 
         # load pdb structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths)
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # find the variant residue
         variant_residue = None
@@ -388,14 +392,14 @@ class ProteinProteinInterfaceAtomicQuery(Query):
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
-    def build_graph(self, feature_modules: List) -> Graph:
+    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
         """
 
         # load pdb structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths)
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # get the contact residues
         interface_pairs = get_residue_contact_pairs(
@@ -477,14 +481,14 @@ class ProteinProteinInterfaceResidueQuery(Query):
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
-    def build_graph(self, feature_modules: List) -> Graph:
+    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
         """
 
         # load pdb structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths)
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # get the contact residues
         interface_pairs = get_residue_contact_pairs(
