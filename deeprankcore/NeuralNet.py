@@ -300,7 +300,13 @@ class NeuralNet():
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
-    def train(self, nepoch=1, validate=False, save_model='last'):
+    def train(
+        self,
+        nepoch: Optional[int] = 1,
+        validate: Optional[bool] = False,
+        save_model: Optional[str] = 'last',
+        model_path: Optional[str] = None,
+    ):
         """
         Trains the model
 
@@ -313,6 +319,9 @@ class NeuralNet():
 
         train_losses = []
         valid_losses = []
+
+        if model_path is None:
+            model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._metrics_exporters:
 
@@ -346,8 +355,7 @@ class NeuralNet():
                     if save_model == 'best':
 
                         if min(valid_losses) == loss_:
-                            self.save_model(
-                                filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar')
+                            self.save_model(model_path)
                 else:
                     # if no validation set, saves the best performing model on
                     # the traing set
@@ -358,13 +366,11 @@ class NeuralNet():
                                             This may lead to training set data overfitting.
                                             We advice you to use an external validation set.""")
 
-                            self.save_model(
-                                filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar')
+                            self.save_model(model_path)
 
             # Save the last model
             if save_model == 'last':
-                self.save_model(
-                    filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}.pth.tar')
+                self.save_model(model_path)
 
     def test(self, dataset_test=None):
         """
