@@ -3,7 +3,7 @@
 from glob import glob
 from typing import Optional, List
 from functools import partial
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 import logging
 import os
 
@@ -16,6 +16,8 @@ _log = logging.getLogger(__name__)
 
 
 def _preprocess_one_query(prefix: str, feature_names: List[str], query: Query):
+
+    _log.info(f'\nPreprocess query with process ID {os.getpid()}.')
 
     # because only one process may access an hdf5 file at the time:
     output_path = f"{prefix}-{os.getpid()}.hdf5"
@@ -40,15 +42,21 @@ def preprocess(feature_modules: List, queries: List[Query],
     """
 
     if process_count is None:
-        process_count = cpu_count()
+        # returns the set of CPUs available considering the sched_setaffinity Linux system call,
+        # which limits which CPUs a process and its children can run on.
+        process_count = len(os.sched_getaffinity(0))
+
+    _log.info(f'\nSet of CPU processors available: {process_count}.')
 
     if prefix is None:
         prefix = "preprocessed-data"
 
+    _log.info('Creating pool function to process the queries...')
     pool_function = partial(_preprocess_one_query, prefix,
                             [m.__name__ for m in feature_modules])
 
     with Pool(process_count) as pool:
+        _log.info('Starting pooling...\n')
         pool.map(pool_function, queries)
 
     output_paths = glob(f"{prefix}-*.hdf5")
