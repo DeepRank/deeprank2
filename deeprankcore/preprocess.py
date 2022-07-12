@@ -40,15 +40,21 @@ def preprocess(feature_modules: List, queries: List[Query],
     """
 
     if process_count is None:
-        process_count = cpu_count()
+        # returns the set of CPUs available considering the sched_setaffinity Linux system call,
+        # which limits which CPUs a process and its children can run on.
+        process_count = len(os.sched_getaffinity(0))
+
+    print(f'\nSet of CPU processors available: {process_count}.')
 
     if prefix is None:
         prefix = "preprocessed-data"
 
+    print('Creating pool function to process the queries...')
     pool_function = partial(_preprocess_one_query, prefix,
                             [m.__name__ for m in feature_modules])
 
     with Pool(process_count) as pool:
+        print('Starting pooling...\n')
         pool.map(pool_function, queries)
 
     output_paths = glob(f"{prefix}-*.hdf5")
