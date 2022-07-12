@@ -25,7 +25,7 @@ jobs:
         run: pytest --cov-config setup.cfg
       - name: Coveralls
         env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: python-${{ matrix.version }}
         run: |
           coveralls --service=github
