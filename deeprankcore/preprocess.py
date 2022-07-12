@@ -3,7 +3,7 @@
 from glob import glob
 from typing import Optional, List
 from functools import partial
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 import logging
 import os
 
