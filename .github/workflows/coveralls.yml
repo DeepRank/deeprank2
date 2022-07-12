@@ -3,7 +3,7 @@ name: coveralls
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -22,7 +22,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-python-and-package
       - name: Run unit tests with coverage
-        run: pytest --cov-config setup.cfg
+        env:
+          CONDA_PREFIX: /usr/share/miniconda
+        run: |
+          pytest --cov-config setup.cfg
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
