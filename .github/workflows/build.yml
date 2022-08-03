@@ -1,0 +1,33 @@
+name: build
+
+on:
+  # Trigger analysis when pushing in master or pull requests, and when creating
+  # a pull request. 
+  push:
+    branches:
+      - main
+  pull_request:
+      types: [opened, synchronize, reopened]
+
+
+jobs:
+  build:
+    name: Build for (${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest']
+        python-version: [3.9]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-python-and-package
+      - name: Run unit tests
+        env:
+          CONDA_PREFIX: /usr/share/miniconda
+        run: |
+          pytest -v
+      - name: Verify that we can build the package
+        run: python3 setup.py sdist bdist_wheel

@@ -1,44 +1,4 @@
-# deeprank-core
-
-[![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main)
-[![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)
-[![Documentation Status](https://readthedocs.org/projects/deeprankcore/badge/?version=latest)](https://deeprankcore.readthedocs.io/en/latest/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore)
-
-![alt-text](./deeprankcore.png)
-
-## Installation
-
-### Dependencies
-
-Before installing deeprank-core you need to install:
-
- * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
-    * **How to build it without sudo privileges on a Linux machine**. After having run `make` in the reduce/ root directory, go to reduce/reduce_src/Makefile and modify `/usr/local/` to a folder in your home directory, such as `/home/user_name/apps`. Note that such a folder needs to be added to the PATH in the `.bashrc` file. Then run `make install` from reduce/. 
- * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
- * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
-
-### deeprank-core installation
-
-Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:
-
-```
-pip install deeprankcore
-```
-
-You can get all the new developments by cloning the repo and installing the code with
-
-```
-git clone https://github.com/DeepRank/deeprank-core
-cd deeprank-core
-pip install -e ./
-```
-
-## Documentation
-The documentation can be found here : https://deeprankcore.rtfd.io/
-
+# Quick start
 ## Generate Graphs
 
 The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
@@ -197,9 +157,3 @@ nn.train(nepoch=50)
 After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprankcore/h5x/h5x.py` to explorer the connection graph used by deeprank-core. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly` as shown below.
 
 ![alt-text](./h5_deeprankcore.png)
-
-## For the developers
-
-### Software release
-
-Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings. 

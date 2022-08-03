@@ -1,0 +1,69 @@
+name: "Install Python and deeprankcore"
+
+description: "Installs Python, updates pip and installs deeprankcore together with its dependencies."
+
+inputs:
+
+  python-version:
+    required: false
+    description: "The Python version to use. Specify major and minor version, e.g. '3.9'."
+    default: "3.9"
+
+  extras-require:
+    required: false
+    description: "The extras dependencies packages to be installed, for instance 'dev' or 'dev,publishing,notebooks'."
+    default: "test"
+
+runs:
+
+  using: "composite"
+
+  steps:
+    - name: Cancel Previous Runs and Set up Python
+      uses: styfle/cancel-workflow-action@0.4.0
+      with:
+          access_token: ${{ github.token }}
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+        cache-dependency-path: setup.cfg
+
+    - name: Setup conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        update-conda: true
+        python-version: ${{ inputs.python-version }}
+        conda-channels: anaconda
+    - run: conda --version
+      shell: bash {0}
+    - run: which python
+      shell: bash {0}
+
+    - name: Upgrade pip and install dependencies
+      shell: bash {0}
+      env:
+        CMAKE_INSTALL_PREFIX: .local
+      run: |
+        python3 -m pip install --upgrade pip setuptools wheel
+        # install reduce from git
+        git clone https://github.com/rlabduke/reduce
+        mkdir -p build/reduce
+        cd build/reduce
+        cmake ../../reduce
+        make
+        sudo make install
+        cd ../..
+        # Only way to install msms is through conda
+        conda install -c bioconda msms
+        # We install pytorch with conda because otherwise it breaks
+        conda install pytorch -c pytorch
+        # In the future, release h5xplorer on PyPI
+        pip install git+https://github.com/DeepRank/h5xplorer.git@master
+
+    - name: Install the package
+      shell: bash {0}
+      run: python3 -m pip install .[${{ inputs.extras-require }}]
+      env:
+        CONDA_PREFIX: /usr/share/miniconda

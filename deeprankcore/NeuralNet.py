@@ -62,6 +62,12 @@ class NeuralNet():
             metrics_exporters: the metrics exporters to use for generating metrics output
         """
 
+        if metrics_exporters is not None:
+            self._metrics_exporters = MetricsExporterCollection(
+                *metrics_exporters)
+        else:
+            self._metrics_exporters = MetricsExporterCollection()
+
         if pretrained_model is None:
             self.target = dataset.target # already defined in HDF5DatSet object
             self.lr = lr
@@ -120,12 +126,6 @@ class NeuralNet():
             self.load_params(pretrained_model)
             self.load_pretrained_model(dataset, Net)
 
-        if metrics_exporters is not None:
-            self._metrics_exporters = MetricsExporterCollection(
-                *metrics_exporters)
-        else:
-            self._metrics_exporters = MetricsExporterCollection()
-
     def load_pretrained_model(self, test_dataset, Net):
         """
         Loads pretrained model
@@ -135,9 +135,12 @@ class NeuralNet():
             Net (function): neural network
         """
         self.test_loader = DataLoader(test_dataset)
-        PreCluster(test_dataset, method=self.cluster_nodes)
+
+        if self.cluster_nodes is not None: 
+            PreCluster(test_dataset, method=self.cluster_nodes)
 
         print("Test set loaded")
+        
         self.put_model_to_device(test_dataset, Net)
 
         self.set_loss()
@@ -231,16 +234,27 @@ class NeuralNet():
 
         self.num_edge_features = len(self.edge_feature)
 
+        # the target values are optional
+        if dataset.get(0).y is not None:
+
+            target_shape = dataset.get(0).y.shape[0]
+        else:
+            target_shape = None
+
         # regression mode
         if self.task == "reg":
+
+            self.output_shape = 1
+
             self.model = Net(
                 dataset.get(0).num_features,
-                1,
+                self.output_shape,
                 self.num_edge_features).to(
                 self.device)
 
         # classification mode
         elif self.task == "class":
+
             self.classes_to_idx = {
                 i: idx for idx, i in enumerate(
                     self.classes)}
@@ -252,6 +266,13 @@ class NeuralNet():
                 self.output_shape,
                 self.num_edge_features).to(
                 self.device)
+
+        # check for compatibility
+        for metrics_exporter in self._metrics_exporters:
+            if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
+                raise ValueError(f"metrics exporter of type {type(metrics_exporter)} "
+                                 f"is not compatible with output shape {self.output_shape} "
+                                 f"and target shape {target_shape}")
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
@@ -279,7 +300,13 @@ class NeuralNet():
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
-    def train(self, nepoch=1, validate=False, save_model='last'):
+    def train(
+        self,
+        nepoch: Optional[int] = 1,
+        validate: Optional[bool] = False,
+        save_model: Optional[str] = 'last',
+        model_path: Optional[str] = None,
+    ):
         """
         Trains the model
 
@@ -292,6 +319,9 @@ class NeuralNet():
 
         train_losses = []
         valid_losses = []
+
+        if model_path is None:
+            model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._metrics_exporters:
 
@@ -325,8 +355,7 @@ class NeuralNet():
                     if save_model == 'best':
 
                         if min(valid_losses) == loss_:
-                            self.save_model(
-                                filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar')
+                            self.save_model(model_path)
                 else:
                     # if no validation set, saves the best performing model on
                     # the traing set
@@ -337,13 +366,11 @@ class NeuralNet():
                                             This may lead to training set data overfitting.
                                             We advice you to use an external validation set.""")
 
-                            self.save_model(
-                                filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(epoch)}.pth.tar')
+                            self.save_model(model_path)
 
             # Save the last model
             if save_model == 'last':
-                self.save_model(
-                    filename=f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}.pth.tar')
+                self.save_model(model_path)
 
     def test(self, dataset_test=None):
         """

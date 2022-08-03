@@ -75,22 +75,24 @@ def build_residue_graph( # pylint: disable=too-many-locals
             residue1 = atom1.residue
             residue2 = atom2.residue
 
-            contact = ResidueContact(residue1, residue2)
+            if residue1 != residue2:
 
-            node1 = Node(residue1)
-            node2 = Node(residue2)
+                contact = ResidueContact(residue1, residue2)
 
-            node1.features[FEATURENAME_POSITION] = numpy.mean(
-                [atom.position for atom in residue1.atoms], axis=0
-            )
-            node2.features[FEATURENAME_POSITION] = numpy.mean(
-                [atom.position for atom in residue2.atoms], axis=0
-            )
+                node1 = Node(residue1)
+                node2 = Node(residue2)
 
-            # The same residue will be added  multiple times as a node,
-            # but the Graph class fixes this.
-            graph.add_node(node1)
-            graph.add_node(node2)
-            graph.add_edge(Edge(contact))
+                node1.features[FEATURENAME_POSITION] = numpy.mean(
+                    [atom.position for atom in residue1.atoms], axis=0
+                )
+                node2.features[FEATURENAME_POSITION] = numpy.mean(
+                    [atom.position for atom in residue2.atoms], axis=0
+                )
+
+                # The same residue will be added  multiple times as a node,
+                # but the Graph class fixes this.
+                graph.add_node(node1)
+                graph.add_node(node2)
+                graph.add_edge(Edge(contact))
 
     return graph
