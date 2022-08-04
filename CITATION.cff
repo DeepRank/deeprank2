@@ -2,7 +2,8 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: deeprank-core
+doi: 10.5281/zenodo.6772110
+title: Deeprank-Core
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -45,9 +46,11 @@ abstract: >-
   for the prediction of the experimental validity of
   the interface.
 keywords:
-  - graph neural network
-  - protein-protein interface
+  - Graph Neural Networks
+  - Convolutional Neural Networks
+  - Protein-Protein Interface
+  - Deeprank
 license: Apache-2.0
 commit: 4e8823758ba03f824b4281f5689cb6a335ab2f6c
 version: "0.1.1"
-date-released: '2022-06-21'
+date-released: '2022-06-28'
