@@ -2,7 +2,6 @@ name: cffconvert
 
 on:
   push:
-  pull_request:
     paths:
       - CITATION.cff
 
