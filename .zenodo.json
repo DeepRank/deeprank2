@@ -37,10 +37,13 @@
         }
     ],
     "keywords": [
-        "deeprank gnn"
+        "Graph Neural Networks",
+        "Convolutional Neural Networks",
+        "Protein-Protein Interface",
+        "Deeprank"
     ],
     "license": {
         "id": "Apache-2.0"
     },
-    "title": "Deeprank GNN (tbd)"
+    "title": "Deeprank-Core"
 }
