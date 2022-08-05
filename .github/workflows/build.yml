@@ -36,10 +36,19 @@ jobs:
   integration:
     name: Test with GPU
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest']
+        python-version: [3.9]
+
     steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-python-and-package
       - uses: "namiyousef/action-kaggle-gpu-test@main"
         with:
           git_access_token: ${{ secrets.GITHUB_TOKEN }}
           kaggle_api_key: ${{ secrets.KAGGLE_API_KEY }}
           repository_name: ${{ github.repository }}
-          test_folder: integration
+          test_folder: tests
