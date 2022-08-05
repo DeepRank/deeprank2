@@ -3,6 +3,10 @@ import shutil
 import os
 import unittest
 import pytest
+import logging
+
+import torch
+
 from deeprankcore.NeuralNet import NeuralNet
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
@@ -14,6 +18,9 @@ from deeprankcore.models.metrics import (
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter,
 )
+
+
+_log = logging.getLogger(__name__)
 
 
 def _model_base_test( # pylint: disable=too-many-arguments
@@ -47,6 +54,13 @@ def _model_base_test( # pylint: disable=too-many-arguments
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
     )
+
+    if torch.cuda.is_available():
+        _log.debug("cuda is available, testing that the model is cuda")
+        for parameter in nn.model.parameters():
+            assert parameter.is_cuda, f"{parameter} is not cuda"
+    else:
+        _log.debug("cuda is not available")
 
     nn.train(nepoch=10, validate=True)
 
