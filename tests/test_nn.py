@@ -59,6 +59,18 @@ def _model_base_test( # pylint: disable=too-many-arguments
         _log.debug("cuda is available, testing that the model is cuda")
         for parameter in nn.model.parameters():
             assert parameter.is_cuda, f"{parameter} is not cuda"
+
+        data = dataset.get(0)
+
+        for name, data_tensor in (("x", data.x), ("y", data.y),
+                                  ("edge_index", data.edge_index),
+                                  ("edge_attr", data.edge_attr),
+                                  ("pos", data.pos),
+                                  ("cluster0",data.cluster0),
+                                  ("cluster1", data.cluster1)):
+
+            if data_tensor is not None:
+                assert data_tensor.is_cuda, f"data.{name} is not cuda"
     else:
         _log.debug("cuda is not available")
 

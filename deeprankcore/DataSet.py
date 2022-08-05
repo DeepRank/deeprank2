@@ -86,14 +86,14 @@ def PreCluster(dataset, method):
         cluster = community_detection(
             data.edge_index, data.num_nodes, method=method
         )
-        method_grp.create_dataset("depth_0", data=cluster)
+        method_grp.create_dataset("depth_0", data=cluster.cpu())
 
         data = community_pooling(cluster, data)
 
         cluster = community_detection(
             data.edge_index, data.num_nodes, method=method
         )
-        method_grp.create_dataset("depth_1", data=cluster)
+        method_grp.create_dataset("depth_1", data=cluster.cpu())
 
         f5.close()
 
@@ -187,6 +187,9 @@ class HDF5DataSet(Dataset):
         # alows to associate each mol to an index
         # and get fname and mol name from the index
         self.create_index_molecules()
+
+        # get the device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def len(self):
         """Gets the length of the dataset
@@ -297,7 +300,7 @@ class HDF5DataSet(Dataset):
 
                 node_data += (vals,)
 
-            x = torch.tensor(np.hstack(node_data), dtype=torch.float)
+            x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
             if "edge_index" in grp:
@@ -307,6 +310,7 @@ class HDF5DataSet(Dataset):
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
             else:
                 edge_index = torch.empty((2, 0), dtype=torch.long)
+            edge_index = edge_index.to(self.device)
 
             # edge feature (same issue as above)
             if self.edge_feature is not None and len(self.edge_feature) > 0 and \
@@ -324,6 +328,7 @@ class HDF5DataSet(Dataset):
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
+            edge_attr = edge_attr.to(self.device)
 
             if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
                 warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
@@ -334,12 +339,12 @@ class HDF5DataSet(Dataset):
                 y = None
             else:
                 if "score" in grp and self.target in grp["score"]:
-                    y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous()
+                    y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                 else:
                     raise ValueError(f"Target {self.target} missing in {mol}")
 
             # positions
-            pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous()
+            pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
@@ -353,9 +358,9 @@ class HDF5DataSet(Dataset):
                             ):
 
                             cluster0 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long)
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(self.device)
                             cluster1 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long)
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(self.device)
                         else:
                             _log.warning("no clusters detected")
                     else:
@@ -371,7 +376,7 @@ class HDF5DataSet(Dataset):
 
                     y = torch.tensor(
                         [grp["score/" + self.target][()]], dtype=torch.float
-                    ).contiguous()
+                    ).contiguous().to(self.device)
                 else:
                     raise ValueError(f"Target {self.target} missing in {mol}")
 
