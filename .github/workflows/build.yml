@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: "namiyousef/action-kaggle-gpu-test@main"
         with:
-          git_access_token: ${{ secrets.GIT_READ_ONLY_ACCESS_TOKEN }}
+          git_access_token: ${{ secrets.GITHUB_TOKEN }}
           kaggle_api_key: ${{ secrets.KAGGLE_API_KEY }}
           repository_name: ${{ github.repository }}
           test_folder: integration
