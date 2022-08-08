@@ -5,7 +5,7 @@ import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import SingleResidueVariantResidueQuery
 from deeprankcore.domain.amino_acid import alanine, phenylalanine
-import deeprankcore.feature.sasa
+from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa 
 from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.NeuralNet import NeuralNet
@@ -25,6 +25,8 @@ def test_integration():
 
     prefix = os.path.join(output_directory, "test-preprocess")
 
+    feature_modules = [amino_acid, atomic_contact, biopython, bsa, pssm, sasa]
+
     try:
         count_queries = 10
         queries = []
@@ -40,7 +42,7 @@ def test_integration():
             )
             queries.append(query)
 
-        output_paths = preprocess([deeprankcore.feature.sasa], queries, prefix, 10)
+        output_paths = preprocess(feature_modules, queries, prefix, 10)
         assert len(output_paths) > 0
 
         graph_names = []

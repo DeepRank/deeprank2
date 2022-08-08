@@ -216,7 +216,7 @@ class HDF5DataSet(Dataset):
 
     def check_hdf5_files(self):
         """Checks if the data contained in the hdf5 file is valid."""
-        print("   Checking dataset Integrity")
+        print("\nChecking dataset Integrity...\n")
         remove_file = []
         for fname in self.database:
             try:
@@ -246,10 +246,9 @@ class HDF5DataSet(Dataset):
         else:
             for feat in self.node_feature:
                 if feat not in self.available_node_feature:
-                    print(feat, " node feature not found in the file", self.database[0])
-                    print("Possible node feature : ")
-                    print("\n".join(self.available_node_feature))
-                    # raise ValueError('Feature Not found')
+                    print(f"The node feature _{feat}_ was not found in the file {self.database[0]}.")
+                    print("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
+                    print(f"\nPossible node features: {self.available_node_feature}\n")
                     sys.exit()
 
     def check_edge_feature(self):
@@ -264,12 +263,9 @@ class HDF5DataSet(Dataset):
         elif self.edge_feature is not None:
             for feat in self.edge_feature:
                 if feat not in self.available_edge_feature:
-                    print(
-                        feat, " edge attribute not found in the file", self.database[0]
-                    )
-                    print("Possible edge attribute : ")
-                    print("\n".join(self.available_edge_feature))
-                    # raise ValueError('Feature Not found')
+                    print(f"The edge feature _{feat}_ was not found in the file {self.database[0]}.")
+                    print("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
+                    print(f"\nPossible edge features: {self.available_edge_feature}\n")
                     sys.exit()
 
     def load_one_graph(self, fname, mol): # noqa
