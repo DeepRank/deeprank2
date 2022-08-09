@@ -341,7 +341,9 @@ class HDF5DataSet(Dataset):
                 if "score" in grp and self.target in grp["score"]:
                     y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                 else:
-                    raise ValueError(f"Target {self.target} missing in {mol}")
+                    possible_targets = grp["score"].keys()
+                    raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
+                                     " Use the query class to add more target values to input data.")
 
             # positions
             pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous().to(self.device)
@@ -369,16 +371,6 @@ class HDF5DataSet(Dataset):
                     _log.warning("no clustering group found")
             else:
                 _log.warning("no cluster method set")
-
-            y = None
-            if self.target is not None:
-                if self.target in grp["score"]:
-
-                    y = torch.tensor(
-                        [grp["score/" + self.target][()]], dtype=torch.float
-                    ).contiguous().to(self.device)
-                else:
-                    raise ValueError(f"Target {self.target} missing in {mol}")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)

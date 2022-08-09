@@ -1,14 +1,18 @@
 import os
+from typing import Dict, Union
 
 from pdb2sql import StructureSimilarity
 
 
-def get_all_scores(pdb_path, reference_pdb_path):
-    """Assigns scores (lrmsd, irmsd, fnat, dockQ, bin_class, capri_class) to a protein graph
+def get_all_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
+
+    """Computes scores (lrmsd, irmsd, fnat, dockQ, bin_class, capri_class) and outputs them as a dictionary
 
     Args:
         pdb_path (path): path to the scored pdb structure
         reference_pdb_path (path): path to the reference structure required to compute the different score
+
+    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockQ, bin_class, capri_class
     """
 
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
