@@ -332,7 +332,8 @@ class HDF5DataSet(Dataset):
                 if "score" in grp and self.target in grp["score"]:
                     y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous()
                 else:
-                    raise ValueError(f"Target {self.target} missing in {mol}")
+                    raise ValueError(f"Target {self.target} missing in {mol}. \
+                        Check preprocessing query instance to be sure to have inserted the desired target.")
 
             # positions
             pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous()
