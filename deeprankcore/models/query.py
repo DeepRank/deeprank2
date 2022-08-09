@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict, List, Optional, Iterator
+from typing import Dict, List, Optional, Iterator, Union
 import tempfile
 import pdb2sql
 from deeprankcore.models.graph import Graph
@@ -24,9 +24,27 @@ class Query:
 
     Query objects are used to generate graphs from structures.
     objects of this class should be created before any model is loaded
+
+    Query objects can have target values associated with them, these will be stored with the resulting graph.
+    The get_all_scores function under deeprankcore.tools.score is a nice way to get started. It will output a directory that can serve
+    as input for the targets argument.
+
+    Currently, the NeuralNet class under deeprankcore.NeuralNet can work with target values, that have one of the following names:
+
+      for classification:
+       - bin_class (scalar value is expected to be either 0 or 1)
+       - capri_classes (scalar integer values are expected)
+
+      for regression (expects one scalar per graph per target):
+       - irmsd
+       - lrmsd
+       - fnat
+       - dockQ
+
+    Other target names are also allowed, but require additional settings to the NeuralNet object.
     """
 
-    def __init__(self, model_id: str, targets: Optional[Dict[str, float]] = None):
+    def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
         """
         Args:
             model_id: the id of the model to load, usually a pdb accession code
