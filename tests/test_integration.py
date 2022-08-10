@@ -4,7 +4,6 @@ import os
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
-from deeprankcore.domain.amino_acid import alanine, phenylalanine
 from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa 
 from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
