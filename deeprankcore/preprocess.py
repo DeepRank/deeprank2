@@ -35,10 +35,17 @@ def preprocess(feature_modules: List, queries: List[Query],
 
     """
     Args:
-        feature_modules: the feature modules used to generate features, each must implement the add_features function
-        queries: all the queri objects that have to be preprocessed
-        prefix: prefix for the output files, ./preprocessed-data- by default
-        process_count: how many subprocesses will I run simultaneously, by default takes all available cpu cores.
+        feature_modules: list of features' modules used to generate features.
+        Each feature's module must implement the add_features function, and
+        features' modules can be found (or should be placed in case of a custom made feature)
+        in deeprankcore.feature folder.
+
+        queries: all the queries objects that have to be preprocessed.
+
+        prefix: prefix for the output files. ./preprocessed-data- by default.
+        
+        process_count: how many subprocesses to be run simultaneously.
+        By default takes all available cpu cores.
     """
 
     if process_count is None:
