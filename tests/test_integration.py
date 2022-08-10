@@ -15,7 +15,7 @@ import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals
     """
-    Tests preprocessing several PDB files into their feature representation HDF5 file.
+    Tests preprocessing several PDB files into their features representation HDF5 file.
 
     Then uses HDF5 generated files to train and test a GINet network.
 
