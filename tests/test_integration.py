@@ -13,7 +13,7 @@ from deeprankcore.models.metrics import OutputExporter
 from deeprankcore.tools.score import get_all_scores
 import tempfile
 
-def test_integration():
+def test_integration(): # pylint: disable=too-many-locals
     """
     Tests preprocessing several PDB files into their feature representation HDF5 file.
 
