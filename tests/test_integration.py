@@ -30,6 +30,7 @@ def test_integration():
     chain_id2 = "B"
 
     output_directory = mkdtemp()
+    metrics_directory = tempfile.mkdtemp()
 
     prefix = os.path.join(output_directory, "test-preprocess")
 
@@ -79,7 +80,7 @@ def test_integration():
             task="reg",
             batch_size=64,
             percent=[0.8, 0.2],
-            metrics_exporters=[OutputExporter(tempfile.mkdtemp())],
+            metrics_exporters=[OutputExporter(metrics_directory)],
             transform_sigmoid=True,
         )   
 
@@ -89,7 +90,7 @@ def test_integration():
 
         NeuralNet(dataset, GINet, pretrained_model="test.pth.tar")
 
-        assert len(os.listdir(tempfile.mkdtemp())) > 0
+        assert len(os.listdir(metrics_directory)) > 0
 
     finally:
         rmtree(output_directory)
