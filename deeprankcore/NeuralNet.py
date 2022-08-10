@@ -60,6 +60,12 @@ class NeuralNet():
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
             This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
+
+        Notes:
+          - 'task' will default to 'class' if the target is 'bin_class' or 'capri_classes'.
+          - 'task' will default to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
+          - 'task' must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
+          - 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
         """
 
         if metrics_exporters is not None:
