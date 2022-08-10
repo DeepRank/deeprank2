@@ -3,7 +3,7 @@ from shutil import rmtree
 import os
 import h5py
 from deeprankcore.preprocess import preprocess
-from deeprankcore.models.query import SingleResidueVariantResidueQuery
+from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.domain.amino_acid import alanine, phenylalanine
 from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa 
 from tests.utils import PATH_TEST
@@ -11,6 +11,7 @@ from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.NeuralNet import NeuralNet
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter
+from deeprankcore.tools.score import get_all_scores
 import tempfile
 
 def test_integration():
@@ -21,6 +22,13 @@ def test_integration():
 
     """
 
+    pdb_path = str(PATH_TEST / "data/pdb/1ATN/1ATN_1w.pdb")
+    ref_path = str(PATH_TEST / "data/ref/1ATN/1ATN.pdb")
+    pssm_path1 = str(PATH_TEST / "data/pssm/1ATN/1ATN.A.pdb.pssm")
+    pssm_path2 = str(PATH_TEST / "data/pssm/1ATN/1ATN.B.pdb.pssm")
+    chain_id1 = "A"
+    chain_id2 = "B"
+
     output_directory = mkdtemp()
 
     prefix = os.path.join(output_directory, "test-preprocess")
@@ -28,17 +36,18 @@ def test_integration():
     feature_modules = [amino_acid, atomic_contact, biopython, bsa, pssm, sasa]
 
     try:
+
+        targets = get_all_scores(pdb_path, ref_path)
+
         count_queries = 10
         queries = []
-        for number in range(1, count_queries + 1):
-            query = SingleResidueVariantResidueQuery(
-                str(PATH_TEST / "data/pdb/101M/101M.pdb"),
-                "A",
-                number,
-                None,
-                alanine,
-                phenylalanine,
-                pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
+        for _ in range(1, count_queries + 1):
+            query = ProteinProteinInterfaceResidueQuery(
+                pdb_path,
+                chain_id1,
+                chain_id2,
+                pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
+                targets = targets
             )
             queries.append(query)
 
