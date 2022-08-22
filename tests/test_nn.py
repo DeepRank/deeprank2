@@ -51,6 +51,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
         task=task,
         batch_size=64,
         percent=[0.8, 0.2],
+        weight_decay=0.01,
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
     )

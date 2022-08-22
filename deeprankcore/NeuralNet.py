@@ -23,6 +23,7 @@ class NeuralNet():
                  dataset,
                  Net,
                  lr=0.01,
+                 weight_decay=1e-05,
                  batch_size=32,
                  percent=None,
                  dataset_eval=None,
@@ -39,8 +40,12 @@ class NeuralNet():
 
         Args:
             dataset (HDF5DataSet object, required)
+
             Net (function, required): neural network function (ex. GINet, Foutnet etc.)
             lr (float, optional): learning rate. Defaults to 0.01.
+            weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
+                    fundamental for GNNs, otherwise, parameters can become too big and
+                    the gradient may explode. Defaults to 1e-05.
             batch_size (int, optional): defaults to 32.
             percent (list, optional): divides the input dataset into a training and an evaluation set.
                     Defaults to [1.0, 0.0].
@@ -48,6 +53,7 @@ class NeuralNet():
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
+
             task (str, optional): 'reg' for regression or 'class' for classification . Defaults to None.
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
             threshold (int, optional): threshold to compute binary classification metrics. Defaults to 4.0.
@@ -77,6 +83,7 @@ class NeuralNet():
         if pretrained_model is None:
             self.target = dataset.target # already defined in HDF5DatSet object
             self.lr = lr
+            self.weight_decay = weight_decay
             self.batch_size = batch_size
 
             if percent is None:
@@ -152,7 +159,7 @@ class NeuralNet():
         self.set_loss()
 
         # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
         # load the model and the optimizer state if we have one
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
@@ -215,7 +222,7 @@ class NeuralNet():
         self.put_model_to_device(dataset, Net)
 
         # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
         self.set_loss()
 
@@ -635,6 +642,7 @@ class NeuralNet():
             "batch_size": self.batch_size,
             "percent": self.percent,
             "lr": self.lr,
+            "weight_decay": self.weight_decay,
             "index": self.index,
             "shuffle": self.shuffle,
             "threshold": self.threshold,
@@ -665,6 +673,7 @@ class NeuralNet():
         self.batch_size = state["batch_size"]
         self.percent = state["percent"]
         self.lr = state["lr"]
+        self.weight_decay = state["weight_decay"]
         self.index = state["index"]
         self.class_weights = state["class_weight"]
         self.task = state["task"]
