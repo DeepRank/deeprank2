@@ -1,4 +1,4 @@
-# deeprank-core
+# Deeprank-Core
 
 [![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade)
@@ -8,7 +8,23 @@
 [![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore)
 [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B-yellow)](https://fair-software.eu)
 
+## Overview
+
 ![alt-text](./deeprankcore.png)
+
+Deeprank-Core is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using Graph Neural Networks. 
+
+Deeprank-Core contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN models.
+
+#### Features:
+- Predefined atom-level and residue-level PPI feature types
+  - e.g. atomic density, vdw energy, residue contacts, PSSM, etc.
+- Predefined target type
+  - e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
+- Flexible definition of both new features and targets
+- Graphs feature mapping
+- Efficient data storage in HDF5 format
+- Support both classification and regression (based on PyTorch and PyTorch Geometric)
 
 ## Installation
 
