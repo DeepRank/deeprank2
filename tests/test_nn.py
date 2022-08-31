@@ -37,7 +37,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
 
     dataset = HDF5DataSet(
         root="./",
-        database=hdf5_path,
+        hdf5_path=hdf5_path,
         index=None,
         node_feature=node_features,
         edge_feature=edge_features,

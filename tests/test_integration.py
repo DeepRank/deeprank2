@@ -65,7 +65,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
         
         dataset = HDF5DataSet(
-            database=output_paths,
+            hdf5_path=output_paths,
             index=None,
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],

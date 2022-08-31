@@ -2,11 +2,11 @@ from deeprankcore.NeuralNet import NeuralNet
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
 
-database = "./1ATN_residue.hdf5"
+hdf5_path = "./1ATN_residue.hdf5"
 
 dataset = HDF5DataSet(
     root="./",
-    database=database,
+    hdf5_path=hdf5_path,
     index=None,
     node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
     edge_feature=["dist"],

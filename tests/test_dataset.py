@@ -5,11 +5,11 @@ from torch_geometric.data.data import Data
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
-        self.database = "tests/hdf5/1ATN_ppi.hdf5"
+        self.hdf5_path = "tests/hdf5/1ATN_ppi.hdf5"
 
     def test_dataset(self):
         HDF5DataSet(
-            database=self.database,
+            hdf5_path=self.hdf5_path,
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
@@ -18,7 +18,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_dataset_filter(self):
         HDF5DataSet(
-            database=self.database,
+            hdf5_path=self.hdf5_path,
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
@@ -33,7 +33,7 @@ class TestDataSet(unittest.TestCase):
             return data
 
         dataset = HDF5DataSet(
-            database=self.database,
+            hdf5_path=self.hdf5_path,
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",

@@ -370,7 +370,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         chain_id1: str,
         chain_id2: str,
         pssm_paths: Optional[Dict[str, str]] = None,
-        interface_distance_cutoff: Optional[float] = 8.5,
+        interface_distance_cutoff: Optional[float] = 5.5,
         targets: Optional[Dict[str, float]] = None,
     ):
         """
@@ -379,7 +379,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             chain_id1(str): the pdb chain identifier of the first protein of interest
             chain_id2(str): the pdb chain identifier of the second protein of interest
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
+            interface_distance_cutoff(float): max distance in Ångström between two interacting atoms of the two proteins
             targets(dict, optional): named target values associated with this query
         """
 
@@ -459,7 +459,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         chain_id1: str,
         chain_id2: str,
         pssm_paths: Optional[Dict[str, str]] = None,
-        interface_distance_cutoff: float = 8.5,
+        interface_distance_cutoff: float = 10,
         targets: Optional[Dict[str, float]] = None,
     ):
         """
