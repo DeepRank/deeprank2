@@ -55,7 +55,7 @@ pip install -e ./
 ```
 
 ## Documentation
-The documentation can be found here : https://deeprankcore.rtfd.io/
+The documentation can be found [here](https://deeprankcore.rtfd.io/).
 
 ## Generate Graphs
 
