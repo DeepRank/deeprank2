@@ -54,6 +54,8 @@ cd deeprank-core
 pip install -e ./
 ```
 
+ * For MacOS with M1 chip users only: see [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution if you run into problems with PyQt5 during deeprank-core installation.
+
 ## Documentation
 The documentation can be found [here](https://deeprankcore.rtfd.io/).
 
