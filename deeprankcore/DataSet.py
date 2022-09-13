@@ -20,6 +20,31 @@ from typing import Union
 
 _log = logging.getLogger(__name__)
 
+def save_hdf5_keys(
+    hdf5_path: str,
+    data_ids: List[str],
+    data_hdf5_path: str
+    ):
+    """Save references to keys in data_ids in a new hdf5 file.
+    The new file contains only references (external links, see h5py ExternalLink class)
+    to the original hdf5 file.
+    Parameters
+    ----------
+    hdf5_path : str
+        The path to the hdf5 file containing the keys.
+    data_ids : List[str]
+        Keys to be saved in the new hdf5 file.
+        It should be a list containing at least one key.
+    data_hdf5_path : str
+        The path to the new hdf5 file.
+    """
+    if not all(type(d) == str for d in data_ids):
+        raise TypeError("data_ids should be a list containing strings.")
+
+    with h5py.File(data_hdf5_path, "w") as data:
+        for key in data_ids:
+            data[key] = h5py.ExternalLink(hdf5_path, "/" + key)
+
 
 def DivideDataSet(dataset, percent=None, shuffle=True):
     """Divides the dataset into a training set and an evaluation set
