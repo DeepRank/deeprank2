@@ -23,7 +23,7 @@ from deeprankcore.models.metrics import (
 _log = logging.getLogger(__name__)
 
 
-def _model_base_test( # pylint: disable=too-many-arguments
+def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     train_hdf5_path,
     val_hdf5_path,
     test_hdf5_path,
@@ -276,6 +276,7 @@ class TestNeuralNet(unittest.TestCase):
             )
 
         assert len(os.listdir(self.work_directory)) > 0
+
 
 if __name__ == "__main__":
     unittest.main()

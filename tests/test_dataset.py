@@ -67,8 +67,8 @@ class TestDataSet(unittest.TestCase):
             new_ids = list(hdf5.keys())
 
         assert len(new_ids) == n
-        for id in new_ids:
-            assert id in original_ids
+        for new_id in new_ids:
+            assert new_id in original_ids
 
 
 if __name__ == "__main__":

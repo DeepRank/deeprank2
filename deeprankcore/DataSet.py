@@ -38,7 +38,7 @@ def save_hdf5_keys(
     data_hdf5_path : str
         The path to the new hdf5 file.
     """
-    if not all(type(d) == str for d in data_ids):
+    if not all(isinstance(d, str) for d in data_ids):
         raise TypeError("data_ids should be a list containing strings.")
 
     with h5py.File(data_hdf5_path, "w") as data:
