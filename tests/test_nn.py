@@ -16,7 +16,7 @@ from deeprankcore.sGAT import sGAT
 from deeprankcore.models.metrics import (
     OutputExporter,
     TensorboardBinaryClassificationExporter,
-    ScatterPlotExporter,
+    ScatterPlotExporter
 )
 
 
@@ -24,7 +24,9 @@ _log = logging.getLogger(__name__)
 
 
 def _model_base_test( # pylint: disable=too-many-arguments
-    hdf5_path,
+    train_hdf5_path,
+    val_hdf5_path,
+    test_hdf5_path,
     model_class,
     node_features,
     edge_features,
@@ -35,22 +37,43 @@ def _model_base_test( # pylint: disable=too-many-arguments
     clustering_method
 ):
 
-    dataset = HDF5DataSet(
+    dataset_train = HDF5DataSet(
+        hdf5_path=train_hdf5_path,
         root="./",
-        hdf5_path=hdf5_path,
-        index=None,
         node_feature=node_features,
         edge_feature=edge_features,
         target=target,
-        clustering_method=clustering_method,
-    )
+        clustering_method=clustering_method)
+
+    if val_hdf5_path is not None:
+        dataset_val = HDF5DataSet(
+            hdf5_path=val_hdf5_path,
+            root="./",
+            node_feature=node_features,
+            edge_feature=edge_features,
+            target=target,
+            clustering_method=clustering_method)
+    else:
+        dataset_val = None
+
+    if test_hdf5_path is not None:
+        dataset_test = HDF5DataSet(
+            hdf5_path=test_hdf5_path,
+            root="./",
+            node_feature=node_features,
+            edge_feature=edge_features,
+            target=target,
+            clustering_method=clustering_method)
+    else:
+        dataset_test = None
 
     nn = NeuralNet(
-        dataset,
         model_class,
+        dataset_train,
+        dataset_val,
+        dataset_test,
         task=task,
         batch_size=64,
-        percent=[0.8, 0.2],
         weight_decay=0.01,
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
@@ -61,7 +84,7 @@ def _model_base_test( # pylint: disable=too-many-arguments
         for parameter in nn.model.parameters():
             assert parameter.is_cuda, f"{parameter} is not cuda"
 
-        data = dataset.get(0)
+        data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
                                   ("edge_index", data.edge_index),
@@ -79,8 +102,12 @@ def _model_base_test( # pylint: disable=too-many-arguments
 
     nn.save_model("test.pth.tar")
 
-    NeuralNet(dataset, model_class, pretrained_model="test.pth.tar")
-
+    NeuralNet(
+        model_class,
+        dataset_train,
+        dataset_val,
+        dataset_test,
+        pretrained_model="test.pth.tar")
 
 class TestNeuralNet(unittest.TestCase):
     @classmethod
@@ -94,6 +121,8 @@ class TestNeuralNet(unittest.TestCase):
     def test_ginet_sigmoid(self):
         _model_base_test(
             "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
             GINet,
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
@@ -106,6 +135,8 @@ class TestNeuralNet(unittest.TestCase):
 
     def test_ginet(self):
         _model_base_test(
+            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
             "tests/hdf5/1ATN_ppi.hdf5",
             GINet,
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
@@ -122,8 +153,10 @@ class TestNeuralNet(unittest.TestCase):
     def test_ginet_class(self):
         _model_base_test(
             "tests/hdf5/variants.hdf5",
+            "tests/hdf5/variants.hdf5",
+            "tests/hdf5/variants.hdf5",
             GINet,
-            ["size", "polarity", "sasa", "ic", "pssm"],
+            ["polarity", "ic", "pssm"],
             ["dist"],
             "class",
             "bin_class",
@@ -136,12 +169,14 @@ class TestNeuralNet(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
-            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
             FoutNet,
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
-            "reg",
-            "irmsd",
+            "class",
+            "binary",
             [],
             False,
             "mcl",
@@ -149,6 +184,8 @@ class TestNeuralNet(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
+            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
             "tests/hdf5/1ATN_ppi.hdf5",
             sGAT,
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
@@ -162,12 +199,14 @@ class TestNeuralNet(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
-            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
             NaiveNetwork,
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
             "reg",
-            "irmsd",
+            "BA",
             [OutputExporter(self.work_directory)],
             False,
             None,
@@ -176,6 +215,8 @@ class TestNeuralNet(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
+                "tests/hdf5/1ATN_ppi.hdf5",
+                "tests/hdf5/1ATN_ppi.hdf5",
                 "tests/hdf5/1ATN_ppi.hdf5",
                 sGAT,
                 ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
@@ -191,6 +232,8 @@ class TestNeuralNet(unittest.TestCase):
         with pytest.raises(ValueError):
             _model_base_test(
                 "tests/hdf5/variants.hdf5",
+                "tests/hdf5/variants.hdf5",
+                "tests/hdf5/variants.hdf5",
                 GINet,
                 ["size", "polarity", "sasa", "ic", "pssm"],
                 ["dist"],
@@ -201,6 +244,38 @@ class TestNeuralNet(unittest.TestCase):
                 "mcl",
             )
 
+    def test_no_val(self):
+        _model_base_test(
+            "tests/hdf5/test.hdf5",
+            None,
+            "tests/hdf5/test.hdf5",
+            GINet,
+            ["polarity", "ic", "pssm"],
+            ["dist"],
+            "class",
+            "binary",
+            [TensorboardBinaryClassificationExporter(self.work_directory)],
+            False,
+            "mcl",
+        )
+
+    def test_incompatible_pretrained_no_test(self):
+        with pytest.raises(ValueError):
+            _model_base_test(
+                "tests/hdf5/test.hdf5",
+                None,
+                None,
+                GINet,
+                ["polarity", "ic", "pssm"],
+                ["dist"],
+                "class",
+                "binary",
+                [TensorboardBinaryClassificationExporter(self.work_directory)],
+                False,
+                "mcl",
+            )
+
+        assert len(os.listdir(self.work_directory)) > 0
 
 if __name__ == "__main__":
     unittest.main()

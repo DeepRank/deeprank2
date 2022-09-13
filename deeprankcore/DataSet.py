@@ -66,7 +66,6 @@ def DivideDataSet(dataset, percent=None, shuffle=True):
 
     if shuffle:
         np.random.shuffle(index)
-
     size1 = int(percent[0] * size)
     index1, index2 = index[:size1], index[size1:]
 
@@ -355,8 +354,10 @@ class HDF5DataSet(Dataset):
             edge_attr = edge_attr.to(self.device)
 
             if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
-                warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
-                              "with a more up to date version of this software.", DeprecationWarning)
+                warnings.warn(
+                    """Internal edges are not supported anymore.
+                    You should probably prepare the hdf5 file
+                    with a more up to date version of this software.""", DeprecationWarning)
 
             # target
             if self.target is None:

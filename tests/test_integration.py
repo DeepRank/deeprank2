@@ -63,22 +63,42 @@ def test_integration(): # pylint: disable=too-many-locals
             query_id = query.get_query_id()
             assert query_id in graph_names, f"missing in output: {query_id}"
 
-        
-        dataset = HDF5DataSet(
-            hdf5_path=output_paths,
-            index=None,
-            node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            edge_feature=["dist"],
-            target="irmsd",
-            clustering_method="mcl",
+        n_files = len(output_paths)
+
+        node_features = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"]
+        edge_features = ["dist"]
+
+        dataset_train = HDF5DataSet(
+            hdf5_path = output_paths[:int(n_files*0.8)],
+            node_feature = node_features,
+            edge_feature = edge_features,
+            target = "bin_class",
+            clustering_method = "mcl",
+        )
+
+        dataset_val = HDF5DataSet(
+            hdf5_path = output_paths[int(n_files*0.8):n_files-1],
+            node_feature = node_features,
+            edge_feature = edge_features,
+            target = "bin_class",
+            clustering_method = "mcl",
+        )
+
+        dataset_test = HDF5DataSet(
+            hdf5_path = output_paths[-1],
+            node_feature = node_features,
+            edge_feature = edge_features,
+            target = "bin_class",
+            clustering_method = "mcl",
         )
 
         nn = NeuralNet(
-            dataset,
             GINet,
-            task="reg",
+            dataset_train,
+            dataset_val,
+            dataset_test,
+            task="class",
             batch_size=64,
-            percent=[0.8, 0.2],
             metrics_exporters=[OutputExporter(metrics_directory)],
             transform_sigmoid=True,
         )   
@@ -87,7 +107,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
         nn.save_model("test.pth.tar")
 
-        NeuralNet(dataset, GINet, pretrained_model="test.pth.tar")
+        NeuralNet(GINet, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
 
         assert len(os.listdir(metrics_directory)) > 0
 
