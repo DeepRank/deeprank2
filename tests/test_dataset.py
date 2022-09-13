@@ -55,7 +55,7 @@ class TestDataSet(unittest.TestCase):
         assert dataset.len() > 0
         assert dataset.get(0) is not None
 
-    def test_save_function(self):
+    def test_save_external_links(self):
         n = 2
 
         with h5py.File("tests/hdf5/test.hdf5", 'r') as hdf5:
@@ -65,7 +65,24 @@ class TestDataSet(unittest.TestCase):
 
         with h5py.File("tests/hdf5/test_resized.hdf5", 'r') as hdf5:
             new_ids = list(hdf5.keys())
+            assert all(isinstance(hdf5.get(key, getlink=True), h5py._hl.group.ExternalLink) for key in hdf5.keys())
+  
+        assert len(new_ids) == n
+        for new_id in new_ids:
+            assert new_id in original_ids
 
+    def test_save_hard_links(self):
+        n = 2
+
+        with h5py.File("tests/hdf5/test.hdf5", 'r') as hdf5:
+            original_ids = list(hdf5.keys())
+        
+        save_hdf5_keys("tests/hdf5/test.hdf5", original_ids[:n], "tests/hdf5/test_resized.hdf5", hardcopy = True)
+
+        with h5py.File("tests/hdf5/test_resized.hdf5", 'r') as hdf5:
+            new_ids = list(hdf5.keys())
+            assert all(isinstance(hdf5.get(key, getlink=True), h5py._hl.group.HardLink) for key in hdf5.keys())
+  
         assert len(new_ids) == n
         for new_id in new_ids:
             assert new_id in original_ids

@@ -21,29 +21,37 @@ from typing import Union
 _log = logging.getLogger(__name__)
 
 def save_hdf5_keys(
-    hdf5_path: str,
-    data_ids: List[str],
-    data_hdf5_path: str
+    f_src_path: str,
+    src_ids: List[str],
+    f_dest_path: str,
+    hardcopy = False
     ):
     """Save references to keys in data_ids in a new hdf5 file.
-    The new file contains only references (external links, see h5py ExternalLink class)
-    to the original hdf5 file.
     Parameters
     ----------
-    hdf5_path : str
+    f_src_path : str
         The path to the hdf5 file containing the keys.
-    data_ids : List[str]
+    src_ids : List[str]
         Keys to be saved in the new hdf5 file.
         It should be a list containing at least one key.
-    data_hdf5_path : str
+    f_dest_path : str
         The path to the new hdf5 file.
+    hardcopy : bool, default = False
+        If False, the new file contains only references.
+        (external links, see h5py ExternalLink class) to the original hdf5 file.
+        If True, the new file contains a copy of the objects specified in data_ids
+        (see h5py HardLink class).
+        
     """
-    if not all(isinstance(d, str) for d in data_ids):
+    if not all(isinstance(d, str) for d in src_ids):
         raise TypeError("data_ids should be a list containing strings.")
 
-    with h5py.File(data_hdf5_path, "w") as data:
-        for key in data_ids:
-            data[key] = h5py.ExternalLink(hdf5_path, "/" + key)
+    with h5py.File(f_dest_path,'w') as f_dest, h5py.File(f_src_path,'r') as f_src:
+        for key in src_ids:
+            if hardcopy:
+                f_src.copy(f_src[key],f_dest)
+            else:
+                f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
 def DivideDataSet(dataset, percent=None, shuffle=True):
