@@ -11,7 +11,7 @@ def get_binary(values, threshold, target):
 
     Args:
         values (list): vector of the target values
-        threshold (int or float): threshold used to assign a binary value
+        threshold (int or float): threshold used to assign a binary value       # in classes_npl.svg it expects an int, not a float (didnt know how to add comments there)
                                 0 is assigned to 'bad' values;
                                 1 is assigned to 'good' values
         target (string): target (y)
@@ -101,7 +101,7 @@ class Metrics():
             y (list): list of target values
             target (string): irmsd, fnat, capri_class, bin_class
             binary (bool, optional): transform the data in binary vectors. Defaults to True.
-            threshold (int, optional): threshold used to split the data into a binary vector. Defaults to 4.
+            threshold (int, optional): threshold used to split the data into a binary vector. Defaults to 4.    # should this be defaulted to None and then changed to 4?
         """
         self.prediction = prediction
         self.y = y
