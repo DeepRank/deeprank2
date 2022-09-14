@@ -65,7 +65,7 @@ class TestDataSet(unittest.TestCase):
 
         with h5py.File("tests/hdf5/test_resized.hdf5", 'r') as hdf5:
             new_ids = list(hdf5.keys())
-            assert all(isinstance(hdf5.get(key, getlink=True), h5py._hl.group.ExternalLink) for key in hdf5.keys())
+            assert all(isinstance(hdf5.get(key, getlink=True), h5py.ExternalLink) for key in hdf5.keys())
   
         assert len(new_ids) == n
         for new_id in new_ids:
@@ -81,7 +81,7 @@ class TestDataSet(unittest.TestCase):
 
         with h5py.File("tests/hdf5/test_resized.hdf5", 'r') as hdf5:
             new_ids = list(hdf5.keys())
-            assert all(isinstance(hdf5.get(key, getlink=True), h5py._hl.group.HardLink) for key in hdf5.keys())
+            assert all(isinstance(hdf5.get(key, getlink=True), h5py.HardLink) for key in hdf5.keys())
   
         assert len(new_ids) == n
         for new_id in new_ids:
