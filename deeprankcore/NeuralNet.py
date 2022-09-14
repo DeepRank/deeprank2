@@ -30,7 +30,6 @@ class NeuralNet():
                  class_weights=None,
                  task=None,
                  classes=None,
-                 threshold=None,
                  pretrained_model=None,
                  shuffle=True,
                  train_valid_split=DivideDataSet,
@@ -56,7 +55,6 @@ class NeuralNet():
 
             task (str, optional): 'reg' for regression or 'class' for classification . Defaults to None.
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
-            threshold (int, optional): threshold to compute binary classification metrics. Defaults to 4.0.
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the training set. Defaults to True.
             train_valid_split (func, optional): split the dataset in training and validation set. If you want to implement
@@ -99,7 +97,6 @@ class NeuralNet():
             else:
                 self.classes = classes
 
-            self.threshold = threshold
             self.shuffle = shuffle
             self.train_valid_split = train_valid_split
             self.transform_sigmoid = transform_sigmoid
