@@ -122,14 +122,6 @@ class NeuralNet():
                         "                  shuffle=True,"
                         "                  percent=[0.8, 0.2])")
 
-            if self.task == "class" and self.threshold is None:
-                print(
-                    f"the threshold for accuracy computation is set to {self.classes[1]}"
-                )
-                self.threshold = self.classes[1]
-            if self.task == "reg" and self.threshold is None:
-                print("the threshold for accuracy computation is set to 0.3")
-                self.threshold = 0.3
             self.load_model(dataset, Net, dataset_eval)
 
         else:
@@ -388,7 +380,6 @@ class NeuralNet():
 
         Args:
             dataset_test ([type], optional): HDF5DataSet object for testing
-            threshold (int, optional): threshold use to tranform data into binary values. Defaults to 4.
             hdf5 (str, optional): output hdf5 file. Defaults to 'test_data.hdf5'.
         """
 
@@ -642,7 +633,6 @@ class NeuralNet():
             "weight_decay": self.weight_decay,
             "index": self.index,
             "shuffle": self.shuffle,
-            "threshold": self.threshold,
             "cluster_nodes": self.cluster_nodes,
             "transform_sigmoid": self.transform_sigmoid,
         }
@@ -675,7 +665,6 @@ class NeuralNet():
         self.class_weights = state["class_weight"]
         self.task = state["task"]
         self.classes = state["classes"]
-        self.threshold = state["threshold"]
         self.shuffle = state["shuffle"]
         self.cluster_nodes = state["cluster_nodes"]
         self.transform_sigmoid = state["transform_sigmoid"]
