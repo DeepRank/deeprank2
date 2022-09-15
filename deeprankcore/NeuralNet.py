@@ -19,7 +19,7 @@ _log = logging.getLogger(__name__)
 
 class NeuralNet():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals
                  Net,
                  dataset_train,
                  dataset_val = None,
