@@ -67,7 +67,7 @@ def get_comparison(prediction, ground_truth, binary=True, classes=None):
 
 
 class Metrics():
-    def __init__(self, prediction, y, target, threshold=4, binary=True): # noqa
+    def __init__(self, prediction, y, target, threshold, binary=True): # noqa
         """
         Master class from which all metrics are computed
 
@@ -100,8 +100,8 @@ class Metrics():
             prediction (list): predicted values
             y (list): list of target values
             target (string): irmsd, fnat, capri_class, bin_class
+            threshold (int): threshold used to split the data into a binary vector.
             binary (bool, optional): transform the data in binary vectors. Defaults to True.
-            threshold (int, optional): threshold used to split the data into a binary vector. Defaults to 4.
         """
         self.prediction = prediction
         self.y = y
