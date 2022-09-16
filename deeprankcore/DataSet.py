@@ -166,7 +166,7 @@ class HDF5DataSet(Dataset):
             a torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before being saved to disk. Defaults to None.
 
-            dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules.
+            dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
