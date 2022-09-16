@@ -54,7 +54,7 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-def DivideDataSet(dataset, train_size=None):
+def _DivideDataSet(dataset, train_size=None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:

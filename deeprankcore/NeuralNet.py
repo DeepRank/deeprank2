@@ -12,7 +12,7 @@ from torch_geometric.loader import DataLoader
 
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprankcore.DataSet import DivideDataSet, PreCluster
+from deeprankcore.DataSet import _DivideDataSet, PreCluster
 
 _log = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class NeuralNet():
             self.batch_size = batch_size
 
             if train_size is None:
-                self.train_size = 0.75    # is it necessary to set here, given that None will default to 0.75 in DivideDataSet function?
+                self.train_size = 0.75    # is it necessary to set here, given that None will default to 0.75 in _DivideDataSet function?
             else:
                 self.train_size = train_size
 
@@ -179,7 +179,7 @@ class NeuralNet():
                     PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
                     print(f"No validation dataset given. Randomly splitting training set in training set ({(train_size*100)}%) and validation set ({100-train_size*100}%).")
-                    dataset_train, dataset_val = DivideDataSet(
+                    dataset_train, dataset_val = _DivideDataSet(
                         dataset_train, train_size=self.train_size)
             else:
                 raise ValueError(
