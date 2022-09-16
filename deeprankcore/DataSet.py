@@ -447,17 +447,14 @@ class HDF5DataSet(Dataset):
                 if self.subset is None:
                     mol_names = list(fh5.keys())
                 else:
-                    mol_names = [list(fh5.keys())[i] for i in self.index]
+                    mol_names = [i for i in self.subset if i in list(fh5.keys())]
+
                 for k in mol_names:
                     if self.filter(fh5[k]):
                         self.index_complexes += [(fdata, k)]
                 fh5.close()
             except Exception:
                 _log.exception(f"on {fdata}")
-
-        self.ntrain = len(self.index_complexes)
-        self.index_train = list(range(self.ntrain))
-        self.ntot = len(self.index_complexes)
 
     def filter(self, molgrp):
         """Filters the molecule according to a dictionary.
