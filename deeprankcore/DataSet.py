@@ -75,21 +75,26 @@ def _DivideDataSet(dataset, train_size=None):
     elif train_size is float:
         n_train = int(train_size * full_size)
     elif train_size is int:
-        n_train = train_size
-    
+        if train_size == 1: # user probably intended it to be 1.0 (100%), not 1 datapoint
+            n_train = full_size
+            print ("WARNING: `train_size = 1` interpreted as 1.0 (100%), not as 1 datapoint")
+        else:
+            n_train = train_size
+        
     # negative values means it is the number of datapoints to NOT include in training data
     if n_train < 0:
         n_train = full_size - n_train
     
-    # raise exceptions if
-    if n_train >= full_size:
-        raise Exception # is there a more specific Exception that should be used here?
-            (f"invalid train_size. train_size too large. \n\t" 
-            "train_size must be a float between -1 and 1 OR an int with absolute value smaller than len(dataset) ({full_size})")
-    if n_train == 0:
-        raise Exception
-            (f"invalid train_size. train_size may not be 0. \n\t"
-            "train_size must be a float between -1 and 1 OR an int with absolute value smaller than len(dataset) ({full_size})")
+    # raise exceptions if no training data or if more than 100% training data
+    if n_train > full_size:
+        raise ValueError
+            (f"invalid train_size: train_size too large. \n\t" 
+            "train_size must be a float between -1 and 1 OR an int with max absolute value of len(dataset) ({full_size})")
+    if n_train <= 0:
+        raise ValueError
+            (f"invalid train_size: train_size must be larger than 0. \n\t"
+            "train_size must be a float between -1 and 1 OR an int with max absolute value of len(dataset) ({full_size})")
+                # this error statement does not cover that -len(dataset) will raise error, but I think it will become too wordy otherwise
 
 
     index = np.arange(full_size)

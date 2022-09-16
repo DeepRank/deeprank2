@@ -24,10 +24,10 @@ class NeuralNet():
                  dataset_train,
                  dataset_val = None,
                  dataset_test = None,
-                 train_size = None,
                  lr = 0.01,
                  weight_decay = 1e-05,
                  batch_size = 32,
+                 train_size = None,                 
                  class_weights = None,
                  task = None,
                  classes = None,
@@ -41,16 +41,17 @@ class NeuralNet():
             Net (function, required): neural network function (ex. GINet, Foutnet etc.)
             dataset_train (HDF5DataSet object, required): training set used during training.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
-                Defaults to None. If None, training set will be split into training set and
-                validation set during training.
+                Defaults to None. If None, training set will be split randomly into training set and
+                validation set during training, using train_size parameter
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
-            train_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. 
-                Defaults to 0.75.
             lr (float, optional): learning rate. Defaults to 0.01.
             weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
                     fundamental for GNNs, otherwise, parameters can become too big and
                     the gradient may explode. Defaults to 1e-05.
             batch_size (int, optional): defaults to 32.
+            train_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for training. 
+                Negative values will set size of the validation dataset instead.
+                Defaults to 0.75.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
@@ -81,12 +82,7 @@ class NeuralNet():
             self.lr = lr
             self.weight_decay = weight_decay
             self.batch_size = batch_size
-
-            if train_size is None:
-                self.train_size = 0.75    # is it necessary to set here, given that None will default to 0.75 in _DivideDataSet function?
-            else:
-                self.train_size = train_size
-
+            self.train_size = train_size    # if None, will be set to 0.75 in _DivideDataSet function
             self.class_weights = class_weights
             self.task = task
 
