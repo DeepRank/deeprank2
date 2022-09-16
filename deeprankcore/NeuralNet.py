@@ -25,7 +25,6 @@ class NeuralNet():
                  dataset_val = None,
                  dataset_test = None,
                  val_size = None,
-                 random_split = True,
                  lr = 0.01,
                  weight_decay = 1e-05,
                  batch_size = 32,
@@ -47,8 +46,6 @@ class NeuralNet():
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
             val_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. 
                 Defaults to 0.25.
-            random_split (bool, optional): whether or not to shuffle data before splitting into training and validation.
-                Defaults to True.
             lr (float, optional): learning rate. Defaults to 0.01.
             weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
                     fundamental for GNNs, otherwise, parameters can become too big and
@@ -89,7 +86,6 @@ class NeuralNet():
                 self.val_size = 0.25    # is it necessary to set here, given that None will default to 0.25 in DivideDataSet function?
             else:
                 self.val_size = val_size
-            self.random_split = random_split 
 
             self.class_weights = class_weights
             self.task = task
@@ -120,7 +116,6 @@ class NeuralNet():
                         "model = NeuralNet(dataset, GINet,"
                         "                  target='physiological_assembly',"
                         "                  task='class',"
-                        "                  random_split=True,"
                         "                  val_size=0.25)")
 
 
@@ -639,7 +634,6 @@ class NeuralNet():
             "class_weight": self.class_weights,
             "batch_size": self.batch_size,
             "val_size": self.val_size,
-            "random_split ": self.random_split 
             "lr": self.lr,
             "weight_decay": self.weight_decay,
             "index": self.index,
@@ -670,7 +664,6 @@ class NeuralNet():
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
-        self.random_split = state["random_split"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.index = state["index"]

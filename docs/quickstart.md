@@ -78,7 +78,7 @@ It is also possible to define a user-defined function for splitting the dataset 
 
 ```python
 
-def UDF_DivideDataSet(dataset, val_size, random_split):
+def UDF_DivideDataSet(dataset, val_size):
     ...
     return train_dataset, valid_dataset
 ```

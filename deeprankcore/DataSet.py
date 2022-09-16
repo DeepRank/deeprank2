@@ -54,13 +54,12 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-def DivideDataSet(dataset, val_size=None, random_split=True):
+def DivideDataSet(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
         dataset (HDF5DataSet): input dataset to be split into training and validation data
         val_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. Defaults to 0.25.
-        random_split (bool, optional): whether or not to shuffle data before splitting. Defaults to True.
 
     Returns:
         HDF5DataSet: [description]
@@ -81,8 +80,7 @@ def DivideDataSet(dataset, val_size=None, random_split=True):
             ("val_size too small. No data would be included in dataset_val. Please increase val_size.")
 
     index = np.arange(full_size)
-    if random_split:
-        np.random.shuffle(index)
+    np.random.shuffle(index)
     index_train, index_val = index[n_val:], index[:n_val]
 
     dataset_train = copy.deepcopy(dataset)
