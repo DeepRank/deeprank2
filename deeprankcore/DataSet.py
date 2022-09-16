@@ -143,7 +143,7 @@ class HDF5DataSet(Dataset):
         dict_filter: dict = None,
         target: str = None,
         tqdm: bool = True,
-        index: int = None,
+        subset: list = None,
         node_feature: Union[List[str], str] = "all",
         edge_feature: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
@@ -173,7 +173,7 @@ class HDF5DataSet(Dataset):
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
-            index (int, optional): index of a molecule. Defaults to None.
+            subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
             or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
@@ -200,7 +200,7 @@ class HDF5DataSet(Dataset):
         self.target = target
         self.dict_filter = dict_filter
         self.tqdm = tqdm
-        self.index = index
+        self.subset = subset
 
         self.node_feature = node_feature
 
@@ -444,7 +444,7 @@ class HDF5DataSet(Dataset):
                 data_tqdm.set_postfix(mol=os.path.basename(fdata))
             try:
                 fh5 = h5py.File(fdata, "r")
-                if self.index is None:
+                if self.subset is None:
                     mol_names = list(fh5.keys())
                 else:
                     mol_names = [list(fh5.keys())[i] for i in self.index]

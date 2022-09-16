@@ -13,7 +13,7 @@ class TestDataSet(unittest.TestCase):
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
-            index=None,
+            subset=None,
         )
 
     def test_dataset_filter(self):
@@ -22,7 +22,7 @@ class TestDataSet(unittest.TestCase):
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
-            index=None,
+            subset=None,
             dict_filter={"irmsd": "<10"},
         )
 
@@ -37,7 +37,7 @@ class TestDataSet(unittest.TestCase):
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
-            index=None,
+            subset=None,
             transform=operator
         )
 
