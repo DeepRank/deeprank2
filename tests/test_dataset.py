@@ -87,6 +87,21 @@ class TestDataSet(unittest.TestCase):
         for new_id in new_ids:
             assert new_id in original_ids
 
+    def test_subset(self):
+        hdf5 = h5py.File("tests/hdf5/train.hdf5", 'r')  # contains 44 datapoints
+        hdf5_keys = list(hdf5.keys())
+        n = 10
+        subset = hdf5_keys[:n]
+
+        dataset = HDF5DataSet(
+            hdf5_path="tests/hdf5/train.hdf5",
+            subset=subset,
+        )
+
+        assert n == len(dataset)
+
+        
+
 
 if __name__ == "__main__":
     unittest.main()
