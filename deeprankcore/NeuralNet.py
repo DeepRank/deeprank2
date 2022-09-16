@@ -24,7 +24,7 @@ class NeuralNet():
                  dataset_train,
                  dataset_val = None,
                  dataset_test = None,
-                 val_size = None,
+                 train_size = None,
                  lr = 0.01,
                  weight_decay = 1e-05,
                  batch_size = 32,
@@ -44,8 +44,8 @@ class NeuralNet():
                 Defaults to None. If None, training set will be split into training set and
                 validation set during training.
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
-            val_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. 
-                Defaults to 0.25.
+            train_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. 
+                Defaults to 0.75.
             lr (float, optional): learning rate. Defaults to 0.01.
             weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
                     fundamental for GNNs, otherwise, parameters can become too big and
@@ -82,10 +82,10 @@ class NeuralNet():
             self.weight_decay = weight_decay
             self.batch_size = batch_size
 
-            if val_size is None:
-                self.val_size = 0.25    # is it necessary to set here, given that None will default to 0.25 in DivideDataSet function?
+            if train_size is None:
+                self.train_size = 0.75    # is it necessary to set here, given that None will default to 0.75 in DivideDataSet function?
             else:
-                self.val_size = val_size
+                self.train_size = train_size
 
             self.class_weights = class_weights
             self.task = task
@@ -116,7 +116,7 @@ class NeuralNet():
                         "model = NeuralNet(dataset, GINet,"
                         "                  target='physiological_assembly',"
                         "                  task='class',"
-                        "                  val_size=0.25)")
+                        "                  train_size=0.75)")
 
 
             self.load_model(dataset_train, dataset_val, dataset_test, Net)
@@ -178,9 +178,9 @@ class NeuralNet():
                 if dataset_val is not None:
                     PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
-                    print(f"No validation dataset given. Randomly splitting training set in training set ({100-(val_size*100)}%) and validation set ({val_size*100}%).")
+                    print(f"No validation dataset given. Randomly splitting training set in training set ({(train_size*100)}%) and validation set ({100-train_size*100}%).")
                     dataset_train, dataset_val = DivideDataSet(
-                        dataset_train, val_size=self.val_size)
+                        dataset_train, train_size=self.train_size)
             else:
                 raise ValueError(
                     "Invalid node clustering method. \n\t"
@@ -633,7 +633,7 @@ class NeuralNet():
             "classes": self.classes,
             "class_weight": self.class_weights,
             "batch_size": self.batch_size,
-            "val_size": self.val_size,
+            "train_size": self.train_size,
             "lr": self.lr,
             "weight_decay": self.weight_decay,
             "index": self.index,
@@ -663,7 +663,7 @@ class NeuralNet():
         self.edge_feature = state["edge"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
-        self.val_size = state["val_size"]
+        self.train_size = state["train_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.index = state["index"]

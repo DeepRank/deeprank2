@@ -19,7 +19,7 @@ NN = NeuralNet(
     GINet,
     task="reg",
     batch_size=64,
-    val_size=0.25
+    train_size=0.75
 )
 
 NN.train(nepoch=250, validate=False)

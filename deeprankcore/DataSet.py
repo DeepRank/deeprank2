@@ -54,30 +54,30 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-def DivideDataSet(dataset, val_size=None):
+def DivideDataSet(dataset, train_size=None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
         dataset (HDF5DataSet): input dataset to be split into training and validation data
-        val_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. Defaults to 0.25.
+        train_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. Defaults to 0.75.
 
     Returns:
         HDF5DataSet: [description]
     """
 
-    if val_size is None:
-        val_size = 0.25
-    elif val_size >= 1 or val_size <= 0:
-        raise ValueError ("val_size must be between 0 and 1")
+    if train_size is None:
+        train_size = 0.75
+    elif train_size >= 1 or train_size <= 0:
+        raise ValueError ("train_size must be between 0 and 1")
 
     full_size = len(dataset)
-    n_val = int(val_size * full_size)
-    if n_val == full_size:
+    n_train = int(train_size * full_size)
+    if n_train == full_size:
         raise Exception # is there a more specific Exception that should be used here?
-            ("val_size too large. All data would be included in dataset_val. Please decrease val_size.")
-    if n_val == 0:
+            ("train_size too large. All data would be included in dataset_train. Please decrease train_size.")
+    if n_train == 0:
         raise Exception
-            ("val_size too small. No data would be included in dataset_val. Please increase val_size.")
+            ("train_size too small. No data would be included in dataset_train. Please increase train_size.")
 
     index = np.arange(full_size)
     np.random.shuffle(index)
