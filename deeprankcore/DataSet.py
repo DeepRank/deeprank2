@@ -59,25 +59,38 @@ def DivideDataSet(dataset, train_size=None):
 
     Args:
         dataset (HDF5DataSet): input dataset to be split into training and validation data
-        train_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. Defaults to 0.75.
+        train_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for training. 
+            Negative values will set size of the validation dataset instead.
+            Defaults to 0.75.
 
     Returns:
         HDF5DataSet: [description]
     """
 
-    if train_size is None:
-        train_size = 0.75
-    elif train_size >= 1 or train_size <= 0:
-        raise ValueError ("train_size must be between 0 and 1")
-
     full_size = len(dataset)
-    n_train = int(train_size * full_size)
-    if n_train == full_size:
+
+    # find number of datapoints to include in training dataset
+    if train_size is None:
+        n_train = int(0.75 * full_size)
+    elif train_size is float:
+        n_train = int(train_size * full_size)
+    elif train_size is int:
+        n_train = train_size
+    
+    # negative values means it is the number of datapoints to NOT include in training data
+    if n_train < 0:
+        n_train = full_size - n_train
+    
+    # raise exceptions if
+    if n_train >= full_size:
         raise Exception # is there a more specific Exception that should be used here?
-            ("train_size too large. All data would be included in dataset_train. Please decrease train_size.")
+            (f"invalid train_size. train_size too large. \n\t" 
+            "train_size must be a float between -1 and 1 OR an int with absolute value smaller than len(dataset) ({full_size})")
     if n_train == 0:
         raise Exception
-            ("train_size too small. No data would be included in dataset_train. Please increase train_size.")
+            (f"invalid train_size. train_size may not be 0. \n\t"
+            "train_size must be a float between -1 and 1 OR an int with absolute value smaller than len(dataset) ({full_size})")
+
 
     index = np.arange(full_size)
     np.random.shuffle(index)
