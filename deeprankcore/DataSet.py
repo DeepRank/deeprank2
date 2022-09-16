@@ -54,36 +54,44 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-def DivideDataSet(dataset, percent=None, shuffle=True):
+def DivideDataSet(dataset, val_size=None, shuffle=True):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
         dataset ([type])
-        percent (list, optional): [description]. Defaults to [0.8, 0.2].
+        val_size (float, optional): fraction of dataset to use for validation. Must be between 0 and 1. Defaults to 0.25.
         shuffle (bool, optional): [description]. Defaults to True.
 
     Returns:
         [type]: [description]
     """
 
-    if percent is None:
-        percent = [0.8, 0.2]
+    if val_size is None:
+        val_size = 0.25
+    elif val_size >= 1 or val_size <= 0:
+        raise ValueError ("val_size must be between 0 and 1")
 
-    size = len(dataset)
-    index = np.arange(size)
+    full_size = len(dataset)
+    n_val = int(val_size * full_size)
+    if n_val == full_size:
+        raise Exception # is there a more specific Exception that should be used here?
+            ("val_size too large. All data would be included in dataset_val. Please decrease val_size.")
+    if n_val == 0:
+        raise Exception
+            ("val_size too small. No data would be included in dataset_val. Please increase val_size.")
 
+    index = np.arange(full_size)
     if shuffle:
         np.random.shuffle(index)
-    size1 = int(percent[0] * size)
-    index1, index2 = index[:size1], index[size1:]
+    index_train, index_val = index[n_val:], index[:n_val]
 
-    dataset1 = copy.deepcopy(dataset)
-    dataset1.index_complexes = [dataset.index_complexes[i] for i in index1]
+    dataset_train = copy.deepcopy(dataset)
+    dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
 
-    dataset2 = copy.deepcopy(dataset)
-    dataset2.index_complexes = [dataset.index_complexes[i] for i in index2]
+    dataset_val = copy.deepcopy(dataset)
+    dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
 
-    return dataset1, dataset2
+    return dataset_train, dataset_val
 
 
 def PreCluster(dataset, method):
