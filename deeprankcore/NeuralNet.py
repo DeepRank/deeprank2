@@ -27,7 +27,7 @@ class NeuralNet():
                  lr = 0.01,
                  weight_decay = 1e-05,
                  batch_size = 32,
-                 train_size = None,                 
+                 train_size = None,
                  class_weights = None,
                  task = None,
                  classes = None,
@@ -174,7 +174,7 @@ class NeuralNet():
                 if dataset_val is not None:
                     PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
-                    print(f"No validation dataset given. Randomly splitting training set in training set ({(train_size*100)}%) and validation set ({100-train_size*100}%).")
+                    print("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     dataset_train, dataset_val = _DivideDataSet(
                         dataset_train, train_size=self.train_size)
             else:
