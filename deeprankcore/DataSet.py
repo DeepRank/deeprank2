@@ -96,7 +96,7 @@ def _DivideDataSet(dataset, train_size=None):
 
     index = np.arange(full_size)
     np.random.shuffle(index)
-    index_train, index_val = index[n_val:], index[:n_val]
+    index_train, index_val = index[:n_train], index[n_train:]
 
     dataset_train = copy.deepcopy(dataset)
     dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
