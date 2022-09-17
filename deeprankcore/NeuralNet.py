@@ -51,7 +51,7 @@ class NeuralNet():
             batch_size (int, optional): defaults to 32.
             train_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for training. 
                 Negative values will set size of the validation dataset instead.
-                Defaults to 0.75.
+                Defaults to 0.75 in _DivideDataSet function.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
