@@ -91,7 +91,8 @@ def _DivideDataSet(dataset, train_size=None):
             f"train_size must be a float between -1 and 1 OR an int with max absolute value of len(dataset) ({full_size})")
     if n_train <= 0:
         raise ValueError ("invalid train_size: train_size must be larger than 0. \n\t" +
-            f"train_size must be a float between -1 and 1 OR an int with max absolute value of len(dataset) ({full_size})") # this error statement does not cover that -len(dataset) will raise error, but I think it will become too wordy otherwise
+            f"train_size must be a float between -1 and 1 OR an int with max absolute value of len(dataset) ({full_size})") 
+            # this error statement does not cover that -len(dataset) will also raise error, but I think it will become too wordy otherwise
 
 
     index = np.arange(full_size)
