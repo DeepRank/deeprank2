@@ -27,7 +27,7 @@ class NeuralNet():
                  lr = 0.01,
                  weight_decay = 1e-05,
                  batch_size = 32,
-                 train_size = None,
+                 val_size = None,
                  class_weights = None,
                  task = None,
                  classes = None,
@@ -42,15 +42,15 @@ class NeuralNet():
             dataset_train (HDF5DataSet object, required): training set used during training.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
-                validation set during training, using train_size parameter
+                validation set during training, using val_size parameter
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
             lr (float, optional): learning rate. Defaults to 0.01.
             weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
                     fundamental for GNNs, otherwise, parameters can become too big and
                     the gradient may explode. Defaults to 1e-05.
             batch_size (int, optional): defaults to 32.
-            train_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for training. 
-                Defaults to 0.75 in _DivideDataSet function.
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for training. 
+                Defaults to 0.25 in _DivideDataSet function.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
@@ -81,7 +81,7 @@ class NeuralNet():
             self.lr = lr
             self.weight_decay = weight_decay
             self.batch_size = batch_size
-            self.train_size = train_size    # if None, will be set to 0.75 in _DivideDataSet function
+            self.val_size = val_size    # if None, will be set to 0.75 in _DivideDataSet function
             self.class_weights = class_weights
             self.task = task
 
@@ -111,7 +111,7 @@ class NeuralNet():
                         "model = NeuralNet(dataset, GINet,"
                         "                  target='physiological_assembly',"
                         "                  task='class',"
-                        "                  train_size=0.75)")
+                        "                  val_size=0.25)")
 
 
             self.load_model(dataset_train, dataset_val, dataset_test, Net)
@@ -175,7 +175,7 @@ class NeuralNet():
                 else:
                     print("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     dataset_train, dataset_val = _DivideDataSet(
-                        dataset_train, train_size=self.train_size)
+                        dataset_train, val_size=self.val_size)
             else:
                 raise ValueError(
                     "Invalid node clustering method. \n\t"
@@ -628,7 +628,7 @@ class NeuralNet():
             "classes": self.classes,
             "class_weight": self.class_weights,
             "batch_size": self.batch_size,
-            "train_size": self.train_size,
+            "val_size": self.val_size,
             "lr": self.lr,
             "weight_decay": self.weight_decay,
             "index": self.index,
@@ -658,7 +658,7 @@ class NeuralNet():
         self.edge_feature = state["edge"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
-        self.train_size = state["train_size"]
+        self.val_size = state["val_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.index = state["index"]
