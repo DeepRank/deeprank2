@@ -60,7 +60,6 @@ def _DivideDataSet(dataset, train_size=None):
     Args:
         dataset (HDF5DataSet): input dataset to be split into training and validation data
         train_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for training. 
-            Negative values will set size of the validation dataset instead.
             Defaults to 0.75.
 
     Returns:
@@ -80,20 +79,13 @@ def _DivideDataSet(dataset, train_size=None):
             print ("WARNING: `train_size = 1` interpreted as 1.0 (100%), not as 1 datapoint")
         else:
             n_train = train_size
-        
-    # negative values means it is the number of datapoints to NOT include in training data
-    if n_train < 0:
-        n_train = full_size + n_train # adding negative number
+    else:
+        raise TypeError (f"type(train_size) must be float, int or None ({type(train_size)} detected.)")
     
-    # raise exceptions if no training data or if more than 100% training data
-    if n_train > full_size:
-        raise ValueError ("invalid train_size: train_size too large. \n\t" +
+    # raise exception if no training data or if more than 100% training data
+    if n_train > full_size or n_train <= 0:
+        raise ValueError ("invalid train_size. \n\t" +
             f"train_size must be a float between -1 and 1 OR an int with max absolute value of len(dataset) ({full_size})")
-    if n_train <= 0:
-        raise ValueError ("invalid train_size: train_size must be larger than 0. \n\t" +
-            f"train_size must be a float between -1 and 1 OR an int with max absolute value of len(dataset) ({full_size})") 
-        # this error statement does not cover that -len(dataset) will also raise error, but I think it will become too wordy otherwise
-
 
     index = np.arange(full_size)
     np.random.shuffle(index)
