@@ -1,8 +1,9 @@
+from multiprocessing.sharedctypes import Value
 from time import time
 from typing import List, Optional
 import os
 import logging
-
+import inspect
 # torch import
 import torch
 from torch import nn
@@ -24,8 +25,6 @@ class NeuralNet():
                  dataset_train,
                  dataset_val = None,
                  dataset_test = None,
-                 lr = 0.01,
-                 weight_decay = 1e-05,
                  batch_size = 32,
                  percent = None,
                  class_weights = None,
@@ -44,10 +43,6 @@ class NeuralNet():
                 Defaults to None. If None, training set will be splitted randomly into training set (80%) and
                 validation set (20%) during training.
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
-            lr (float, optional): learning rate. Defaults to 0.01.
-            weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
-                    fundamental for GNNs, otherwise, parameters can become too big and
-                    the gradient may explode. Defaults to 1e-05.
             batch_size (int, optional): defaults to 32.
             percent (list, optional): divides the input dataset into a training and an evaluation set.
                     Defaults to [0.8, 0.2].
@@ -78,8 +73,7 @@ class NeuralNet():
 
         if pretrained_model is None:
             self.target = dataset_train.target # already defined in HDF5DatSet object
-            self.lr = lr
-            self.weight_decay = weight_decay
+            self.optimizer = None
             self.batch_size = batch_size
 
             if percent is None:
@@ -129,6 +123,32 @@ class NeuralNet():
             else:
                 raise ValueError("A HDF5DataSet object needs to be passed as a test set for evaluating the pre-trained model.")
 
+    def configure_optimizers(self, optimizer = None, lr = 0.01, weight_decay = 1e-05):
+
+        """Configure optimizer and its main parameters.
+        Parameters
+        ----------
+        optimizer (optional) : object from torch.optim
+            PyTorch optimizer. Defaults to Adam.
+        lr (optional) : float
+            Learning rate. Defaults to 0.01.
+        weight_decay (optional) : float
+            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
+            the gradient may explode. Defaults to 1e-05.
+        """
+
+        self.lr = lr
+        self.weight_decay = weight_decay
+
+        if optimizer is None:
+            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+        else:
+            optimizers = inspect.getmembers(torch.optim, inspect.isclass)
+            if isinstance(optimizer, tuple([opt[1] for opt in optimizers])):
+                self.optimizer = optimizer(lr = lr, weight_decay = weight_decay)
+            else:
+                raise ValueError("Invalid optimizer. Please use only optimizers from torch.optim package.")
+
     def load_pretrained_model(self, dataset_test, Net):
         """
         Loads pretrained model
@@ -149,7 +169,7 @@ class NeuralNet():
         self.set_loss()
 
         # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        self.configure_optimizers()
 
         # load the model and the optimizer state if we have one
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
@@ -217,7 +237,7 @@ class NeuralNet():
         self.put_model_to_device(dataset_train, Net)
 
         # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        self.configure_optimizers()
 
         self.set_loss()
 
