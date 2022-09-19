@@ -143,7 +143,7 @@ class HDF5DataSet(Dataset):
         dict_filter: dict = None,
         target: str = None,
         tqdm: bool = True,
-        index: int = None,
+        subset: list = None,
         node_feature: Union[List[str], str] = "all",
         edge_feature: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
@@ -166,14 +166,14 @@ class HDF5DataSet(Dataset):
             a torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before being saved to disk. Defaults to None.
 
-            dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules.
+            dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
-            index (int, optional): index of a molecule. Defaults to None.
+            subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
             or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
@@ -200,7 +200,7 @@ class HDF5DataSet(Dataset):
         self.target = target
         self.dict_filter = dict_filter
         self.tqdm = tqdm
-        self.index = index
+        self.subset = subset
 
         self.node_feature = node_feature
 
@@ -444,20 +444,17 @@ class HDF5DataSet(Dataset):
                 data_tqdm.set_postfix(mol=os.path.basename(fdata))
             try:
                 fh5 = h5py.File(fdata, "r")
-                if self.index is None:
+                if self.subset is None:
                     mol_names = list(fh5.keys())
                 else:
-                    mol_names = [list(fh5.keys())[i] for i in self.index]
+                    mol_names = [i for i in self.subset if i in list(fh5.keys())]
+
                 for k in mol_names:
                     if self.filter(fh5[k]):
                         self.index_complexes += [(fdata, k)]
                 fh5.close()
             except Exception:
                 _log.exception(f"on {fdata}")
-
-        self.ntrain = len(self.index_complexes)
-        self.index_train = list(range(self.ntrain))
-        self.ntot = len(self.index_complexes)
 
     def filter(self, molgrp):
         """Filters the molecule according to a dictionary.

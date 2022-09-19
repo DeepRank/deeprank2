@@ -53,7 +53,6 @@ metrics_exporters = [OutputExporter(metrics_output_directory),
 dataset = HDF5DataSet(
     root = "./",
     database = database,
-    index = range(400),
     node_feature = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
     edge_feature = ["dist"],
     target = "irmsd",
