@@ -102,23 +102,26 @@ class TestDataSet(unittest.TestCase):
 
             assert len(dataset_train) == n
             assert len(dataset_val) == n_
-
-    # def fail_trainsize(self):
-    #     hdf5 = "tests/hdf5/train.hdf5"
-    #     hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
-    #     n = int ( 0.75 * len(hdf5_file) )
-    #     n_ = len(hdf5_file) - n
-    #     test_cases = [
-    #         0, 0.0, # no zeroes allowed
-    #         1.1, -1.1, # float not allowed to be larger than 1.0
-    #         n + 1, n_ -1, # abs(int) cannot be larger than all data 
-    #         ]
         
-    #     for t in test_cases:
-    #         _DivideDataSet(
-    #             dataset = HDF5DataSet(hdf5_path=hdf5),
-    #             train_size=t,
-    #         )
+    def test_invalid_trainsize(self):
+
+        hdf5 = "tests/hdf5/train.hdf5"
+        hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
+        n = len(hdf5_file)
+        test_cases = [
+            0, 0.0,     # no zeroes allowed
+            -0.5, -1,   # no negative values 
+            1.1, n + 1, # cannot use more than all data as input
+            # 'test'      # no strings allowed
+            ]
+        
+        for t in test_cases:
+            with self.assertRaises(ValueError):
+                _DivideDataSet(
+                    dataset = HDF5DataSet(hdf5_path=hdf5),
+                    train_size=t,
+                )
+        
 
 
 if __name__ == "__main__":
