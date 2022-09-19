@@ -85,7 +85,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             count_edges_hdf5 = entry_group["edge_index"].shape[0]
 
-        dataset = HDF5DataSet(database=tmp_path)
+        dataset = HDF5DataSet(hdf5_path=tmp_path)
         torch_data_entry = dataset[0]
         assert torch_data_entry is not None
 

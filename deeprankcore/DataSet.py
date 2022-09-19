@@ -13,9 +13,45 @@ import h5py
 import copy
 from ast import literal_eval
 from deeprankcore.community_pooling import community_detection, community_pooling
+from typing import Callable
+from typing import List
+from typing import Union
 
 
 _log = logging.getLogger(__name__)
+
+def save_hdf5_keys(
+    f_src_path: str,
+    src_ids: List[str],
+    f_dest_path: str,
+    hardcopy = False
+    ):
+    """Save references to keys in data_ids in a new hdf5 file.
+    Parameters
+    ----------
+    f_src_path : str
+        The path to the hdf5 file containing the keys.
+    src_ids : List[str]
+        Keys to be saved in the new hdf5 file.
+        It should be a list containing at least one key.
+    f_dest_path : str
+        The path to the new hdf5 file.
+    hardcopy : bool, default = False
+        If False, the new file contains only references.
+        (external links, see h5py ExternalLink class) to the original hdf5 file.
+        If True, the new file contains a copy of the objects specified in data_ids
+        (see h5py HardLink class).
+        
+    """
+    if not all(isinstance(d, str) for d in src_ids):
+        raise TypeError("data_ids should be a list containing strings.")
+
+    with h5py.File(f_dest_path,'w') as f_dest, h5py.File(f_src_path,'r') as f_src:
+        for key in src_ids:
+            if hardcopy:
+                f_src.copy(f_src[key],f_dest)
+            else:
+                f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
 def DivideDataSet(dataset, percent=None, shuffle=True):
@@ -38,7 +74,6 @@ def DivideDataSet(dataset, percent=None, shuffle=True):
 
     if shuffle:
         np.random.shuffle(index)
-
     size1 = int(percent[0] * size)
     index1, index2 = index[:size1], index[size1:]
 
@@ -101,25 +136,27 @@ def PreCluster(dataset, method):
 class HDF5DataSet(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
-        root="./",
-        database=None,
-        transform=None,
-        pre_transform=None,
-        dict_filter=None,
-        target=None,
-        tqdm=True,
-        index=None,
-        node_feature="all",
-        edge_feature=None,
-        clustering_method="mcl",
-        edge_feature_transform=lambda x: np.tanh(-x / 2 + 2) + 1,
+        hdf5_path,
+        root: str = "./",
+        transform: Callable = None,
+        pre_transform: Callable = None,
+        dict_filter: dict = None,
+        target: str = None,
+        tqdm: bool = True,
+        index: int = None,
+        node_feature: Union[List[str], str] = "all",
+        edge_feature: Union[List[str], str] = "all",
+        clustering_method: str = "mcl",
+        edge_feature_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
     ):
         """Class from which the hdf5 datasets are loaded.
 
         Args:
-            root (str, optional): [description]. Defaults to "./".
+            root (str, optional): Root directory where the dataset should be
+            saved. Defaults to "./"
 
-            database (str, optional): Path to hdf5 file(s). Defaults to None.
+            hdf5_path (str, optional): Path to hdf5 file(s). For multiple hdf5 files, 
+            insert the paths in a list. Defaults to None.
 
             transform (callable, optional): A function/transform that takes in
             a torch_geometric.data.Data object and returns a transformed version.
@@ -142,8 +179,9 @@ class HDF5DataSet(Dataset):
             or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
             The complete list can be found in deeprankcore/domain/features.py
 
-            edge_feature (list, optional): the complete list can be found in deeprankcore/domain/features.py.
-            Defaults to ["dist"], distance.
+            edge_feature (list, optional): consider all pre-computed edge features ("all")
+            or some defined edge features (provide a list, example: ["dist", "coulomb"]).
+            The complete list can be found in deeprankcore/domain/features.py
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
             or 'louvain' algorithm). Note that this parameter can be None only if the neural
@@ -154,10 +192,10 @@ class HDF5DataSet(Dataset):
         """
         super().__init__(root, transform, pre_transform)
 
-        # allow for multiple database
-        self.database = database
-        if not isinstance(database, list):
-            self.database = [database]
+        # allow for multiple hdf5 files
+        self.hdf5_path = hdf5_path
+        if not isinstance(hdf5_path, list):
+            self.hdf5_path = [hdf5_path]
 
         self.target = target
         self.dict_filter = dict_filter
@@ -166,10 +204,7 @@ class HDF5DataSet(Dataset):
 
         self.node_feature = node_feature
 
-        if edge_feature is None:
-            self.edge_feature = ["dist"]
-        else:
-            self.edge_feature = edge_feature
+        self.edge_feature = edge_feature
 
         self.edge_feature_transform = edge_feature_transform
         self._transform = transform
@@ -221,7 +256,7 @@ class HDF5DataSet(Dataset):
         """Checks if the data contained in the hdf5 file is valid."""
         print("\nChecking dataset Integrity...\n")
         remove_file = []
-        for fname in self.database:
+        for fname in self.hdf5_path:
             try:
                 f = h5py.File(fname, "r")
                 mol_names = list(f.keys())
@@ -235,11 +270,11 @@ class HDF5DataSet(Dataset):
                 remove_file.append(fname)
 
         for name in remove_file:
-            self.database.remove(name)
+            self.hdf5_path.remove(name)
 
     def check_node_feature(self):
         """Checks if the required node features exist"""
-        f = h5py.File(self.database[0], "r")
+        f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_node_feature = list(f[mol_key + "/node_data/"].keys())
         f.close()
@@ -249,14 +284,14 @@ class HDF5DataSet(Dataset):
         else:
             for feat in self.node_feature:
                 if feat not in self.available_node_feature:
-                    print(f"The node feature _{feat}_ was not found in the file {self.database[0]}.")
+                    print(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
                     print("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
                     print(f"\nPossible node features: {self.available_node_feature}\n")
                     sys.exit()
 
     def check_edge_feature(self):
         """Checks if the required edge features exist"""
-        f = h5py.File(self.database[0], "r")
+        f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_edge_feature = list(f[mol_key + "/edge_data/"].keys())
         f.close()
@@ -266,7 +301,7 @@ class HDF5DataSet(Dataset):
         elif self.edge_feature is not None:
             for feat in self.edge_feature:
                 if feat not in self.available_edge_feature:
-                    print(f"The edge feature _{feat}_ was not found in the file {self.database[0]}.")
+                    print(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
                     print("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
                     print(f"\nPossible edge features: {self.available_edge_feature}\n")
                     sys.exit()
@@ -327,8 +362,10 @@ class HDF5DataSet(Dataset):
             edge_attr = edge_attr.to(self.device)
 
             if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
-                warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
-                              "with a more up to date version of this software.", DeprecationWarning)
+                warnings.warn(
+                    """Internal edges are not supported anymore.
+                    You should probably prepare the hdf5 file
+                    with a more up to date version of this software.""", DeprecationWarning)
 
             # target
             if self.target is None:
@@ -390,16 +427,16 @@ class HDF5DataSet(Dataset):
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
         This allows to refer to one complex with its index in the list
         """
-        _log.debug(f"Processing data set with hdf5 files: {self.database}")
+        _log.debug(f"Processing data set with hdf5 files: {self.hdf5_path}")
 
         self.index_complexes = []
 
         desc = f"{'   Train dataset':25s}"
         if self.tqdm:
-            data_tqdm = tqdm(self.database, desc=desc, file=sys.stdout)
+            data_tqdm = tqdm(self.hdf5_path, desc=desc, file=sys.stdout)
         else:
             print("   Train dataset")
-            data_tqdm = self.database
+            data_tqdm = self.hdf5_path
         sys.stdout.flush()
 
         for fdata in data_tqdm:

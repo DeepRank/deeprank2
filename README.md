@@ -27,6 +27,27 @@ Deeprank-Core contains useful APIs for pre-processing PPIs data, computing featu
 - Efficient data storage in HDF5 format
 - Support both classification and regression (based on PyTorch and PyTorch Geometric)
 
+Deeprank-Core documentation can be found here : https://deeprankcore.rtfd.io/.
+
+## Table of contents
+
+- [Deeprank-Core](#deeprank-core)
+  - [Overview](#overview)
+      - [Features:](#features)
+  - [Table of contents](#table-of-contents)
+  - [Installation](#installation)
+    - [Dependencies](#dependencies)
+    - [Deeprank-core Package](#deeprank-core-package)
+  - [Getting Started](#getting-started)
+    - [Data generation](#data-generation)
+    - [Data exploration](#data-exploration)
+    - [Dataset(s)](#datasets)
+    - [Training](#training)
+      - [Custom GNN](#custom-gnn)
+  - [h5x support](#h5x-support)
+  - [For the developers](#for-the-developers)
+    - [Software release](#software-release)
+
 ## Installation
 
 ### Dependencies
@@ -38,7 +59,7 @@ Before installing deeprank-core you need to install:
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
 
-### deeprank-core installation
+### Deeprank-core Package
 
 Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:
 
@@ -57,119 +78,197 @@ pip install -e ./
  * For MacOS with M1 chip users only: see [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution if you run into problems with PyQt5 during deeprank-core installation.
 
 ## Documentation
+
 The documentation can be found [here](https://deeprankcore.rtfd.io/).
 
-## Generate Graphs
+## Getting Started
 
-The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
+### Data generation
+
+The process of generating graphs takes as input `.pdb` files representing protein-protein structural complexes and the correspondent Position-Specific Scoring Matrices (PSSMs) in the form of `.pssm` files. Query objects describe how the graphs should be built.
 
 ```python
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import bsa, pssm, amino_acid, biopython
 
-feature_modules = [bsa, pssm, amino_acid, biopython]
+feature_modules = [bsa, pssm, biopython, atomic_contact]
 
 queries = []
 
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+# Append data points
+queries.append(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "1ATN_1w.pdb",
+    chain_id1 = "A",
+    chain_id2 = "B",
+    targets = {
+        "binary": 0
+    },
+    pssm_paths = {
+        "A": "1ATN.A.pdb.pssm",
+        "B": "1ATN.B.pdb.pssm"
+    }
+))
+queries.append(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "1ATN_2w.pdb",
+    chain_id1 = "A",
+    chain_id2 = "B",
+    targets = {
+        "binary": 1
+    },
+    pssm_paths = {
+        "A": "1ATN.A.pdb.pssm",
+        "B": "1ATN.B.pdb.pssm"
+    }
+))
+queries.append(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "1ATN_3w.pdb",
+    chain_id1 = "A",
+    chain_id2 = "B",
+    targets = {
+        "binary": 0
+    },
+    pssm_paths = {
+        "A": "1ATN.A.pdb.pssm",
+        "B": "1ATN.B.pdb.pssm"
+    }
+))
 
-# run the preprocessing
-output_paths = preprocess(feature_modules, queries, "train-data")
-
-# print the paths of the generated files
-print(output_paths)
+# Generate graphs and save them in hdf5 files
+# The default creates a number of hdf5 files equals to the cpu cores available
+# See deeprankcore.preprocess.preprocess for more details
+output_paths = preprocess(feature_modules, queries, "<output_folder>/<prefix_for_outputs>")
 
 ```
 
 The user is free to implement his/her own query class. Each implementation requires the `build_graph` method to be present.
 
 
-## Graph Interaction Network
+### Data exploration
 
-Using the graph interaction network is rather simple :
+As representative example, the following is the hdf5 structure generated by the previous phase for `1ATN_1w.pdb`, so for one single graph:
 
+```bash
+└── ppi-1ATN_1w:A-B
+    ├── edge_data
+    │   ├── coulomb
+    │   ├── covalent
+    │   ├── vanderwaals
+    │   └── dist
+    ├── edge_index
+    ├── edges
+    ├── node_data
+    │   ├── bsa
+    │   ├── pssm
+    │   ├── ic
+    │   ├── hse
+    │   └── depth
+    ├── nodes
+    └── score
+        └── binary
+```
+
+This graph represents the interface between two proteins contained in the `.pdb` file at the residue level. Each graph generated by deeprank-core has the above structure (apart from the features and the target that are specified by the user). 
+
+It is always a good practice to first explore the data, and then make decision about splitting them in training, test and validation sets. For this purpose, users can either use [HDF5View](https://www.hdfgroup.org/downloads/hdfview/), a visual tool written in Java for browsing and editing HDF5 files, or Python packages such as [h5py](https://docs.h5py.org/en/stable/). Few examples for the latter:
+
+```python
+import h5py
+
+with h5py.File("<hdf5_path.hdf5>", "r") as hdf5:
+
+    # List of all graphs in hdf5, each graph representing a ppi
+    ids = list(hdf5.keys())
+
+    # List of all edge features
+    edge_features = list(hdf5[ids[0]]["edge_data"])
+    # List of all node features
+    node_features = list(hdf5[ids[0]]["node_data"]) 
+    labels = list(hdf5[ids[0]]["score"]) # list of labels
+
+     # Coulomb feature for ids[0], numpy.ndarray
+    edge_feat_coulomb = hdf5[ids[0]]["edge_data"]["coulomb"][:]
+    # Polarity feature for ids[0], numpy.ndarray
+    node_feat_polarity = hdf5[ids[0]]["node_data"]["polarity"][:] 
+```
+
+### Dataset(s)
+
+Data can be split in sets implementing custom splits according to the specific application. Utility splitting functions are currently under development.
+
+Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file), then the corresponding graphs can be saved in hdf5 files containing only references (external links) to the original one. For example:
+
+```python
+from deeprankcore.DataSet import save_hdf5_keys
+
+save_hdf5_keys("<original_hdf5_path.hdf5>", train_ids, "<train_hdf5_path.hdf5>")
+save_hdf5_keys("<original_hdf5_path.hdf5>", valid_ids, "<val_hdf5_path.hdf5>")
+save_hdf5_keys("<original_hdf5_path.hdf5>", test_ids, "<test_hdf5_path.hdf5>")
+```
+
+Now the HDF5DataSet objects can be defined:
+
+```python
+from deeprankcore.DataSet import HDF5DataSet
+
+node_features = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"]
+edge_features = ["dist"]
+
+# Creating HDF5DataSet objects
+dataset_train = HDF5DataSet(
+    hdf5_path = "<train_hdf5_path.hdf5>",
+    node_feature = node_features,
+    edge_feature = edge_features
+)
+dataset_val = HDF5DataSet(
+    hdf5_path = "<val_hdf5_path.hdf5>",
+    node_feature = node_features,
+    edge_feature = edge_features
+)
+dataset_test = HDF5DataSet(
+    hdf5_path = "<test_hdf5_path.hdf5>",
+    node_feature = node_features,
+    edge_feature = edge_features
+)
+```
+
+### Training
+
+Training can be performed using one of the already existing GNNs, for example GINet:
 
 ```python
 from deeprankcore.NeuralNet import NeuralNet
-from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
-database = './hdf5/1ACB_residue.hdf5'
-
 metrics_output_directory = "./metrics"
-metrics_exporters = [OutputExporter(metrics_output_directory),
-                     ScatterPlotExporter(metrics_output_directory, 5)]
+metrics_exporters = [OutputExporter(metrics_output_directory)]
 
-# creating HDF5DataSet object and selecting molecules, node/edge features, target, and clustering method:
-dataset = HDF5DataSet(
-    root = "./",
-    database = database,
-    index = range(400),
-    node_feature = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-    edge_feature = ["dist"],
-    target = "irmsd",
-    clustering_method = "mcl",
-)
-
-# training a network using the above defined dataset
 nn = NeuralNet(
-    dataset,
     GINet,
-    task = "reg",
+    dataset_train,
+    dataset_val,
+    dataset_test,
+    lr = 0.001,
     batch_size = 64,
-    percent = [0.8, 0.2],
+    task = "class",
     metrics_exporters = metrics_exporters
 )
 
-nn.train(nepoch = 50, validate = False)
-```
-## Custom Train-Validation split
-
-It is also possible to define a user-defined function for splitting the dataset in train and validation sets, for example if you want to perform the split according to the peptides clusters (the default split is done after shuffling, according to percent parameter):
-
-```python
-
-def UDF_DivideDataSet(dataset, percent, shuffle):
-    ...
-    return train_dataset, valid_dataset
+nn.train(nepoch = 50, validate = True)
+nn.test(dataset_test = dataset_test)
+nn.save_model(filename = "<output_model_path.pth.tar>")
 ```
 
-Then, the user-defined function can be passed to NeuralNet class as parameter:
-
-```python
-
-nn = NeuralNet(
-    dataset,
-    GINet,
-    task = "reg",
-    batch_size = 64,
-    percent = [0.8, 0.2],
-    train_valid_split = UDF_DivideDataSet,
-    metrics_exporters = metrics_exporters
-)
-```
-
-## Custom GNN
+#### Custom GNN
 
 It is also possible to define new network architecture and to specify the loss and optimizer to be used during the training.
 
 ```python
-
-
 def normalized_cut_2d(edge_index, pos):
     row, col = edge_index
     edge_attr = torch.norm(pos[row] - pos[col], p=2, dim=1)
     return normalized_cut(edge_index, edge_attr, num_nodes=pos.size(0))
-
 
 class CustomNet(torch.nn.Module):
     def __init__(self):
@@ -195,21 +294,16 @@ class CustomNet(torch.nn.Module):
         x = F.dropout(x, training=self.training)
         return F.log_softmax(self.fc2(x), dim=1)
 
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 nn = NeuralNet(
-    dataset,
     CustomNet,
-    batch_size = 64,
-    percent = [0.8, 0.2],
-    train_valid_split = UDF_DivideDataSet,
-    device=device
+    dataset_train,
+    dataset_val,
+    dataset_test,
+    batch_size = 64
+    task = "class",
+    metrics_exporters = metrics_exporters
 )
-nn.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-nn.loss = MSELoss()
 
-nn.train(nepoch=50)
 ```
 
 ## h5x support
