@@ -1,5 +1,5 @@
 import unittest
-from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys
+from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys, _DivideDataSet
 from torch_geometric.data.data import Data
 import h5py
 
@@ -86,6 +86,41 @@ class TestDataSet(unittest.TestCase):
         assert len(new_ids) == n
         for new_id in new_ids:
             assert new_id in original_ids
+
+    def test_trainsize(self):
+        hdf5 = "tests/hdf5/train.hdf5"
+        hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
+        n = int ( 0.75 * len(hdf5_file) )
+        n_ = len(hdf5_file) - n
+        test_cases = [None, 0.75, n]
+        
+        for t in test_cases:
+            dataset_train, dataset_val =_DivideDataSet(
+                dataset = HDF5DataSet(hdf5_path=hdf5),
+                train_size=t,
+            )
+
+            assert len(dataset_train) == n
+            assert len(dataset_val) == n_
+        
+    def test_invalid_trainsize(self):
+
+        hdf5 = "tests/hdf5/train.hdf5"
+        hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
+        n = len(hdf5_file)
+        test_cases = [
+            0, 0.0,     # no zeroes allowed
+            -0.5, -1,   # no negative values 
+            1.1, n + 1, # cannot use more than all data as input
+            ]
+        
+        for t in test_cases:
+            with self.assertRaises(ValueError):
+                _DivideDataSet(
+                    dataset = HDF5DataSet(hdf5_path=hdf5),
+                    train_size=t,
+                )
+        
 
 
 if __name__ == "__main__":
