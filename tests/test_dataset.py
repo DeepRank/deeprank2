@@ -92,7 +92,7 @@ class TestDataSet(unittest.TestCase):
         hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
         n = int ( 0.75 * len(hdf5_file) )
         n_ = len(hdf5_file) - n
-        test_cases = [None, 0.75, n, -0.25, -n_]
+        test_cases = [None, 0.75, n]
         
         for t in test_cases:
             dataset_train, dataset_val =_DivideDataSet(
