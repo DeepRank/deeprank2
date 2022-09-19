@@ -67,20 +67,22 @@ def _DivideDataSet(dataset, train_size=None):
         HDF5DataSet: [description]
     """
 
+    if train_size is None:
+        train_size = 0.75
     full_size = len(dataset)
 
     # find number of datapoints to include in training dataset
-    if train_size is None:
-        n_train = int(0.75 * full_size)
-    elif train_size is float:
+    if isinstance (train_size, float):
         n_train = int(train_size * full_size)
-    elif train_size is int:
+    elif isinstance (train_size, int):
         if train_size == 1: # user probably intended it to be 1.0 (100%), not 1 datapoint
             n_train = full_size
             print ("WARNING: `train_size = 1` interpreted as 1.0 (100%), not as 1 datapoint")
         else:
             n_train = train_size
-        
+    else:
+        raise TypeError (f"train_size must be of type float, int, or None. Currently set as {type(train_size)}")
+
     # negative values means it is the number of datapoints to NOT include in training data
     if n_train < 0:
         n_train = full_size + n_train # adding negative number
