@@ -93,7 +93,7 @@ class NeuralNet():
             self.shuffle = shuffle
             self.transform_sigmoid = transform_sigmoid
 
-            self.index = dataset_train.index
+            self.subset = dataset_train.subset
             self.node_feature = dataset_train.node_feature
             self.edge_feature = dataset_train.edge_feature
             self.cluster_nodes = dataset_train.clustering_method
@@ -631,7 +631,7 @@ class NeuralNet():
             "val_size": self.val_size,
             "lr": self.lr,
             "weight_decay": self.weight_decay,
-            "index": self.index,
+            "subset": self.subset,
             "shuffle": self.shuffle,
             "cluster_nodes": self.cluster_nodes,
             "transform_sigmoid": self.transform_sigmoid,
@@ -661,7 +661,7 @@ class NeuralNet():
         self.val_size = state["val_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
-        self.index = state["index"]
+        self.subset = state["subset"]
         self.class_weights = state["class_weight"]
         self.task = state["task"]
         self.classes = state["classes"]

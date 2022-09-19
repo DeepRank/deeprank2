@@ -13,7 +13,7 @@ class TestDataSet(unittest.TestCase):
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
-            index=None,
+            subset=None,
         )
 
     def test_dataset_filter(self):
@@ -22,7 +22,7 @@ class TestDataSet(unittest.TestCase):
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
-            index=None,
+            subset=None,
             dict_filter={"irmsd": "<10"},
         )
 
@@ -37,7 +37,7 @@ class TestDataSet(unittest.TestCase):
             node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
-            index=None,
+            subset=None,
             transform=operator
         )
 
@@ -121,6 +121,20 @@ class TestDataSet(unittest.TestCase):
                     dataset = HDF5DataSet(hdf5_path=hdf5),
                     val_size=t,
                 )
+
+    def test_subset(self):
+        hdf5 = h5py.File("tests/hdf5/train.hdf5", 'r')  # contains 44 datapoints
+        hdf5_keys = list(hdf5.keys())
+        n = 10
+        subset = hdf5_keys[:n]
+
+        dataset = HDF5DataSet(
+            hdf5_path="tests/hdf5/train.hdf5",
+            subset=subset,
+        )
+
+        assert n == len(dataset)
+
         
 
 
