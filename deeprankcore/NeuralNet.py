@@ -49,7 +49,7 @@ class NeuralNet():
                     fundamental for GNNs, otherwise, parameters can become too big and
                     the gradient may explode. Defaults to 1e-05.
             batch_size (int, optional): defaults to 32.
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for training. 
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
                 Defaults to 0.25 in _DivideDataSet function.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
@@ -81,7 +81,7 @@ class NeuralNet():
             self.lr = lr
             self.weight_decay = weight_decay
             self.batch_size = batch_size
-            self.val_size = val_size    # if None, will be set to 0.75 in _DivideDataSet function
+            self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
             self.task = task
 
