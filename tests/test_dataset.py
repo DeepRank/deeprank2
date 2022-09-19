@@ -90,9 +90,9 @@ class TestDataSet(unittest.TestCase):
     def test_trainsize(self):
         hdf5 = "tests/hdf5/train.hdf5"
         hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
-        n = int ( 0.25 * len(hdf5_file) )
-        n_ = len(hdf5_file) - n
-        test_cases = [None, 0.25, n]
+        n_val = int ( 0.25 * len(hdf5_file) )
+        n_train = len(hdf5_file) - n_val
+        test_cases = [None, 0.25, n_val]
         
         for t in test_cases:
             dataset_train, dataset_val =_DivideDataSet(
@@ -100,8 +100,8 @@ class TestDataSet(unittest.TestCase):
                 val_size=t,
             )
 
-            assert len(dataset_train) == n
-            assert len(dataset_val) == n_
+            assert len(dataset_train) == n_train
+            assert len(dataset_val) == n_val
         
     def test_invalid_trainsize(self):
 
@@ -109,12 +109,13 @@ class TestDataSet(unittest.TestCase):
         hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
         n = len(hdf5_file)
         test_cases = [
-            0, 0.0,     # no zeroes allowed
+            1.0, n,     # cannot be 100% validation data
             -0.5, -1,   # no negative values 
             1.1, n + 1, # cannot use more than all data as input
             ]
         
         for t in test_cases:
+            print(t)
             with self.assertRaises(ValueError):
                 _DivideDataSet(
                     dataset = HDF5DataSet(hdf5_path=hdf5),
