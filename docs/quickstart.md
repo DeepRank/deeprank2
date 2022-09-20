@@ -65,7 +65,7 @@ nn = NeuralNet(
     GINet,
     task = "reg",
     batch_size = 64,
-    percent = [0.8, 0.2],
+    val_size = 0.25,
     metrics_exporters = metrics_exporters
 )
 
@@ -73,11 +73,11 @@ nn.train(nepoch = 50, validate = False)
 ```
 ## Custom Train-Validation split
 
-It is also possible to define a user-defined function for splitting the dataset in train and validation sets, for example if you want to perform the split according to the peptides clusters (the default split is done after shuffling, according to percent parameter):
+It is also possible to define a user-defined function for splitting the dataset in train and validation sets, for example if you want to perform the split according to the peptides clusters (the default split is done after shuffling, according to val_size parameter):
 
 ```python
 
-def UDF_DivideDataSet(dataset, percent, shuffle):
+def UDF_DivideDataSet(dataset, val_size):
     ...
     return train_dataset, valid_dataset
 ```
@@ -91,7 +91,7 @@ nn = NeuralNet(
     GINet,
     task = "reg",
     batch_size = 64,
-    percent = [0.8, 0.2],
+    val_size = 0.25,
     train_valid_split = UDF_DivideDataSet,
     metrics_exporters = metrics_exporters
 )
@@ -141,7 +141,7 @@ nn = NeuralNet(
     dataset,
     CustomNet,
     batch_size = 64,
-    percent = [0.8, 0.2],
+    val_size = 0.25,
     train_valid_split = UDF_DivideDataSet,
     device=device
 )
