@@ -1,7 +1,6 @@
 from tempfile import mkdtemp
 from shutil import rmtree
 import os
-from xml.dom.minicompat import defproperty
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import SingleResidueVariantResidueQuery
