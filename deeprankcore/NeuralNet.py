@@ -123,7 +123,7 @@ class NeuralNet():
             else:
                 raise ValueError("A HDF5DataSet object needs to be passed as a test set for evaluating the pre-trained model.")
 
-    def configure_optimizers(self, optimizer = None, lr = 0.01, weight_decay = 1e-05):
+    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
 
         """Configure optimizer and its main parameters.
         Parameters

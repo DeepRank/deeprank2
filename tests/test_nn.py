@@ -325,7 +325,7 @@ class TestNeuralNet(unittest.TestCase):
         )
 
         assert isinstance(nn.optimizer, torch.optim.Adam)
-        assert nn.lr == 0.01
+        assert nn.lr == 0.001
         assert nn.weight_decay == 1e-05
 
 
