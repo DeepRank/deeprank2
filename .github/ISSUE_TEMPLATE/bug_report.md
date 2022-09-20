@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: 'Bug: '
+title: 'Bug: <please fill here>'
 labels: 'bug'
 assignees: ''
 
@@ -17,7 +17,7 @@ A clear and concise description of what the bug is.
 - Inputs:
 
 **To Reproduce**
-Steps/commands to reproduce the behaviour:
+Steps/commands/screenshots to reproduce the behaviour:
  1.  
  2.
  3. 
