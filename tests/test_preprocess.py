@@ -55,7 +55,8 @@ def test_preprocess_single_feature():
     """
     Tests preprocessing several PDB files into their feature representation HDF5 file.
     """
-    feature_modules = [feature.sasa]
+
+    feature_modules = [sasa]
     preprocess_tester(feature_modules)
 
 
