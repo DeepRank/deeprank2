@@ -276,13 +276,14 @@ class TestNeuralNet(unittest.TestCase):
 
     def test_optim(self):
 
-        dataset_train = HDF5DataSet(
+        dataset = HDF5DataSet(
             hdf5_path="tests/hdf5/test.hdf5",
+            target="binary",
             root="./")
 
         nn = NeuralNet(
             NaiveNetwork,
-            dataset_train,
+            dataset,
             task = "class"
         )
 
@@ -292,7 +293,7 @@ class TestNeuralNet(unittest.TestCase):
 
         nn.configure_optimizers(optimizer, lr, weight_decay)
 
-        assert nn.optimizer == optimizer
+        assert isinstance(nn.optimizer, optimizer)
         assert nn.lr == lr
         assert nn.weight_decay == weight_decay
 
@@ -302,12 +303,30 @@ class TestNeuralNet(unittest.TestCase):
 
         nn_pretrained = NeuralNet(
             NaiveNetwork,
-            dataset_train,
+            dataset_train=dataset,
+            dataset_test=dataset,
             pretrained_model="test.pth.tar")
 
-        assert nn_pretrained.optimizer == optimizer
+        assert isinstance(nn_pretrained.optimizer, optimizer)
         assert nn_pretrained.lr == lr
         assert nn_pretrained.weight_decay == weight_decay
+
+    def test_default_optim(self):
+
+        dataset = HDF5DataSet(
+            hdf5_path="tests/hdf5/test.hdf5",
+            target="binary",
+            root="./")
+
+        nn = NeuralNet(
+            NaiveNetwork,
+            dataset,
+            task = "class"
+        )
+
+        assert isinstance(nn.optimizer, torch.optim.Adam)
+        assert nn.lr == 0.01
+        assert nn.weight_decay == 1e-05
 
 
 if __name__ == "__main__":

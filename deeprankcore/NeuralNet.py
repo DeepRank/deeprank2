@@ -143,11 +143,11 @@ class NeuralNet():
         if optimizer is None:
             self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
         else:
-            optimizers = inspect.getmembers(torch.optim, inspect.isclass)
-            if isinstance(optimizer, tuple([opt[1] for opt in optimizers])):
-                self.optimizer = optimizer(lr = lr, weight_decay = weight_decay)
-            else:
-                raise ValueError("Invalid optimizer. Please use only optimizers from torch.optim package.")
+            try:
+                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
+            except Exception as e:
+                print(e)
+                print("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
     def load_pretrained_model(self, dataset_test, Net):
         """
@@ -168,10 +168,7 @@ class NeuralNet():
 
         self.set_loss()
 
-        # optimizer
-        self.configure_optimizers()
-
-        # load the model and the optimizer state if we have one
+        # load the model and the optimizer state
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
@@ -645,8 +642,9 @@ class NeuralNet():
             filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
         """
         state = {
-            "model": self.model.state_dict(),
-            "optimizer": self.optimizer.state_dict(),
+            "model_state": self.model.state_dict(),
+            "optimizer": self.optimizer,
+            "optimizer_state": self.optimizer.state_dict(),
             "node": self.node_feature,
             "edge": self.edge_feature,
             "target": self.target,
@@ -694,6 +692,6 @@ class NeuralNet():
         self.shuffle = state["shuffle"]
         self.cluster_nodes = state["cluster_nodes"]
         self.transform_sigmoid = state["transform_sigmoid"]
-
-        self.opt_loaded_state_dict = state["optimizer"]
-        self.model_load_state_dict = state["model"]
+        self.optimizer = state["optimizer"]
+        self.opt_loaded_state_dict = state["optimizer_state"]
+        self.model_load_state_dict = state["model_state"]
