@@ -235,7 +235,7 @@ dataset_test = HDF5DataSet(
 
 ### Training
 
-Training can be performed using one of the already existing GNNs, for example GINet:
+Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
 
 ```python
 from deeprankcore.NeuralNet import NeuralNet
@@ -256,14 +256,30 @@ nn = NeuralNet(
     metrics_exporters = metrics_exporters
 )
 
+```
+
+Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
+
+```python
+import torch
+
+nn.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
+
+```
+
+Then the Trainer can be trained and tested, and the model can be saved:
+
+```python
 nn.train(nepoch = 50, validate = True)
 nn.test(dataset_test = dataset_test)
 nn.save_model(filename = "<output_model_path.pth.tar>")
+
 ```
+
 
 #### Custom GNN
 
-It is also possible to define new network architecture and to specify the optimizer (`torch.optim.Adam` by default) to be used during the training.
+It is also possible to define new network architectures:
 
 ```python
 import torch 
@@ -307,7 +323,6 @@ nn = NeuralNet(
     metrics_exporters = metrics_exporters
 )
 
-nn.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
 nn.train(nepoch=50)
 
 ```
