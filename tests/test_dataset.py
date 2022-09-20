@@ -102,6 +102,8 @@ class TestDataSet(unittest.TestCase):
 
             assert len(dataset_train) == n_train
             assert len(dataset_val) == n_val
+
+        hdf5_file.close()
         
     def test_invalid_trainsize(self):
 
@@ -121,6 +123,8 @@ class TestDataSet(unittest.TestCase):
                     dataset = HDF5DataSet(hdf5_path=hdf5),
                     val_size=t,
                 )
+        
+        hdf5_file.close()
 
     def test_subset(self):
         hdf5 = h5py.File("tests/hdf5/train.hdf5", 'r')  # contains 44 datapoints
@@ -135,8 +139,8 @@ class TestDataSet(unittest.TestCase):
 
         assert n == len(dataset)
 
+        hdf5.close()
         
-
 
 if __name__ == "__main__":
     unittest.main()
