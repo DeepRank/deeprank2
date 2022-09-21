@@ -11,7 +11,7 @@ from torch_geometric.loader import DataLoader
 
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprankcore.DataSet import DivideDataSet, PreCluster
+from deeprankcore.DataSet import _DivideDataSet, PreCluster
 
 _log = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class NeuralNet():
                  dataset_val = None,
                  dataset_test = None,
                  batch_size = 32,
-                 percent = None,
+                 val_size = None,
                  class_weights = None,
                  task = None,
                  classes = None,
@@ -38,12 +38,12 @@ class NeuralNet():
             Net (function, required): neural network function (ex. GINet, Foutnet etc.)
             dataset_train (HDF5DataSet object, required): training set used during training.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
-                Defaults to None. If None, training set will be splitted randomly into training set (80%) and
-                validation set (20%) during training.
+                Defaults to None. If None, training set will be split randomly into training set and
+                validation set during training, using val_size parameter
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
             batch_size (int, optional): defaults to 32.
-            percent (list, optional): divides the input dataset into a training and an evaluation set.
-                    Defaults to [0.8, 0.2].
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+                Defaults to 0.25 in _DivideDataSet function.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
@@ -73,12 +73,7 @@ class NeuralNet():
             self.target = dataset_train.target # already defined in HDF5DatSet object
             self.optimizer = None
             self.batch_size = batch_size
-
-            if percent is None:
-                self.percent = [0.8, 0.2]
-            else:
-                self.percent = percent
-
+            self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
             self.task = task
 
@@ -108,8 +103,7 @@ class NeuralNet():
                         "model = NeuralNet(dataset, GINet,"
                         "                  target='physiological_assembly',"
                         "                  task='class',"
-                        "                  shuffle=True,"
-                        "                  percent=[0.8, 0.2])")
+                        "                  val_size=0.25)")
 
 
             self.load_model(dataset_train, dataset_val, dataset_test, Net)
@@ -194,9 +188,9 @@ class NeuralNet():
                 if dataset_val is not None:
                     PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
-                    print("No validation dataset given. Randomly splitting training set in training set (80%) and validation set (20%).")
-                    dataset_train, dataset_val = DivideDataSet(
-                        dataset_train, percent=self.percent)
+                    print("No validation dataset given. Randomly splitting training set in training set and validation set.")
+                    dataset_train, dataset_val = _DivideDataSet(
+                        dataset_train, val_size=self.val_size)
             else:
                 raise ValueError(
                     "Invalid node clustering method. \n\t"
@@ -650,7 +644,7 @@ class NeuralNet():
             "classes": self.classes,
             "class_weight": self.class_weights,
             "batch_size": self.batch_size,
-            "percent": self.percent,
+            "val_size": self.val_size,
             "lr": self.lr,
             "weight_decay": self.weight_decay,
             "subset": self.subset,
@@ -680,7 +674,7 @@ class NeuralNet():
         self.edge_feature = state["edge"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
-        self.percent = state["percent"]
+        self.val_size = state["val_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.subset = state["subset"]
