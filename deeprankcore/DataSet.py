@@ -13,9 +13,7 @@ import h5py
 import copy
 from ast import literal_eval
 from deeprankcore.community_pooling import community_detection, community_pooling
-from typing import Callable
-from typing import List
-from typing import Union
+from typing import Callable, List, Union
 
 
 _log = logging.getLogger(__name__)
@@ -146,14 +144,14 @@ def PreCluster(dataset, method):
 class HDF5DataSet(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
-        hdf5_path,
+        hdf5_path: str,
         root: str = "./",
         transform: Callable = None,
         pre_transform: Callable = None,
         dict_filter: dict = None,
         target: str = None,
         tqdm: bool = True,
-        subset: list = None,
+        subset: List[str] = None,
         node_feature: Union[List[str], str] = "all",
         edge_feature: Union[List[str], str] = "all",
         clustering_method: str = "mcl",

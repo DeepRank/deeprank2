@@ -1,5 +1,5 @@
 from time import time
-from typing import List, Optional
+from typing import List, Optional, Union
 import os
 import logging
 
@@ -9,6 +9,7 @@ from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
+from DataSet import HDF5DataSet
 
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
@@ -21,18 +22,19 @@ class NeuralNet():
 
     def __init__(self, # pylint: disable=too-many-arguments, too-many-locals
                  Net,
-                 dataset_train,
-                 dataset_val = None,
-                 dataset_test = None,
-                 lr = 0.01,
-                 weight_decay = 1e-05,
-                 batch_size = 32,
-                 val_size = None,
-                 class_weights = None,
-                 task = None,
-                 classes = None,
-                 pretrained_model = None,
-                 shuffle = True,
+                 dataset_train: HDF5DataSet,
+                 dataset_val: Optional[HDF5DataSet] = None,
+                 dataset_test: Optional[HDF5DataSet] = None,
+                 lr: float = 0.01,
+                 weight_decay: int = 1e-05,
+                 batch_size: int = 32,
+                 val_size: Optional[Union[float, int]] = None,
+                 target: Optional[str] = None,
+                 class_weights: Optional[Union[list,bool]] = None,
+                 task: Optional[str] = None,
+                 classes: Optional[list] = None,
+                 pretrained_model: Optional[str] = None,
+                 shuffle: bool = True,
                  transform_sigmoid: Optional[bool] = False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
