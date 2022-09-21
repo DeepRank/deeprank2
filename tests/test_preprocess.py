@@ -1,14 +1,14 @@
 from tempfile import mkdtemp
 from shutil import rmtree
+from os.path import basename, isfile, join
+import glob
+import importlib
+from typing import List
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import SingleResidueVariantResidueQuery
 from deeprankcore.domain.amino_acid import alanine, phenylalanine
 from tests.utils import PATH_TEST
-from os.path import basename, isfile, join
-import glob
-import importlib
-from typing import List
 
 
 def preprocess_tester(feature_modules: List):
@@ -60,8 +60,8 @@ def test_preprocess_single_feature():
     Tests preprocessing for single feature.
     """
 
-    from deeprankcore.feature import sasa
-    preprocess_tester([sasa])
+    imp = importlib.import_module(('deeprankcore.feature.sasa'))    # linting doesn't like: from deeprankcore.feature import sasa below top_level
+    preprocess_tester([imp])
 
 
 def test_preprocess_all_features():
