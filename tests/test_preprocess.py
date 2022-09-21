@@ -60,7 +60,7 @@ def test_preprocess_single_feature():
     Tests preprocessing for single feature.
     """
 
-    imp = importlib.import_module(('deeprankcore.feature.sasa'))    # linting doesn't like: from deeprankcore.feature import sasa below top_level
+    imp = importlib.import_module(('deeprankcore.feature.sasa'))
     preprocess_tester([imp])
 
 
