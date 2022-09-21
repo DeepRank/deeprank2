@@ -59,12 +59,13 @@ class NeuralNet():
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
+            target (str, optional): known targets are: 'irmsd', 'lrmsd', 'fnat', 'bin', 'capri_class' or 'DockQ'.
                 Note: 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
-            task (str, optional): 'reg' for regression or 'class' for classification.
-                - Set to 'class' if the target is 'bin_class' or 'capri_classes' (will override setting).
-                - Set to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'  (will override setting)..
-                - Must be actively set to either 'class' or 'reg' if target is not one of the conventional names above.
+                Defaults to None, meaning no training can be performed, only testing/predicting
+            task (str, optional): 'regress' for regression or 'classif' for classification.
+                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin', 'capri_class' or 'DockQ']
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes' (overrides setting).
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ' (will override setting).
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
@@ -103,19 +104,18 @@ class NeuralNet():
             self.cluster_nodes = dataset_train.clustering_method
 
             if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
-                self.task = "reg"
+                self.task = "regress"
             elif self.target in ["bin_class", "capri_classes"]:
-                self.task = "class"
+                self.task = "classif"
             
-            if self.target not in ['class','reg']:
+            if self.task not in ['classif','regress']:
                 raise ValueError(
-                    "User target detected -> The task argument must be 'class' or 'reg'. \n\t"
+                    "User target detected -> The task argument must be 'classif' or 'regress'. \n\t"
                     "Example: \n\t"
                     ""
                     "model = NeuralNet(dataset, GINet,"
                     "                  target='physiological_assembly',"
-                    "                  task='class',"
-                    "                  val_size=0.25)")
+                    "                  task='classif')")
 
             self.load_model(dataset_train, dataset_val, dataset_test, Net)
 
@@ -247,7 +247,7 @@ class NeuralNet():
             target_shape = None
 
         # regression mode
-        if self.task == "reg":
+        if self.task == "regress":
 
             self.output_shape = 1
 
@@ -258,7 +258,7 @@ class NeuralNet():
                 self.device)
 
         # classification mode
-        elif self.task == "class":
+        elif self.task == "classif":
 
             self.classes_to_idx = {
                 i: idx for idx, i in enumerate(
@@ -281,10 +281,10 @@ class NeuralNet():
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
-        if self.task == "reg":
+        if self.task == "regress":
             self.loss = MSELoss()
 
-        elif self.task == "class":
+        elif self.task == "classif":
 
             # assign weights to each class in case of unbalanced dataset
             self.weights = None
@@ -452,7 +452,7 @@ class NeuralNet():
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
 
             # get the outputs for export
-            if self.task == 'class':
+            if self.task == 'classif':
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -515,7 +515,7 @@ class NeuralNet():
             targets += data_batch.y.tolist()
 
             # get the outputs for export
-            if self.task == 'class':
+            if self.task == 'classif':
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -572,7 +572,7 @@ class NeuralNet():
 
     def format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
-        if self.task == "class":
+        if self.task == "classif":
             # pred = F.softmax(pred, dim=1)
 
             if target is not None:
