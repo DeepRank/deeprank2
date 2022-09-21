@@ -202,7 +202,6 @@ class HDF5DataSet(Dataset):
         if not isinstance(hdf5_path, list):
             self.hdf5_path = [hdf5_path]
 
-        self.target = target
         self.dict_filter = dict_filter
         self.tqdm = tqdm
         self.subset = subset
@@ -252,6 +251,7 @@ class HDF5DataSet(Dataset):
         Returns:
             dict: {'mol':[fname,mol],'feature':feature,'target':target}
         """
+        # I NEED TO CHECK WHAT TARGET DOES HERE, BUT PROBS OK
 
         fname, mol = self.index_complexes[index]
         data = self.load_one_graph(fname, mol)
@@ -320,7 +320,7 @@ class HDF5DataSet(Dataset):
 
         Returns:
             Data object or None: torch_geometric Data object containing the node features,
-            the internal and external edge features, the target and the xyz coordinates.
+            the internal and external edge features, the target, and the xyz coordinates (position).
             Return None if features cannot be loaded.
         """
 
@@ -373,13 +373,16 @@ class HDF5DataSet(Dataset):
                     with a more up to date version of this software.""", DeprecationWarning)
 
             # target
+            # NOT SURE HOW TO DEAL WITH THIS IF TARGET IS ONLY SET IN NEURALNET.
+            #   DATASET APPEARS TO INHERENTLY NEED A TARGET IN ORDER TO CREATE GRAPHS. 
+            #   NOT SURE WHAT WOULD HAPPEN IF WE REMOVE THE TARGET FROM THE GRAPHS. 
+            #   ALTERNATIVELY, IT DOES SEEM LIKE ALL POSSIBLE TARGETS ARE BEING READ HERE ANYWAY, MAYBE THIS DOES NOT HAVE TO BE SET BY USER
             if self.target is None:
                 y = None
             else:
                 if "score" in grp and self.target in grp["score"]:
                     y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                 else:
-
                     possible_targets = grp["score"].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
                                      " Use the query class to add more target values to input data.")
