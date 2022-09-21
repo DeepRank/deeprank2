@@ -149,7 +149,6 @@ class HDF5DataSet(Dataset):
         transform: Callable = None,
         pre_transform: Callable = None,
         dict_filter: dict = None,
-        target: str = None,
         tqdm: bool = True,
         subset: List[str] = None,
         node_feature: Union[List[str], str] = "all",
@@ -176,8 +175,6 @@ class HDF5DataSet(Dataset):
 
             dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
-
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 

@@ -25,12 +25,12 @@ class NeuralNet():
                  dataset_train: HDF5DataSet,
                  dataset_val: Optional[HDF5DataSet] = None,
                  dataset_test: Optional[HDF5DataSet] = None,
+                 val_size: Optional[Union[float, int]] = None,
                  lr: float = 0.01,
                  weight_decay: int = 1e-05,
                  batch_size: int = 32,
-                 val_size: Optional[Union[float, int]] = None,
-                 target: Optional[str] = None,
                  class_weights: Optional[Union[list,bool]] = None,
+                 target: Optional[str] = None,
                  task: Optional[str] = None,
                  classes: Optional[list] = None,
                  pretrained_model: Optional[str] = None,
@@ -41,35 +41,37 @@ class NeuralNet():
 
         Args:
             Net (function, required): neural network function (ex. GINet, Foutnet etc.)
+            
             dataset_train (HDF5DataSet object, required): training set used during training.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+                Defaults to 0.25 in _DivideDataSet function.
+            
             lr (float, optional): learning rate. Defaults to 0.01.
             weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
                     fundamental for GNNs, otherwise, parameters can become too big and
                     the gradient may explode. Defaults to 1e-05.
             batch_size (int, optional): defaults to 32.
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-                Defaults to 0.25 in _DivideDataSet function.
+            
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
-
-            task (str, optional): 'reg' for regression or 'class' for classification . Defaults to None.
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
+                Note: 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
+            task (str, optional): 'reg' for regression or 'class' for classification.
+                - Set to 'class' if the target is 'bin_class' or 'capri_classes' (will override setting).
+                - Set to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'  (will override setting)..
+                - Must be actively set to either 'class' or 'reg' if target is not one of the conventional names above.
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
+
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
             This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
-
-        Notes:
-          - 'task' will default to 'class' if the target is 'bin_class' or 'capri_classes'.
-          - 'task' will default to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
-          - 'task' must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
-          - 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
         """
 
         if metrics_exporters is not None:
