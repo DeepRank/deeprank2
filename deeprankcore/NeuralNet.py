@@ -1,9 +1,7 @@
-from multiprocessing.sharedctypes import Value
 from time import time
 from typing import List, Optional
 import os
 import logging
-import inspect
 # torch import
 import torch
 from torch import nn
@@ -20,7 +18,7 @@ _log = logging.getLogger(__name__)
 
 class NeuralNet():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(self, # pylint: disable=too-many-arguments
                  Net,
                  dataset_train,
                  dataset_val = None,
