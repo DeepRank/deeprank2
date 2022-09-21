@@ -81,12 +81,12 @@ class NeuralNet():
             self._metrics_exporters = MetricsExporterCollection()
 
         if pretrained_model is None:
-            self.target = dataset_train.target # already defined in HDF5DatSet object
             self.lr = lr
             self.weight_decay = weight_decay
             self.batch_size = batch_size
             self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
+            self.target = target
             self.task = task
 
             if classes is None:
@@ -102,21 +102,20 @@ class NeuralNet():
             self.edge_feature = dataset_train.edge_feature
             self.cluster_nodes = dataset_train.clustering_method
 
-            if self.task is None:
-                if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
-                    self.task = "reg"
-                elif self.target in ["bin_class", "capri_classes"]:
-                    self.task = "class"
-                else:
-                    raise ValueError(
-                        "User target detected -> The task argument is required ('class' or 'reg'). \n\t"
-                        "Example: \n\t"
-                        ""
-                        "model = NeuralNet(dataset, GINet,"
-                        "                  target='physiological_assembly',"
-                        "                  task='class',"
-                        "                  val_size=0.25)")
-
+            if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
+                self.task = "reg"
+            elif self.target in ["bin_class", "capri_classes"]:
+                self.task = "class"
+            
+            if self.target not in ['class','reg']:
+                raise ValueError(
+                    "User target detected -> The task argument must be 'class' or 'reg'. \n\t"
+                    "Example: \n\t"
+                    ""
+                    "model = NeuralNet(dataset, GINet,"
+                    "                  target='physiological_assembly',"
+                    "                  task='class',"
+                    "                  val_size=0.25)")
 
             self.load_model(dataset_train, dataset_val, dataset_test, Net)
 
