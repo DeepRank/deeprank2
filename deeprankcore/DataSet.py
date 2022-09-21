@@ -54,36 +54,46 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-def DivideDataSet(dataset, percent=None, shuffle=True):
+def _DivideDataSet(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
-        dataset ([type])
-        percent (list, optional): [description]. Defaults to [0.8, 0.2].
-        shuffle (bool, optional): [description]. Defaults to True.
+        dataset (HDF5DataSet): input dataset to be split into training and validation data
+        val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+            Defaults to 0.25.
 
     Returns:
-        [type]: [description]
+        HDF5DataSet: [description]
     """
 
-    if percent is None:
-        percent = [0.8, 0.2]
+    if val_size is None:
+        val_size = 0.25
+    full_size = len(dataset)
 
-    size = len(dataset)
-    index = np.arange(size)
+    # find number of datapoints to include in training dataset
+    if isinstance (val_size, float):
+        n_val = int(val_size * full_size)
+    elif isinstance (val_size, int):
+        n_val = val_size
+    else:
+        raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
+    
+    # raise exception if no training data or negative validation size
+    if n_val >= full_size or n_val < 0:
+        raise ValueError ("invalid val_size. \n\t" +
+            f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
 
-    if shuffle:
-        np.random.shuffle(index)
-    size1 = int(percent[0] * size)
-    index1, index2 = index[:size1], index[size1:]
+    index = np.arange(full_size)
+    np.random.shuffle(index)
+    index_train, index_val = index[n_val:], index[:n_val]
 
-    dataset1 = copy.deepcopy(dataset)
-    dataset1.index_complexes = [dataset.index_complexes[i] for i in index1]
+    dataset_train = copy.deepcopy(dataset)
+    dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
 
-    dataset2 = copy.deepcopy(dataset)
-    dataset2.index_complexes = [dataset.index_complexes[i] for i in index2]
+    dataset_val = copy.deepcopy(dataset)
+    dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
 
-    return dataset1, dataset2
+    return dataset_train, dataset_val
 
 
 def PreCluster(dataset, method):
