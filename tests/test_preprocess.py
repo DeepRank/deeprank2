@@ -1,12 +1,13 @@
 from tempfile import mkdtemp
 from shutil import rmtree
-import os
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import SingleResidueVariantResidueQuery
 from deeprankcore.domain.amino_acid import alanine, phenylalanine
-from deeprankcore.feature import *
 from tests.utils import PATH_TEST
+from os.path import basename, isfile, join
+import glob
+import importlib
 
 
 def preprocess_tester(feature_modules):
@@ -16,7 +17,7 @@ def preprocess_tester(feature_modules):
 
     output_directory = mkdtemp()
 
-    prefix = os.path.join(output_directory, "test-preprocess")
+    prefix = join(output_directory, "test-preprocess")
 
 
     try:
@@ -64,7 +65,13 @@ def test_preprocess_all_features():
     Tests preprocessing several PDB files into their features representation HDF5 file.
     """
 
-    feature_folder = os.listdir('./deeprankcore/feature')
-    feature_modules = [ basename(f)[:-3] for f in feature_folder if os.path.isfile(f) and not f.endswith('__init__.py')]    # not sure if there is a way to directly read __all_ from feature/__init__.py
+    # copying this from feature.__init__.py
+    modules = glob.glob(join('./deeprankcore/feature/', "*.py"))
+    modules = [ basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py')]
+
+    feature_modules = []
+    for m in modules:
+        imp = importlib.import_module('deeprankcore.feature.' + m)
+        feature_modules.append(imp)
 
     preprocess_tester(feature_modules)
