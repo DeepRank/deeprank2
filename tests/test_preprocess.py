@@ -13,10 +13,10 @@ from typing import List
 
 def preprocess_tester(feature_modules: List):
     """
-    Generic function to test preprocess for either single or all feature types.
+    Generic function to test preprocessing several PDB files into their feature representation HDF5 file.
 
     Args:
-        feature_modules: list of feature modules to be tested
+        feature_modules: list of feature modules (from .deeprankcore.feature) to be passed to preprocess
     """
 
     output_directory = mkdtemp()
@@ -57,7 +57,7 @@ def preprocess_tester(feature_modules: List):
 
 def test_preprocess_single_feature():
     """
-    Tests preprocessing several PDB files into their feature representation HDF5 file.
+    Tests preprocessing for single feature.
     """
 
     from deeprankcore.feature import sasa
@@ -66,7 +66,7 @@ def test_preprocess_single_feature():
 
 def test_preprocess_all_features():
     """
-    Tests preprocessing several PDB files into their features representation HDF5 file.
+    Tests preprocessing for all features.
     """
 
     # copying this from feature.__init__.py
