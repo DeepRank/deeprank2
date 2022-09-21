@@ -8,11 +8,15 @@ from tests.utils import PATH_TEST
 from os.path import basename, isfile, join
 import glob
 import importlib
+from typing import List
 
 
-def preprocess_tester(feature_modules):
+def preprocess_tester(feature_modules: List):
     """
     Generic function to test preprocess for either single or all feature types.
+
+    Args:
+        feature_modules: list of feature modules to be tested
     """
 
     output_directory = mkdtemp()
@@ -56,8 +60,8 @@ def test_preprocess_single_feature():
     Tests preprocessing several PDB files into their feature representation HDF5 file.
     """
 
-    feature_modules = [sasa]
-    preprocess_tester(feature_modules)
+    from deeprankcore.feature import sasa
+    preprocess_tester([sasa])
 
 
 def test_preprocess_all_features():
