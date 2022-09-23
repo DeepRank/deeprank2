@@ -1,38 +1,50 @@
 # node features
-FEATURENAME_NODE_COVALENT = "covalent" # bool       # FEATURENAME_COVALENT = "covalent"
-FEATURENAME_NODE_COORDINATES = "coordinates" # list[3xfloat]      # FEATURENAME_POSITION = "pos"
-FEATURENAME_NODE_RESIDUE = "residue" # AminoAcid object     # FEATURENAME_AMINOACID = "type"
-FEATURENAME_NODE_VARIANTRESIDUE = "variant_residue" # AminoAcid object      # FEATURENAME_VARIANTAMINOACID = "variant"
-# FEATURENAME_CHAIN = "chain" # bool; I think unused. It is checked twice, but never assigned. Not clear what is meant by "chain"
-# FEATURENAME_CHARGE = "charge" # float(<0); unused, but the information is present in domain.aminoacid.py; any particular reason why it is not used?
-FEATURENAME_NODE_POLARITY = "polarity" # Polarity object        # FEATURENAME_POLARITY = "polarity"
-FEATURENAME_NODE_SIZE = "size" # int        # potentially rename if atom features will also include a size
-FEATURENAME_NODE_BURIEDSURFACEAREA = "buried_surface_area" # float      # FEATURENAME_BURIEDSURFACEAREA = "bsa"
-FEATURENAME_NODE_HALFSPHEREEXPOSURE = "half_sphere_exposire" # list[3xfloat] # can't find this in the code      # FEATURENAME_HALFSPHEREEXPOSURE = "hse"
-FEATURENAME_NODE_PSSM = "pssm" # FEATURENAME_PSSM = "pssm"
-# FEATURENAME_CONSERVATION = "conservation"
-# FEATURENAME_CONSERVATIONDIFFERENCE = "conservation_difference"
-# FEATURENAME_INFORMATIONCONTENT = "ic"
-# FEATURENAME_RESIDUEDEPTH = "depth"
-# FEATURENAME_PSSMDIFFERENCE = "pssm_difference"
-# FEATURENAME_PSSMWILDTYPE = "pssm_wildtype"
-# FEATURENAME_PSSMVARIANT = "pssm_variant"
-# FEATURENAME_SASA = "sasa"
-# FEATURENAME_SIZEDIFFERENCE = "size_difference"
-# FEATURENAME_POLARITYDIFFERENCE = "polarity_difference"
-# FEATURENAME_HYDROGENBONDDONORS = "hb_donors"
-# FEATURENAME_HYDROGENBONDDONORSDIFFERENCE = "hb_donors_difference"
-# FEATURENAME_HYDROGENBONDACCEPTORS = "hb_acceptors"
-# FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE = "hb_acceptors_difference"
+
+## generic features
+FEATURE_NODE_MAINCHAIN = "main_chain" # FEATURENAME_CHAIN = "chain" : bool. --> I think unused. It is checked twice, but never assigned.
+FEATURE_NODE_COORDINATES = "coordinates" # FEATURENAME_POSITION = "pos": list[3xfloat]
+
+## residue core features
+FEATURE_NODE_RESIDUE = "residue" # FEATURENAME_AMINOACID = "type": AminoAcid object     
+FEATURE_NODE_CHARGE = "charge" # FEATURENAME_CHARGE = "charge" : float(<0) --> currently unused, any particular reason?
+FEATURE_NODE_POLARITY = "polarity" # FEATURENAME_POLARITY = "polarity" : Polarity object
+FEATURE_NODE_RESIDUESIZE = "residue_size" # FEATURENAME_SIZE = "size" : int --> called it residue size in case we will also have an atom size in the future
+FEATURE_NODE_HBONDDONORS = "hbond_donors" # FEATURENAME_HYDROGENBONDDONORS = "hb_donors" : int
+FEATURE_NODE_HBONDACCEPTORS = "hbond_acceptors"# FEATURENAME_HYDROGENBONDACCEPTORS = "hb_acceptors" : int
+
+## conservation features
+FEATURE_NODE_PSSM = "pssm" # FEATURENAME_PSSM = "pssm": list[20xint]
+FEATURE_NODE_INFORMATIONCONTENT = "information_content" # FEATURENAME_INFORMATIONCONTENT = "ic" : float
+FEATURE_NODE_CONSERVATION = "conservation" # FEATURENAME_PSSMWILDTYPE = "pssm_wildtype" : int
+
+## protein context features
+FEATURE_NODE_BURIEDSURFACEAREA = "buried_surface_area" # FEATURENAME_BURIEDSURFACEAREA = "bsa": float
+FEATURE_NODE_HALFSPHEREEXPOSURE = "half_sphere_exposure" # FEATURENAME_HALFSPHEREEXPOSURE = "hse":  list[3xfloat] 
+FEATURE_NODE_RESIDUEDEPTH = "residue_depth" # FEATURENAME_RESIDUEDEPTH = "depth" : float
+FEATURE_NODE_SASA = "sasa" # FEATURENAME_SASA = "sasa" : float
+
+## variant features
+FEATURE_NODE_VARIANTRESIDUE = "variant_residue" # FEATURENAME_VARIANTAMINOACID = "variant": AminoAcid object
+FEATURE_NODE_DIFFERENCESIZE = "difference_size" # FEATURENAME_SIZEDIFFERENCE = "size_difference" : int
+FEATURE_NODE_DIFFERENCEPOLARITY = "difference_polarity" # FEATURENAME_POLARITYDIFFERENCE = "polarity_difference"
+FEATURE_NODE_DIFFERENCEHBONDDONORS = "difference_hbond_donors" # FEATURENAME_HYDROGENBONDDONORSDIFFERENCE = "hb_donors_difference"
+FEATURE_NODE_DIFFERENCEHBONDACCEPTORS = "difference_hbond_acceptors" # FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE = "hb_acceptors_difference"
+FEATURE_NODE_DIFFERENCECHARGE = "difference_charge" # if we include CHARGE, it probably makes sense to include this one too
+FEATURE_NODE_VARIANTCONSERVATION = "variant_conservation" # FEATURENAME_PSSMVARIANT = "pssm_variant" : int  --> isn't this information basically covered by FEATURENAME_NODE_CONSERVATIONDIFFERENCE? If not, then we should maybe also include VARIANT versions for: SIZE, POLARITY, HBONDDONORS, HBONDACCEPTORS
+FEATURE_NODE_DIFFERENCECONSERVATION = "difference_conservation" # FEATURENAME_PSSMDIFFERENCE = "pssm_difference" : int
+# FEATURENAME_CONSERVATION = "conservation" # int; unused; i think superceded by FEATURENAME_PSSMVARIANT
+# FEATURENAME_CONSERVATIONDIFFERENCE = "conservation_difference" # unused, i think superceded by: FEATURENAME_PSSMDIFFERENCE
+
 
 
 # edge features
-FEATURENAME_EDGE_ELECTROSTATICPOTENTIAL = "electrostatic_potential" # FEATURENAME_EDGECOULOMB = "coulomb"
-FEATURENAME_EDGE_LJPOTENTIAL = "lj_potential" # FEATURENAME_EDGEVANDERWAALS = "vanderwaals"
-FEATURENAME_EDGE_DISTANCE = "distance" # FEATURENAME_EDGEDISTANCE = "dist"
-FEATURENAME_EDGE_RESIDUES = "residues" # FEATURENAME_EDGETYPE = "type"
-# FEATURENAME_EDGESAMECHAIN = "same_chain" #unused; is this planned to be used moving forward?
+FEATURE_EDGE_COVALENT = "covalent" # FEATURENAME_COVALENT = "covalent" : bool
+FEATURE_EDGE_ELECTROSTATICPOTENTIAL = "electrostatic_potential" # FEATURENAME_EDGECOULOMB = "coulomb"
+FEATURE_EDGE_LJPOTENTIAL = "lj_potential" # FEATURENAME_EDGEVANDERWAALS = "vanderwaals"
+FEATURE_EDGE_DISTANCE = "distance" # FEATURENAME_EDGEDISTANCE = "dist"
+# FEATURE_EDGE_INTERACTIONTYPE = "interaction_type" # FEATURENAME_EDGETYPE = "type" --> replace by CIS/SAMECHAIN
+FEATURE_EDGE_CIS = "cis" # FEATURENAME_EDGESAMECHAIN = "same_chain" # bool --> unused; I think superceded by INTERACTIONTYPE, but this parameter makes more sense to me
 
-# feature values
-EDGETYPE_CIS = "cis_interaction" # EDGETYPE_INTERNAL = "internal"
-EDGETYPE_TRANS = "trans_interaction"# EDGETYPE_INTERFACE = "interface"
+# ## edge types --> use EDGE_CIS instead?
+# FEATURE_EDGE_CISINTERACTION = "cis_interaction" # EDGETYPE_INTERNAL = "internal"
+# FEATURE_EDGE_TRANSINTERACTION = "trans_interaction"# EDGETYPE_INTERFACE = "interface"
