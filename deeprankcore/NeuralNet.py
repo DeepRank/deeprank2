@@ -73,12 +73,12 @@ class NeuralNet():
             self._metrics_exporters = MetricsExporterCollection()
 
         if pretrained_model is None:
+            self.target = dataset_train.target
+            self.task = dataset_train.task
             self.lr = lr
             self.weight_decay = weight_decay
             self.batch_size = batch_size
             self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
-            self.target = dataset_train.target
-            self.task = dataset_train.task
 
             self.class_weights = class_weights
             if classes is None:

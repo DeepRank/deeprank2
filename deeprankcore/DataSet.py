@@ -399,10 +399,6 @@ class HDF5DataSet(Dataset):
                     with a more up to date version of this software.""", DeprecationWarning)
 
             # target
-            # NOT SURE HOW TO DEAL WITH THIS IF TARGET IS ONLY SET IN NEURALNET.
-            #   DATASET APPEARS TO INHERENTLY NEED A TARGET IN ORDER TO CREATE GRAPHS. 
-            #   NOT SURE WHAT WOULD HAPPEN IF WE REMOVE THE TARGET FROM THE GRAPHS. 
-            #   ALTERNATIVELY, IT DOES SEEM LIKE ALL POSSIBLE TARGETS ARE BEING READ HERE ANYWAY, MAYBE THIS DOES NOT HAVE TO BE SET BY USER
             if self.target is None:
                 y = None
             else:
