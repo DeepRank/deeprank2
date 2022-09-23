@@ -10,14 +10,14 @@ from deeprankcore.domain.feature import (FEATURENAME_AMINOACID, FEATURENAME_VARI
                                          FEATURENAME_HYDROGENBONDDONORS, FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
                                          FEATURENAME_HYDROGENBONDACCEPTORS, FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE)
 
-def add_features( # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None):
+def add_features(
+    graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+):
 
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id
-
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
