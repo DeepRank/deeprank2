@@ -1,4 +1,4 @@
-from deeprankcore.models.structure import Atom, AtomicElement, Residue
+from deeprankcore.models.structure import Atom
 from deeprankcore.models.graph import Graph
 
 
@@ -30,4 +30,3 @@ def add_features(
 
             node.features[FEATURE_NODE_ATOMICELEMENT] = atom.element.onehot
             node.features[FEATURE_NODE_PDBOCCUPANCY] = atom.occupancy
-
