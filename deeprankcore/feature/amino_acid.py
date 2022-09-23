@@ -10,8 +10,8 @@ from deeprankcore.domain.feature import (FEATURENAME_AMINOACID, FEATURENAME_VARI
                                          FEATURENAME_HYDROGENBONDDONORS, FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
                                          FEATURENAME_HYDROGENBONDACCEPTORS, FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE)
 
-def add_features(
-    graph: Graph,
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str, graph: Graph,
     single_amino_acid_variant: Optional[SingleResidueVariant] = None
 ):
 

@@ -124,7 +124,7 @@ def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
     # determine which atoms are close enough to form a covalent bond
     covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
 
-    # set the features
+    # set the edge features
     for _, edge in enumerate(edges):
         contact = edge.id
         atom1_index = atom_indices[contact.atom1]
