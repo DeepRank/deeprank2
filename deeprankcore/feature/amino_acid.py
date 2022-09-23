@@ -21,6 +21,8 @@ def add_features( # pylint: disable=unused-argument
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
+            FEATURE_NODE_ELEMENT = "element" # move to domain.feature.py
+            node.features[FEATURE_NODE_ELEMENT] = atom.element.onehot
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}") 
 
