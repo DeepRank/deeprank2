@@ -30,8 +30,6 @@ class NeuralNet():
                  weight_decay: int = 1e-05,
                  batch_size: int = 32,
                  class_weights: Optional[Union[list,bool]] = None,
-                 target: Optional[str] = None,
-                 task: Optional[str] = None,
                  classes: Optional[list] = None,
                  pretrained_model: Optional[str] = None,
                  shuffle: bool = True,
@@ -59,13 +57,6 @@ class NeuralNet():
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
-            target (str, optional): known targets are: 'irmsd', 'lrmsd', 'fnat', 'bin', 'capri_class' or 'DockQ'.
-                Note: 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
-                Defaults to None, meaning no training can be performed, only testing/predicting
-            task (str, optional): 'regress' for regression or 'classif' for classification.
-                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin', 'capri_class' or 'DockQ']
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes' (overrides setting).
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ' (will override setting).
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
@@ -86,10 +77,10 @@ class NeuralNet():
             self.weight_decay = weight_decay
             self.batch_size = batch_size
             self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
-            self.class_weights = class_weights
-            self.target = target
-            self.task = task
+            self.target = dataset_train.target
+            self.task = dataset_train.task
 
+            self.class_weights = class_weights
             if classes is None:
                 self.classes = [0, 1]
             else:
@@ -102,20 +93,6 @@ class NeuralNet():
             self.node_feature = dataset_train.node_feature
             self.edge_feature = dataset_train.edge_feature
             self.cluster_nodes = dataset_train.clustering_method
-
-            if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
-                self.task = "regress"
-            elif self.target in ["bin_class", "capri_classes"]:
-                self.task = "classif"
-            
-            if self.task not in ['classif','regress']:
-                raise ValueError(
-                    "User target detected -> The task argument must be 'classif' or 'regress'. \n\t"
-                    "Example: \n\t"
-                    ""
-                    "model = NeuralNet(dataset, GINet,"
-                    "                  target='physiological_assembly',"
-                    "                  task='classif')")
 
             self.load_model(dataset_train, dataset_val, dataset_test, Net)
 
@@ -660,13 +637,13 @@ class NeuralNet():
         self.node_feature = state["node"]
         self.edge_feature = state["edge"]
         self.target = state["target"]
+        self.task = state["task"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.subset = state["subset"]
         self.class_weights = state["class_weight"]
-        self.task = state["task"]
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
         self.cluster_nodes = state["cluster_nodes"]

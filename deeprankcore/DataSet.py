@@ -13,7 +13,7 @@ import h5py
 import copy
 from ast import literal_eval
 from deeprankcore.community_pooling import community_detection, community_pooling
-from typing import Callable, List, Union
+from typing import Callable, List, Union, Optional
 
 
 _log = logging.getLogger(__name__)
@@ -149,6 +149,8 @@ class HDF5DataSet(Dataset):
         transform: Callable = None,
         pre_transform: Callable = None,
         dict_filter: dict = None,
+        target: Optional[str] = None,
+        task: Optional[str] = None,
         tqdm: bool = True,
         subset: List[str] = None,
         node_feature: Union[List[str], str] = "all",
@@ -178,6 +180,15 @@ class HDF5DataSet(Dataset):
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
+            target (str, optional): known targets are: 'irmsd', 'lrmsd', 'fnat', 'bin', 'capri_class' or 'DockQ'.
+                Note: 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
+                Defaults to None, meaning no training can be performed, only testing/predicting
+            task (str, optional): 'regress' for regression or 'classif' for classification.
+                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin', 'capri_class' or 'DockQ']
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes' (overrides setting).
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ' (will override setting).
+
+
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
@@ -206,8 +217,23 @@ class HDF5DataSet(Dataset):
         self.tqdm = tqdm
         self.subset = subset
 
-        self.node_feature = node_feature
+        self.target = target
+        self.task = task
+        if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
+            self.task = "regress"
+        elif self.target in ["bin_class", "capri_classes"]:
+            self.task = "classif"
+        
+        if self.task not in ['classif','regress']:
+            raise ValueError(
+                "User target detected -> The task argument must be 'classif' or 'regress'. \n\t"
+                "Example: \n\t"
+                ""
+                "model = NeuralNet(dataset, GINet,"
+                "                  target='physiological_assembly',"
+                "                  task='classif')")
 
+        self.node_feature = node_feature
         self.edge_feature = edge_feature
 
         self.edge_feature_transform = edge_feature_transform
