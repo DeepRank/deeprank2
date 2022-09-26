@@ -35,7 +35,10 @@ class NeuralNet():
         """Class from which the network is trained, evaluated and tested
 
         Args:
-            Net (function, required): neural network function (ex. GINet, Foutnet etc.)
+            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
+                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
+                in terms of output shape (NeuralNet class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
             dataset_train (HDF5DataSet object, required): training set used during training.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
@@ -48,19 +51,17 @@ class NeuralNet():
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
 
-            task (str, optional): 'reg' for regression or 'class' for classification . Defaults to None.
+            task (str, optional): 'reg' for regression or 'class' for classification.
+                Defaults to 'class' if the target is 'bin_class' or 'capri_classes'.
+                Defaults to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
+                It must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
-            This can speed up the optimization and puts the value between 0 and 1.
+                This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
 
-        Notes:
-          - 'task' will default to 'class' if the target is 'bin_class' or 'capri_classes'.
-          - 'task' will default to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
-          - 'task' must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
-          - 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
         """
 
         if metrics_exporters is not None:
@@ -76,11 +77,6 @@ class NeuralNet():
             self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
             self.task = task
-
-            if classes is None:
-                self.classes = [0, 1]
-            else:
-                self.classes = classes
 
             self.shuffle = shuffle
             self.transform_sigmoid = transform_sigmoid
@@ -105,6 +101,12 @@ class NeuralNet():
                         "                  task='class',"
                         "                  val_size=0.25)")
 
+            if (classes is None) and (self.task == 'class'):
+                self.classes = [0, 1]
+            elif self.task == 'class':
+                self.classes = classes
+            else:
+                self.classes = None
 
             self.load_model(dataset_train, dataset_val, dataset_test, Net)
 
@@ -272,10 +274,6 @@ class NeuralNet():
         # classification mode
         elif self.task == "class":
 
-            self.classes_to_idx = {
-                i: idx for idx, i in enumerate(
-                    self.classes)}
-            self.idx_to_classes = dict(enumerate(self.classes))
             self.output_shape = len(self.classes)
 
             self.model = Net(
@@ -314,6 +312,7 @@ class NeuralNet():
                 self.weights = self.weights / self.weights.sum()
                 print(f"class weights: {self.weights}")
 
+            # Note that non-linear activation is automatically applied in CrossEntropyLoss
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
@@ -350,10 +349,9 @@ class NeuralNet():
                 self.eval(self.valid_loader, 0, "validation")
 
             # Loop over epochs
-            self.data = {}
             for epoch in range(1, nepoch + 1):
 
-                # Train the model
+                # Sets the module in training mode
                 self.model.train()
 
                 loss_ = self._epoch(epoch, "training")
@@ -375,7 +373,7 @@ class NeuralNet():
                             self.save_model(model_path)
                 else:
                     # if no validation set, saves the best performing model on
-                    # the traing set
+                    # the training set
                     if save_model == 'best':
                         if min(train_losses) == loss_: # noqa
                             _log.warning(
@@ -416,7 +414,6 @@ class NeuralNet():
                         "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t"
                         ">> model = NeuralNet(dataset_test, gnn, pretrained_model = model_saved, target=None)\n\t"
                         ">> model.test()\n\t")
-            self.data = {}
 
             # Run test
             self.eval(self.test_loader, 0, "testing")
@@ -437,6 +434,7 @@ class NeuralNet():
         Returns:
             running loss:
         """
+        # Sets the module in evaluation mode
         self.model.eval()
 
         loss_func = self.loss
@@ -463,7 +461,8 @@ class NeuralNet():
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
 
-            # get the outputs for export
+            # Get the outputs for export
+            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == 'class':
                 pred = F.softmax(pred.detach(), dim=1)
             else:
@@ -526,7 +525,8 @@ class NeuralNet():
 
             targets += data_batch.y.tolist()
 
-            # get the outputs for export
+            # Get the outputs for export
+            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == 'class':
                 pred = F.softmax(pred.detach(), dim=1)
             else:
@@ -584,20 +584,29 @@ class NeuralNet():
 
     def format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
-        if self.task == "class":
-            # pred = F.softmax(pred, dim=1)
 
-            if target is not None:
-                target = torch.tensor([self.classes_to_idx[int(x)]
-                                       for x in target]).to(self.device)
+        if (self.task == 'class') and (target is not None):
+            # For categorical cross entropy, the target must be a one-dimensional tensor
+            # of class indices with type long and the output should have raw, unnormalized values
+            classes_to_idx = {
+                i: idx for idx, i in enumerate(self.classes)
+            }
 
-        elif self.transform_sigmoid is True:
+            target = torch.tensor(
+                [classes_to_idx[int(x)] for x in target]
+            ).to(self.device)
 
-            # Sigmoid(x) = 1 / (1 + exp(-x))
-            pred = torch.sigmoid(pred.reshape(-1))
+        elif self.task == 'reg':
+            if self.transform_sigmoid is True:
 
-        else:
-            pred = pred.reshape(-1)
+                # Sigmoid(x) = 1 / (1 + exp(-x))
+                pred = torch.sigmoid(pred.reshape(-1))
+
+            else:
+                pred = pred.reshape(-1)
+
+        if target is not None:
+            target = target.to(self.device)
 
         return pred, target
 

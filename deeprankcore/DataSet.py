@@ -179,7 +179,11 @@ class HDF5DataSet(Dataset):
             dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. It can also be a custom-defined
+            target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
+            here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
+            please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
+            Defaults to None.
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
@@ -382,7 +386,12 @@ class HDF5DataSet(Dataset):
                 y = None
             else:
                 if "score" in grp and self.target in grp["score"]:
-                    y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
+                    grp['score/'+self.target][()]
+                    try:
+                        y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
+                    except Exception as e:
+                        print(e)
+                        print('If your target variable contains categorical classes, please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
 
                     possible_targets = grp["score"].keys()
