@@ -182,7 +182,7 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
     # determine which atoms are close enough to form a covalent bond
     covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
 
-    # set the features
+    # set the node features
     for _, edge in enumerate(edges):
         contact = edge.id
         for atom1 in contact.residue1.atoms:
