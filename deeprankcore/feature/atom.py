@@ -21,12 +21,6 @@ FEATURE_NODE_ATOMICCHARGE = "atomic_charge" # float
 FEATURE_NODE_VANDERWAALS = "vanderwaals" # ?
 
 
-# Do we care about residue position in an atom-graph? 
-# Currently, POSITION is set to atom positions for atom graphs and average atom positions for residue-graphs
-# # If so, we should create separate RESIDUEPOSITION and ATOMPOSITION features
-
-
-
 def add_features( # pylint: disable=unused-argument
     pdb_path: str, 
     graph: Graph, 
@@ -50,4 +44,3 @@ def add_features( # pylint: disable=unused-argument
                 # set parameters to zero, so that the potential becomes zero
                 node.features[FEATURE_NODE_ATOMICCHARGE] = 0.0
                 node.features[FEATURE_NODE_VANDERWAALS] = VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
-                
