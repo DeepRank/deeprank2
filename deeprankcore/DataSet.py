@@ -386,12 +386,12 @@ class HDF5DataSet(Dataset):
                 y = None
             else:
                 if "score" in grp and self.target in grp["score"]:
-                    grp['score/'+self.target][()]
                     try:
                         y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                     except Exception as e:
                         print(e)
-                        print('If your target variable contains categorical classes, please convert them into class indices before defining the HDF5DataSet instance.')
+                        print('If your target variable contains categorical classes, \
+                        please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
 
                     possible_targets = grp["score"].keys()
