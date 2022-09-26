@@ -40,10 +40,10 @@ deeprankcore.Metrics module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.NeuralNet module
+deeprankcore.Trainer module
 -----------------------------
 
-.. automodule:: deeprankcore.NeuralNet
+.. automodule:: deeprankcore.Trainer
    :members:
    :undoc-members:
    :show-inheritance:

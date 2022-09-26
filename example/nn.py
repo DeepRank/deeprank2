@@ -1,4 +1,4 @@
-from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.Trainer import Trainer
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
 
@@ -14,7 +14,7 @@ dataset = HDF5DataSet(
     clustering_method='mcl',
 )
 
-NN = NeuralNet(
+NN = Trainer(
     dataset,
     GINet,
     task="reg",

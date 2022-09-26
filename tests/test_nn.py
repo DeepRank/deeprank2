@@ -5,7 +5,7 @@ import unittest
 import pytest
 import logging
 import torch
-from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.Trainer import Trainer
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
 from deeprankcore.foutnet import FoutNet
@@ -65,7 +65,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     else:
         dataset_test = None
 
-    nn = NeuralNet(
+    nn = Trainer(
         model_class,
         dataset_train,
         dataset_val,
@@ -99,14 +99,14 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
 
     nn.save_model("test.pth.tar")
 
-    NeuralNet(
+    Trainer(
         model_class,
         dataset_train,
         dataset_val,
         dataset_test,
         pretrained_model="test.pth.tar")
 
-class TestNeuralNet(unittest.TestCase):
+class TestTrainer(unittest.TestCase):
     @classmethod
     def setUpClass(class_):
         class_.work_directory = tempfile.mkdtemp()
@@ -281,7 +281,7 @@ class TestNeuralNet(unittest.TestCase):
             target="binary",
             root="./")
 
-        nn = NeuralNet(
+        nn = Trainer(
             NaiveNetwork,
             dataset,
             task = "class"
@@ -301,7 +301,7 @@ class TestNeuralNet(unittest.TestCase):
 
         nn.save_model("test.pth.tar")
 
-        nn_pretrained = NeuralNet(
+        nn_pretrained = Trainer(
             NaiveNetwork,
             dataset_train=dataset,
             dataset_test=dataset,
@@ -318,7 +318,7 @@ class TestNeuralNet(unittest.TestCase):
             target="binary",
             root="./")
 
-        nn = NeuralNet(
+        nn = Trainer(
             NaiveNetwork,
             dataset,
             task = "class"

@@ -16,7 +16,7 @@ from deeprankcore.DataSet import _DivideDataSet, PreCluster
 _log = logging.getLogger(__name__)
 
 
-class NeuralNet():
+class Trainer():
 
     def __init__(self, # pylint: disable=too-many-arguments
                  Net,
@@ -37,7 +37,7 @@ class NeuralNet():
         Args:
             Net (function, required): neural network class (ex. GINet, Foutnet etc.).
                 It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (NeuralNet class takes care of formatting the output shape according to the task).
+                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
             dataset_train (HDF5DataSet object, required): training set used during training.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
@@ -96,7 +96,7 @@ class NeuralNet():
                         "User target detected -> The task argument is required ('class' or 'reg'). \n\t"
                         "Example: \n\t"
                         ""
-                        "model = NeuralNet(dataset, GINet,"
+                        "model = Trainer(dataset, GINet,"
                         "                  target='physiological_assembly',"
                         "                  task='class',"
                         "                  val_size=0.25)")
@@ -412,7 +412,7 @@ class NeuralNet():
                         "\n\t"
                         ">> model.test(test_dataset)\n\t"
                         "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t"
-                        ">> model = NeuralNet(dataset_test, gnn, pretrained_model = model_saved, target=None)\n\t"
+                        ">> model = Trainer(dataset_test, gnn, pretrained_model = model_saved, target=None)\n\t"
                         ">> model.test()\n\t")
 
             # Run test

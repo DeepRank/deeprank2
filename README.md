@@ -238,14 +238,14 @@ dataset_test = HDF5DataSet(
 Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
 
 ```python
-from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
 metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
-nn = NeuralNet(
+nn = Trainer(
     GINet,
     dataset_train,
     dataset_val,
@@ -313,7 +313,7 @@ class CustomNet(torch.nn.Module):
         x = F.dropout(x, training=self.training)
         return F.log_softmax(self.fc2(x), dim=1)
 
-nn = NeuralNet(
+nn = Trainer(
     CustomNet,
     dataset_train,
     dataset_val,

@@ -29,7 +29,7 @@ class Query:
     The get_all_scores function under deeprankcore.tools.score is a nice way to get started. It will output a directory that can serve
     as input for the targets argument.
 
-    Currently, the NeuralNet class under deeprankcore.NeuralNet can work with target values, that have one of the following names:
+    Currently, the Trainer class under deeprankcore.Trainer can work with target values, that have one of the following names:
 
       for classification:
        - bin_class (scalar value is expected to be either 0 or 1)
@@ -41,7 +41,7 @@ class Query:
        - fnat
        - dockQ
 
-    Other target names are also allowed, but require additional settings to the NeuralNet object.
+    Other target names are also allowed, but require additional settings to the Trainer object.
     """
 
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
