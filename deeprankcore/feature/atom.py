@@ -1,5 +1,12 @@
 from deeprankcore.models.structure import Atom
 from deeprankcore.models.graph import Graph
+from deeprankcore.models.forcefield.vanderwaals import VanderwaalsParam
+from deeprankcore.domain.forcefield import atomic_forcefield
+from deeprankcore.models.error import UnknownAtomError
+import logging
+
+
+_log = logging.getLogger(__name__)
 
 
 # these will ultimately be moved to deeprankcore.domain.feature.py and imported in this file.
