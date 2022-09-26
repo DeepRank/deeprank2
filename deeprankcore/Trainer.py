@@ -11,7 +11,7 @@ from torch_geometric.loader import DataLoader
 
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprankcore.DataSet import _DivideDataSet, PreCluster
+from deeprankcore.DataSet import _DivideDataSet, _PreCluster
 
 _log = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ class Trainer():
         self.test_loader = DataLoader(dataset_test)
 
         if self.cluster_nodes is not None: 
-            PreCluster(dataset_test, method=self.cluster_nodes)
+            _PreCluster(dataset_test, method=self.cluster_nodes)
 
         print("Test set loaded")
         
@@ -185,10 +185,10 @@ class Trainer():
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
                 print("Loading clusters")
-                PreCluster(dataset_train, method=self.cluster_nodes)
+                _PreCluster(dataset_train, method=self.cluster_nodes)
 
                 if dataset_val is not None:
-                    PreCluster(dataset_val, method=self.cluster_nodes)
+                    _PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
                     print("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     dataset_train, dataset_val = _DivideDataSet(
@@ -215,7 +215,7 @@ class Trainer():
 
             if self.cluster_nodes in ('mcl', 'louvain'):
                 print("Loading clusters for the evaluation set.")
-                PreCluster(dataset_test, method=self.cluster_nodes)
+                _PreCluster(dataset_test, method=self.cluster_nodes)
 
             self.valid_loader = DataLoader(
                 dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
@@ -401,7 +401,7 @@ class Trainer():
             # Loads the test dataset if provided
             if dataset_test is not None:
 
-                PreCluster(dataset_test, method='mcl')
+                _PreCluster(dataset_test, method='mcl')
 
                 self.test_loader = DataLoader(dataset_test)
 

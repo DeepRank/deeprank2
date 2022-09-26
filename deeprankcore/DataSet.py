@@ -96,7 +96,7 @@ def _DivideDataSet(dataset, val_size=None):
     return dataset_train, dataset_val
 
 
-def PreCluster(dataset, method):
+def _PreCluster(dataset, method):
     """Pre-clusters nodes of the graphs
 
     Args:
@@ -105,7 +105,7 @@ def PreCluster(dataset, method):
     """
     for fname, mol in tqdm(dataset.index_complexes):
 
-        data = dataset.load_one_graph(fname, mol)
+        data = dataset._load_one_graph(fname, mol)
 
         if data is None:
             f5 = h5py.File(fname, "a")
@@ -226,16 +226,16 @@ class HDF5DataSet(Dataset):
         self.clustering_method = clustering_method
 
         # check if the files are ok
-        self.check_hdf5_files()
+        self._check_hdf5_files()
 
         # check the selection of features
-        self.check_node_feature()
-        self.check_edge_feature()
+        self._check_node_feature()
+        self._check_edge_feature()
 
         # create the indexing system
         # alows to associate each mol to an index
         # and get fname and mol name from the index
-        self.create_index_molecules()
+        self._create_index_molecules()
 
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -263,10 +263,10 @@ class HDF5DataSet(Dataset):
         """
 
         fname, mol = self.index_complexes[index]
-        data = self.load_one_graph(fname, mol)
+        data = self._load_one_graph(fname, mol)
         return data
 
-    def check_hdf5_files(self):
+    def _check_hdf5_files(self):
         """Checks if the data contained in the hdf5 file is valid."""
         print("\nChecking dataset Integrity...\n")
         remove_file = []
@@ -286,7 +286,7 @@ class HDF5DataSet(Dataset):
         for name in remove_file:
             self.hdf5_path.remove(name)
 
-    def check_node_feature(self):
+    def _check_node_feature(self):
         """Checks if the required node features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
@@ -303,7 +303,7 @@ class HDF5DataSet(Dataset):
                     print(f"\nPossible node features: {self.available_node_feature}\n")
                     sys.exit()
 
-    def check_edge_feature(self):
+    def _check_edge_feature(self):
         """Checks if the required edge features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
@@ -320,7 +320,7 @@ class HDF5DataSet(Dataset):
                     print(f"\nPossible edge features: {self.available_edge_feature}\n")
                     sys.exit()
 
-    def load_one_graph(self, fname, mol): # noqa
+    def _load_one_graph(self, fname, mol): # noqa
         """Loads one graph
 
         Args:
@@ -440,7 +440,7 @@ class HDF5DataSet(Dataset):
 
         return data
 
-    def create_index_molecules(self):
+    def _create_index_molecules(self):
         """Creates the indexing of each molecule in the dataset.
 
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
@@ -469,13 +469,13 @@ class HDF5DataSet(Dataset):
                     mol_names = [i for i in self.subset if i in list(fh5.keys())]
 
                 for k in mol_names:
-                    if self.filter(fh5[k]):
+                    if self._filter(fh5[k]):
                         self.index_complexes += [(fdata, k)]
                 fh5.close()
             except Exception:
                 _log.exception(f"on {fdata}")
 
-    def filter(self, molgrp):
+    def _filter(self, molgrp):
         """Filters the molecule according to a dictionary.
 
         The filter is based on the attribute self.dict_filter
