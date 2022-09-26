@@ -27,9 +27,11 @@ FEATURE_NODE_VANDERWAALS = "vanderwaals" # ?
 
 
 
-def add_features(
-    graph: Graph,
-):
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str, 
+    graph: Graph, 
+    *args, **kwargs
+    ):
 
     for node in graph.nodes:
         if isinstance(node.id, Atom):   # I think this is necessary, otherwise it'll complain if it's an amino acid graph, right?
@@ -37,3 +39,15 @@ def add_features(
 
             node.features[FEATURE_NODE_ATOMICELEMENT] = atom.element.onehot
             node.features[FEATURE_NODE_PDBOCCUPANCY] = atom.occupancy
+        
+            try:    # I copied the try/except structure from feature.atomic_contact.add_features_for_atoms; not sure if it's actually necessary.
+                node.features[FEATURE_NODE_ATOMICCHARGE] = atomic_forcefield.get_charge(atom)
+                node.features[FEATURE_NODE_VANDERWAALS] = atomic_forcefield.get_vanderwaals_parameters(atom)
+
+            except UnknownAtomError:
+                _log.warning("Ignoring atom %s, because it's unknown to the forcefield", atom)
+
+                # set parameters to zero, so that the potential becomes zero
+                node.features[FEATURE_NODE_ATOMICCHARGE] = 0.0
+                node.features[FEATURE_NODE_VANDERWAALS] = VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
+                
