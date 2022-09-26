@@ -108,12 +108,12 @@ class Trainer():
             else:
                 self.classes = None
 
-            self.load_model(dataset_train, dataset_val, dataset_test, Net)
+            self._load_model(dataset_train, dataset_val, dataset_test, Net)
 
         else:
-            self.load_params(pretrained_model)
+            self._load_params(pretrained_model)
             if dataset_test is not None:
-                self.load_pretrained_model(dataset_test, Net)
+                self._load_pretrained_model(dataset_test, Net)
             else:
                 raise ValueError("A HDF5DataSet object needs to be passed as a test set for evaluating the pre-trained model.")
 
@@ -143,7 +143,7 @@ class Trainer():
                 print(e)
                 print("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
-    def load_pretrained_model(self, dataset_test, Net):
+    def _load_pretrained_model(self, dataset_test, Net):
         """
         Loads pretrained model
 
@@ -158,7 +158,7 @@ class Trainer():
 
         print("Test set loaded")
         
-        self.put_model_to_device(dataset_test, Net)
+        self._put_model_to_device(dataset_test, Net)
 
         self.set_loss()
 
@@ -166,7 +166,7 @@ class Trainer():
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def load_model(self, dataset_train, dataset_val, dataset_test, Net):
+    def _load_model(self, dataset_train, dataset_val, dataset_test, Net):
         
         """
         Loads model
@@ -225,14 +225,14 @@ class Trainer():
         else:
             print("No independent validation set loaded")
 
-        self.put_model_to_device(dataset_train, Net)
+        self._put_model_to_device(dataset_train, Net)
 
         # optimizer
         self.configure_optimizers()
 
         self.set_loss()
 
-    def put_model_to_device(self, dataset, Net):
+    def _put_model_to_device(self, dataset, Net):
         """
         Puts the model on the available device
 
@@ -344,9 +344,9 @@ class Trainer():
             # Number of epochs
             self.nepoch = nepoch
 
-            self.eval(self.train_loader, 0, "training")
+            self._eval(self.train_loader, 0, "training")
             if validate:
-                self.eval(self.valid_loader, 0, "validation")
+                self._eval(self.valid_loader, 0, "validation")
 
             # Loop over epochs
             for epoch in range(1, nepoch + 1):
@@ -361,7 +361,7 @@ class Trainer():
                 # Validate the model
                 if validate:
 
-                    loss_ = self.eval(self.valid_loader, epoch, "validation")
+                    loss_ = self._eval(self.valid_loader, epoch, "validation")
 
                     valid_losses.append(loss_)
 
@@ -406,7 +406,7 @@ class Trainer():
                 self.test_loader = DataLoader(dataset_test)
 
             else:
-                if self.load_pretrained_model is None:
+                if self._load_pretrained_model is None:
                     raise ValueError(
                         "You need to upload a test dataset \n\t"
                         "\n\t"
@@ -416,9 +416,9 @@ class Trainer():
                         ">> model.test()\n\t")
 
             # Run test
-            self.eval(self.test_loader, 0, "testing")
+            self._eval(self.test_loader, 0, "testing")
 
-    def eval( # pylint: disable=too-many-locals
+    def _eval( # pylint: disable=too-many-locals
             self,
             loader: DataLoader,
             epoch_number: int,
@@ -451,7 +451,7 @@ class Trainer():
 
             data_batch = data_batch.to(self.device)
             pred = self.model(data_batch)
-            pred, data_batch.y = self.format_output(pred, data_batch.y)
+            pred, data_batch.y = self._format_output(pred, data_batch.y)
 
             # Check if a target value was provided (i.e. benchmarck scenario)
             if data_batch.y is not None:
@@ -483,7 +483,7 @@ class Trainer():
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, targets)
 
-        self.log_epoch_data(pass_name, epoch_number, eval_loss, dt)
+        self._log_epoch_data(pass_name, epoch_number, eval_loss, dt)
 
         return eval_loss
 
@@ -512,7 +512,7 @@ class Trainer():
             data_batch = data_batch.to(self.device)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
-            pred, data_batch.y = self.format_output(pred, data_batch.y)
+            pred, data_batch.y = self._format_output(pred, data_batch.y)
 
             loss_ = self.loss(pred, data_batch.y)
             loss_.backward()
@@ -546,28 +546,12 @@ class Trainer():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, targets)
-        self.log_epoch_data(pass_name, epoch_number, epoch_loss, dt)
+        self._log_epoch_data(pass_name, epoch_number, epoch_loss, dt)
 
         return epoch_loss
 
-    def compute_class_weights(self):
-
-        targets_all = []
-        for batch in self.train_loader:
-            targets_all.append(batch.y)
-
-        targets_all = torch.cat(targets_all).squeeze().tolist()
-        weights = torch.tensor(
-            [targets_all.count(i) for i in self.classes], dtype=torch.float32
-        )
-        print(f"class occurences: {weights}")
-        weights = 1.0 / weights
-        weights = weights / weights.sum()
-        print(f"class weights: {weights}")
-        return weights
-
     @staticmethod
-    def log_epoch_data(stage, epoch, loss, time):
+    def _log_epoch_data(stage, epoch, loss, time):
         """
         Prints the data of each epoch
 
@@ -582,7 +566,7 @@ class Trainer():
             'Epoch [%04d] : %s loss %e | time %1.2e sec.' % # pylint: disable=consider-using-f-string
             (epoch, stage, loss, time))
 
-    def format_output(self, pred, target=None):
+    def _format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
 
         if (self.task == 'class') and (target is not None):
@@ -610,30 +594,6 @@ class Trainer():
 
         return pred, target
 
-    @staticmethod
-    def update_name(hdf5, outdir):
-        """
-        Checks if the file already exists, if so, update the name
-
-        Args:
-            hdf5 (str): hdf5 file
-            outdir (str): output directory
-
-        Returns:
-            str: update hdf5 name
-        """
-        fname = os.path.join(outdir, hdf5)
-
-        count = 0
-        hdf5_name = hdf5.split(".")[0]
-
-        # If file exists, change its name with a number
-        while os.path.exists(fname):
-            count += 1
-            hdf5 = f"{hdf5_name}_{count:03d}.hdf5"
-            fname = os.path.join(outdir, hdf5)
-
-        return fname
 
     def save_model(self, filename='model.pth.tar'):
         """
@@ -664,7 +624,7 @@ class Trainer():
 
         torch.save(state, filename)
 
-    def load_params(self, filename):
+    def _load_params(self, filename):
         """
         Loads the parameters of a pretrained model
 
