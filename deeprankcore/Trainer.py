@@ -1,14 +1,13 @@
 from time import time
 from typing import List, Optional
-import os
 import logging
+import warnings
 # torch import
 import torch
 from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
 from deeprankcore.DataSet import _DivideDataSet, _PreCluster
@@ -19,44 +18,47 @@ _log = logging.getLogger(__name__)
 class Trainer():
 
     def __init__(self, # pylint: disable=too-many-arguments
-                 Net,
-                 dataset_train,
+                 dataset_train = None,
                  dataset_val = None,
                  dataset_test = None,
-                 batch_size = 32,
+                 Net = None,
                  val_size = None,
                  class_weights = None,
                  task = None,
                  classes = None,
                  pretrained_model = None,
+                 batch_size = 32,
                  shuffle = True,
                  transform_sigmoid: Optional[bool] = False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
         Args:
-            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
-                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
-                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
             dataset_train (HDF5DataSet object, required): training set used during training.
+                Can't be None if pretrained_model is also None. Defaults to None.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
-            batch_size (int, optional): defaults to 32.
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-                Defaults to 0.25 in _DivideDataSet function.
+            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
+                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
+                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
+                to use for validation.
+                - Should be set to 0 if no validation set is needed.
+                - Should be not set (None) if dataset_val is not None.
+                Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
-
             task (str, optional): 'reg' for regression or 'class' for classification.
                 Defaults to 'class' if the target is 'bin_class' or 'capri_classes'.
                 Defaults to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
                 It must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+            batch_size (int, optional): defaults to 32.
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
@@ -70,11 +72,21 @@ class Trainer():
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
+        if (val_size is not None) and (dataset_val is not None):
+            raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
+
         if pretrained_model is None:
-            self.target = dataset_train.target # already defined in HDF5DatSet object
+
+            if dataset_train is None:
+                raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
+            
+            if Net is None:
+                raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
+
+            self.target = dataset_train.target  # already defined in HDF5DatSet object
             self.optimizer = None
             self.batch_size = batch_size
-            self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
+            self.val_size = val_size            # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
             self.task = task
 
@@ -112,10 +124,18 @@ class Trainer():
 
         else:
             self._load_params(pretrained_model)
+
+            if dataset_train is not None:
+                warnings.warn("Pretrained model loaded. dataset_train will be ignored.")
+            if dataset_val is not None:
+                warnings.warn("Pretrained model loaded. dataset_val will be ignored.")
+            if Net is None:
+                raise ValueError("No neural network class found. Please add it for \
+                    completing the loading of the pretrained model.")
             if dataset_test is not None:
                 self._load_pretrained_model(dataset_test, Net)
             else:
-                raise ValueError("A HDF5DataSet object needs to be passed as a test set for evaluating the pre-trained model.")
+                raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
 
     def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
 
@@ -151,10 +171,11 @@ class Trainer():
             dataset_test: HDF5DataSet object to be tested with the model
             Net (function): neural network
         """
-        self.test_loader = DataLoader(dataset_test)
 
         if self.cluster_nodes is not None: 
             _PreCluster(dataset_test, method=self.cluster_nodes)
+
+        self.test_loader = DataLoader(dataset_test)
 
         print("Test set loaded")
         
@@ -204,10 +225,13 @@ class Trainer():
         )
         print("Training set loaded")
 
-        self.valid_loader = DataLoader(
-            dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
-        )
-        print("Validation set loaded")
+        if dataset_val is not None:
+            self.valid_loader = DataLoader(
+                dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
+            )
+            print("Validation set loaded")
+        else:
+            self.valid_loader = None
 
         # independent validation dataset
         if dataset_test is not None:
@@ -217,13 +241,12 @@ class Trainer():
                 print("Loading clusters for the evaluation set.")
                 _PreCluster(dataset_test, method=self.cluster_nodes)
 
-            self.valid_loader = DataLoader(
-                dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
-            )
+            self.test_loader = DataLoader(dataset_test)
             print("Independent validation set loaded !")
 
         else:
             print("No independent validation set loaded")
+            self.test_loader = None
 
         self._put_model_to_device(dataset_train, Net)
 
@@ -328,7 +351,8 @@ class Trainer():
 
         Args:
             nepoch (int, optional): number of epochs. Defaults to 1.
-            validate (bool, optional): perform validation. Defaults to False.
+            validate (bool, optional): perform validation. If True, there must be
+                a validation set. Defaults to False.
             save_model (last, best, optional): save the model. Defaults to 'last'
             hdf5 (str, optional): hdf5 output file
         """
@@ -361,6 +385,9 @@ class Trainer():
                 # Validate the model
                 if validate:
 
+                    if self.valid_loader is None:
+                        raise ValueError("No validation dataset provided.")
+
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
 
                     valid_losses.append(loss_)
@@ -392,29 +419,21 @@ class Trainer():
         Tests the model
 
         Args:
-            dataset_test ([type], optional): HDF5DataSet object for testing
-            hdf5 (str, optional): output hdf5 file. Defaults to 'test_data.hdf5'.
+            dataset_test (HDF5Dataset object, required): dataset for testing the model
         """
 
         with self._metrics_exporters:
-
             # Loads the test dataset if provided
             if dataset_test is not None:
 
-                _PreCluster(dataset_test, method='mcl')
+                if self.cluster_nodes in ('mcl', 'louvain'):
+                    _PreCluster(dataset_test, method=self.cluster_nodes)
 
                 self.test_loader = DataLoader(dataset_test)
 
-            else:
-                if self._load_pretrained_model is None:
-                    raise ValueError(
-                        "You need to upload a test dataset \n\t"
-                        "\n\t"
-                        ">> model.test(test_dataset)\n\t"
-                        "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t"
-                        ">> model = Trainer(dataset_test, gnn, pretrained_model = model_saved, target=None)\n\t"
-                        ">> model.test()\n\t")
-
+            elif (dataset_test is None) and (self.test_loader is None):
+                raise ValueError("No test dataset provided.")
+                
             # Run test
             self._eval(self.test_loader, 0, "testing")
 

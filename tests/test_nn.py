@@ -22,10 +22,10 @@ _log = logging.getLogger(__name__)
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
-    model_class,
     train_hdf5_path,
     val_hdf5_path,
     test_hdf5_path,
+    model_class,
     node_features,
     edge_features,
     task,
@@ -66,10 +66,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_test = None
 
     nn = Trainer(
-        model_class,
         dataset_train,
         dataset_val,
         dataset_test,
+        model_class,
         task=task,
         batch_size=64,
         metrics_exporters=metrics_exporters,
@@ -100,10 +100,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     nn.save_model("test.pth.tar")
 
     Trainer(
-        model_class,
         dataset_train,
         dataset_val,
         dataset_test,
+        model_class,
         pretrained_model="test.pth.tar")
 
 class TestTrainer(unittest.TestCase):
@@ -117,10 +117,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_sigmoid(self):
         _model_base_test(
+            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
             GINet,
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
             "reg",
@@ -131,11 +131,11 @@ class TestTrainer(unittest.TestCase):
         )
 
     def test_ginet(self):
-        _model_base_test(
-            GINet,            
+        _model_base_test(           
             "tests/hdf5/1ATN_ppi.hdf5",
             "tests/hdf5/1ATN_ppi.hdf5",
             "tests/hdf5/1ATN_ppi.hdf5",
+            GINet,
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
             "reg",
@@ -149,10 +149,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_class(self):
         _model_base_test(
+            "tests/hdf5/variants.hdf5",
+            "tests/hdf5/variants.hdf5",
+            "tests/hdf5/variants.hdf5",
             GINet,
-            "tests/hdf5/variants.hdf5",
-            "tests/hdf5/variants.hdf5",
-            "tests/hdf5/variants.hdf5",
             ["polarity", "ic", "pssm"],
             ["dist"],
             "class",
@@ -166,10 +166,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
             FoutNet,
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
             "class",
@@ -181,10 +181,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
+            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/hdf5/1ATN_ppi.hdf5",
             sGAT,
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
             "reg",
@@ -196,10 +196,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
+            "tests/hdf5/test.hdf5",
             NaiveNetwork,
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
             ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             ["dist"],
             "reg",
@@ -212,10 +212,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
+                "tests/hdf5/1ATN_ppi.hdf5",
+                "tests/hdf5/1ATN_ppi.hdf5",
+                "tests/hdf5/1ATN_ppi.hdf5",
                 sGAT,
-                "tests/hdf5/1ATN_ppi.hdf5",
-                "tests/hdf5/1ATN_ppi.hdf5",
-                "tests/hdf5/1ATN_ppi.hdf5",
                 ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
                 ["dist"],
                 "reg",
@@ -228,10 +228,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_classification(self):
         with pytest.raises(ValueError):
             _model_base_test(
+                "tests/hdf5/variants.hdf5",
+                "tests/hdf5/variants.hdf5",
+                "tests/hdf5/variants.hdf5",
                 GINet,
-                "tests/hdf5/variants.hdf5",
-                "tests/hdf5/variants.hdf5",
-                "tests/hdf5/variants.hdf5",
                 ["size", "polarity", "sasa", "ic", "pssm"],
                 ["dist"],
                 "class",
@@ -243,10 +243,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_val(self):
         _model_base_test(
-            GINet,
             "tests/hdf5/test.hdf5",
             None,
             "tests/hdf5/test.hdf5",
+            GINet,
             ["polarity", "ic", "pssm"],
             ["dist"],
             "class",
@@ -259,10 +259,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_pretrained_no_test(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                GINet,
                 "tests/hdf5/test.hdf5",
                 None,
                 None,
+                GINet,
                 ["polarity", "ic", "pssm"],
                 ["dist"],
                 "class",
@@ -282,8 +282,8 @@ class TestTrainer(unittest.TestCase):
             root="./")
 
         nn = Trainer(
-            NaiveNetwork,
-            dataset,
+            dataset_train = dataset,
+            Net = NaiveNetwork,
             task = "class"
         )
 
@@ -302,9 +302,8 @@ class TestTrainer(unittest.TestCase):
         nn.save_model("test.pth.tar")
 
         nn_pretrained = Trainer(
-            NaiveNetwork,
-            dataset_train=dataset,
             dataset_test=dataset,
+            Net = NaiveNetwork,
             pretrained_model="test.pth.tar")
 
         assert isinstance(nn_pretrained.optimizer, optimizer)
@@ -319,8 +318,8 @@ class TestTrainer(unittest.TestCase):
             root="./")
 
         nn = Trainer(
-            NaiveNetwork,
-            dataset,
+            dataset_train = dataset,
+            Net = NaiveNetwork,
             task = "class"
         )
 

@@ -83,15 +83,20 @@ def _DivideDataSet(dataset, val_size=None):
         raise ValueError ("invalid val_size. \n\t" +
             f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
 
-    index = np.arange(full_size)
-    np.random.shuffle(index)
-    index_train, index_val = index[n_val:], index[:n_val]
+    if val_size == 0:
+        dataset_train = dataset
+        dataset_val = None
+    else:
+        index = np.arange(full_size)
+        np.random.shuffle(index)
 
-    dataset_train = copy.deepcopy(dataset)
-    dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
+        index_train, index_val = index[n_val:], index[:n_val]
 
-    dataset_val = copy.deepcopy(dataset)
-    dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
+        dataset_train = copy.deepcopy(dataset)
+        dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
+
+        dataset_val = copy.deepcopy(dataset)
+        dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
 
     return dataset_train, dataset_val
 

@@ -112,18 +112,18 @@ metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
 nn = Trainer(
-    GINet,
     dataset_train,
     dataset_val,
     dataset_test,
+    GINet,
     lr = 0.001,
-    batch_size = 64,
     task = "class",
+    batch_size = 64,
     metrics_exporters = metrics_exporters
 )
 
 nn.train(nepoch = 50, validate = True)
-nn.test(dataset_test = dataset_test)
+nn.test()
 nn.save_model(filename = "<output_model_path.pth.tar>")
 ```
 
@@ -167,12 +167,12 @@ class CustomNet(torch.nn.Module):
 
 
 nn = Trainer(
-    CustomNet,
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64
+    CustomNet,
     task = "class",
+    batch_size = 64,
     metrics_exporters = metrics_exporters
 )
 

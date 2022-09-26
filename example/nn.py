@@ -14,13 +14,13 @@ dataset = HDF5DataSet(
     clustering_method='mcl',
 )
 
-NN = Trainer(
+nn = Trainer(
     dataset,
     GINet,
+    val_size=0.25,
     task="reg",
     batch_size=64,
-    val_size=0.25
 )
 
-NN.train(nepoch=250, validate=False)
-NN.plot_scatter()
+nn.train(nepoch=250, validate=False)
+nn.plot_scatter()

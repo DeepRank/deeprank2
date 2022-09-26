@@ -93,10 +93,10 @@ def test_integration(): # pylint: disable=too-many-locals
         )
 
         nn = Trainer(
-            GINet,
             dataset_train,
             dataset_val,
             dataset_test,
+            GINet,
             task="class",
             batch_size=64,
             metrics_exporters=[OutputExporter(metrics_directory)],
@@ -107,7 +107,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
         nn.save_model("test.pth.tar")
 
-        Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
+        Trainer(dataset_train, dataset_val, dataset_test, GINet, pretrained_model="test.pth.tar")
 
         assert len(os.listdir(metrics_directory)) > 0
 
