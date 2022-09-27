@@ -21,7 +21,7 @@ _log = logging.getLogger(__name__)
 
 class Trainer():
 
-    def __init__(self, # pylint: disable=too-many-arguments
+    def __init__(self, # pylint: disable=too-many-arguments, too-many-branches
                  dataset_train = None,
                  dataset_val = None,
                  dataset_test = None,
@@ -216,7 +216,7 @@ class Trainer():
                     self._PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
                     print("No validation dataset given. Randomly splitting training set in training set and validation set.")
-                    dataset_train, dataset_val = self._DivideDataSet(
+                    dataset_train, dataset_val = _DivideDataSet(
                         dataset_train, val_size=self.val_size)
             else:
                 raise ValueError(
@@ -245,7 +245,9 @@ class Trainer():
                 print("Loading clusters for the evaluation set.")
                 self._PreCluster(dataset_test, method=self.cluster_nodes)
 
-            self.test_loader = DataLoader(dataset_test)
+            self.test_loader = DataLoader(
+                dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+            )
             print("Independent validation set loaded !")
 
         else:
@@ -433,7 +435,9 @@ class Trainer():
                 if self.cluster_nodes in ('mcl', 'louvain'):
                     self._PreCluster(dataset_test, method=self.cluster_nodes)
 
-                self.test_loader = DataLoader(dataset_test)
+                self.test_loader = DataLoader(
+                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                )
 
             elif (dataset_test is None) and (self.test_loader is None):
                 raise ValueError("No test dataset provided.")
@@ -726,48 +730,48 @@ class Trainer():
 
             f5.close()
 
-    def _DivideDataSet(self, dataset, val_size=None):
-        """Divides the dataset into a training set and an evaluation set
+def _DivideDataSet(dataset, val_size=None):
+    """Divides the dataset into a training set and an evaluation set
 
-        Args:
-            dataset (HDF5DataSet): input dataset to be split into training and validation data
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-                Defaults to 0.25.
+    Args:
+        dataset (HDF5DataSet): input dataset to be split into training and validation data
+        val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+            Defaults to 0.25.
 
-        Returns:
-            HDF5DataSet: [description]
-        """
+    Returns:
+        HDF5DataSet: [description]
+    """
 
-        if val_size is None:
-            val_size = 0.25
-        full_size = len(dataset)
+    if val_size is None:
+        val_size = 0.25
+    full_size = len(dataset)
 
-        # find number of datapoints to include in training dataset
-        if isinstance (val_size, float):
-            n_val = int(val_size * full_size)
-        elif isinstance (val_size, int):
-            n_val = val_size
-        else:
-            raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
-        
-        # raise exception if no training data or negative validation size
-        if n_val >= full_size or n_val < 0:
-            raise ValueError ("invalid val_size. \n\t" +
-                f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
+    # find number of datapoints to include in training dataset
+    if isinstance (val_size, float):
+        n_val = int(val_size * full_size)
+    elif isinstance (val_size, int):
+        n_val = val_size
+    else:
+        raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
+    
+    # raise exception if no training data or negative validation size
+    if n_val >= full_size or n_val < 0:
+        raise ValueError ("invalid val_size. \n\t" +
+            f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
 
-        if val_size == 0:
-            dataset_train = dataset
-            dataset_val = None
-        else:
-            index = np.arange(full_size)
-            np.random.shuffle(index)
+    if val_size == 0:
+        dataset_train = dataset
+        dataset_val = None
+    else:
+        index = np.arange(full_size)
+        np.random.shuffle(index)
 
-            index_train, index_val = index[n_val:], index[:n_val]
+        index_train, index_val = index[n_val:], index[:n_val]
 
-            dataset_train = copy.deepcopy(dataset)
-            dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
+        dataset_train = copy.deepcopy(dataset)
+        dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
 
-            dataset_val = copy.deepcopy(dataset)
-            dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
+        dataset_val = copy.deepcopy(dataset)
+        dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
 
-        return dataset_train, dataset_val
+    return dataset_train, dataset_val
