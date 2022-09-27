@@ -241,7 +241,7 @@ class TestTrainer(unittest.TestCase):
                 "mcl",
             )
 
-    def test_no_val(self):
+    def test_no_val(self): # check shapes of train and valid
         _model_base_test(
             "tests/hdf5/test.hdf5",
             None,
@@ -256,23 +256,77 @@ class TestTrainer(unittest.TestCase):
             "mcl",
         )
 
-    def test_incompatible_pretrained_no_test(self):
+# add one with val_size = 0
+# change nn to trainer everywhere
+
+    def test_incompatible_no_pretrained_no_train(self):
         with pytest.raises(ValueError):
-            _model_base_test(
-                "tests/hdf5/test.hdf5",
-                None,
-                None,
-                GINet,
-                ["polarity", "ic", "pssm"],
-                ["dist"],
-                "class",
-                "binary",
-                [TensorboardBinaryClassificationExporter(self.work_directory)],
-                False,
-                "mcl",
+
+            dataset = HDF5DataSet(
+                hdf5_path="tests/hdf5/test.hdf5",
+                target="binary",
+                root="./")
+
+            Trainer(
+                dataset_test = dataset,
+                Net = NaiveNetwork,
+                task = "class"
             )
 
-        assert len(os.listdir(self.work_directory)) > 0
+    def test_incompatible_no_pretrained_no_Net(self):
+        with pytest.raises(ValueError):
+            dataset = HDF5DataSet(
+                hdf5_path="tests/hdf5/test.hdf5",
+                target="binary",
+                root="./")
+
+            Trainer(
+                dataset_train = dataset,
+                task = "class"
+            )
+
+    def test_incompatible_pretrained_no_test(self):
+        with pytest.raises(ValueError):
+            dataset = HDF5DataSet(
+                hdf5_path="tests/hdf5/test.hdf5",
+                target="binary",
+                root="./")
+
+            trainer = Trainer(
+                dataset_train = dataset,
+                Net = GINet,
+                task = "class"
+            )
+
+            trainer.train(nepoch=10, validate=True)
+
+            trainer.save_model("test.pth.tar")
+
+            Trainer(
+                dataset_train = dataset,
+                Net = GINet,
+                pretrained_model="test.pth.tar")
+
+    def test_incompatible_pretrained_no_Net(self):
+        with pytest.raises(ValueError):
+            dataset = HDF5DataSet(
+                hdf5_path="tests/hdf5/test.hdf5",
+                target="binary",
+                root="./")
+
+            trainer = Trainer(
+                dataset_train = dataset,
+                Net = GINet,
+                task = "class"
+            )
+
+            trainer.train(nepoch=10, validate=True)
+
+            trainer.save_model("test.pth.tar")
+
+            Trainer(
+                dataset_test = dataset,
+                pretrained_model="test.pth.tar")
 
     def test_optim(self):
 

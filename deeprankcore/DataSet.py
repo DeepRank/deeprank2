@@ -163,7 +163,7 @@ class HDF5DataSet(Dataset):
         """
 
         fname, mol = self.index_complexes[index]
-        data = self._load_one_graph(fname, mol)
+        data = self.load_one_graph(fname, mol)
         return data
 
     def _check_hdf5_files(self):
