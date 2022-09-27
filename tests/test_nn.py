@@ -241,24 +241,6 @@ class TestTrainer(unittest.TestCase):
                 "mcl",
             )
 
-    def test_no_val(self): # check shapes of train and valid
-        _model_base_test(
-            "tests/hdf5/test.hdf5",
-            None,
-            "tests/hdf5/test.hdf5",
-            GINet,
-            ["polarity", "ic", "pssm"],
-            ["dist"],
-            "class",
-            "binary",
-            [TensorboardBinaryClassificationExporter(self.work_directory)],
-            False,
-            "mcl",
-        )
-
-# add one with val_size = 0
-# change nn to trainer everywhere
-
     def test_incompatible_no_pretrained_no_train(self):
         with pytest.raises(ValueError):
 
