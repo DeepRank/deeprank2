@@ -1,21 +1,17 @@
 import sys
 import os
-
 import logging
 import warnings
-
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
-import copy
 from ast import literal_eval
 from typing import Callable
 from typing import List
 from typing import Union
-
 
 _log = logging.getLogger(__name__)
 
@@ -157,12 +153,6 @@ class HDF5DataSet(Dataset):
         """
         return len(self.index_complexes)
 
-    def _download(self):
-        pass
-
-    def _process(self):
-        pass
-
     def get(self, index): # pylint: disable=arguments-renamed
         """Gets one item from its unique index.
 
@@ -230,7 +220,7 @@ class HDF5DataSet(Dataset):
                     print(f"\nPossible edge features: {self.available_edge_feature}\n")
                     sys.exit()
 
-    def _load_one_graph(self, fname, mol): # noqa
+    def load_one_graph(self, fname, mol): # noqa
         """Loads one graph
 
         Args:

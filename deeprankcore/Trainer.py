@@ -689,7 +689,7 @@ class Trainer():
         """
         for fname, mol in tqdm(dataset.index_complexes):
 
-            data = dataset._load_one_graph(fname, mol)
+            data = dataset.load_one_graph(fname, mol)
 
             if data is None:
                 f5 = h5py.File(fname, "a")
