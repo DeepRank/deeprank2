@@ -12,7 +12,6 @@ from tqdm import tqdm
 import h5py
 import copy
 from ast import literal_eval
-from deeprankcore.community_pooling import community_detection, community_pooling
 from typing import Callable
 from typing import List
 from typing import Union
@@ -99,53 +98,6 @@ def _DivideDataSet(dataset, val_size=None):
         dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
 
     return dataset_train, dataset_val
-
-
-def _PreCluster(dataset, method):
-    """Pre-clusters nodes of the graphs
-
-    Args:
-        dataset (HDF5DataSet object)
-        method (srt): 'mcl' (Markov Clustering) or 'louvain'
-    """
-    for fname, mol in tqdm(dataset.index_complexes):
-
-        data = dataset._load_one_graph(fname, mol)
-
-        if data is None:
-            f5 = h5py.File(fname, "a")
-            try:
-                print(f"deleting {mol}")
-                del f5[mol]
-            except BaseException:
-                print(f"{mol} not found")
-            f5.close()
-            continue
-
-        f5 = h5py.File(fname, "a")
-        grp = f5[mol]
-
-        clust_grp = grp.require_group("clustering")
-
-        if method.lower() in clust_grp:
-            print(f"Deleting previous data for mol {mol} method {method}")
-            del clust_grp[method.lower()]
-
-        method_grp = clust_grp.create_group(method.lower())
-
-        cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
-        )
-        method_grp.create_dataset("depth_0", data=cluster.cpu())
-
-        data = community_pooling(cluster, data)
-
-        cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
-        )
-        method_grp.create_dataset("depth_1", data=cluster.cpu())
-
-        f5.close()
 
 
 class HDF5DataSet(Dataset):

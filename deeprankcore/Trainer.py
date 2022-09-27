@@ -2,6 +2,8 @@ from time import time
 from typing import List, Optional
 import logging
 import warnings
+from tqdm import tqdm
+import h5py
 # torch import
 import torch
 from torch import nn
@@ -10,7 +12,8 @@ import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprankcore.DataSet import _DivideDataSet, _PreCluster
+from deeprankcore.community_pooling import community_detection, community_pooling
+from deeprankcore.DataSet import _DivideDataSet
 
 _log = logging.getLogger(__name__)
 
@@ -675,3 +678,49 @@ class Trainer():
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
+
+    def _PreCluster(self, dataset, method):
+        """Pre-clusters nodes of the graphs
+
+        Args:
+            dataset (HDF5DataSet object)
+            method (srt): 'mcl' (Markov Clustering) or 'louvain'
+        """
+        for fname, mol in tqdm(dataset.index_complexes):
+
+            data = dataset._load_one_graph(fname, mol)
+
+            if data is None:
+                f5 = h5py.File(fname, "a")
+                try:
+                    print(f"deleting {mol}")
+                    del f5[mol]
+                except BaseException:
+                    print(f"{mol} not found")
+                f5.close()
+                continue
+
+            f5 = h5py.File(fname, "a")
+            grp = f5[mol]
+
+            clust_grp = grp.require_group("clustering")
+
+            if method.lower() in clust_grp:
+                print(f"Deleting previous data for mol {mol} method {method}")
+                del clust_grp[method.lower()]
+
+            method_grp = clust_grp.create_group(method.lower())
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_0", data=cluster.cpu())
+
+            data = community_pooling(cluster, data)
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_1", data=cluster.cpu())
+
+            f5.close()
