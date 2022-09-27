@@ -53,53 +53,6 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-def _DivideDataSet(dataset, val_size=None):
-    """Divides the dataset into a training set and an evaluation set
-
-    Args:
-        dataset (HDF5DataSet): input dataset to be split into training and validation data
-        val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-            Defaults to 0.25.
-
-    Returns:
-        HDF5DataSet: [description]
-    """
-
-    if val_size is None:
-        val_size = 0.25
-    full_size = len(dataset)
-
-    # find number of datapoints to include in training dataset
-    if isinstance (val_size, float):
-        n_val = int(val_size * full_size)
-    elif isinstance (val_size, int):
-        n_val = val_size
-    else:
-        raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
-    
-    # raise exception if no training data or negative validation size
-    if n_val >= full_size or n_val < 0:
-        raise ValueError ("invalid val_size. \n\t" +
-            f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
-
-    if val_size == 0:
-        dataset_train = dataset
-        dataset_val = None
-    else:
-        index = np.arange(full_size)
-        np.random.shuffle(index)
-
-        index_train, index_val = index[n_val:], index[:n_val]
-
-        dataset_train = copy.deepcopy(dataset)
-        dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
-
-        dataset_val = copy.deepcopy(dataset)
-        dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
-
-    return dataset_train, dataset_val
-
-
 class HDF5DataSet(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
