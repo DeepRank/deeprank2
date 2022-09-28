@@ -19,7 +19,7 @@ from deeprankcore.models.query import (
     ProteinProteinInterfaceResidueQuery
 )
 from deeprankcore.domain.feature import (
-    FEATURENAME_POSITION,
+    FEATURE_NODE_POSITION,
     FEATURENAME_AMINOACID,
     FEATURENAME_VARIANTAMINOACID,
     FEATURENAME_POLARITY,
@@ -40,7 +40,7 @@ from deeprankcore.DataSet import HDF5DataSet
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
     assert len(g.nodes) > 0, "no nodes"
-    assert FEATURENAME_POSITION in g.nodes[0].features
+    assert FEATURE_NODE_POSITION in g.nodes[0].features
 
     assert len(g.edges) > 0, "no edges"
     assert FEATURENAME_EDGEDISTANCE in g.edges[0].features
@@ -120,7 +120,7 @@ def test_interface_graph_residue():
     _check_graph_makes_sense(
         g,
         [
-            FEATURENAME_POSITION,
+            FEATURE_NODE_POSITION,
             FEATURENAME_POLARITY,
             FEATURENAME_PSSM,
             FEATURENAME_INFORMATIONCONTENT,
@@ -148,7 +148,7 @@ def test_interface_graph_atomic():
     _check_graph_makes_sense(
         g,
         [
-            FEATURENAME_POSITION,
+            FEATURE_NODE_POSITION,
             FEATURENAME_PSSM,
             FEATURENAME_BURIEDSURFACEAREA,
             FEATURENAME_INFORMATIONCONTENT,
@@ -178,7 +178,7 @@ def test_variant_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            FEATURENAME_POSITION,
+            FEATURE_NODE_POSITION,
             FEATURENAME_SASA,
             FEATURENAME_AMINOACID,
             FEATURENAME_VARIANTAMINOACID,
@@ -218,7 +218,7 @@ def test_variant_graph_1A0Z():
     _check_graph_makes_sense(
         g,
         [
-            FEATURENAME_POSITION,
+            FEATURE_NODE_POSITION,
             FEATURENAME_AMINOACID,
             FEATURENAME_VARIANTAMINOACID,
             FEATURENAME_SASA,
@@ -256,7 +256,7 @@ def test_variant_graph_9API():
     _check_graph_makes_sense(
         g,
         [
-            FEATURENAME_POSITION,
+            FEATURE_NODE_POSITION,
             FEATURENAME_AMINOACID,
             FEATURENAME_VARIANTAMINOACID,
             FEATURENAME_SASA,
@@ -287,7 +287,7 @@ def test_variant_residue_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            FEATURENAME_POSITION,
+            FEATURE_NODE_POSITION,
             FEATURENAME_SASA,
             FEATURENAME_PSSM,
             FEATURENAME_AMINOACID,

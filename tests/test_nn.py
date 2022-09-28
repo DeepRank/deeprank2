@@ -19,6 +19,7 @@ from deeprankcore.models.metrics import (
     ScatterPlotExporter
 )
 from deeprankcore.domain.storage import HDF5KEY_GRAPH_INDICES
+from deeprankcore.domain.feature import FEATURE_NODE_POSITION
 
 
 _log = logging.getLogger(__name__)
@@ -90,7 +91,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         for name, data_tensor in (("x", data.x), ("y", data.y),
                                   (HDF5KEY_GRAPH_INDICES, data.edge_index),
                                   ("edge_attr", data.edge_attr),
-                                  ("pos", data.pos),
+                                  (FEATURE_NODE_POSITION, data.pos),
                                   ("cluster0",data.cluster0),
                                   ("cluster1", data.cluster1)):
 

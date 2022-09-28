@@ -10,6 +10,7 @@ from torch_geometric.nn.pool.pool import pool_edge, pool_batch
 from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.data import Batch, Data
 import matplotlib.pyplot as plt
+from deeprankcore.domain.feature import FEATURE_NODE_POSITION
 
 
 import numpy as np
@@ -191,7 +192,7 @@ def community_pooling(cluster, data):
     # determine what the batches has as attributes
     has_internal_edges = hasattr(data, "internal_edge_index")
     has_pos2D = hasattr(data, "pos2D")
-    has_pos = hasattr(data, "pos")
+    has_pos = hasattr(data, FEATURE_NODE_POSITION)
     has_cluster = hasattr(data, "cluster0")
 
     if has_internal_edges:

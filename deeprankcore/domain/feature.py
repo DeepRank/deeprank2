@@ -1,8 +1,8 @@
 # node features
 
 ## generic features
-FEATURE_NODE_MAINCHAIN = "main_chain" # FEATURENAME_CHAIN = "chain" : bool. --> I think unused. It is checked twice, but never assigned.
-FEATURE_NODE_COORDINATES = "coordinates" # FEATURENAME_POSITION = "pos": list[3xfloat]
+FEATURE_NODE_MAINCHAIN = "main_chain" # bool; previously: FEATURENAME_CHAIN
+FEATURE_NODE_POSITION = "coordinates" # list[3xfloat]; previously: FEATURENAME_POSITION
 
 ## residue core features
 FEATURE_NODE_RESIDUE = "residue" # FEATURENAME_AMINOACID = "type": AminoAcid object     
