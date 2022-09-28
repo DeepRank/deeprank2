@@ -376,6 +376,8 @@ class Trainer():
 
             self._eval(self.train_loader, 0, "training")
             if validate:
+                if self.valid_loader is None:
+                    raise ValueError("No validation dataset provided.")
                 self._eval(self.valid_loader, 0, "validation")
 
             # Loop over epochs
@@ -390,9 +392,6 @@ class Trainer():
 
                 # Validate the model
                 if validate:
-
-                    if self.valid_loader is None:
-                        raise ValueError("No validation dataset provided.")
 
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
 
