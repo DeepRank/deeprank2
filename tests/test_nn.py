@@ -18,6 +18,7 @@ from deeprankcore.models.metrics import (
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
+from deeprankcore.domain.storage import HDF5KEY_GRAPH_INDICES
 
 
 _log = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                  ("edge_index", data.edge_index),
+                                  (HDF5KEY_GRAPH_INDICES, data.edge_index),
                                   ("edge_attr", data.edge_attr),
                                   ("pos", data.pos),
                                   ("cluster0",data.cluster0),

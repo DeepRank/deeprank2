@@ -13,9 +13,8 @@ import h5py
 import copy
 from ast import literal_eval
 from deeprankcore.community_pooling import community_detection, community_pooling
-from typing import Callable
-from typing import List
-from typing import Union
+from deeprankcore.domain.storage import HDF5KEY_GRAPH_TARGETVALUES, HDF5KEY_GRAPH_INDICES
+from typing import Callable, List, Union
 
 
 _log = logging.getLogger(__name__)
@@ -344,8 +343,8 @@ class HDF5DataSet(Dataset):
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if "edge_index" in grp:
-                ind = grp['edge_index'][()]
+            if HDF5KEY_GRAPH_INDICES in grp:
+                ind = grp[HDF5KEY_GRAPH_INDICES][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
@@ -381,11 +380,10 @@ class HDF5DataSet(Dataset):
             if self.target is None:
                 y = None
             else:
-                if "score" in grp and self.target in grp["score"]:
+                if HDF5KEY_GRAPH_TARGETVALUES in grp and self.target in grp[HDF5KEY_GRAPH_TARGETVALUES]:
                     y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                 else:
-
-                    possible_targets = grp["score"].keys()
+                    possible_targets = grp[HDF5KEY_GRAPH_TARGETVALUES].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
                                      " Use the query class to add more target values to input data.")
 
@@ -485,11 +483,11 @@ class HDF5DataSet(Dataset):
         for cond_name, cond_vals in self.dict_filter.items():
 
             try:
-                molgrp["score"][cond_name][()]
+                molgrp[HDF5KEY_GRAPH_TARGETVALUES][cond_name][()]
             except KeyError:
                 print(f"   :Filter {cond_name} not found for mol {molgrp}")
                 print("   :Filter options are")
-                for k in molgrp["score"].keys():
+                for k in molgrp[HDF5KEY_GRAPH_TARGETVALUES].keys():
                     print("   : ", k)
 
             # if we have a string it's more complicated

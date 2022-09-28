@@ -187,15 +187,15 @@ with h5py.File("<hdf5_path.hdf5>", "r") as hdf5:
     ids = list(hdf5.keys())
 
     # List of all edge features
-    edge_features = list(hdf5[ids[0]]["edge_data"])
+    edge_features = list(hdf5[ids[0]]["edge_features"])
     # List of all node features
-    node_features = list(hdf5[ids[0]]["node_data"]) 
-    labels = list(hdf5[ids[0]]["score"]) # list of labels
+    node_features = list(hdf5[ids[0]]["node_features"]) 
+    labels = list(hdf5[ids[0]]["target_values"]) # list of labels
 
      # Coulomb feature for ids[0], numpy.ndarray
-    edge_feat_coulomb = hdf5[ids[0]]["edge_data"]["coulomb"][:]
+    edge_feat_coulomb = hdf5[ids[0]]["edge_features"]["coulomb"][:]
     # Polarity feature for ids[0], numpy.ndarray
-    node_feat_polarity = hdf5[ids[0]]["node_data"]["polarity"][:] 
+    node_feat_polarity = hdf5[ids[0]]["node_features"]["polarity"][:] 
 ```
 
 ### Dataset(s)

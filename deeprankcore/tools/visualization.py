@@ -19,10 +19,9 @@ from deeprankcore.domain.feature import (
     EDGETYPE_INTERFACE
 )
 from deeprankcore.domain.storage import (
-    HDF5KEY_GRAPH_NODENAMES,
     HDF5KEY_GRAPH_NODEFEATURES,
-    HDF5KEY_GRAPH_EDGENAMES,
-    HDF5KEY_GRAPH_EDGEINDICES,
+    HDF5KEY_GRAPH_NAMES,
+    HDF5KEY_GRAPH_INDICES,
     HDF5KEY_GRAPH_EDGEFEATURES
 )
 
@@ -55,7 +54,7 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
 
     # read nodes
     node_names = [
-        _get_node_key(key) for key in graph_group[HDF5KEY_GRAPH_NODENAMES][()]
+        _get_node_key(key) for key in graph_group[HDF5KEY_GRAPH_NAMES][()]
     ]
     node_features_group = graph_group[HDF5KEY_GRAPH_NODEFEATURES]
     node_features = {}
@@ -71,8 +70,8 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
             ][node_index]
 
     # read edges
-    edge_names = graph_group[HDF5KEY_GRAPH_EDGENAMES][()]
-    edge_node_indices = graph_group[HDF5KEY_GRAPH_EDGEINDICES][()]
+    edge_names = graph_group[HDF5KEY_GRAPH_NAMES][()]
+    edge_node_indices = graph_group[HDF5KEY_GRAPH_INDICES][()]
     edge_features_group = graph_group[HDF5KEY_GRAPH_EDGEFEATURES]
     edge_features = {}
     edge_feature_names = list(edge_features_group.keys())

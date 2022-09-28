@@ -10,7 +10,7 @@ from deeprankcore.models.contact import ResidueContact
 from deeprankcore.tools.pdb import get_structure
 from deeprankcore.domain.storage import (
     HDF5KEY_GRAPH_NODEFEATURES,
-    HDF5KEY_GRAPH_EDGEINDICES,
+    HDF5KEY_GRAPH_INDICES,
     HDF5KEY_GRAPH_EDGEFEATURES,
     HDF5KEY_GRID_MAPPEDFEATURES,
     HDF5KEY_GRID_MAPPEDFEATURESVALUE
@@ -78,8 +78,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             assert node_feature_name in node_features_group
             assert len(numpy.nonzero(node_features_group[node_feature_name][()])) > 0
 
-            assert HDF5KEY_GRAPH_EDGEINDICES in entry_group
-            assert len(numpy.nonzero(entry_group[HDF5KEY_GRAPH_EDGEINDICES][()])) > 0
+            assert HDF5KEY_GRAPH_INDICES in entry_group
+            assert len(numpy.nonzero(entry_group[HDF5KEY_GRAPH_INDICES][()])) > 0
 
             assert HDF5KEY_GRAPH_EDGEFEATURES in entry_group
             edge_features_group = entry_group[HDF5KEY_GRAPH_EDGEFEATURES]

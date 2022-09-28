@@ -10,7 +10,7 @@ import h5py
 import itertools
 from scipy.signal import bspline
 from deeprankcore.domain.storage import (
-    HDF5KEY_GRID_POINTS,
+    HDF5KEY_GRID_GRIDPOINTS,
     HDF5KEY_GRID_X,
     HDF5KEY_GRID_Y,
     HDF5KEY_GRID_Z,
@@ -262,7 +262,7 @@ class Grid:
             grid_group = hdf5_file.require_group(self.id)
 
             # store grid points
-            points_group = grid_group.create_group(HDF5KEY_GRID_POINTS)
+            points_group = grid_group.create_group(HDF5KEY_GRID_GRIDPOINTS)
             points_group.create_dataset(HDF5KEY_GRID_X, data=self.xs)
             points_group.create_dataset(HDF5KEY_GRID_Y, data=self.ys)
             points_group.create_dataset(HDF5KEY_GRID_Z, data=self.zs)
