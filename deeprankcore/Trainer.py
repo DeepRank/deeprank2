@@ -303,6 +303,9 @@ class Trainer():
         # classification mode
         elif self.task == "class":
 
+            self.classes_to_idx = {
+                i: idx for idx, i in enumerate(self.classes)
+            }
             self.output_shape = len(self.classes)
 
             self.model = Net(
@@ -598,12 +601,8 @@ class Trainer():
         if (self.task == 'class') and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
-            classes_to_idx = {
-                i: idx for idx, i in enumerate(self.classes)
-            }
-
             target = torch.tensor(
-                [classes_to_idx[int(x)] for x in target]
+                [self.classes_to_idx[int(x)] for x in target]
             ).to(self.device)
 
         elif self.task == 'reg':
