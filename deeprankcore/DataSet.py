@@ -17,6 +17,8 @@ from deeprankcore.domain.storage import (HDF5KEY_GRAPH_TARGETVALUES,
                                         HDF5KEY_GRAPH_INDICES, 
                                         HDF5KEY_GRAPH_NODEFEATURES, 
                                         HDF5KEY_GRAPH_EDGEFEATURES)
+from deeprankcore.domain.feature import (FEATURE_NODE_POSITION,
+                                        )
 from typing import Callable, List, Union
 
 
@@ -384,20 +386,20 @@ class HDF5DataSet(Dataset):
                 y = None
             else:
                 if HDF5KEY_GRAPH_TARGETVALUES in grp and self.target in grp[HDF5KEY_GRAPH_TARGETVALUES]:
-                    y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
+                    y = torch.tensor([grp[f"{HDF5KEY_GRAPH_TARGETVALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
                 else:
                     possible_targets = grp[HDF5KEY_GRAPH_TARGETVALUES].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
                                      " Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{HDF5KEY_GRAPH_NODEFEATURES}/{FEATURE_NODE_POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
             cluster1 = None
             if self.clustering_method is not None:
-                if 'clustering' in grp.keys():
+                if "clustering" in grp.keys():
                     if self.clustering_method in grp["clustering"].keys():
                         if (
                             "depth_0" in grp[f"clustering/{self.clustering_method}"].keys() and
