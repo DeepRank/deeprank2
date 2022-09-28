@@ -62,7 +62,7 @@ def add_target(graph_path, target_name, target_list, sep=" "):
                     if HDF5KEY_GRAPH_TARGETVALUES not in model_gp:
                         model_gp.create_group(HDF5KEY_GRAPH_TARGETVALUES)
 
-                    group = f5[f"{model}/score/"]
+                    group = f5[f"{model}/{HDF5KEY_GRAPH_TARGETVALUES}/"]
 
                     if target_name in group.keys():
                         # Delete the target if it already existed

@@ -32,7 +32,7 @@ from deeprankcore.domain.feature import (
     FEATURENAME_EDGEVANDERWAALS,
     FEATURENAME_EDGEDISTANCE
 )
-from deeprankcore.domain.storage import HDF5KEY_GRAPH_INDICES
+from deeprankcore.domain.storage import HDF5KEY_GRAPH_INDICES, HDF5KEY_GRAPH_NODEFEATURES, HDF5KEY_GRAPH_EDGEFEATURES
 from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
 from deeprankcore.DataSet import HDF5DataSet
 
@@ -62,13 +62,13 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             for feature_name in node_feature_names:
                 assert (
-                    entry_group[f"node_data/{feature_name}"][()].size > 0
+                    entry_group[f"{HDF5KEY_GRAPH_NODEFEATURES}/{feature_name}"][()].size > 0
                 ), f"no {feature_name} feature"
 
                 assert (
                     len(
                         numpy.nonzero(
-                            entry_group[f"node_data/{feature_name}"][()]
+                            entry_group[f"{HDF5KEY_GRAPH_NODEFEATURES}/{feature_name}"][()]
                         )
                     )
                     > 0
@@ -80,7 +80,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             for feature_name in edge_feature_names:
                 assert (
-                    entry_group[f"edge_data/{feature_name}"][()].shape[0]
+                    entry_group[f"{HDF5KEY_GRAPH_EDGEFEATURES}/{feature_name}"][()].shape[0]
                     == entry_group[HDF5KEY_GRAPH_INDICES].shape[0]
                 ), f"not enough edge {feature_name} feature values"
 

@@ -13,7 +13,10 @@ import h5py
 import copy
 from ast import literal_eval
 from deeprankcore.community_pooling import community_detection, community_pooling
-from deeprankcore.domain.storage import HDF5KEY_GRAPH_TARGETVALUES, HDF5KEY_GRAPH_INDICES
+from deeprankcore.domain.storage import (HDF5KEY_GRAPH_TARGETVALUES, 
+                                        HDF5KEY_GRAPH_INDICES, 
+                                        HDF5KEY_GRAPH_NODEFEATURES, 
+                                        HDF5KEY_GRAPH_EDGEFEATURES)
 from typing import Callable, List, Union
 
 
@@ -285,7 +288,7 @@ class HDF5DataSet(Dataset):
         """Checks if the required node features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[mol_key + "/node_data/"].keys())
+        self.available_node_feature = list(f[f"{mol_key}/{HDF5KEY_GRAPH_NODEFEATURES}/"].keys())
         f.close()
 
         if self.node_feature == "all":
@@ -302,7 +305,7 @@ class HDF5DataSet(Dataset):
         """Checks if the required edge features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[mol_key + "/edge_data/"].keys())
+        self.available_edge_feature = list(f[f"{mol_key}/{HDF5KEY_GRAPH_EDGEFEATURES}/"].keys())
         f.close()
 
         if self.edge_feature == "all":
@@ -334,7 +337,7 @@ class HDF5DataSet(Dataset):
             # node features
             node_data = ()
             for feat in self.node_feature:
-                vals = grp["node_data/" + feat][()]
+                vals = grp[f"{HDF5KEY_GRAPH_NODEFEATURES}/{feat}"][()]
                 if vals.ndim == 1:
                     vals = vals.reshape(-1, 1)
 
@@ -354,11 +357,11 @@ class HDF5DataSet(Dataset):
 
             # edge feature (same issue as above)
             if self.edge_feature is not None and len(self.edge_feature) > 0 and \
-               "edge_data" in grp:
+               HDF5KEY_GRAPH_EDGEFEATURES in grp:
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    vals = grp['edge_data/'+feat][()]
+                    vals = grp[f"{HDF5KEY_GRAPH_EDGEFEATURES}/+{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
                     edge_data += (vals,)
