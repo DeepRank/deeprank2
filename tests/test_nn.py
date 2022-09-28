@@ -343,7 +343,7 @@ class TestTrainer(unittest.TestCase):
         )
 
         assert len(trainer.train_loader) == len(dataset)
-        assert trainer.valid_loader == None
+        assert trainer.valid_loader is None
 
     def test_optim(self):
 
