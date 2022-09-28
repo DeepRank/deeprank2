@@ -111,7 +111,7 @@ from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
-nn = Trainer(
+trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
@@ -122,9 +122,9 @@ nn = Trainer(
     metrics_exporters = metrics_exporters
 )
 
-nn.train(nepoch = 50, validate = True)
-nn.test()
-nn.save_model(filename = "<output_model_path.pth.tar>")
+trainer.train(nepoch = 50, validate = True)
+trainer.test()
+trainer.save_model(filename = "<output_model_path.pth.tar>")
 ```
 
 
@@ -166,7 +166,7 @@ class CustomNet(torch.nn.Module):
         return F.log_softmax(self.fc2(x), dim=1)
 
 
-nn = Trainer(
+trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
@@ -176,8 +176,8 @@ nn = Trainer(
     metrics_exporters = metrics_exporters
 )
 
-nn.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
-nn.train(nepoch=50)
+trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
+trainer.train(nepoch=50)
 ```
 
 ## h5x support

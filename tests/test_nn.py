@@ -65,7 +65,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     else:
         dataset_test = None
 
-    nn = Trainer(
+    trainer = Trainer(
         dataset_train,
         dataset_val,
         dataset_test,
@@ -78,7 +78,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
 
     if torch.cuda.is_available():
         _log.debug("cuda is available, testing that the model is cuda")
-        for parameter in nn.model.parameters():
+        for parameter in trainer.model.parameters():
             assert parameter.is_cuda, f"{parameter} is not cuda"
 
         data = dataset_train.get(0)
@@ -95,9 +95,9 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     else:
         _log.debug("cuda is not available")
 
-    nn.train(nepoch=10, validate=True)
+    trainer.train(nepoch=10, validate=True)
 
-    nn.save_model("test.pth.tar")
+    trainer.save_model("test.pth.tar")
 
     Trainer(
         dataset_train,
@@ -352,7 +352,7 @@ class TestTrainer(unittest.TestCase):
             target="binary",
             root="./")
 
-        nn = Trainer(
+        trainer = Trainer(
             dataset_train = dataset,
             Net = NaiveNetwork,
             task = "class"
@@ -362,24 +362,24 @@ class TestTrainer(unittest.TestCase):
         lr = 0.1
         weight_decay = 1e-04
 
-        nn.configure_optimizers(optimizer, lr, weight_decay)
+        trainer.configure_optimizers(optimizer, lr, weight_decay)
 
-        assert isinstance(nn.optimizer, optimizer)
-        assert nn.lr == lr
-        assert nn.weight_decay == weight_decay
+        assert isinstance(trainer.optimizer, optimizer)
+        assert trainer.lr == lr
+        assert trainer.weight_decay == weight_decay
 
-        nn.train(nepoch=10, validate=True)
+        trainer.train(nepoch=10, validate=True)
 
-        nn.save_model("test.pth.tar")
+        trainer.save_model("test.pth.tar")
 
-        nn_pretrained = Trainer(
+        trainer_pretrained = Trainer(
             dataset_test=dataset,
             Net = NaiveNetwork,
             pretrained_model="test.pth.tar")
 
-        assert isinstance(nn_pretrained.optimizer, optimizer)
-        assert nn_pretrained.lr == lr
-        assert nn_pretrained.weight_decay == weight_decay
+        assert isinstance(trainer_pretrained.optimizer, optimizer)
+        assert trainer_pretrained.lr == lr
+        assert trainer_pretrained.weight_decay == weight_decay
 
     def test_default_optim(self):
 
@@ -388,15 +388,15 @@ class TestTrainer(unittest.TestCase):
             target="binary",
             root="./")
 
-        nn = Trainer(
+        trainer = Trainer(
             dataset_train = dataset,
             Net = NaiveNetwork,
             task = "class"
         )
 
-        assert isinstance(nn.optimizer, torch.optim.Adam)
-        assert nn.lr == 0.001
-        assert nn.weight_decay == 1e-05
+        assert isinstance(trainer.optimizer, torch.optim.Adam)
+        assert trainer.lr == 0.001
+        assert trainer.weight_decay == 1e-05
 
 
 if __name__ == "__main__":

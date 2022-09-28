@@ -14,7 +14,7 @@ dataset = HDF5DataSet(
     clustering_method='mcl',
 )
 
-nn = Trainer(
+trainer = Trainer(
     dataset,
     GINet,
     val_size=0.25,
@@ -22,5 +22,5 @@ nn = Trainer(
     batch_size=64,
 )
 
-nn.train(nepoch=250, validate=False)
-nn.plot_scatter()
+trainer.train(nepoch=250, validate=False)
+trainer.plot_scatter()

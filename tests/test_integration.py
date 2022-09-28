@@ -92,7 +92,7 @@ def test_integration(): # pylint: disable=too-many-locals
             clustering_method = "mcl",
         )
 
-        nn = Trainer(
+        trainer = Trainer(
             dataset_train,
             dataset_val,
             dataset_test,
@@ -103,9 +103,9 @@ def test_integration(): # pylint: disable=too-many-locals
             transform_sigmoid=True,
         )   
 
-        nn.train(nepoch=10, validate=True) 
+        trainer.train(nepoch=10, validate=True) 
 
-        nn.save_model("test.pth.tar")
+        trainer.save_model("test.pth.tar")
 
         Trainer(dataset_train, dataset_val, dataset_test, GINet, pretrained_model="test.pth.tar")
 
