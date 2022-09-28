@@ -310,6 +310,41 @@ class TestTrainer(unittest.TestCase):
                 dataset_test = dataset,
                 pretrained_model="test.pth.tar")
 
+    def test_no_valid_provided(self):
+
+        dataset = HDF5DataSet(
+            hdf5_path="tests/hdf5/test.hdf5",
+            target="binary",
+            root="./")
+
+        trainer = Trainer(
+            dataset_train = dataset,
+            Net = GINet,
+            task = "class",
+            batch_size = 1
+        )
+
+        assert len(trainer.train_loader) == int(0.75 * len(dataset))
+        assert len(trainer.valid_loader) == int(0.25 * len(dataset))
+
+    def test_no_valid_full_train(self):
+
+        dataset = HDF5DataSet(
+            hdf5_path="tests/hdf5/test.hdf5",
+            target="binary",
+            root="./")
+
+        trainer = Trainer(
+            dataset_train = dataset,
+            Net = GINet,
+            val_size = 0,
+            task = "class",
+            batch_size = 1
+        )
+
+        assert len(trainer.train_loader) == len(dataset)
+        assert trainer.valid_loader == None
+
     def test_optim(self):
 
         dataset = HDF5DataSet(
