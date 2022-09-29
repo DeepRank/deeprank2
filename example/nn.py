@@ -11,13 +11,13 @@ dataset = HDF5DataSet(
     node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
     edge_feature=["dist"],
     target="irmsd",
+    task="regress",
     clustering_method='mcl',
 )
 
 NN = NeuralNet(
     dataset,
     GINet,
-    task="reg",
     batch_size=64,
     val_size=0.25
 )

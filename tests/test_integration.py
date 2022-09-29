@@ -89,6 +89,7 @@ def test_integration(): # pylint: disable=too-many-locals
             node_feature = node_features,
             edge_feature = edge_features,
             target = "bin_class",
+            task="classif",
             clustering_method = "mcl",
         )
 
@@ -97,7 +98,6 @@ def test_integration(): # pylint: disable=too-many-locals
             dataset_train,
             dataset_val,
             dataset_test,
-            task="class",
             batch_size=64,
             metrics_exporters=[OutputExporter(metrics_directory)],
             transform_sigmoid=True,

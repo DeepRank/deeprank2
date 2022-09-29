@@ -9,18 +9,17 @@ from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-from DataSet import HDF5DataSet
 
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprankcore.DataSet import _DivideDataSet, PreCluster
+from deeprankcore.DataSet import _DivideDataSet, PreCluster, HDF5DataSet
 
 _log = logging.getLogger(__name__)
 
 
 class NeuralNet():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(self, # pylint: disable=too-many-arguments
                  Net,
                  dataset_train: HDF5DataSet,
                  dataset_val: Optional[HDF5DataSet] = None,

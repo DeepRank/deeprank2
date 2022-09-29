@@ -56,6 +56,7 @@ dataset = HDF5DataSet(
     node_feature = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
     edge_feature = ["dist"],
     target = "irmsd",
+    task = "regress",
     clustering_method = "mcl",
 )
 
@@ -63,7 +64,6 @@ dataset = HDF5DataSet(
 nn = NeuralNet(
     dataset,
     GINet,
-    task = "reg",
     batch_size = 64,
     val_size = 0.25,
     metrics_exporters = metrics_exporters
@@ -89,7 +89,7 @@ Then, the user-defined function can be passed to NeuralNet class as parameter:
 nn = NeuralNet(
     dataset,
     GINet,
-    task = "reg",
+    task = "regress",
     batch_size = 64,
     val_size = 0.25,
     train_valid_split = UDF_DivideDataSet,
