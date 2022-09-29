@@ -2,7 +2,6 @@ from time import time
 from typing import List, Optional, Union
 import os
 import logging
-
 # torch import
 import torch
 from torch import nn
@@ -42,6 +41,7 @@ class NeuralNet():
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
+            batch_size (int, optional): defaults to 32.
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
                 Defaults to 0.25 in _DivideDataSet function.
             
@@ -67,7 +67,7 @@ class NeuralNet():
 
         if pretrained_model is None:
             self.target = dataset_train.target
-            self.task = dataset_train.task
+            self.optimizer = None
             self.batch_size = batch_size
             self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet method
 
@@ -94,6 +94,32 @@ class NeuralNet():
             else:
                 raise ValueError("A HDF5DataSet object needs to be passed as a test set for evaluating the pre-trained model.")
 
+    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
+
+        """Configure optimizer and its main parameters.
+        Parameters
+        ----------
+        optimizer (optional) : object from torch.optim
+            PyTorch optimizer. Defaults to Adam.
+        lr (optional) : float
+            Learning rate. Defaults to 0.01.
+        weight_decay (optional) : float
+            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
+            the gradient may explode. Defaults to 1e-05.
+        """
+
+        self.lr = lr
+        self.weight_decay = weight_decay
+
+        if optimizer is None:
+            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+        else:
+            try:
+                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
+            except Exception as e:
+                print(e)
+                print("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+
     def load_pretrained_model(self, dataset_test, Net):
         """
         Loads pretrained model
@@ -113,10 +139,7 @@ class NeuralNet():
 
         self.set_loss()
 
-        # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
-
-        # load the model and the optimizer state if we have one
+        # load the model and the optimizer state
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
@@ -182,7 +205,7 @@ class NeuralNet():
         self.put_model_to_device(dataset_train, Net)
 
         # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        self.configure_optimizers()
 
         self.set_loss()
 
@@ -590,8 +613,9 @@ class NeuralNet():
             filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
         """
         state = {
-            "model": self.model.state_dict(),
-            "optimizer": self.optimizer.state_dict(),
+            "model_state": self.model.state_dict(),
+            "optimizer": self.optimizer,
+            "optimizer_state": self.optimizer.state_dict(),
             "node": self.node_feature,
             "edge": self.edge_feature,
             "target": self.target,
@@ -639,6 +663,6 @@ class NeuralNet():
         self.shuffle = state["shuffle"]
         self.cluster_nodes = state["cluster_nodes"]
         self.transform_sigmoid = state["transform_sigmoid"]
-
-        self.opt_loaded_state_dict = state["optimizer"]
-        self.model_load_state_dict = state["model"]
+        self.optimizer = state["optimizer"]
+        self.opt_loaded_state_dict = state["optimizer_state"]
+        self.model_load_state_dict = state["model_state"]
