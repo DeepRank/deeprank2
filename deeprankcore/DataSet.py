@@ -185,7 +185,7 @@ class HDF5DataSet(Dataset):
                 Defaults to None, meaning no training can be performed, only testing/predicting
             task (str, optional): 'regress' for regression or 'classif' for classification.
                 Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin', 'capri_class' or 'DockQ']
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes' (overrides setting).
+                Automatically set to 'classif' if the target is 'binary', 'bin_class' or 'capri_classes' (overrides setting).
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ' (will override setting).
 
 
@@ -221,12 +221,12 @@ class HDF5DataSet(Dataset):
         self.task = task
         if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
             self.task = "regress"
-        elif self.target in ["bin_class", "capri_classes"]:
+        elif self.target in ["binary", "bin_class", "capri_classes"]:
             self.task = "classif"
         
-        if self.task not in ['classif','regress']:
+        if self.task not in ['classif','regress'] and self.target is not None:
             raise ValueError(
-                "User target detected -> The task argument must be 'classif' or 'regress'. \n\t"
+                f"User target detected: {self.target}-> The task argument must be 'classif' or 'regress'. \n\t"
                 "Example: \n\t"
                 ""
                 "model = NeuralNet(dataset, GINet,"
