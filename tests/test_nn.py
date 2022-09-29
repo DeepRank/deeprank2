@@ -281,12 +281,12 @@ class TestNeuralNet(unittest.TestCase):
         dataset = HDF5DataSet(
             hdf5_path="tests/hdf5/test.hdf5",
             target="binary",
+            task = "classif",
             root="./")
 
         nn = NeuralNet(
             NaiveNetwork,
             dataset,
-            task = "class"
         )
 
         optimizer = torch.optim.Adamax
@@ -318,12 +318,12 @@ class TestNeuralNet(unittest.TestCase):
         dataset = HDF5DataSet(
             hdf5_path="tests/hdf5/test.hdf5",
             target="binary",
+            task = "classif",
             root="./")
 
         nn = NeuralNet(
             NaiveNetwork,
             dataset,
-            task = "class"
         )
 
         assert isinstance(nn.optimizer, torch.optim.Adam)
