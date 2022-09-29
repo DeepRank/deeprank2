@@ -69,7 +69,7 @@ class NeuralNet():
             self.target = dataset_train.target
             self.task = dataset_train.task
             self.batch_size = batch_size
-            self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
+            self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet method
 
             self.class_weights = class_weights
             if classes is None:
