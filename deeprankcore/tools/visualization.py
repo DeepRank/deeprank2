@@ -162,7 +162,7 @@ def plotly_2d( # noqa
     node_connect = {}
     for edge in graph.edges:
 
-        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]]["type"])
+        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]][FEATURENAME_EDGETYPE])
         if edge_type == EDGETYPE_INTERNAL:
             trace = go.Scatter(
                 x=[],

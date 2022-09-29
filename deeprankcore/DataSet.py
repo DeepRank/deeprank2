@@ -190,7 +190,7 @@ class HDF5DataSet(Dataset):
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
-            or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
+            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
             The complete list can be found in deeprankcore/domain/features.py
 
             edge_feature (list, optional): consider all pre-computed edge features ("all")
@@ -363,7 +363,7 @@ class HDF5DataSet(Dataset):
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    vals = grp[f"{HDF5KEY_GRAPH_EDGEFEATURES}/+{feat}"][()]
+                    vals = grp[f"{HDF5KEY_GRAPH_EDGEFEATURES}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
                     edge_data += (vals,)

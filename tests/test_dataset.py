@@ -2,6 +2,14 @@ import unittest
 from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys, _DivideDataSet
 from torch_geometric.data.data import Data
 import h5py
+from deeprankcore.domain.feature import(
+    FEATURE_NODE_POLARITY,
+    FEATURE_NODE_RESTYPE,
+    FEATURE_NODE_BURIEDSURFACEAREA,
+    FEATURE_NODE_HALFSPHEREEXPOSURE,
+    FEATURE_NODE_INFORMATIONCONTENT,
+    FEATURE_NODE_PSSM
+)
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
@@ -10,7 +18,7 @@ class TestDataSet(unittest.TestCase):
     def test_dataset(self):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            node_feature=["res_type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
             subset=None,
@@ -19,7 +27,7 @@ class TestDataSet(unittest.TestCase):
     def test_dataset_filter(self):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            node_feature=["res_type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
             edge_feature=["dist"],
             target="irmsd",
             subset=None,

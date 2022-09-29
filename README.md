@@ -217,7 +217,7 @@ Now the HDF5DataSet objects can be defined:
 ```python
 from deeprankcore.DataSet import HDF5DataSet
 
-node_features = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"]
+node_features = ["res_type", "polarity", "bsa", "depth", "hse", "ic", "pssm"]
 edge_features = ["dist"]
 
 # Creating HDF5DataSet objects
