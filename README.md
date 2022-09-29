@@ -249,9 +249,7 @@ nn = NeuralNet(
     dataset_train,
     dataset_val,
     dataset_test,
-    lr = 0.001,
     batch_size = 64,
-    task = "classif",
     metrics_exporters = metrics_exporters
 )
 
@@ -300,7 +298,6 @@ nn = NeuralNet(
     dataset_val,
     dataset_test,
     batch_size = 64
-    task = "classif",
     metrics_exporters = metrics_exporters
 )
 

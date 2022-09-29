@@ -25,8 +25,6 @@ class NeuralNet():
                  dataset_val: Optional[HDF5DataSet] = None,
                  dataset_test: Optional[HDF5DataSet] = None,
                  val_size: Optional[Union[float, int]] = None,
-                 lr: float = 0.01,
-                 weight_decay: int = 1e-05,
                  batch_size: int = 32,
                  class_weights: Optional[Union[list,bool]] = None,
                  classes: Optional[list] = None,
@@ -47,10 +45,6 @@ class NeuralNet():
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
                 Defaults to 0.25 in _DivideDataSet function.
             
-            lr (float, optional): learning rate. Defaults to 0.01.
-            weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
-                    fundamental for GNNs, otherwise, parameters can become too big and
-                    the gradient may explode. Defaults to 1e-05.
             batch_size (int, optional): defaults to 32.
             
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
@@ -74,8 +68,6 @@ class NeuralNet():
         if pretrained_model is None:
             self.target = dataset_train.target
             self.task = dataset_train.task
-            self.lr = lr
-            self.weight_decay = weight_decay
             self.batch_size = batch_size
             self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
 
