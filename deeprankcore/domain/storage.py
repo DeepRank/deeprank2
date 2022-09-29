@@ -21,8 +21,9 @@ HDF5KEY_GRID_MAPPEDFEATURESVALUE = "mapped_features_value"
 # TO DO LIST:
 # - Search/replace outdated nomenclature inside strings: node_data, edge_data, score, edges, nodes, edge_index
 #   - is there a way to fuse strings with a given character in between????
-# - Update FEATURENAMEs
+# - Update FEATURENAMEs (done until res_type)
 #   - make sure to search for strings as well
+#   - move featurenames into dict instead of individual strings
 # - Fix clustering groups/names
 # - Move above stuff to deeprankcore.domain.feature instead?
 # - Is grid stuff relevant here (or is it a CNN thing)?
