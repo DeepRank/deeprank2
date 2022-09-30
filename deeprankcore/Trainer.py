@@ -262,7 +262,7 @@ class Trainer():
             target_shape = None
 
         # regression mode
-        if self.task == "reg":
+        if self.task == "regress":
 
             self.output_shape = 1
 
@@ -273,7 +273,7 @@ class Trainer():
                 self.device)
 
         # classification mode
-        elif self.task == "class":
+        elif self.task == "classif":
 
             self.classes_to_idx = {
                 i: idx for idx, i in enumerate(self.classes)
@@ -295,10 +295,10 @@ class Trainer():
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
-        if self.task == "reg":
+        if self.task == "regress":
             self.loss = MSELoss()
 
-        elif self.task == "class":
+        elif self.task == "classif":
 
             # assign weights to each class in case of unbalanced dataset
             self.weights = None
@@ -464,7 +464,7 @@ class Trainer():
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == 'class':
+            if self.task == "classif":
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -528,7 +528,7 @@ class Trainer():
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == 'class':
+            if self.task == "classif":
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -570,14 +570,14 @@ class Trainer():
     def _format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
 
-        if (self.task == 'class') and (target is not None):
+        if (self.task == "classif") and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
                 [self.classes_to_idx[int(x)] for x in target]
             ).to(self.device)
 
-        elif self.task == 'reg':
+        elif self.task == "regress":
             if self.transform_sigmoid is True:
 
                 # Sigmoid(x) = 1 / (1 + exp(-x))
