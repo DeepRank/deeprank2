@@ -238,21 +238,21 @@ dataset_test = HDF5DataSet(
 Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
 
 ```python
-from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
 metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
-nn = NeuralNet(
-    GINet,
+trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
+    GINet,
     lr = 0.001,
-    batch_size = 64,
     task = "class",
+    batch_size = 64,
     metrics_exporters = metrics_exporters
 )
 
@@ -263,16 +263,16 @@ Optimizer (`torch.optim.Adam` by default) and loss function can be defined by us
 ```python
 import torch
 
-nn.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
+trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
 
 ```
 
 Then the Trainer can be trained and tested, and the model can be saved:
 
 ```python
-nn.train(nepoch = 50, validate = True)
-nn.test(dataset_test = dataset_test)
-nn.save_model(filename = "<output_model_path.pth.tar>")
+trainer.train(nepoch = 50, validate = True)
+trainer.test()
+trainer.save_model(filename = "<output_model_path.pth.tar>")
 
 ```
 
@@ -313,17 +313,17 @@ class CustomNet(torch.nn.Module):
         x = F.dropout(x, training=self.training)
         return F.log_softmax(self.fc2(x), dim=1)
 
-nn = NeuralNet(
-    CustomNet,
+trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64
+    CustomNet,
     task = "class",
+    batch_size = 64,
     metrics_exporters = metrics_exporters
 )
 
-nn.train(nepoch=50)
+trainer.train(nepoch=50)
 
 ```
 

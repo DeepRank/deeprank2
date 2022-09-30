@@ -1,22 +1,17 @@
 import sys
 import os
-
 import logging
 import warnings
-
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
-import copy
 from ast import literal_eval
-from deeprankcore.community_pooling import community_detection, community_pooling
 from typing import Callable
 from typing import List
 from typing import Union
-
 
 _log = logging.getLogger(__name__)
 
@@ -52,95 +47,6 @@ def save_hdf5_keys(
                 f_src.copy(f_src[key],f_dest)
             else:
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
-
-
-def _DivideDataSet(dataset, val_size=None):
-    """Divides the dataset into a training set and an evaluation set
-
-    Args:
-        dataset (HDF5DataSet): input dataset to be split into training and validation data
-        val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-            Defaults to 0.25.
-
-    Returns:
-        HDF5DataSet: [description]
-    """
-
-    if val_size is None:
-        val_size = 0.25
-    full_size = len(dataset)
-
-    # find number of datapoints to include in training dataset
-    if isinstance (val_size, float):
-        n_val = int(val_size * full_size)
-    elif isinstance (val_size, int):
-        n_val = val_size
-    else:
-        raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
-    
-    # raise exception if no training data or negative validation size
-    if n_val >= full_size or n_val < 0:
-        raise ValueError ("invalid val_size. \n\t" +
-            f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
-
-    index = np.arange(full_size)
-    np.random.shuffle(index)
-    index_train, index_val = index[n_val:], index[:n_val]
-
-    dataset_train = copy.deepcopy(dataset)
-    dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
-
-    dataset_val = copy.deepcopy(dataset)
-    dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
-
-    return dataset_train, dataset_val
-
-
-def PreCluster(dataset, method):
-    """Pre-clusters nodes of the graphs
-
-    Args:
-        dataset (HDF5DataSet object)
-        method (srt): 'mcl' (Markov Clustering) or 'louvain'
-    """
-    for fname, mol in tqdm(dataset.index_complexes):
-
-        data = dataset.load_one_graph(fname, mol)
-
-        if data is None:
-            f5 = h5py.File(fname, "a")
-            try:
-                print(f"deleting {mol}")
-                del f5[mol]
-            except BaseException:
-                print(f"{mol} not found")
-            f5.close()
-            continue
-
-        f5 = h5py.File(fname, "a")
-        grp = f5[mol]
-
-        clust_grp = grp.require_group("clustering")
-
-        if method.lower() in clust_grp:
-            print(f"Deleting previous data for mol {mol} method {method}")
-            del clust_grp[method.lower()]
-
-        method_grp = clust_grp.create_group(method.lower())
-
-        cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
-        )
-        method_grp.create_dataset("depth_0", data=cluster.cpu())
-
-        data = community_pooling(cluster, data)
-
-        cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
-        )
-        method_grp.create_dataset("depth_1", data=cluster.cpu())
-
-        f5.close()
 
 
 class HDF5DataSet(Dataset):
@@ -179,7 +85,11 @@ class HDF5DataSet(Dataset):
             dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. It can also be a custom-defined
+            target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
+            here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
+            please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
+            Defaults to None.
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
@@ -222,16 +132,16 @@ class HDF5DataSet(Dataset):
         self.clustering_method = clustering_method
 
         # check if the files are ok
-        self.check_hdf5_files()
+        self._check_hdf5_files()
 
         # check the selection of features
-        self.check_node_feature()
-        self.check_edge_feature()
+        self._check_node_feature()
+        self._check_edge_feature()
 
         # create the indexing system
         # alows to associate each mol to an index
         # and get fname and mol name from the index
-        self.create_index_molecules()
+        self._create_index_molecules()
 
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -242,12 +152,6 @@ class HDF5DataSet(Dataset):
             int: number of complexes in the dataset
         """
         return len(self.index_complexes)
-
-    def _download(self):
-        pass
-
-    def _process(self):
-        pass
 
     def get(self, index): # pylint: disable=arguments-renamed
         """Gets one item from its unique index.
@@ -262,7 +166,7 @@ class HDF5DataSet(Dataset):
         data = self.load_one_graph(fname, mol)
         return data
 
-    def check_hdf5_files(self):
+    def _check_hdf5_files(self):
         """Checks if the data contained in the hdf5 file is valid."""
         print("\nChecking dataset Integrity...\n")
         remove_file = []
@@ -282,7 +186,7 @@ class HDF5DataSet(Dataset):
         for name in remove_file:
             self.hdf5_path.remove(name)
 
-    def check_node_feature(self):
+    def _check_node_feature(self):
         """Checks if the required node features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
@@ -299,7 +203,7 @@ class HDF5DataSet(Dataset):
                     print(f"\nPossible node features: {self.available_node_feature}\n")
                     sys.exit()
 
-    def check_edge_feature(self):
+    def _check_edge_feature(self):
         """Checks if the required edge features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
@@ -382,7 +286,12 @@ class HDF5DataSet(Dataset):
                 y = None
             else:
                 if "score" in grp and self.target in grp["score"]:
-                    y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
+                    try:
+                        y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
+                    except Exception as e:
+                        print(e)
+                        print('If your target variable contains categorical classes, \
+                        please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
 
                     possible_targets = grp["score"].keys()
@@ -431,7 +340,7 @@ class HDF5DataSet(Dataset):
 
         return data
 
-    def create_index_molecules(self):
+    def _create_index_molecules(self):
         """Creates the indexing of each molecule in the dataset.
 
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
@@ -460,13 +369,13 @@ class HDF5DataSet(Dataset):
                     mol_names = [i for i in self.subset if i in list(fh5.keys())]
 
                 for k in mol_names:
-                    if self.filter(fh5[k]):
+                    if self._filter(fh5[k]):
                         self.index_complexes += [(fdata, k)]
                 fh5.close()
             except Exception:
                 _log.exception(f"on {fdata}")
 
-    def filter(self, molgrp):
+    def _filter(self, molgrp):
         """Filters the molecule according to a dictionary.
 
         The filter is based on the attribute self.dict_filter
