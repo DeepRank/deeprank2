@@ -9,9 +9,7 @@ from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
-from typing import Callable
-from typing import List
-from typing import Union
+from typing import Callable, List, Union
 
 _log = logging.getLogger(__name__)
 
@@ -327,7 +325,6 @@ class HDF5DataSet(Dataset):
                         print('If your target variable contains categorical classes, \
                         please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
-
                     possible_targets = grp["score"].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
                                      " Use the query class to add more target values to input data.")
