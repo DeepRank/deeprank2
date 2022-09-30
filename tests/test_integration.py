@@ -97,7 +97,6 @@ def test_integration(): # pylint: disable=too-many-locals
             dataset_val,
             dataset_test,
             GINet,
-            task="class",
             batch_size=64,
             metrics_exporters=[OutputExporter(metrics_directory)],
             transform_sigmoid=True,
