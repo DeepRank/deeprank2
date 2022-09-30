@@ -219,17 +219,21 @@ edge_features = ["dist"]
 dataset_train = HDF5DataSet(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_feature = node_features,
-    edge_feature = edge_features
+    edge_feature = edge_features,
+    target = "bin"
 )
 dataset_val = HDF5DataSet(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_feature = node_features,
-    edge_feature = edge_features
+    edge_feature = edge_features,
+    target = "bin"
+
 )
 dataset_test = HDF5DataSet(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_feature = node_features,
-    edge_feature = edge_features
+    edge_feature = edge_features,
+    target = "bin"
 )
 ```
 
@@ -250,8 +254,6 @@ trainer = Trainer(
     dataset_val,
     dataset_test,
     GINet,
-    lr = 0.001,
-    task = "class",
     batch_size = 64,
     metrics_exporters = metrics_exporters
 )
@@ -318,7 +320,6 @@ trainer = Trainer(
     dataset_val,
     dataset_test,
     CustomNet,
-    task = "class",
     batch_size = 64,
     metrics_exporters = metrics_exporters
 )
