@@ -3,14 +3,17 @@ from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys
 from deeprankcore.Trainer import _DivideDataSet
 from torch_geometric.data.data import Data
 import h5py
-from deeprankcore.domain.feature import(
-    FEATURE_NODE_POLARITY,
+from deeprankcore.domain.feature import (
     FEATURE_NODE_RESTYPE,
+    FEATURE_NODE_POLARITY,
     FEATURE_NODE_BURIEDSURFACEAREA,
+    FEATURE_NODE_RESIDUEDEPTH,
     FEATURE_NODE_HALFSPHEREEXPOSURE,
     FEATURE_NODE_INFORMATIONCONTENT,
     FEATURE_NODE_PSSM
 )
+
+node_feats = [FEATURE_NODE_RESTYPE, FEATURE_NODE_POLARITY, FEATURE_NODE_BURIEDSURFACEAREA, FEATURE_NODE_HALFSPHEREEXPOSURE, FEATURE_NODE_INFORMATIONCONTENT, FEATURE_NODE_PSSM]
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
@@ -19,7 +22,7 @@ class TestDataSet(unittest.TestCase):
     def test_dataset(self):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_feature=["res_type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            node_feature=node_feats,
             edge_feature=["dist"],
             target="irmsd",
             subset=None,
@@ -28,7 +31,7 @@ class TestDataSet(unittest.TestCase):
     def test_dataset_filter(self):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_feature=["res_type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            node_feature=node_feats,
             edge_feature=["dist"],
             target="irmsd",
             subset=None,
@@ -43,7 +46,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset = HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            node_feature=node_feats,
             edge_feature=["dist"],
             target="irmsd",
             subset=None,
@@ -56,7 +59,7 @@ class TestDataSet(unittest.TestCase):
     def test_multi_file_dataset(self):
         dataset = HDF5DataSet(
             hdf5_path=["tests/hdf5/train.hdf5", "tests/hdf5/valid.hdf5"],
-            node_feature=["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
+            node_feature=node_feats,
             edge_feature=["dist"],
             target="binary"
         )

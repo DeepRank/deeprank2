@@ -22,7 +22,7 @@ from deeprankcore.domain.feature import (
     FEATURE_NODE_POSITION,
     FEATURENAME_AMINOACID,
     FEATURENAME_VARIANTAMINOACID,
-    FEATURENAME_POLARITY,
+    FEATURE_NODE_POLARITY,
     FEATURENAME_BURIEDSURFACEAREA,
     FEATURENAME_PSSM,
     FEATURENAME_INFORMATIONCONTENT,
@@ -121,7 +121,7 @@ def test_interface_graph_residue():
         g,
         [
             FEATURE_NODE_POSITION,
-            FEATURENAME_POLARITY,
+            FEATURE_NODE_POLARITY,
             FEATURENAME_PSSM,
             FEATURENAME_INFORMATIONCONTENT,
         ],
@@ -292,7 +292,7 @@ def test_variant_residue_graph_101M():
             FEATURENAME_PSSM,
             FEATURENAME_AMINOACID,
             FEATURENAME_VARIANTAMINOACID,
-            FEATURENAME_POLARITY,
+            FEATURE_NODE_POLARITY,
         ],
         [FEATURENAME_EDGEDISTANCE],
     )

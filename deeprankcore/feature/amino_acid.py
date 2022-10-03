@@ -5,7 +5,7 @@ from deeprankcore.models.graph import Graph
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.domain.feature import (FEATURENAME_AMINOACID, FEATURENAME_VARIANTAMINOACID,
-                                         FEATURENAME_SIZE, FEATURENAME_POLARITY,
+                                         FEATURENAME_SIZE, FEATURE_NODE_POLARITY,
                                          FEATURENAME_SIZEDIFFERENCE, FEATURENAME_POLARITYDIFFERENCE,
                                          FEATURENAME_HYDROGENBONDDONORS, FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
                                          FEATURENAME_HYDROGENBONDACCEPTORS, FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE)
@@ -26,7 +26,7 @@ def add_features( # pylint: disable=unused-argument
 
         node.features[FEATURENAME_AMINOACID] = residue.amino_acid.onehot
         node.features[FEATURENAME_SIZE] = residue.amino_acid.size
-        node.features[FEATURENAME_POLARITY] = residue.amino_acid.polarity.onehot
+        node.features[FEATURE_NODE_POLARITY] = residue.amino_acid.polarity.onehot
         node.features[FEATURENAME_HYDROGENBONDDONORS] = residue.amino_acid.count_hydrogen_bond_donors
         node.features[FEATURENAME_HYDROGENBONDACCEPTORS] = residue.amino_acid.count_hydrogen_bond_acceptors
 

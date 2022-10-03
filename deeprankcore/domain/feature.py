@@ -6,7 +6,7 @@ FEATURE_NODE_POSITION = "coordinates" # list[3xfloat]; previously: FEATURENAME_P
 
 ## residue core features
 FEATURE_NODE_RESTYPE = "res_type" # AminoAcid object; previously: FEATURENAME_AMINOACID
-FEATURE_NODE_CHARGE = "charge" # FEATURENAME_CHARGE = "charge" : float(<0) --> currently unused, any particular reason?
+FEATURE_NODE_RESCHARGE = "res_charge" # float(<0)
 FEATURE_NODE_POLARITY = "polarity" # FEATURENAME_POLARITY = "polarity" : Polarity object
 FEATURE_NODE_RESIDUESIZE = "residue_size" # FEATURENAME_SIZE = "size" : int --> called it residue size in case we will also have an atom size in the future
 FEATURE_NODE_HBONDDONORS = "hbond_donors" # FEATURENAME_HYDROGENBONDDONORS = "hb_donors" : int
