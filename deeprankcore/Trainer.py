@@ -21,7 +21,7 @@ _log = logging.getLogger(__name__)
 
 class Trainer():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-branches
+    def __init__(self, # pylint: disable=too-many-arguments
                  dataset_train = None,
                  dataset_val = None,
                  dataset_test = None,

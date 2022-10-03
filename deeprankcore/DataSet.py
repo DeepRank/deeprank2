@@ -126,17 +126,18 @@ class HDF5DataSet(Dataset):
 
         self.target = target
 
-        # I made it so it overrules the user setting in case the target is one of the 'known' types. 
+        # I made it so it overrules the user setting in case the target is one of the 'known' types.
         # Is this what we want, or do we prefer to raise an error or show a warning in case it does not match? 
-        self.task = task    
         if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
             self.task = "regress"
         elif self.target in ["bin", "binary", "bin_class", "capri_classes"]:
             self.task = "classif"
+        else:
+            self.task = task
         
         if self.task not in ['classif','regress'] and self.target is not None:
             raise ValueError(
-                f"User target detected: {self.target}-> The task argument must be 'classif' or 'regress'. \n\t"
+                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
                 "Example: \n\t"
                 ""
                 "model = NeuralNet(dataset, GINet,"

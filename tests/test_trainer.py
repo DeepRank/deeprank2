@@ -40,6 +40,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         root="./",
         node_feature=node_features,
         edge_feature=edge_features,
+        task = task,
         target=target,
         clustering_method=clustering_method)
 
@@ -49,6 +50,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             root="./",
             node_feature=node_features,
             edge_feature=edge_features,
+            task = task,
             target=target,
             clustering_method=clustering_method)
     else:
