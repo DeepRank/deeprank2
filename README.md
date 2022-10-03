@@ -38,6 +38,7 @@ Deeprank-Core documentation can be found here : https://deeprankcore.rtfd.io/.
   - [Installation](#installation)
     - [Dependencies](#dependencies)
     - [Deeprank-core Package](#deeprank-core-package)
+  - [Documentation](#documentation)
   - [Getting Started](#getting-started)
     - [Data generation](#data-generation)
     - [Data exploration](#data-exploration)
@@ -240,37 +241,55 @@ dataset_test = HDF5DataSet(
 
 ### Training
 
-Training can be performed using one of the already existing GNNs, for example GINet:
+Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
 
 ```python
-from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
 metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
-nn = NeuralNet(
-    GINet,
+trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
+    GINet,
     lr = 0.001,
-    batch_size = 64,
     task = "class",
+    batch_size = 64,
     metrics_exporters = metrics_exporters
 )
 
-nn.train(nepoch = 50, validate = True)
-nn.test(dataset_test = dataset_test)
-nn.save_model(filename = "<output_model_path.pth.tar>")
 ```
+
+Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
+
+```python
+import torch
+
+trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
+
+```
+
+Then the Trainer can be trained and tested, and the model can be saved:
+
+```python
+trainer.train(nepoch = 50, validate = True)
+trainer.test()
+trainer.save_model(filename = "<output_model_path.pth.tar>")
+
+```
+
 
 #### Custom GNN
 
-It is also possible to define new network architecture and to specify the loss and optimizer to be used during the training.
+It is also possible to define new network architectures:
 
 ```python
+import torch 
+
 def normalized_cut_2d(edge_index, pos):
     row, col = edge_index
     edge_attr = torch.norm(pos[row] - pos[col], p=2, dim=1)
@@ -300,15 +319,17 @@ class CustomNet(torch.nn.Module):
         x = F.dropout(x, training=self.training)
         return F.log_softmax(self.fc2(x), dim=1)
 
-nn = NeuralNet(
-    CustomNet,
+trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64
+    CustomNet,
     task = "class",
+    batch_size = 64,
     metrics_exporters = metrics_exporters
 )
+
+trainer.train(nepoch=50)
 
 ```
 

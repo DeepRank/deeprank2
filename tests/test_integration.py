@@ -7,7 +7,7 @@ from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa 
 from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
-from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter
 from deeprankcore.tools.score import get_all_scores
@@ -92,22 +92,22 @@ def test_integration(): # pylint: disable=too-many-locals
             clustering_method = "mcl",
         )
 
-        nn = NeuralNet(
-            GINet,
+        trainer = Trainer(
             dataset_train,
             dataset_val,
             dataset_test,
+            GINet,
             task="class",
             batch_size=64,
             metrics_exporters=[OutputExporter(metrics_directory)],
             transform_sigmoid=True,
         )   
 
-        nn.train(nepoch=10, validate=True) 
+        trainer.train(nepoch=10, validate=True) 
 
-        nn.save_model("test.pth.tar")
+        trainer.save_model("test.pth.tar")
 
-        NeuralNet(GINet, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
+        Trainer(dataset_train, dataset_val, dataset_test, GINet, pretrained_model="test.pth.tar")
 
         assert len(os.listdir(metrics_directory)) > 0
 

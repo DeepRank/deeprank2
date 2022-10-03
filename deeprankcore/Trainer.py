@@ -1,73 +1,73 @@
 from time import time
 from typing import List, Optional
-import os
 import logging
-
+import warnings
+from tqdm import tqdm
+import h5py
+import copy
+import numpy as np
 # torch import
 import torch
 from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
-from deeprankcore.DataSet import _DivideDataSet, PreCluster
+from deeprankcore.community_pooling import community_detection, community_pooling
 
 _log = logging.getLogger(__name__)
 
 
-class NeuralNet():
+class Trainer():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals
-                 Net,
-                 dataset_train,
+    def __init__(self, # pylint: disable=too-many-arguments, too-many-branches
+                 dataset_train = None,
                  dataset_val = None,
                  dataset_test = None,
-                 lr = 0.01,
-                 weight_decay = 1e-05,
-                 batch_size = 32,
+                 Net = None,
                  val_size = None,
                  class_weights = None,
                  task = None,
                  classes = None,
                  pretrained_model = None,
+                 batch_size = 32,
                  shuffle = True,
                  transform_sigmoid: Optional[bool] = False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None):
         """Class from which the network is trained, evaluated and tested
 
         Args:
-            Net (function, required): neural network function (ex. GINet, Foutnet etc.)
             dataset_train (HDF5DataSet object, required): training set used during training.
+                Can't be None if pretrained_model is also None. Defaults to None.
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
-            lr (float, optional): learning rate. Defaults to 0.01.
-            weight_decay (float, optional): weight decay (L2 penalty). Weight decay is 
-                    fundamental for GNNs, otherwise, parameters can become too big and
-                    the gradient may explode. Defaults to 1e-05.
-            batch_size (int, optional): defaults to 32.
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-                Defaults to 0.25 in _DivideDataSet function.
+            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
+                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
+                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
+                to use for validation.
+                - Should be set to 0 if no validation set is needed.
+                - Should be not set (None) if dataset_val is not None.
+                Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
-
-            task (str, optional): 'reg' for regression or 'class' for classification . Defaults to None.
+            task (str, optional): 'reg' for regression or 'class' for classification.
+                Defaults to 'class' if the target is 'bin_class' or 'capri_classes'.
+                Defaults to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
+                It must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+            batch_size (int, optional): defaults to 32.
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
-            This can speed up the optimization and puts the value between 0 and 1.
+                This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
 
-        Notes:
-          - 'task' will default to 'class' if the target is 'bin_class' or 'capri_classes'.
-          - 'task' will default to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
-          - 'task' must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
-          - 'target' must be set to a target value that was actually given to the Query class as input. See: deeprankcore.models.query
         """
 
         if metrics_exporters is not None:
@@ -76,19 +76,23 @@ class NeuralNet():
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
+        if (val_size is not None) and (dataset_val is not None):
+            raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
+
         if pretrained_model is None:
-            self.target = dataset_train.target # already defined in HDF5DatSet object
-            self.lr = lr
-            self.weight_decay = weight_decay
+
+            if dataset_train is None:
+                raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
+            
+            if Net is None:
+                raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
+
+            self.target = dataset_train.target  # already defined in HDF5DatSet object
+            self.optimizer = None
             self.batch_size = batch_size
-            self.val_size = val_size    # if None, will be set to 0.25 in _DivideDataSet function
+            self.val_size = val_size            # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
             self.task = task
-
-            if classes is None:
-                self.classes = [0, 1]
-            else:
-                self.classes = classes
 
             self.shuffle = shuffle
             self.transform_sigmoid = transform_sigmoid
@@ -108,22 +112,62 @@ class NeuralNet():
                         "User target detected -> The task argument is required ('class' or 'reg'). \n\t"
                         "Example: \n\t"
                         ""
-                        "model = NeuralNet(dataset, GINet,"
+                        "model = Trainer(dataset, GINet,"
                         "                  target='physiological_assembly',"
                         "                  task='class',"
                         "                  val_size=0.25)")
 
+            if (classes is None) and (self.task == 'class'):
+                self.classes = [0, 1]
+            elif self.task == 'class':
+                self.classes = classes
+            else:
+                self.classes = None
 
-            self.load_model(dataset_train, dataset_val, dataset_test, Net)
+            self._load_model(dataset_train, dataset_val, dataset_test, Net)
 
         else:
-            self.load_params(pretrained_model)
-            if dataset_test is not None:
-                self.load_pretrained_model(dataset_test, Net)
-            else:
-                raise ValueError("A HDF5DataSet object needs to be passed as a test set for evaluating the pre-trained model.")
+            self._load_params(pretrained_model)
 
-    def load_pretrained_model(self, dataset_test, Net):
+            if dataset_train is not None:
+                warnings.warn("Pretrained model loaded. dataset_train will be ignored.")
+            if dataset_val is not None:
+                warnings.warn("Pretrained model loaded. dataset_val will be ignored.")
+            if Net is None:
+                raise ValueError("No neural network class found. Please add it for \
+                    completing the loading of the pretrained model.")
+            if dataset_test is not None:
+                self._load_pretrained_model(dataset_test, Net)
+            else:
+                raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
+
+    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
+
+        """Configure optimizer and its main parameters.
+        Parameters
+        ----------
+        optimizer (optional) : object from torch.optim
+            PyTorch optimizer. Defaults to Adam.
+        lr (optional) : float
+            Learning rate. Defaults to 0.01.
+        weight_decay (optional) : float
+            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
+            the gradient may explode. Defaults to 1e-05.
+        """
+
+        self.lr = lr
+        self.weight_decay = weight_decay
+
+        if optimizer is None:
+            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+        else:
+            try:
+                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
+            except Exception as e:
+                print(e)
+                print("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+
+    def _load_pretrained_model(self, dataset_test, Net):
         """
         Loads pretrained model
 
@@ -131,25 +175,23 @@ class NeuralNet():
             dataset_test: HDF5DataSet object to be tested with the model
             Net (function): neural network
         """
-        self.test_loader = DataLoader(dataset_test)
 
         if self.cluster_nodes is not None: 
-            PreCluster(dataset_test, method=self.cluster_nodes)
+            self._PreCluster(dataset_test, method=self.cluster_nodes)
+
+        self.test_loader = DataLoader(dataset_test)
 
         print("Test set loaded")
         
-        self.put_model_to_device(dataset_test, Net)
+        self._put_model_to_device(dataset_test, Net)
 
         self.set_loss()
 
-        # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
-
-        # load the model and the optimizer state if we have one
+        # load the model and the optimizer state
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def load_model(self, dataset_train, dataset_val, dataset_test, Net):
+    def _load_model(self, dataset_train, dataset_val, dataset_test, Net):
         
         """
         Loads model
@@ -168,10 +210,10 @@ class NeuralNet():
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
                 print("Loading clusters")
-                PreCluster(dataset_train, method=self.cluster_nodes)
+                self._PreCluster(dataset_train, method=self.cluster_nodes)
 
                 if dataset_val is not None:
-                    PreCluster(dataset_val, method=self.cluster_nodes)
+                    self._PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
                     print("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     dataset_train, dataset_val = _DivideDataSet(
@@ -187,10 +229,13 @@ class NeuralNet():
         )
         print("Training set loaded")
 
-        self.valid_loader = DataLoader(
-            dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
-        )
-        print("Validation set loaded")
+        if dataset_val is not None:
+            self.valid_loader = DataLoader(
+                dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
+            )
+            print("Validation set loaded")
+        else:
+            self.valid_loader = None
 
         # independent validation dataset
         if dataset_test is not None:
@@ -198,24 +243,25 @@ class NeuralNet():
 
             if self.cluster_nodes in ('mcl', 'louvain'):
                 print("Loading clusters for the evaluation set.")
-                PreCluster(dataset_test, method=self.cluster_nodes)
+                self._PreCluster(dataset_test, method=self.cluster_nodes)
 
-            self.valid_loader = DataLoader(
+            self.test_loader = DataLoader(
                 dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
             )
             print("Independent validation set loaded !")
 
         else:
             print("No independent validation set loaded")
+            self.test_loader = None
 
-        self.put_model_to_device(dataset_train, Net)
+        self._put_model_to_device(dataset_train, Net)
 
         # optimizer
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        self.configure_optimizers()
 
         self.set_loss()
 
-    def put_model_to_device(self, dataset, Net):
+    def _put_model_to_device(self, dataset, Net):
         """
         Puts the model on the available device
 
@@ -258,9 +304,8 @@ class NeuralNet():
         elif self.task == "class":
 
             self.classes_to_idx = {
-                i: idx for idx, i in enumerate(
-                    self.classes)}
-            self.idx_to_classes = dict(enumerate(self.classes))
+                i: idx for idx, i in enumerate(self.classes)
+            }
             self.output_shape = len(self.classes)
 
             self.model = Net(
@@ -299,6 +344,7 @@ class NeuralNet():
                 self.weights = self.weights / self.weights.sum()
                 print(f"class weights: {self.weights}")
 
+            # Note that non-linear activation is automatically applied in CrossEntropyLoss
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
@@ -314,7 +360,8 @@ class NeuralNet():
 
         Args:
             nepoch (int, optional): number of epochs. Defaults to 1.
-            validate (bool, optional): perform validation. Defaults to False.
+            validate (bool, optional): perform validation. If True, there must be
+                a validation set. Defaults to False.
             save_model (last, best, optional): save the model. Defaults to 'last'
             hdf5 (str, optional): hdf5 output file
         """
@@ -330,15 +377,16 @@ class NeuralNet():
             # Number of epochs
             self.nepoch = nepoch
 
-            self.eval(self.train_loader, 0, "training")
+            self._eval(self.train_loader, 0, "training")
             if validate:
-                self.eval(self.valid_loader, 0, "validation")
+                if self.valid_loader is None:
+                    raise ValueError("No validation dataset provided.")
+                self._eval(self.valid_loader, 0, "validation")
 
             # Loop over epochs
-            self.data = {}
             for epoch in range(1, nepoch + 1):
 
-                # Train the model
+                # Sets the module in training mode
                 self.model.train()
 
                 loss_ = self._epoch(epoch, "training")
@@ -348,7 +396,7 @@ class NeuralNet():
                 # Validate the model
                 if validate:
 
-                    loss_ = self.eval(self.valid_loader, epoch, "validation")
+                    loss_ = self._eval(self.valid_loader, epoch, "validation")
 
                     valid_losses.append(loss_)
 
@@ -360,7 +408,7 @@ class NeuralNet():
                             self.save_model(model_path)
                 else:
                     # if no validation set, saves the best performing model on
-                    # the traing set
+                    # the training set
                     if save_model == 'best':
                         if min(train_losses) == loss_: # noqa
                             _log.warning(
@@ -379,34 +427,27 @@ class NeuralNet():
         Tests the model
 
         Args:
-            dataset_test ([type], optional): HDF5DataSet object for testing
-            hdf5 (str, optional): output hdf5 file. Defaults to 'test_data.hdf5'.
+            dataset_test (HDF5Dataset object, required): dataset for testing the model
         """
 
         with self._metrics_exporters:
-
             # Loads the test dataset if provided
             if dataset_test is not None:
 
-                PreCluster(dataset_test, method='mcl')
+                if self.cluster_nodes in ('mcl', 'louvain'):
+                    self._PreCluster(dataset_test, method=self.cluster_nodes)
 
-                self.test_loader = DataLoader(dataset_test)
+                self.test_loader = DataLoader(
+                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                )
 
-            else:
-                if self.load_pretrained_model is None:
-                    raise ValueError(
-                        "You need to upload a test dataset \n\t"
-                        "\n\t"
-                        ">> model.test(test_dataset)\n\t"
-                        "if a pretrained network is loaded, you can directly test the model on the loaded dataset :\n\t"
-                        ">> model = NeuralNet(dataset_test, gnn, pretrained_model = model_saved, target=None)\n\t"
-                        ">> model.test()\n\t")
-            self.data = {}
-
+            elif (dataset_test is None) and (self.test_loader is None):
+                raise ValueError("No test dataset provided.")
+                
             # Run test
-            self.eval(self.test_loader, 0, "testing")
+            self._eval(self.test_loader, 0, "testing")
 
-    def eval( # pylint: disable=too-many-locals
+    def _eval( # pylint: disable=too-many-locals
             self,
             loader: DataLoader,
             epoch_number: int,
@@ -422,6 +463,7 @@ class NeuralNet():
         Returns:
             running loss:
         """
+        # Sets the module in evaluation mode
         self.model.eval()
 
         loss_func = self.loss
@@ -438,7 +480,7 @@ class NeuralNet():
 
             data_batch = data_batch.to(self.device)
             pred = self.model(data_batch)
-            pred, data_batch.y = self.format_output(pred, data_batch.y)
+            pred, data_batch.y = self._format_output(pred, data_batch.y)
 
             # Check if a target value was provided (i.e. benchmarck scenario)
             if data_batch.y is not None:
@@ -448,7 +490,8 @@ class NeuralNet():
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
 
-            # get the outputs for export
+            # Get the outputs for export
+            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == 'class':
                 pred = F.softmax(pred.detach(), dim=1)
             else:
@@ -469,7 +512,7 @@ class NeuralNet():
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, targets)
 
-        self.log_epoch_data(pass_name, epoch_number, eval_loss, dt)
+        self._log_epoch_data(pass_name, epoch_number, eval_loss, dt)
 
         return eval_loss
 
@@ -498,7 +541,7 @@ class NeuralNet():
             data_batch = data_batch.to(self.device)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
-            pred, data_batch.y = self.format_output(pred, data_batch.y)
+            pred, data_batch.y = self._format_output(pred, data_batch.y)
 
             loss_ = self.loss(pred, data_batch.y)
             loss_.backward()
@@ -511,7 +554,8 @@ class NeuralNet():
 
             targets += data_batch.y.tolist()
 
-            # get the outputs for export
+            # Get the outputs for export
+            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == 'class':
                 pred = F.softmax(pred.detach(), dim=1)
             else:
@@ -531,28 +575,12 @@ class NeuralNet():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, targets)
-        self.log_epoch_data(pass_name, epoch_number, epoch_loss, dt)
+        self._log_epoch_data(pass_name, epoch_number, epoch_loss, dt)
 
         return epoch_loss
 
-    def compute_class_weights(self):
-
-        targets_all = []
-        for batch in self.train_loader:
-            targets_all.append(batch.y)
-
-        targets_all = torch.cat(targets_all).squeeze().tolist()
-        weights = torch.tensor(
-            [targets_all.count(i) for i in self.classes], dtype=torch.float32
-        )
-        print(f"class occurences: {weights}")
-        weights = 1.0 / weights
-        weights = weights / weights.sum()
-        print(f"class weights: {weights}")
-        return weights
-
     @staticmethod
-    def log_epoch_data(stage, epoch, loss, time):
+    def _log_epoch_data(stage, epoch, loss, time):
         """
         Prints the data of each epoch
 
@@ -567,49 +595,30 @@ class NeuralNet():
             'Epoch [%04d] : %s loss %e | time %1.2e sec.' % # pylint: disable=consider-using-f-string
             (epoch, stage, loss, time))
 
-    def format_output(self, pred, target=None):
+    def _format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
-        if self.task == "class":
-            # pred = F.softmax(pred, dim=1)
 
-            if target is not None:
-                target = torch.tensor([self.classes_to_idx[int(x)]
-                                       for x in target]).to(self.device)
+        if (self.task == 'class') and (target is not None):
+            # For categorical cross entropy, the target must be a one-dimensional tensor
+            # of class indices with type long and the output should have raw, unnormalized values
+            target = torch.tensor(
+                [self.classes_to_idx[int(x)] for x in target]
+            ).to(self.device)
 
-        elif self.transform_sigmoid is True:
+        elif self.task == 'reg':
+            if self.transform_sigmoid is True:
 
-            # Sigmoid(x) = 1 / (1 + exp(-x))
-            pred = torch.sigmoid(pred.reshape(-1))
+                # Sigmoid(x) = 1 / (1 + exp(-x))
+                pred = torch.sigmoid(pred.reshape(-1))
 
-        else:
-            pred = pred.reshape(-1)
+            else:
+                pred = pred.reshape(-1)
+
+        if target is not None:
+            target = target.to(self.device)
 
         return pred, target
 
-    @staticmethod
-    def update_name(hdf5, outdir):
-        """
-        Checks if the file already exists, if so, update the name
-
-        Args:
-            hdf5 (str): hdf5 file
-            outdir (str): output directory
-
-        Returns:
-            str: update hdf5 name
-        """
-        fname = os.path.join(outdir, hdf5)
-
-        count = 0
-        hdf5_name = hdf5.split(".")[0]
-
-        # If file exists, change its name with a number
-        while os.path.exists(fname):
-            count += 1
-            hdf5 = f"{hdf5_name}_{count:03d}.hdf5"
-            fname = os.path.join(outdir, hdf5)
-
-        return fname
 
     def save_model(self, filename='model.pth.tar'):
         """
@@ -619,8 +628,9 @@ class NeuralNet():
             filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
         """
         state = {
-            "model": self.model.state_dict(),
-            "optimizer": self.optimizer.state_dict(),
+            "model_state": self.model.state_dict(),
+            "optimizer": self.optimizer,
+            "optimizer_state": self.optimizer.state_dict(),
             "node": self.node_feature,
             "edge": self.edge_feature,
             "target": self.target,
@@ -639,7 +649,7 @@ class NeuralNet():
 
         torch.save(state, filename)
 
-    def load_params(self, filename):
+    def _load_params(self, filename):
         """
         Loads the parameters of a pretrained model
 
@@ -668,6 +678,98 @@ class NeuralNet():
         self.shuffle = state["shuffle"]
         self.cluster_nodes = state["cluster_nodes"]
         self.transform_sigmoid = state["transform_sigmoid"]
+        self.optimizer = state["optimizer"]
+        self.opt_loaded_state_dict = state["optimizer_state"]
+        self.model_load_state_dict = state["model_state"]
 
-        self.opt_loaded_state_dict = state["optimizer"]
-        self.model_load_state_dict = state["model"]
+    def _PreCluster(self, dataset, method):
+        """Pre-clusters nodes of the graphs
+
+        Args:
+            dataset (HDF5DataSet object)
+            method (srt): 'mcl' (Markov Clustering) or 'louvain'
+        """
+        for fname, mol in tqdm(dataset.index_complexes):
+
+            data = dataset.load_one_graph(fname, mol)
+
+            if data is None:
+                f5 = h5py.File(fname, "a")
+                try:
+                    print(f"deleting {mol}")
+                    del f5[mol]
+                except BaseException:
+                    print(f"{mol} not found")
+                f5.close()
+                continue
+
+            f5 = h5py.File(fname, "a")
+            grp = f5[mol]
+
+            clust_grp = grp.require_group("clustering")
+
+            if method.lower() in clust_grp:
+                print(f"Deleting previous data for mol {mol} method {method}")
+                del clust_grp[method.lower()]
+
+            method_grp = clust_grp.create_group(method.lower())
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_0", data=cluster.cpu())
+
+            data = community_pooling(cluster, data)
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_1", data=cluster.cpu())
+
+            f5.close()
+
+def _DivideDataSet(dataset, val_size=None):
+    """Divides the dataset into a training set and an evaluation set
+
+    Args:
+        dataset (HDF5DataSet): input dataset to be split into training and validation data
+        val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+            Defaults to 0.25.
+
+    Returns:
+        HDF5DataSet: [description]
+    """
+
+    if val_size is None:
+        val_size = 0.25
+    full_size = len(dataset)
+
+    # find number of datapoints to include in training dataset
+    if isinstance (val_size, float):
+        n_val = int(val_size * full_size)
+    elif isinstance (val_size, int):
+        n_val = val_size
+    else:
+        raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
+    
+    # raise exception if no training data or negative validation size
+    if n_val >= full_size or n_val < 0:
+        raise ValueError ("invalid val_size. \n\t" +
+            f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
+
+    if val_size == 0:
+        dataset_train = dataset
+        dataset_val = None
+    else:
+        index = np.arange(full_size)
+        np.random.shuffle(index)
+
+        index_train, index_val = index[n_val:], index[:n_val]
+
+        dataset_train = copy.deepcopy(dataset)
+        dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
+
+        dataset_val = copy.deepcopy(dataset)
+        dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
+
+    return dataset_train, dataset_val

@@ -1,4 +1,4 @@
-from deeprankcore.NeuralNet import NeuralNet
+from deeprankcore.Trainer import Trainer
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
 
@@ -14,13 +14,13 @@ dataset = HDF5DataSet(
     clustering_method='mcl',
 )
 
-NN = NeuralNet(
+trainer = Trainer(
     dataset,
     GINet,
+    val_size=0.25,
     task="reg",
     batch_size=64,
-    val_size=0.25
 )
 
-NN.train(nepoch=250, validate=False)
-NN.plot_scatter()
+trainer.train(nepoch=250, validate=False)
+trainer.plot_scatter()
