@@ -1,5 +1,5 @@
 # GRAPH GROUPS
-HDF5KEY_GRAPH_NODEFEATURES = "node_features"
-HDF5KEY_GRAPH_EDGEFEATURES = "edge_features"
-HDF5KEY_GRAPH_TARGETVALUES = "target_values"
+NODE = "node_features"
+EDGE = "edge_features"
+TARGET = "target_values"
 
