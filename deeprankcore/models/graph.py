@@ -8,13 +8,7 @@ import h5py
 from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.contact import Contact
 from deeprankcore.models.grid import MapMethod, Grid, GridSettings
-from deeprankcore.domain.storage import (
-    HDF5KEY_GRAPH_TARGETVALUES,
-    HDF5KEY_GRAPH_NODEFEATURES,
-    HDF5KEY_GRAPH_NAMES,
-    HDF5KEY_GRAPH_INDICES,
-    HDF5KEY_GRAPH_EDGEFEATURES
-    )
+from deeprankcore.domain.features import groups
 
 _log = logging.getLogger(__name__)
 
@@ -162,12 +156,12 @@ class Graph:
 
             # create groups to hold data
             graph_group = hdf5_file.require_group(self.id)
-            node_features_group = graph_group.create_group(HDF5KEY_GRAPH_NODEFEATURES)
-            edge_feature_group = graph_group.create_group(HDF5KEY_GRAPH_EDGEFEATURES)
+            node_features_group = graph_group.create_group(groups.NODE)
+            edge_feature_group = graph_group.create_group(groups.EDGE)
 
             # store node names
             node_names = numpy.array([str(key) for key in self._nodes]).astype("S")
-            node_features_group.create_dataset(HDF5KEY_GRAPH_NAMES, data=node_names)
+            node_features_group.create_dataset(groups.NAMES, data=node_names)
 
             # store node features
             node_key_list = list(self._nodes.keys())
@@ -208,9 +202,9 @@ class Graph:
 
             # store edge names and indices
             edge_feature_group.create_dataset(
-                HDF5KEY_GRAPH_NAMES, data=numpy.array(edge_names).astype("S")
+                groups.NAMES, data=numpy.array(edge_names).astype("S")
             )
-            edge_feature_group.create_dataset(HDF5KEY_GRAPH_INDICES, data=edge_indices)
+            edge_feature_group.create_dataset(groups.INDICES, data=edge_indices)
 
             # store edge features
             for edge_feature_name in edge_feature_names:
@@ -219,7 +213,7 @@ class Graph:
                 )
 
             # store target values
-            score_group = graph_group.create_group(HDF5KEY_GRAPH_TARGETVALUES)
+            score_group = graph_group.create_group(groups.TARGET)
             for target_name, target_data in self.targets.items():
                 score_group.create_dataset(target_name, data=target_data)
 

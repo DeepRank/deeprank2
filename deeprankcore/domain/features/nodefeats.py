@@ -1,5 +1,4 @@
 ## generic features
-NAMES = "_names" # HDF5KEY_GRAPH_NAMES (edge or node??)
 MAINCHAIN = "main_chain" # bool; previously: FEATURENAME_CHAIN
 POSITION = "coordinates" # list[3xfloat]; previously: FEATURENAME_POSITION
 

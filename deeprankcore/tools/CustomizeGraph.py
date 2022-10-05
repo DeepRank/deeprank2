@@ -2,7 +2,7 @@ import glob
 import h5py
 import os
 import numpy as np
-from deeprankcore.domain.storage import HDF5KEY_GRAPH_TARGETVALUES
+from deeprankcore.domain.features import groups
 
 
 
@@ -59,10 +59,10 @@ def add_target(graph_path, target_name, target_list, sep=" "):
                 try:
                     model_gp = f5[model]
 
-                    if HDF5KEY_GRAPH_TARGETVALUES not in model_gp:
-                        model_gp.create_group(HDF5KEY_GRAPH_TARGETVALUES)
+                    if groups.TARGET not in model_gp:
+                        model_gp.create_group(groups.TARGET)
 
-                    group = f5[f"{model}/{HDF5KEY_GRAPH_TARGETVALUES}/"]
+                    group = f5[f"{model}/{groups.TARGET}/"]
 
                     if target_name in group.keys():
                         # Delete the target if it already existed

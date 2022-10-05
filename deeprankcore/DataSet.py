@@ -10,12 +10,7 @@ from tqdm import tqdm
 import h5py
 from ast import literal_eval
 from deeprankcore.community_pooling import community_detection, community_pooling
-from deeprankcore.domain.storage import (HDF5KEY_GRAPH_TARGETVALUES, 
-                                        HDF5KEY_GRAPH_INDICES, 
-                                        HDF5KEY_GRAPH_NODEFEATURES, 
-                                        HDF5KEY_GRAPH_EDGEFEATURES)
-from deeprankcore.domain.feature import (FEATURE_NODE_POSITION,
-                                        )
+from deeprankcore.domain.features import groups, nodefeats
 from typing import Callable, List, Union
 
 
@@ -196,7 +191,7 @@ class HDF5DataSet(Dataset):
         """Checks if the required node features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[f"{mol_key}/{HDF5KEY_GRAPH_NODEFEATURES}/"].keys())
+        self.available_node_feature = list(f[f"{mol_key}/{groups.NODE}/"].keys())
         f.close()
 
         if self.node_feature == "all":
@@ -213,7 +208,7 @@ class HDF5DataSet(Dataset):
         """Checks if the required edge features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[f"{mol_key}/{HDF5KEY_GRAPH_EDGEFEATURES}/"].keys())
+        self.available_edge_feature = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
         f.close()
 
         if self.edge_feature == "all":
@@ -245,7 +240,7 @@ class HDF5DataSet(Dataset):
             # node features
             node_data = ()
             for feat in self.node_feature:
-                vals = grp[f"{HDF5KEY_GRAPH_NODEFEATURES}/{feat}"][()]
+                vals = grp[f"{groups.NODE}/{feat}"][()]
                 if vals.ndim == 1:
                     vals = vals.reshape(-1, 1)
 
@@ -254,8 +249,8 @@ class HDF5DataSet(Dataset):
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if HDF5KEY_GRAPH_INDICES in grp:
-                ind = grp[HDF5KEY_GRAPH_INDICES][()]
+            if groups.INDICES in grp:
+                ind = grp[groups.INDICES][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
@@ -265,11 +260,11 @@ class HDF5DataSet(Dataset):
 
             # edge feature (same issue as above)
             if self.edge_feature is not None and len(self.edge_feature) > 0 and \
-               HDF5KEY_GRAPH_EDGEFEATURES in grp:
+               groups.EDGE in grp:
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    vals = grp[f"{HDF5KEY_GRAPH_EDGEFEATURES}/{feat}"][()]
+                    vals = grp[f"{groups.EDGE}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
                     edge_data += (vals,)
@@ -292,7 +287,7 @@ class HDF5DataSet(Dataset):
                 y = None
             else:
 
-                if HDF5KEY_GRAPH_TARGETVALUES in grp and self.target in grp[HDF5KEY_GRAPH_TARGETVALUES]:
+                if groups.TARGET in grp and self.target in grp[groups.TARGET]:
                     try:
                         y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                     except Exception as e:
@@ -300,12 +295,12 @@ class HDF5DataSet(Dataset):
                         print('If your target variable contains categorical classes, \
                         please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
-                    possible_targets = grp[HDF5KEY_GRAPH_TARGETVALUES].keys()
+                    possible_targets = grp[groups.TARGET].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
                                      " Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp[f"{HDF5KEY_GRAPH_NODEFEATURES}/{FEATURE_NODE_POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{groups.NODE}/{nodefeats.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
@@ -400,11 +395,11 @@ class HDF5DataSet(Dataset):
         for cond_name, cond_vals in self.dict_filter.items():
 
             try:
-                molgrp[HDF5KEY_GRAPH_TARGETVALUES][cond_name][()]
+                molgrp[groups.TARGET][cond_name][()]
             except KeyError:
                 print(f"   :Filter {cond_name} not found for mol {molgrp}")
                 print("   :Filter options are")
-                for k in molgrp[HDF5KEY_GRAPH_TARGETVALUES].keys():
+                for k in molgrp[groups.TARGET].keys():
                     print("   : ", k)
 
             # if we have a string it's more complicated

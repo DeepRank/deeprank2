@@ -11,18 +11,13 @@ import community
 import markov_clustering
 
 from deeprankcore.tools.embedding import manifold_embedding
+from deeprankcore.domain.features import groups
 from deeprankcore.domain.feature import (
     FEATURE_NODE_POSITION,
     FEATURE_NODE_MAINCHAIN,
     FEATURENAME_EDGETYPE,
     EDGETYPE_INTERNAL,
     EDGETYPE_INTERFACE
-)
-from deeprankcore.domain.storage import (
-    HDF5KEY_GRAPH_NODEFEATURES,
-    HDF5KEY_GRAPH_NAMES,
-    HDF5KEY_GRAPH_INDICES,
-    HDF5KEY_GRAPH_EDGEFEATURES
 )
 
 
@@ -54,9 +49,9 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
 
     # read nodes
     node_names = [
-        _get_node_key(key) for key in graph_group[HDF5KEY_GRAPH_NAMES][()]
+        _get_node_key(key) for key in graph_group[groups.NAMES][()]
     ]
-    node_features_group = graph_group[HDF5KEY_GRAPH_NODEFEATURES]
+    node_features_group = graph_group[groups.NODE]
     node_features = {}
     node_feature_names = list(node_features_group.keys())
     for node_feature_name in node_feature_names:
@@ -70,9 +65,9 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
             ][node_index]
 
     # read edges
-    edge_names = graph_group[HDF5KEY_GRAPH_NAMES][()]
-    edge_node_indices = graph_group[HDF5KEY_GRAPH_INDICES][()]
-    edge_features_group = graph_group[HDF5KEY_GRAPH_EDGEFEATURES]
+    edge_names = graph_group[groups.NAMES][()]
+    edge_node_indices = graph_group[groups.INDICES][()]
+    edge_features_group = graph_group[groups.EDGE]
     edge_features = {}
     edge_feature_names = list(edge_features_group.keys())
     for edge_feature_name in edge_feature_names:

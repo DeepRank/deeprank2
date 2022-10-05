@@ -1,4 +1,3 @@
-NAMES = "_names" # HDF5KEY_GRAPH_NAMES (edge or node??)
 COVALENT = "covalent" # FEATURENAME_COVALENT = "covalent" : bool
 ELECTROSTATIC = "electrostatic" # FEATURENAME_EDGECOULOMB = "coulomb"
 VANDERWAALS = "vanderwaals" # FEATURENAME_EDGEVANDERWAALS = "vanderwaals"
