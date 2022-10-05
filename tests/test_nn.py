@@ -16,11 +16,13 @@ from deeprankcore.models.metrics import (
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
-from deeprankcore.domain.features import groups, nodefeats
-from deeprankcore.domain.feature import FEATURE_NODE_POSITION
+from deeprankcore.domain.features import groups, edgefeats
+from deeprankcore.domain.features import nodefeats as Nfeat
 
 
 _log = logging.getLogger(__name__)
+
+default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM],
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
@@ -88,7 +90,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         for name, data_tensor in (("x", data.x), ("y", data.y),
                                   (groups.INDICES, data.edge_index),
                                   ("edge_attr", data.edge_attr),
-                                  (nodefeats.POSITION, data.pos),
+                                  (Nfeat.POSITION, data.pos),
                                   ("cluster0",data.cluster0),
                                   ("cluster1", data.cluster1)):
 
@@ -123,8 +125,8 @@ class TestTrainer(unittest.TestCase):
             "tests/hdf5/1ATN_ppi.hdf5",
             "tests/hdf5/1ATN_ppi.hdf5",
             GINet,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
+            default_features,
+            [edgefeats.DISTANCE],
             "reg",
             "irmsd",
             [OutputExporter(self.work_directory)],
@@ -138,8 +140,8 @@ class TestTrainer(unittest.TestCase):
             "tests/hdf5/1ATN_ppi.hdf5",
             "tests/hdf5/1ATN_ppi.hdf5",
             GINet,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
+            default_features,
+            [edgefeats.DISTANCE],
             "reg",
             "irmsd",
             [OutputExporter(self.work_directory)],
@@ -155,8 +157,8 @@ class TestTrainer(unittest.TestCase):
             "tests/hdf5/variants.hdf5",
             "tests/hdf5/variants.hdf5",
             GINet,
-            ["polarity", "ic", "pssm"],
-            ["dist"],
+            [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
+            [edgefeats.DISTANCE],
             "class",
             "bin_class",
             [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -172,8 +174,8 @@ class TestTrainer(unittest.TestCase):
             "tests/hdf5/test.hdf5",
             "tests/hdf5/test.hdf5",
             FoutNet,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
+            default_features,
+            [edgefeats.DISTANCE],
             "class",
             "binary",
             [],
@@ -187,8 +189,8 @@ class TestTrainer(unittest.TestCase):
             "tests/hdf5/1ATN_ppi.hdf5",
             "tests/hdf5/1ATN_ppi.hdf5",
             sGAT,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
+            default_features,
+            [edgefeats.DISTANCE],
             "reg",
             "irmsd",
             [],
@@ -202,8 +204,8 @@ class TestTrainer(unittest.TestCase):
             "tests/hdf5/test.hdf5",
             "tests/hdf5/test.hdf5",
             NaiveNetwork,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
+            default_features,
+            [edgefeats.DISTANCE],
             "reg",
             "BA",
             [OutputExporter(self.work_directory)],
@@ -218,8 +220,8 @@ class TestTrainer(unittest.TestCase):
                 "tests/hdf5/1ATN_ppi.hdf5",
                 "tests/hdf5/1ATN_ppi.hdf5",
                 sGAT,
-                ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-                ["dist"],
+                default_features,
+                [edgefeats.DISTANCE],
                 "reg",
                 "irmsd",
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -234,8 +236,8 @@ class TestTrainer(unittest.TestCase):
                 "tests/hdf5/variants.hdf5",
                 "tests/hdf5/variants.hdf5",
                 GINet,
-                ["size", "polarity", "sasa", "ic", "pssm"],
-                ["dist"],
+                [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
+                [edgefeats.DISTANCE],
                 "class",
                 "bin_class",
                 [ScatterPlotExporter(self.work_directory)],

@@ -18,21 +18,11 @@ from deeprankcore.models.query import (
     ProteinProteinInterfaceAtomicQuery,
     ProteinProteinInterfaceResidueQuery
 )
-from deeprankcore.domain.feature import (
-    FEATURE_NODE_POSITION,
-    FEATURENAME_AMINOACID,
-    FEATURENAME_VARIANTAMINOACID,
-    FEATURE_NODE_POLARITY,
-    FEATURENAME_BURIEDSURFACEAREA,
-    FEATURENAME_PSSM,
-    FEATURENAME_INFORMATIONCONTENT,
-    FEATURENAME_PSSMDIFFERENCE,
-    FEATURENAME_SASA,
-    FEATURENAME_EDGECOULOMB,
-    FEATURENAME_EDGEVANDERWAALS,
-    FEATURENAME_EDGEDISTANCE
-)
+
 from deeprankcore.domain.features import groups
+from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain.features import edgefeats as Efeat
+
 from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
 from deeprankcore.DataSet import HDF5DataSet
 
@@ -40,10 +30,10 @@ from deeprankcore.DataSet import HDF5DataSet
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
     assert len(g.nodes) > 0, "no nodes"
-    assert FEATURE_NODE_POSITION in g.nodes[0].features
+    assert Nfeat.POSITION in g.nodes[0].features
 
     assert len(g.edges) > 0, "no edges"
-    assert FEATURENAME_EDGEDISTANCE in g.edges[0].features
+    assert Efeat.DISTANCE in g.edges[0].features
 
     for edge in g.edges:
         if edge.id.item1 == edge.id.item2:
@@ -120,12 +110,12 @@ def test_interface_graph_residue():
     _check_graph_makes_sense(
         g,
         [
-            FEATURE_NODE_POSITION,
-            FEATURE_NODE_POLARITY,
-            FEATURENAME_PSSM,
-            FEATURENAME_INFORMATIONCONTENT,
+            Nfeat.POSITION,
+            Nfeat.POLARITY,
+            Nfeat.PSSM,
+            Nfeat.INFOCONTENT,
         ],
-        [FEATURENAME_EDGEDISTANCE],
+        [Efeat.DISTANCE],
     )
 
 
@@ -148,12 +138,12 @@ def test_interface_graph_atomic():
     _check_graph_makes_sense(
         g,
         [
-            FEATURE_NODE_POSITION,
-            FEATURENAME_PSSM,
-            FEATURENAME_BURIEDSURFACEAREA,
-            FEATURENAME_INFORMATIONCONTENT,
+            Nfeat.POSITION,
+            Nfeat.PSSM,
+            Nfeat.BSA,
+            Nfeat.INFOCONTENT,
         ],
-        [FEATURENAME_EDGEDISTANCE],
+        [Efeat.DISTANCE],
     )
 
 
@@ -178,16 +168,16 @@ def test_variant_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            FEATURE_NODE_POSITION,
-            FEATURENAME_SASA,
-            FEATURENAME_AMINOACID,
-            FEATURENAME_VARIANTAMINOACID,
-            FEATURENAME_PSSMDIFFERENCE,
+            Nfeat.POSITION,
+            Nfeat.SASA,
+            Nfeat.RESTYPE,
+            Nfeat.VARIANTRES,
+            Nfeat.DIFFCONSERVATION,
         ],
         [
-            FEATURENAME_EDGEDISTANCE,
-            FEATURENAME_EDGEVANDERWAALS,
-            FEATURENAME_EDGECOULOMB,
+            Efeat.DISTANCE,
+            Efeat.VANDERWAALS,
+            Efeat.ELECTROSTATIC,
         ],
     )
 
@@ -218,16 +208,16 @@ def test_variant_graph_1A0Z():
     _check_graph_makes_sense(
         g,
         [
-            FEATURE_NODE_POSITION,
-            FEATURENAME_AMINOACID,
-            FEATURENAME_VARIANTAMINOACID,
-            FEATURENAME_SASA,
-            FEATURENAME_PSSMDIFFERENCE,
+            Nfeat.POSITION,
+            Nfeat.RESTYPE,
+            Nfeat.VARIANTRES,
+            Nfeat.SASA,
+            Nfeat.DIFFCONSERVATION,
         ],
         [
-            FEATURENAME_EDGEDISTANCE,
-            FEATURENAME_EDGEVANDERWAALS,
-            FEATURENAME_EDGECOULOMB,
+            Efeat.DISTANCE,
+            Efeat.VANDERWAALS,
+            Efeat.ELECTROSTATIC,
         ],
     )
 
@@ -256,16 +246,16 @@ def test_variant_graph_9API():
     _check_graph_makes_sense(
         g,
         [
-            FEATURE_NODE_POSITION,
-            FEATURENAME_AMINOACID,
-            FEATURENAME_VARIANTAMINOACID,
-            FEATURENAME_SASA,
-            FEATURENAME_PSSMDIFFERENCE,
+            Nfeat.POSITION,
+            Nfeat.RESTYPE,
+            Nfeat.VARIANTRES,
+            Nfeat.SASA,
+            Nfeat.DIFFCONSERVATION,
         ],
         [
-            FEATURENAME_EDGEDISTANCE,
-            FEATURENAME_EDGEVANDERWAALS,
-            FEATURENAME_EDGECOULOMB,
+            Efeat.DISTANCE,
+            Efeat.VANDERWAALS,
+            Efeat.ELECTROSTATIC,
         ],
     )
 
@@ -287,14 +277,14 @@ def test_variant_residue_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            FEATURE_NODE_POSITION,
-            FEATURENAME_SASA,
-            FEATURENAME_PSSM,
-            FEATURENAME_AMINOACID,
-            FEATURENAME_VARIANTAMINOACID,
-            FEATURE_NODE_POLARITY,
+            Nfeat.POSITION,
+            Nfeat.SASA,
+            Nfeat.PSSM,
+            Nfeat.RESTYPE,
+            Nfeat.VARIANTRES,
+            Nfeat.POLARITY,
         ],
-        [FEATURENAME_EDGEDISTANCE],
+        [Efeat.DISTANCE],
     )
 
 
@@ -305,4 +295,4 @@ def test_res_ppi():
 
     g = query.build_graph([sasa, atomic_contact])
 
-    _check_graph_makes_sense(g, [FEATURENAME_SASA], [FEATURENAME_EDGECOULOMB])
+    _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELECTROSTATIC])

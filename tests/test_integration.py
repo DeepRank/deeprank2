@@ -4,13 +4,15 @@ import os
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
-from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa 
+from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa
 from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter
 from deeprankcore.tools.score import get_all_scores
+from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain.features import edgefeats
 import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals
@@ -65,8 +67,8 @@ def test_integration(): # pylint: disable=too-many-locals
 
         n_files = len(output_paths)
 
-        node_features = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"]
-        edge_features = ["dist"]
+        node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+        edge_features = [edgefeats.DISTANCE]
 
         dataset_train = HDF5DataSet(
             hdf5_path = output_paths[:int(n_files*0.8)],

@@ -3,7 +3,7 @@ import numpy
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import get_surface, residue_depth
 from Bio.PDB.HSExposure import HSExposureCA
-from deeprankcore.domain.feature import FEATURENAME_RESIDUEDEPTH, FEATURENAME_HALFSPHEREEXPOSURE
+from deeprankcore.domain.features import nodefeats
 from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.graph import Graph
 
@@ -41,10 +41,10 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         # These can only be calculated per residue, not per atom.
         # So for atomic graphs, every atom gets its residue's value.
         bio_residue = bio_model[residue.chain.id][residue.number]
-        node.features[FEATURENAME_RESIDUEDEPTH] = residue_depth(bio_residue, surface)
+        node.features[nodefeats.RESDEPTH] = residue_depth(bio_residue, surface)
 
         hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
         if hse_key in hse:
-            node.features[FEATURENAME_HALFSPHEREEXPOSURE] = hse[hse_key]
+            node.features[nodefeats.HSE] = hse[hse_key]
         else:
-            node.features[FEATURENAME_HALFSPHEREEXPOSURE] = numpy.array((0, 0, 0))
+            node.features[nodefeats.HSE] = numpy.array((0, 0, 0))

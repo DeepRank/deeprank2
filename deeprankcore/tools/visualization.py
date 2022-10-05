@@ -11,10 +11,10 @@ import community
 import markov_clustering
 
 from deeprankcore.tools.embedding import manifold_embedding
-from deeprankcore.domain.features import groups
+from deeprankcore.domain.features import (groups,
+                                          nodefeats as Nfeat, 
+                                          edgefeats)
 from deeprankcore.domain.feature import (
-    FEATURE_NODE_POSITION,
-    FEATURE_NODE_MAINCHAIN,
     FEATURENAME_EDGETYPE,
     EDGETYPE_INTERNAL,
     EDGETYPE_INTERFACE
@@ -113,7 +113,7 @@ def plotly_2d( # noqa
         import chart_studio.plotly as py # pylint: disable=import-outside-toplevel
 
     pos = numpy.array(
-        [v.tolist() for _, v in networkx.get_node_attributes(graph, FEATURE_NODE_POSITION).items()]
+        [v.tolist() for _, v in networkx.get_node_attributes(graph, Nfeat.POSITION).items()]
     )
     pos2D = manifold_embedding(pos)
     dict_pos = dict(zip(graph.nodes, pos2D))
@@ -229,8 +229,8 @@ def plotly_2d( # noqa
 
     for node in graph.nodes:
 
-        if FEATURE_NODE_MAINCHAIN in graph.nodes[node]:
-            index = int(graph.nodes[node][FEATURE_NODE_MAINCHAIN])
+        if Nfeat.MAINCHAIN in graph.nodes[node]:
+            index = int(graph.nodes[node][Nfeat.MAINCHAIN])
         else:
             index = 0
 
@@ -331,8 +331,8 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
         else:
             continue
 
-        x0, y0, z0 = graph.nodes[edge[0]][FEATURE_NODE_POSITION]
-        x1, y1, z1 = graph.nodes[edge[1]][FEATURE_NODE_POSITION]
+        x0, y0, z0 = graph.nodes[edge[0]][Nfeat.POSITION]
+        x1, y1, z1 = graph.nodes[edge[1]][Nfeat.POSITION]
 
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
@@ -384,12 +384,12 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
 
     for node in graph.nodes:
 
-        if FEATURE_NODE_MAINCHAIN in graph.nodes[node]:
-            index = int(graph.nodes[node][FEATURE_NODE_MAINCHAIN])
+        if Nfeat.MAINCHAIN in graph.nodes[node]:
+            index = int(graph.nodes[node][Nfeat.MAINCHAIN])
         else:
             index = 0
 
-        pos = graph.nodes[node][FEATURE_NODE_POSITION]
+        pos = graph.nodes[node][Nfeat.POSITION]
 
         node_trace[index]["x"] += (pos[0],)
         node_trace[index]["y"] += (pos[1],)

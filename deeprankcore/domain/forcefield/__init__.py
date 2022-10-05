@@ -8,6 +8,7 @@ from deeprankcore.tools.forcefield.patch import PatchParser
 from deeprankcore.tools.forcefield.residue import ResidueClassParser
 from deeprankcore.tools.forcefield.param import ParamParser
 from deeprankcore.models.error import UnknownAtomError
+from deeprankcore.domain.features import nodefeats
 
 logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class AtomicForcefield:
         # check top
         top_key = (residue_name, atom_name)
         if top_key in self._top_rows:
-            type_ = self._top_rows[top_key]["res_type"]
+            type_ = self._top_rows[top_key][nodefeats.RESTYPE]
 
         # check patch, which overrides top
         residue_class = self._find_matching_residue_class(atom.residue)
