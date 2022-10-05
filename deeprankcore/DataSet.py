@@ -306,17 +306,17 @@ class HDF5DataSet(Dataset):
             cluster0 = None
             cluster1 = None
             if self.clustering_method is not None:
-                if groups.CLUSTERS in grp.keys():
-                    if self.clustering_method in grp[groups.CLUSTERS].keys():
+                if 'clustering' in grp.keys():
+                    if self.clustering_method in grp["clustering"].keys():
                         if (
-                            f"{{self.clustering_method}}_{groups.DEPTH0}" in grp[f"{groups.CLUSTERS}"].keys() and
-                            f"{{self.clustering_method}}_{groups.DEPTH1}" in grp[f"{groups.CLUSTERS}"].keys()
+                            "depth_0" in grp[f"clustering/{self.clustering_method}"].keys() and
+                            "depth_1" in grp[f"clustering/{self.clustering_method}"].keys()
                             ):
 
                             cluster0 = torch.tensor(
-                                grp[f"{groups.CLUSTERS}/{self.clustering_method}_{groups.DEPTH0}"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(self.device)
                             cluster1 = torch.tensor(
-                                grp[f"{groups.CLUSTERS}/{self.clustering_method}_{groups.DEPTH1}"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(self.device)
                         else:
                             _log.warning("no clusters detected")
                     else:
@@ -325,7 +325,6 @@ class HDF5DataSet(Dataset):
                     _log.warning("no clustering group found")
             else:
                 _log.warning("no cluster method set")
-
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
 

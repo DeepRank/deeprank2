@@ -683,9 +683,9 @@ class Trainer():
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
 
-    def _PreCluster(self, dataset, method):
+def _PreCluster(self, dataset, method):
         """Pre-clusters nodes of the graphs
-
+        
         Args:
             dataset (HDF5DataSet object)
             method (srt): 'mcl' (Markov Clustering) or 'louvain'
@@ -707,7 +707,7 @@ class Trainer():
             f5 = h5py.File(fname, "a")
             grp = f5[mol]
 
-            clust_grp = grp.require_group(groups.CLUSTERS)
+            clust_grp = grp.require_group("clustering")
 
             if method.lower() in clust_grp:
                 print(f"Deleting previous data for mol {mol} method {method}")
@@ -718,14 +718,14 @@ class Trainer():
             cluster = community_detection(
                 data.edge_index, data.num_nodes, method=method
             )
-            method_grp.create_dataset(groups.DEPTH0, data=cluster.cpu())
+            method_grp.create_dataset("depth_0", data=cluster.cpu())
 
             data = community_pooling(cluster, data)
 
             cluster = community_detection(
                 data.edge_index, data.num_nodes, method=method
             )
-            method_grp.create_dataset(groups.DEPTH1, data=cluster.cpu())
+            method_grp.create_dataset("depth_1", data=cluster.cpu())
 
             f5.close()
 
