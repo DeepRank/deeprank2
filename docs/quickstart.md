@@ -79,9 +79,11 @@ Now the HDF5DataSet objects can be defined:
 
 ```python
 from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain.features import edgefeats as Efeat
 
-node_features = ["res_type", "polarity", "bsa", "res_depth", "hse", "info_content", "pssm"]
-edge_features = ["distance"]
+node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+edge_features = [Efeat.DISTANCE]
 
 # Creating HDF5DataSet objects
 dataset_train = HDF5DataSet(
