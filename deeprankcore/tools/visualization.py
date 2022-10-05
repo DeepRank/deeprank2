@@ -119,8 +119,6 @@ def plotly_2d( # noqa
     ebunch = []
     for e in graph.edges:
         typ = graph.edges[e][edgefeats.INTERFACE]
-        if isinstance(typ, bytes):
-            typ = typ.decode("utf-8")
         if typ == 1.0:
             ebunch.append(e)
     gtmp.remove_edges_from(ebunch)
