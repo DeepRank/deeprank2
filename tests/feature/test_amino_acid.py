@@ -1,6 +1,6 @@
 from pdb2sql import pdb2sql
 
-from deeprankcore.domain.amino_acid import serine
+from deeprankcore.models.amino_acid import serine
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.feature.sasa import add_features
 from deeprankcore.tools.graph import build_residue_graph

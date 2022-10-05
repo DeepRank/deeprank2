@@ -1,7 +1,7 @@
 from typing import Optional
 import numpy
 from deeprankcore.models.variant import SingleResidueVariant
-from deeprankcore.domain.amino_acid import amino_acids
+from deeprankcore.models.amino_acid import amino_acids
 from deeprankcore.models.structure import Residue, Atom
 from deeprankcore.models.graph import Graph
 from deeprankcore.domain.feature import (FEATURENAME_PSSM, FEATURENAME_PSSMDIFFERENCE,

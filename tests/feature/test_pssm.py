@@ -1,6 +1,6 @@
 from pdb2sql import pdb2sql
 import numpy
-from deeprankcore.domain.amino_acid import alanine
+from deeprankcore.models.amino_acid import alanine
 from deeprankcore.tools.pssm import parse_pssm
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.feature.pssm import add_features

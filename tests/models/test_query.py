@@ -2,7 +2,7 @@ from tempfile import mkstemp
 import numpy
 import os
 import h5py
-from deeprankcore.domain.amino_acid import (
+from deeprankcore.models.amino_acid import (
     alanine,
     arginine,
     asparagine,
@@ -32,7 +32,7 @@ from deeprankcore.domain.feature import (
     FEATURENAME_EDGEVANDERWAALS,
     FEATURENAME_EDGEDISTANCE
 )
-from deeprankcore.domain.storage import HDF5KEY_GRAPH_INDICES, HDF5KEY_GRAPH_NODEFEATURES, HDF5KEY_GRAPH_EDGEFEATURES
+from deeprankcore.domain.features import groups
 from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
 from deeprankcore.DataSet import HDF5DataSet
 
@@ -62,29 +62,29 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             for feature_name in node_feature_names:
                 assert (
-                    entry_group[f"{HDF5KEY_GRAPH_NODEFEATURES}/{feature_name}"][()].size > 0
+                    entry_group[f"{groups.NODE}/{feature_name}"][()].size > 0
                 ), f"no {feature_name} feature"
 
                 assert (
                     len(
                         numpy.nonzero(
-                            entry_group[f"{HDF5KEY_GRAPH_NODEFEATURES}/{feature_name}"][()]
+                            entry_group[f"{groups.NODE}/{feature_name}"][()]
                         )
                     )
                     > 0
                 ), f"{feature_name}: all zero"
 
-            assert entry_group[HDF5KEY_GRAPH_INDICES][()].shape[1] == 2, "wrong edge index shape"
+            assert entry_group[groups.INDICES][()].shape[1] == 2, "wrong edge index shape"
 
-            assert entry_group[HDF5KEY_GRAPH_INDICES].shape[0] > 0, "no edge indices"
+            assert entry_group[groups.INDICES].shape[0] > 0, "no edge indices"
 
             for feature_name in edge_feature_names:
                 assert (
-                    entry_group[f"{HDF5KEY_GRAPH_EDGEFEATURES}/{feature_name}"][()].shape[0]
-                    == entry_group[HDF5KEY_GRAPH_INDICES].shape[0]
+                    entry_group[f"{groups.EDGE}/{feature_name}"][()].shape[0]
+                    == entry_group[groups.INDICES].shape[0]
                 ), f"not enough edge {feature_name} feature values"
 
-            count_edges_hdf5 = entry_group[HDF5KEY_GRAPH_INDICES].shape[0]
+            count_edges_hdf5 = entry_group[groups.INDICES].shape[0]
 
         dataset = HDF5DataSet(hdf5_path=tmp_path)
         torch_data_entry = dataset[0]
