@@ -1,5 +1,5 @@
 ## generic features
-MAINCHAIN = "main_chain" # bool; former FEATURENAME_CHAIN
+CHAINID = "chain_id" # bool; former FEATURENAME_CHAIN
 POSITION = "position" # list[3xfloat]; former FEATURENAME_POSITION
 
 ## residue core features

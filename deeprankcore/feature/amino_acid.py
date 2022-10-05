@@ -21,6 +21,7 @@ def add_features( # pylint: disable=unused-argument
             raise TypeError(f"Unexpected node type: {type(node.id)}") 
 
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
+        node.features[Nfeat.RESCHARGE] = residue.amino_acid.charge
         node.features[Nfeat.RESSIZE] = residue.amino_acid.size
         node.features[Nfeat.POLARITY] = residue.amino_acid.polarity.onehot
         node.features[Nfeat.HBDONORS] = residue.amino_acid.count_hydrogen_bond_donors
@@ -32,14 +33,16 @@ def add_features( # pylint: disable=unused-argument
             variant = single_amino_acid_variant.variant_amino_acid
 
             if residue == single_amino_acid_variant.residue:
-                node.features[Nfeat.DIFFSIZE] = variant.size - wildtype.size
                 node.features[Nfeat.VARIANTRES] = variant.onehot
+                node.features[Nfeat.DIFFCHARGE] = variant.charge - wildtype.charge
+                node.features[Nfeat.DIFFSIZE] = variant.size - wildtype.size
                 node.features[Nfeat.DIFFPOLARITY] = variant.polarity.onehot - wildtype.polarity.onehot  # what happens when you subtract onehot values from each other?
                 node.features[Nfeat.DIFFHBDONORS] = variant.count_hydrogen_bond_donors - wildtype.count_hydrogen_bond_donors
                 node.features[Nfeat.DIFFHBACCEPTORS] = variant.count_hydrogen_bond_acceptors - wildtype.count_hydrogen_bond_acceptors
             else:
-                node.features[Nfeat.DIFFSIZE] = 0
                 node.features[Nfeat.VARIANTRES] = residue.amino_acid.onehot
+                node.features[Nfeat.DIFFCHARGE] = 0
+                node.features[Nfeat.DIFFSIZE] = 0
                 node.features[Nfeat.DIFFPOLARITY] = numpy.zeros(residue.amino_acid.polarity.onehot.shape)
                 node.features[Nfeat.DIFFHBDONORS] = 0
                 node.features[Nfeat.DIFFHBACCEPTORS] = 0

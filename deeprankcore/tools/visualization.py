@@ -75,7 +75,7 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
         edge_key = (node1_name, node2_name)
 
         graph.add_edge(node1_name, node2_name)
-        graph.edges[node1_name, node2_name][edgefeats.INTERFACE] = 1.0
+        graph.edges[node1_name, node2_name][edgefeats.SAMECHAIN] = 1.0
         for edge_feature_name in edge_feature_names:
             graph.edges[edge_key][edge_feature_name] = edge_features[edge_feature_name][
                 edge_index
@@ -118,7 +118,7 @@ def plotly_2d( # noqa
     gtmp = deepcopy(graph)
     ebunch = []
     for e in graph.edges:
-        typ = graph.edges[e][edgefeats.INTERFACE]
+        typ = graph.edges[e][edgefeats.SAMECHAIN]
         if typ == 1.0:
             ebunch.append(e)
     gtmp.remove_edges_from(ebunch)
@@ -150,7 +150,7 @@ def plotly_2d( # noqa
     node_connect = {}
     for edge in graph.edges:
 
-        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]][edgefeats.INTERFACE])
+        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN])
         if edge_type == 0.0:
             trace = go.Scatter(
                 x=[],
@@ -222,8 +222,8 @@ def plotly_2d( # noqa
 
     for node in graph.nodes:
 
-        if Nfeat.MAINCHAIN in graph.nodes[node]:
-            index = int(graph.nodes[node][Nfeat.MAINCHAIN])
+        if Nfeat.CHAINID in graph.nodes[node]:
+            index = int(graph.nodes[node][Nfeat.CHAINID])
         else:
             index = 0
 
@@ -296,7 +296,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
     for edge in graph.edges:
 
         edge_type = _get_edge_type_name(
-            graph.edges[edge[0], edge[1]][edgefeats.INTERFACE]
+            graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
         )
         if edge_type == 0.0:
             trace = go.Scatter3d(
@@ -377,8 +377,8 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
 
     for node in graph.nodes:
 
-        if Nfeat.MAINCHAIN in graph.nodes[node]:
-            index = int(graph.nodes[node][Nfeat.MAINCHAIN])
+        if Nfeat.CHAINID in graph.nodes[node]:
+            index = int(graph.nodes[node][Nfeat.CHAINID])
         else:
             index = 0
 
