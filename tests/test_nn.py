@@ -22,7 +22,7 @@ from deeprankcore.domain.features import nodefeats as Nfeat
 
 _log = logging.getLogger(__name__)
 
-default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM],
+default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals

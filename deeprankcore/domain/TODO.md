@@ -26,6 +26,7 @@
 
 ## [ ] Remake the test *.pdb files
   - I'll need Giulia's help for this
+  - [ ] Run Pytest to make sure I didn't break anything
 
 ## [ ] Specific feature stuff
   - [ ] Assign currently unused features

@@ -15,7 +15,6 @@ from torch_geometric.loader import DataLoader
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
-from deeprankcore.domain.features import groups
 
 _log = logging.getLogger(__name__)
 
@@ -683,9 +682,9 @@ class Trainer():
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
 
-def _PreCluster(self, dataset, method):
+    def _PreCluster(self, dataset, method):
         """Pre-clusters nodes of the graphs
-        
+
         Args:
             dataset (HDF5DataSet object)
             method (srt): 'mcl' (Markov Clustering) or 'louvain'

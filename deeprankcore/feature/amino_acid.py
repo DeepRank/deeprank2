@@ -36,7 +36,7 @@ def add_features( # pylint: disable=unused-argument
                 node.features[Nfeat.VARIANTRES] = variant.onehot
                 node.features[Nfeat.DIFFCHARGE] = variant.charge - wildtype.charge
                 node.features[Nfeat.DIFFSIZE] = variant.size - wildtype.size
-                node.features[Nfeat.DIFFPOLARITY] = variant.polarity.onehot - wildtype.polarity.onehot  # what happens when you subtract onehot values from each other?
+                node.features[Nfeat.DIFFPOLARITY] = variant.polarity.onehot - wildtype.polarity.onehot
                 node.features[Nfeat.DIFFHBDONORS] = variant.count_hydrogen_bond_donors - wildtype.count_hydrogen_bond_donors
                 node.features[Nfeat.DIFFHBACCEPTORS] = variant.count_hydrogen_bond_acceptors - wildtype.count_hydrogen_bond_acceptors
             else:

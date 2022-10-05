@@ -9,7 +9,6 @@ from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
-from deeprankcore.community_pooling import community_detection, community_pooling
 from deeprankcore.domain.features import groups, nodefeats
 from typing import Callable, List, Union
 
