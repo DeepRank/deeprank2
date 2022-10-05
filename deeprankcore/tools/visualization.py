@@ -14,11 +14,6 @@ from deeprankcore.tools.embedding import manifold_embedding
 from deeprankcore.domain.features import (groups,
                                           nodefeats as Nfeat, 
                                           edgefeats)
-from deeprankcore.domain.feature import (
-    FEATURENAME_EDGETYPE,
-    EDGETYPE_INTERNAL,
-    EDGETYPE_INTERFACE
-)
 
 
 _log = logging.getLogger(__name__)
@@ -80,7 +75,7 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
         edge_key = (node1_name, node2_name)
 
         graph.add_edge(node1_name, node2_name)
-        graph.edges[node1_name, node2_name][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
+        graph.edges[node1_name, node2_name][edgefeats.INTERFACE] = 1.0
         for edge_feature_name in edge_feature_names:
             graph.edges[edge_key][edge_feature_name] = edge_features[edge_feature_name][
                 edge_index
@@ -123,10 +118,10 @@ def plotly_2d( # noqa
     gtmp = deepcopy(graph)
     ebunch = []
     for e in graph.edges:
-        typ = graph.edges[e][FEATURENAME_EDGETYPE]
+        typ = graph.edges[e][edgefeats.INTERFACE]
         if isinstance(typ, bytes):
             typ = typ.decode("utf-8")
-        if typ == EDGETYPE_INTERFACE:
+        if typ == 1.0:
             ebunch.append(e)
     gtmp.remove_edges_from(ebunch)
 
@@ -157,8 +152,8 @@ def plotly_2d( # noqa
     node_connect = {}
     for edge in graph.edges:
 
-        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]][FEATURENAME_EDGETYPE])
-        if edge_type == EDGETYPE_INTERNAL:
+        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]][edgefeats.INTERFACE])
+        if edge_type == 0.0:
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -169,7 +164,7 @@ def plotly_2d( # noqa
                 line=go.scatter.Line(color="rgb(110,110,110)", width=3),
             )
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        elif edge_type == 1.0:
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -188,10 +183,10 @@ def plotly_2d( # noqa
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
 
-        if edge_type == EDGETYPE_INTERNAL:
+        if edge_type == 0.0:
             internal_edge_trace_list.append(trace)
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        elif edge_type == 1.0:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:
@@ -303,9 +298,9 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
     for edge in graph.edges:
 
         edge_type = _get_edge_type_name(
-            graph.edges[edge[0], edge[1]][FEATURENAME_EDGETYPE]
+            graph.edges[edge[0], edge[1]][edgefeats.INTERFACE]
         )
-        if edge_type == EDGETYPE_INTERNAL:
+        if edge_type == 0.0:
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -317,7 +312,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
                 line=go.scatter3d.Line(color="rgb(110,110,110)", width=5),
             )
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        elif edge_type == 1.0:
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -338,10 +333,10 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
         trace["y"] += (y0, y1, None)
         trace["z"] += (z0, z1, None)
 
-        if edge_type == EDGETYPE_INTERNAL:
+        if edge_type == 0.0:
             internal_edge_trace_list.append(trace)
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        elif edge_type == 1.0:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:

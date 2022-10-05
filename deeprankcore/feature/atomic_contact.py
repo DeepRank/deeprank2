@@ -5,8 +5,7 @@ from scipy.spatial import distance_matrix
 from deeprankcore.models.structure import Atom
 from deeprankcore.models.graph import Graph, Edge
 from deeprankcore.models.contact import ResidueContact, AtomicContact
-from deeprankcore.domain.feature import (FEATURENAME_EDGEDISTANCE, FEATURENAME_EDGEVANDERWAALS,
-                                         FEATURENAME_EDGECOULOMB, FEATURENAME_COVALENT)
+from deeprankcore.domain.features import edgefeats as Efeat
 from deeprankcore.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0, MAX_COVALENT_DISTANCE
 from deeprankcore.models.forcefield.vanderwaals import VanderwaalsParam
 from deeprankcore.models.error import UnknownAtomError
@@ -130,14 +129,14 @@ def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
         atom1_index = atom_indices[contact.atom1]
         atom2_index = atom_indices[contact.atom2]
 
-        edge.features[FEATURENAME_EDGEDISTANCE] = interatomic_distances[atom1_index, atom2_index]
-        edge.features[FEATURENAME_EDGEVANDERWAALS] = interatomic_vanderwaals_potentials[atom1_index, atom2_index]
-        edge.features[FEATURENAME_EDGECOULOMB] = interatomic_electrostatic_potentials[atom1_index, atom2_index]
+        edge.features[Efeat.DISTANCE] = interatomic_distances[atom1_index, atom2_index]
+        edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_potentials[atom1_index, atom2_index]
+        edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_potentials[atom1_index, atom2_index]
 
         if covalent_neighbours[atom1_index, atom2_index]:
-            edge.features[FEATURENAME_COVALENT] = 1.0
+            edge.features[Efeat.COVALENT] = 1.0
         else:
-            edge.features[FEATURENAME_COVALENT] = 0.0
+            edge.features[Efeat.COVALENT] = 0.0
 
 
 def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-locals
@@ -191,20 +190,20 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
                 atom1_index = atom_indices[atom1]
                 atom2_index = atom_indices[atom2]
 
-                edge.features[FEATURENAME_EDGEDISTANCE] = min(edge.features.get(FEATURENAME_EDGEDISTANCE, 1e99),
+                edge.features[Efeat.DISTANCE] = min(edge.features.get(Efeat.DISTANCE, 1e99),
                                                               interatomic_distances[atom1_index, atom2_index])
 
-                edge.features[FEATURENAME_EDGEVANDERWAALS] = (edge.features.get(FEATURENAME_EDGEVANDERWAALS, 0.0) +
+                edge.features[Efeat.VANDERWAALS] = (edge.features.get(Efeat.VANDERWAALS, 0.0) +
                                                               interatomic_vanderwaals_potentials[atom1_index, atom2_index])
 
-                edge.features[FEATURENAME_EDGECOULOMB] = (edge.features.get(FEATURENAME_EDGECOULOMB, 0.0) +
+                edge.features[Efeat.ELECTROSTATIC] = (edge.features.get(Efeat.ELECTROSTATIC, 0.0) +
                                                           interatomic_electrostatic_potentials[atom1_index, atom2_index])
 
                 if covalent_neighbours[atom1_index, atom2_index]:
-                    edge.features[FEATURENAME_COVALENT] = 1.0
+                    edge.features[Efeat.COVALENT] = 1.0
 
-                elif FEATURENAME_COVALENT not in edge.features:
-                    edge.features[FEATURENAME_COVALENT] = 0.0
+                elif Efeat.COVALENT not in edge.features:
+                    edge.features[Efeat.COVALENT] = 0.0
 
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
