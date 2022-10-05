@@ -15,6 +15,7 @@ from torch_geometric.loader import DataLoader
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
+from deeprankcore.domain.features import groups
 
 _log = logging.getLogger(__name__)
 
@@ -706,7 +707,7 @@ class Trainer():
             f5 = h5py.File(fname, "a")
             grp = f5[mol]
 
-            clust_grp = grp.require_group("clustering")
+            clust_grp = grp.require_group(groups.CLUSTERS)
 
             if method.lower() in clust_grp:
                 print(f"Deleting previous data for mol {mol} method {method}")
@@ -717,14 +718,14 @@ class Trainer():
             cluster = community_detection(
                 data.edge_index, data.num_nodes, method=method
             )
-            method_grp.create_dataset("depth_0", data=cluster.cpu())
+            method_grp.create_dataset(groups.DEPTH0, data=cluster.cpu())
 
             data = community_pooling(cluster, data)
 
             cluster = community_detection(
                 data.edge_index, data.num_nodes, method=method
             )
-            method_grp.create_dataset("depth_1", data=cluster.cpu())
+            method_grp.create_dataset(groups.DEPTH1, data=cluster.cpu())
 
             f5.close()
 
