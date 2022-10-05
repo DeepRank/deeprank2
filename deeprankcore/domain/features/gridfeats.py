@@ -1,7 +1,0 @@
-POINTS = "grid_points"
-X = "x"
-Y = "y"
-Z = "z"
-CENTER = "center"
-MAPPEDFEATURES = "mapped_features"
-MAPPEDFEATURESVALUE = "mapped_features_value"

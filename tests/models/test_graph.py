@@ -8,7 +8,7 @@ from deeprankcore.models.grid import GridSettings, MapMethod
 from deeprankcore.models.graph import Graph, Edge, Node
 from deeprankcore.models.contact import ResidueContact
 from deeprankcore.tools.pdb import get_structure
-from deeprankcore.domain.features import groups, gridfeats
+from deeprankcore.domain.features import groups
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals
@@ -80,8 +80,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             assert len(numpy.nonzero(edge_features_group[edge_feature_name][()])) > 0
 
             # check for grid-mapped values
-            assert gridfeats.MAPPEDFEATURES in entry_group
-            mapped_group = entry_group[gridfeats.MAPPEDFEATURES]
+            assert "mapped_features" in entry_group
+            mapped_group = entry_group["mapped_features"]
 
             for feature_name in (node_feature_name, edge_feature_name):
                 feature_name = f"{feature_name}_000"
@@ -89,8 +89,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 assert (
                     feature_name in mapped_group
                 ), f"missing mapped feature {feature_name}"
-                assert gridfeats.MAPPEDFEATURESVALUE in mapped_group[feature_name]
-                data = mapped_group[feature_name][gridfeats.MAPPEDFEATURESVALUE][()]
+                assert "value" in mapped_group[feature_name]
+                data = mapped_group[feature_name]["value"][()]
                 assert len(numpy.nonzero(data)) > 0, f"{feature_name}: all zero"
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test

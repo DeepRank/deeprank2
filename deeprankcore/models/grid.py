@@ -9,7 +9,6 @@ import numpy
 import h5py
 import itertools
 from scipy.signal import bspline
-from deeprankcore.domain.features import gridfeats
 
 
 
@@ -255,19 +254,19 @@ class Grid:
             grid_group = hdf5_file.require_group(self.id)
 
             # store grid points
-            points_group = grid_group.create_group(gridfeats.POINTS)
-            points_group.create_dataset(gridfeats.X, data=self.xs)
-            points_group.create_dataset(gridfeats.Y, data=self.ys)
-            points_group.create_dataset(gridfeats.Z, data=self.zs)
-            points_group.create_dataset(gridfeats.CENTER, data=self.center)
+            points_group = grid_group.create_group("grid_points")
+            points_group.create_dataset("x", data=self.xs)
+            points_group.create_dataset("y", data=self.ys)
+            points_group.create_dataset("z", data=self.zs)
+            points_group.create_dataset("center", data=self.center)
 
             # store grid features
-            features_group = grid_group.require_group(gridfeats.MAPPEDFEATURES)
+            features_group = grid_group.require_group("mapped_features")
             for feature_name, feature_data in self.features.items():
 
                 feature_group = features_group.require_group(feature_name)
                 feature_group.create_dataset(
-                    gridfeats.MAPPEDFEATURESVALUE,
+                    "value",
                     data=feature_data,
                     compression="lzf",
                     chunks=True,
