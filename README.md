@@ -200,7 +200,7 @@ with h5py.File("<hdf5_path.hdf5>", "r") as hdf5:
 
     # Polarity feature for ids[0], numpy.ndarray
     node_feat_polarity = hdf5[ids[0]][groups.EDGE][Nfeat.POLARITY][:] 
-     # Coulomb feature for ids[0], numpy.ndarray
+     # Electrostatic feature for ids[0], numpy.ndarray
     edge_feat_electrostatic = hdf5[ids[0]][groups.EDGE][Efeat.ELECTROSTATIC][:]
 ```
 
