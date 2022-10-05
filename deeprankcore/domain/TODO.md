@@ -1,8 +1,7 @@
 # My to do list for this issue and #145:
 
-## [X] Update FEATURENAMEs (done until res_type)
+## [ ] Update FEATURENAMEs (done until res_type)
     - [X] make sure to search for strings as well
-    - [X] move featurenames into dict instead of individual strings??
     - [X] move all this into submodules
     - [X] Double check all the tests for node/edge features
     - [X] Double check README, quickstart, and examples
@@ -11,6 +10,7 @@
     - [X] Move domain.storage
         - [x] delete domain/storage.py
     - [x] delete domain/feature.py
+    - [ ] shorten/clarify some of the feature names?
 
 ## [ ] Update clustering groups/names
     - [X] Update cluster naming to one level shallower and prefixing the clustering-type
@@ -33,7 +33,7 @@
             - Don't know how to get this info
                 - models/structure has a Chain class
         - [ ] SAMECHAIN always set to 1
-        - [ ] check whether all other features are actually assigned
+        - [X] check whether all other features are actually assigned
             - tools.visualization, line 83: `graph.edges[node1_name, node2_name][edgefeats.SAMECHAIN] = 1.0` without any if statement
             - currently there is no chain info anyway, but once we have that, this would be useful
             - would need to find out how to extract CHAINID from the two nodes of this edge
@@ -44,6 +44,6 @@
 
 ## [ ] Rethink definitions of deeprankcore/domain vs deeprankcore/models
     - [X] deeprankcore/domain/amino-acid --> add to deeprankcore/models/amino-acid
-    - [ ] deeprankcore/models/polarity --> add to deeprankcore/models/amino-acid
+    - [X] deeprankcore/models/polarity --> add to deeprankcore/models/amino-acid
     - [ ] deeprankcore/models/error --> move to deeprankcore/domain/errors (and start filling it up)
     - [ ] potentially merge the two folders
