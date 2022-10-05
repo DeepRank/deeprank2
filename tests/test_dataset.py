@@ -3,17 +3,10 @@ from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys
 from deeprankcore.Trainer import _DivideDataSet
 from torch_geometric.data.data import Data
 import h5py
-from deeprankcore.domain.feature import (
-    FEATURE_NODE_RESTYPE,
-    FEATURE_NODE_POLARITY,
-    FEATURE_NODE_BURIEDSURFACEAREA,
-    FEATURE_NODE_RESIDUEDEPTH,
-    FEATURE_NODE_HALFSPHEREEXPOSURE,
-    FEATURE_NODE_INFORMATIONCONTENT,
-    FEATURE_NODE_PSSM
-)
+from deeprankcore.domain.features.edgefeats import DISTANCE
+from deeprankcore.domain.features import nodefeats as Nfeat
 
-node_feats = [FEATURE_NODE_RESTYPE, FEATURE_NODE_POLARITY, FEATURE_NODE_BURIEDSURFACEAREA, FEATURE_NODE_HALFSPHEREEXPOSURE, FEATURE_NODE_INFORMATIONCONTENT, FEATURE_NODE_PSSM]
+node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
@@ -23,7 +16,7 @@ class TestDataSet(unittest.TestCase):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
-            edge_feature=["dist"],
+            edge_feature=[DISTANCE],
             target="irmsd",
             subset=None,
         )
@@ -32,7 +25,7 @@ class TestDataSet(unittest.TestCase):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
-            edge_feature=["dist"],
+            edge_feature=[DISTANCE],
             target="irmsd",
             subset=None,
             dict_filter={"irmsd": "<10"},
@@ -47,7 +40,7 @@ class TestDataSet(unittest.TestCase):
         dataset = HDF5DataSet(
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
-            edge_feature=["dist"],
+            edge_feature=[DISTANCE],
             target="irmsd",
             subset=None,
             transform=operator
@@ -60,7 +53,7 @@ class TestDataSet(unittest.TestCase):
         dataset = HDF5DataSet(
             hdf5_path=["tests/hdf5/train.hdf5", "tests/hdf5/valid.hdf5"],
             node_feature=node_feats,
-            edge_feature=["dist"],
+            edge_feature=[DISTANCE],
             target="binary"
         )
 
