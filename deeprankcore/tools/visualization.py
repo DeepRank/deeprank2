@@ -268,7 +268,7 @@ def plotly_2d( # noqa
             py.plot(fig)
 
 
-def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
+def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC0001
     graph: networkx.Graph,
     out: Optional[str] = None,
     offline: bool = False,
