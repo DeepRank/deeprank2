@@ -96,6 +96,8 @@ def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
     positions = []
     atom_charges = []
     atom_vanderwaals_parameters = []
+    atom_chains = []
+    atom_residues = []
     for atom_index, atom in enumerate(atoms):
         try:
             charge = atomic_forcefield.get_charge(atom)
@@ -112,6 +114,8 @@ def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
         atom_vanderwaals_parameters.append(vanderwaals)
         positions.append(atom.position)
         atom_indices[atom] = atom_index
+        atom_chains.append(atom.residue.chain.id)
+        atom_residues.append(atom.residue.number)
 
     # calculate the distance matrix for those atoms
     interatomic_distances = distance_matrix(positions, positions, p=2)
@@ -137,7 +141,16 @@ def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
             edge.features[Efeat.COVALENT] = 1.0
         else:
             edge.features[Efeat.COVALENT] = 0.0
-
+        
+        if atom_chains[atom1_index] == atom_chains[atom2_index]:
+            edge.features[Efeat.SAMECHAIN] = 1.0
+            if atom_residues[atom1_index] == atom_residues[atom2_index]:
+                edge.features[Efeat.SAMERES] = 1.0
+            else:
+                edge.features[Efeat.SAMERES] = 0.0
+        else:
+            edge.features[Efeat.SAMECHAIN] = 0.0
+            edge.features[Efeat.SAMERES] = 0.0
 
 def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-locals
     # get a set of all the atoms involved
@@ -153,6 +166,7 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
     positions = []
     atom_charges = []
     atom_vanderwaals_parameters = []
+    atom_chains = []
     for atom_index, atom in enumerate(atoms):
 
         try:
@@ -170,6 +184,8 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
         atom_vanderwaals_parameters.append(vanderwaals)
         positions.append(atom.position)
         atom_indices[atom] = atom_index
+        atom_chains.append(atom.residue.chain.id)
+
 
     # calculate the distance matrix for those atoms
     interatomic_distances = distance_matrix(positions, positions, p=2)
@@ -201,10 +217,13 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
 
                 if covalent_neighbours[atom1_index, atom2_index]:
                     edge.features[Efeat.COVALENT] = 1.0
-
                 elif Efeat.COVALENT not in edge.features:
                     edge.features[Efeat.COVALENT] = 0.0
 
+            if atom_chains[atom1_index] == atom_chains[atom2_index]:
+                edge.features[Efeat.SAMECHAIN] = 1.0
+            else:
+                edge.features[Efeat.SAMECHAIN] = 0.0
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
 

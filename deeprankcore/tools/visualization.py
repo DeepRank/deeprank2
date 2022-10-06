@@ -11,9 +11,9 @@ import community
 import markov_clustering
 
 from deeprankcore.tools.embedding import manifold_embedding
-from deeprankcore.domain.features import (groups,
-                                          nodefeats as Nfeat, 
-                                          edgefeats)
+from deeprankcore.domain.features import groups
+from deeprankcore.domain.features import nodefeats as Nfeat 
+from deeprankcore.domain.features import edgefeats
 
 
 _log = logging.getLogger(__name__)
@@ -75,7 +75,6 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
         edge_key = (node1_name, node2_name)
 
         graph.add_edge(node1_name, node2_name)
-        graph.edges[node1_name, node2_name][edgefeats.SAMECHAIN] = 1.0
         for edge_feature_name in edge_feature_names:
             graph.edges[edge_key][edge_feature_name] = edge_features[edge_feature_name][
                 edge_index
@@ -222,10 +221,10 @@ def plotly_2d( # noqa
 
     for node in graph.nodes:
 
+        index = 0
         if Nfeat.CHAINID in graph.nodes[node]:
-            index = int(graph.nodes[node][Nfeat.CHAINID])
-        else:
-            index = 0
+            if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]: # I believe graph.nodes is listlike so calling nodes[0] should work
+                index = 1
 
         pos = graph.nodes[node]["pos2D"]
 
@@ -377,10 +376,10 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
 
     for node in graph.nodes:
 
+        index = 0
         if Nfeat.CHAINID in graph.nodes[node]:
-            index = int(graph.nodes[node][Nfeat.CHAINID])
-        else:
-            index = 0
+            if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]: # I believe graph.nodes is listlike so calling nodes[0] should work
+                index = 1
 
         pos = graph.nodes[node][Nfeat.POSITION]
 
