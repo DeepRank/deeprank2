@@ -76,7 +76,7 @@ class AtomicForcefield:
         # check top
         top_key = (residue_name, atom_name)
         if top_key in self._top_rows:
-            type_ = self._top_rows[top_key][nodefeats.RESTYPE]
+            type_ = self._top_rows[top_key]["type"]
 
         # check patch, which overrides top
         residue_class = self._find_matching_residue_class(atom.residue)

@@ -378,8 +378,15 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
 
         index = 0
         if Nfeat.CHAINID in graph.nodes[node]:
-            if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]: # I believe graph.nodes is listlike so calling nodes[0] should work
-                index = 1
+            try:
+                if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]: # I believe graph.nodes is listlike so calling nodes[0] should work
+                    index = 1
+            except Exception as e:
+                print('exception caught in tools/visualization')
+                print('`if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]` is faulty')
+                raise e
+            else:
+                print('no error caught')
 
         pos = graph.nodes[node][Nfeat.POSITION]
 
