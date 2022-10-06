@@ -168,19 +168,19 @@ class HDF5DataSet(Dataset):
 
     def _check_hdf5_files(self):
         """Checks if the data contained in the hdf5 file is valid."""
-        print("\nChecking dataset Integrity...\n")
+        _log.info("\nChecking dataset Integrity...")
         remove_file = []
         for fname in self.hdf5_path:
             try:
                 f = h5py.File(fname, "r")
                 mol_names = list(f.keys())
                 if len(mol_names) == 0:
-                    print(f"    -> {fname} is empty ")
+                    _log.info(f"    -> {fname} is empty ")
                     remove_file.append(fname)
                 f.close()
             except Exception as e:
-                print(e)
-                print(f"    -> {fname} is corrupted ")
+                _log.error(e)
+                _log.info(f"    -> {fname} is corrupted ")
                 remove_file.append(fname)
 
         for name in remove_file:
@@ -198,9 +198,9 @@ class HDF5DataSet(Dataset):
         else:
             for feat in self.node_feature:
                 if feat not in self.available_node_feature:
-                    print(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    print("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
-                    print(f"\nPossible node features: {self.available_node_feature}\n")
+                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info(f"\nPossible node features: {self.available_node_feature}\n")
                     sys.exit()
 
     def _check_edge_feature(self):
@@ -215,9 +215,9 @@ class HDF5DataSet(Dataset):
         elif self.edge_feature is not None:
             for feat in self.edge_feature:
                 if feat not in self.available_edge_feature:
-                    print(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    print("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
-                    print(f"\nPossible edge features: {self.available_edge_feature}\n")
+                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
                     sys.exit()
 
     def load_one_graph(self, fname, mol): # noqa
@@ -289,8 +289,8 @@ class HDF5DataSet(Dataset):
                     try:
                         y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                     except Exception as e:
-                        print(e)
-                        print('If your target variable contains categorical classes, \
+                        _log.error(e)
+                        _log.info('If your target variable contains categorical classes, \
                         please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
 
@@ -350,11 +350,11 @@ class HDF5DataSet(Dataset):
 
         self.index_complexes = []
 
-        desc = f"{'   Train dataset':25s}"
+        desc = f"   {self.hdf5_path}{' dataset':25s}"
         if self.tqdm:
             data_tqdm = tqdm(self.hdf5_path, desc=desc, file=sys.stdout)
         else:
-            print("   Train dataset")
+            _log.info(f"   {self.hdf5_path} dataset\n")
             data_tqdm = self.hdf5_path
         sys.stdout.flush()
 
@@ -396,10 +396,10 @@ class HDF5DataSet(Dataset):
             try:
                 molgrp["score"][cond_name][()]
             except KeyError:
-                print(f"   :Filter {cond_name} not found for mol {molgrp}")
-                print("   :Filter options are")
+                _log.info(f"   :Filter {cond_name} not found for mol {molgrp}")
+                _log.info("   :Filter options are")
                 for k in molgrp["score"].keys():
-                    print("   : ", k)
+                    _log.info("   : ", k)
 
             # if we have a string it's more complicated
             if isinstance(cond_vals, str):

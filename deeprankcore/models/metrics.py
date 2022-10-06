@@ -10,7 +10,7 @@ from torch import argmax, tensor
 from torch.nn.functional import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import roc_auc_score
-
+import pandas as pd
 
 _log = logging.getLogger(__name__)
 
@@ -251,3 +251,50 @@ class ScatterPlotExporter(MetricsExporter):
         "for regression, target data is needed and output data must be a list of one-dimensional values"
 
         return output_data_shape == 1 and target_data_shape == 1
+
+class ConciseOutputExporter(MetricsExporter):
+    """ A metrics exporter that writes a CSV output table, containing every single data point.
+
+        Included are:
+            - phase (train/valid/test)
+            - epoch
+            - entry names
+            - output values
+            - target values
+            - loss per epoch
+
+        The user can then load the csv table into a Pandas df, and plotting metrics
+    """
+
+    def __init__(
+        self,
+        directory_path: str):
+
+        self._directory_path = directory_path
+        d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
+        self.df = pd.DataFrame(data=d)
+
+    def epoch_process(
+        self,
+        pass_name: str,
+        epoch_number: int, 
+        entry_names: List[str],
+        output_values: List[Any],
+        target_values: List[Any],
+        loss: float):
+
+        pass_name = [pass_name] * len(output_values)
+        loss = [loss] * len(output_values)
+        epoch_number = [epoch_number] * len(output_values)
+
+        d_epoch = {'phase': pass_name, 'epoch': epoch_number, 'entry': entry_names, 'output': output_values, 'target': target_values, 'loss': loss}
+        df_epoch = pd.DataFrame(data=d_epoch)
+
+        self.df = pd.concat([self.df, df_epoch])
+
+    def save_all_metrics(self):
+
+        self.df.to_hdf(
+            os.path.join(self._directory_path, 'metrics.hdf5'),
+            key='metrics',
+            mode='w')
