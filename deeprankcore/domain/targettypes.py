@@ -4,7 +4,7 @@
 VALUES = "target_values"
 
 # classification tasks
-BINARY = "bin_class"
+BINARY = "binary"
 CAPRI = "capri_class"
 
 # regression tasks

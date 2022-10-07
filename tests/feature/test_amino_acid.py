@@ -31,4 +31,4 @@ def test_add_features():
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
             assert node.features[nodefeats.DIFFSIZE] > 0
-            assert node.features[nodefeats.HBDONORS] > 0
+            assert node.features[nodefeats.DIFFHBDONORS] > 0

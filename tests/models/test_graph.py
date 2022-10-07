@@ -71,13 +71,13 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             assert node_feature_name in node_features_group
             assert len(numpy.nonzero(node_features_group[node_feature_name][()])) > 0
 
-            assert groups.INDICES in entry_group
-            assert len(numpy.nonzero(entry_group[groups.INDICES][()])) > 0
-
             assert groups.EDGE in entry_group
             edge_features_group = entry_group[groups.EDGE]
             assert edge_feature_name in edge_features_group
             assert len(numpy.nonzero(edge_features_group[edge_feature_name][()])) > 0
+
+            assert groups.INDICES in edge_features_group
+            assert len(numpy.nonzero(edge_features_group[groups.INDICES][()])) > 0
 
             # check for grid-mapped values
             assert "mapped_features" in entry_group
