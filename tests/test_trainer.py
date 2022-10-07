@@ -18,7 +18,7 @@ from deeprankcore.models.metrics import (
 )
 from deeprankcore.domain.features import groups, edgefeats
 from deeprankcore.domain.features import nodefeats as Nfeat
-from deeprankcore.domain import targets
+from deeprankcore.domain import targetvalues as targets
 
 
 _log = logging.getLogger(__name__)

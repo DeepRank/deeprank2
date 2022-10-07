@@ -5,7 +5,7 @@ from torch_geometric.data.data import Data
 import h5py
 from deeprankcore.domain.features import edgefeats 
 from deeprankcore.domain.features import nodefeats as Nfeat
-from deeprankcore.domain import targets
+from deeprankcore.domain import targetvalues as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 

@@ -22,7 +22,7 @@ from deeprankcore.models.query import (
 from deeprankcore.domain.features import groups
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats as Efeat
-from deeprankcore.domain import targets
+from deeprankcore.domain import targetvalues as targets
 
 from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
 from deeprankcore.DataSet import HDF5DataSet

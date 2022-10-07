@@ -3,7 +3,7 @@ from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.ginet import GINet
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats
-from deeprankcore.domain import targets
+from deeprankcore.domain import targetvalues as targets
 
 hdf5_path = "./1ATN_residue.hdf5"
 

@@ -3,7 +3,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score
-from deeprankcore.domain import targets
+from deeprankcore.domain import targetvalues as targets
 
 
 def get_binary(values, threshold, target):

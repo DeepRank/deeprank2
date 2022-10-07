@@ -15,7 +15,7 @@ from torch_geometric.loader import DataLoader
 # deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
-from deeprankcore.domain import targets
+from deeprankcore.domain import targetvalues as targets
 
 _log = logging.getLogger(__name__)
 

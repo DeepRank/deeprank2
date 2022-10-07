@@ -10,7 +10,7 @@ from tqdm import tqdm
 import h5py
 from ast import literal_eval
 from deeprankcore.domain.features import groups, nodefeats
-from deeprankcore.domain import targets
+from deeprankcore.domain import targetvalues as targets
 from typing import Callable, List, Union
 
 
