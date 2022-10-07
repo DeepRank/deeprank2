@@ -288,7 +288,7 @@ class HDF5DataSet(Dataset):
 
                 if groups.TARGET in grp and self.target in grp[groups.TARGET]:
                     try:
-                        y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
+                        y = torch.tensor([grp[f"{groups.TARGET}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
                     except Exception as e:
                         print(e)
                         print('If your target variable contains categorical classes, \
