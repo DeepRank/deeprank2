@@ -247,7 +247,7 @@ class HDF5DataSet(Dataset):
             self.edge_feature = self.available_edge_feature
         elif self.edge_feature is not None:
             for feat in self.edge_feature:
-                if feat not in self.available_edge_feature:
+                if feat not in self.available_edge_feature and feat[0] != '_':
                     print(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
                     print("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
                     print(f"\nPossible edge features: {self.available_edge_feature}\n")
@@ -272,17 +272,18 @@ class HDF5DataSet(Dataset):
             # node features
             node_data = ()
             for feat in self.node_feature:
-                vals = grp[f"{groups.NODE}/{feat}"][()]
-                if vals.ndim == 1:
-                    vals = vals.reshape(-1, 1)
+                if feat[0] != '_':
+                    vals = grp[f"{groups.NODE}/{feat}"][()]
+                    if vals.ndim == 1:
+                        vals = vals.reshape(-1, 1)
 
-                node_data += (vals,)
+                    node_data += (vals,)
 
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if groups.INDICES in grp:
-                ind = grp[groups.INDICES][()]
+            if groups.INDICES in grp[groups.EDGE]:
+                ind = grp[f"{groups.EDGE}/{groups.INDICES}"][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
@@ -296,10 +297,11 @@ class HDF5DataSet(Dataset):
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    vals = grp[f"{groups.EDGE}/{feat}"][()]
-                    if vals.ndim == 1:
-                        vals = vals.reshape(-1, 1)
-                    edge_data += (vals,)
+                    if feat[0] != '_':
+                        vals = grp[f"{groups.EDGE}/{feat}"][()]
+                        if vals.ndim == 1:
+                            vals = vals.reshape(-1, 1)
+                        edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
                 edge_data = self.edge_feature_transform(edge_data)
@@ -329,7 +331,7 @@ class HDF5DataSet(Dataset):
                 else:
                     possible_targets = grp[targets.VALUES].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
-                                     " Use the query class to add more target values to input data.")
+                                     "\n Use the query class to add more target values to input data.")
 
             # positions
             pos = torch.tensor(grp[f"{groups.NODE}/{nodefeats.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
