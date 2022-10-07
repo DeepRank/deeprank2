@@ -44,6 +44,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         root="./",
         node_feature=node_features,
         edge_feature=edge_features,
+        task = task,
         target=target,
         clustering_method=clustering_method)
 
@@ -53,6 +54,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             root="./",
             node_feature=node_features,
             edge_feature=edge_features,
+            task = task,
             target=target,
             clustering_method=clustering_method)
     else:
@@ -65,6 +67,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             node_feature=node_features,
             edge_feature=edge_features,
             target=target,
+            task=task,
             clustering_method=clustering_method)
     else:
         dataset_test = None
@@ -74,7 +77,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val,
         dataset_test,
         model_class,
-        task=task,
         batch_size=64,
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
@@ -127,7 +129,7 @@ class TestTrainer(unittest.TestCase):
             GINet,
             default_features,
             [edgefeats.DISTANCE],
-            "reg",
+            "regress",
             "irmsd",
             [OutputExporter(self.work_directory)],
             True,
@@ -142,7 +144,7 @@ class TestTrainer(unittest.TestCase):
             GINet,
             default_features,
             [edgefeats.DISTANCE],
-            "reg",
+            "regress",
             "irmsd",
             [OutputExporter(self.work_directory)],
             False,
@@ -159,7 +161,7 @@ class TestTrainer(unittest.TestCase):
             GINet,
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             [edgefeats.DISTANCE],
-            "class",
+            "classif",
             "bin_class",
             [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
@@ -176,7 +178,7 @@ class TestTrainer(unittest.TestCase):
             FoutNet,
             default_features,
             [edgefeats.DISTANCE],
-            "class",
+            "classif",
             "binary",
             [],
             False,
@@ -191,7 +193,7 @@ class TestTrainer(unittest.TestCase):
             sGAT,
             default_features,
             [edgefeats.DISTANCE],
-            "reg",
+            "regress",
             "irmsd",
             [],
             False,
@@ -206,7 +208,7 @@ class TestTrainer(unittest.TestCase):
             NaiveNetwork,
             default_features,
             [edgefeats.DISTANCE],
-            "reg",
+            "regress",
             "BA",
             [OutputExporter(self.work_directory)],
             False,
@@ -222,7 +224,7 @@ class TestTrainer(unittest.TestCase):
                 sGAT,
                 default_features,
                 [edgefeats.DISTANCE],
-                "reg",
+                "regress",
                 "irmsd",
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
                 False,
@@ -238,7 +240,7 @@ class TestTrainer(unittest.TestCase):
                 GINet,
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 [edgefeats.DISTANCE],
-                "class",
+                "classif",
                 "bin_class",
                 [ScatterPlotExporter(self.work_directory)],
                 False,
@@ -256,7 +258,6 @@ class TestTrainer(unittest.TestCase):
             Trainer(
                 dataset_test = dataset,
                 Net = NaiveNetwork,
-                task = "class"
             )
 
     def test_incompatible_no_pretrained_no_Net(self):
@@ -268,7 +269,6 @@ class TestTrainer(unittest.TestCase):
 
             Trainer(
                 dataset_train = dataset,
-                task = "class"
             )
 
     def test_incompatible_pretrained_no_test(self):
@@ -281,7 +281,6 @@ class TestTrainer(unittest.TestCase):
             trainer = Trainer(
                 dataset_train = dataset,
                 Net = GINet,
-                task = "class"
             )
 
             trainer.train(nepoch=10, validate=True)
@@ -303,7 +302,6 @@ class TestTrainer(unittest.TestCase):
             trainer = Trainer(
                 dataset_train = dataset,
                 Net = GINet,
-                task = "class"
             )
 
             trainer.train(nepoch=10, validate=True)
@@ -324,7 +322,6 @@ class TestTrainer(unittest.TestCase):
         trainer = Trainer(
             dataset_train = dataset,
             Net = GINet,
-            task = "class",
             batch_size = 1
         )
 
@@ -342,7 +339,6 @@ class TestTrainer(unittest.TestCase):
             dataset_train = dataset,
             Net = GINet,
             val_size = 0,
-            task = "class",
             batch_size = 1
         )
 
@@ -359,7 +355,6 @@ class TestTrainer(unittest.TestCase):
         trainer = Trainer(
             dataset_train = dataset,
             Net = NaiveNetwork,
-            task = "class"
         )
 
         optimizer = torch.optim.Adamax
@@ -395,7 +390,6 @@ class TestTrainer(unittest.TestCase):
         trainer = Trainer(
             dataset_train = dataset,
             Net = NaiveNetwork,
-            task = "class"
         )
 
         assert isinstance(trainer.optimizer, torch.optim.Adam)

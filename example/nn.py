@@ -20,7 +20,6 @@ trainer = Trainer(
     dataset,
     GINet,
     val_size=0.25,
-    task="reg",
     batch_size=64,
 )
 
