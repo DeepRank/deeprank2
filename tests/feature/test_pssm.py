@@ -43,7 +43,6 @@ def test_add_features():
         Nfeat.PSSM,
         Nfeat.DIFFCONSERVATION,
         Nfeat.CONSERVATION,
-        Nfeat.VARIANTCONSERVATION,
         Nfeat.INFOCONTENT,
     ):
         assert numpy.any([node.features[feature_name] != 0.0 for node in graph.nodes])

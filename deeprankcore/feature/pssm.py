@@ -40,10 +40,8 @@ def add_features( # pylint: disable=unused-argument
                 conservation_variant = pssm_row.get_conservation(single_amino_acid_variant.variant_amino_acid)
 
                 node.features[Nfeat.CONSERVATION] = conservation_wildtype
-                node.features[Nfeat.VARIANTCONSERVATION] = conservation_variant
                 node.features[Nfeat.DIFFCONSERVATION] = conservation_variant - conservation_wildtype
             else:
                 # all nodes must have the same features, so set them to zero here
                 node.features[Nfeat.CONSERVATION] = 0.0
-                node.features[Nfeat.VARIANTCONSERVATION] = 0.0
                 node.features[Nfeat.DIFFCONSERVATION] = 0.0
