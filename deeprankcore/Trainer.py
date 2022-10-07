@@ -7,14 +7,11 @@ import h5py
 import copy
 import numpy as np
 import os
-import glob
-# torch import
 import torch
 from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-# deeprankcore import
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
 

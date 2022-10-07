@@ -235,7 +235,8 @@ class HDF5DataSet(Dataset):
             for feat in self.node_feature:
                 if feat not in self.available_node_feature:
                     _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function.\
+                        Probably, the feature wasn't generated during the preprocessing step.")
                     _log.info(f"\nPossible node features: {self.available_node_feature}\n")
                     sys.exit()
 
@@ -252,7 +253,8 @@ class HDF5DataSet(Dataset):
             for feat in self.edge_feature:
                 if feat not in self.available_edge_feature:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info("\nCheck feature_modules passed to the preprocess function. Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function.\
+                        Probably, the feature wasn't generated during the preprocessing step.")
                     _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
                     sys.exit()
 

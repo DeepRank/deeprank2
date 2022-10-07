@@ -275,7 +275,7 @@ class ConciseOutputExporter(MetricsExporter):
         d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
         self.df = pd.DataFrame(data=d)
 
-    def epoch_process(
+    def epoch_process( # pylint: disable=too-many-arguments
         self,
         pass_name: str,
         epoch_number: int, 
