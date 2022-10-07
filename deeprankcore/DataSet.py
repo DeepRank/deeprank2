@@ -125,9 +125,6 @@ class HDF5DataSet(Dataset):
             self.hdf5_path = [hdf5_path]
 
         self.target = target
-
-        # I made it so it overrules the user setting in case the target is one of the 'known' types.
-        # Is this what we want, or do we prefer to raise an error or show a warning in case it does not match? 
         if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
             self.task = "regress"
         elif self.target in ["bin", "binary", "bin_class", "capri_classes"]:
