@@ -140,13 +140,19 @@ class HDF5DataSet(Dataset):
                 "model = NeuralNet(dataset, GINet,"
                 "                  target='physiological_assembly',"
                 "                  task='classif')")
+        
+        if self.task == 'classif':
+            if classes is None:
+                self.classes = [0, 1]
+            else:
+                self.classes = classes
 
-        if (classes is None) and (self.task == 'classif'):
-            self.classes = [0, 1]
-        elif self.task == 'classif':
-            self.classes = classes
+            self.classes_to_idx = {
+                i: idx for idx, i in enumerate(self.classes)
+            }
         else:
             self.classes = None
+            self.classes_to_idx = None
 
         self.dict_filter = dict_filter
         self.tqdm = tqdm
