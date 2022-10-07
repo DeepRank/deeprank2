@@ -13,3 +13,6 @@ LRMSD = 'lrmsd'
 FNAT = 'fnat'
 DOCKQ = 'dockq'
 
+# task names
+REGRESS = 'regress'
+CLASSIF = 'classif'

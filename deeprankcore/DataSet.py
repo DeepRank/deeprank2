@@ -129,13 +129,13 @@ class HDF5DataSet(Dataset):
 
         self.target = target
         if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
-            self.task = "regress"
+            self.task = targets.REGRESS
         elif self.target in [targets.BINARY, targets.CAPRI]:
-            self.task = "classif"
+            self.task = targets.CLASSIF
         else:
             self.task = task
         
-        if self.task not in ['classif','regress'] and self.target is not None:
+        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
             raise ValueError(
                 f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
                 "Example: \n\t"
@@ -144,9 +144,9 @@ class HDF5DataSet(Dataset):
                 "                  target='physiological_assembly',"
                 "                  task='classif')")
 
-        if (classes is None) and (self.task == 'classif'):
+        if (classes is None) and (self.task == targets.CLASSIF):
             self.classes = [0, 1]
-        elif self.task == 'classif':
+        elif self.task == targets.CLASSIF:
             self.classes = classes
         else:
             self.classes = None
