@@ -21,15 +21,13 @@ _log = logging.getLogger(__name__)
 
 class Trainer():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-branches
+    def __init__(self, # pylint: disable=too-many-arguments
                  dataset_train = None,
                  dataset_val = None,
                  dataset_test = None,
                  Net = None,
                  val_size = None,
                  class_weights = None,
-                 task = None,
-                 classes = None,
                  pretrained_model = None,
                  batch_size = 32,
                  shuffle = True,
@@ -56,11 +54,6 @@ class Trainer():
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
-            task (str, optional): 'reg' for regression or 'class' for classification.
-                Defaults to 'class' if the target is 'bin_class' or 'capri_classes'.
-                Defaults to 'reg' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockQ'.
-                It must be set to either 'class' or 'reg' if 'target' is not one of the conventional names.
-            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             batch_size (int, optional): defaults to 32.
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
@@ -88,11 +81,12 @@ class Trainer():
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
             self.target = dataset_train.target  # already defined in HDF5DatSet object
+            self.task = dataset_train.task
+            self.classes = dataset_train.classes
             self.optimizer = None
             self.batch_size = batch_size
             self.val_size = val_size            # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
-            self.task = task
 
             self.shuffle = shuffle
             self.transform_sigmoid = transform_sigmoid
@@ -101,28 +95,6 @@ class Trainer():
             self.node_feature = dataset_train.node_feature
             self.edge_feature = dataset_train.edge_feature
             self.cluster_nodes = dataset_train.clustering_method
-
-            if self.task is None:
-                if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
-                    self.task = "reg"
-                elif self.target in ["bin_class", "capri_classes"]:
-                    self.task = "class"
-                else:
-                    raise ValueError(
-                        "User target detected -> The task argument is required ('class' or 'reg'). \n\t"
-                        "Example: \n\t"
-                        ""
-                        "model = Trainer(dataset, GINet,"
-                        "                  target='physiological_assembly',"
-                        "                  task='class',"
-                        "                  val_size=0.25)")
-
-            if (classes is None) and (self.task == 'class'):
-                self.classes = [0, 1]
-            elif self.task == 'class':
-                self.classes = classes
-            else:
-                self.classes = None
 
             self._load_model(dataset_train, dataset_val, dataset_test, Net)
 
@@ -290,7 +262,7 @@ class Trainer():
             target_shape = None
 
         # regression mode
-        if self.task == "reg":
+        if self.task == "regress":
 
             self.output_shape = 1
 
@@ -301,7 +273,7 @@ class Trainer():
                 self.device)
 
         # classification mode
-        elif self.task == "class":
+        elif self.task == "classif":
 
             self.classes_to_idx = {
                 i: idx for idx, i in enumerate(self.classes)
@@ -323,10 +295,10 @@ class Trainer():
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
-        if self.task == "reg":
+        if self.task == "regress":
             self.loss = MSELoss()
 
-        elif self.task == "class":
+        elif self.task == "classif":
 
             # assign weights to each class in case of unbalanced dataset
             self.weights = None
@@ -492,7 +464,7 @@ class Trainer():
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == 'class':
+            if self.task == "classif":
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -556,7 +528,7 @@ class Trainer():
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == 'class':
+            if self.task == "classif":
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -598,14 +570,14 @@ class Trainer():
     def _format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
 
-        if (self.task == 'class') and (target is not None):
+        if (self.task == "classif") and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
                 [self.classes_to_idx[int(x)] for x in target]
             ).to(self.device)
 
-        elif self.task == 'reg':
+        elif self.task == "regress":
             if self.transform_sigmoid is True:
 
                 # Sigmoid(x) = 1 / (1 + exp(-x))

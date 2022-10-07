@@ -9,9 +9,7 @@ from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
-from typing import Callable
-from typing import List
-from typing import Union
+from typing import Callable, List, Union
 
 _log = logging.getLogger(__name__)
 
@@ -58,6 +56,8 @@ class HDF5DataSet(Dataset):
         pre_transform: Callable = None,
         dict_filter: dict = None,
         target: str = None,
+        task: str = None,
+        classes: List = None,
         tqdm: bool = True,
         subset: list = None,
         node_feature: Union[List[str], str] = "all",
@@ -91,6 +91,13 @@ class HDF5DataSet(Dataset):
             please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
             Defaults to None.
 
+            task (str, optional): 'regress' for regression or 'classif' for classification.
+                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin', 'binary', ''bin_class', 'capri_class', or 'DockQ']
+                Automatically set to 'classif' if the target is 'binary', 'bin_class', 'bin', or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'DockQ'.
+
+            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
+
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
@@ -118,6 +125,29 @@ class HDF5DataSet(Dataset):
             self.hdf5_path = [hdf5_path]
 
         self.target = target
+        if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
+            self.task = "regress"
+        elif self.target in ["bin", "binary", "bin_class", "capri_classes"]:
+            self.task = "classif"
+        else:
+            self.task = task
+        
+        if self.task not in ['classif','regress'] and self.target is not None:
+            raise ValueError(
+                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
+                "Example: \n\t"
+                ""
+                "model = NeuralNet(dataset, GINet,"
+                "                  target='physiological_assembly',"
+                "                  task='classif')")
+
+        if (classes is None) and (self.task == 'classif'):
+            self.classes = [0, 1]
+        elif self.task == 'classif':
+            self.classes = classes
+        else:
+            self.classes = None
+
         self.dict_filter = dict_filter
         self.tqdm = tqdm
         self.subset = subset
@@ -293,7 +323,6 @@ class HDF5DataSet(Dataset):
                         print('If your target variable contains categorical classes, \
                         please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
-
                     possible_targets = grp["score"].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
                                      " Use the query class to add more target values to input data.")

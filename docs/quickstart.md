@@ -18,7 +18,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "binary": 0
+        "bin_class": 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -30,7 +30,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "binary": 1
+        "bin_class": 1
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -42,7 +42,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "binary": 0
+        "bin_class": 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -86,17 +86,20 @@ edge_features = ["dist"]
 dataset_train = HDF5DataSet(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_feature = node_features,
-    edge_feature = edge_features
+    edge_feature = edge_features,
+    target = 'bin_class'
 )
 dataset_val = HDF5DataSet(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_feature = node_features,
-    edge_feature = edge_features
+    edge_feature = edge_features,
+    target = 'bin_class'
 )
 dataset_test = HDF5DataSet(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_feature = node_features,
-    edge_feature = edge_features
+    edge_feature = edge_features,
+    target = 'bin_class'
 )
 ```
 ## Training
@@ -116,8 +119,6 @@ trainer = Trainer(
     dataset_val,
     dataset_test,
     GINet,
-    lr = 0.001,
-    task = "class",
     batch_size = 64,
     metrics_exporters = metrics_exporters
 )
@@ -171,7 +172,6 @@ trainer = Trainer(
     dataset_val,
     dataset_test,
     CustomNet,
-    task = "class",
     batch_size = 64,
     metrics_exporters = metrics_exporters
 )
