@@ -9,6 +9,7 @@ from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.contact import Contact
 from deeprankcore.models.grid import MapMethod, Grid, GridSettings
 from deeprankcore.domain.features import groups
+from deeprankcore.domain import targets
 
 _log = logging.getLogger(__name__)
 
@@ -213,7 +214,7 @@ class Graph:
                 )
 
             # store target values
-            score_group = graph_group.create_group(groups.TARGET)
+            score_group = graph_group.create_group(targets.VALUES)
             for target_name, target_data in self.targets.items():
                 score_group.create_dataset(target_name, data=target_data)
 

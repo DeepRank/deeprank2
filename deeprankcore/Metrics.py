@@ -3,6 +3,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score
+from deeprankcore.domain import targets
 
 
 def get_binary(values, threshold, target):
@@ -21,7 +22,7 @@ def get_binary(values, threshold, target):
     Returns:
         list: list of binary values
     """
-    inverse = ["fnat", "bin_class"]
+    inverse = [targets.FNAT, targets.BINARY]
     if target in inverse:
         values_binary = [1 if x > threshold else 0 for x in values]
     else:
@@ -125,9 +126,9 @@ class Metrics():
             )
 
         else:
-            if target == "capri_class":
+            if target == targets.CAPRI:
                 classes = [1, 2, 3, 4, 5]
-            elif target == "bin_class":
+            elif target == targets.BINARY:
                 classes = [0, 1]
             else:
                 raise ValueError("target must be capri_class on bin_class")
@@ -194,7 +195,7 @@ class Metrics():
         self.median_squared_log_error = None
         self.r2_score = None
 
-        if target in ["fnat", "irmsd", "lrmsd"]:
+        if target in [targets.FNAT, targets.IRMSD, targets.LRMSD]:
 
             # Explained variance regression score function
             self.explained_variance = metrics.explained_variance_score(
@@ -251,7 +252,7 @@ class Metrics():
         """
         idx = np.argsort(self.prediction)
 
-        inverse = ["fnat", "bin_class"]
+        inverse = [targets.FNAT, targets.BINARY]
         if self.target in inverse:
             idx = idx[::-1]
 

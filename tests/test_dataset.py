@@ -5,6 +5,7 @@ from torch_geometric.data.data import Data
 import h5py
 from deeprankcore.domain.features import edgefeats 
 from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain import targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
@@ -17,7 +18,7 @@ class TestDataSet(unittest.TestCase):
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
             edge_feature=[edgefeats.DISTANCE],
-            target="irmsd",
+            target=targets.IRMSD,
             subset=None,
         )
 
@@ -26,9 +27,9 @@ class TestDataSet(unittest.TestCase):
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
             edge_feature=[edgefeats.DISTANCE],
-            target="irmsd",
+            target=targets.IRMSD,
             subset=None,
-            dict_filter={"irmsd": "<10"},
+            dict_filter={targets.IRMSD: "<10"},
         )
 
     def test_transform(self):
@@ -41,7 +42,7 @@ class TestDataSet(unittest.TestCase):
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
             edge_feature=[edgefeats.DISTANCE],
-            target="irmsd",
+            target=targets.IRMSD,
             subset=None,
             transform=operator
         )
@@ -54,7 +55,7 @@ class TestDataSet(unittest.TestCase):
             hdf5_path=["tests/hdf5/train.hdf5", "tests/hdf5/valid.hdf5"],
             node_feature=node_feats,
             edge_feature=[edgefeats.DISTANCE],
-            target="binary"
+            target=targets.BINARY
         )
 
         assert dataset.len() > 0

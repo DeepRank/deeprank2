@@ -10,6 +10,7 @@ from tqdm import tqdm
 import h5py
 from ast import literal_eval
 from deeprankcore.domain.features import groups, nodefeats
+from deeprankcore.domain import targets
 from typing import Callable, List, Union
 
 
@@ -87,16 +88,16 @@ class HDF5DataSet(Dataset):
             dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. It can also be a custom-defined
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
             target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
             here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
             please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
             Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification.
-                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin', 'binary', ''bin_class', 'capri_class', or 'DockQ']
-                Automatically set to 'classif' if the target is 'binary', 'bin_class', 'bin', or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'DockQ'.
+                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq']
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
@@ -127,9 +128,9 @@ class HDF5DataSet(Dataset):
             self.hdf5_path = [hdf5_path]
 
         self.target = target
-        if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
             self.task = "regress"
-        elif self.target in ["bin", "binary", "bin_class", "capri_classes"]:
+        elif self.target in [targets.BINARY, targets.CAPRI]:
             self.task = "classif"
         else:
             self.task = task
@@ -318,7 +319,7 @@ class HDF5DataSet(Dataset):
                 y = None
             else:
 
-                if groups.TARGET in grp and self.target in grp[groups.TARGET]:
+                if targets.VALUES in grp and self.target in grp[targets.VALUES]:
                     try:
                         y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
                     except Exception as e:
@@ -326,7 +327,7 @@ class HDF5DataSet(Dataset):
                         print('If your target variable contains categorical classes, \
                         please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
-                    possible_targets = grp[groups.TARGET].keys()
+                    possible_targets = grp[targets.VALUES].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
                                      " Use the query class to add more target values to input data.")
 
@@ -425,11 +426,11 @@ class HDF5DataSet(Dataset):
         for cond_name, cond_vals in self.dict_filter.items():
 
             try:
-                molgrp[groups.TARGET][cond_name][()]
+                molgrp[targets.VALUES][cond_name][()]
             except KeyError:
                 print(f"   :Filter {cond_name} not found for mol {molgrp}")
                 print("   :Filter options are")
-                for k in molgrp[groups.TARGET].keys():
+                for k in molgrp[targets.VALUES].keys():
                     print("   : ", k)
 
             # if we have a string it's more complicated

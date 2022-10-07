@@ -7,6 +7,7 @@ The process of generating graphs takes as input `.pdb` files representing protei
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import bsa, pssm, amino_acid, biopython
+from deeprankcore.domain import targets
 
 feature_modules = [bsa, pssm, biopython, atomic_contact]
 
@@ -18,7 +19,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "bin_class": 0
+        targets.BINARY: 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -30,7 +31,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "bin_class": 1
+        targets.BINARY: 1
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -42,7 +43,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "bin_class": 0
+        targets.BINARY: 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -90,19 +91,19 @@ dataset_train = HDF5DataSet(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
-    target = 'bin_class'
+    target = targets.BINARY
 )
 dataset_val = HDF5DataSet(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
-    target = 'bin_class'
+    target = targets.BINARY
 )
 dataset_test = HDF5DataSet(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
-    target = 'bin_class'
+    target = targets.BINARY
 )
 ```
 ## Training

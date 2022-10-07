@@ -18,6 +18,7 @@ from deeprankcore.models.metrics import (
 )
 from deeprankcore.domain.features import groups, edgefeats
 from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain import targets
 
 
 _log = logging.getLogger(__name__)
@@ -130,7 +131,7 @@ class TestTrainer(unittest.TestCase):
             default_features,
             [edgefeats.DISTANCE],
             "regress",
-            "irmsd",
+            targets.IRMSD,
             [OutputExporter(self.work_directory)],
             True,
             "mcl",
@@ -145,7 +146,7 @@ class TestTrainer(unittest.TestCase):
             default_features,
             [edgefeats.DISTANCE],
             "regress",
-            "irmsd",
+            targets.IRMSD,
             [OutputExporter(self.work_directory)],
             False,
             "mcl",
@@ -162,7 +163,7 @@ class TestTrainer(unittest.TestCase):
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             [edgefeats.DISTANCE],
             "classif",
-            "bin_class",
+            targets.BINARY,
             [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
             "mcl",
@@ -179,7 +180,7 @@ class TestTrainer(unittest.TestCase):
             default_features,
             [edgefeats.DISTANCE],
             "classif",
-            "binary",
+            targets.BINARY,
             [],
             False,
             "mcl",
@@ -194,7 +195,7 @@ class TestTrainer(unittest.TestCase):
             default_features,
             [edgefeats.DISTANCE],
             "regress",
-            "irmsd",
+            targets.IRMSD,
             [],
             False,
             "mcl",
@@ -225,7 +226,7 @@ class TestTrainer(unittest.TestCase):
                 default_features,
                 [edgefeats.DISTANCE],
                 "regress",
-                "irmsd",
+                targets.IRMSD,
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
                 False,
                 "mcl",
@@ -241,7 +242,7 @@ class TestTrainer(unittest.TestCase):
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 [edgefeats.DISTANCE],
                 "classif",
-                "bin_class",
+                targets.BINARY,
                 [ScatterPlotExporter(self.work_directory)],
                 False,
                 "mcl",
@@ -252,7 +253,7 @@ class TestTrainer(unittest.TestCase):
 
             dataset = HDF5DataSet(
                 hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                target=targets.BINARY,
                 root="./")
 
             Trainer(
@@ -264,7 +265,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
                 hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                target=targets.BINARY,
                 root="./")
 
             Trainer(
@@ -275,7 +276,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
                 hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                target=targets.BINARY,
                 root="./")
 
             trainer = Trainer(
@@ -296,7 +297,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
                 hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                target=targets.BINARY,
                 root="./")
 
             trainer = Trainer(
@@ -316,7 +317,7 @@ class TestTrainer(unittest.TestCase):
 
         dataset = HDF5DataSet(
             hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(
@@ -332,7 +333,7 @@ class TestTrainer(unittest.TestCase):
 
         dataset = HDF5DataSet(
             hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(
@@ -349,7 +350,7 @@ class TestTrainer(unittest.TestCase):
 
         dataset = HDF5DataSet(
             hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(
@@ -384,7 +385,7 @@ class TestTrainer(unittest.TestCase):
 
         dataset = HDF5DataSet(
             hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(

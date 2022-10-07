@@ -13,6 +13,7 @@ from deeprankcore.models.metrics import OutputExporter
 from deeprankcore.tools.score import get_all_scores
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats
+from deeprankcore.domain import targets
 import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals
@@ -39,7 +40,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
     try:
 
-        targets = get_all_scores(pdb_path, ref_path)
+        all_targets = get_all_scores(pdb_path, ref_path)
 
         count_queries = 10
         queries = []
@@ -49,7 +50,7 @@ def test_integration(): # pylint: disable=too-many-locals
                 chain_id1,
                 chain_id2,
                 pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
-                targets = targets
+                targets = all_targets
             )
             queries.append(query)
 
@@ -74,7 +75,7 @@ def test_integration(): # pylint: disable=too-many-locals
             hdf5_path = output_paths[:int(n_files*0.8)],
             node_feature = node_features,
             edge_feature = edge_features,
-            target = "bin_class",
+            target = targets.BINARY,
             clustering_method = "mcl",
         )
 
@@ -82,7 +83,7 @@ def test_integration(): # pylint: disable=too-many-locals
             hdf5_path = output_paths[int(n_files*0.8):n_files-1],
             node_feature = node_features,
             edge_feature = edge_features,
-            target = "bin_class",
+            target = targets.BINARY,
             clustering_method = "mcl",
         )
 
@@ -90,7 +91,7 @@ def test_integration(): # pylint: disable=too-many-locals
             hdf5_path = output_paths[-1],
             node_feature = node_features,
             edge_feature = edge_features,
-            target = "bin_class",
+            target = targets.BINARY,
             clustering_method = "mcl",
         )
 
