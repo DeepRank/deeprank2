@@ -7,7 +7,7 @@ The process of generating graphs takes as input `.pdb` files representing protei
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import bsa, pssm, amino_acid, biopython
-from deeprankcore.domain import targetvalues as targets
+from deeprankcore.domain import targettypes as targets
 
 feature_modules = [bsa, pssm, biopython, atomic_contact]
 

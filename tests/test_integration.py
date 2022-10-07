@@ -13,7 +13,7 @@ from deeprankcore.models.metrics import OutputExporter
 from deeprankcore.tools.score import get_all_scores
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats
-from deeprankcore.domain import targetvalues as targets
+from deeprankcore.domain import targettypes as targets
 import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals

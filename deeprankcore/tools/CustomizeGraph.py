@@ -2,7 +2,7 @@ import glob
 import h5py
 import os
 import numpy as np
-from deeprankcore.domain import targetvalues as targets
+from deeprankcore.domain import targettypes as targets
 
 
 

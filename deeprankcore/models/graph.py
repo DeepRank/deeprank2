@@ -9,7 +9,7 @@ from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.contact import Contact
 from deeprankcore.models.grid import MapMethod, Grid, GridSettings
 from deeprankcore.domain.features import groups
-from deeprankcore.domain import targetvalues as targets
+from deeprankcore.domain import targettypes as targets
 
 _log = logging.getLogger(__name__)
 

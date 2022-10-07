@@ -2,7 +2,7 @@ import os
 from typing import Dict, Union
 
 from pdb2sql import StructureSimilarity
-from deeprankcore.domain import targetvalues as targets
+from deeprankcore.domain import targettypes as targets
 
 
 def get_all_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
