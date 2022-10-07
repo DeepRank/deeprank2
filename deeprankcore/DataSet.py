@@ -436,7 +436,7 @@ class HDF5DataSet(Dataset):
                 _log.info(f"   :Filter {cond_name} not found for mol {molgrp}")
                 _log.info("   :Filter options are")
                 for k in molgrp["score"].keys():
-                    _log.info("   : ", k)
+                    _log.info("   : ", k) # pylint: disable=logging-too-many-args
 
             # if we have a string it's more complicated
             if isinstance(cond_vals, str):
