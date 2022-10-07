@@ -43,10 +43,8 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
     graph = networkx.Graph()
 
     # read nodes
-    node_names = [
-        _get_node_key(key) for key in graph_group[groups.NAMES][()]
-    ]
     node_features_group = graph_group[groups.NODE]
+    node_names = [_get_node_key(key) for key in node_features_group[groups.NAMES][()]]
     node_features = {}
     node_feature_names = list(node_features_group.keys())
     for node_feature_name in node_feature_names:
@@ -60,9 +58,9 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
             ][node_index]
 
     # read edges
-    edge_names = graph_group[groups.NAMES][()]
-    edge_node_indices = graph_group[groups.INDICES][()]
     edge_features_group = graph_group[groups.EDGE]
+    edge_names = edge_features_group[groups.NAMES][()]
+    edge_node_indices = edge_features_group[groups.INDICES][()]
     edge_features = {}
     edge_feature_names = list(edge_features_group.keys())
     for edge_feature_name in edge_feature_names:
@@ -219,13 +217,15 @@ def plotly_2d( # noqa
     # 'rgb(0,102,255)'
     node_trace = [node_trace_A, node_trace_B]
 
-    for node in graph.nodes:
+    for x, node in enumerate(graph.nodes):
 
         index = 0
         if Nfeat.CHAINID in graph.nodes[node]:
-            if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]: # I believe graph.nodes is listlike so calling nodes[0] should work
+            if x == 0:
+                first_chain = graph.nodes[node][Nfeat.CHAINID]
+            if graph.nodes[node][Nfeat.CHAINID] != first_chain: # This is not very puythonic, but somehow I'm stuck on how to do this without enumerating
                 index = 1
-
+        
         pos = graph.nodes[node]["pos2D"]
 
         node_trace[index]["x"] += (pos[0],)
@@ -374,19 +374,14 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
 
     node_trace = [node_trace_A, node_trace_B]
 
-    for node in graph.nodes:
+    for x, node in enumerate(graph.nodes):
 
         index = 0
         if Nfeat.CHAINID in graph.nodes[node]:
-            try:
-                if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]: # I believe graph.nodes is listlike so calling nodes[0] should work
-                    index = 1
-            except Exception as e:
-                print('exception caught in tools/visualization')
-                print('`if graph.nodes[node][Nfeat.CHAINID] == graph.nodes[0][Nfeat.CHAINID]` is faulty')
-                raise e
-            else:
-                print('no error caught')
+            if x == 0:
+                first_chain = graph.nodes[node][Nfeat.CHAINID]
+            if graph.nodes[node][Nfeat.CHAINID] != first_chain: # This is not very puythonic, but somehow I'm stuck on how to do this without enumerating
+                index = 1
 
         pos = graph.nodes[node][Nfeat.POSITION]
 
