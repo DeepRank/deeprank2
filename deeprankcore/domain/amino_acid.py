@@ -84,8 +84,7 @@ isoleucine = AminoAcid(
     "I",
     charge=-0.37,
     polarity=Polarity.APOLAR,
-    size=4, 
-    count_hydrogen_bond_donors=0,
+    size=4, count_hydrogen_bond_donors=0,
     count_hydrogen_bond_acceptors=0,
     index=7)
 
