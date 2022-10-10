@@ -6,14 +6,13 @@ from tqdm import tqdm
 import h5py
 import copy
 import numpy as np
-# torch import
+import os
 import torch
 from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-# deeprankcore import
-from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter
+from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targettypes as targets
 
@@ -33,7 +32,8 @@ class Trainer():
                  batch_size = 32,
                  shuffle = True,
                  transform_sigmoid: Optional[bool] = False,
-                 metrics_exporters: Optional[List[MetricsExporter]] = None):
+                 metrics_exporters: Optional[List[MetricsExporter]] = None,
+                 output_dir = './metrics'):
         """Class from which the network is trained, evaluated and tested
 
         Args:
@@ -61,14 +61,20 @@ class Trainer():
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
-
+            output_dir: location for metrics file (see ConciseOutputExporter class)
         """
-
         if metrics_exporters is not None:
             self._metrics_exporters = MetricsExporterCollection(
                 *metrics_exporters)
+                
         else:
             self._metrics_exporters = MetricsExporterCollection()
+
+        self.output_dir = output_dir
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+
+        self.complete_exporter = ConciseOutputExporter(self.output_dir)
 
         if (val_size is not None) and (dataset_val is not None):
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
@@ -84,6 +90,7 @@ class Trainer():
             self.target = dataset_train.target  # already defined in HDF5DatSet object
             self.task = dataset_train.task
             self.classes = dataset_train.classes
+            self.classes_to_idx = dataset_train.classes_to_idx
             self.optimizer = None
             self.batch_size = batch_size
             self.val_size = val_size            # if None, will be set to 0.25 in _DivideDataSet function
@@ -96,6 +103,7 @@ class Trainer():
             self.node_feature = dataset_train.node_feature
             self.edge_feature = dataset_train.edge_feature
             self.cluster_nodes = dataset_train.clustering_method
+            self.epoch_saved_model = None
 
             self._load_model(dataset_train, dataset_val, dataset_test, Net)
 
@@ -109,6 +117,7 @@ class Trainer():
             if Net is None:
                 raise ValueError("No neural network class found. Please add it for \
                     completing the loading of the pretrained model.")
+
             if dataset_test is not None:
                 self._load_pretrained_model(dataset_test, Net)
             else:
@@ -137,8 +146,8 @@ class Trainer():
             try:
                 self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
             except Exception as e:
-                print(e)
-                print("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+                _log.error(e)
+                _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
     def _load_pretrained_model(self, dataset_test, Net):
         """
@@ -154,7 +163,7 @@ class Trainer():
 
         self.test_loader = DataLoader(dataset_test)
 
-        print("Test set loaded")
+        _log.info("Testing set loaded\n")
         
         self._put_model_to_device(dataset_test, Net)
 
@@ -182,13 +191,13 @@ class Trainer():
 
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
-                print("Loading clusters")
+                _log.info("Loading clusters")
                 self._PreCluster(dataset_train, method=self.cluster_nodes)
 
                 if dataset_val is not None:
                     self._PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
-                    print("No validation dataset given. Randomly splitting training set in training set and validation set.")
+                    _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     dataset_train, dataset_val = _DivideDataSet(
                         dataset_train, val_size=self.val_size)
             else:
@@ -200,31 +209,30 @@ class Trainer():
         self.train_loader = DataLoader(
             dataset_train, batch_size=self.batch_size, shuffle=self.shuffle
         )
-        print("Training set loaded")
+        _log.info("Training set loaded\n")
 
         if dataset_val is not None:
             self.valid_loader = DataLoader(
                 dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
             )
-            print("Validation set loaded")
+            _log.info("Validation set loaded\n")
         else:
             self.valid_loader = None
 
         # independent validation dataset
         if dataset_test is not None:
-            print("Loading independent evaluation dataset...")
+            _log.info("Loading independent testing dataset...")
 
             if self.cluster_nodes in ('mcl', 'louvain'):
-                print("Loading clusters for the evaluation set.")
                 self._PreCluster(dataset_test, method=self.cluster_nodes)
 
             self.test_loader = DataLoader(
                 dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
             )
-            print("Independent validation set loaded !")
+            _log.info("Testing set loaded\n")
 
         else:
-            print("No independent validation set loaded")
+            _log.info("No independent testing set loaded")
             self.test_loader = None
 
         self._put_model_to_device(dataset_train, Net)
@@ -249,7 +257,7 @@ class Trainer():
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
-        _log.info("device set to : %s", self.device)
+        _log.info("Device set to %s.", self.device)
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
@@ -276,9 +284,6 @@ class Trainer():
         # classification mode
         elif self.task == targets.CLASSIF:
 
-            self.classes_to_idx = {
-                i: idx for idx, i in enumerate(self.classes)
-            }
             self.output_shape = len(self.classes)
 
             self.model = Net(
@@ -312,10 +317,10 @@ class Trainer():
                 self.weights = torch.tensor(
                     [targets_all.count(i) for i in self.classes], dtype=torch.float32
                 )
-                print(f"class occurences: {self.weights}")
+                _log.info(f"class occurences: {self.weights}")
                 self.weights = 1.0 / self.weights
                 self.weights = self.weights / self.weights.sum()
-                print(f"class weights: {self.weights}")
+                _log.info(f"class weights: {self.weights}")
 
             # Note that non-linear activation is automatically applied in CrossEntropyLoss
             self.loss = nn.CrossEntropyLoss(
@@ -350,6 +355,7 @@ class Trainer():
             # Number of epochs
             self.nepoch = nepoch
 
+            _log.info('Epoch 0:')
             self._eval(self.train_loader, 0, "training")
             if validate:
                 if self.valid_loader is None:
@@ -358,6 +364,8 @@ class Trainer():
 
             # Loop over epochs
             for epoch in range(1, nepoch + 1):
+
+                _log.info(f'Epoch {epoch}:')
 
                 # Sets the module in training mode
                 self.model.train()
@@ -379,6 +387,7 @@ class Trainer():
 
                         if min(valid_losses) == loss_:
                             self.save_model(model_path)
+                            self.epoch_saved_model = epoch
                 else:
                     # if no validation set, saves the best performing model on
                     # the training set
@@ -390,10 +399,16 @@ class Trainer():
                                             We advice you to use an external validation set.""")
 
                             self.save_model(model_path)
+                            self.epoch_saved_model = epoch
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
 
             # Save the last model
             if save_model == 'last':
                 self.save_model(model_path)
+                self.epoch_saved_model = epoch
+                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
+
+            self.complete_exporter.save_all_metrics()
 
     def test(self, dataset_test=None):
         """
@@ -419,6 +434,8 @@ class Trainer():
                 
             # Run test
             self._eval(self.test_loader, 0, "testing")
+
+            self.complete_exporter.save_all_metrics()
 
     def _eval( # pylint: disable=too-many-locals
             self,
@@ -485,7 +502,15 @@ class Trainer():
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals)
 
-        self._log_epoch_data(pass_name, epoch_number, eval_loss, dt)
+        self.complete_exporter.epoch_process(
+            pass_name,
+            epoch_number,
+            entry_names,
+            outputs,
+            targets,
+            eval_loss)
+
+        self._log_epoch_data(pass_name, eval_loss, dt)
 
         return eval_loss
 
@@ -548,12 +573,21 @@ class Trainer():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals)
-        self._log_epoch_data(pass_name, epoch_number, epoch_loss, dt)
+
+        self.complete_exporter.epoch_process(
+            pass_name,
+            epoch_number,
+            entry_names,
+            outputs,
+            target_vals,
+            epoch_loss)
+
+        self._log_epoch_data(pass_name, epoch_loss, dt)
 
         return epoch_loss
 
     @staticmethod
-    def _log_epoch_data(stage, epoch, loss, time):
+    def _log_epoch_data(stage, loss, time):
         """
         Prints the data of each epoch
 
@@ -563,10 +597,7 @@ class Trainer():
             loss (float): loss during that epoch
             time (float): timing of the epoch
         """
-
-        _log.info( # pylint: disable=logging-not-lazy
-            'Epoch [%04d] : %s loss %e | time %1.2e sec.' % # pylint: disable=consider-using-f-string
-            (epoch, stage, loss, time))
+        _log.info(f'{stage} loss {loss} | time {time}')
 
     def _format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
@@ -669,10 +700,10 @@ class Trainer():
             if data is None:
                 f5 = h5py.File(fname, "a")
                 try:
-                    print(f"deleting {mol}")
+                    _log.info(f"deleting {mol}")
                     del f5[mol]
                 except BaseException:
-                    print(f"{mol} not found")
+                    _log.info(f"{mol} not found")
                 f5.close()
                 continue
 
@@ -682,7 +713,7 @@ class Trainer():
             clust_grp = grp.require_group("clustering")
 
             if method.lower() in clust_grp:
-                print(f"Deleting previous data for mol {mol} method {method}")
+                #_log.info(f"Deleting previous data for mol {mol} method {method}")
                 del clust_grp[method.lower()]
 
             method_grp = clust_grp.create_group(method.lower())
