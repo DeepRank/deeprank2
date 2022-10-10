@@ -4,6 +4,7 @@ import os
 import unittest
 import pytest
 import logging
+import warnings
 import torch
 from deeprankcore.Trainer import Trainer
 from deeprankcore.DataSet import HDF5DataSet
@@ -37,7 +38,8 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     target,
     metrics_exporters,
     transform_sigmoid,
-    clustering_method
+    clustering_method,
+    use_cuda = False
 ):
 
     dataset_train = HDF5DataSet(
@@ -83,7 +85,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         transform_sigmoid=transform_sigmoid,
     )
 
-    if torch.cuda.is_available():
+    if use_cuda:
         _log.debug("cuda is available, testing that the model is cuda")
         for parameter in trainer.model.parameters():
             assert parameter.is_cuda, f"{parameter} is not cuda"
@@ -91,16 +93,14 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                  (groups.INDICES, data.edge_index), # not sure if this is correct, or whether I need to use "edge_index" after all
-                                  ("edge_attr", data.edge_attr),
-                                  ("pos", data.pos), # not sure if it should be like this or groups.POSITION instead
-                                  ("cluster0",data.cluster0),
-                                  ("cluster1", data.cluster1)):
+                                (groups.INDICES, data.edge_index), # not sure if this is correct, or whether I need to use "edge_index" after all
+                                ("edge_attr", data.edge_attr),
+                                ("pos", data.pos), # not sure if it should be like this or groups.POSITION instead
+                                ("cluster0",data.cluster0),
+                                ("cluster1", data.cluster1)):
 
             if data_tensor is not None:
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
-    else:
-        _log.debug("cuda is not available")
 
     trainer.train(nepoch=10, validate=True)
 
@@ -396,6 +396,30 @@ class TestTrainer(unittest.TestCase):
         assert isinstance(trainer.optimizer, torch.optim.Adam)
         assert trainer.lr == 0.001
         assert trainer.weight_decay == 1e-05
+
+    def test_cuda(self):    # from test_ginet, but with cuda
+        if torch.cuda.is_available():
+
+            _model_base_test(           
+                "tests/hdf5_new/1ATN_ppi.hdf5",
+                "tests/hdf5_new/1ATN_ppi.hdf5",
+                "tests/hdf5_new/1ATN_ppi.hdf5",
+                GINet,
+                default_features,
+                [edgefeats.DISTANCE],
+                targets.REGRESS,
+                targets.IRMSD,
+                [OutputExporter(self.work_directory)],
+                False,
+                "mcl",
+                True # use_cuda
+            )
+
+            assert len(os.listdir(self.work_directory)) > 0
+
+        else:
+            warnings.warn("CUDA NOT AVAILABLE. test_cuda skipped")
+            _log.debug("cuda is not available, test_cuda skipped")
 
 
 if __name__ == "__main__":
