@@ -20,7 +20,6 @@ def add_features( # pylint: disable=unused-argument
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}") 
 
-        node.features[Nfeat.CHAINID] = residue.chain.id
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
         node.features[Nfeat.RESCHARGE] = residue.amino_acid.charge
         node.features[Nfeat.RESSIZE] = residue.amino_acid.size

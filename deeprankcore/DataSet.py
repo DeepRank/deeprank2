@@ -224,6 +224,7 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_node_feature = list(f[f"{mol_key}/{groups.NODE}/"].keys())
+        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_']
         f.close()
 
         if self.node_feature == "all":
@@ -241,6 +242,7 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_edge_feature = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
+        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_']
         f.close()
 
         if self.edge_feature == "all":

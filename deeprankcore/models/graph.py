@@ -163,6 +163,8 @@ class Graph:
             # store node names
             node_names = numpy.array([str(key) for key in self._nodes]).astype("S")
             node_features_group.create_dataset(groups.NAMES, data=node_names)
+            chain_ids = numpy.array([str(key).split()[1] for key in self._nodes]).astype("S")
+            node_features_group.create_dataset(groups.CHAINID, data=chain_ids)
 
             # store node features
             node_key_list = list(self._nodes.keys())
