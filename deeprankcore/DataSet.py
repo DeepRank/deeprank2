@@ -330,7 +330,6 @@ class HDF5DataSet(Dataset):
             if self.target is None:
                 y = None
             else:
-
                 if targets.VALUES in grp and self.target in grp[targets.VALUES]:
                     try:
                         y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
@@ -369,6 +368,7 @@ class HDF5DataSet(Dataset):
                     _log.warning("no clustering group found")
             else:
                 _log.warning("no cluster method set")
+                
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
 

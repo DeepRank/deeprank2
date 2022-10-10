@@ -408,7 +408,7 @@ class Trainer():
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
 
-            # self.complete_exporter.save_all_metrics()
+            self.complete_exporter.save_all_metrics()
 
     def test(self, dataset_test=None):
         """
@@ -435,7 +435,7 @@ class Trainer():
             # Run test
             self._eval(self.test_loader, 0, "testing")
 
-            # self.complete_exporter.save_all_metrics()
+            self.complete_exporter.save_all_metrics()
 
     def _eval( # pylint: disable=too-many-locals
             self,

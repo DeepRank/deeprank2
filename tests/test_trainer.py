@@ -93,11 +93,11 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                (groups.INDICES, data.edge_index),
-                                ("edge_attr", data.edge_attr),
-                                (Nfeat.POSITION, data.pos),
-                                ("cluster0",data.cluster0),
-                                ("cluster1", data.cluster1)):
+                                  (groups.INDICES, data.edge_index),
+                                  ("edge_attr", data.edge_attr),
+                                  (Nfeat.POSITION, data.pos),
+                                  ("cluster0",data.cluster0),
+                                  ("cluster1", data.cluster1)):
 
             if data_tensor is not None:
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
@@ -163,7 +163,7 @@ class TestTrainer(unittest.TestCase):
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             [edgefeats.DISTANCE],
             targets.CLASSIF,
-            'bin_class', # for some reason this file still uses bin_class instead of binary as the target
+            "bin_class", # for some reason this file still uses bin_class instead of binary as the target
             [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
             "mcl",
@@ -242,7 +242,7 @@ class TestTrainer(unittest.TestCase):
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 [edgefeats.DISTANCE],
                 targets.CLASSIF,
-                'bin_class', # for some reason this file still uses bin_class instead of binary as the target
+                "bin_class", # for some reason this file still uses bin_class instead of binary as the target
                 [ScatterPlotExporter(self.work_directory)],
                 False,
                 "mcl",

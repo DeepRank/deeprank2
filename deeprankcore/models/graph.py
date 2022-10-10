@@ -160,7 +160,7 @@ class Graph:
             node_features_group = graph_group.create_group(groups.NODE)
             edge_feature_group = graph_group.create_group(groups.EDGE)
 
-            # store node names
+            # store node names and chain_ids
             node_names = numpy.array([str(key) for key in self._nodes]).astype("S")
             node_features_group.create_dataset(groups.NAMES, data=node_names)
             chain_ids = numpy.array([str(key).split()[1] for key in self._nodes]).astype("S")
@@ -180,7 +180,7 @@ class Graph:
                     node_feature_name, data=node_feature_data
                 )
 
-            # find edges
+            # identify edges
             edge_indices = []
             edge_names = []
 
