@@ -6,4 +6,3 @@ EDGE = "edge_features"
 NAMES = "_names"
 CHAINID = "_chain_id" # str; former FEATURENAME_CHAIN (was not assigned, but supposedly numeric, now a str)
 INDICES = "_indices"
-

@@ -220,10 +220,10 @@ def plotly_2d( # noqa
     for x, node in enumerate(graph.nodes):
 
         index = 0
-        if Nfeat.CHAINID in graph.nodes[node]:
+        if groups.CHAINID in graph.nodes[node]:
             if x == 0:
-                first_chain = graph.nodes[node][Nfeat.CHAINID]
-            if graph.nodes[node][Nfeat.CHAINID] != first_chain: # This is not very pythonic, but somehow I'm stuck on how to do this without enumerating
+                first_chain = graph.nodes[node][groups.CHAINID]
+            if graph.nodes[node][groups.CHAINID] != first_chain: # This is not very pythonic, but somehow I'm stuck on how to do this without enumerating
                 index = 1
         
         pos = graph.nodes[node]["pos2D"]
@@ -377,10 +377,10 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
     for x, node in enumerate(graph.nodes):
 
         index = 0
-        if Nfeat.CHAINID in graph.nodes[node]:
+        if groups.CHAINID in graph.nodes[node]:
             if x == 0:
-                first_chain = graph.nodes[node][Nfeat.CHAINID]
-            if graph.nodes[node][Nfeat.CHAINID] != first_chain: # This is not very puythonic, but somehow I'm stuck on how to do this without enumerating
+                first_chain = graph.nodes[node][groups.CHAINID]
+            if graph.nodes[node][groups.CHAINID] != first_chain: # This is not very puythonic, but somehow I'm stuck on how to do this without enumerating
                 index = 1
 
         pos = graph.nodes[node][Nfeat.POSITION]
