@@ -115,8 +115,7 @@ def plotly_2d( # noqa
     gtmp = deepcopy(graph)
     ebunch = []
     for e in graph.edges:
-        typ = graph.edges[e][edgefeats.SAMECHAIN]
-        if typ == 1.0:
+        if graph.edges[e][edgefeats.SAMECHAIN] == 0.0:
             ebunch.append(e)
     gtmp.remove_edges_from(ebunch)
 
@@ -147,8 +146,8 @@ def plotly_2d( # noqa
     node_connect = {}
     for edge in graph.edges:
 
-        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN])
-        if edge_type == 0.0:
+        same_chain = graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
+        if same_chain == 1.0:
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -159,7 +158,7 @@ def plotly_2d( # noqa
                 line=go.scatter.Line(color="rgb(110,110,110)", width=3),
             )
 
-        elif edge_type == 1.0:
+        if same_chain == 0.0:
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -178,10 +177,10 @@ def plotly_2d( # noqa
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
 
-        if edge_type == 0.0:
+        if same_chain == 1.0:
             internal_edge_trace_list.append(trace)
 
-        elif edge_type == 1.0:
+        if same_chain == 0.0:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:
@@ -294,10 +293,8 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
 
     for edge in graph.edges:
 
-        edge_type = _get_edge_type_name(
-            graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
-        )
-        if edge_type == 0.0:
+        same_chain = graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
+        if same_chain == 1.0:
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -309,7 +306,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
                 line=go.scatter3d.Line(color="rgb(110,110,110)", width=5),
             )
 
-        elif edge_type == 1.0:
+        elif same_chain == 0.0:
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -330,10 +327,10 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
         trace["y"] += (y0, y1, None)
         trace["z"] += (z0, z1, None)
 
-        if edge_type == 0.0:
+        if same_chain == 1.0:
             internal_edge_trace_list.append(trace)
 
-        elif edge_type == 1.0:
+        elif same_chain == 0.0:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:

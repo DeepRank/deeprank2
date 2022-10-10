@@ -7,7 +7,7 @@ from deeprankcore.domain.features import edgefeats
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain import targettypes as targets
 
-node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
