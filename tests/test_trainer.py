@@ -93,9 +93,9 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                (groups.INDICES, data.edge_index), # not sure if this is correct, or whether I need to use "edge_index" after all
+                                (groups.INDICES, data.edge_index),
                                 ("edge_attr", data.edge_attr),
-                                ("pos", data.pos), # not sure if it should be like this or groups.POSITION instead
+                                (Nfeat.POSITION, data.pos),
                                 ("cluster0",data.cluster0),
                                 ("cluster1", data.cluster1)):
 
@@ -124,9 +124,9 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_sigmoid(self):
         _model_base_test(
-            "tests/hdf5_new/1ATN_ppi.hdf5",
-            "tests/hdf5_new/1ATN_ppi.hdf5",
-            "tests/hdf5_new/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_features,
             [edgefeats.DISTANCE],
@@ -139,9 +139,9 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet(self):
         _model_base_test(           
-            "tests/hdf5_new/1ATN_ppi.hdf5",
-            "tests/hdf5_new/1ATN_ppi.hdf5",
-            "tests/hdf5_new/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_features,
             [edgefeats.DISTANCE],
@@ -156,9 +156,9 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_class(self):
         _model_base_test(
-            "tests/hdf5_new/variants.hdf5",
-            "tests/hdf5_new/variants.hdf5",
-            "tests/hdf5_new/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
             GINet,
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             [edgefeats.DISTANCE],
@@ -173,9 +173,9 @@ class TestTrainer(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
-            "tests/hdf5_new/test.hdf5",
-            "tests/hdf5_new/test.hdf5",
-            "tests/hdf5_new/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             FoutNet,
             default_features,
             [edgefeats.DISTANCE],
@@ -188,9 +188,9 @@ class TestTrainer(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
-            "tests/hdf5_new/1ATN_ppi.hdf5",
-            "tests/hdf5_new/1ATN_ppi.hdf5",
-            "tests/hdf5_new/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             sGAT,
             default_features,
             [edgefeats.DISTANCE],
@@ -203,9 +203,9 @@ class TestTrainer(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
-            "tests/hdf5_new/test.hdf5",
-            "tests/hdf5_new/test.hdf5",
-            "tests/hdf5_new/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
             default_features,
             [edgefeats.DISTANCE],
@@ -219,9 +219,9 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/hdf5_new/1ATN_ppi.hdf5",
-                "tests/hdf5_new/1ATN_ppi.hdf5",
-                "tests/hdf5_new/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 sGAT,
                 default_features,
                 [edgefeats.DISTANCE],
@@ -235,9 +235,9 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_classification(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/hdf5_new/variants.hdf5",
-                "tests/hdf5_new/variants.hdf5",
-                "tests/hdf5_new/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
                 GINet,
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 [edgefeats.DISTANCE],
@@ -252,7 +252,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
 
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5_new/test.hdf5",
+                hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
 
@@ -264,7 +264,7 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_no_pretrained_no_Net(self):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5_new/test.hdf5",
+                hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
 
@@ -275,7 +275,7 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_pretrained_no_test(self):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5_new/test.hdf5",
+                hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
 
@@ -296,7 +296,7 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5_new/test.hdf5",
+                hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
 
@@ -316,7 +316,7 @@ class TestTrainer(unittest.TestCase):
     def test_no_valid_provided(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5_new/test.hdf5",
+            hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
 
@@ -332,7 +332,7 @@ class TestTrainer(unittest.TestCase):
     def test_no_valid_full_train(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5_new/test.hdf5",
+            hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
 
@@ -349,7 +349,7 @@ class TestTrainer(unittest.TestCase):
     def test_optim(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5_new/test.hdf5",
+            hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
 
@@ -384,7 +384,7 @@ class TestTrainer(unittest.TestCase):
     def test_default_optim(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5_new/test.hdf5",
+            hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
 
@@ -397,13 +397,13 @@ class TestTrainer(unittest.TestCase):
         assert trainer.lr == 0.001
         assert trainer.weight_decay == 1e-05
 
-    def test_cuda(self):    # from test_ginet, but with cuda
+    def test_cuda(self):    # test_ginet, but with cuda
         if torch.cuda.is_available():
 
             _model_base_test(           
-                "tests/hdf5_new/1ATN_ppi.hdf5",
-                "tests/hdf5_new/1ATN_ppi.hdf5",
-                "tests/hdf5_new/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
                 default_features,
                 [edgefeats.DISTANCE],

@@ -1,0 +1,6 @@
+# include necessary hdf5 files
+! ./1ATN_ppi.hdf5
+! ./test.hdf5
+! ./train.hdf5
+! ./valid.hdf5
+! ./variants.hdf5
