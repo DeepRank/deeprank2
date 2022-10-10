@@ -8,12 +8,12 @@ from deeprankcore.domain.features import nodefeats as Nfeat
 
 def add_features( # pylint: disable=unused-argument
     pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None):
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):
 
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id
-
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
