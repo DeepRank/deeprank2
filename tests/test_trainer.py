@@ -163,7 +163,7 @@ class TestTrainer(unittest.TestCase):
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             [edgefeats.DISTANCE],
             targets.CLASSIF,
-            "bin_class", # for some reason this file still uses bin_class instead of binary as the target
+            targets.BINARY,
             [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
             "mcl",
@@ -242,7 +242,7 @@ class TestTrainer(unittest.TestCase):
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 [edgefeats.DISTANCE],
                 targets.CLASSIF,
-                "bin_class", # for some reason this file still uses bin_class instead of binary as the target
+                targets.BINARY,
                 [ScatterPlotExporter(self.work_directory)],
                 False,
                 "mcl",
