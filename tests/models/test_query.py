@@ -31,7 +31,7 @@ from deeprankcore.DataSet import HDF5DataSet
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
     assert len(g.nodes) > 0, "no nodes"
-    assert Nfeat.POSITION in g.nodes[0].features
+    assert groups.POSITION in g.nodes[0].features
 
     assert len(g.edges) > 0, "no edges"
     assert Efeat.DISTANCE in g.edges[0].features
@@ -109,7 +109,7 @@ def test_interface_graph_residue():
     _check_graph_makes_sense(
         g,
         [
-            Nfeat.POSITION,
+            groups.POSITION,
             Nfeat.POLARITY,
             Nfeat.PSSM,
             Nfeat.INFOCONTENT,
@@ -137,7 +137,7 @@ def test_interface_graph_atomic():
     _check_graph_makes_sense(
         g,
         [
-            Nfeat.POSITION,
+            groups.POSITION,
             Nfeat.PSSM,
             Nfeat.BSA,
             Nfeat.INFOCONTENT,
@@ -167,7 +167,7 @@ def test_variant_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            Nfeat.POSITION,
+            groups.POSITION,
             Nfeat.SASA,
             Nfeat.RESTYPE,
             Nfeat.VARIANTRES,
@@ -207,7 +207,7 @@ def test_variant_graph_1A0Z():
     _check_graph_makes_sense(
         g,
         [
-            Nfeat.POSITION,
+            groups.POSITION,
             Nfeat.RESTYPE,
             Nfeat.VARIANTRES,
             Nfeat.SASA,
@@ -245,7 +245,7 @@ def test_variant_graph_9API():
     _check_graph_makes_sense(
         g,
         [
-            Nfeat.POSITION,
+            groups.POSITION,
             Nfeat.RESTYPE,
             Nfeat.VARIANTRES,
             Nfeat.SASA,
@@ -276,7 +276,7 @@ def test_variant_residue_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            Nfeat.POSITION,
+            groups.POSITION,
             Nfeat.SASA,
             Nfeat.PSSM,
             Nfeat.RESTYPE,

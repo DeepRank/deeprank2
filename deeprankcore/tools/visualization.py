@@ -12,7 +12,6 @@ import markov_clustering
 
 from deeprankcore.tools.embedding import manifold_embedding
 from deeprankcore.domain.features import groups
-from deeprankcore.domain.features import nodefeats as Nfeat 
 from deeprankcore.domain.features import edgefeats
 
 
@@ -105,7 +104,7 @@ def plotly_2d( # noqa
         import chart_studio.plotly as py # pylint: disable=import-outside-toplevel
 
     pos = numpy.array(
-        [v.tolist() for _, v in networkx.get_node_attributes(graph, Nfeat.POSITION).items()]
+        [v.tolist() for _, v in networkx.get_node_attributes(graph, groups.POSITION).items()]
     )
     pos2D = manifold_embedding(pos)
     dict_pos = dict(zip(graph.nodes, pos2D))
@@ -320,8 +319,8 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
         else:
             continue
 
-        x0, y0, z0 = graph.nodes[edge[0]][Nfeat.POSITION]
-        x1, y1, z1 = graph.nodes[edge[1]][Nfeat.POSITION]
+        x0, y0, z0 = graph.nodes[edge[0]][groups.POSITION]
+        x1, y1, z1 = graph.nodes[edge[1]][groups.POSITION]
 
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
@@ -380,7 +379,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
             if graph.nodes[node][groups.CHAINID] != first_chain: # This is not very puythonic, but somehow I'm stuck on how to do this without enumerating
                 index = 1
 
-        pos = graph.nodes[node][Nfeat.POSITION]
+        pos = graph.nodes[node][groups.POSITION]
 
         node_trace[index]["x"] += (pos[0],)
         node_trace[index]["y"] += (pos[1],)

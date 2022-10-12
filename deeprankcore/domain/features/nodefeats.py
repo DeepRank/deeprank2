@@ -1,6 +1,3 @@
-## generic features
-POSITION = "position" # list[3xfloat]; former FEATURENAME_POSITION
-
 ## residue core features
 RESTYPE = "res_type" # AminoAcid object; former FEATURENAME_AMINOACID
 RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 

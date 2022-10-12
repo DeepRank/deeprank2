@@ -9,7 +9,7 @@ from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
-from deeprankcore.domain.features import groups, nodefeats
+from deeprankcore.domain.features import groups
 from deeprankcore.domain import targettypes as targets
 from typing import Callable, List, Union
 
@@ -343,7 +343,7 @@ class HDF5DataSet(Dataset):
                                      "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp[f"{groups.NODE}/{nodefeats.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{groups.NODE}/{groups.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
