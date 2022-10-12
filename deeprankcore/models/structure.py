@@ -225,6 +225,9 @@ class Atom:
             element(deeprank atomic element enumeration): the chemical element
             position(numpy array of length 3): pdb position xyz of this atom
             occupancy(float): pdb occupancy value
+                            This represents the proportion of structures where the atom is detected at a given position.
+                            Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
+                            Note that only the highest occupancy atom is used by deeprankcore (see tools.pdb._add_atom_to_residue) 
         """
         self._residue = residue
         self._name = name
