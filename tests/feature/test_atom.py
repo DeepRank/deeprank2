@@ -39,6 +39,5 @@ def test_add_features(): # copied first part, up to add_features, from test_sasa
     graph = build_atomic_graph(atoms, "101M-108-atom", 4.5)
     add_features(pdb_path, graph)
 
-    assert not any(
-        numpy.isnan(node.features[nodefeats.RESCHARGE]) for node in graph.nodes
-    )
+    assert not any(numpy.isnan(node.features[nodefeats.ATOMCHARGE]) for node in graph.nodes)
+    assert not any(numpy.isnan(node.features[nodefeats.PDBOCCUPANCY]) for node in graph.nodes)
