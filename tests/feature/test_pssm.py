@@ -1,18 +1,13 @@
 from pdb2sql import pdb2sql
 import numpy
-from deeprankcore.domain.amino_acid import alanine
+from deeprankcore.models.amino_acid import alanine
 from deeprankcore.tools.pssm import parse_pssm
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.feature.pssm import add_features
 from deeprankcore.tools.graph import build_atomic_graph
 from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
-from deeprankcore.domain.feature import (
-    FEATURENAME_PSSM,
-    FEATURENAME_PSSMDIFFERENCE,
-    FEATURENAME_PSSMWILDTYPE,
-    FEATURENAME_PSSMVARIANT,
-    FEATURENAME_INFORMATIONCONTENT,
-)
+from deeprankcore.domain.features import nodefeats as Nfeat
+
 
 
 def test_add_features():
@@ -45,10 +40,9 @@ def test_add_features():
     add_features(pdb_path, graph, variant)
 
     for feature_name in (
-        FEATURENAME_PSSM,
-        FEATURENAME_PSSMDIFFERENCE,
-        FEATURENAME_PSSMWILDTYPE,
-        FEATURENAME_PSSMVARIANT,
-        FEATURENAME_INFORMATIONCONTENT,
+        Nfeat.PSSM,
+        Nfeat.DIFFCONSERVATION,
+        Nfeat.CONSERVATION,
+        Nfeat.INFOCONTENT,
     ):
         assert numpy.any([node.features[feature_name] != 0.0 for node in graph.nodes])

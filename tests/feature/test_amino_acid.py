@@ -1,14 +1,11 @@
 from pdb2sql import pdb2sql
 
-from deeprankcore.domain.amino_acid import serine
+from deeprankcore.models.amino_acid import serine
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.feature.sasa import add_features
 from deeprankcore.tools.graph import build_residue_graph
 from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
-from deeprankcore.domain.feature import (
-    FEATURENAME_HYDROGENBONDDONORSDIFFERENCE,
-    FEATURENAME_SIZEDIFFERENCE,
-)
+from deeprankcore.domain.features import nodefeats
 from deeprankcore.feature.amino_acid import add_features # noqa
 
 
@@ -33,5 +30,5 @@ def test_add_features():
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
-            assert node.features[FEATURENAME_SIZEDIFFERENCE] > 0
-            assert node.features[FEATURENAME_HYDROGENBONDDONORSDIFFERENCE] > 0
+            assert node.features[nodefeats.DIFFSIZE] > 0
+            assert node.features[nodefeats.DIFFHBDONORS] > 0

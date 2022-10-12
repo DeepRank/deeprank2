@@ -3,10 +3,7 @@ from pdb2sql import pdb2sql
 from deeprankcore.feature.biopython import add_features
 from deeprankcore.tools.graph import build_residue_graph
 from deeprankcore.tools.pdb import get_structure, get_residue_contact_pairs
-from deeprankcore.domain.feature import (
-    FEATURENAME_HALFSPHEREEXPOSURE,
-    FEATURENAME_RESIDUEDEPTH,
-)
+from deeprankcore.domain.features import nodefeats
 
 
 def test_add_features():
@@ -30,9 +27,9 @@ def test_add_features():
     add_features(pdb_path, graph)
 
     assert numpy.any(
-        node.features[FEATURENAME_HALFSPHEREEXPOSURE] != 0.0 for node in graph.nodes
+        node.features[nodefeats.HSE] != 0.0 for node in graph.nodes
     )
 
     assert numpy.any(
-        node.features[FEATURENAME_RESIDUEDEPTH] != 0.0 for node in graph.nodes
+        node.features[nodefeats.RESDEPTH] != 0.0 for node in graph.nodes
     )

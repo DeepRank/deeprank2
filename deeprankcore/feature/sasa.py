@@ -3,7 +3,7 @@ import numpy
 import freesasa
 from deeprankcore.models.structure import Residue, Atom
 from deeprankcore.models.graph import Node, Graph
-from deeprankcore.domain.feature import FEATURENAME_SASA
+from deeprankcore.domain.features import nodefeats
 
 
 def add_features_for_residues(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
@@ -20,7 +20,7 @@ def add_features_for_residues(structure: freesasa.Structure, # pylint: disable=c
         if numpy.isnan(area):
             raise ValueError(f"freesasa returned {area} for {residue}")
 
-        node.features[FEATURENAME_SASA] = area
+        node.features[nodefeats.SASA] = area
 
 
 def add_features_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
@@ -38,7 +38,7 @@ def add_features_for_atoms(structure: freesasa.Structure, # pylint: disable=c-ex
         if numpy.isnan(area):
             raise ValueError(f"freesasa returned {area} for {atom}")
 
-        node.features[FEATURENAME_SASA] = area
+        node.features[nodefeats.SASA] = area
 
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument

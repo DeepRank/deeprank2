@@ -7,7 +7,7 @@ import numpy
 from pdb2sql import interface as get_interface
 
 from deeprankcore.models.structure import Atom, Residue, Chain, Structure, AtomicElement
-from deeprankcore.domain.amino_acid import amino_acids
+from deeprankcore.models.amino_acid import amino_acids
 from deeprankcore.models.pair import Pair
 from deeprankcore.domain.forcefield import atomic_forcefield
 from deeprankcore.models.contact import ResidueContact, AtomicContact

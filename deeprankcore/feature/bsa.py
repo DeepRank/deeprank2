@@ -2,7 +2,7 @@ import logging
 import freesasa
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.structure import Residue, Atom
-from deeprankcore.domain.feature import FEATURENAME_BURIEDSURFACEAREA
+from deeprankcore.domain.features import nodefeats
 
 
 logging.getLogger(__name__)
@@ -71,4 +71,4 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             sasa_chain_results[chain_id])[area_key] # pylint: disable=c-extension-no-member
         area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key] # pylint: disable=c-extension-no-member
 
-        node.features[FEATURENAME_BURIEDSURFACEAREA] = area_monomer - area_multimer
+        node.features[nodefeats.BSA] = area_monomer - area_multimer

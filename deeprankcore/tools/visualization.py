@@ -11,20 +11,9 @@ import community
 import markov_clustering
 
 from deeprankcore.tools.embedding import manifold_embedding
-from deeprankcore.domain.feature import (
-    FEATURENAME_POSITION,
-    FEATURENAME_CHAIN,
-    FEATURENAME_EDGETYPE,
-    EDGETYPE_INTERNAL,
-    EDGETYPE_INTERFACE
-)
-from deeprankcore.domain.storage import (
-    HDF5KEY_GRAPH_NODENAMES,
-    HDF5KEY_GRAPH_NODEFEATURES,
-    HDF5KEY_GRAPH_EDGENAMES,
-    HDF5KEY_GRAPH_EDGEINDICES,
-    HDF5KEY_GRAPH_EDGEFEATURES
-)
+from deeprankcore.domain.features import groups
+from deeprankcore.domain.features import nodefeats as Nfeat 
+from deeprankcore.domain.features import edgefeats
 
 
 _log = logging.getLogger(__name__)
@@ -54,10 +43,8 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
     graph = networkx.Graph()
 
     # read nodes
-    node_names = [
-        _get_node_key(key) for key in graph_group[HDF5KEY_GRAPH_NODENAMES][()]
-    ]
-    node_features_group = graph_group[HDF5KEY_GRAPH_NODEFEATURES]
+    node_features_group = graph_group[groups.NODE]
+    node_names = [_get_node_key(key) for key in node_features_group[groups.NAMES][()]]
     node_features = {}
     node_feature_names = list(node_features_group.keys())
     for node_feature_name in node_feature_names:
@@ -71,9 +58,9 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
             ][node_index]
 
     # read edges
-    edge_names = graph_group[HDF5KEY_GRAPH_EDGENAMES][()]
-    edge_node_indices = graph_group[HDF5KEY_GRAPH_EDGEINDICES][()]
-    edge_features_group = graph_group[HDF5KEY_GRAPH_EDGEFEATURES]
+    edge_features_group = graph_group[groups.EDGE]
+    edge_names = edge_features_group[groups.NAMES][()]
+    edge_node_indices = edge_features_group[groups.INDICES][()]
     edge_features = {}
     edge_feature_names = list(edge_features_group.keys())
     for edge_feature_name in edge_feature_names:
@@ -86,7 +73,6 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
         edge_key = (node1_name, node2_name)
 
         graph.add_edge(node1_name, node2_name)
-        graph.edges[node1_name, node2_name][FEATURENAME_EDGETYPE] = EDGETYPE_INTERFACE
         for edge_feature_name in edge_feature_names:
             graph.edges[edge_key][edge_feature_name] = edge_features[edge_feature_name][
                 edge_index
@@ -119,7 +105,7 @@ def plotly_2d( # noqa
         import chart_studio.plotly as py # pylint: disable=import-outside-toplevel
 
     pos = numpy.array(
-        [v.tolist() for _, v in networkx.get_node_attributes(graph, "pos").items()]
+        [v.tolist() for _, v in networkx.get_node_attributes(graph, Nfeat.POSITION).items()]
     )
     pos2D = manifold_embedding(pos)
     dict_pos = dict(zip(graph.nodes, pos2D))
@@ -129,10 +115,7 @@ def plotly_2d( # noqa
     gtmp = deepcopy(graph)
     ebunch = []
     for e in graph.edges:
-        typ = graph.edges[e][FEATURENAME_EDGETYPE]
-        if isinstance(typ, bytes):
-            typ = typ.decode("utf-8")
-        if typ == EDGETYPE_INTERFACE:
+        if graph.edges[e][edgefeats.SAMECHAIN] == 0.0:
             ebunch.append(e)
     gtmp.remove_edges_from(ebunch)
 
@@ -163,8 +146,8 @@ def plotly_2d( # noqa
     node_connect = {}
     for edge in graph.edges:
 
-        edge_type = _get_edge_type_name(graph.edges[edge[0], edge[1]]["type"])
-        if edge_type == EDGETYPE_INTERNAL:
+        same_chain = graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
+        if same_chain == 1.0:
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -175,7 +158,7 @@ def plotly_2d( # noqa
                 line=go.scatter.Line(color="rgb(110,110,110)", width=3),
             )
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        if same_chain == 0.0:
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -194,10 +177,10 @@ def plotly_2d( # noqa
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
 
-        if edge_type == EDGETYPE_INTERNAL:
+        if same_chain == 1.0:
             internal_edge_trace_list.append(trace)
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        if same_chain == 0.0:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:
@@ -233,13 +216,15 @@ def plotly_2d( # noqa
     # 'rgb(0,102,255)'
     node_trace = [node_trace_A, node_trace_B]
 
-    for node in graph.nodes:
+    for x, node in enumerate(graph.nodes):
 
-        if "chain" in graph.nodes[node]:
-            index = int(graph.nodes[node]["chain"])
-        else:
-            index = 0
-
+        index = 0
+        if groups.CHAINID in graph.nodes[node]:
+            if x == 0:
+                first_chain = graph.nodes[node][groups.CHAINID]
+            if graph.nodes[node][groups.CHAINID] != first_chain: # This is not very pythonic, but somehow I'm stuck on how to do this without enumerating
+                index = 1
+        
         pos = graph.nodes[node]["pos2D"]
 
         node_trace[index]["x"] += (pos[0],)
@@ -282,7 +267,7 @@ def plotly_2d( # noqa
             py.plot(fig)
 
 
-def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
+def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC0001
     graph: networkx.Graph,
     out: Optional[str] = None,
     offline: bool = False,
@@ -308,10 +293,8 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
 
     for edge in graph.edges:
 
-        edge_type = _get_edge_type_name(
-            graph.edges[edge[0], edge[1]][FEATURENAME_EDGETYPE]
-        )
-        if edge_type == EDGETYPE_INTERNAL:
+        same_chain = graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
+        if same_chain == 1.0:
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -323,7 +306,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
                 line=go.scatter3d.Line(color="rgb(110,110,110)", width=5),
             )
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        elif same_chain == 0.0:
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -337,17 +320,17 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
         else:
             continue
 
-        x0, y0, z0 = graph.nodes[edge[0]][FEATURENAME_POSITION]
-        x1, y1, z1 = graph.nodes[edge[1]][FEATURENAME_POSITION]
+        x0, y0, z0 = graph.nodes[edge[0]][Nfeat.POSITION]
+        x1, y1, z1 = graph.nodes[edge[1]][Nfeat.POSITION]
 
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
         trace["z"] += (z0, z1, None)
 
-        if edge_type == EDGETYPE_INTERNAL:
+        if same_chain == 1.0:
             internal_edge_trace_list.append(trace)
 
-        elif edge_type == EDGETYPE_INTERFACE:
+        elif same_chain == 0.0:
             edge_trace_list.append(trace)
 
         for i in [0, 1]:
@@ -388,14 +371,16 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches
 
     node_trace = [node_trace_A, node_trace_B]
 
-    for node in graph.nodes:
+    for x, node in enumerate(graph.nodes):
 
-        if FEATURENAME_CHAIN in graph.nodes[node]:
-            index = int(graph.nodes[node][FEATURENAME_CHAIN])
-        else:
-            index = 0
+        index = 0
+        if groups.CHAINID in graph.nodes[node]:
+            if x == 0:
+                first_chain = graph.nodes[node][groups.CHAINID]
+            if graph.nodes[node][groups.CHAINID] != first_chain: # This is not very puythonic, but somehow I'm stuck on how to do this without enumerating
+                index = 1
 
-        pos = graph.nodes[node]["pos"]
+        pos = graph.nodes[node][Nfeat.POSITION]
 
         node_trace[index]["x"] += (pos[0],)
         node_trace[index]["y"] += (pos[1],)
