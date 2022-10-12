@@ -146,7 +146,7 @@ def plotly_2d( # noqa
     for edge in graph.edges:
 
         same_chain = graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
-        if same_chain == 1.0:
+        if same_chain == 1.0: # internal
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -157,7 +157,7 @@ def plotly_2d( # noqa
                 line=go.scatter.Line(color="rgb(110,110,110)", width=3),
             )
 
-        if same_chain == 0.0:
+        if same_chain == 0.0:  # interface
             trace = go.Scatter(
                 x=[],
                 y=[],
@@ -176,10 +176,10 @@ def plotly_2d( # noqa
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
 
-        if same_chain == 1.0:
+        if same_chain == 1.0: # internal
             internal_edge_trace_list.append(trace)
 
-        if same_chain == 0.0:
+        if same_chain == 0.0: # interface
             edge_trace_list.append(trace)
 
         for i in [0, 1]:
@@ -293,7 +293,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
     for edge in graph.edges:
 
         same_chain = graph.edges[edge[0], edge[1]][edgefeats.SAMECHAIN]
-        if same_chain == 1.0:
+        if same_chain == 1.0: # internal
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -305,7 +305,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
                 line=go.scatter3d.Line(color="rgb(110,110,110)", width=5),
             )
 
-        elif same_chain == 0.0:
+        elif same_chain == 0.0: # interface
             trace = go.Scatter3d(
                 x=[],
                 y=[],
@@ -326,10 +326,10 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
         trace["y"] += (y0, y1, None)
         trace["z"] += (z0, z1, None)
 
-        if same_chain == 1.0:
+        if same_chain == 1.0: # internal
             internal_edge_trace_list.append(trace)
 
-        elif same_chain == 0.0:
+        elif same_chain == 0.0: # interface
             edge_trace_list.append(trace)
 
         for i in [0, 1]:

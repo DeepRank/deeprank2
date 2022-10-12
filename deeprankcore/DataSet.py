@@ -230,7 +230,7 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_node_feature = list(f[f"{mol_key}/{groups.NODE}/"].keys())
-        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_']
+        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.node_feature == "all":
@@ -249,14 +249,14 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_edge_feature = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
-        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_']
+        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.edge_feature == "all":
             self.edge_feature = self.available_edge_feature
         elif self.edge_feature is not None:
             for feat in self.edge_feature:
-                if feat not in self.available_edge_feature and feat[0] != '_':
+                if feat not in self.available_edge_feature:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
                     _log.info("\nCheck feature_modules passed to the preprocess function.\
                         Probably, the feature wasn't generated during the preprocessing step.")
@@ -282,7 +282,7 @@ class HDF5DataSet(Dataset):
             # node features
             node_data = ()
             for feat in self.node_feature:
-                if feat[0] != '_':
+                if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{groups.NODE}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
@@ -307,7 +307,7 @@ class HDF5DataSet(Dataset):
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    if feat[0] != '_':
+                    if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{groups.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
