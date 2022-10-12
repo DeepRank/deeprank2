@@ -43,7 +43,7 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
 
     # read nodes
     node_features_group = graph_group[groups.NODE]
-    node_names = [_get_node_key(key) for key in node_features_group[groups.NAMES][()]]
+    node_names = [_get_node_key(key) for key in node_features_group[groups.NAME][()]]
     node_features = {}
     node_feature_names = list(node_features_group.keys())
     for node_feature_name in node_feature_names:
@@ -58,8 +58,8 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
 
     # read edges
     edge_features_group = graph_group[groups.EDGE]
-    edge_names = edge_features_group[groups.NAMES][()]
-    edge_node_indices = edge_features_group[groups.INDICES][()]
+    edge_names = edge_features_group[groups.NAME][()]
+    edge_node_indices = edge_features_group[groups.INDEX][()]
     edge_features = {}
     edge_feature_names = list(edge_features_group.keys())
     for edge_feature_name in edge_feature_names:

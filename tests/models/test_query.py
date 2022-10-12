@@ -64,16 +64,16 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
                     > 0
                 ), f"{feature_name}: all zero"
 
-            assert entry_group[f"{groups.EDGE}/{groups.INDICES}"][()].shape[1] == 2, "wrong edge index shape"
-            assert entry_group[f"{groups.EDGE}/{groups.INDICES}"].shape[0] > 0, "no edge indices"
+            assert entry_group[f"{groups.EDGE}/{groups.INDEX}"][()].shape[1] == 2, "wrong edge index shape"
+            assert entry_group[f"{groups.EDGE}/{groups.INDEX}"].shape[0] > 0, "no edge indices"
 
             for feature_name in edge_feature_names:
                 assert (
                     entry_group[f"{groups.EDGE}/{feature_name}"][()].shape[0]
-                    == entry_group[f"{groups.EDGE}/{groups.INDICES}"].shape[0]
+                    == entry_group[f"{groups.EDGE}/{groups.INDEX}"].shape[0]
                 ), f"not enough edge {feature_name} feature values"
 
-            count_edges_hdf5 = entry_group[f"{groups.EDGE}/{groups.INDICES}"].shape[0]
+            count_edges_hdf5 = entry_group[f"{groups.EDGE}/{groups.INDEX}"].shape[0]
 
         dataset = HDF5DataSet(hdf5_path=tmp_path)
         torch_data_entry = dataset[0]

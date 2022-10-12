@@ -292,8 +292,8 @@ class HDF5DataSet(Dataset):
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if groups.INDICES in grp[groups.EDGE]:
-                ind = grp[f"{groups.EDGE}/{groups.INDICES}"][()]
+            if groups.INDEX in grp[groups.EDGE]:
+                ind = grp[f"{groups.EDGE}/{groups.INDEX}"][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
@@ -368,7 +368,7 @@ class HDF5DataSet(Dataset):
                     _log.warning("no clustering group found")
             else:
                 _log.warning("no cluster method set")
-                
+
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
 
