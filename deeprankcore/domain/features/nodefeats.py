@@ -9,6 +9,12 @@ POLARITY = "polarity" #  Polarity object; former FEATURENAME_POLARITY
 HBDONORS = "hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORS
 HBACCEPTORS = "hb_acceptors"# int; former FEATURENAME_HYDROGENBONDACCEPTORS
 
+# atomic element core features
+ATOMTYPE = "atom_type" # AtomicElement object
+ATOMCHARGE = "atom_charge" # float
+VANDERWAALSPARAMETERS = "vanderwaals_parameters" # ?
+PDBOCCUPANCY = "pdb_occupancy" # float(0 < x < 1)
+
 ## conservation features
 PSSM = "pssm" # list[20xint]; former FEATURENAME_PSSM
 INFOCONTENT = "info_content" # float; former FEATURENAME_INFORMATIONCONTENT
@@ -22,7 +28,6 @@ DIFFPOLARITY = "diff_polarity" # [type?]; former FEATURENAME_POLARITYDIFFERENCE
 DIFFHBDONORS = "diff_hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORSDIFFERENCE
 DIFFHBACCEPTORS = "diff_hb_acceptors" # int; former FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE
 DIFFCONSERVATION = "diff_conservation" # int; former FEATURENAME_PSSMDIFFERENCE & FEATURENAME_CONSERVATIONDIFFERENCE
-VARIANTCONSERVATION = "variant_conservation" # int; former FEATURENAME_PSSMVARIANT & FEATURENAME_CONSERVATION
 
 ## protein context features
 BSA = "bsa" # float; former FEATURENAME_BURIEDSURFACEAREA
