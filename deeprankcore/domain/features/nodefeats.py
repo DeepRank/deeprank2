@@ -9,11 +9,6 @@ POLARITY = "polarity" #  Polarity object; former FEATURENAME_POLARITY
 HBDONORS = "hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORS
 HBACCEPTORS = "hb_acceptors"# int; former FEATURENAME_HYDROGENBONDACCEPTORS
 
-## conservation features
-PSSM = "pssm" # list[20xint]; former FEATURENAME_PSSM
-INFOCONTENT = "info_content" # float; former FEATURENAME_INFORMATIONCONTENT
-CONSERVATION = "conservation" # int; former FEATURENAME_PSSMWILDTYPE
-
 ## variant residue features
 VARIANTRES = "variant_res" # AminoAcid object; former FEATURENAME_VARIANTAMINOACID
 DIFFCHARGE = "diff_charge" # float
@@ -29,6 +24,11 @@ BSA = "bsa" # float; former FEATURENAME_BURIEDSURFACEAREA
 HSE = "hse" # list[3xfloat]; former FEATURENAME_HALFSPHEREEXPOSURE 
 SASA = "sasa" # float; former FEATURENAME_SASA
 RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
+
+## conservation features
+PSSM = "pssm" # list[20xint]; former FEATURENAME_PSSM
+INFOCONTENT = "info_content" # float; former FEATURENAME_INFORMATIONCONTENT
+CONSERVATION = "conservation" # int; former FEATURENAME_PSSMWILDTYPE
 
 ## atom core features
 ATOMTYPE = "atom_type"

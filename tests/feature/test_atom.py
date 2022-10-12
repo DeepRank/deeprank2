@@ -6,7 +6,6 @@ from deeprankcore.tools.graph import build_atomic_graph
 from deeprankcore.models.structure import Chain, Residue
 from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
 from deeprankcore.domain.features import nodefeats
-from deeprankcore.feature.atom import add_features
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
