@@ -1,5 +1,3 @@
-
-
 class VanderwaalsParam:
     def __init__(
             self,
