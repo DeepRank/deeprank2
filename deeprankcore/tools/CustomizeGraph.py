@@ -2,6 +2,8 @@ import glob
 import h5py
 import os
 import numpy as np
+from deeprankcore.domain import targettypes as targets
+
 
 
 def add_target(graph_path, target_name, target_list, sep=" "):
@@ -57,10 +59,10 @@ def add_target(graph_path, target_name, target_list, sep=" "):
                 try:
                     model_gp = f5[model]
 
-                    if "score" not in model_gp:
-                        model_gp.create_group("score")
+                    if targets.VALUES not in model_gp:
+                        model_gp.create_group(targets.VALUES)
 
-                    group = f5[f"{model}/score/"]
+                    group = f5[f"{model}/{targets.VALUES}/"]
 
                     if target_name in group.keys():
                         # Delete the target if it already existed

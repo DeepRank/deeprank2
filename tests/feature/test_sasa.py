@@ -1,13 +1,13 @@
 import numpy
 from pdb2sql import pdb2sql
-from deeprankcore.domain.amino_acid import alanine
+from deeprankcore.models.amino_acid import alanine
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.models.graph import Graph, Node
 from deeprankcore.models.structure import Chain, Residue
 from deeprankcore.feature.sasa import add_features
 from deeprankcore.tools.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
-from deeprankcore.domain.feature import FEATURENAME_SASA
+from deeprankcore.domain.features import nodefeats
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
@@ -57,18 +57,18 @@ def test_add_features_to_residues():
 
     # check for NaN
     assert not any(
-        numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes
+        numpy.isnan(node.features[nodefeats.SASA]) for node in graph.nodes
     )
 
     # surface residues should have large area
     surface_residue_node = _get_residue_node(graph, 105)
-    assert surface_residue_node.features[FEATURENAME_SASA] > 25.0
+    assert surface_residue_node.features[nodefeats.SASA] > 25.0
 
     # buried residues should have small area
     buried_residue_node = _get_residue_node(graph, 72)
     assert (
-        buried_residue_node.features[FEATURENAME_SASA] < 25.0
-    ), buried_residue_node.features[FEATURENAME_SASA]
+        buried_residue_node.features[nodefeats.SASA] < 25.0
+    ), buried_residue_node.features[nodefeats.SASA]
 
 
 def test_add_features_to_atoms():
@@ -97,15 +97,15 @@ def test_add_features_to_atoms():
 
     # check for NaN
     assert not any(
-        numpy.isnan(node.features[FEATURENAME_SASA]) for node in graph.nodes
+        numpy.isnan(node.features[nodefeats.SASA]) for node in graph.nodes
     )
 
     # surface atoms should have large area
     surface_atom_node = _get_atom_node(graph, 105, "OE2")
-    assert surface_atom_node.features[FEATURENAME_SASA] > 25.0
+    assert surface_atom_node.features[nodefeats.SASA] > 25.0
 
     # buried atoms should have small area
     buried_atom_node = _get_atom_node(graph, 72, "CG")
     assert (
-        buried_atom_node.features[FEATURENAME_SASA] == 0.0
-    ), buried_atom_node.features[FEATURENAME_SASA]
+        buried_atom_node.features[nodefeats.SASA] == 0.0
+    ), buried_atom_node.features[nodefeats.SASA]

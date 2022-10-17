@@ -14,6 +14,7 @@ import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
+from deeprankcore.domain import targettypes as targets
 
 _log = logging.getLogger(__name__)
 
@@ -270,7 +271,7 @@ class Trainer():
             target_shape = None
 
         # regression mode
-        if self.task == "regress":
+        if self.task == targets.REGRESS:
 
             self.output_shape = 1
 
@@ -281,7 +282,7 @@ class Trainer():
                 self.device)
 
         # classification mode
-        elif self.task == "classif":
+        elif self.task == targets.CLASSIF:
 
             self.output_shape = len(self.classes)
 
@@ -300,10 +301,10 @@ class Trainer():
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
-        if self.task == "regress":
+        if self.task == targets.REGRESS:
             self.loss = MSELoss()
 
-        elif self.task == "classif":
+        elif self.task == targets.CLASSIF:
 
             # assign weights to each class in case of unbalanced dataset
             self.weights = None
@@ -457,7 +458,7 @@ class Trainer():
 
         loss_func = self.loss
 
-        targets = []
+        target_vals = []
         outputs = []
         entry_names = []
 
@@ -473,7 +474,7 @@ class Trainer():
 
             # Check if a target value was provided (i.e. benchmarck scenario)
             if data_batch.y is not None:
-                targets += data_batch.y.tolist()
+                target_vals += data_batch.y.tolist()
                 loss_ = loss_func(pred, data_batch.y)
 
                 count_predictions += pred.shape[0]
@@ -481,7 +482,7 @@ class Trainer():
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == "classif":
+            if self.task == targets.CLASSIF:
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -499,14 +500,14 @@ class Trainer():
             eval_loss = 0.0
 
         self._metrics_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, targets)
+            pass_name, epoch_number, entry_names, outputs, target_vals)
 
         self.complete_exporter.epoch_process(
             pass_name,
             epoch_number,
             entry_names,
             outputs,
-            targets,
+            target_vals,
             eval_loss)
 
         self._log_epoch_data(pass_name, eval_loss, dt)
@@ -528,7 +529,7 @@ class Trainer():
         sum_of_losses = 0
         count_predictions = 0
 
-        targets = []
+        target_vals = []
         outputs = []
         entry_names = []
 
@@ -549,11 +550,11 @@ class Trainer():
             # convert mean back to sum
             sum_of_losses += loss_.detach().item() * pred.shape[0]
 
-            targets += data_batch.y.tolist()
+            target_vals += data_batch.y.tolist()
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == "classif":
+            if self.task == targets.CLASSIF:
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
@@ -571,14 +572,14 @@ class Trainer():
             epoch_loss = 0.0
 
         self._metrics_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, targets)
+            pass_name, epoch_number, entry_names, outputs, target_vals)
 
         self.complete_exporter.epoch_process(
             pass_name,
             epoch_number,
             entry_names,
             outputs,
-            targets,
+            target_vals,
             epoch_loss)
 
         self._log_epoch_data(pass_name, epoch_loss, dt)
@@ -601,14 +602,14 @@ class Trainer():
     def _format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
 
-        if (self.task == "classif") and (target is not None):
+        if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
                 [self.classes_to_idx[int(x)] for x in target]
             ).to(self.device)
 
-        elif self.task == "regress":
+        elif self.task == targets.REGRESS:
             if self.transform_sigmoid is True:
 
                 # Sigmoid(x) = 1 / (1 + exp(-x))

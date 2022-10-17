@@ -39,7 +39,7 @@ class Query:
        - irmsd
        - lrmsd
        - fnat
-       - dockQ
+       - dockq
 
     Other target names are also allowed, but require additional settings to the Trainer object.
     """

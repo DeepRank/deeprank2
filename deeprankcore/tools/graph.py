@@ -6,7 +6,7 @@ from scipy.spatial import distance_matrix
 from deeprankcore.models.graph import Graph, Node, Edge
 from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.contact import AtomicContact, ResidueContact
-from deeprankcore.domain.feature import FEATURENAME_POSITION
+from deeprankcore.domain.features import groups
 
 
 def build_atomic_graph( # pylint: disable=too-many-locals
@@ -33,8 +33,8 @@ def build_atomic_graph( # pylint: disable=too-many-locals
 
             node1 = Node(atom1)
             node2 = Node(atom2)
-            node1.features[FEATURENAME_POSITION] = atom1.position
-            node2.features[FEATURENAME_POSITION] = atom2.position
+            node1.features[groups.POSITION] = atom1.position
+            node2.features[groups.POSITION] = atom2.position
 
             graph.add_node(node1)
             graph.add_node(node2)
@@ -82,10 +82,10 @@ def build_residue_graph( # pylint: disable=too-many-locals
                 node1 = Node(residue1)
                 node2 = Node(residue2)
 
-                node1.features[FEATURENAME_POSITION] = numpy.mean(
+                node1.features[groups.POSITION] = numpy.mean(
                     [atom.position for atom in residue1.atoms], axis=0
                 )
-                node2.features[FEATURENAME_POSITION] = numpy.mean(
+                node2.features[groups.POSITION] = numpy.mean(
                     [atom.position for atom in residue2.atoms], axis=0
                 )
 

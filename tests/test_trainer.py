@@ -4,6 +4,7 @@ import os
 import unittest
 import pytest
 import logging
+import warnings
 import torch
 from deeprankcore.Trainer import Trainer
 from deeprankcore.DataSet import HDF5DataSet
@@ -16,9 +17,14 @@ from deeprankcore.models.metrics import (
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
+from deeprankcore.domain.features import groups, edgefeats
+from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain import targettypes as targets
 
 
 _log = logging.getLogger(__name__)
+
+default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
@@ -32,7 +38,8 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     target,
     metrics_exporters,
     transform_sigmoid,
-    clustering_method
+    clustering_method,
+    use_cuda = False
 ):
 
     dataset_train = HDF5DataSet(
@@ -78,7 +85,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         transform_sigmoid=transform_sigmoid,
     )
 
-    if torch.cuda.is_available():
+    if use_cuda:
         _log.debug("cuda is available, testing that the model is cuda")
         for parameter in trainer.model.parameters():
             assert parameter.is_cuda, f"{parameter} is not cuda"
@@ -86,16 +93,14 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                  ("edge_index", data.edge_index),
+                                  (groups.INDEX, data.edge_index),
                                   ("edge_attr", data.edge_attr),
-                                  ("pos", data.pos),
+                                  (groups.POSITION, data.pos),
                                   ("cluster0",data.cluster0),
                                   ("cluster1", data.cluster1)):
 
             if data_tensor is not None:
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
-    else:
-        _log.debug("cuda is not available")
 
     trainer.train(nepoch=10, validate=True)
 
@@ -119,14 +124,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_sigmoid(self):
         _model_base_test(
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
-            "regress",
-            "irmsd",
+            default_features,
+            [edgefeats.DISTANCE],
+            targets.REGRESS,
+            targets.IRMSD,
             [OutputExporter(self.work_directory)],
             True,
             "mcl",
@@ -134,14 +139,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet(self):
         _model_base_test(           
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
-            "regress",
-            "irmsd",
+            default_features,
+            [edgefeats.DISTANCE],
+            targets.REGRESS,
+            targets.IRMSD,
             [OutputExporter(self.work_directory)],
             False,
             "mcl",
@@ -151,14 +156,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_class(self):
         _model_base_test(
-            "tests/hdf5/variants.hdf5",
-            "tests/hdf5/variants.hdf5",
-            "tests/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
             GINet,
-            ["polarity", "ic", "pssm"],
-            ["dist"],
-            "classif",
-            "bin_class",
+            [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
+            [edgefeats.DISTANCE],
+            targets.CLASSIF,
+            targets.BINARY,
             [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
             "mcl",
@@ -168,14 +173,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             FoutNet,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
-            "classif",
-            "binary",
+            default_features,
+            [edgefeats.DISTANCE],
+            targets.CLASSIF,
+            targets.BINARY,
             [],
             False,
             "mcl",
@@ -183,14 +188,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
-            "tests/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             sGAT,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
-            "regress",
-            "irmsd",
+            default_features,
+            [edgefeats.DISTANCE],
+            targets.REGRESS,
+            targets.IRMSD,
             [],
             False,
             "mcl",
@@ -198,13 +203,13 @@ class TestTrainer(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
-            "tests/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
-            ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-            ["dist"],
-            "regress",
+            default_features,
+            [edgefeats.DISTANCE],
+            targets.REGRESS,
             "BA",
             [OutputExporter(self.work_directory)],
             False,
@@ -214,14 +219,14 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/hdf5/1ATN_ppi.hdf5",
-                "tests/hdf5/1ATN_ppi.hdf5",
-                "tests/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 sGAT,
-                ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-                ["dist"],
-                "regress",
-                "irmsd",
+                default_features,
+                [edgefeats.DISTANCE],
+                targets.REGRESS,
+                targets.IRMSD,
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
                 False,
                 "mcl",
@@ -230,14 +235,14 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_classification(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/hdf5/variants.hdf5",
-                "tests/hdf5/variants.hdf5",
-                "tests/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
                 GINet,
-                ["size", "polarity", "sasa", "ic", "pssm"],
-                ["dist"],
-                "classif",
-                "bin_class",
+                [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
+                [edgefeats.DISTANCE],
+                targets.CLASSIF,
+                targets.BINARY,
                 [ScatterPlotExporter(self.work_directory)],
                 False,
                 "mcl",
@@ -247,8 +252,8 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
 
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
                 root="./")
 
             Trainer(
@@ -259,8 +264,8 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_no_pretrained_no_Net(self):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
                 root="./")
 
             Trainer(
@@ -270,8 +275,8 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_pretrained_no_test(self):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
                 root="./")
 
             trainer = Trainer(
@@ -291,8 +296,8 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
             dataset = HDF5DataSet(
-                hdf5_path="tests/hdf5/test.hdf5",
-                target="binary",
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
                 root="./")
 
             trainer = Trainer(
@@ -311,8 +316,8 @@ class TestTrainer(unittest.TestCase):
     def test_no_valid_provided(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            hdf5_path="tests/data/hdf5/test.hdf5",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(
@@ -327,8 +332,8 @@ class TestTrainer(unittest.TestCase):
     def test_no_valid_full_train(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            hdf5_path="tests/data/hdf5/test.hdf5",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(
@@ -344,8 +349,8 @@ class TestTrainer(unittest.TestCase):
     def test_optim(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            hdf5_path="tests/data/hdf5/test.hdf5",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(
@@ -379,8 +384,8 @@ class TestTrainer(unittest.TestCase):
     def test_default_optim(self):
 
         dataset = HDF5DataSet(
-            hdf5_path="tests/hdf5/test.hdf5",
-            target="binary",
+            hdf5_path="tests/data/hdf5/test.hdf5",
+            target=targets.BINARY,
             root="./")
 
         trainer = Trainer(
@@ -391,6 +396,30 @@ class TestTrainer(unittest.TestCase):
         assert isinstance(trainer.optimizer, torch.optim.Adam)
         assert trainer.lr == 0.001
         assert trainer.weight_decay == 1e-05
+
+    def test_cuda(self):    # test_ginet, but with cuda
+        if torch.cuda.is_available():
+
+            _model_base_test(           
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                GINet,
+                default_features,
+                [edgefeats.DISTANCE],
+                targets.REGRESS,
+                targets.IRMSD,
+                [OutputExporter(self.work_directory)],
+                False,
+                "mcl",
+                True # use_cuda
+            )
+
+            assert len(os.listdir(self.work_directory)) > 0
+
+        else:
+            warnings.warn("CUDA NOT AVAILABLE. test_cuda skipped")
+            _log.debug("cuda is not available, test_cuda skipped")
 
 
 if __name__ == "__main__":

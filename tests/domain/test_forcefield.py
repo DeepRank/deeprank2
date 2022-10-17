@@ -2,7 +2,7 @@ from pdb2sql import pdb2sql
 
 from deeprankcore.domain.forcefield import atomic_forcefield
 from deeprankcore.tools.pdb import get_structure
-from deeprankcore.domain.amino_acid import arginine, glutamate
+from deeprankcore.models.amino_acid import arginine, glutamate
 
 
 def test_atomic_forcefield():

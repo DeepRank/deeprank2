@@ -7,6 +7,7 @@ The process of generating graphs takes as input `.pdb` files representing protei
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import bsa, pssm, amino_acid, biopython
+from deeprankcore.domain import targettypes as targets
 
 feature_modules = [bsa, pssm, biopython, atomic_contact]
 
@@ -18,7 +19,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "bin_class": 0
+        targets.BINARY: 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -30,7 +31,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "bin_class": 1
+        targets.BINARY: 1
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -42,7 +43,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        "bin_class": 0
+        targets.BINARY: 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -67,6 +68,7 @@ Data can be split in sets implementing custom splits according to the specific a
 Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file), then the corresponding graphs can be saved in hdf5 files containing only references (external links) to the original one. For example:
 
 ```python
+
 from deeprankcore.DataSet import save_hdf5_keys
 
 save_hdf5_keys("<original_hdf5_path.hdf5>", train_ids, "<train_hdf5_path.hdf5>")
@@ -78,28 +80,30 @@ Now the HDF5DataSet objects can be defined:
 
 ```python
 from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain.features import edgefeats as Efeat
 
-node_features = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"]
-edge_features = ["dist"]
+node_features = [Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+edge_features = [Efeat.DISTANCE]
 
 # Creating HDF5DataSet objects
 dataset_train = HDF5DataSet(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
-    target = 'bin_class'
+    target = targets.BINARY
 )
 dataset_val = HDF5DataSet(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
-    target = 'bin_class'
+    target = targets.BINARY
 )
 dataset_test = HDF5DataSet(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
-    target = 'bin_class'
+    target = targets.BINARY
 )
 ```
 ## Training

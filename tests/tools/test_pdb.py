@@ -6,7 +6,7 @@ from deeprankcore.tools.pdb import (
     get_surrounding_residues,
     find_neighbour_atoms,
 )
-from deeprankcore.domain.amino_acid import valine
+from deeprankcore.models.amino_acid import valine
 from deeprankcore.models.structure import AtomicElement
 
 

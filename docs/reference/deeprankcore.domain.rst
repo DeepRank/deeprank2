@@ -15,7 +15,7 @@ Submodules
 deeprankcore.domain.amino\_acid module
 --------------------------------------
 
-.. automodule:: deeprankcore.domain.amino_acid
+.. automodule:: deeprankcore.models.amino_acid
    :members:
    :undoc-members:
    :show-inheritance:

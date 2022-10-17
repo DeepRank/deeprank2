@@ -9,7 +9,10 @@ from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
+from deeprankcore.domain.features import groups
+from deeprankcore.domain import targettypes as targets
 from typing import Callable, List, Union
+
 
 _log = logging.getLogger(__name__)
 
@@ -85,16 +88,16 @@ class HDF5DataSet(Dataset):
             dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. It can also be a custom-defined
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
             target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
             here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
             please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
             Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification.
-                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin', 'binary', ''bin_class', 'capri_class', or 'DockQ']
-                Automatically set to 'classif' if the target is 'binary', 'bin_class', 'bin', or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'DockQ'.
+                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq']
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
@@ -103,7 +106,7 @@ class HDF5DataSet(Dataset):
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
-            or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
+            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
             The complete list can be found in deeprankcore/domain/features.py
 
             edge_feature (list, optional): consider all pre-computed edge features ("all")
@@ -125,14 +128,14 @@ class HDF5DataSet(Dataset):
             self.hdf5_path = [hdf5_path]
 
         self.target = target
-        if self.target in ["irmsd", "lrmsd", "fnat", "dockQ"]:
-            self.task = "regress"
-        elif self.target in ["bin", "binary", "bin_class", "capri_classes"]:
-            self.task = "classif"
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+            self.task = targets.REGRESS
+        elif self.target in [targets.BINARY, targets.CAPRI]:
+            self.task = targets.CLASSIF
         else:
             self.task = task
         
-        if self.task not in ['classif','regress'] and self.target is not None:
+        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
             raise ValueError(
                 f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
                 "Example: \n\t"
@@ -141,7 +144,7 @@ class HDF5DataSet(Dataset):
                 "                  target='physiological_assembly',"
                 "                  task='classif')")
         
-        if self.task == 'classif':
+        if self.task == targets.CLASSIF:
             if classes is None:
                 self.classes = [0, 1]
             else:
@@ -226,7 +229,8 @@ class HDF5DataSet(Dataset):
         """Checks if the required node features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[mol_key + "/node_data/"].keys())
+        self.available_node_feature = list(f[f"{mol_key}/{groups.NODE}/"].keys())
+        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.node_feature == "all":
@@ -244,7 +248,8 @@ class HDF5DataSet(Dataset):
         """Checks if the required edge features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[mol_key + "/edge_data/"].keys())
+        self.available_edge_feature = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
+        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.edge_feature == "all":
@@ -277,17 +282,18 @@ class HDF5DataSet(Dataset):
             # node features
             node_data = ()
             for feat in self.node_feature:
-                vals = grp["node_data/" + feat][()]
-                if vals.ndim == 1:
-                    vals = vals.reshape(-1, 1)
+                if feat[0] != '_':  # ignore metafeatures
+                    vals = grp[f"{groups.NODE}/{feat}"][()]
+                    if vals.ndim == 1:
+                        vals = vals.reshape(-1, 1)
 
-                node_data += (vals,)
+                    node_data += (vals,)
 
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if "edge_index" in grp:
-                ind = grp['edge_index'][()]
+            if groups.INDEX in grp[groups.EDGE]:
+                ind = grp[f"{groups.EDGE}/{groups.INDEX}"][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
@@ -297,14 +303,15 @@ class HDF5DataSet(Dataset):
 
             # edge feature (same issue as above)
             if self.edge_feature is not None and len(self.edge_feature) > 0 and \
-               "edge_data" in grp:
+               groups.EDGE in grp:
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    vals = grp['edge_data/'+feat][()]
-                    if vals.ndim == 1:
-                        vals = vals.reshape(-1, 1)
-                    edge_data += (vals,)
+                    if feat[0] != '_':   # ignore metafeatures
+                        vals = grp[f"{groups.EDGE}/{feat}"][()]
+                        if vals.ndim == 1:
+                            vals = vals.reshape(-1, 1)
+                        edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
                 edge_data = self.edge_feature_transform(edge_data)
@@ -323,20 +330,20 @@ class HDF5DataSet(Dataset):
             if self.target is None:
                 y = None
             else:
-                if "score" in grp and self.target in grp["score"]:
+                if targets.VALUES in grp and self.target in grp[targets.VALUES]:
                     try:
-                        y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous().to(self.device)
+                        y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
                     except Exception as e:
                         _log.error(e)
                         _log.info('If your target variable contains categorical classes, \
                         please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
-                    possible_targets = grp["score"].keys()
+                    possible_targets = grp[targets.VALUES].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
-                                     " Use the query class to add more target values to input data.")
+                                     "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{groups.NODE}/{groups.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
@@ -431,11 +438,11 @@ class HDF5DataSet(Dataset):
         for cond_name, cond_vals in self.dict_filter.items():
 
             try:
-                molgrp["score"][cond_name][()]
+                molgrp[targets.VALUES][cond_name][()]
             except KeyError:
                 _log.info(f"   :Filter {cond_name} not found for mol {molgrp}")
                 _log.info("   :Filter options are")
-                for k in molgrp["score"].keys():
+                for k in molgrp[targets.VALUES].keys():
                     _log.info("   : ", k) # pylint: disable=logging-too-many-args
 
             # if we have a string it's more complicated

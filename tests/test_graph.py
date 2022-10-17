@@ -6,8 +6,8 @@ from deeprankcore.tools.score import get_all_scores
 
 class TestGraph(unittest.TestCase):
     def setUp(self):
-        with h5py.File("tests/hdf5/1ATN_ppi.hdf5", "r") as f5:
-            self.networkx_graph = hdf5_to_networkx(f5["1ATN_1w"])
+        with h5py.File("tests/data/hdf5/1ATN_ppi.hdf5", "r") as f5:
+            self.networkx_graph = hdf5_to_networkx(f5["residue-ppi-1ATN_1w:A-B"])
 
         self.pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
         self.reference_path = "tests/data/pdb/1ATN/1ATN_2w.pdb"

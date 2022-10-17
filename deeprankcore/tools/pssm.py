@@ -2,7 +2,7 @@ from typing import TextIO
 
 from deeprankcore.models.structure import Residue, Chain
 from deeprankcore.models.pssm import PssmRow, PssmTable
-from deeprankcore.domain.amino_acid import amino_acids
+from deeprankcore.models.amino_acid import amino_acids
 
 amino_acids_by_letter = {
     amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids
