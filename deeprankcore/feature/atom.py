@@ -5,6 +5,7 @@ from deeprankcore.domain.forcefield import atomic_forcefield
 from deeprankcore.domain.features import nodefeats
 from deeprankcore.models.error import UnknownAtomError
 import logging
+import numpy as np
 
 
 _log = logging.getLogger(__name__)
@@ -25,11 +26,9 @@ def add_features( # pylint: disable=unused-argument
         
             try:
                 node.features[nodefeats.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
-                node.features[nodefeats.VDWPARAMETERS] = atomic_forcefield.get_vanderwaals_parameters(atom)
 
             except UnknownAtomError:
                 _log.warning(f"Ignoring atom {atom}, because it's unknown to the forcefield")
 
                 # set parameters to zero, so that the potential becomes zero
                 node.features[nodefeats.ATOMCHARGE] = 0.0
-                node.features[nodefeats.VDWPARAMETERS] = VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
