@@ -162,7 +162,7 @@ class Graph:
 
             # store node names and chain_ids
             node_names = numpy.array([str(key) for key in self._nodes]).astype("S")
-            node_features_group.create_dataset(groups.NAMES, data=node_names)
+            node_features_group.create_dataset(groups.NAME, data=node_names)
             chain_ids = numpy.array([str(key).split()[1] for key in self._nodes]).astype("S")
             node_features_group.create_dataset(groups.CHAINID, data=chain_ids)
 
@@ -205,9 +205,9 @@ class Graph:
 
             # store edge names and indices
             edge_feature_group.create_dataset(
-                groups.NAMES, data=numpy.array(edge_names).astype("S")
+                groups.NAME, data=numpy.array(edge_names).astype("S")
             )
-            edge_feature_group.create_dataset(groups.INDICES, data=edge_indices)
+            edge_feature_group.create_dataset(groups.INDEX, data=edge_indices)
 
             # store edge features
             for edge_feature_name in edge_feature_names:

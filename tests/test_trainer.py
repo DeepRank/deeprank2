@@ -93,9 +93,9 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                  (groups.INDICES, data.edge_index),
+                                  (groups.INDEX, data.edge_index),
                                   ("edge_attr", data.edge_attr),
-                                  (Nfeat.POSITION, data.pos),
+                                  (groups.POSITION, data.pos),
                                   ("cluster0",data.cluster0),
                                   ("cluster1", data.cluster1)):
 

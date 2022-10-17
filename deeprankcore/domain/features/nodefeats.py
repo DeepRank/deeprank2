@@ -1,6 +1,3 @@
-## generic features
-POSITION = "position" # list[3xfloat]; former FEATURENAME_POSITION
-
 ## residue core features
 RESTYPE = "res_type" # AminoAcid object; former FEATURENAME_AMINOACID
 RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
@@ -17,7 +14,6 @@ DIFFPOLARITY = "diff_polarity" # [type?]; former FEATURENAME_POLARITYDIFFERENCE
 DIFFHBDONORS = "diff_hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORSDIFFERENCE
 DIFFHBACCEPTORS = "diff_hb_acceptors" # int; former FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE
 DIFFCONSERVATION = "diff_conservation" # int; former FEATURENAME_PSSMDIFFERENCE & FEATURENAME_CONSERVATIONDIFFERENCE
-VARIANTCONSERVATION = "variant_conservation" # int; former FEATURENAME_PSSMVARIANT & FEATURENAME_CONSERVATION
 
 ## protein context features
 BSA = "bsa" # float; former FEATURENAME_BURIEDSURFACEAREA

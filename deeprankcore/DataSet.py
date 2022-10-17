@@ -9,7 +9,7 @@ from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
-from deeprankcore.domain.features import groups, nodefeats
+from deeprankcore.domain.features import groups
 from deeprankcore.domain import targettypes as targets
 from typing import Callable, List, Union
 
@@ -230,7 +230,7 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_node_feature = list(f[f"{mol_key}/{groups.NODE}/"].keys())
-        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_']
+        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.node_feature == "all":
@@ -249,14 +249,14 @@ class HDF5DataSet(Dataset):
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         self.available_edge_feature = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
-        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_']
+        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.edge_feature == "all":
             self.edge_feature = self.available_edge_feature
         elif self.edge_feature is not None:
             for feat in self.edge_feature:
-                if feat not in self.available_edge_feature and feat[0] != '_':
+                if feat not in self.available_edge_feature:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
                     _log.info("\nCheck feature_modules passed to the preprocess function.\
                         Probably, the feature wasn't generated during the preprocessing step.")
@@ -282,7 +282,7 @@ class HDF5DataSet(Dataset):
             # node features
             node_data = ()
             for feat in self.node_feature:
-                if feat[0] != '_':
+                if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{groups.NODE}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
@@ -292,8 +292,8 @@ class HDF5DataSet(Dataset):
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if groups.INDICES in grp[groups.EDGE]:
-                ind = grp[f"{groups.EDGE}/{groups.INDICES}"][()]
+            if groups.INDEX in grp[groups.EDGE]:
+                ind = grp[f"{groups.EDGE}/{groups.INDEX}"][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
@@ -307,7 +307,7 @@ class HDF5DataSet(Dataset):
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    if feat[0] != '_':
+                    if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{groups.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
@@ -343,7 +343,7 @@ class HDF5DataSet(Dataset):
                                      "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp[f"{groups.NODE}/{nodefeats.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{groups.NODE}/{groups.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
@@ -368,7 +368,7 @@ class HDF5DataSet(Dataset):
                     _log.warning("no clustering group found")
             else:
                 _log.warning("no cluster method set")
-                
+
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
 
