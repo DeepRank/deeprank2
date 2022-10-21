@@ -1,13 +1,53 @@
-# deeprank-core
+# Deeprank-Core
 
-[![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main)
-[![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)
-[![Documentation Status](https://readthedocs.org/projects/deeprankcore/badge/?version=latest)](https://deeprankcore.readthedocs.io/en/latest/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore)
+| Badges | |
+|:----:|----|
+| **fairness** |  [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403) |
+| **package** |  [![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade) |
+| **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprankcore/badge/?version=latest)](https://deeprankcore.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
+| **tests** | [![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions) ![Linting status](https://github.com/DeepRank/deeprank-core/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main) |
+| **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)  |
+
+
+## Overview
 
 ![alt-text](./deeprankcore.png)
+
+Deeprank-Core is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using Graph Neural Networks. 
+
+Deeprank-Core contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN models.
+
+#### Features:
+- Predefined atom-level and residue-level PPI feature types
+  - e.g. atomic density, vdw energy, residue contacts, PSSM, etc.
+- Predefined target type
+  - e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
+- Flexible definition of both new features and targets
+- Graphs feature mapping
+- Efficient data storage in HDF5 format
+- Support both classification and regression (based on PyTorch and PyTorch Geometric)
+
+Deeprank-Core documentation can be found here : https://deeprankcore.rtfd.io/.
+
+## Table of contents
+
+- [Deeprank-Core](#deeprank-core)
+  - [Overview](#overview)
+      - [Features:](#features)
+  - [Table of contents](#table-of-contents)
+  - [Installation](#installation)
+    - [Dependencies](#dependencies)
+    - [Deeprank-core Package](#deeprank-core-package)
+  - [Documentation](#documentation)
+  - [Getting Started](#getting-started)
+    - [Data generation](#data-generation)
+    - [Data exploration](#data-exploration)
+    - [Dataset(s)](#datasets)
+    - [Training](#training)
+      - [Custom GNN](#custom-gnn)
+  - [h5x support](#h5x-support)
+  - [For the developers](#for-the-developers)
+    - [Software release](#software-release)
 
 ## Installation
 
@@ -20,7 +60,7 @@ Before installing deeprank-core you need to install:
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
  * [pytorch](https://pytorch.org/): `conda install pytorch -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
 
-### deeprank-core installation
+### Deeprank-core Package
 
 Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:
 
@@ -36,120 +76,226 @@ cd deeprank-core
 pip install -e ./
 ```
 
+ * For MacOS with M1 chip users only: see [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution if you run into problems with PyQt5 during deeprank-core installation.
+
 ## Documentation
-The documentation can be found here : https://deeprankcore.rtfd.io/
 
-## Generate Graphs
+The documentation can be found [here](https://deeprankcore.rtfd.io/).
 
-The process of generating graphs is called preprocessing. In order to do so, one needs query objects, describing how the graphs should be built.
+## Getting Started
+
+### Data generation
+
+The process of generating graphs takes as input `.pdb` files representing protein-protein structural complexes and the correspondent Position-Specific Scoring Matrices (PSSMs) in the form of `.pssm` files. Query objects describe how the graphs should be built.
 
 ```python
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import bsa, pssm, amino_acid, biopython
 
-feature_modules = [bsa, pssm, amino_acid, biopython]
+feature_modules = [bsa, pssm, biopython, atomic_contact]
 
 queries = []
 
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_1w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_2w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_3w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
-queries.append(ProteinProteinInterfaceResidueQuery(pdb_path='1ATN_4w.pdb', chain_id1="A", chain_id2="B",
-                                                   pssm_paths={"A": "1ATN.A.pdb.pssm", "B": "1ATN.B.pdb.pssm"}))
+# Append data points
+queries.append(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "1ATN_1w.pdb",
+    chain_id1 = "A",
+    chain_id2 = "B",
+    targets = {
+        "binary": 0
+    },
+    pssm_paths = {
+        "A": "1ATN.A.pdb.pssm",
+        "B": "1ATN.B.pdb.pssm"
+    }
+))
+queries.append(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "1ATN_2w.pdb",
+    chain_id1 = "A",
+    chain_id2 = "B",
+    targets = {
+        "binary": 1
+    },
+    pssm_paths = {
+        "A": "1ATN.A.pdb.pssm",
+        "B": "1ATN.B.pdb.pssm"
+    }
+))
+queries.append(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "1ATN_3w.pdb",
+    chain_id1 = "A",
+    chain_id2 = "B",
+    targets = {
+        "binary": 0
+    },
+    pssm_paths = {
+        "A": "1ATN.A.pdb.pssm",
+        "B": "1ATN.B.pdb.pssm"
+    }
+))
 
-# run the preprocessing
-output_paths = preprocess(feature_modules, queries, "train-data")
-
-# print the paths of the generated files
-print(output_paths)
+# Generate graphs and save them in hdf5 files
+# The default creates a number of hdf5 files equals to the cpu cores available
+# See deeprankcore.preprocess.preprocess for more details
+output_paths = preprocess(feature_modules, queries, "<output_folder>/<prefix_for_outputs>")
 
 ```
 
 The user is free to implement his/her own query class. Each implementation requires the `build_graph` method to be present.
 
 
-## Graph Interaction Network
+### Data exploration
 
-Using the graph interaction network is rather simple :
+As representative example, the following is the hdf5 structure generated by the previous phase for `1ATN_1w.pdb`, so for one single graph:
 
+```bash
+└── ppi-1ATN_1w:A-B
+    ├── edge_features
+    │   ├── _index
+    │   ├── _name
+    │   ├── covalent
+    │   ├── distance
+    │   ├── electrostatic
+    │   ├── same_chain
+    │   ├── vanderwaals
+    ├── node_features
+    │   ├── _chain_id
+    │   ├── _name
+    │   ├── _position
+    │   ├── bsa
+    │   ├── hse
+    │   ├── info_content
+    │   ├── res_depth
+    │   ├── pssm
+    └── target_values
+        └── binary
+
+```
+
+This graph represents the interface between two proteins contained in the `.pdb` file at the residue level. Each graph generated by deeprank-core has the above structure (apart from the features and the target that are specified by the user). 
+
+It is always a good practice to first explore the data, and then make decision about splitting them in training, test and validation sets. For this purpose, users can either use [HDF5View](https://www.hdfgroup.org/downloads/hdfview/), a visual tool written in Java for browsing and editing HDF5 files, or Python packages such as [h5py](https://docs.h5py.org/en/stable/). Few examples for the latter:
 
 ```python
-from deeprankcore.NeuralNet import NeuralNet
+import h5py
+from deeprankcore.domain.features import groups
+
+with h5py.File("<hdf5_path.hdf5>", "r") as hdf5:
+
+    # List of all graphs in hdf5, each graph representing a ppi
+    ids = list(hdf5.keys())
+
+    # List of all node features
+    node_features = list(hdf5[ids[0]]["node_features"]) 
+    # List of all edge features
+    edge_features = list(hdf5[ids[0]]["edge_features"])
+    # List of all edge targets
+    targets = list(hdf5[ids[0]]["target_values"])
+
+    # BSA feature for ids[0], numpy.ndarray
+    node_feat_polarity = hdf5[ids[0]]["node_features"]["bsa"][:] 
+     # Electrostatic feature for ids[0], numpy.ndarray
+    edge_feat_electrostatic = hdf5[ids[0]]["edge_features"]["electrostatic"][:]
+```
+
+### Dataset(s)
+
+Data can be split in sets implementing custom splits according to the specific application. Utility splitting functions are currently under development.
+
+Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file), then the corresponding graphs can be saved in hdf5 files containing only references (external links) to the original one. For example:
+
+```python
+from deeprankcore.DataSet import save_hdf5_keys
+
+save_hdf5_keys("<original_hdf5_path.hdf5>", train_ids, "<train_hdf5_path.hdf5>")
+save_hdf5_keys("<original_hdf5_path.hdf5>", valid_ids, "<val_hdf5_path.hdf5>")
+save_hdf5_keys("<original_hdf5_path.hdf5>", test_ids, "<test_hdf5_path.hdf5>")
+```
+
+Now the HDF5DataSet objects can be defined:
+
+```python
 from deeprankcore.DataSet import HDF5DataSet
+
+node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
+edge_features = ["distance"]
+
+# Creating HDF5DataSet objects
+dataset_train = HDF5DataSet(
+    hdf5_path = "<train_hdf5_path.hdf5>",
+    node_feature = node_features,
+    edge_feature = edge_features,
+    target = "binary"
+)
+dataset_val = HDF5DataSet(
+    hdf5_path = "<val_hdf5_path.hdf5>",
+    node_feature = node_features,
+    edge_feature = edge_features,
+    target = "binary"
+
+)
+dataset_test = HDF5DataSet(
+    hdf5_path = "<test_hdf5_path.hdf5>",
+    node_feature = node_features,
+    edge_feature = edge_features,
+    target = "binary"
+)
+```
+
+### Training
+
+Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
+
+```python
+from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
 
-database = './hdf5/1ACB_residue.hdf5'
-
 metrics_output_directory = "./metrics"
-metrics_exporters = [OutputExporter(metrics_output_directory),
-                     ScatterPlotExporter(metrics_output_directory, 5)]
+metrics_exporters = [OutputExporter(metrics_output_directory)]
 
-# creating HDF5DataSet object and selecting molecules, node/edge features, target, and clustering method:
-dataset = HDF5DataSet(
-    root = "./",
-    database = database,
-    index = range(400),
-    node_feature = ["type", "polarity", "bsa", "depth", "hse", "ic", "pssm"],
-    edge_feature = ["dist"],
-    target = "irmsd",
-    clustering_method = "mcl",
-)
-
-# training a network using the above defined dataset
-nn = NeuralNet(
-    dataset,
+trainer = Trainer(
+    dataset_train,
+    dataset_val,
+    dataset_test,
     GINet,
-    task = "reg",
     batch_size = 64,
-    percent = [0.8, 0.2],
     metrics_exporters = metrics_exporters
 )
 
-nn.train(nepoch = 50, validate = False)
-```
-## Custom Train-Validation split
-
-It is also possible to define a user-defined function for splitting the dataset in train and validation sets, for example if you want to perform the split according to the peptides clusters (the default split is done after shuffling, according to percent parameter):
-
-```python
-
-def UDF_DivideDataSet(dataset, percent, shuffle):
-    ...
-    return train_dataset, valid_dataset
 ```
 
-Then, the user-defined function can be passed to NeuralNet class as parameter:
+Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
 
 ```python
+import torch
 
-nn = NeuralNet(
-    dataset,
-    GINet,
-    task = "reg",
-    batch_size = 64,
-    percent = [0.8, 0.2],
-    train_valid_split = UDF_DivideDataSet,
-    metrics_exporters = metrics_exporters
-)
+trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
+
 ```
 
-## Custom GNN
-
-It is also possible to define new network architecture and to specify the loss and optimizer to be used during the training.
+Then the Trainer can be trained and tested, and the model can be saved:
 
 ```python
+trainer.train(nepoch = 50, validate = True)
+trainer.test()
+trainer.save_model(filename = "<output_model_path.pth.tar>")
 
+```
+
+
+#### Custom GNN
+
+It is also possible to define new network architectures:
+
+```python
+import torch 
 
 def normalized_cut_2d(edge_index, pos):
     row, col = edge_index
     edge_attr = torch.norm(pos[row] - pos[col], p=2, dim=1)
     return normalized_cut(edge_index, edge_attr, num_nodes=pos.size(0))
-
 
 class CustomNet(torch.nn.Module):
     def __init__(self):
@@ -175,21 +321,17 @@ class CustomNet(torch.nn.Module):
         x = F.dropout(x, training=self.training)
         return F.log_softmax(self.fc2(x), dim=1)
 
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-nn = NeuralNet(
-    dataset,
+trainer = Trainer(
+    dataset_train,
+    dataset_val,
+    dataset_test,
     CustomNet,
     batch_size = 64,
-    percent = [0.8, 0.2],
-    train_valid_split = UDF_DivideDataSet,
-    device=device
+    metrics_exporters = metrics_exporters
 )
-nn.optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-nn.loss = MSELoss()
 
-nn.train(nepoch=50)
+trainer.train(nepoch=50)
+
 ```
 
 ## h5x support

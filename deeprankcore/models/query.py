@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict, List, Optional, Iterator
+from typing import Dict, List, Optional, Iterator, Union
 import tempfile
 import pdb2sql
 from deeprankcore.models.graph import Graph
@@ -24,9 +24,27 @@ class Query:
 
     Query objects are used to generate graphs from structures.
     objects of this class should be created before any model is loaded
+
+    Query objects can have target values associated with them, these will be stored with the resulting graph.
+    The get_all_scores function under deeprankcore.tools.score is a nice way to get started. It will output a directory that can serve
+    as input for the targets argument.
+
+    Currently, the Trainer class under deeprankcore.Trainer can work with target values, that have one of the following names:
+
+      for classification:
+       - bin_class (scalar value is expected to be either 0 or 1)
+       - capri_classes (scalar integer values are expected)
+
+      for regression (expects one scalar per graph per target):
+       - irmsd
+       - lrmsd
+       - fnat
+       - dockq
+
+    Other target names are also allowed, but require additional settings to the Trainer object.
     """
 
-    def __init__(self, model_id: str, targets: Optional[Dict[str, float]] = None):
+    def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
         """
         Args:
             model_id: the id of the model to load, usually a pdb accession code
@@ -352,7 +370,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         chain_id1: str,
         chain_id2: str,
         pssm_paths: Optional[Dict[str, str]] = None,
-        interface_distance_cutoff: Optional[float] = 8.5,
+        interface_distance_cutoff: Optional[float] = 5.5,
         targets: Optional[Dict[str, float]] = None,
     ):
         """
@@ -361,7 +379,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             chain_id1(str): the pdb chain identifier of the first protein of interest
             chain_id2(str): the pdb chain identifier of the second protein of interest
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
+            interface_distance_cutoff(float): max distance in Ångström between two interacting atoms of the two proteins
             targets(dict, optional): named target values associated with this query
         """
 
@@ -441,7 +459,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         chain_id1: str,
         chain_id2: str,
         pssm_paths: Optional[Dict[str, str]] = None,
-        interface_distance_cutoff: float = 8.5,
+        interface_distance_cutoff: float = 10,
         targets: Optional[Dict[str, float]] = None,
     ):
         """

@@ -3,7 +3,7 @@ from deeprankcore.models.structure import Structure
 from deeprankcore.feature.bsa import add_features
 from deeprankcore.tools.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.tools.pdb import get_structure, get_residue_contact_pairs
-from deeprankcore.domain.feature import FEATURENAME_BURIEDSURFACEAREA
+from deeprankcore.domain.features import nodefeats
 
 
 def _find_residue_node(graph, chain_id, residue_number):
@@ -58,7 +58,7 @@ def test_add_features_residue():
     # chain B ASP 93, at interface
     node = _find_residue_node(graph, "B", 93)
 
-    assert node.features[FEATURENAME_BURIEDSURFACEAREA] > 0.0
+    assert node.features[nodefeats.BSA] > 0.0
 
 
 def test_add_features_atom():
@@ -83,4 +83,4 @@ def test_add_features_atom():
     # chain B ASP 93, at interface
     node = _find_atom_node(graph, "B", 93, "OD1")
 
-    assert node.features[FEATURENAME_BURIEDSURFACEAREA] > 0.0
+    assert node.features[nodefeats.BSA] > 0.0

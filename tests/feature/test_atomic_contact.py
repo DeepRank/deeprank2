@@ -8,13 +8,10 @@ from deeprankcore.models.contact import AtomicContact, ResidueContact
 from deeprankcore.models.graph import Edge, Graph
 from deeprankcore.tools.pdb import get_structure
 from deeprankcore.feature.atomic_contact import add_features
-from deeprankcore.domain.amino_acid import alanine
+from deeprankcore.models.amino_acid import alanine
 from deeprankcore.models.variant import SingleResidueVariant
-from deeprankcore.domain.feature import (
-    FEATURENAME_EDGEDISTANCE,
-    FEATURENAME_EDGEVANDERWAALS,
-    FEATURENAME_EDGECOULOMB,
-)
+from deeprankcore.domain.features import edgefeats as Efeat
+
 
 
 def _get_atom(chain: Chain, residue_number: int, atom_name: str) -> Atom:
@@ -54,9 +51,9 @@ def test_add_features():
     )
     edge_close = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_close), variant)
-    assert not numpy.isnan(edge_close.features[FEATURENAME_EDGEVANDERWAALS])
-    assert edge_close.features[FEATURENAME_EDGEVANDERWAALS] > 0.0, edge_close.features[
-        FEATURENAME_EDGEVANDERWAALS
+    assert not numpy.isnan(edge_close.features[Efeat.VANDERWAALS])
+    assert edge_close.features[Efeat.VANDERWAALS] > 0.0, edge_close.features[
+        Efeat.VANDERWAALS
     ]
 
     # MET 0 N - ASP 27 CB, very far, should have negative vanderwaals energ
@@ -65,9 +62,9 @@ def test_add_features():
     )
     edge_far = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_far), variant)
-    assert not numpy.isnan(edge_far.features[FEATURENAME_EDGEVANDERWAALS])
-    assert edge_far.features[FEATURENAME_EDGEVANDERWAALS] < 0.0, edge_far.features[
-        FEATURENAME_EDGEVANDERWAALS
+    assert not numpy.isnan(edge_far.features[Efeat.VANDERWAALS])
+    assert edge_far.features[Efeat.VANDERWAALS] < 0.0, edge_far.features[
+        Efeat.VANDERWAALS
     ]
 
     # MET 0 N - PHE 138 CG, intermediate distance, should have more negative
@@ -78,21 +75,21 @@ def test_add_features():
     )
     edge_intermediate = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_intermediate), variant)
-    assert not numpy.isnan(edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS])
+    assert not numpy.isnan(edge_intermediate.features[Efeat.VANDERWAALS])
     assert (
-        edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS]
-        < edge_far.features[FEATURENAME_EDGEVANDERWAALS]
-    ), f"{edge_intermediate.features[FEATURENAME_EDGEVANDERWAALS]} >= {edge_far.features[FEATURENAME_EDGEVANDERWAALS]}"
+        edge_intermediate.features[Efeat.VANDERWAALS]
+        < edge_far.features[Efeat.VANDERWAALS]
+    ), f"{edge_intermediate.features[Efeat.VANDERWAALS]} >= {edge_far.features[Efeat.VANDERWAALS]}"
 
     # Check the distances
     assert (
-        edge_close.features[FEATURENAME_EDGEDISTANCE]
-        < edge_intermediate.features[FEATURENAME_EDGEDISTANCE]
-    ), f"{edge_close.features[FEATURENAME_EDGEDISTANCE]} >= {edge_intermediate.features[FEATURENAME_EDGEDISTANCE]}"
+        edge_close.features[Efeat.DISTANCE]
+        < edge_intermediate.features[Efeat.DISTANCE]
+    ), f"{edge_close.features[Efeat.DISTANCE]} >= {edge_intermediate.features[Efeat.DISTANCE]}"
     assert (
-        edge_far.features[FEATURENAME_EDGEDISTANCE]
-        > edge_intermediate.features[FEATURENAME_EDGEDISTANCE]
-    ), f"{edge_far.features[FEATURENAME_EDGEDISTANCE]} <= {edge_intermediate.features[FEATURENAME_EDGEDISTANCE]}"
+        edge_far.features[Efeat.DISTANCE]
+        > edge_intermediate.features[Efeat.DISTANCE]
+    ), f"{edge_far.features[Efeat.DISTANCE]} <= {edge_intermediate.features[Efeat.DISTANCE]}"
 
     # ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy
     contact = AtomicContact(
@@ -101,10 +98,10 @@ def test_add_features():
     )
     close_attracting_edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(close_attracting_edge), variant)
-    assert not numpy.isnan(close_attracting_edge.features[FEATURENAME_EDGECOULOMB])
+    assert not numpy.isnan(close_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
-        close_attracting_edge.features[FEATURENAME_EDGECOULOMB] < 0.0
-    ), close_attracting_edge.features[FEATURENAME_EDGECOULOMB]
+        close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
+    ), close_attracting_edge.features[Efeat.ELECTROSTATIC]
 
     # ARG 139 CZ - ASP 20 OD2, far attractive electrostatic energy
     contact = AtomicContact(
@@ -113,14 +110,14 @@ def test_add_features():
     )
     far_attracting_edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(far_attracting_edge), variant)
-    assert not numpy.isnan(far_attracting_edge.features[FEATURENAME_EDGECOULOMB])
+    assert not numpy.isnan(far_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
-        far_attracting_edge.features[FEATURENAME_EDGECOULOMB] < 0.0
-    ), far_attracting_edge.features[FEATURENAME_EDGECOULOMB]
+        far_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
+    ), far_attracting_edge.features[Efeat.ELECTROSTATIC]
     assert (
-        far_attracting_edge.features[FEATURENAME_EDGECOULOMB]
-        > close_attracting_edge.features[FEATURENAME_EDGECOULOMB]
-    ), f"{far_attracting_edge.features[FEATURENAME_EDGECOULOMB]} <= {close_attracting_edge.features[FEATURENAME_EDGECOULOMB]}"
+        far_attracting_edge.features[Efeat.ELECTROSTATIC]
+        > close_attracting_edge.features[Efeat.ELECTROSTATIC]
+    ), f"{far_attracting_edge.features[Efeat.ELECTROSTATIC]} <= {close_attracting_edge.features[Efeat.ELECTROSTATIC]}"
 
     # GLU 109 OE2 - GLU 105 OE1, repulsive electrostatic energy
     contact = AtomicContact(
@@ -129,10 +126,10 @@ def test_add_features():
     )
     opposing_edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(opposing_edge), variant)
-    assert not numpy.isnan(opposing_edge.features[FEATURENAME_EDGECOULOMB])
+    assert not numpy.isnan(opposing_edge.features[Efeat.ELECTROSTATIC])
     assert (
-        opposing_edge.features[FEATURENAME_EDGECOULOMB] > 0.0
-    ), opposing_edge.features[FEATURENAME_EDGECOULOMB]
+        opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
+    ), opposing_edge.features[Efeat.ELECTROSTATIC]
 
     # check that we can calculate residue contacts
     contact = ResidueContact(
@@ -140,16 +137,16 @@ def test_add_features():
     )
     edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge), variant)
-    assert not numpy.isnan(edge.features[FEATURENAME_EDGEDISTANCE]) > 0.0
-    assert edge.features[FEATURENAME_EDGEDISTANCE] > 0.0
-    assert edge.features[FEATURENAME_EDGEDISTANCE] < 1e5
+    assert not numpy.isnan(edge.features[Efeat.DISTANCE]) > 0.0
+    assert edge.features[Efeat.DISTANCE] > 0.0
+    assert edge.features[Efeat.DISTANCE] < 1e5
 
-    assert not numpy.isnan(edge.features[FEATURENAME_EDGECOULOMB])
-    assert edge.features[FEATURENAME_EDGECOULOMB] != 0.0, edge.features[
-        FEATURENAME_EDGECOULOMB
+    assert not numpy.isnan(edge.features[Efeat.ELECTROSTATIC])
+    assert edge.features[Efeat.ELECTROSTATIC] != 0.0, edge.features[
+        Efeat.ELECTROSTATIC
     ]
 
-    assert not numpy.isnan(edge.features[FEATURENAME_EDGEVANDERWAALS])
-    assert edge.features[FEATURENAME_EDGEVANDERWAALS] != 0.0, edge.features[
-        FEATURENAME_EDGEVANDERWAALS
+    assert not numpy.isnan(edge.features[Efeat.VANDERWAALS])
+    assert edge.features[Efeat.VANDERWAALS] != 0.0, edge.features[
+        Efeat.VANDERWAALS
     ]

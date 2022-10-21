@@ -4,15 +4,27 @@
 
 ### Added
 
+### Changed
+
+### Removed
+
+## 0.2.0
+
+Released on Aug 10, 2022
+
+### Added
+
 * Automatic version bumping using `bump2version` with `.bumpversion.cfg` #126
+* `cffconvert.yml` to the CI workflow #139
+* Integration test for the Machine Learning pipeline #95
+* The package now is tested also on Python 3.10 #165
 
 ### Changed
 
 * Test PyPI package before publishing, by triggering a `workflow_dispatch` event from the Actions tab on `release.yml` workflow file #123
 * Coveralls is now working again #124
 * Wrong Zenodo entry has been corrected #138
-
-### Removed
+* Improved CUDA support (added for data tensors) #132
 
 ## 0.1.1
 
@@ -45,5 +57,3 @@ Released on June 28, 2022
 * The zero-division like error from TensorboardBinaryClassificationExporter has been fixed #112
 * h5xplorer is installed through `setup.cfg` file #121
 * Sphinx docs have been fixed #108
-
-### Removed

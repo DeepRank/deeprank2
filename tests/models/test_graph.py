@@ -8,14 +8,7 @@ from deeprankcore.models.grid import GridSettings, MapMethod
 from deeprankcore.models.graph import Graph, Edge, Node
 from deeprankcore.models.contact import ResidueContact
 from deeprankcore.tools.pdb import get_structure
-from deeprankcore.domain.storage import (
-    HDF5KEY_GRAPH_NODEFEATURES,
-    HDF5KEY_GRAPH_EDGEINDICES,
-    HDF5KEY_GRAPH_EDGEFEATURES,
-    HDF5KEY_GRID_MAPPEDFEATURES,
-    HDF5KEY_GRID_MAPPEDFEATURESVALUE
-
-)
+from deeprankcore.domain.features import groups
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals
@@ -73,22 +66,22 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             entry_group = f5[entry_id]
 
             # check for graph values
-            assert HDF5KEY_GRAPH_NODEFEATURES in entry_group
-            node_features_group = entry_group[HDF5KEY_GRAPH_NODEFEATURES]
+            assert groups.NODE in entry_group
+            node_features_group = entry_group[groups.NODE]
             assert node_feature_name in node_features_group
             assert len(numpy.nonzero(node_features_group[node_feature_name][()])) > 0
 
-            assert HDF5KEY_GRAPH_EDGEINDICES in entry_group
-            assert len(numpy.nonzero(entry_group[HDF5KEY_GRAPH_EDGEINDICES][()])) > 0
-
-            assert HDF5KEY_GRAPH_EDGEFEATURES in entry_group
-            edge_features_group = entry_group[HDF5KEY_GRAPH_EDGEFEATURES]
+            assert groups.EDGE in entry_group
+            edge_features_group = entry_group[groups.EDGE]
             assert edge_feature_name in edge_features_group
             assert len(numpy.nonzero(edge_features_group[edge_feature_name][()])) > 0
 
+            assert groups.INDEX in edge_features_group
+            assert len(numpy.nonzero(edge_features_group[groups.INDEX][()])) > 0
+
             # check for grid-mapped values
-            assert HDF5KEY_GRID_MAPPEDFEATURES in entry_group
-            mapped_group = entry_group[HDF5KEY_GRID_MAPPEDFEATURES]
+            assert "mapped_features" in entry_group
+            mapped_group = entry_group["mapped_features"]
 
             for feature_name in (node_feature_name, edge_feature_name):
                 feature_name = f"{feature_name}_000"
@@ -96,8 +89,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 assert (
                     feature_name in mapped_group
                 ), f"missing mapped feature {feature_name}"
-                assert HDF5KEY_GRID_MAPPEDFEATURESVALUE in mapped_group[feature_name]
-                data = mapped_group[feature_name][HDF5KEY_GRID_MAPPEDFEATURESVALUE][()]
+                assert "value" in mapped_group[feature_name]
+                data = mapped_group[feature_name]["value"][()]
                 assert len(numpy.nonzero(data)) > 0, f"{feature_name}: all zero"
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test

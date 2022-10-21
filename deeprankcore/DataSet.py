@@ -1,125 +1,81 @@
 import sys
 import os
-
 import logging
 import warnings
-
 import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
-import copy
 from ast import literal_eval
-from deeprankcore.community_pooling import community_detection, community_pooling
+from deeprankcore.domain.features import groups
+from deeprankcore.domain import targettypes as targets
+from typing import Callable, List, Union
 
 
 _log = logging.getLogger(__name__)
 
-
-def DivideDataSet(dataset, percent=None, shuffle=True):
-    """Divides the dataset into a training set and an evaluation set
-
-    Args:
-        dataset ([type])
-        percent (list, optional): [description]. Defaults to [0.8, 0.2].
-        shuffle (bool, optional): [description]. Defaults to True.
-
-    Returns:
-        [type]: [description]
+def save_hdf5_keys(
+    f_src_path: str,
+    src_ids: List[str],
+    f_dest_path: str,
+    hardcopy = False
+    ):
+    """Save references to keys in data_ids in a new hdf5 file.
+    Parameters
+    ----------
+    f_src_path : str
+        The path to the hdf5 file containing the keys.
+    src_ids : List[str]
+        Keys to be saved in the new hdf5 file.
+        It should be a list containing at least one key.
+    f_dest_path : str
+        The path to the new hdf5 file.
+    hardcopy : bool, default = False
+        If False, the new file contains only references.
+        (external links, see h5py ExternalLink class) to the original hdf5 file.
+        If True, the new file contains a copy of the objects specified in data_ids
+        (see h5py HardLink class).
+        
     """
+    if not all(isinstance(d, str) for d in src_ids):
+        raise TypeError("data_ids should be a list containing strings.")
 
-    if percent is None:
-        percent = [0.8, 0.2]
-
-    size = len(dataset)
-    index = np.arange(size)
-
-    if shuffle:
-        np.random.shuffle(index)
-
-    size1 = int(percent[0] * size)
-    index1, index2 = index[:size1], index[size1:]
-
-    dataset1 = copy.deepcopy(dataset)
-    dataset1.index_complexes = [dataset.index_complexes[i] for i in index1]
-
-    dataset2 = copy.deepcopy(dataset)
-    dataset2.index_complexes = [dataset.index_complexes[i] for i in index2]
-
-    return dataset1, dataset2
-
-
-def PreCluster(dataset, method):
-    """Pre-clusters nodes of the graphs
-
-    Args:
-        dataset (HDF5DataSet object)
-        method (srt): 'mcl' (Markov Clustering) or 'louvain'
-    """
-    for fname, mol in tqdm(dataset.index_complexes):
-
-        data = dataset.load_one_graph(fname, mol)
-
-        if data is None:
-            f5 = h5py.File(fname, "a")
-            try:
-                print(f"deleting {mol}")
-                del f5[mol]
-            except BaseException:
-                print(f"{mol} not found")
-            f5.close()
-            continue
-
-        f5 = h5py.File(fname, "a")
-        grp = f5[mol]
-
-        clust_grp = grp.require_group("clustering")
-
-        if method.lower() in clust_grp:
-            print(f"Deleting previous data for mol {mol} method {method}")
-            del clust_grp[method.lower()]
-
-        method_grp = clust_grp.create_group(method.lower())
-
-        cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
-        )
-        method_grp.create_dataset("depth_0", data=cluster)
-
-        data = community_pooling(cluster, data)
-
-        cluster = community_detection(
-            data.edge_index, data.num_nodes, method=method
-        )
-        method_grp.create_dataset("depth_1", data=cluster)
-
-        f5.close()
+    with h5py.File(f_dest_path,'w') as f_dest, h5py.File(f_src_path,'r') as f_src:
+        for key in src_ids:
+            if hardcopy:
+                f_src.copy(f_src[key],f_dest)
+            else:
+                f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
 class HDF5DataSet(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
-        root="./",
-        database=None,
-        transform=None,
-        pre_transform=None,
-        dict_filter=None,
-        target=None,
-        tqdm=True,
-        index=None,
-        node_feature="all",
-        edge_feature=None,
-        clustering_method="mcl",
-        edge_feature_transform=lambda x: np.tanh(-x / 2 + 2) + 1,
+        hdf5_path,
+        root: str = "./",
+        transform: Callable = None,
+        pre_transform: Callable = None,
+        dict_filter: dict = None,
+        target: str = None,
+        task: str = None,
+        classes: List = None,
+        tqdm: bool = True,
+        subset: list = None,
+        node_feature: Union[List[str], str] = "all",
+        edge_feature: Union[List[str], str] = "all",
+        clustering_method: str = "mcl",
+        edge_feature_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
     ):
         """Class from which the hdf5 datasets are loaded.
 
         Args:
-            root (str, optional): [description]. Defaults to "./".
+            root (str, optional): Root directory where the dataset should be
+            saved. Defaults to "./"
 
-            database (str, optional): Path to hdf5 file(s). Defaults to None.
+            hdf5_path (str, optional): Path to hdf5 file(s). For multiple hdf5 files, 
+            insert the paths in a list. Defaults to None.
 
             transform (callable, optional): A function/transform that takes in
             a torch_geometric.data.Data object and returns a transformed version.
@@ -129,21 +85,33 @@ class HDF5DataSet(Dataset):
             a torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before being saved to disk. Defaults to None.
 
-            dict_filter dictionnary, optional): Dictionnary of type [name: cond] to filter the molecules.
+            dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or DockQ. Defaults to None.
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
+            target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
+            here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
+            please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
+            Defaults to None.
+
+            task (str, optional): 'regress' for regression or 'classif' for classification.
+                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq']
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+
+            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
-            index (int, optional): index of a molecule. Defaults to None.
+            subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
             node_feature (str or list, optional): consider all pre-computed node features ("all")
-            or some defined node features (provide a list, example: ["type", "polarity", "bsa"]).
+            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
             The complete list can be found in deeprankcore/domain/features.py
 
-            edge_feature (list, optional): the complete list can be found in deeprankcore/domain/features.py.
-            Defaults to ["dist"], distance.
+            edge_feature (list, optional): consider all pre-computed edge features ("all")
+            or some defined edge features (provide a list, example: ["dist", "coulomb"]).
+            The complete list can be found in deeprankcore/domain/features.py
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
             or 'louvain' algorithm). Note that this parameter can be None only if the neural
@@ -154,22 +122,48 @@ class HDF5DataSet(Dataset):
         """
         super().__init__(root, transform, pre_transform)
 
-        # allow for multiple database
-        self.database = database
-        if not isinstance(database, list):
-            self.database = [database]
+        # allow for multiple hdf5 files
+        self.hdf5_path = hdf5_path
+        if not isinstance(hdf5_path, list):
+            self.hdf5_path = [hdf5_path]
 
         self.target = target
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+            self.task = targets.REGRESS
+        elif self.target in [targets.BINARY, targets.CAPRI]:
+            self.task = targets.CLASSIF
+        else:
+            self.task = task
+        
+        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
+            raise ValueError(
+                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
+                "Example: \n\t"
+                ""
+                "model = NeuralNet(dataset, GINet,"
+                "                  target='physiological_assembly',"
+                "                  task='classif')")
+        
+        if self.task == targets.CLASSIF:
+            if classes is None:
+                self.classes = [0, 1]
+            else:
+                self.classes = classes
+
+            self.classes_to_idx = {
+                i: idx for idx, i in enumerate(self.classes)
+            }
+        else:
+            self.classes = None
+            self.classes_to_idx = None
+
         self.dict_filter = dict_filter
         self.tqdm = tqdm
-        self.index = index
+        self.subset = subset
 
         self.node_feature = node_feature
 
-        if edge_feature is None:
-            self.edge_feature = ["dist"]
-        else:
-            self.edge_feature = edge_feature
+        self.edge_feature = edge_feature
 
         self.edge_feature_transform = edge_feature_transform
         self._transform = transform
@@ -177,16 +171,19 @@ class HDF5DataSet(Dataset):
         self.clustering_method = clustering_method
 
         # check if the files are ok
-        self.check_hdf5_files()
+        self._check_hdf5_files()
 
         # check the selection of features
-        self.check_node_feature()
-        self.check_edge_feature()
+        self._check_node_feature()
+        self._check_edge_feature()
 
         # create the indexing system
         # alows to associate each mol to an index
         # and get fname and mol name from the index
-        self.create_index_molecules()
+        self._create_index_molecules()
+
+        # get the device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def len(self):
         """Gets the length of the dataset
@@ -194,12 +191,6 @@ class HDF5DataSet(Dataset):
             int: number of complexes in the dataset
         """
         return len(self.index_complexes)
-
-    def _download(self):
-        pass
-
-    def _process(self):
-        pass
 
     def get(self, index): # pylint: disable=arguments-renamed
         """Gets one item from its unique index.
@@ -214,31 +205,32 @@ class HDF5DataSet(Dataset):
         data = self.load_one_graph(fname, mol)
         return data
 
-    def check_hdf5_files(self):
+    def _check_hdf5_files(self):
         """Checks if the data contained in the hdf5 file is valid."""
-        print("   Checking dataset Integrity")
+        _log.info("\nChecking dataset Integrity...")
         remove_file = []
-        for fname in self.database:
+        for fname in self.hdf5_path:
             try:
                 f = h5py.File(fname, "r")
                 mol_names = list(f.keys())
                 if len(mol_names) == 0:
-                    print(f"    -> {fname} is empty ")
+                    _log.info(f"    -> {fname} is empty ")
                     remove_file.append(fname)
                 f.close()
             except Exception as e:
-                print(e)
-                print(f"    -> {fname} is corrupted ")
+                _log.error(e)
+                _log.info(f"    -> {fname} is corrupted ")
                 remove_file.append(fname)
 
         for name in remove_file:
-            self.database.remove(name)
+            self.hdf5_path.remove(name)
 
-    def check_node_feature(self):
+    def _check_node_feature(self):
         """Checks if the required node features exist"""
-        f = h5py.File(self.database[0], "r")
+        f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[mol_key + "/node_data/"].keys())
+        self.available_node_feature = list(f[f"{mol_key}/{groups.NODE}/"].keys())
+        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.node_feature == "all":
@@ -246,17 +238,18 @@ class HDF5DataSet(Dataset):
         else:
             for feat in self.node_feature:
                 if feat not in self.available_node_feature:
-                    print(feat, " node feature not found in the file", self.database[0])
-                    print("Possible node feature : ")
-                    print("\n".join(self.available_node_feature))
-                    # raise ValueError('Feature Not found')
+                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function.\
+                        Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info(f"\nPossible node features: {self.available_node_feature}\n")
                     sys.exit()
 
-    def check_edge_feature(self):
+    def _check_edge_feature(self):
         """Checks if the required edge features exist"""
-        f = h5py.File(self.database[0], "r")
+        f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[mol_key + "/edge_data/"].keys())
+        self.available_edge_feature = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
+        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
         if self.edge_feature == "all":
@@ -264,12 +257,10 @@ class HDF5DataSet(Dataset):
         elif self.edge_feature is not None:
             for feat in self.edge_feature:
                 if feat not in self.available_edge_feature:
-                    print(
-                        feat, " edge attribute not found in the file", self.database[0]
-                    )
-                    print("Possible edge attribute : ")
-                    print("\n".join(self.available_edge_feature))
-                    # raise ValueError('Feature Not found')
+                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function.\
+                        Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
                     sys.exit()
 
     def load_one_graph(self, fname, mol): # noqa
@@ -291,55 +282,68 @@ class HDF5DataSet(Dataset):
             # node features
             node_data = ()
             for feat in self.node_feature:
-                vals = grp["node_data/" + feat][()]
-                if vals.ndim == 1:
-                    vals = vals.reshape(-1, 1)
+                if feat[0] != '_':  # ignore metafeatures
+                    vals = grp[f"{groups.NODE}/{feat}"][()]
+                    if vals.ndim == 1:
+                        vals = vals.reshape(-1, 1)
 
-                node_data += (vals,)
+                    node_data += (vals,)
 
-            x = torch.tensor(np.hstack(node_data), dtype=torch.float)
+            x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if "edge_index" in grp:
-                ind = grp['edge_index'][()]
+            if groups.INDEX in grp[groups.EDGE]:
+                ind = grp[f"{groups.EDGE}/{groups.INDEX}"][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
             else:
                 edge_index = torch.empty((2, 0), dtype=torch.long)
+            edge_index = edge_index.to(self.device)
 
             # edge feature (same issue as above)
             if self.edge_feature is not None and len(self.edge_feature) > 0 and \
-               "edge_data" in grp:
+               groups.EDGE in grp:
 
                 edge_data = ()
                 for feat in self.edge_feature:
-                    vals = grp['edge_data/'+feat][()]
-                    if vals.ndim == 1:
-                        vals = vals.reshape(-1, 1)
-                    edge_data += (vals,)
+                    if feat[0] != '_':   # ignore metafeatures
+                        vals = grp[f"{groups.EDGE}/{feat}"][()]
+                        if vals.ndim == 1:
+                            vals = vals.reshape(-1, 1)
+                        edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
                 edge_data = self.edge_feature_transform(edge_data)
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
+            edge_attr = edge_attr.to(self.device)
 
             if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
-                warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
-                              "with a more up to date version of this software.", DeprecationWarning)
+                warnings.warn(
+                    """Internal edges are not supported anymore.
+                    You should probably prepare the hdf5 file
+                    with a more up to date version of this software.""", DeprecationWarning)
 
             # target
             if self.target is None:
                 y = None
             else:
-                if "score" in grp and self.target in grp["score"]:
-                    y = torch.tensor([grp['score/'+self.target][()]], dtype=torch.float).contiguous()
+                if targets.VALUES in grp and self.target in grp[targets.VALUES]:
+                    try:
+                        y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
+                    except Exception as e:
+                        _log.error(e)
+                        _log.info('If your target variable contains categorical classes, \
+                        please convert them into class indices before defining the HDF5DataSet instance.')
                 else:
-                    raise ValueError(f"Target {self.target} missing in {mol}")
+                    possible_targets = grp[targets.VALUES].keys()
+                    raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
+                                     "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp['node_data/pos/'][()], dtype=torch.float).contiguous()
+            pos = torch.tensor(grp[f"{groups.NODE}/{groups.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
@@ -353,9 +357,9 @@ class HDF5DataSet(Dataset):
                             ):
 
                             cluster0 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long)
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(self.device)
                             cluster1 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long)
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(self.device)
                         else:
                             _log.warning("no clusters detected")
                     else:
@@ -364,16 +368,6 @@ class HDF5DataSet(Dataset):
                     _log.warning("no clustering group found")
             else:
                 _log.warning("no cluster method set")
-
-            y = None
-            if self.target is not None:
-                if self.target in grp["score"]:
-
-                    y = torch.tensor(
-                        [grp["score/" + self.target][()]], dtype=torch.float
-                    ).contiguous()
-                else:
-                    raise ValueError(f"Target {self.target} missing in {mol}")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
@@ -390,22 +384,22 @@ class HDF5DataSet(Dataset):
 
         return data
 
-    def create_index_molecules(self):
+    def _create_index_molecules(self):
         """Creates the indexing of each molecule in the dataset.
 
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
         This allows to refer to one complex with its index in the list
         """
-        _log.debug(f"Processing data set with hdf5 files: {self.database}")
+        _log.debug(f"Processing data set with hdf5 files: {self.hdf5_path}")
 
         self.index_complexes = []
 
-        desc = f"{'   Train dataset':25s}"
+        desc = f"   {self.hdf5_path}{' dataset':25s}"
         if self.tqdm:
-            data_tqdm = tqdm(self.database, desc=desc, file=sys.stdout)
+            data_tqdm = tqdm(self.hdf5_path, desc=desc, file=sys.stdout)
         else:
-            print("   Train dataset")
-            data_tqdm = self.database
+            _log.info(f"   {self.hdf5_path} dataset\n")
+            data_tqdm = self.hdf5_path
         sys.stdout.flush()
 
         for fdata in data_tqdm:
@@ -413,22 +407,19 @@ class HDF5DataSet(Dataset):
                 data_tqdm.set_postfix(mol=os.path.basename(fdata))
             try:
                 fh5 = h5py.File(fdata, "r")
-                if self.index is None:
+                if self.subset is None:
                     mol_names = list(fh5.keys())
                 else:
-                    mol_names = [list(fh5.keys())[i] for i in self.index]
+                    mol_names = [i for i in self.subset if i in list(fh5.keys())]
+
                 for k in mol_names:
-                    if self.filter(fh5[k]):
+                    if self._filter(fh5[k]):
                         self.index_complexes += [(fdata, k)]
                 fh5.close()
             except Exception:
                 _log.exception(f"on {fdata}")
 
-        self.ntrain = len(self.index_complexes)
-        self.index_train = list(range(self.ntrain))
-        self.ntot = len(self.index_complexes)
-
-    def filter(self, molgrp):
+    def _filter(self, molgrp):
         """Filters the molecule according to a dictionary.
 
         The filter is based on the attribute self.dict_filter
@@ -447,12 +438,12 @@ class HDF5DataSet(Dataset):
         for cond_name, cond_vals in self.dict_filter.items():
 
             try:
-                molgrp["score"][cond_name][()]
+                molgrp[targets.VALUES][cond_name][()]
             except KeyError:
-                print(f"   :Filter {cond_name} not found for mol {molgrp}")
-                print("   :Filter options are")
-                for k in molgrp["score"].keys():
-                    print("   : ", k)
+                _log.info(f"   :Filter {cond_name} not found for mol {molgrp}")
+                _log.info("   :Filter options are")
+                for k in molgrp[targets.VALUES].keys():
+                    _log.info("   : ", k) # pylint: disable=logging-too-many-args
 
             # if we have a string it's more complicated
             if isinstance(cond_vals, str):

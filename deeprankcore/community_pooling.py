@@ -75,7 +75,7 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
 
         # detect communities using MCL
         elif method == "mcl":
-            matrix = nx.to_scipy_sparse_matrix(subg)
+            matrix = nx.to_scipy_sparse_array(subg)
             # run MCL with default parameters
             result = mc.run_mcl(matrix)
             mc_clust = mc.get_clusters(result)  # get clusters
@@ -142,7 +142,7 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"): # 
     # detect the communities using MCL detection
     if method == "mcl":
 
-        matrix = nx.to_scipy_sparse_matrix(g)
+        matrix = nx.to_scipy_sparse_array(g)
 
         # run MCL with default parameters
         result = mc.run_mcl(matrix)
@@ -195,8 +195,10 @@ def community_pooling(cluster, data):
     has_cluster = hasattr(data, "cluster0")
 
     if has_internal_edges:
-        warnings.warn("Internal edges are not supported anymore. You should probably prepare the hdf5 file "
-                      "with a more up to date version of this software.", DeprecationWarning)
+        warnings.warn(
+            """Internal edges are not supported anymore.
+            You should probably prepare the hdf5 file with
+            a more up to date version of this software.""", DeprecationWarning)
 
     cluster, perm = consecutive_cluster(cluster)
     cluster = cluster.to(data.x.device)

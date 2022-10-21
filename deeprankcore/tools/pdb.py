@@ -7,7 +7,7 @@ import numpy
 from pdb2sql import interface as get_interface
 
 from deeprankcore.models.structure import Atom, Residue, Chain, Structure, AtomicElement
-from deeprankcore.domain.amino_acid import amino_acids
+from deeprankcore.models.amino_acid import amino_acids
 from deeprankcore.models.pair import Pair
 from deeprankcore.domain.forcefield import atomic_forcefield
 from deeprankcore.models.contact import ResidueContact, AtomicContact
@@ -362,6 +362,7 @@ def get_surrounding_residues(structure, residue, radius):
     distances = distance_matrix(structure_atom_positions, residue_atom_positions, p=2)
 
     close_residues = set([])
+
     for structure_atom_index, structure_atom in enumerate(structure_atoms):
 
         shortest_distance = numpy.min(distances[structure_atom_index, :])

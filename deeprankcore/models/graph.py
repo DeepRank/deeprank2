@@ -8,14 +8,8 @@ import h5py
 from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.contact import Contact
 from deeprankcore.models.grid import MapMethod, Grid, GridSettings
-from deeprankcore.domain.storage import (
-    HDF5KEY_GRAPH_SCORE,
-    HDF5KEY_GRAPH_NODENAMES,
-    HDF5KEY_GRAPH_NODEFEATURES,
-    HDF5KEY_GRAPH_EDGENAMES,
-    HDF5KEY_GRAPH_EDGEINDICES,
-    HDF5KEY_GRAPH_EDGEFEATURES
-    )
+from deeprankcore.domain.features import groups
+from deeprankcore.domain import targettypes as targets
 
 _log = logging.getLogger(__name__)
 
@@ -161,15 +155,18 @@ class Graph:
 
         with h5py.File(hdf5_path, "a") as hdf5_file:
 
-            # create a group to hold everything
+            # create groups to hold data
             graph_group = hdf5_file.require_group(self.id)
+            node_features_group = graph_group.create_group(groups.NODE)
+            edge_feature_group = graph_group.create_group(groups.EDGE)
 
-            # store node names
+            # store node names and chain_ids
             node_names = numpy.array([str(key) for key in self._nodes]).astype("S")
-            graph_group.create_dataset(HDF5KEY_GRAPH_NODENAMES, data=node_names)
+            node_features_group.create_dataset(groups.NAME, data=node_names)
+            chain_ids = numpy.array([str(key).split()[1] for key in self._nodes]).astype("S")
+            node_features_group.create_dataset(groups.CHAINID, data=chain_ids)
 
             # store node features
-            node_features_group = graph_group.create_group(HDF5KEY_GRAPH_NODEFEATURES)
             node_key_list = list(self._nodes.keys())
             first_node_data = list(self._nodes.values())[0].features
             node_feature_names = list(first_node_data.keys())
@@ -183,7 +180,7 @@ class Graph:
                     node_feature_name, data=node_feature_data
                 )
 
-            # store edges
+            # identify edges
             edge_indices = []
             edge_names = []
 
@@ -206,20 +203,20 @@ class Graph:
                         edge.features[edge_feature_name]
                     )
 
-            graph_group.create_dataset(
-                HDF5KEY_GRAPH_EDGENAMES, data=numpy.array(edge_names).astype("S")
+            # store edge names and indices
+            edge_feature_group.create_dataset(
+                groups.NAME, data=numpy.array(edge_names).astype("S")
             )
+            edge_feature_group.create_dataset(groups.INDEX, data=edge_indices)
 
-            graph_group.create_dataset(HDF5KEY_GRAPH_EDGEINDICES, data=edge_indices)
-
-            edge_feature_group = graph_group.create_group(HDF5KEY_GRAPH_EDGEFEATURES)
+            # store edge features
             for edge_feature_name in edge_feature_names:
                 edge_feature_group.create_dataset(
                     edge_feature_name, data=edge_feature_data[edge_feature_name]
                 )
 
             # store target values
-            score_group = graph_group.create_group(HDF5KEY_GRAPH_SCORE)
+            score_group = graph_group.create_group(targets.VALUES)
             for target_name, target_data in self.targets.items():
                 score_group.create_dataset(target_name, data=target_data)
 
