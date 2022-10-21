@@ -11,6 +11,7 @@ on:
 
 
 jobs:
+
   build:
     name: Build for (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -44,10 +45,7 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
+      - uses: ./.github/actions/install-python-and-package
       - uses: "namiyousef/action-kaggle-gpu-test@main"
         with:
           git_access_token: ${{ secrets.GITHUB_TOKEN }}
