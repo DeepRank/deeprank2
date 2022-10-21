@@ -31,28 +31,15 @@ jobs:
           pytest -v
       - name: Verify that we can build the package
         run: python3 setup.py sdist bdist_wheel
-    
+  
   integration:
     name: Test with GPU
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest']
-        python-version: [3.9]
-    
-    
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-      - uses: "namiyousef/action-kaggle-gpu-test@main"
-        with:
-          git_access_token: ${{ secrets.GITHUB_TOKEN }}
-          kaggle_api_key: ${{ secrets.KAGGLE_API_KEY }}
-          repository_name: ${{ github.repository }}
-          test_folder: tests
+    - uses: "namiyousef/action-kaggle-gpu-test@develop"
+      with:
+        git_access_token: "${{ secrets.GITHUB_TOKEN }}"
+        kaggle_api_key: "${{ secrets.KAGGLE_API_KEY }}"
+        repository_name: "${{ github.repository }}"
+        test_folder: tests
+        python_version: "3.9"
