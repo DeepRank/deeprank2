@@ -52,5 +52,5 @@ keywords:
   - Deeprank
 license: Apache-2.0
 commit: 4e8823758ba03f824b4281f5689cb6a335ab2f6c
-version: "0.2.0"
+version: "1.0.0"
 date-released: '2022-06-28'
