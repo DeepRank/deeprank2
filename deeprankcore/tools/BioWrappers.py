@@ -4,10 +4,8 @@ from Bio.PDB.HSExposure import HSExposureCA
 
 import warnings
 from Bio import BiopythonWarning
-
-
 with warnings.catch_warnings():
-    warnings.simplefilter("ignore", BiopythonWarning)
+    warnings.simplefilter("ignore", BiopythonWarning) # this does nothing because nothing is inside the loop...
 
 def get_bio_model(pdbfile):
     """Get the model
