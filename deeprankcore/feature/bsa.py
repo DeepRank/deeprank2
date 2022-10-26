@@ -1,5 +1,6 @@
 import logging
 import freesasa
+freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.structure import Residue, Atom
 from deeprankcore.domain.features import nodefeats
