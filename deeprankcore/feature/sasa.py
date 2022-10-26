@@ -1,11 +1,11 @@
 from typing import List
 import numpy
 import freesasa
-freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member
 from deeprankcore.models.structure import Residue, Atom
 from deeprankcore.models.graph import Node, Graph
 from deeprankcore.domain.features import nodefeats
 
+freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member
 
 def add_features_for_residues(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
                               result: freesasa.Result, # pylint: disable=c-extension-no-member
