@@ -11,7 +11,7 @@ from deeprankcore.models.amino_acid import amino_acids
 from deeprankcore.models.pair import Pair
 from deeprankcore.domain.forcefield import atomic_forcefield
 from deeprankcore.models.contact import ResidueContact, AtomicContact
-from deeprankcore.feature.atomic_contact import get_coulomb_potentials, get_lennard_jones_potentials
+from deeprankcore.feature.atomic_contact import get_coulomb_potentials_new, get_lennard_jones_potentials_new
 
 
 _log = logging.getLogger(__name__)
@@ -148,19 +148,9 @@ def get_atomic_contacts(atoms: List[Atom]) -> List[AtomicContact]:
     # calculate distance matrix
     interatomic_distances = distance_matrix(atom_postions, atom_postions, p=2)
 
-    # get forcefield parameters
-    atom_charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
-    atom_vanderwaals_parameters = [
-        atomic_forcefield.get_vanderwaals_parameters(atom) for atom in atoms
-    ]
-
     # calculate potentials
-    interatomic_electrostatic_potentials = get_coulomb_potentials(
-        interatomic_distances, atom_charges
-    )
-    interatomic_vanderwaals_potentials = get_lennard_jones_potentials(
-        interatomic_distances, atoms, atom_vanderwaals_parameters
-    )
+    interatomic_electrostatic_potentials = get_coulomb_potentials_new(atoms,atoms)
+    interatomic_vanderwaals_potentials = get_lennard_jones_potentials_new(atoms,atoms)
 
     # build contacts
     contacts = []
