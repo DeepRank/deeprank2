@@ -16,7 +16,7 @@ from deeprankcore.feature.atomic_contact import get_coulomb_potentials, get_lenn
 _log = logging.getLogger(__name__)
 
 
-def is_xray(pdb_file):
+def is_xray(pdb_file): # unused, do we still need this?
     "check that an open pdb file is an x-ray structure"
 
     for line in pdb_file:
@@ -363,7 +363,7 @@ def get_surrounding_residues(structure, residue, radius):
     return close_residues
 
 
-def find_neighbour_atoms(atoms, max_distance):
+def find_neighbour_atoms(atoms, max_distance): # currently unused (except in test) but potentially useful
     """For a given list of atoms, find the pairs of atoms that lie next to each other.
 
     Args:
