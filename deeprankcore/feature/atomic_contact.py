@@ -40,8 +40,8 @@ def get_coulomb_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> np.nda
     distances = distance_matrix(positions1, positions2)
 
     # find charges
-    charges1 = [atomic_forcefield.get_charge(atom) for atom in atoms1]
-    charges2 = [atomic_forcefield.get_charge(atom) for atom in atoms2]
+    charges1 = [atomic_forcefield.get_charge(atom, override = True) for atom in atoms1]
+    charges2 = [atomic_forcefield.get_charge(atom, override = True) for atom in atoms2]
 
     # calculate potentials
     coulomb_potentials = np.expand_dims(charges1, axis=1) * np.expand_dims(charges2, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
@@ -56,14 +56,19 @@ def get_lennard_jones_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> 
     distances = distance_matrix(positions1, positions2)
 
     # calculate vanderwaals potentials
-    sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms1]
-    sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms2]       
+    if atoms1[0].residue == atoms2[0].residue: # use intra- parameters
+        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_sigma for atom in atoms1]
+        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_sigma for atom in atoms2]       
+        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_epsilon for atom in atoms1]
+        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_epsilon for atom in atoms2]
+    else: # use inter- parameters
+        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_sigma for atom in atoms1]
+        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_sigma for atom in atoms2]       
+        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_epsilon for atom in atoms1]
+        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_epsilon for atom in atoms2]
+        
     mean_sigmas = (np.array(sigmas1).reshape(-1, 1) + sigmas2) / 2
-
-    eps1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms1]
-    eps2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms2]
-    geomean_eps = np.sqrt((np.array(eps1).reshape(-1, 1) * eps2)) # sqrt(eps1*eps2)
-    
+    geomean_eps = np.sqrt((np.array(epsilon1).reshape(-1, 1) * epsilon2)) # sqrt(eps1*eps2)
     lennard_jones_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
     return lennard_jones_potentials
@@ -165,7 +170,7 @@ def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
     covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
 
     # set the edge features
-    for _, edge in enumerate(edges):
+    for edge in edges:
         contact = edge.id
         atom1_index = atom_indices[contact.atom1]
         atom2_index = atom_indices[contact.atom2]
