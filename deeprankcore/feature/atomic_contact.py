@@ -72,6 +72,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         elif isinstance(contact, AtomicContact):
             atoms1 = [contact.atom1]
             atoms2 = [contact.atom2]
+            edge.features[Efeat.SAMERES] = float( contact.atom1.residue == contact.atom2.residue) # 1.0 for True; 0.0 for False
         else:
             raise TypeError(
                 f"Unexpected edge type: {type(contact)} for {edge}")

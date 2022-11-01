@@ -13,8 +13,6 @@ from deeprankcore.models.pair import Pair
 _log = logging.getLogger(__name__)
 
 
-
-
 def add_hydrogens(input_pdb_path, output_pdb_path):
     "this requires reduce: https://github.com/rlabduke/reduce"
 
