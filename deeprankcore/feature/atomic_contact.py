@@ -212,7 +212,7 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
         positions1 = [atom.position for atom in atoms1]
         positions2 = [atom.position for atom in atoms2]
         distances = distance_matrix(positions1, positions2)
-        edge.features[Efeat.DISTANCE] = np.min(distances)
+        edge.features[Efeat.DISTANCE] = np.min(distances) # minimum atom distance is considered the distance between 2 residues
         
         # determine whether residues are covalently bond
         edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE ) # 1.0 for True; 0.0 for False
@@ -222,6 +222,18 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
         charges2 = [atomic_forcefield.get_charge(x) for x in atoms2]
         coulomb_potentials = np.expand_dims(charges1, axis=1) * np.expand_dims(charges2, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
         edge.features[Efeat.ELECTROSTATIC] = np.sum(coulomb_potentials)
+
+        # calculate vanderwaals potential
+        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(x).inter_sigma for x in atoms1]
+        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(x).inter_sigma for x in atoms2]       
+        mean_sigmas = (np.array(sigmas1).reshape(-1, 1) + sigmas2) / 2
+ 
+        eps1 = [atomic_forcefield.get_vanderwaals_parameters(x).inter_epsilon for x in atoms1]
+        eps2 = [atomic_forcefield.get_vanderwaals_parameters(x).inter_epsilon for x in atoms2]
+        geomean_eps = np.sqrt((np.array(eps1).reshape(-1, 1) * eps2))
+        
+        vanderwaals = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+        edge.features[Efeat.VANDERWAALS] = np.sum(vanderwaals)
 
         for atom1 in contact.residue1.atoms:
             for atom2 in contact.residue2.atoms:
