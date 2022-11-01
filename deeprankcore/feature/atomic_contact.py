@@ -1,6 +1,6 @@
 from typing import List
 import logging
-import numpy
+import numpy as np
 from scipy.spatial import distance_matrix
 from deeprankcore.models.structure import Atom
 from deeprankcore.models.graph import Graph, Edge
@@ -14,7 +14,7 @@ from deeprankcore.models.error import UnknownAtomError
 _log = logging.getLogger(__name__)
 
 
-def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> numpy.ndarray:
+def get_coulomb_potentials(distances: np.ndarray, charges: List[float]) -> np.ndarray:
     """ Calculate the Coulomb potentials, given a distance matrix and a list of charges of equal size.
 
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
@@ -27,14 +27,14 @@ def get_coulomb_potentials(distances: numpy.ndarray, charges: List[float]) -> nu
                          .format(charge_count, "x".join([str(d) for d in distances.shape])))
 
     # calculate the potentials
-    potentials = numpy.expand_dims(charges, axis=0) * numpy.expand_dims(charges, axis=1) \
+    potentials = np.expand_dims(charges, axis=0) * np.expand_dims(charges, axis=1) \
                  * COULOMB_CONSTANT / (EPSILON0 * distances)
 
     return potentials
 
 
-def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
-                                 vanderwaals_parameters: List[VanderwaalsParam]) -> numpy.ndarray:
+def get_lennard_jones_potentials(distances: np.ndarray, atoms: List[Atom],
+                                 vanderwaals_parameters: List[VanderwaalsParam]) -> np.ndarray:
     """ Calculate Lennard-Jones potentials, given a distance matrix and a list of atoms with vanderwaals parameters of equal size.
 
          Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
@@ -49,10 +49,10 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
                          .format(atom_count, "x".join([str(d) for d in distances.shape])))
 
     # collect parameters
-    sigmas1 = numpy.empty((atom_count, atom_count))
-    sigmas2 = numpy.empty((atom_count, atom_count))
-    epsilons1 = numpy.empty((atom_count, atom_count))
-    epsilons2 = numpy.empty((atom_count, atom_count))
+    sigmas1 = np.empty((atom_count, atom_count))
+    sigmas2 = np.empty((atom_count, atom_count))
+    epsilons1 = np.empty((atom_count, atom_count))
+    epsilons2 = np.empty((atom_count, atom_count))
     for atom1_index in range(atom_count):
         for atom2_index in range(atom_count):
             atom1 = atoms[atom1_index]
@@ -75,7 +75,7 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
 
     # calculate potentials
     sigmas = 0.5 * (sigmas1 + sigmas2)
-    epsilons = numpy.sqrt(sigmas1 * sigmas2)
+    epsilons = np.sqrt(sigmas1 * sigmas2)
     potentials = 4.0 * epsilons * ((sigmas / distances) ** 12 - (sigmas / distances) ** 6)
 
     return potentials
