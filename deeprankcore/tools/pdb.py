@@ -13,14 +13,6 @@ from deeprankcore.models.pair import Pair
 _log = logging.getLogger(__name__)
 
 
-def is_xray(pdb_file): # unused, do we still need this?
-    "check that an open pdb file is an x-ray structure"
-
-    for line in pdb_file:
-        if line.startswith("EXPDTA") and "X-RAY DIFFRACTION" in line:
-            return True
-
-    return False
 
 
 def add_hydrogens(input_pdb_path, output_pdb_path):
@@ -239,27 +231,3 @@ def get_surrounding_residues(structure, residue, radius):
 
     return close_residues
 
-
-def find_neighbour_atoms(atoms, max_distance): # currently unused (except in test) but potentially useful
-    """For a given list of atoms, find the pairs of atoms that lie next to each other.
-
-    Args:
-        atoms(list of deeprank atom objects): the atoms to look at
-        max_distance(float): max distance between two atoms in Ångström
-
-    Returns: (a set of deeprank atom object pairs): the paired atoms
-    """
-
-    atom_positions = [atom.position for atom in atoms]
-
-    distances = distance_matrix(atom_positions, atom_positions, p=2)
-
-    neighbours = distances < max_distance
-
-    pairs = set([])
-
-    for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
-        if atom1_index != atom2_index:
-            pairs.add(Pair(atoms[atom1_index], atoms[atom2_index]))
-
-    return pairs

@@ -4,7 +4,6 @@ from deeprankcore.tools.pdb import (
     get_structure,
     get_residue_contact_pairs,
     get_surrounding_residues,
-    find_neighbour_atoms,
 )
 from deeprankcore.models.amino_acid import valine
 from deeprankcore.models.structure import AtomicElement
@@ -92,22 +91,3 @@ def test_surrounding_residues():
     assert residue in close_residues, "the centering residue wasn't included"
 
 
-def test_neighbour_atoms():
-
-    pdb_path = "tests/data/pdb/101M/101M.pdb"
-
-    pdb = pdb2sql(pdb_path)
-    try:
-        structure = get_structure(pdb, "101M")
-    finally:
-        pdb._close() # pylint: disable=protected-access
-
-    atoms = structure.get_atoms()
-
-    atom_pairs = find_neighbour_atoms(atoms, 4.5)
-
-    assert len(atom_pairs) > 0, "no atom pairs found"
-    assert len(atom_pairs) < numpy.square(len(atoms)), "every two atoms were paired"
-
-    for atom1, atom2 in atom_pairs:
-        assert atom1 != atom2, f"atom {atom1} was paired with itself"
