@@ -200,6 +200,22 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
     # set the edge features
     for _, edge in enumerate(edges):
         contact = edge.id
+
+        atoms1 = contact.residue1.atoms
+        atoms2 = contact.residue2.atoms
+        
+        # determine whether residues are on the same chain
+        edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain ) # 1.0 for True; 0.0 for False
+
+        # calculate minimum distance between residues
+        positions1 = [atom.position for atom in atoms1]
+        positions2 = [atom.position for atom in atoms2]
+        edge.features[Efeat.DISTANCE] = np.min(distance_matrix(positions1, positions2))
+        
+        # determine whether residues are covalently bond
+        edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE ) # 1.0 for True; 0.0 for False
+
+        # 
         for atom1 in contact.residue1.atoms:
             for atom2 in contact.residue2.atoms:
 
