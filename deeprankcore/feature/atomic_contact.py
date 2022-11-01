@@ -11,7 +11,7 @@ from deeprankcore.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, 
 _log = logging.getLogger(__name__)
 
 
-def get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
+def _get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
     """ 
         Calculate pairwise Coulomb potentials between each Atom from atoms1 and each Atom from atoms2.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
@@ -32,7 +32,7 @@ def get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: boo
     return coulomb_potentials
 
 
-def get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
+def _get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
     """ 
         Calculate Lennard-Jones potentials between each Atom from atoms1 and each Atom from atoms2.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
@@ -81,8 +81,8 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
                                                 [atom.position for atom in atoms2])
 
         # calculate potentials matrices
-        interatomic_electrostatic_potentials = get_coulomb_potentials(atoms1, atoms2)
-        interatomic_vanderwaals_potentials = get_lennard_jones_potentials(atoms1, atoms2)
+        interatomic_electrostatic_potentials = _get_coulomb_potentials(atoms1, atoms2)
+        interatomic_vanderwaals_potentials = _get_lennard_jones_potentials(atoms1, atoms2)
 
         # set features
         edge.features[Efeat.DISTANCE] = np.min(interatomic_distances) # minimum atom distance is considered as the distance between 2 residues
