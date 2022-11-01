@@ -153,77 +153,24 @@ def add_features_for_atoms(edges: List[Edge]): # pylint: disable=too-many-locals
             edge.features[Efeat.SAMERES] = 0.0
 
 def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-locals
-    # get a set of all the atoms involved
-    atoms = set([])
+    # set the edge features
     for edge in edges:
         contact = edge.id
-        for atom in (contact.residue1.atoms + contact.residue2.atoms):
-            atoms.add(atom)
-    atoms = list(atoms)
 
-    # get all atomic parameters
-    atom_indices = {}
-    positions = []
-    atom_charges = []
-    atom_vanderwaals_parameters = []
-    atom_chains = []
-    for atom_index, atom in enumerate(atoms):
-
-        try:
-            charge = atomic_forcefield.get_charge(atom)
-            vanderwaals = atomic_forcefield.get_vanderwaals_parameters(atom)
-
-        except UnknownAtomError:
-            _log.warning("Ignoring atom %s, because it's unknown to the forcefield", atom)
-
-            # set parameters to zero, so that the potential becomes zero
-            charge = 0.0
-            vanderwaals = VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
-
-        atom_charges.append(charge)
-        atom_vanderwaals_parameters.append(vanderwaals)
-        positions.append(atom.position)
-        atom_indices[atom] = atom_index
-        atom_chains.append(atom.residue.chain.id)
-
-
-    # calculate the distance matrix for those atoms
-    interatomic_distances = distance_matrix(positions, positions, p=2)
-
-    # calculate potentials
-    interatomic_electrostatic_potentials = get_coulomb_potentials(interatomic_distances, atom_charges)
-    interatomic_vanderwaals_potentials = get_lennard_jones_potentials(interatomic_distances, atoms, atom_vanderwaals_parameters)
-
-    # determine which atoms are close enough to form a covalent bond
-    covalent_neighbours = interatomic_distances < MAX_COVALENT_DISTANCE
-
-    # set the edge features
-    for _, edge in enumerate(edges):
-        contact = edge.id
-
-        # DB ENTRY: quick calculations
         atoms1 = contact.residue1.atoms
         atoms2 = contact.residue2.atoms
         
-        # determine whether residues are on the same chain
-        edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain ) # 1.0 for True; 0.0 for False
-
-        # calculate minimum distance between residues
+        # calculate distances
         positions1 = [atom.position for atom in atoms1]
         positions2 = [atom.position for atom in atoms2]
         distances = distance_matrix(positions1, positions2)
-        edge.features[Efeat.DISTANCE] = np.min(distances) # minimum atom distance is considered the distance between 2 residues
-        
-        # determine whether residues are covalently bond
-        edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE ) # 1.0 for True; 0.0 for False
 
-        # calculate electrostatic potential
+        # calculate electrostatic potentials
         charges1 = [atomic_forcefield.get_charge(x) for x in atoms1]
         charges2 = [atomic_forcefield.get_charge(x) for x in atoms2]
         coulomb_potentials = np.expand_dims(charges1, axis=1) * np.expand_dims(charges2, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
-        edge.features[Efeat.ELECTROSTATIC] = np.sum(coulomb_potentials)
 
-        # calculate vanderwaals potential
+        # calculate vanderwaals potentials
         sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(x).inter_sigma for x in atoms1]
         sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(x).inter_sigma for x in atoms2]       
         mean_sigmas = (np.array(sigmas1).reshape(-1, 1) + sigmas2) / 2
@@ -232,33 +179,15 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
         eps2 = [atomic_forcefield.get_vanderwaals_parameters(x).inter_epsilon for x in atoms2]
         geomean_eps = np.sqrt((np.array(eps1).reshape(-1, 1) * eps2))
         
-        vanderwaals = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
-        edge.features[Efeat.VANDERWAALS] = np.sum(vanderwaals)
+        lennard_jones_potential = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
-        for atom1 in contact.residue1.atoms:
-            for atom2 in contact.residue2.atoms:
+        # set features
+        edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain ) # 1.0 for True; 0.0 for False
+        edge.features[Efeat.DISTANCE] = np.min(distances) # minimum atom distance is considered as the distance between 2 residues
+        edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE ) # 1.0 for True; 0.0 for False
+        edge.features[Efeat.ELECTROSTATIC] = np.sum(coulomb_potentials)
+        edge.features[Efeat.VANDERWAALS] = np.sum(lennard_jones_potential)
 
-                atom1_index = atom_indices[atom1]
-                atom2_index = atom_indices[atom2]
-
-                edge.features[Efeat.DISTANCE] = min(edge.features.get(Efeat.DISTANCE, 1e99),
-                                                              interatomic_distances[atom1_index, atom2_index])
-
-                edge.features[Efeat.VANDERWAALS] = (edge.features.get(Efeat.VANDERWAALS, 0.0) +
-                                                              interatomic_vanderwaals_potentials[atom1_index, atom2_index])
-
-                edge.features[Efeat.ELECTROSTATIC] = (edge.features.get(Efeat.ELECTROSTATIC, 0.0) +
-                                                          interatomic_electrostatic_potentials[atom1_index, atom2_index])
-
-                if covalent_neighbours[atom1_index, atom2_index]:
-                    edge.features[Efeat.COVALENT] = 1.0
-                elif Efeat.COVALENT not in edge.features:
-                    edge.features[Efeat.COVALENT] = 0.0
-
-            if atom_chains[atom1_index] == atom_chains[atom2_index]:
-                edge.features[Efeat.SAMECHAIN] = 1.0
-            else:
-                edge.features[Efeat.SAMECHAIN] = 0.0
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
 

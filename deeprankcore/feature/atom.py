@@ -21,12 +21,4 @@ def add_features( # pylint: disable=unused-argument
 
             node.features[nodefeats.ATOMTYPE] = atom.element.onehot
             node.features[nodefeats.PDBOCCUPANCY] = atom.occupancy
-        
-            try:
-                node.features[nodefeats.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
-
-            except UnknownAtomError:
-                _log.warning(f"Ignoring atom {atom}, because it's unknown to the forcefield")
-
-                # set parameters to zero, so that the potential becomes zero
-                node.features[nodefeats.ATOMCHARGE] = 0.0
+            node.features[nodefeats.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
