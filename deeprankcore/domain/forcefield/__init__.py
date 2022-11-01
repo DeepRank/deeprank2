@@ -59,17 +59,13 @@ class AtomicForcefield:
 
         return None
 
-    def get_vanderwaals_parameters(self, atom: Atom, override = True):
+    def get_vanderwaals_parameters(self, atom: Atom):
         atom_name = atom.name
 
         if atom.residue.amino_acid is None:
-            if override:
-                _log.warning(f"no amino acid for {atom}; three letter code set to XXX")
-                residue_name = 'XXX'
-            else:
-                raise UnknownAtomError(f"no amino acid for {atom}")
-
-        residue_name = atom.residue.amino_acid.three_letter_code
+            _log.warning(f"no amino acid for {atom}; three letter code set to XXX")
+            residue_name = 'XXX'
+        else: residue_name = atom.residue.amino_acid.three_letter_code
 
         type_ = None
 
@@ -87,18 +83,14 @@ class AtomicForcefield:
 
                     type_ = action["TYPE"]
 
-        if type_ is None:
-            if override: # pylint: disable=no-else-return
-                _log.warning(f"Atom {atom} is unknown to the forcefield; vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0)")
-                return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
-            else:
-                raise UnknownAtomError(
-                    f"not mentioned in top or patch: {top_key}")
-
-        return self._vanderwaals_parameters[type_]
+        if type_ is None: # pylint: disable=no-else-return
+            _log.warning(f"Atom {atom} is unknown to the forcefield; vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0)")
+            return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
+        else:
+            return self._vanderwaals_parameters[type_]
 
 
-    def get_charge(self, atom: Atom, override = True):
+    def get_charge(self, atom: Atom):
         """
             Args:
                 atom(Atom): the atom to get the charge for
@@ -125,15 +117,11 @@ class AtomicForcefield:
 
                     charge = float(action["CHARGE"])
 
-        if charge is None:
-            if override:
-                _log.warning(f"Atom {atom} is unknown to the forcefield; charge is set to 0.0")
-                charge = 0.0
-            else:
-                raise UnknownAtomError(
-                    f"not mentioned in top or patch: {top_key}")
-
-        return charge
+        if charge is None: # pylint: disable=no-else-return
+            _log.warning(f"Atom {atom} is unknown to the forcefield; charge is set to 0.0")
+            return 0.0
+        else:
+            return charge
 
 
 atomic_forcefield = AtomicForcefield()

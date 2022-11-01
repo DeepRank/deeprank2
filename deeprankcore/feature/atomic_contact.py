@@ -11,7 +11,7 @@ from deeprankcore.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, 
 _log = logging.getLogger(__name__)
 
 
-def _get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
+def _get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom]) -> np.ndarray:
     """ 
         Calculate pairwise Coulomb potentials between each Atom from atoms1 and each Atom from atoms2.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
@@ -23,8 +23,8 @@ def _get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bo
     distances = distance_matrix(positions1, positions2)
 
     # find charges
-    charges1 = [atomic_forcefield.get_charge(atom, override = override) for atom in atoms1]
-    charges2 = [atomic_forcefield.get_charge(atom, override = override) for atom in atoms2]
+    charges1 = [atomic_forcefield.get_charge(atom) for atom in atoms1]
+    charges2 = [atomic_forcefield.get_charge(atom) for atom in atoms2]
 
     # calculate potentials
     coulomb_potentials = np.expand_dims(charges1, axis=1) * np.expand_dims(charges2, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
@@ -32,7 +32,7 @@ def _get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bo
     return coulomb_potentials
 
 
-def _get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
+def _get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom]) -> np.ndarray:
     """ 
         Calculate Lennard-Jones potentials between each Atom from atoms1 and each Atom from atoms2.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
@@ -45,15 +45,15 @@ def _get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom], overri
 
     # calculate vanderwaals potentials
     if atoms1[0].residue == atoms2[0].residue: # use intra- parameters
-        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_sigma for atom in atoms1]
-        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_sigma for atom in atoms2]       
-        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_epsilon for atom in atoms1]
-        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_epsilon for atom in atoms2]
+        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms1]
+        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms2]       
+        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms1]
+        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms2]
     else: # use inter- parameters
-        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_sigma for atom in atoms1]
-        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_sigma for atom in atoms2]       
-        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_epsilon for atom in atoms1]
-        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_epsilon for atom in atoms2]
+        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms1]
+        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms2]       
+        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms1]
+        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms2]
         
     mean_sigmas = 0.5 * (np.array(sigmas1).reshape(-1, 1) + sigmas2)
     geomean_eps = np.sqrt((np.array(epsilon1).reshape(-1, 1) * epsilon2)) # sqrt(eps1*eps2)
