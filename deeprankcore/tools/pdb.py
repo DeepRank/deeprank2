@@ -9,14 +9,11 @@ from pdb2sql import interface as get_interface
 from deeprankcore.models.structure import Atom, Residue, Chain, Structure, AtomicElement
 from deeprankcore.models.amino_acid import amino_acids
 from deeprankcore.models.pair import Pair
-from deeprankcore.models.contact import ResidueContact, AtomicContact
-from deeprankcore.feature.atomic_contact import get_coulomb_potentials, get_lennard_jones_potentials
-
 
 _log = logging.getLogger(__name__)
 
 
-def is_xray(pdb_file):
+def is_xray(pdb_file): # unused, do we still need this?
     "check that an open pdb file is an x-ray structure"
 
     for line in pdb_file:
@@ -134,126 +131,6 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
     return structure
 
 
-def get_atomic_contacts(atoms: List[Atom]) -> List[AtomicContact]:
-    """Computes all the contacts between a given list of atoms.
-    It doesn't pair atoms with themselves, so no zero divisions are expected.
-
-    Warning: do not call this on all atoms in the structure, since this can lead to
-             excessive memory consumption! Be sure to use queries to make a selection.
-    """
-
-    atom_postions = [atom.position for atom in atoms]
-
-    # calculate distance matrix
-    interatomic_distances = distance_matrix(atom_postions, atom_postions, p=2)
-
-    # calculate potentials
-    interatomic_electrostatic_potentials = get_coulomb_potentials(atoms,atoms)
-    interatomic_vanderwaals_potentials = get_lennard_jones_potentials(atoms,atoms)
-
-    # build contacts
-    contacts = []
-
-    count_atoms = len(atoms)
-    for atom1_index in range(count_atoms):
-        for atom2_index in range(
-            atom1_index + 1, count_atoms
-        ):  # don't make the same contact twice and don't pair an atom with itself
-
-            contacts.append(
-                AtomicContact( # pylint: disable=too-many-function-args
-                    atoms[atom1_index],
-                    atoms[atom2_index],
-                    interatomic_distances[atom1_index][atom2_index],
-                    interatomic_electrostatic_potentials[atom1_index][atom2_index],
-                    interatomic_vanderwaals_potentials[atom1_index][atom2_index],
-                )
-            )
-    return contacts
-
-
-def get_residue_contacts(residues: List[Residue]) -> List[ResidueContact]:
-    """Computes all the contacts between a given list of residues.
-    It doesn't pair residues with themselves, so no zero divisions are expected.
-
-    Warning: do not call this on all residues in the structure, since this can lead to
-             excessive memory consumption! Be sure to use queries to make a selection.
-    """
-
-    atoms = []
-    for residue in residues:
-        atoms += residue.atoms
-
-    atomic_contacts = get_atomic_contacts(atoms)
-
-    # start with empty dictionaries, to hold the distance and energies per
-    # contact
-    residue_minimum_distances = {}
-    residue_electrostatic_potential_sums = {}
-    residue_vanderwaals_potential_sums = {}
-
-    # iterate over all interatomic contacts
-    for atomic_contact in atomic_contacts:
-        if (
-            atomic_contact.atom1.residue != atomic_contact.atom2.residue
-        ):  # don't pair a residue with itself
-
-            residue1 = atomic_contact.atom1.residue
-            residue2 = atomic_contact.atom2.residue
-
-            residue_pair = Pair(residue1, residue2)
-
-            if residue_pair not in residue_minimum_distances:
-
-                # initialize distance and energies per residue contact
-                residue_minimum_distances[residue_pair] = 1e99
-                residue_electrostatic_potential_sums[residue_pair] = 0.0
-                residue_vanderwaals_potential_sums[residue_pair] = 0.0
-
-            # aggregate
-            residue_minimum_distances[residue_pair] = min(
-                residue_minimum_distances[residue_pair], atomic_contact.distance
-            )
-            residue_electrostatic_potential_sums[
-                residue_pair
-            ] += atomic_contact.electrostatic_potential
-            residue_vanderwaals_potential_sums[
-                residue_pair
-            ] += atomic_contact.vanderwaals_potential
-
-    # convert to residue contacts
-    residue_contacts = []
-    for residue_pair, distance in residue_minimum_distances.items():
-        residue_contacts.append(
-            ResidueContact( # pylint: disable=too-many-function-args
-                residue_pair.item1,
-                residue_pair.item2,
-                distance,
-                residue_electrostatic_potential_sums[residue_pair],
-                residue_vanderwaals_potential_sums[residue_pair],
-            )
-        )
-    return residue_contacts
-
-
-def get_residue_distance(residue1, residue2):
-    """Get the shortest distance between two atoms from two different given residues.
-
-    Args:
-        residue1(deeprank residue object): the first residue
-        residue2(deeprank residue object): the second residue
-
-    Returns(float): the shortest distance
-    """
-
-    residue1_atom_positions = numpy.array([atom.position for atom in residue1.atoms])
-    residue2_atom_positions = numpy.array([atom.position for atom in residue2.atoms])
-
-    distances = distance_matrix(residue1_atom_positions, residue2_atom_positions, p=2)
-
-    return numpy.min(distances)
-
-
 def get_residue_contact_pairs( # pylint: disable=too-many-locals
     pdb_path: str,
     structure: Structure,
@@ -363,7 +240,7 @@ def get_surrounding_residues(structure, residue, radius):
     return close_residues
 
 
-def find_neighbour_atoms(atoms, max_distance):
+def find_neighbour_atoms(atoms, max_distance): # currently unused (except in test) but potentially useful
     """For a given list of atoms, find the pairs of atoms that lie next to each other.
 
     Args:
