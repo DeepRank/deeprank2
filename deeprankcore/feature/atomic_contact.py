@@ -12,9 +12,9 @@ _log = logging.getLogger(__name__)
 
 
 def get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
-    """ Calculate the Coulomb potentials, given a distance matrix and a list of charges of equal size.
-
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
+    """ 
+        Calculate pairwise Coulomb potentials between each Atom from atoms1 and each Atom from atoms2.
+        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
     """
 
     # calculate distances
@@ -33,9 +33,9 @@ def get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], override: boo
 
 
 def get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
-    """ Calculate Lennard-Jones potentials, given a distance matrix and a list of atoms with vanderwaals parameters of equal size.
-
-         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite
+    """ 
+        Calculate Lennard-Jones potentials between each Atom from atoms1 and each Atom from atoms2.
+        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
     """
 
     # calculate distances

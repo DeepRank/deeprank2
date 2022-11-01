@@ -9,7 +9,6 @@ from pdb2sql import interface as get_interface
 from deeprankcore.models.structure import Atom, Residue, Chain, Structure, AtomicElement
 from deeprankcore.models.amino_acid import amino_acids
 from deeprankcore.models.pair import Pair
-from deeprankcore.domain.forcefield import atomic_forcefield
 from deeprankcore.models.contact import ResidueContact, AtomicContact
 from deeprankcore.feature.atomic_contact import get_coulomb_potentials, get_lennard_jones_potentials
 

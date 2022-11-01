@@ -88,7 +88,7 @@ class AtomicForcefield:
                     type_ = action["TYPE"]
 
         if type_ is None:
-            if override:
+            if override: # pylint: disable=no-else-return
                 _log.warning(f"Atom {atom} is unknown to the forcefield; vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0)")
                 return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
             else:

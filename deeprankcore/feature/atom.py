@@ -2,7 +2,6 @@ from deeprankcore.models.structure import Atom
 from deeprankcore.models.graph import Graph
 from deeprankcore.domain.forcefield import atomic_forcefield
 from deeprankcore.domain.features import nodefeats
-from deeprankcore.models.error import UnknownAtomError
 import logging
 
 
