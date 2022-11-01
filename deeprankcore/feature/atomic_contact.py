@@ -75,7 +75,7 @@ def get_lennard_jones_potentials(distances: numpy.ndarray, atoms: List[Atom],
 
     # calculate potentials
     sigmas = 0.5 * (sigmas1 + sigmas2)
-    epsilons = numpy.sqrt(sigmas1 * sigmas2)
+    epsilons = numpy.sqrt(epsilons1 * epsilons2)
     potentials = 4.0 * epsilons * ((sigmas / distances) ** 12 - (sigmas / distances) ** 6)
 
     return potentials
