@@ -7,7 +7,6 @@ from deeprankcore.tools.forcefield.top import TopParser
 from deeprankcore.tools.forcefield.patch import PatchParser
 from deeprankcore.tools.forcefield.residue import ResidueClassParser
 from deeprankcore.tools.forcefield.param import ParamParser
-from deeprankcore.models.error import UnknownAtomError
 from deeprankcore.models.forcefield.vanderwaals import VanderwaalsParam
 
 
