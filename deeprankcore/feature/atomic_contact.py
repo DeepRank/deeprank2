@@ -33,6 +33,43 @@ def get_coulomb_potentials(distances: np.ndarray, charges: List[float]) -> np.nd
     return potentials
 
 
+def get_coulomb_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> np.ndarray:
+    # calculate distances
+    positions1 = [atom.position for atom in atoms1]
+    positions2 = [atom.position for atom in atoms2]
+    distances = distance_matrix(positions1, positions2)
+
+    # find charges
+    charges1 = [atomic_forcefield.get_charge(atom) for atom in atoms1]
+    charges2 = [atomic_forcefield.get_charge(atom) for atom in atoms2]
+
+    # calculate potentials
+    coulomb_potentials = np.expand_dims(charges1, axis=1) * np.expand_dims(charges2, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
+
+    return coulomb_potentials
+
+
+def get_lennard_jones_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> np.ndarray:
+    # calculate distances
+    positions1 = [atom.position for atom in atoms1]
+    positions2 = [atom.position for atom in atoms2]
+    distances = distance_matrix(positions1, positions2)
+
+    # calculate vanderwaals potentials
+    sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms1]
+    sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms2]       
+    mean_sigmas = (np.array(sigmas1).reshape(-1, 1) + sigmas2) / 2
+
+    eps1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms1]
+    eps2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms2]
+    geomean_eps = np.sqrt((np.array(eps1).reshape(-1, 1) * eps2)) # sqrt(eps1*eps2)
+    
+    lennard_jones_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+
+    return lennard_jones_potentials
+
+
+
 def get_lennard_jones_potentials(distances: np.ndarray, atoms: List[Atom],
                                  vanderwaals_parameters: List[VanderwaalsParam]) -> np.ndarray:
     """ Calculate Lennard-Jones potentials, given a distance matrix and a list of atoms with vanderwaals parameters of equal size.
