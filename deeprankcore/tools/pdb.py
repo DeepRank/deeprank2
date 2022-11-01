@@ -228,4 +228,3 @@ def get_surrounding_residues(structure, residue, radius):
             close_residues.add(structure_atom.residue)
 
     return close_residues
-
