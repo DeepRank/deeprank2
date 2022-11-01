@@ -75,7 +75,7 @@ def get_lennard_jones_potentials(distances: np.ndarray, atoms: List[Atom],
 
     # calculate potentials
     sigmas = 0.5 * (sigmas1 + sigmas2)
-    epsilons = np.sqrt(sigmas1 * sigmas2)
+    epsilons = np.sqrt(epsilons1 * epsilons2)
     potentials = 4.0 * epsilons * ((sigmas / distances) ** 12 - (sigmas / distances) ** 6)
 
     return potentials
@@ -201,6 +201,7 @@ def add_features_for_residues(edges: List[Edge]): # pylint: disable=too-many-loc
     for _, edge in enumerate(edges):
         contact = edge.id
 
+        # DB ENTRY: quick calculations
         atoms1 = contact.residue1.atoms
         atoms2 = contact.residue2.atoms
         
