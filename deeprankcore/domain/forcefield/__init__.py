@@ -8,8 +8,10 @@ from deeprankcore.tools.forcefield.patch import PatchParser
 from deeprankcore.tools.forcefield.residue import ResidueClassParser
 from deeprankcore.tools.forcefield.param import ParamParser
 from deeprankcore.models.error import UnknownAtomError
+from deeprankcore.models.forcefield.vanderwaals import VanderwaalsParam
 
-logging.getLogger(__name__)
+
+_log = logging.getLogger(__name__)
 
 
 _forcefield_directory_path = os.path.dirname(os.path.abspath(__file__))
@@ -57,16 +59,15 @@ class AtomicForcefield:
 
         return None
 
-    def get_vanderwaals_parameters(self, atom: Atom):
-        type_ = self._get_type(atom)
-
-        return self._vanderwaals_parameters[type_]
-
-    def _get_type(self, atom: Atom):
+    def get_vanderwaals_parameters(self, atom: Atom, override = True):
         atom_name = atom.name
 
         if atom.residue.amino_acid is None:
-            raise UnknownAtomError(f"no amino acid for {atom}")
+            if override:
+                _log.warning(f"no amino acid for {atom}; three letter code set to XXX")
+                residue_name = 'XXX'
+            else:
+                raise UnknownAtomError(f"no amino acid for {atom}")
 
         residue_name = atom.residue.amino_acid.three_letter_code
 
@@ -87,12 +88,17 @@ class AtomicForcefield:
                     type_ = action["TYPE"]
 
         if type_ is None:
-            raise UnknownAtomError(
-                f"not mentioned in top or patch: {top_key}")
+            if override:
+                _log.warning(f"Atom {atom} is unknown to the forcefield; vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0)")
+                return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
+            else:
+                raise UnknownAtomError(
+                    f"not mentioned in top or patch: {top_key}")
 
-        return type_
+        return self._vanderwaals_parameters[type_]
 
-    def get_charge(self, atom: Atom):
+
+    def get_charge(self, atom: Atom, override = True):
         """
             Args:
                 atom(Atom): the atom to get the charge for
@@ -120,8 +126,12 @@ class AtomicForcefield:
                     charge = float(action["CHARGE"])
 
         if charge is None:
-            raise UnknownAtomError(
-                f"not mentioned in top or patch: {top_key}")
+            if override:
+                _log.warning(f"Atom {atom} is unknown to the forcefield; charge is set to 0.0")
+                charge = 0.0
+            else:
+                raise UnknownAtomError(
+                    f"not mentioned in top or patch: {top_key}")
 
         return charge
 
