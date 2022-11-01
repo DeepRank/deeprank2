@@ -33,15 +33,15 @@ def get_coulomb_potentials(distances: np.ndarray, charges: List[float]) -> np.nd
     return potentials
 
 
-def get_coulomb_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> np.ndarray:
+def get_coulomb_potentials_new(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
     # calculate distances
     positions1 = [atom.position for atom in atoms1]
     positions2 = [atom.position for atom in atoms2]
     distances = distance_matrix(positions1, positions2)
 
     # find charges
-    charges1 = [atomic_forcefield.get_charge(atom, override = True) for atom in atoms1]
-    charges2 = [atomic_forcefield.get_charge(atom, override = True) for atom in atoms2]
+    charges1 = [atomic_forcefield.get_charge(atom, override = override) for atom in atoms1]
+    charges2 = [atomic_forcefield.get_charge(atom, override = override) for atom in atoms2]
 
     # calculate potentials
     coulomb_potentials = np.expand_dims(charges1, axis=1) * np.expand_dims(charges2, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
@@ -49,7 +49,7 @@ def get_coulomb_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> np.nda
     return coulomb_potentials
 
 
-def get_lennard_jones_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> np.ndarray:
+def get_lennard_jones_potentials_new(atoms1: List[Atom], atoms2: List[Atom], override: bool = True) -> np.ndarray:
     # calculate distances
     positions1 = [atom.position for atom in atoms1]
     positions2 = [atom.position for atom in atoms2]
@@ -57,17 +57,17 @@ def get_lennard_jones_potentials_new(atoms1: List[Atom], atoms2: List[Atom]) -> 
 
     # calculate vanderwaals potentials
     if atoms1[0].residue == atoms2[0].residue: # use intra- parameters
-        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_sigma for atom in atoms1]
-        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_sigma for atom in atoms2]       
-        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_epsilon for atom in atoms1]
-        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).intra_epsilon for atom in atoms2]
+        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_sigma for atom in atoms1]
+        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_sigma for atom in atoms2]       
+        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_epsilon for atom in atoms1]
+        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).intra_epsilon for atom in atoms2]
     else: # use inter- parameters
-        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_sigma for atom in atoms1]
-        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_sigma for atom in atoms2]       
-        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_epsilon for atom in atoms1]
-        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = True).inter_epsilon for atom in atoms2]
+        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_sigma for atom in atoms1]
+        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_sigma for atom in atoms2]       
+        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_epsilon for atom in atoms1]
+        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom, override = override).inter_epsilon for atom in atoms2]
         
-    mean_sigmas = (np.array(sigmas1).reshape(-1, 1) + sigmas2) / 2
+    mean_sigmas = 0.5 * (np.array(sigmas1).reshape(-1, 1) + sigmas2)
     geomean_eps = np.sqrt((np.array(epsilon1).reshape(-1, 1) * epsilon2)) # sqrt(eps1*eps2)
     lennard_jones_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
