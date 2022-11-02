@@ -45,8 +45,8 @@ def _get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom], distan
         epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms1]
         epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms2]
         
-    mean_sigmas = 0.5 * (np.array(sigmas1).reshape(-1, 1) + sigmas2)
-    geomean_eps = np.sqrt((np.array(epsilon1).reshape(-1, 1) * epsilon2)) # sqrt(eps1*eps2)
+    mean_sigmas = 0.5 * np.add.outer(sigmas1,sigmas2)
+    geomean_eps = np.sqrt(np.multiply.outer(epsilon1,epsilon2)) # sqrt(eps1*eps2)
     lennard_jones_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
     return lennard_jones_potentials
