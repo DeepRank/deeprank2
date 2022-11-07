@@ -51,7 +51,7 @@ def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> n
     return lennard_jones_potentials
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
     # get a set of all the atoms involved with a unique index
     ## create an empty set
     all_atoms = set() 
