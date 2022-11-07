@@ -14,7 +14,7 @@ _log = logging.getLogger(__name__)
 
 def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 
-        Calculate pairwise Coulomb potentials between each Atom from atoms1 and each Atom from atoms2.
+        Calculate Coulomb potentials between between all Atoms in atom.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
     """
 
@@ -29,7 +29,7 @@ def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndar
 
 def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 
-        Calculate all pairwise Lennard-Jones potentials between each two Atoms in atom.
+        Calculate Lennard-Jones potentials between all Atoms in atom.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
     """
 
