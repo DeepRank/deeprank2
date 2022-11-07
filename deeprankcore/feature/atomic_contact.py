@@ -77,7 +77,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
     ## calculate the pairwise potentials between all atoms
     with warnings.catch_warnings(record=RuntimeWarning):
         warnings.simplefilter("ignore")
-        interatomic_electrostatic_potentials = _get_coulomb_potentials(all_atoms, all_atoms, interatomic_distances)
+        interatomic_electrostatic_potentials = _get_coulomb_potentials(all_atoms, interatomic_distances)
         interatomic_vanderwaals_potentials = _get_lennard_jones_potentials(all_atoms, interatomic_distances)
 
     # generate dictionary with an index for each unique atom
