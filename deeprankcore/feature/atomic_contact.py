@@ -27,28 +27,27 @@ def _get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], distances: n
     return coulomb_potentials
 
 
-def _get_lennard_jones_potentials(atoms1: List[Atom], atoms2: List[Atom], distances: np.ndarray) -> np.ndarray:
+def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 
-        Calculate Lennard-Jones potentials between each Atom from atoms1 and each Atom from atoms2.
+        Calculate all pairwise Lennard-Jones potentials between each two Atoms in atom.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
     """
 
-    # calculate vanderwaals potentials
-    if atoms1[0].residue == atoms2[0].residue: # use intra- parameters
-        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms1]
-        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms2]       
-        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms1]
-        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms2]
-    else: # use inter- parameters
-        sigmas1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms1]
-        sigmas2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms2]       
-        epsilon1 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms1]
-        epsilon2 = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms2]
-        
-    mean_sigmas = 0.5 * np.add.outer(sigmas1,sigmas2)
-    geomean_eps = np.sqrt(np.multiply.outer(epsilon1,epsilon2)) # sqrt(eps1*eps2)
-    lennard_jones_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    # calculate intra potentials
+    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms]
+    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms]
+    mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
+    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons)) # sqrt(eps1*eps2)
+    intra_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    
+    # calculate inter potentials
+    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms]
+    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms]
+    mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
+    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons)) # sqrt(eps1*eps2)
+    inter_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
+    lennard_jones_potentials = {'intra': intra_potentials, 'inter': inter_potentials}
     return lennard_jones_potentials
 
 
