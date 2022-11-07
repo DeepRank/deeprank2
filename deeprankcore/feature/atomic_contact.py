@@ -12,18 +12,17 @@ from deeprankcore.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, 
 _log = logging.getLogger(__name__)
 
 
-def _get_coulomb_potentials(atoms1: List[Atom], atoms2: List[Atom], distances: np.ndarray) -> np.ndarray:
+def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 
         Calculate pairwise Coulomb potentials between each Atom from atoms1 and each Atom from atoms2.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
     """
 
     # find charges
-    charges1 = [atomic_forcefield.get_charge(atom) for atom in atoms1]
-    charges2 = [atomic_forcefield.get_charge(atom) for atom in atoms2]
+    charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
 
     # calculate potentials
-    coulomb_potentials = np.expand_dims(charges1, axis=1) * np.expand_dims(charges2, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
+    coulomb_potentials = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
 
     return coulomb_potentials
 
