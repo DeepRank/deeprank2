@@ -58,9 +58,6 @@ class HDF5DataSet(Dataset):
         transform: Callable = None,
         pre_transform: Callable = None,
         dict_filter: dict = None,
-        target: str = None,
-        task: str = None,
-        classes: List = None,
         tqdm: bool = True,
         subset: list = None,
         clustering_method: str = "mcl",
@@ -115,36 +112,6 @@ class HDF5DataSet(Dataset):
         self.hdf5_path = hdf5_path
         if not isinstance(hdf5_path, list):
             self.hdf5_path = [hdf5_path]
-
-        self.target = target
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
-            self.task = targets.REGRESS
-        elif self.target in [targets.BINARY, targets.CAPRI]:
-            self.task = targets.CLASSIF
-        else:
-            self.task = task
-        
-        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
-            raise ValueError(
-                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
-                "Example: \n\t"
-                ""
-                "model = NeuralNet(dataset, GINet,"
-                "                  target='physiological_assembly',"
-                f"                  task='{targets.CLASSIF}')")
-        
-        if self.task == targets.CLASSIF:
-            if classes is None:
-                self.classes = [0, 1]
-            else:
-                self.classes = classes
-
-            self.classes_to_idx = {
-                i: idx for idx, i in enumerate(self.classes)
-            }
-        else:
-            self.classes = None
-            self.classes_to_idx = None
 
         self.dict_filter = dict_filter
         self.tqdm = tqdm

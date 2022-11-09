@@ -33,7 +33,10 @@ class Trainer():
                 #  test_size = None, # should be implemented equivalent to val_size
                  pretrained_model: str = None,
                  node_features: Union[List[str], str] = "all",
-                 edge_features: Union[List[str], str] = "all",                 
+                 edge_features: Union[List[str], str] = "all",
+                 target: str = None,
+                 task: str = None,
+                 classes: List = None,
                  batch_size: int = 32,
                  shuffle: bool = True,
                  class_weights = None,
@@ -112,17 +115,54 @@ class Trainer():
             if Net is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
+            # set features
             self.subset = dataset_train.subset
             self.node_features = node_features
             self.edge_features = edge_features
             self._check_features() # load all features or check whether selected features exist
 
+            # set target, task, and classes
+            ## target
+            self.target = target
+            
+            ## task
+            if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+                self.task = targets.REGRESS
+            elif self.target in [targets.BINARY, targets.CAPRI]:
+                self.task = targets.CLASSIF
+            else:
+                self.task = task
+            if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
+                raise ValueError(
+                    f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
+                    "Example: \n\t"
+                    ""
+                    "model = NeuralNet(dataset, GINet,"
+                    "                  target='physiological_assembly',"
+                    f"                  task='{targets.CLASSIF}')")
+            
+            ## classes
+            if self.task == targets.CLASSIF:
+                if classes is None:
+                    self.classes = [0, 1]
+                else:
+                    self.classes = classes
+
+                self.classes_to_idx = {
+                    i: idx for idx, i in enumerate(self.classes)
+                }
+            else:
+                self.classes = None
+                self.classes_to_idx = None
+
+            # load settings from dataset_train
             self.cluster_nodes = dataset_train.clustering_method
             self.target = dataset_train.target  # already defined in HDF5DatSet object
             self.task = dataset_train.task
             self.classes = dataset_train.classes
             self.classes_to_idx = dataset_train.classes_to_idx
 
+            # set neural net
             self.val_size = val_size # if None, will be set to 0.25 in _DivideDataSet function
             self.batch_size = batch_size
             self.shuffle = shuffle
