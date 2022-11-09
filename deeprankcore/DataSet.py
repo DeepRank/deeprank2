@@ -63,10 +63,10 @@ class HDF5DataSet(Dataset):
         classes: List = None,
         tqdm: bool = True,
         subset: list = None,
-        node_feature: Union[List[str], str] = "all",
-        edge_feature: Union[List[str], str] = "all",
+        node_features: Union[List[str], str] = "all",
+        edge_features: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
-        edge_feature_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
+        edge_features_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
     ):
         """Class from which the hdf5 datasets are loaded.
 
@@ -105,11 +105,11 @@ class HDF5DataSet(Dataset):
 
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
-            node_feature (str or list, optional): consider all pre-computed node features ("all")
+            node_features (str or list, optional): consider all pre-computed node features ("all")
             or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
             The complete list can be found in deeprankcore/domain/features.py
 
-            edge_feature (list, optional): consider all pre-computed edge features ("all")
+            edge_features (list, optional): consider all pre-computed edge features ("all")
             or some defined edge features (provide a list, example: ["dist", "coulomb"]).
             The complete list can be found in deeprankcore/domain/features.py
 
@@ -117,7 +117,7 @@ class HDF5DataSet(Dataset):
             or 'louvain' algorithm). Note that this parameter can be None only if the neural
             network doesn't expects clusters (e.g. naive_gnn). Defaults to "mcl".
 
-            edge_feature_transform (function, optional): transformation applied to the edge features.
+            edge_features_transform (function, optional): transformation applied to the edge features.
             Defaults to lambdax:np.tanh(-x/2+2)+1.
         """
         super().__init__(root, transform, pre_transform)
@@ -161,11 +161,11 @@ class HDF5DataSet(Dataset):
         self.tqdm = tqdm
         self.subset = subset
 
-        self.node_feature = node_feature
+        self.node_features = node_features
 
-        self.edge_feature = edge_feature
+        self.edge_features = edge_features
 
-        self.edge_feature_transform = edge_feature_transform
+        self.edge_features_transform = edge_features_transform
         self._transform = transform
 
         self.clustering_method = clustering_method
@@ -174,8 +174,8 @@ class HDF5DataSet(Dataset):
         self._check_hdf5_files()
 
         # check the selection of features
-        self._check_node_feature()
-        self._check_edge_feature()
+        self._check_node_features()
+        self._check_edge_features()
 
         # create the indexing system
         # alows to associate each mol to an index
@@ -225,42 +225,42 @@ class HDF5DataSet(Dataset):
         for name in remove_file:
             self.hdf5_path.remove(name)
 
-    def _check_node_feature(self):
+    def _check_node_features(self):
         """Checks if the required node features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[f"{mol_key}/{groups.NODE}/"].keys())
-        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
+        self.available_node_features = list(f[f"{mol_key}/{groups.NODE}/"].keys())
+        self.available_node_features = [key for key in self.available_node_features if key[0] != '_'] # ignore metafeatures
         f.close()
 
-        if self.node_feature == "all":
-            self.node_feature = self.available_node_feature
+        if self.node_features == "all":
+            self.node_features = self.available_node_features
         else:
-            for feat in self.node_feature:
-                if feat not in self.available_node_feature:
+            for feat in self.node_features:
+                if feat not in self.available_node_features:
                     _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
                     _log.info("\nCheck feature_modules passed to the preprocess function.\
                         Probably, the feature wasn't generated during the preprocessing step.")
-                    _log.info(f"\nPossible node features: {self.available_node_feature}\n")
+                    _log.info(f"\nPossible node features: {self.available_node_features}\n")
                     sys.exit()
 
-    def _check_edge_feature(self):
+    def _check_edge_features(self):
         """Checks if the required edge features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
-        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
+        self.available_edge_features = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
+        self.available_edge_features = [key for key in self.available_edge_features if key[0] != '_'] # ignore metafeatures
         f.close()
 
-        if self.edge_feature == "all":
-            self.edge_feature = self.available_edge_feature
-        elif self.edge_feature is not None:
-            for feat in self.edge_feature:
-                if feat not in self.available_edge_feature:
+        if self.edge_features == "all":
+            self.edge_features = self.available_edge_features
+        elif self.edge_features is not None:
+            for feat in self.edge_features:
+                if feat not in self.available_edge_features:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
                     _log.info("\nCheck feature_modules passed to the preprocess function.\
                         Probably, the feature wasn't generated during the preprocessing step.")
-                    _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
+                    _log.info(f"\nPossible edge features: {self.available_edge_features}\n")
                     sys.exit()
 
     def load_one_graph(self, fname, mol): # noqa
@@ -281,7 +281,7 @@ class HDF5DataSet(Dataset):
 
             # node features
             node_data = ()
-            for feat in self.node_feature:
+            for feat in self.node_features:
                 if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{groups.NODE}/{feat}"][()]
                     if vals.ndim == 1:
@@ -302,11 +302,11 @@ class HDF5DataSet(Dataset):
             edge_index = edge_index.to(self.device)
 
             # edge feature (same issue as above)
-            if self.edge_feature is not None and len(self.edge_feature) > 0 and \
+            if self.edge_features is not None and len(self.edge_features) > 0 and \
                groups.EDGE in grp:
 
                 edge_data = ()
-                for feat in self.edge_feature:
+                for feat in self.edge_features:
                     if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{groups.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
@@ -314,7 +314,7 @@ class HDF5DataSet(Dataset):
                         edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
-                edge_data = self.edge_feature_transform(edge_data)
+                edge_data = self.edge_features_transform(edge_data)
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
