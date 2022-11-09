@@ -1,5 +1,5 @@
 from time import time
-from typing import List, Optional
+from typing import List, Optional, Union
 import logging
 import warnings
 from tqdm import tqdm
@@ -12,9 +12,11 @@ from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
+
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targettypes as targets
+from deeprankcore.DataSet import HDF5DataSet
 
 _log = logging.getLogger(__name__)
 
@@ -22,22 +24,27 @@ _log = logging.getLogger(__name__)
 class Trainer():
 
     def __init__(self, # pylint: disable=too-many-arguments
-                 dataset_train = None,
-                 dataset_val = None,
-                 dataset_test = None,
-                 val_size = None,
+                 Net,
+                 dataset_train: HDF5DataSet = None,
+                 dataset_val: HDF5DataSet = None,
+                 dataset_test: HDF5DataSet = None,
+                 val_size: Union[float, int] = None,
                 #  test_size = None, # should be implemented equivalent to val_size
-                 Net = None,
+                 pretrained_model: str = None,
+                 batch_size: int = 32,
+                 shuffle: bool = True,
                  class_weights = None,
-                 pretrained_model = None,
-                 batch_size = 32,
-                 shuffle = True,
                  transform_sigmoid: Optional[bool] = False,
                  metrics_exporters: Optional[List[MetricsExporter]] = None,
                  output_dir = './metrics'):
         """Class from which the network is trained, evaluated and tested
 
         Args:
+            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
+                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
+                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+
             dataset_train (HDF5DataSet object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
 
@@ -53,20 +60,16 @@ class Trainer():
                 - Should be not set (None) if dataset_val is not None.
                 Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
 
-            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
-                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
-                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
-
-            class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
-                    The user can either input a list of weights or let DeepRanl-GNN (True) define weights
-                    based on the dataset content. Defaults to None.
-
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
 
             batch_size (int, optional): defaults to 32.
 
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
+
+            class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
+                    The user can either input a list of weights or let DeepRanl-GNN (True) define weights
+                    based on the dataset content. Defaults to None.
+                    --> to me it looks like a (non-empty) list is treated as a True, or am I missing something here?
 
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
@@ -77,8 +80,7 @@ class Trainer():
         """
         if metrics_exporters is not None:
             self._metrics_exporters = MetricsExporterCollection(
-                *metrics_exporters)
-                
+                *metrics_exporters) 
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
@@ -92,29 +94,28 @@ class Trainer():
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
 
         if pretrained_model is None:
-
             if dataset_train is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
-            
             if Net is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
-
-            self.target = dataset_train.target  # already defined in HDF5DatSet object
-            self.task = dataset_train.task
-            self.classes = dataset_train.classes
-            self.classes_to_idx = dataset_train.classes_to_idx
-            self.optimizer = None
-            self.batch_size = batch_size
-            self.val_size = val_size # if None, will be set to 0.25 in _DivideDataSet function
-            self.class_weights = class_weights
-
-            self.shuffle = shuffle
-            self.transform_sigmoid = transform_sigmoid
 
             self.subset = dataset_train.subset
             self.node_features = dataset_train.node_features
             self.edge_features = dataset_train.edge_features
             self.cluster_nodes = dataset_train.clustering_method
+            self.target = dataset_train.target  # already defined in HDF5DatSet object
+            self.task = dataset_train.task
+            self.classes = dataset_train.classes
+            self.classes_to_idx = dataset_train.classes_to_idx
+
+            self.val_size = val_size # if None, will be set to 0.25 in _DivideDataSet function
+            self.batch_size = batch_size
+            self.shuffle = shuffle
+
+            self.class_weights = class_weights
+            self.transform_sigmoid = transform_sigmoid
+
+            self.optimizer = None
             self.epoch_saved_model = None
 
             self._load_model(dataset_train, dataset_val, dataset_test, Net)
@@ -317,7 +318,6 @@ class Trainer():
             self.loss = MSELoss()
 
         elif self.task == targets.CLASSIF:
-
             # assign weights to each class in case of unbalanced dataset
             self.weights = None
             if self.class_weights:
@@ -647,12 +647,12 @@ class Trainer():
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
-            "node": self.node_features,
-            "edge": self.edge_features,
+            "node_features": self.node_features,
+            "edge_features": self.edge_features,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,
-            "class_weight": self.class_weights,
+            "class_weights": self.class_weights,
             "batch_size": self.batch_size,
             "val_size": self.val_size,
             "lr": self.lr,
@@ -680,15 +680,15 @@ class Trainer():
 
         state = torch.load(filename, map_location=torch.device(self.device))
 
-        self.node_features = state["node"]
-        self.edge_features = state["edge"]
+        self.node_features = state["node_features"]
+        self.edge_features = state["edge_features"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.subset = state["subset"]
-        self.class_weights = state["class_weight"]
+        self.class_weights = state["class_weights"]
         self.task = state["task"]
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
