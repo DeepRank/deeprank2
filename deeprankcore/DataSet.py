@@ -191,17 +191,17 @@ class HDF5DataSet(Dataset):
 
             # node features
             node_data = ()
-            for feat in self.node_features:
+            for feat in grp[f"{groups.NODE}"]:
                 if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{groups.NODE}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
 
                     node_data += (vals,)
-
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
-            # edge index, we have to have all the edges i.e : (i,j) and (j,i)
+            # edge index
+            # (we have to have all the edges i.e : (i,j) and (j,i) )
             if groups.INDEX in grp[groups.EDGE]:
                 ind = grp[f"{groups.EDGE}/{groups.INDEX}"][()]
                 if ind.ndim == 2:
@@ -211,12 +211,11 @@ class HDF5DataSet(Dataset):
                 edge_index = torch.empty((2, 0), dtype=torch.long)
             edge_index = edge_index.to(self.device)
 
-            # edge feature (same issue as above)
-            if self.edge_features is not None and len(self.edge_features) > 0 and \
-               groups.EDGE in grp:
-
+            # edge feature
+            # (same issue as above)
+            if groups.EDGE in grp and grp[f"{groups.EDGE}"] is not None and len(grp[f"{groups.EDGE}"]) > 0:
                 edge_data = ()
-                for feat in self.edge_features:
+                for feat in grp[f"{groups.EDGE}"]:
                     if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{groups.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
@@ -237,20 +236,17 @@ class HDF5DataSet(Dataset):
                     with a more up to date version of this software.""", DeprecationWarning)
 
             # target
-            if self.target is None:
-                y = None
-            else:
-                if targets.VALUES in grp and self.target in grp[targets.VALUES]:
+            if targets.VALUES in grp:
+                for target in grp[f"{targets.VALUES}"]:
                     try:
-                        y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
+                        y = torch.tensor([grp[f"{targets.VALUES}/{target}"][()]], dtype=torch.float).contiguous().to(self.device)
                     except Exception as e:
                         _log.error(e)
                         _log.info('If your target variable contains categorical classes, \
                         please convert them into class indices before defining the HDF5DataSet instance.')
-                else:
-                    possible_targets = grp[targets.VALUES].keys()
-                    raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
-                                     "\n Use the query class to add more target values to input data.")
+            else:
+                raise ValueError(f"No targets in entry {mol} in file {fname}." +
+                                    "\n Use the query class to add target values to input data.")
 
             # positions
             pos = torch.tensor(grp[f"{groups.NODE}/{groups.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
@@ -281,11 +277,8 @@ class HDF5DataSet(Dataset):
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
-
         data.cluster0 = cluster0
         data.cluster1 = cluster1
-
-        # mol name
         data.mol = mol
 
         # apply transformation
