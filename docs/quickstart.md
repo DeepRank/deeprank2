@@ -119,10 +119,10 @@ metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
 trainer = Trainer(
+    GINet,
     dataset_train,
     dataset_val,
     dataset_test,
-    GINet,
     batch_size = 64,
     metrics_exporters = metrics_exporters
 )
