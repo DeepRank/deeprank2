@@ -11,7 +11,8 @@ Welcome to deeprankcore documentation!
    :caption: deeprankcore:
    
    installation
-   quickstart
+   getstarted
+   features
    
 .. toctree::
    :maxdepth: 2
