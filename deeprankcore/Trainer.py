@@ -7,6 +7,7 @@ import h5py
 import copy
 import numpy as np
 import os
+import sys
 import torch
 from torch import nn
 from torch.nn import MSELoss
@@ -16,6 +17,7 @@ from torch_geometric.loader import DataLoader
 from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targettypes as targets
+from deeprankcore.domain.features import groups
 from deeprankcore.DataSet import HDF5DataSet
 
 _log = logging.getLogger(__name__)
@@ -31,6 +33,8 @@ class Trainer():
                  val_size: Union[float, int] = None,
                 #  test_size = None, # should be implemented equivalent to val_size
                  pretrained_model: str = None,
+                 node_features: Union[List[str], str] = "all",
+                 edge_features: Union[List[str], str] = "all",                 
                  batch_size: int = 32,
                  shuffle: bool = True,
                  class_weights = None,
@@ -61,6 +65,16 @@ class Trainer():
                 Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
 
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+
+            node_features (str or list, optional): consider all pre-computed node features ("all")
+            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
+            Defaults to "all".
+            The complete list can be found in deeprankcore/domain/features.py
+
+            edge_features (list, optional): consider all pre-computed edge features ("all")
+            or some defined edge features (provide a list, example: ["dist", "coulomb"]).
+            Defaults to "all".
+            The complete list can be found in deeprankcore/domain/features.py
 
             batch_size (int, optional): defaults to 32.
 
@@ -100,8 +114,13 @@ class Trainer():
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
             self.subset = dataset_train.subset
-            self.node_features = dataset_train.node_features
-            self.edge_features = dataset_train.edge_features
+            self.node_features = node_features
+            self.edge_features = edge_features
+            
+            # check the selection of features
+            self._check_node_features()
+            self._check_edge_features()
+
             self.cluster_nodes = dataset_train.clustering_method
             self.target = dataset_train.target  # already defined in HDF5DatSet object
             self.task = dataset_train.task
@@ -161,6 +180,44 @@ class Trainer():
             except Exception as e:
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+
+    def _check_node_features(self):
+        """Checks if the required node features exist"""
+        f = h5py.File(self.hdf5_path[0], "r")
+        mol_key = list(f.keys())[0]
+        self.available_node_features = list(f[f"{mol_key}/{groups.NODE}/"].keys())
+        self.available_node_features = [key for key in self.available_node_features if key[0] != '_'] # ignore metafeatures
+        f.close()
+
+        if self.node_features == "all":
+            self.node_features = self.available_node_features
+        else:
+            for feat in self.node_features:
+                if feat not in self.available_node_features:
+                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function.\
+                        Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info(f"\nPossible node features: {self.available_node_features}\n")
+                    sys.exit()
+
+    def _check_edge_features(self):
+        """Checks if the required edge features exist"""
+        f = h5py.File(self.hdf5_path[0], "r")
+        mol_key = list(f.keys())[0]
+        self.available_edge_features = list(f[f"{mol_key}/{groups.EDGE}/"].keys())
+        self.available_edge_features = [key for key in self.available_edge_features if key[0] != '_'] # ignore metafeatures
+        f.close()
+
+        if self.edge_features == "all":
+            self.edge_features = self.available_edge_features
+        elif self.edge_features is not None:
+            for feat in self.edge_features:
+                if feat not in self.available_edge_features:
+                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info("\nCheck feature_modules passed to the preprocess function.\
+                        Probably, the feature wasn't generated during the preprocessing step.")
+                    _log.info(f"\nPossible edge features: {self.available_edge_features}\n")
+                    sys.exit()
 
     def _load_pretrained_model(self, dataset_test, Net):
         """
