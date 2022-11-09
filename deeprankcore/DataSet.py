@@ -53,7 +53,7 @@ def save_hdf5_keys(
 class HDF5DataSet(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
-        hdf5_path,
+        hdf5_path: Union[List[str], str],
         root: str = "./",
         transform: Callable = None,
         pre_transform: Callable = None,
@@ -71,17 +71,16 @@ class HDF5DataSet(Dataset):
         """Class from which the hdf5 datasets are loaded.
 
         Args:
+            hdf5_path (str, optional): Path to hdf5 file(s). Use a list for multiple hdf5 files.
+
             root (str, optional): Root directory where the dataset should be
             saved. Defaults to "./"
-
-            hdf5_path (str, optional): Path to hdf5 file(s). For multiple hdf5 files, 
-            insert the paths in a list. Defaults to None.
 
             transform (callable, optional): A function/transform that takes in
             a torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before every access. Defaults to None.
 
-            pre_transform (callable, optional):  A function/transform that takes in
+            pre_transform (callable, optional): A function/transform that takes in
             a torch_geometric.data.Data object and returns a transformed version.
             The data object will be transformed before being saved to disk. Defaults to None.
 
@@ -95,22 +94,24 @@ class HDF5DataSet(Dataset):
             Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification.
-                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq']
                 Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+                This parameter is only used if target is not in ['bin_class', 'capri_class', 'irmsd', 'lrmsd', 'fnat', 'dockq']
 
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
-            subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
+            subset (list, optional): list of keys from hdf5 file to include. Default includes all keys.
 
             node_features (str or list, optional): consider all pre-computed node features ("all")
             or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
+            Defaults to "all".
             The complete list can be found in deeprankcore/domain/features.py
 
             edge_features (list, optional): consider all pre-computed edge features ("all")
             or some defined edge features (provide a list, example: ["dist", "coulomb"]).
+            Defaults to "all".
             The complete list can be found in deeprankcore/domain/features.py
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
