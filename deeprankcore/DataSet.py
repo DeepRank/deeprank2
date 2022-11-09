@@ -143,7 +143,7 @@ class HDF5DataSet(Dataset):
                 ""
                 "model = NeuralNet(dataset, GINet,"
                 "                  target='physiological_assembly',"
-                "                  task='classif')")
+                f"                  task='{targets.CLASSIF}')")
         
         if self.task == targets.CLASSIF:
             if classes is None:
@@ -429,7 +429,7 @@ class HDF5DataSet(Dataset):
         Args:
             molgrp (str): group name of the molecule in the hdf5 file
         Returns:
-            bool: True if we keep the complex False otherwise
+            bool: True if we keep the complex; False otherwise
         Raises:
             ValueError: If an unsuported condition is provided
         """

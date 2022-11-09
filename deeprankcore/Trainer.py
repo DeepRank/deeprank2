@@ -25,8 +25,9 @@ class Trainer():
                  dataset_train = None,
                  dataset_val = None,
                  dataset_test = None,
-                 Net = None,
                  val_size = None,
+                #  test_size = None, # should be implemented equivalent to val_size
+                 Net = None,
                  class_weights = None,
                  pretrained_model = None,
                  batch_size = 32,
@@ -39,28 +40,39 @@ class Trainer():
         Args:
             dataset_train (HDF5DataSet object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
+
             dataset_val (HDF5DataSet object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
+
             dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
-            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
-                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
-                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
                 to use for validation.
                 - Should be set to 0 if no validation set is needed.
                 - Should be not set (None) if dataset_val is not None.
                 Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
+
+            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
+                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
+                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
+
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+
             batch_size (int, optional): defaults to 32.
+
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
+
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
+
             metrics_exporters: the metrics exporters to use for generating metrics output
+
             output_dir: location for metrics file (see ConciseOutputExporter class)
         """
         if metrics_exporters is not None:
@@ -93,7 +105,7 @@ class Trainer():
             self.classes_to_idx = dataset_train.classes_to_idx
             self.optimizer = None
             self.batch_size = batch_size
-            self.val_size = val_size            # if None, will be set to 0.25 in _DivideDataSet function
+            self.val_size = val_size # if None, will be set to 0.25 in _DivideDataSet function
             self.class_weights = class_weights
 
             self.shuffle = shuffle
