@@ -11,7 +11,7 @@ Before installing deeprankcore you need to install:
 
 ## Deeprank-Core Package
 
-Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:
+Once the dependencies installed, you can install the latest release of deeprankcore using the PyPi package manager:
 
 ```
 pip install deeprankcore
@@ -25,4 +25,4 @@ cd deeprank-core
 pip install -e ./
 ```
 
- * For MacOS with M1 chip users only: see [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution if you run into problems with PyQt5 during deeprank-core installation.
+ * For MacOS with M1 chip users only: see [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution if you run into problems with PyQt5 during Deeprank-Core installation.

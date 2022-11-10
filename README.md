@@ -56,7 +56,7 @@ Before installing deeprankcore you need to install:
 
 ### Deeprank-Core Package
 
-Once the dependencies installed, you can install the latest release of deeprank-core using the PyPi package manager:
+Once the dependencies installed, you can install the latest release of Deeprank-Core using the PyPi package manager:
 
 ```
 pip install deeprankcore

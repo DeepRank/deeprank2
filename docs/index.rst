@@ -11,10 +11,9 @@ Deeprank-Core is a deep learning framework for data mining Protein-Protein Inter
 Deeprank-Core contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN models.
 
 Main features:
-* Predefined atom-level and residue-level PPI feature types
-  * e.g. atomic density, vdw energy, residue contacts, PSSM, etc.
-* Predefined target type
-  * e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
+
+* Predefined atom-level and residue-level PPI feature types (e.g. atomic density, vdw energy, residue contacts, PSSM, etc.)
+* Predefined target type (e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.)
 * Flexible definition of both new features and targets
 * Graphs feature mapping
 * Efficient data storage in HDF5 format
@@ -55,14 +54,10 @@ Package reference
 ===========
    
 .. toctree::
-   :caption: This section documents the Deeprank-Core API.
+   :caption: API
    :hidden:
 
    reference/deeprankcore
-   reference/deeprankcore.feature
-   reference/deeprankcore.domain
-   reference/deeprankcore.models
-   reference/deeprankcore.tools
 
 Indices and tables
 ==================
