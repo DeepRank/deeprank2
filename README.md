@@ -27,8 +27,6 @@ Main features:
 - Efficient data storage in HDF5 format
 - Support both classification and regression (based on PyTorch and PyTorch Geometric)
 
-Deeprank-Core documentation can be found here : https://deeprankcore.rtfd.io/.
-
 ## Table of contents
 
 - [Deeprank-Core](#deeprank-core)
@@ -39,12 +37,11 @@ Deeprank-Core documentation can be found here : https://deeprankcore.rtfd.io/.
     - [Deeprank-Core Package](#deeprank-core-package)
   - [Documentation](#documentation)
   - [Quick start](#quick-start)
-    - [Data generation](#data-generation)
+    - [Graphs generation](#graphs-generation)
     - [Dataset(s)](#datasets)
     - [Training](#training)
       - [Custom GNN](#custom-gnn)
-  - [For the developers](#for-the-developers)
-    - [Software release](#software-release)
+  - [Package development](#package-development)
 
 ## Installation
 
@@ -81,7 +78,7 @@ More extensive and detailed documentation can be found [here](https://deeprankco
 
 ## Quick start
 
-### Data generation
+### Graphs generation
 
 The process of generating graphs takes as input `.pdb` files representing protein-protein structural complexes and the correspondent Position-Specific Scoring Matrices (PSSMs) in the form of `.pssm` files. Query objects describe how the graphs should be built.
 
@@ -276,8 +273,7 @@ trainer.train(nepoch=50)
 
 ```
 
-## For the developers
+## Package development
 
-### Software release
-
-Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings. 
+- Software release
+  - Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings.
