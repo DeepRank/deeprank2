@@ -132,7 +132,9 @@ class Trainer():
             self.subset = dataset_train.subset
             self.node_features = node_features
             self.edge_features = edge_features
-            self._check_features() # load all features or check whether selected features exist
+            for dataset in [dataset_train, dataset_val, dataset_test]:
+                if dataset:
+                    self._check_features(dataset) # load all features or check whether selected features exist
 
             # set target, task, and classes
             ## target
@@ -170,10 +172,6 @@ class Trainer():
 
             # load settings from dataset_train
             self.cluster_nodes = dataset_train.clustering_method
-            self.target = dataset_train.target  # already defined in HDF5DatSet object
-            self.task = dataset_train.task
-            self.classes = dataset_train.classes
-            self.classes_to_idx = dataset_train.classes_to_idx
 
             # set neural net
             self.val_size = val_size # if None, will be set to 0.25 in _DivideDataSet function
@@ -230,9 +228,9 @@ class Trainer():
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
-    def _check_features(self):
+    def _check_features(self, dataset):
         """Checks if the required features exist"""
-        f = h5py.File(self.hdf5_path[0], "r")
+        f = h5py.File(dataset.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         
         # read available node features
@@ -378,7 +376,7 @@ class Trainer():
 
         self.set_loss()
 
-    def _put_model_to_device(self, dataset, Net):
+    def _put_model_to_device(self, dataset: HDF5DataSet, Net):
         """
         Puts the model on the available device
 

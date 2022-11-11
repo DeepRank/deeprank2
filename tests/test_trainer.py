@@ -24,7 +24,7 @@ from deeprankcore.domain import targettypes as targets
 
 _log = logging.getLogger(__name__)
 
-default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+default_node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
@@ -43,43 +43,32 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
 ):
 
     dataset_train = HDF5DataSet(
-        hdf5_path=train_hdf5_path,
-        root="./",
-        node_features=node_features,
-        edge_features=edge_features,
-        task = task,
-        target=target,
+        train_hdf5_path,
         clustering_method=clustering_method)
 
     if val_hdf5_path is not None:
         dataset_val = HDF5DataSet(
-            hdf5_path=val_hdf5_path,
-            root="./",
-            node_features=node_features,
-            edge_features=edge_features,
-            task = task,
-            target=target,
+            val_hdf5_path,
             clustering_method=clustering_method)
     else:
         dataset_val = None
 
     if test_hdf5_path is not None:
         dataset_test = HDF5DataSet(
-            hdf5_path=test_hdf5_path,
-            root="./",
-            node_features=node_features,
-            edge_features=edge_features,
-            target=target,
-            task=task,
+            test_hdf5_path,
             clustering_method=clustering_method)
     else:
         dataset_test = None
 
     trainer = Trainer(
+        model_class,
         dataset_train,
         dataset_val,
         dataset_test,
-        model_class,
+        node_features=node_features,
+        edge_features=edge_features,
+        target=target,
+        task=task,
         batch_size=64,
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
@@ -128,7 +117,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
-            default_features,
+            default_node_features,
             [edgefeats.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
@@ -143,7 +132,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
-            default_features,
+            default_node_features,
             [edgefeats.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
@@ -177,7 +166,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             "tests/data/hdf5/test.hdf5",
             FoutNet,
-            default_features,
+            default_node_features,
             [edgefeats.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
@@ -192,7 +181,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
             sGAT,
-            default_features,
+            default_node_features,
             [edgefeats.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
@@ -207,7 +196,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
-            default_features,
+            default_node_features,
             [edgefeats.DISTANCE],
             targets.REGRESS,
             "BA",
@@ -223,7 +212,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 sGAT,
-                default_features,
+                default_node_features,
                 [edgefeats.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
@@ -405,7 +394,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
-                default_features,
+                default_node_features,
                 [edgefeats.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
