@@ -6,8 +6,8 @@ from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa
 from tests.utils import PATH_TEST
-from deeprankcore.DataSet import HDF5DataSet
-from deeprankcore.Trainer import Trainer
+from deeprankcore.dataset import HDF5DataSet
+from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter
 from deeprankcore.tools.score import get_all_scores

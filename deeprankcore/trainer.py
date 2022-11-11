@@ -17,7 +17,7 @@ from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExport
 from deeprankcore.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targettypes as targets
 from deeprankcore.domain.features import groups
-from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.dataset import HDF5DataSet
 
 _log = logging.getLogger(__name__)
 
