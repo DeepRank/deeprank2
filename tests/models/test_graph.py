@@ -7,7 +7,7 @@ import numpy
 from deeprankcore.models.grid import GridSettings, MapMethod
 from deeprankcore.models.graph import Graph, Edge, Node
 from deeprankcore.models.contact import ResidueContact
-from deeprankcore.tools.pdb import get_structure
+from deeprankcore.models.pdb import get_structure
 from deeprankcore.domain.features import groups
 
 

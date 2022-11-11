@@ -60,18 +60,10 @@ deeprankcore.tools.pdb module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.tools.pssm module
+deeprankcore.models.pssm module
 ------------------------------
 
-.. automodule:: deeprankcore.tools.pssm
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.tools.pssm\_3dcons\_to\_deeprank module
-----------------------------------------------------
-
-.. automodule:: deeprankcore.tools.pssm_3dcons_to_deeprank
+.. automodule:: deeprankcore.models.pssm
    :members:
    :undoc-members:
    :show-inheritance:

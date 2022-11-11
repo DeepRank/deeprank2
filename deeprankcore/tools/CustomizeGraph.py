@@ -5,7 +5,6 @@ import numpy as np
 from deeprankcore.domain import targettypes as targets
 
 
-
 def add_target(graph_path, target_name, target_list, sep=" "):
     """Add a target to all the graphs contains in hdf5 files
 

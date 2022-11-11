@@ -3,9 +3,7 @@ import os
 import shutil
 import unittest
 import numpy as np
-from deeprankcore.tools.pssm_3dcons_to_deeprank import pssm_3dcons_to_deeprank
-from deeprankcore.tools.hdf5_to_csv import hdf5_to_csv
-from deeprankcore.tools.CustomizeGraph import add_target
+from deeprankcore.tools.customizegraph import add_target
 from deeprankcore.tools.embedding import manifold_embedding
 
 
@@ -18,12 +16,6 @@ class TestTools(unittest.TestCase):
         self.h5_train_ref = "tests/data/train_ref/train_data.hdf5"
 
         self.h5_graphs = "tests/data/hdf5/1ATN_ppi.hdf5"
-
-    def test_pssm_convert(self):
-        pssm_3dcons_to_deeprank(self.pssm_path)
-
-    def test_h52csv(self):
-        hdf5_to_csv(self.h5_train_ref)
 
     def test_add_target(self):
 

@@ -5,14 +5,14 @@ import tempfile
 import pdb2sql
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.amino_acid import AminoAcid
-from deeprankcore.tools.pdb import (
+from deeprankcore.models.pdb import (
     get_residue_contact_pairs,
     get_surrounding_residues,
     get_structure,
     add_hydrogens,
 )
 from deeprankcore.tools.pssm import parse_pssm
-from deeprankcore.tools.graph import build_residue_graph, build_atomic_graph
+from deeprankcore.models.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.models.variant import SingleResidueVariant
 import pickle
 

@@ -5,8 +5,8 @@ from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.models.graph import Graph, Node
 from deeprankcore.models.structure import Chain, Residue
 from deeprankcore.features.sasa import add_features
-from deeprankcore.tools.graph import build_residue_graph, build_atomic_graph
-from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
+from deeprankcore.models.graph import build_residue_graph, build_atomic_graph
+from deeprankcore.models.pdb import get_structure, get_surrounding_residues
 from deeprankcore.domain.features import nodefeats
 
 

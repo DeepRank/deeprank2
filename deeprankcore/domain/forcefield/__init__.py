@@ -3,10 +3,10 @@ import logging
 import numpy
 from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.forcefield.patch import PatchActionType
-from deeprankcore.tools.forcefield.top import TopParser
-from deeprankcore.tools.forcefield.patch import PatchParser
-from deeprankcore.tools.forcefield.residue import ResidueClassParser
-from deeprankcore.tools.forcefield.param import ParamParser
+from deeprankcore.domain.forcefield.top import TopParser
+from deeprankcore.domain.forcefield.patch import PatchParser
+from deeprankcore.domain.forcefield.residue import ResidueClassParser
+from deeprankcore.domain.forcefield.param import ParamParser
 from deeprankcore.models.forcefield.vanderwaals import VanderwaalsParam
 
 

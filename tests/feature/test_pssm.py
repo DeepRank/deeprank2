@@ -4,8 +4,8 @@ from deeprankcore.models.amino_acid import alanine
 from deeprankcore.tools.pssm import parse_pssm
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.features.pssm import add_features
-from deeprankcore.tools.graph import build_atomic_graph
-from deeprankcore.tools.pdb import get_structure, get_surrounding_residues
+from deeprankcore.models.graph import build_atomic_graph
+from deeprankcore.models.pdb import get_structure, get_surrounding_residues
 from deeprankcore.domain.features import nodefeats as Nfeat
 
 
