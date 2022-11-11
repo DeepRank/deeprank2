@@ -78,6 +78,19 @@ class Trainer():
             Defaults to "all".
             The complete list can be found in deeprankcore/domain/features.py
 
+            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
+            target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
+            here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
+            please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
+            Defaults to None.
+
+            task (str, optional): 'regress' for regression or 'classif' for classification.
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+                This parameter is only used if target is not in ['bin_class', 'capri_class', 'irmsd', 'lrmsd', 'fnat', 'dockq']
+
+            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
+
             batch_size (int, optional): defaults to 32.
 
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
@@ -808,12 +821,12 @@ class Trainer():
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
 
-    def _PreCluster(self, dataset, method):
+    def _PreCluster(self, dataset: HDF5DataSet, method: str):
         """Pre-clusters nodes of the graphs
 
         Args:
             dataset (HDF5DataSet object)
-            method (srt): 'mcl' (Markov Clustering) or 'louvain'
+            method (str): 'mcl' (Markov Clustering) or 'louvain'
         """
         for fname, mol in tqdm(dataset.index_complexes):
 

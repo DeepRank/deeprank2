@@ -82,19 +82,6 @@ class HDF5DataSet(Dataset):
             dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
             Defaults to None.
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
-            target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
-            here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
-            please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
-            Defaults to None.
-
-            task (str, optional): 'regress' for regression or 'classif' for classification.
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
-                This parameter is only used if target is not in ['bin_class', 'capri_class', 'irmsd', 'lrmsd', 'fnat', 'dockq']
-
-            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
-
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
             subset (list, optional): list of keys from hdf5 file to include. Default includes all keys.
