@@ -3,11 +3,8 @@ from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys
 from deeprankcore.Trainer import _DivideDataSet
 from torch_geometric.data.data import Data
 import h5py
-from deeprankcore.domain.features import edgefeats 
-from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain import targettypes as targets
 
-node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
