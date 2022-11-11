@@ -60,6 +60,8 @@ class HDF5DataSet(Dataset):
         dict_filter: dict = None,
         tqdm: bool = True,
         subset: list = None,
+        clustering_method: str = "mcl",
+        edge_features_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
     ):
         """Class from which the hdf5 datasets are loaded.
 
@@ -96,6 +98,13 @@ class HDF5DataSet(Dataset):
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
             subset (list, optional): list of keys from hdf5 file to include. Default includes all keys.
+
+            clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
+            or 'louvain' algorithm). Note that this parameter can be None only if the neural
+            network doesn't expects clusters (e.g. naive_gnn). Defaults to "mcl".
+
+            edge_features_transform (function, optional): transformation applied to the edge features.
+            Defaults to lambdax:np.tanh(-x/2+2)+1.
         """
         super().__init__(root, transform, pre_transform)
 
@@ -107,7 +116,11 @@ class HDF5DataSet(Dataset):
         self.dict_filter = dict_filter
         self.tqdm = tqdm
         self.subset = subset
+
+        self.edge_features_transform = edge_features_transform
         self._transform = transform
+
+        self.clustering_method = clustering_method
 
         # check if the files are ok
         self._check_hdf5_files()
@@ -126,6 +139,19 @@ class HDF5DataSet(Dataset):
             int: number of complexes in the dataset
         """
         return len(self.index_complexes)
+
+    def get(self, index): # pylint: disable=arguments-renamed
+        """Gets one item from its unique index.
+
+        Args:
+            index (int): index of the complex
+        Returns:
+            dict: {'mol':[fname,mol],'feature':feature,'target':target}
+        """
+
+        fname, mol = self.index_complexes[index]
+        data = self.load_one_graph(fname, mol)
+        return data
 
     def _check_hdf5_files(self):
         """Checks if the data contained in the hdf5 file is valid."""
@@ -146,6 +172,120 @@ class HDF5DataSet(Dataset):
 
         for name in remove_file:
             self.hdf5_path.remove(name)
+
+    def load_one_graph(self, fname, mol): # noqa
+        """Loads one graph
+
+        Args:
+            fname (str): hdf5 file name
+            mol (str): name of the molecule
+
+        Returns:
+            Data object or None: torch_geometric Data object containing the node features,
+            the internal and external edge features, the target and the xyz coordinates.
+            Return None if features cannot be loaded.
+        """
+
+        with h5py.File(fname, 'r') as f5:
+            grp = f5[mol]
+
+            # node features
+            node_data = ()
+            for feat in grp[f"{groups.NODE}"]:
+                if feat[0] != '_':  # ignore metafeatures
+                    vals = grp[f"{groups.NODE}/{feat}"][()]
+                    if vals.ndim == 1:
+                        vals = vals.reshape(-1, 1)
+
+                    node_data += (vals,)
+            x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
+
+            # edge index
+            # (we have to have all the edges i.e : (i,j) and (j,i) )
+            if groups.INDEX in grp[groups.EDGE]:
+                ind = grp[f"{groups.EDGE}/{groups.INDEX}"][()]
+                if ind.ndim == 2:
+                    ind = np.vstack((ind, np.flip(ind, 1))).T
+                edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
+            else:
+                edge_index = torch.empty((2, 0), dtype=torch.long)
+            edge_index = edge_index.to(self.device)
+
+            # edge feature
+            # (same issue as above)
+            if groups.EDGE in grp and grp[f"{groups.EDGE}"] is not None and len(grp[f"{groups.EDGE}"]) > 0:
+                edge_data = ()
+                for feat in grp[f"{groups.EDGE}"]:
+                    if feat[0] != '_':   # ignore metafeatures
+                        vals = grp[f"{groups.EDGE}/{feat}"][()]
+                        if vals.ndim == 1:
+                            vals = vals.reshape(-1, 1)
+                        edge_data += (vals,)
+                edge_data = np.hstack(edge_data)
+                edge_data = np.vstack((edge_data, edge_data))
+                edge_data = self.edge_features_transform(edge_data)
+                edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
+            else:
+                edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
+            edge_attr = edge_attr.to(self.device)
+
+            if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
+                warnings.warn(
+                    """Internal edges are not supported anymore.
+                    You should probably prepare the hdf5 file
+                    with a more up to date version of this software.""", DeprecationWarning)
+
+            # target
+            if targets.VALUES in grp:
+                for target in grp[f"{targets.VALUES}"]:
+                    try:
+                        y = torch.tensor([grp[f"{targets.VALUES}/{target}"][()]], dtype=torch.float).contiguous().to(self.device)
+                    except Exception as e:
+                        _log.error(e)
+                        _log.info('If your target variable contains categorical classes, \
+                        please convert them into class indices before defining the HDF5DataSet instance.')
+            else:
+                raise ValueError(f"No targets in entry {mol} in file {fname}." +
+                                    "\n Use the query class to add target values to input data.")
+
+            # positions
+            pos = torch.tensor(grp[f"{groups.NODE}/{groups.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+
+            # cluster
+            cluster0 = None
+            cluster1 = None
+            if self.clustering_method is not None:
+                if 'clustering' in grp.keys():
+                    if self.clustering_method in grp["clustering"].keys():
+                        if (
+                            "depth_0" in grp[f"clustering/{self.clustering_method}"].keys() and
+                            "depth_1" in grp[f"clustering/{self.clustering_method}"].keys()
+                            ):
+
+                            cluster0 = torch.tensor(
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(self.device)
+                            cluster1 = torch.tensor(
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(self.device)
+                        else:
+                            _log.warning("no clusters detected")
+                    else:
+                        _log.warning(f"no clustering/{self.clustering_method} detected")
+                else:
+                    _log.warning("no clustering group found")
+            else:
+                _log.warning("no cluster method set")
+
+        # load
+        data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
+        data.cluster0 = cluster0
+        data.cluster1 = cluster1
+        data.mol = mol
+
+        # apply transformation
+        if self._transform is not None:
+            data = self._transform(data)
+
+        return data
 
     def _create_index_molecules(self):
         """Creates the indexing of each molecule in the dataset.
