@@ -12,7 +12,7 @@ from deeprankcore.models.amino_acid import (
     lysine,
     phenylalanine
 )
-from deeprankcore.models.query import (
+from deeprankcore.query import (
     SingleResidueVariantResidueQuery,
     SingleResidueVariantAtomicQuery,
     ProteinProteinInterfaceAtomicQuery,

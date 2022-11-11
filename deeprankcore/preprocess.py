@@ -9,7 +9,7 @@ import os
 
 import importlib
 
-from deeprankcore.models.query import Query
+from deeprankcore.query import Query
 
 
 _log = logging.getLogger(__name__)

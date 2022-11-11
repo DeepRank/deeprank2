@@ -12,9 +12,9 @@
 ###############################################################################
 
 # Create output dir
-[[ ! -d uml ]] && mkdir uml
-[[ -d uml ]] && rm -f uml/*
-cd uml
+[[ ! -d class_diagrams ]] && mkdir class_diagrams
+[[ -d class_diagrams ]] && rm -f class_diagrams/*
+cd class_diagrams
 
 # Generate .puml for the project
 # output: packages_npl.pul and classes_npl.puml
@@ -41,13 +41,13 @@ done
 printf "\nGenerating UML .svg diagrams:\n"
 for i in `awk '/^class/{print $4}' classes_npl.puml`; do
     cat $i.puml | plantuml -tsvg -pipe > $i.svg
-    echo "  uml/$i.svg"
+    echo "  class_diagrams/$i.svg"
 done
 
 # Output:
 #  packages_npl.svg, UML package diagram (modules)
 #  classes_npl.svg, UML for all classes
 plantuml -tsvg -I classes_npl.puml -I packages_npl.puml
-echo "  uml/classes_npl.svg"
-echo "  uml/packages_npl.svg"
+echo "  class_diagrams/classes_npl.svg"
+echo "  class_diagrams/packages_npl.svg"
 echo "Done"

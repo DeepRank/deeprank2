@@ -48,10 +48,10 @@ deeprankcore.Trainer module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.alignmentNet module
+deeprankcore.alignmentnet module
 --------------------------------
 
-.. automodule:: deeprankcore.alignmentNet
+.. automodule:: deeprankcore.alignmentnet
    :members:
    :undoc-members:
    :show-inheritance:
@@ -104,10 +104,10 @@ deeprankcore.preprocess module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.sGAT module
+deeprankcore.sgat module
 ------------------------
 
-.. automodule:: deeprankcore.sGAT
+.. automodule:: deeprankcore.sgat
    :members:
    :undoc-members:
    :show-inheritance:

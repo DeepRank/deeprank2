@@ -10,7 +10,7 @@ from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
 
 # deeprankcore import
-from deeprankcore.community_pooling import get_preloaded_cluster, community_pooling
+from deeprankcore.tools.community_pooling import get_preloaded_cluster, community_pooling
 
 
 class GINetConvLayer(torch.nn.Module):

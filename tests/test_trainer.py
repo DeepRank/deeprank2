@@ -8,10 +8,10 @@ import warnings
 import torch
 from deeprankcore.Trainer import Trainer
 from deeprankcore.DataSet import HDF5DataSet
-from deeprankcore.ginet import GINet
-from deeprankcore.foutnet import FoutNet
-from deeprankcore.naive_gnn import NaiveNetwork
-from deeprankcore.sGAT import sGAT
+from deeprankcore.neuralnets.ginet import GINet
+from deeprankcore.neuralnets.foutnet import FoutNet
+from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
+from deeprankcore.neuralnets.sgat import sGAT
 from deeprankcore.models.metrics import (
     OutputExporter,
     TensorboardBinaryClassificationExporter,
