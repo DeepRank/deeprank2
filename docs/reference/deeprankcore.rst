@@ -1,18 +1,6 @@
 deeprankcore package
 ====================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   deeprankcore.domain
-   deeprankcore.feature
-   deeprankcore.h5x
-   deeprankcore.models
-   deeprankcore.tools
-
 Submodules
 ----------
 
@@ -112,10 +100,14 @@ deeprankcore.sGAT module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+Subpackages
+-----------
 
-.. automodule:: deeprankcore
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 4
+
+   deeprankcore.domain
+   deeprankcore.feature
+   deeprankcore.h5x
+   deeprankcore.models
+   deeprankcore.tools

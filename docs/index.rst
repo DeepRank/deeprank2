@@ -59,6 +59,9 @@ Package reference
 
    reference/deeprankcore
 
+:doc:`reference/deeprankcore`
+    This section documents the Deeprank-Core API.
+
 Indices and tables
 ==================
 
