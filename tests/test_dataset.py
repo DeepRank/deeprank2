@@ -16,19 +16,11 @@ class TestDataSet(unittest.TestCase):
     def test_dataset(self):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_features=node_feats,
-            edge_features=[edgefeats.DISTANCE],
-            target=targets.IRMSD,
-            subset=None,
         )
 
     def test_dataset_filter(self):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_features=node_feats,
-            edge_features=[edgefeats.DISTANCE],
-            target=targets.IRMSD,
-            subset=None,
             dict_filter={targets.IRMSD: "<10"},
         )
 
@@ -40,10 +32,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset = HDF5DataSet(
             hdf5_path=self.hdf5_path,
-            node_features=node_feats,
-            edge_features=[edgefeats.DISTANCE],
-            target=targets.IRMSD,
-            subset=None,
             transform=operator
         )
 
@@ -53,9 +41,6 @@ class TestDataSet(unittest.TestCase):
     def test_multi_file_dataset(self):
         dataset = HDF5DataSet(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
-            node_features=node_feats,
-            edge_features=[edgefeats.DISTANCE],
-            target=targets.BINARY
         )
 
         assert dataset.len() > 0
@@ -98,7 +83,7 @@ class TestDataSet(unittest.TestCase):
         hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
         n_val = int ( 0.25 * len(hdf5_file) )
         n_train = len(hdf5_file) - n_val
-        test_cases = [None, 0.25, n_val]
+        test_cases = [None, 0.25, n_val] # should all pass
         
         for t in test_cases:
             dataset_train, dataset_val =_DivideDataSet(
@@ -116,7 +101,7 @@ class TestDataSet(unittest.TestCase):
         hdf5 = "tests/data/hdf5/train.hdf5"
         hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
         n = len(hdf5_file)
-        test_cases = [
+        test_cases = [  # should all fail
             1.0, n,     # cannot be 100% validation data
             -0.5, -1,   # no negative values 
             1.1, n + 1, # cannot use more than all data as input
