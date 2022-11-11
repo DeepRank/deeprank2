@@ -7,7 +7,7 @@ from deeprankcore.models.structure import Chain, Atom
 from deeprankcore.models.contact import AtomicContact, ResidueContact
 from deeprankcore.models.graph import Edge, Graph
 from deeprankcore.tools.pdb import get_structure
-from deeprankcore.feature.atomic_contact import add_features
+from deeprankcore.features.atomic_contact import add_features
 from deeprankcore.models.amino_acid import alanine
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.domain.features import edgefeats as Efeat

@@ -1,7 +1,7 @@
 import numpy
 from pdb2sql import pdb2sql
 
-from deeprankcore.feature.atom import add_features
+from deeprankcore.features.atom import add_features
 from deeprankcore.tools.graph import build_atomic_graph
 from deeprankcore.models.structure import Chain, Residue
 from deeprankcore.tools.pdb import get_structure, get_surrounding_residues

@@ -24,7 +24,7 @@ from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats as Efeat
 from deeprankcore.domain import targettypes as targets
 
-from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
+from deeprankcore.features import sasa, atomic_contact, bsa, pssm, amino_acid
 from deeprankcore.DataSet import HDF5DataSet
 
 

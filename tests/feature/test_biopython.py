@@ -1,6 +1,6 @@
 import numpy
 from pdb2sql import pdb2sql
-from deeprankcore.feature.biopython import add_features
+from deeprankcore.features.biopython import add_features
 from deeprankcore.tools.graph import build_residue_graph
 from deeprankcore.tools.pdb import get_structure, get_residue_contact_pairs
 from deeprankcore.domain.features import nodefeats

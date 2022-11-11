@@ -60,7 +60,7 @@ def test_preprocess_single_feature():
     Tests preprocessing for single feature.
     """
 
-    imp = importlib.import_module(('deeprankcore.feature.sasa'))
+    imp = importlib.import_module(('deeprankcore.features.sasa'))
     preprocess_tester([imp])
 
 
@@ -70,12 +70,12 @@ def test_preprocess_all_features():
     """
 
     # copying this from feature.__init__.py
-    modules = glob.glob(join('./deeprankcore/feature/', "*.py"))
+    modules = glob.glob(join('./deeprankcore/features/', "*.py"))
     modules = [ basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py')]
 
     feature_modules = []
     for m in modules:
-        imp = importlib.import_module('deeprankcore.feature.' + m)
+        imp = importlib.import_module('deeprankcore.features.' + m)
         feature_modules.append(imp)
 
     preprocess_tester(feature_modules)
