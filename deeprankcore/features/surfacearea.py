@@ -1,6 +1,6 @@
 import logging
 import freesasa
-import numpy
+import numpy as np
 from typing import List
 from deeprankcore.models.graph import Node, Graph
 from deeprankcore.models.structure.residue import Residue
@@ -22,7 +22,7 @@ def add_sasa_for_residues(structure: freesasa.Structure, # pylint: disable=c-ext
         selection = ("residue, (resi %s) and (chain %s)" % (residue.number_string, residue.chain.id),) # pylint: disable=consider-using-f-string
 
         area = freesasa.selectArea(selection, structure, result)['residue'] # pylint: disable=c-extension-no-member
-        if numpy.isnan(area):
+        if np.isnan(area):
             raise ValueError(f"freesasa returned {area} for {residue}")
 
         node.features[nodefeatures.SASA] = area
@@ -40,7 +40,7 @@ def add_sasa_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extens
             (atom.name, atom.residue.number_string, atom.residue.chain.id),) # pylint: disable=consider-using-f-string
 
         area = freesasa.selectArea(selection, structure, result)['atom'] # pylint: disable=c-extension-no-member
-        if numpy.isnan(area):
+        if np.isnan(area):
             raise ValueError(f"freesasa returned {area} for {atom}")
 
         node.features[nodefeatures.SASA] = area

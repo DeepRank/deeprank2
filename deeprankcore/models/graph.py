@@ -1,7 +1,6 @@
-from enum import Enum
 from typing import Callable, Union, List
 import logging
-import numpy
+import numpy as np
 import h5py
 from deeprankcore.models.structure.atom import Atom
 from deeprankcore.models.structure.residue import Residue
@@ -29,18 +28,18 @@ class Edge:
         self.features[feature_name] = feature_value
 
     @property
-    def position1(self) -> numpy.array:
+    def position1(self) -> np.array:
         return self.id.item1.position
 
     @property
-    def position2(self) -> numpy.array:
+    def position2(self) -> np.array:
         return self.id.item2.position
 
     def has_nan(self) -> bool:
         "whether there are any NaN values in the edge's features"
 
         for feature_data in self.features.values():
-            if numpy.any(numpy.isnan(feature_data)):
+            if np.any(np.isnan(feature_data)):
                 return True
 
         return False
@@ -67,7 +66,7 @@ class Node:
         "whether there are any NaN values in the node's features"
 
         for feature_data in self.features.values():
-            if numpy.any(numpy.isnan(feature_data)):
+            if np.any(np.isnan(feature_data)):
                 return True
 
         return False
@@ -75,7 +74,7 @@ class Node:
     def add_feature(
         self,
         feature_name: str,
-        feature_function: Callable[[Union[Atom, Residue]], numpy.ndarray],
+        feature_function: Callable[[Union[Atom, Residue]], np.ndarray],
     ):
         feature_value = feature_function(self.id)
 
@@ -88,7 +87,7 @@ class Node:
         self.features[feature_name] = feature_value
 
     @property
-    def position(self) -> numpy.array:
+    def position(self) -> np.array:
         return self.id.position
 
 
@@ -157,9 +156,9 @@ class Graph:
             edge_feature_group = graph_group.create_group(Efeat.EDGE)
 
             # store node names and chain_ids
-            node_names = numpy.array([str(key) for key in self._nodes]).astype("S")
+            node_names = np.array([str(key) for key in self._nodes]).astype("S")
             node_features_group.create_dataset(Nfeat.NAME, data=node_names)
-            chain_ids = numpy.array([str(key).split()[1] for key in self._nodes]).astype("S")
+            chain_ids = np.array([str(key).split()[1] for key in self._nodes]).astype("S")
             node_features_group.create_dataset(Nfeat.CHAINID, data=chain_ids)
 
             # store node features
@@ -201,7 +200,7 @@ class Graph:
 
             # store edge names and indices
             edge_feature_group.create_dataset(
-                Efeat.NAME, data=numpy.array(edge_names).astype("S")
+                Efeat.NAME, data=np.array(edge_names).astype("S")
             )
             edge_feature_group.create_dataset(Efeat.INDEX, data=edge_indices)
 
@@ -220,7 +219,7 @@ class Graph:
         self, hdf5_path: str, settings: GridSettings, method: MapMethod
     ) -> str:
 
-        center = numpy.mean([node.position for node in self._nodes], axis=0)
+        center = np.mean([node.position for node in self._nodes], axis=0)
         grid = Grid(self.id, settings, center)
 
         self.map_to_grid(grid, method)
@@ -235,7 +234,7 @@ def build_atomic_graph( # pylint: disable=too-many-locals
     The edge distance cutoff is in Ångströms.
     """
 
-    positions = numpy.empty((len(atoms), 3))
+    positions = np.empty((len(atoms), 3))
     for atom_index, atom in enumerate(atoms):
         positions[atom_index] = atom.position
 
@@ -243,7 +242,7 @@ def build_atomic_graph( # pylint: disable=too-many-locals
     neighbours = distances < edge_distance_cutoff
 
     graph = Graph(graph_id)
-    for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
+    for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
         if atom1_index != atom2_index:
 
             atom1 = atoms[atom1_index]
@@ -277,7 +276,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
             atoms.add(atom)
     atoms = list(atoms)
 
-    positions = numpy.empty((len(atoms), 3))
+    positions = np.empty((len(atoms), 3))
     for atom_index, atom in enumerate(atoms):
         positions[atom_index] = atom.position
 
@@ -285,7 +284,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     neighbours = distances < edge_distance_cutoff
 
     graph = Graph(graph_id)
-    for atom1_index, atom2_index in numpy.transpose(numpy.nonzero(neighbours)):
+    for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
         if atom1_index != atom2_index:
 
             atom1 = atoms[atom1_index]
@@ -301,10 +300,10 @@ def build_residue_graph( # pylint: disable=too-many-locals
                 node1 = Node(residue1)
                 node2 = Node(residue2)
 
-                node1.features[Nfeat.POSITION] = numpy.mean(
+                node1.features[Nfeat.POSITION] = np.mean(
                     [atom.position for atom in residue1.atoms], axis=0
                 )
-                node2.features[Nfeat.POSITION] = numpy.mean(
+                node2.features[Nfeat.POSITION] = np.mean(
                     [atom.position for atom in residue2.atoms], axis=0
                 )
 

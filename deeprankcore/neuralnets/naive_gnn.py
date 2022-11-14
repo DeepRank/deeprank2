@@ -2,7 +2,6 @@
 
 import torch
 from torch.nn import Module, Linear, Sequential, ReLU
-
 from torch_scatter import scatter_mean, scatter_sum
 
 class NaiveConvolutionalLayer(Module):

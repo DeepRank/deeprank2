@@ -1,5 +1,5 @@
 from typing import Optional
-import numpy
+import numpy as np
 from deeprankcore.models.structure.variant import SingleResidueVariant
 from deeprankcore.domain.aminoacids import amino_acids
 from deeprankcore.models.structure.residue import Residue
@@ -26,7 +26,7 @@ def add_features( # pylint: disable=unused-argument
 
         pssm_row = residue.get_pssm()
 
-        profile = numpy.array([pssm_row.get_conservation(amino_acid)
+        profile = np.array([pssm_row.get_conservation(amino_acid)
                                for amino_acid in profile_amino_acid_order])
 
         node.features[Nfeat.PSSM] = profile

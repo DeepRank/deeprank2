@@ -3,7 +3,7 @@ import shutil
 import os
 import h5py
 from pdb2sql import pdb2sql
-import numpy
+import numpy as np
 from deeprankcore.models.grid import GridSettings, MapMethod
 from deeprankcore.models.graph import Graph, Edge, Node
 from deeprankcore.models.contact import ResidueContact
@@ -40,9 +40,9 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
     node_feature_name = "node_feature"
     edge_feature_name = "edge_feature"
 
-    node0.features[node_feature_name] = numpy.array([0.1])
-    node1.features[node_feature_name] = numpy.array([1.0])
-    edge01.features[edge_feature_name] = numpy.array([2.0])
+    node0.features[node_feature_name] = np.array([0.1])
+    node1.features[node_feature_name] = np.array([1.0])
+    edge01.features[edge_feature_name] = np.array([2.0])
 
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
@@ -70,15 +70,15 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             assert Nfeat.NODE in entry_group
             node_features_group = entry_group[Nfeat.NODE]
             assert node_feature_name in node_features_group
-            assert len(numpy.nonzero(node_features_group[node_feature_name][()])) > 0
+            assert len(np.nonzero(node_features_group[node_feature_name][()])) > 0
 
             assert Efeat.EDGE in entry_group
             edge_features_group = entry_group[Efeat.EDGE]
             assert edge_feature_name in edge_features_group
-            assert len(numpy.nonzero(edge_features_group[edge_feature_name][()])) > 0
+            assert len(np.nonzero(edge_features_group[edge_feature_name][()])) > 0
 
             assert Efeat.INDEX in edge_features_group
-            assert len(numpy.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
+            assert len(np.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
 
             # check for grid-mapped values
             assert "mapped_features" in entry_group
@@ -92,6 +92,6 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 ), f"missing mapped feature {feature_name}"
                 assert "value" in mapped_group[feature_name]
                 data = mapped_group[feature_name]["value"][()]
-                assert len(numpy.nonzero(data)) > 0, f"{feature_name}: all zero"
+                assert len(np.nonzero(data)) > 0, f"{feature_name}: all zero"
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test

@@ -1,11 +1,8 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
-
+import torch.nn.functional as F
 from torch_scatter import scatter_mean
 from torch_scatter import scatter_sum
-
-# torch_geometric import
 from torch_geometric.nn.inits import uniform
 
 

@@ -1,5 +1,4 @@
 from pdb2sql import pdb2sql
-
 from deeprankcore.domain.aminoacids import serine
 from deeprankcore.models.structure.variant import SingleResidueVariant
 from deeprankcore.features.surfacearea import add_features

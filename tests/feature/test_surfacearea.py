@@ -1,5 +1,5 @@
 from pdb2sql import pdb2sql
-import numpy
+import numpy as np
 from deeprankcore.domain.aminoacids import alanine
 from deeprankcore.models.structure.pdb_structure import Structure, Chain
 from deeprankcore.models.structure.residue import Residue
@@ -119,7 +119,7 @@ def test_sasa_residue():
 
     # check for NaN
     assert not any(
-        numpy.isnan(node.features[nodefeatures.SASA]) for node in graph.nodes
+        np.isnan(node.features[nodefeatures.SASA]) for node in graph.nodes
     )
 
     # surface residues should have large area
@@ -159,7 +159,7 @@ def test_sasa_atom():
 
     # check for NaN
     assert not any(
-        numpy.isnan(node.features[nodefeatures.SASA]) for node in graph.nodes
+        np.isnan(node.features[nodefeatures.SASA]) for node in graph.nodes
     )
 
     # surface atoms should have large area

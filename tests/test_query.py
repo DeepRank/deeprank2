@@ -1,5 +1,5 @@
 from tempfile import mkstemp
-import numpy
+import numpy as np
 import os
 import h5py
 from deeprankcore.domain.aminoacids import (
@@ -54,7 +54,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
                 assert (
                     len(
-                        numpy.nonzero(
+                        np.nonzero(
                             entry_group[f"{Nfeat.NODE}/{feature_name}"][()]
                         )
                     )

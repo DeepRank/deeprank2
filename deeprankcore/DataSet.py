@@ -2,17 +2,17 @@ import sys
 import os
 import logging
 import warnings
-import torch
 import numpy as np
+import h5py
+from tqdm import tqdm
+from ast import literal_eval
+import torch
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
-from tqdm import tqdm
-import h5py
-from ast import literal_eval
+from typing import Callable, List, Union
 from deeprankcore.domain import (nodefeatures as Nfeat,
                                 edgefeatures as Efeat,
                                 targettypes as targets)
-from typing import Callable, List, Union
 
 
 _log = logging.getLogger(__name__)

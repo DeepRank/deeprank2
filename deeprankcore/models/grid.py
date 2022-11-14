@@ -5,7 +5,7 @@ This module holds the classes that are used when working with a 3D grid.
 
 from enum import Enum
 from typing import Dict
-import numpy
+import numpy as np
 import h5py
 import itertools
 from scipy.signal import bspline
@@ -56,7 +56,7 @@ class Grid:
     - feature values on each point
     """
 
-    def __init__(self, id_: str, settings: GridSettings, center: numpy.array):
+    def __init__(self, id_: str, settings: GridSettings, center: np.array):
         self.id = id_
 
         self._settings = settings
@@ -66,60 +66,60 @@ class Grid:
 
         self._features = {}
 
-    def _set_mesh(self, settings: GridSettings, center: numpy.array):
+    def _set_mesh(self, settings: GridSettings, center: np.array):
         "builds the grid points"
 
         half_size = settings.size / 2
 
         min_x = center[0] - half_size
         max_x = center[0] + half_size
-        self._xs = numpy.linspace(min_x, max_x, num=settings.points_count)
+        self._xs = np.linspace(min_x, max_x, num=settings.points_count)
 
         min_y = center[1] - half_size
         max_y = center[1] + half_size
-        self._ys = numpy.linspace(min_y, max_y, num=settings.points_count)
+        self._ys = np.linspace(min_y, max_y, num=settings.points_count)
 
         min_z = center[2] - half_size
         max_z = center[2] + half_size
-        self._zs = numpy.linspace(min_z, max_z, num=settings.points_count)
+        self._zs = np.linspace(min_z, max_z, num=settings.points_count)
 
-        self._ygrid, self._xgrid, self._zgrid = numpy.meshgrid(
+        self._ygrid, self._xgrid, self._zgrid = np.meshgrid(
             self._ys, self._xs, self._zs
         )
 
     @property
-    def xs(self) -> numpy.array:
+    def xs(self) -> np.array:
         return self._xs
 
     @property
-    def xgrid(self) -> numpy.array:
+    def xgrid(self) -> np.array:
         return self._xgrid
 
     @property
-    def ys(self) -> numpy.array:
+    def ys(self) -> np.array:
         return self._ys
 
     @property
-    def ygrid(self) -> numpy.array:
+    def ygrid(self) -> np.array:
         return self._ygrid
 
     @property
-    def zs(self) -> numpy.array:
+    def zs(self) -> np.array:
         return self._zs
 
     @property
-    def zgrid(self) -> numpy.array:
+    def zgrid(self) -> np.array:
         return self._zgrid
 
     @property
-    def center(self) -> numpy.array:
+    def center(self) -> np.array:
         return self._center
 
     @property
-    def features(self) -> Dict[str, numpy.array]:
+    def features(self) -> Dict[str, np.array]:
         return self._features
 
-    def add_feature_values(self, feature_name: str, data: numpy.ndarray):
+    def add_feature_values(self, feature_name: str, data: np.ndarray):
         """Makes sure feature values per grid point get stored.
 
         This method may be called repeatedly to add on to existing grid point values.
@@ -131,41 +131,41 @@ class Grid:
             self._features[feature_name] += data
 
     def _get_mapped_feature_gaussian(
-        self, position: numpy.ndarray, value: float
-    ) -> numpy.ndarray:
+        self, position: np.ndarray, value: float
+    ) -> np.ndarray:
 
         beta = 1.0
 
         fx, fy, fz = position
-        distances = numpy.sqrt(
+        distances = np.sqrt(
             (self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2
         )
 
-        return value * numpy.exp(-beta * distances)
+        return value * np.exp(-beta * distances)
 
     def _get_mapped_feature_fast_gaussian(
-        self, position: numpy.ndarray, value: float
-    ) -> numpy.ndarray:
+        self, position: np.ndarray, value: float
+    ) -> np.ndarray:
 
         beta = 1.0
         cutoff = 5.0 * beta
 
         fx, fy, fz = position
-        distances = numpy.sqrt(
+        distances = np.sqrt(
             (self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2
         )
 
-        data = numpy.zeros(distances.shape)
+        data = np.zeros(distances.shape)
 
-        data[distances < cutoff] = value * numpy.exp(
+        data[distances < cutoff] = value * np.exp(
             -beta * distances[distances < cutoff]
         )
 
         return data
 
     def _get_mapped_feature_bsp_line(
-        self, position: numpy.ndarray, value: float
-    ) -> numpy.ndarray:
+        self, position: np.ndarray, value: float
+    ) -> np.ndarray:
 
         order = 4
 
@@ -179,34 +179,34 @@ class Grid:
         return value * bsp_data
 
     def _get_mapped_feature_nearest_neighbour( # pylint: disable=too-many-locals
-        self, position: numpy.ndarray, value: float
-    ) -> numpy.ndarray:
+        self, position: np.ndarray, value: float
+    ) -> np.ndarray:
 
         fx, _, _ = position
-        distances_x = numpy.abs(self.xs - fx)
-        distances_y = numpy.abs(self.ys - fx)
-        distances_z = numpy.abs(self.zs - fx)
+        distances_x = np.abs(self.xs - fx)
+        distances_y = np.abs(self.ys - fx)
+        distances_z = np.abs(self.zs - fx)
 
-        indices_x = numpy.argsort(distances_x)[:2]
-        indices_y = numpy.argsort(distances_y)[:2]
-        indices_z = numpy.argsort(distances_z)[:2]
+        indices_x = np.argsort(distances_x)[:2]
+        indices_y = np.argsort(distances_y)[:2]
+        indices_z = np.argsort(distances_z)[:2]
 
         sorted_x = distances_x[indices_x]
-        weights_x = sorted_x / numpy.sum(sorted_x)
+        weights_x = sorted_x / np.sum(sorted_x)
 
         sorted_y = distances_y[indices_y]
-        weights_y = sorted_y / numpy.sum(sorted_y)
+        weights_y = sorted_y / np.sum(sorted_y)
 
         sorted_z = distances_z[indices_z]
-        weights_z = sorted_z / numpy.sum(sorted_z)
+        weights_z = sorted_z / np.sum(sorted_z)
 
         indices = [indices_x, indices_y, indices_z]
         points = list(itertools.product(*indices))
 
         weight_products = list(itertools.product(weights_x, weights_y, weights_z))
-        weights = [numpy.sum(p) for p in weight_products]
+        weights = [np.sum(p) for p in weight_products]
 
-        neighbour_data = numpy.zeros(
+        neighbour_data = np.zeros(
             (self.xs.shape[0], self.ys.shape[0], self.zs.shape[0])
         )
 
@@ -219,9 +219,9 @@ class Grid:
 
     def map_feature(
         self,
-        position: numpy.ndarray,
+        position: np.ndarray,
         feature_name: str,
-        feature_value: numpy.ndarray,
+        feature_value: np.ndarray,
         method: MapMethod,
     ):
         "Maps point feature data at a given position to the grid, using the given method."

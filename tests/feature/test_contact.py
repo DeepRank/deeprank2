@@ -1,8 +1,6 @@
 from uuid import uuid4
-
 from pdb2sql import pdb2sql
-import numpy
-
+import numpy as np
 from deeprankcore.models.structure.pdb_structure import Chain
 from deeprankcore.models.structure.atom import Atom
 from deeprankcore.models.contact import AtomicContact, ResidueContact
@@ -52,7 +50,7 @@ def test_add_features():
     )
     edge_close = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_close), variant)
-    assert not numpy.isnan(edge_close.features[Efeat.VANDERWAALS])
+    assert not np.isnan(edge_close.features[Efeat.VANDERWAALS])
     assert edge_close.features[Efeat.VANDERWAALS] > 0.0, edge_close.features[
         Efeat.VANDERWAALS
     ]
@@ -63,7 +61,7 @@ def test_add_features():
     )
     edge_far = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_far), variant)
-    assert not numpy.isnan(edge_far.features[Efeat.VANDERWAALS])
+    assert not np.isnan(edge_far.features[Efeat.VANDERWAALS])
     assert edge_far.features[Efeat.VANDERWAALS] < 0.0, edge_far.features[
         Efeat.VANDERWAALS
     ]
@@ -76,7 +74,7 @@ def test_add_features():
     )
     edge_intermediate = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_intermediate), variant)
-    assert not numpy.isnan(edge_intermediate.features[Efeat.VANDERWAALS])
+    assert not np.isnan(edge_intermediate.features[Efeat.VANDERWAALS])
     assert (
         edge_intermediate.features[Efeat.VANDERWAALS]
         < edge_far.features[Efeat.VANDERWAALS]
@@ -99,7 +97,7 @@ def test_add_features():
     )
     close_attracting_edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(close_attracting_edge), variant)
-    assert not numpy.isnan(close_attracting_edge.features[Efeat.ELECTROSTATIC])
+    assert not np.isnan(close_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
         close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
     ), close_attracting_edge.features[Efeat.ELECTROSTATIC]
@@ -111,7 +109,7 @@ def test_add_features():
     )
     far_attracting_edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(far_attracting_edge), variant)
-    assert not numpy.isnan(far_attracting_edge.features[Efeat.ELECTROSTATIC])
+    assert not np.isnan(far_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
         far_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
     ), far_attracting_edge.features[Efeat.ELECTROSTATIC]
@@ -127,7 +125,7 @@ def test_add_features():
     )
     opposing_edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(opposing_edge), variant)
-    assert not numpy.isnan(opposing_edge.features[Efeat.ELECTROSTATIC])
+    assert not np.isnan(opposing_edge.features[Efeat.ELECTROSTATIC])
     assert (
         opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
     ), opposing_edge.features[Efeat.ELECTROSTATIC]
@@ -138,16 +136,16 @@ def test_add_features():
     )
     edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge), variant)
-    assert not numpy.isnan(edge.features[Efeat.DISTANCE]) > 0.0
+    assert not np.isnan(edge.features[Efeat.DISTANCE]) > 0.0
     assert edge.features[Efeat.DISTANCE] > 0.0
     assert edge.features[Efeat.DISTANCE] < 1e5
 
-    assert not numpy.isnan(edge.features[Efeat.ELECTROSTATIC])
+    assert not np.isnan(edge.features[Efeat.ELECTROSTATIC])
     assert edge.features[Efeat.ELECTROSTATIC] != 0.0, edge.features[
         Efeat.ELECTROSTATIC
     ]
 
-    assert not numpy.isnan(edge.features[Efeat.VANDERWAALS])
+    assert not np.isnan(edge.features[Efeat.VANDERWAALS])
     assert edge.features[Efeat.VANDERWAALS] != 0.0, edge.features[
         Efeat.VANDERWAALS
     ]

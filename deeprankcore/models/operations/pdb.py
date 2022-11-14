@@ -1,8 +1,8 @@
 import logging
 from typing import List
+import numpy as np
 import subprocess
 from scipy.spatial import distance_matrix
-import numpy
 from pdb2sql import interface as get_interface
 from deeprankcore.models.structure.pdb_structure import Chain, Structure
 from deeprankcore.models.structure.atom import Atom, AtomicElement
@@ -91,7 +91,7 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
             amino_acid = None
 
         # Turn the x,y,z into a vector:
-        atom_position = numpy.array([x, y, z])
+        atom_position = np.array([x, y, z])
 
         # Init chain.
         if chain_id not in chains:
@@ -221,7 +221,7 @@ def get_surrounding_residues(structure, residue, radius):
 
     for structure_atom_index, structure_atom in enumerate(structure_atoms):
 
-        shortest_distance = numpy.min(distances[structure_atom_index, :])
+        shortest_distance = np.min(distances[structure_atom_index, :])
 
         if shortest_distance < radius:
 

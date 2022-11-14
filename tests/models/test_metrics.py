@@ -4,10 +4,8 @@ import csv
 import shutil
 from tempfile import mkdtemp
 import logging
-
 import unittest
 from unittest.mock import patch
-
 from deeprankcore.models.metrics import (
     MetricsExporterCollection,
     TensorboardBinaryClassificationExporter,

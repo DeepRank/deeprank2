@@ -3,6 +3,7 @@ import os
 from typing import Dict, List, Optional, Iterator, Union
 import tempfile
 import pdb2sql
+import pickle
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.structure.aminoacid import AminoAcid
 from deeprankcore.models.operations.pdb import (
@@ -14,7 +15,6 @@ from deeprankcore.models.operations.pdb import (
 from deeprankcore.tools.pssm import parse_pssm
 from deeprankcore.models.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.models.structure.variant import SingleResidueVariant
-import pickle
 
 _log = logging.getLogger(__name__)
 

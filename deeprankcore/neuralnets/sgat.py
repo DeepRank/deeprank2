@@ -1,15 +1,10 @@
 import torch
+from torch import nn
 from torch.nn import Parameter
 import torch.nn.functional as F
-from torch import nn
-
 from torch_scatter import scatter_mean
-
-# torch_geometric import
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
-
-# deeprankcore import
 from deeprankcore.models.operations.community_pooling import get_preloaded_cluster, community_pooling
 
 

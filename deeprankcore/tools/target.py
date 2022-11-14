@@ -2,9 +2,9 @@ import glob
 import h5py
 import os
 import numpy as np
-from deeprankcore.domain import targettypes as targets
 from typing import Dict, Union
 from pdb2sql import StructureSimilarity
+from deeprankcore.domain import targettypes as targets
 
 
 

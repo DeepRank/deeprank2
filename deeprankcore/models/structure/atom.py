@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from enum import Enum
 from deeprankcore.models.structure.residue import Residue
 
@@ -14,8 +14,8 @@ class AtomicElement(Enum):
     H = 6
 
     @property
-    def onehot(self) -> numpy.array:
-        value = numpy.zeros(max(el.value for el in AtomicElement))
+    def onehot(self) -> np.array:
+        value = np.zeros(max(el.value for el in AtomicElement))
         value[self.value - 1] = 1.0
         return value
 
@@ -28,7 +28,7 @@ class Atom:
         residue: Residue,
         name: str,
         element: AtomicElement,
-        position: numpy.array,
+        position: np.array,
         occupancy: float,
     ):
         """
@@ -80,7 +80,7 @@ class Atom:
         return self._occupancy
 
     @property
-    def position(self) -> numpy.array:
+    def position(self) -> np.array:
         return self._position
 
     @property

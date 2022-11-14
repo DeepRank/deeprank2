@@ -252,6 +252,7 @@ class ScatterPlotExporter(MetricsExporter):
 
         return output_data_shape == 1 and target_data_shape == 1
 
+
 class ConciseOutputExporter(MetricsExporter):
     # tbd: if either we want to uniform it with MetricsExporter interface, or if we want to delete the other exporters
     """ A metrics exporter that writes a CSV output table, containing every single data point.

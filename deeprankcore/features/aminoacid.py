@@ -1,6 +1,5 @@
 from typing import Optional
-
-import numpy
+import numpy as np
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.structure.variant import SingleResidueVariant
 from deeprankcore.models.structure.atom import Atom
@@ -44,6 +43,6 @@ def add_features( # pylint: disable=unused-argument
                 node.features[Nfeat.VARIANTRES] = residue.amino_acid.onehot
                 node.features[Nfeat.DIFFCHARGE] = 0
                 node.features[Nfeat.DIFFSIZE] = 0
-                node.features[Nfeat.DIFFPOLARITY] = numpy.zeros(residue.amino_acid.polarity.onehot.shape)
+                node.features[Nfeat.DIFFPOLARITY] = np.zeros(residue.amino_acid.polarity.onehot.shape)
                 node.features[Nfeat.DIFFHBDONORS] = 0
                 node.features[Nfeat.DIFFHBACCEPTORS] = 0

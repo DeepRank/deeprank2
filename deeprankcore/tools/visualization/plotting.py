@@ -3,13 +3,11 @@ from copy import deepcopy
 from typing import Optional
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
-
 import h5py
-import numpy
+import numpy as np
 import networkx
 import community
 import markov_clustering
-
 from deeprankcore.tools.visualization.embedding import manifold_embedding
 from deeprankcore.domain import (nodefeatures as Nfeat,
                                  edgefeatures as Efeat)
@@ -25,7 +23,7 @@ def _get_node_key(value):
 
     key = ""
     for item in value:
-        if isinstance(item, (bytes, numpy.bytes_)):
+        if isinstance(item, (bytes, np.bytes_)):
             key = item.decode()
 
         elif isinstance(item, str):
@@ -82,7 +80,7 @@ def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disab
 
 
 def _get_edge_type_name(value):
-    if isinstance(value, (bytes, numpy.bytes_)):
+    if isinstance(value, (bytes, np.bytes_)):
 
         return value.decode()
 
@@ -104,7 +102,7 @@ def plotly_2d( # noqa
     else:
         import chart_studio.plotly as py # pylint: disable=import-outside-toplevel
 
-    pos = numpy.array(
+    pos = np.array(
         [v.tolist() for _, v in networkx.get_node_attributes(graph, Nfeat.POSITION).items()]
     )
     pos2D = manifold_embedding(pos)
@@ -134,7 +132,7 @@ def plotly_2d( # noqa
                 cluster[node_key[node]] = ic
 
     # get the colormap for the clsuter line
-    ncluster = numpy.max([v for _, v in cluster.items()]) + 1
+    ncluster = np.max([v for _, v in cluster.items()]) + 1
     cmap = plt.cm.nipy_spectral
     N = cmap.N
     cmap = [cmap(i) for i in range(N)]
@@ -234,7 +232,7 @@ def plotly_2d( # noqa
         )
 
         nc = node_connect[node]
-        node_trace[index]["marker"]["size"] += (5 + 15 * numpy.tanh(nc / 5),)
+        node_trace[index]["marker"]["size"] += (5 + 15 * np.tanh(nc / 5),)
         node_trace[index]["marker"]["line"]["color"] += (cluster[node],)
 
     fig = go.Figure(
@@ -388,7 +386,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
         node_trace[index]["text"] += (" ".join(node),)
 
         nc = node_connect[node]
-        node_trace[index]["marker"]["size"] += (5 + 15 * numpy.tanh(nc / 5),)
+        node_trace[index]["marker"]["size"] += (5 + 15 * np.tanh(nc / 5),)
 
     fig = go.Figure(
         data=[*node_trace, *internal_edge_trace_list, *edge_trace_list],

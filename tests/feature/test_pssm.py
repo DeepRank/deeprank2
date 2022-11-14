@@ -1,5 +1,5 @@
 from pdb2sql import pdb2sql
-import numpy
+import numpy as np
 from deeprankcore.domain.aminoacids import alanine
 from deeprankcore.tools.pssm import parse_pssm
 from deeprankcore.models.structure.variant import SingleResidueVariant
@@ -45,4 +45,4 @@ def test_add_features():
         Nfeat.CONSERVATION,
         Nfeat.INFOCONTENT,
     ):
-        assert numpy.any([node.features[feature_name] != 0.0 for node in graph.nodes])
+        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes])

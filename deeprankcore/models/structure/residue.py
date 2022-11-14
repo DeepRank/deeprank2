@@ -1,5 +1,5 @@
 from typing import Optional
-import numpy
+import numpy as np
 from deeprankcore.models.structure.pdb_structure import Chain
 from deeprankcore.models.structure.aminoacid import AminoAcid
 from deeprankcore.models.pssm import PssmRow
@@ -87,5 +87,5 @@ class Residue:
         return f"{self._chain} {self.number_string}"
 
     @property
-    def position(self) -> numpy.array:
-        return numpy.mean([atom.position for atom in self._atoms], axis=0)
+    def position(self) -> np.array:
+        return np.mean([atom.position for atom in self._atoms], axis=0)

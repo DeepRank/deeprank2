@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from enum import Enum
 
 
@@ -12,7 +12,7 @@ class Polarity(Enum):
 
     @property
     def onehot(self):
-        t = numpy.zeros(4)
+        t = np.zeros(4)
         t[self.value] = 1.0
 
         return t
@@ -70,14 +70,14 @@ class AminoAcid:
         return self._one_letter_code
 
     @property
-    def onehot(self) -> numpy.ndarray:
+    def onehot(self) -> np.ndarray:
         if self._index is None:
             raise ValueError(
                 "amino acid {self._name} index is not set, thus no onehot can be computed"
             )
 
         # assumed that there are only 20 different amino acids
-        a = numpy.zeros(20)
+        a = np.zeros(20)
         a[self._index] = 1.0
 
         return a

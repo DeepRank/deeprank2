@@ -1,5 +1,5 @@
 import logging
-import numpy
+import numpy as np
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import get_surface, residue_depth
 from Bio.PDB.HSExposure import HSExposureCA
@@ -48,4 +48,4 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         if hse_key in hse:
             node.features[nodefeatures.HSE] = hse[hse_key]
         else:
-            node.features[nodefeatures.HSE] = numpy.array((0, 0, 0))
+            node.features[nodefeatures.HSE] = np.array((0, 0, 0))
