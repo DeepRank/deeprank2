@@ -3,7 +3,7 @@ import os
 import shutil
 import unittest
 import numpy as np
-from deeprankcore.tools.target import add_target
+from deeprankcore.tools.target import add_target, compute_targets
 from deeprankcore.tools.visualization.embedding import manifold_embedding
 
 
@@ -44,6 +44,10 @@ class TestTools(unittest.TestCase):
         pos = np.random.rand(110, 3)
         for method in ["tsne", "spectral", "mds"]:
             _ = manifold_embedding(pos, method=method)
+    
+    def test_compute_targets(self):
+        _ = compute_targets("tests/data/pdb/1ATN/1ATN_1w.pdb", "tests/data/ref/1ATN/1ATN.pdb")
+
 
 
 if __name__ == "__main__":
