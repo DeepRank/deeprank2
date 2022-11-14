@@ -1,7 +1,8 @@
 import unittest
 import h5py
+import numpy as np
 from deeprankcore.tools.visualization.plotting import hdf5_to_networkx, plotly_2d, plotly_3d
-from deeprankcore.tools.target import compute_targets
+from deeprankcore.tools.visualization.embedding import manifold_embedding
 
 
 class TestGraph(unittest.TestCase):
@@ -12,14 +13,16 @@ class TestGraph(unittest.TestCase):
         self.pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
         self.reference_path = "tests/data/pdb/1ATN/1ATN_2w.pdb"
 
-    def test_compute_targets(self):
-        compute_targets(self.pdb_path, self.reference_path)
-
     def test_plot_2d(self):
         plotly_2d(self.networkx_graph, "1ATN", disable_plot=True)
 
     def test_plot_3d(self):
         plotly_3d(self.networkx_graph, "1ATN", disable_plot=True)
+
+    def test_embedding(self):
+        pos = np.random.rand(110, 3)
+        for method in ["tsne", "spectral", "mds"]:
+            _ = manifold_embedding(pos, method=method)
 
 
 if __name__ == "__main__":

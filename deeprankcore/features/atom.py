@@ -1,6 +1,6 @@
 from deeprankcore.models.structure.atom import Atom
 from deeprankcore.models.graph import Graph
-from deeprankcore.domain.forcefield.parsers import atomic_forcefield
+from deeprankcore.models.operations.parsers import atomic_forcefield
 from deeprankcore.domain import nodefeatures
 import logging
 

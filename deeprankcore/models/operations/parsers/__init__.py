@@ -10,7 +10,7 @@ from deeprankcore.models.operations.parsers.vdwparam import VanderwaalsParam, Pa
 
 _log = logging.getLogger(__name__)
 
-_forcefield_directory_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+_forcefield_directory_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../../domain/forcefield'))
 
 class AtomicForcefield:
     def __init__(self):
