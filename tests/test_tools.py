@@ -3,8 +3,8 @@ import os
 import shutil
 import unittest
 import numpy as np
-from deeprankcore.tools.customizegraph import add_target
-from deeprankcore.tools.embedding import manifold_embedding
+from deeprankcore.tools.target import add_target
+from deeprankcore.tools.visualization.embedding import manifold_embedding
 
 
 class TestTools(unittest.TestCase):

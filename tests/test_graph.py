@@ -1,7 +1,7 @@
 import unittest
 import h5py
-from deeprankcore.tools.visualization import hdf5_to_networkx, plotly_2d, plotly_3d
-from deeprankcore.tools.score import get_all_scores
+from deeprankcore.tools.visualization.plotting import hdf5_to_networkx, plotly_2d, plotly_3d
+from deeprankcore.tools.target import compute_targets
 
 
 class TestGraph(unittest.TestCase):
@@ -12,8 +12,8 @@ class TestGraph(unittest.TestCase):
         self.pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
         self.reference_path = "tests/data/pdb/1ATN/1ATN_2w.pdb"
 
-    def test_score(self):
-        get_all_scores(self.pdb_path, self.reference_path)
+    def test_compute_targets(self):
+        compute_targets(self.pdb_path, self.reference_path)
 
     def test_plot_2d(self):
         plotly_2d(self.networkx_graph, "1ATN", disable_plot=True)

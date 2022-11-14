@@ -8,7 +8,7 @@ import logging
 import unittest
 from unittest.mock import patch
 
-from deeprankcore.tools.metrics import (
+from deeprankcore.models.metrics import (
     MetricsExporterCollection,
     TensorboardBinaryClassificationExporter,
     OutputExporter,

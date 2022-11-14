@@ -9,8 +9,8 @@ from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
-from deeprankcore.tools.metrics import OutputExporter
-from deeprankcore.tools.score import get_all_scores
+from deeprankcore.models.metrics import OutputExporter
+from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats
 from deeprankcore.domain import targettypes as targets
@@ -40,7 +40,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
     try:
 
-        all_targets = get_all_scores(pdb_path, ref_path)
+        all_targets = compute_targets(pdb_path, ref_path)
 
         count_queries = 5
         queries = []

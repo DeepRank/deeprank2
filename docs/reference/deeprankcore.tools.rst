@@ -68,10 +68,10 @@ deeprankcore.models.pssm module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.tools.score module
+deeprankcore.tools.target module
 -------------------------------
 
-.. automodule:: deeprankcore.tools.score
+.. automodule:: deeprankcore.tools.target
    :members:
    :undoc-members:
    :show-inheritance:

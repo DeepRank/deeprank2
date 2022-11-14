@@ -26,7 +26,7 @@ class Query:
     objects of this class should be created before any model is loaded
 
     Query objects can have target values associated with them, these will be stored with the resulting graph.
-    The get_all_scores function under deeprankcore.tools.score is a nice way to get started. It will output a directory that can serve
+    The compute_targets function under deeprankcore.tools.target is a nice way to get started. It will output a directory that can serve
     as input for the targets argument.
 
     Currently, the Trainer class under deeprankcore.Trainer can work with target values, that have one of the following names:

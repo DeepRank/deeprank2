@@ -1,8 +1,8 @@
 
 
-from deeprankcore.tools.score import get_all_scores
+from deeprankcore.tools.target import compute_targets
 
 
-def test_get_all_scores():
+def test_compute_targets():
 
-    _ = get_all_scores("tests/data/pdb/1ATN/1ATN_1w.pdb", "tests/data/ref/1ATN/1ATN.pdb")
+    _ = compute_targets("tests/data/pdb/1ATN/1ATN_1w.pdb", "tests/data/ref/1ATN/1ATN.pdb")

@@ -10,7 +10,7 @@ import networkx
 import community
 import markov_clustering
 
-from deeprankcore.tools.embedding import manifold_embedding
+from deeprankcore.tools.visualization.embedding import manifold_embedding
 from deeprankcore.domain.features import groups
 from deeprankcore.domain.features import edgefeats
 
