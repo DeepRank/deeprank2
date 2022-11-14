@@ -20,10 +20,10 @@ deeprankcore.tools.BioWrappers module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.tools.CustomizeGraph module
+deeprankcore.tools.customizegraph module
 ----------------------------------------
 
-.. automodule:: deeprankcore.tools.CustomizeGraph
+.. automodule:: deeprankcore.tools.customizegraph
    :members:
    :undoc-members:
    :show-inheritance:
