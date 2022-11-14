@@ -24,7 +24,7 @@ from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats as Efeat
 from deeprankcore.domain import targettypes as targets
 
-from deeprankcore.features import sasa, atomic_contact, bsa, pssm, amino_acid
+from deeprankcore.features import aminoacid, conservation, contact, surfacearea
 from deeprankcore.DataSet import HDF5DataSet
 
 
@@ -104,7 +104,7 @@ def test_interface_graph_residue():
         },
     )
 
-    g = query.build_graph([bsa, amino_acid, pssm, atomic_contact])
+    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -132,7 +132,7 @@ def test_interface_graph_atomic():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([bsa, amino_acid, pssm, atomic_contact])
+    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -162,7 +162,7 @@ def test_variant_graph_101M():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
+    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -202,7 +202,7 @@ def test_variant_graph_1A0Z():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
+    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -240,7 +240,7 @@ def test_variant_graph_9API():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
+    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -271,7 +271,7 @@ def test_variant_residue_graph_101M():
         targets={targets.BINARY: 0},
     )
 
-    g = query.build_graph([sasa, amino_acid, pssm, atomic_contact])
+    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -292,6 +292,6 @@ def test_res_ppi():
     query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/3MRC/3MRC.pdb",
                                                 "M", "P")
 
-    g = query.build_graph([sasa, atomic_contact])
+    g = query.build_graph([surfacearea, contact])
 
     _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELECTROSTATIC])

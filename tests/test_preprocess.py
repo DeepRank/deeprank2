@@ -60,7 +60,7 @@ def test_preprocess_single_feature():
     Tests preprocessing for single feature.
     """
 
-    imp = importlib.import_module(('deeprankcore.features.sasa'))
+    imp = importlib.import_module(('deeprankcore.features.surfacearea'))
     preprocess_tester([imp])
 
 

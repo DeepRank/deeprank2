@@ -1,6 +1,8 @@
 import logging
 import freesasa
-from deeprankcore.models.graph import Graph
+import numpy
+from typing import List
+from deeprankcore.models.graph import Node, Graph
 from deeprankcore.models.structure import Residue, Atom
 from deeprankcore.domain.features import nodefeats
 
@@ -8,10 +10,47 @@ freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-memb
 logging.getLogger(__name__)
 
 
+def add_sasa_for_residues(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
+                              result: freesasa.Result, # pylint: disable=c-extension-no-member
+                              nodes: List[Node]):
+
+    for node in nodes:
+
+        residue = node.id
+
+        selection = ("residue, (resi %s) and (chain %s)" % (residue.number_string, residue.chain.id),) # pylint: disable=consider-using-f-string
+
+        area = freesasa.selectArea(selection, structure, result)['residue'] # pylint: disable=c-extension-no-member
+        if numpy.isnan(area):
+            raise ValueError(f"freesasa returned {area} for {residue}")
+
+        node.features[nodefeats.SASA] = area
+
+
+def add_sasa_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
+                           result: freesasa.Result, # pylint: disable=c-extension-no-member
+                           nodes: List[Node]):
+
+    for node in nodes:
+
+        atom = node.id
+
+        selection = ("atom, (name %s) and (resi %s) and (chain %s)" % \
+            (atom.name, atom.residue.number_string, atom.residue.chain.id),) # pylint: disable=consider-using-f-string
+
+        area = freesasa.selectArea(selection, structure, result)['atom'] # pylint: disable=c-extension-no-member
+        if numpy.isnan(area):
+            raise ValueError(f"freesasa returned {area} for {atom}")
+
+        node.features[nodefeats.SASA] = area
+
+
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
 
-    "calculates the buried surface area (BSA): the area of the protein, that only gets exposed in monomeric state"
+    """calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
+    BSA: the area of the protein, that only gets exposed in monomeric state"""
 
+    # BSA
     sasa_complete_structure = freesasa.Structure() # pylint: disable=c-extension-no-member
     sasa_chain_structures = {}
 
@@ -72,3 +111,15 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key] # pylint: disable=c-extension-no-member
 
         node.features[nodefeats.BSA] = area_monomer - area_multimer
+
+    # SASA
+    structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member
+    result = freesasa.calc(structure) # pylint: disable=c-extension-no-member
+
+    if isinstance(graph.nodes[0].id, Residue):
+        return add_sasa_for_residues(structure, result, graph.nodes)
+
+    if isinstance(graph.nodes[0].id, Atom):
+        return add_sasa_for_atoms(structure, result, graph.nodes)
+
+    raise TypeError(f"Unexpected node type: {type(graph.nodes[0].id)}")

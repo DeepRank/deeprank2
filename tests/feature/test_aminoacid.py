@@ -2,11 +2,11 @@ from pdb2sql import pdb2sql
 
 from deeprankcore.models.amino_acid import serine
 from deeprankcore.models.variant import SingleResidueVariant
-from deeprankcore.features.sasa import add_features
+from deeprankcore.features.surfacearea import add_features
 from deeprankcore.models.graph import build_residue_graph
 from deeprankcore.models.pdb import get_structure, get_surrounding_residues
 from deeprankcore.domain.features import nodefeats
-from deeprankcore.features.amino_acid import add_features # noqa
+from deeprankcore.features.aminoacid import add_features # noqa
 
 
 def test_add_features():

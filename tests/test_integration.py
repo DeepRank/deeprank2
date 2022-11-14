@@ -4,7 +4,7 @@ import os
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.query import ProteinProteinInterfaceResidueQuery
-from deeprankcore.features import amino_acid, atomic_contact, biopython, bsa, pssm, sasa
+from deeprankcore.features import aminoacid, conservation, contact, exposure, surfacearea
 from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
@@ -36,7 +36,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
     prefix = os.path.join(output_directory, "test-preprocess")
 
-    feature_modules = [amino_acid, atomic_contact, biopython, bsa, pssm, sasa]
+    feature_modules = [aminoacid, contact, exposure, surfacearea, conservation]
 
     try:
 
