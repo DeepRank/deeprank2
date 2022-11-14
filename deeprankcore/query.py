@@ -12,7 +12,7 @@ from deeprankcore.models.operations.pdb import (
     get_structure,
     add_hydrogens,
 )
-from deeprankcore.tools.pssm import parse_pssm
+from deeprankcore.models.operations.parsers.pssm import parse_pssm
 from deeprankcore.models.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.models.structure.variant import SingleResidueVariant
 

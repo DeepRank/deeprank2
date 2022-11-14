@@ -2,10 +2,10 @@ import os
 import logging
 from deeprankcore.models.structure.atom import Atom
 from deeprankcore.models.structure.residue import Residue
-from deeprankcore.domain.forcefield.parsers.top import TopParser
-from deeprankcore.domain.forcefield.parsers.patch import PatchParser, PatchActionType
-from deeprankcore.domain.forcefield.parsers.residue import ResidueClassParser
-from deeprankcore.domain.forcefield.parsers.vdwparam import VanderwaalsParam, ParamParser
+from deeprankcore.models.operations.parsers.top import TopParser
+from deeprankcore.models.operations.parsers.patch import PatchParser, PatchActionType
+from deeprankcore.models.operations.parsers.residue import ResidueClassParser
+from deeprankcore.models.operations.parsers.vdwparam import VanderwaalsParam, ParamParser
 
 
 _log = logging.getLogger(__name__)

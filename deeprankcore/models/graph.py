@@ -227,6 +227,7 @@ class Graph:
 
         return hdf5_path
 
+
 def build_atomic_graph( # pylint: disable=too-many-locals
     atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
 ) -> Graph:
