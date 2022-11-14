@@ -1,6 +1,7 @@
 import os
 import logging
-from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.models.structure.atom import Atom
+from deeprankcore.models.structure.residue import Residue
 from deeprankcore.domain.forcefield.parsers.top import TopParser
 from deeprankcore.domain.forcefield.parsers.patch import PatchParser, PatchActionType
 from deeprankcore.domain.forcefield.parsers.residue import ResidueClassParser

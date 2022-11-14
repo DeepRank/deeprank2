@@ -3,7 +3,8 @@ from typing import Callable, Union, List
 import logging
 import numpy
 import h5py
-from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.models.structure.atom import Atom
+from deeprankcore.models.structure.residue import Residue
 from deeprankcore.models.contact import Contact, AtomicContact, ResidueContact
 from deeprankcore.models.grid import MapMethod, Grid, GridSettings
 from deeprankcore.domain import (nodefeatures as Nfeat, 
@@ -45,18 +46,12 @@ class Edge:
         return False
 
 
-class NodeType(Enum):
-    ATOM = 1
-    RESIDUE = 2
-
-
 class Node:
     def __init__(self, id_: Union[Atom, Residue]):
         if isinstance(id_, Atom):
-            self._type = NodeType.ATOM
-
+            self._type = "atom"
         elif isinstance(id_, Residue):
-            self._type = NodeType.RESIDUE
+            self._type = "residue"
         else:
             raise TypeError(type(id_))
 

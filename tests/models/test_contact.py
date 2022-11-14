@@ -1,4 +1,4 @@
-from deeprankcore.models.pair import Pair
+from deeprankcore.models.contact import Pair
 
 
 def test_order_independency():

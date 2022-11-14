@@ -1,8 +1,9 @@
 from typing import Optional
 import numpy
-from deeprankcore.models.variant import SingleResidueVariant
-from deeprankcore.models.amino_acid import amino_acids
-from deeprankcore.models.structure import Residue, Atom
+from deeprankcore.models.structure.variant import SingleResidueVariant
+from deeprankcore.domain.aminoacids import amino_acids
+from deeprankcore.models.structure.residue import Residue
+from deeprankcore.models.structure.atom import Atom
 from deeprankcore.models.graph import Graph
 from deeprankcore.domain import nodefeatures as Nfeat
 

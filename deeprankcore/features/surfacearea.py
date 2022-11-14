@@ -3,7 +3,8 @@ import freesasa
 import numpy
 from typing import List
 from deeprankcore.models.graph import Node, Graph
-from deeprankcore.models.structure import Residue, Atom
+from deeprankcore.models.structure.residue import Residue
+from deeprankcore.models.structure.atom import Atom
 from deeprankcore.domain import nodefeatures
 
 freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member

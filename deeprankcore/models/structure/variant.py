@@ -1,6 +1,5 @@
-
-from deeprankcore.models.amino_acid import AminoAcid
-from deeprankcore.models.structure import Residue
+from deeprankcore.models.structure.residue import Residue
+from deeprankcore.models.structure.aminoacid import AminoAcid
 
 
 class SingleResidueVariant:

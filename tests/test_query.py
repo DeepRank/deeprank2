@@ -2,7 +2,7 @@ from tempfile import mkstemp
 import numpy
 import os
 import h5py
-from deeprankcore.models.amino_acid import (
+from deeprankcore.domain.aminoacids import (
     alanine,
     arginine,
     asparagine,

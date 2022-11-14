@@ -6,9 +6,7 @@ from functools import partial
 from multiprocessing import Pool
 import logging
 import os
-
 import importlib
-
 from deeprankcore.query import Query
 
 

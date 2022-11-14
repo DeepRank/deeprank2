@@ -1,6 +1,6 @@
 import numpy
 
-from deeprankcore.models.amino_acid import amino_acids
+from deeprankcore.domain.aminoacids import amino_acids
 
 
 def test_all_different_onehot():

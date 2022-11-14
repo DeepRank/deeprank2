@@ -1,14 +1,14 @@
 import logging
 from typing import List
 import subprocess
-
 from scipy.spatial import distance_matrix
 import numpy
 from pdb2sql import interface as get_interface
-
-from deeprankcore.models.structure import Atom, Residue, Chain, Structure, AtomicElement
-from deeprankcore.models.amino_acid import amino_acids
-from deeprankcore.models.pair import Pair
+from deeprankcore.models.structure.pdb_structure import Chain, Structure
+from deeprankcore.models.structure.atom import Atom, AtomicElement
+from deeprankcore.models.structure.residue import Residue
+from deeprankcore.models.contact import Pair
+from deeprankcore.domain.aminoacids import amino_acids
 
 _log = logging.getLogger(__name__)
 

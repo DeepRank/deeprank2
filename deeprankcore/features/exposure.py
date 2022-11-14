@@ -4,7 +4,8 @@ from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import get_surface, residue_depth
 from Bio.PDB.HSExposure import HSExposureCA
 from deeprankcore.domain import nodefeatures
-from deeprankcore.models.structure import Atom, Residue
+from deeprankcore.models.structure.atom import Atom
+from deeprankcore.models.structure.residue import Residue
 from deeprankcore.models.graph import Graph
 
 

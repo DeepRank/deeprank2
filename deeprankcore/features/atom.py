@@ -1,4 +1,4 @@
-from deeprankcore.models.structure import Atom
+from deeprankcore.models.structure.atom import Atom
 from deeprankcore.models.graph import Graph
 from deeprankcore.domain.forcefield.parsers import atomic_forcefield
 from deeprankcore.domain import nodefeatures

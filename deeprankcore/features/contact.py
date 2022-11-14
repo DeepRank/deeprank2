@@ -3,7 +3,7 @@ import logging
 import warnings
 import numpy as np
 from scipy.spatial import distance_matrix
-from deeprankcore.models.structure import Atom
+from deeprankcore.models.structure.atom import Atom
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.contact import ResidueContact, AtomicContact
 from deeprankcore.domain import edgefeatures as Efeat
