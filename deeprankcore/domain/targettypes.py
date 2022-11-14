@@ -1,4 +1,4 @@
-# List of default targets in HDF5 files
+# list of default targets and tasks in hdf5 files
 
 ## main group
 VALUES = "target_values"

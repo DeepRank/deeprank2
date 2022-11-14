@@ -17,9 +17,9 @@ from deeprankcore.models.metrics import (
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
-from deeprankcore.domain import metafeatures
-from deeprankcore.domain import nodefeatures as Nfeat
-from deeprankcore.domain import edgefeatures, targettypes as targets
+from deeprankcore.domain import (nodefeatures as Nfeat,
+                                edgefeatures as Efeat,
+                                targettypes as targets)
 
 
 _log = logging.getLogger(__name__)
@@ -93,9 +93,9 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                  (metafeatures.INDEX, data.edge_index),
+                                  (Efeat.INDEX, data.edge_index),
                                   ("edge_attr", data.edge_attr),
-                                  (metafeatures.POSITION, data.pos),
+                                  (Nfeat.POSITION, data.pos),
                                   ("cluster0",data.cluster0),
                                   ("cluster1", data.cluster1)):
 
@@ -129,7 +129,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_features,
-            [edgefeatures.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
             [OutputExporter(self.work_directory)],
@@ -144,7 +144,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_features,
-            [edgefeatures.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
             [OutputExporter(self.work_directory)],
@@ -161,7 +161,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/variants.hdf5",
             GINet,
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
-            [edgefeatures.DISTANCE],
+            [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
             [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -178,7 +178,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             FoutNet,
             default_features,
-            [edgefeatures.DISTANCE],
+            [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
             [],
@@ -193,7 +193,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             sGAT,
             default_features,
-            [edgefeatures.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
             [],
@@ -208,7 +208,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
             default_features,
-            [edgefeatures.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             "BA",
             [OutputExporter(self.work_directory)],
@@ -224,7 +224,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 sGAT,
                 default_features,
-                [edgefeatures.DISTANCE],
+                [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -240,7 +240,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/variants.hdf5",
                 GINet,
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
-                [edgefeatures.DISTANCE],
+                [Efeat.DISTANCE],
                 targets.CLASSIF,
                 targets.BINARY,
                 [ScatterPlotExporter(self.work_directory)],
@@ -406,7 +406,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
                 default_features,
-                [edgefeatures.DISTANCE],
+                [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
                 [OutputExporter(self.work_directory)],

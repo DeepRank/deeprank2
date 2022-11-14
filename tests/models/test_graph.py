@@ -8,7 +8,8 @@ from deeprankcore.models.grid import GridSettings, MapMethod
 from deeprankcore.models.graph import Graph, Edge, Node
 from deeprankcore.models.contact import ResidueContact
 from deeprankcore.models.pdb import get_structure
-from deeprankcore.domain import metafeatures
+from deeprankcore.domain import (nodefeatures as Nfeat,
+                                edgefeatures as Efeat)
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals
@@ -66,18 +67,18 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             entry_group = f5[entry_id]
 
             # check for graph values
-            assert metafeatures.NODE in entry_group
-            node_features_group = entry_group[metafeatures.NODE]
+            assert Nfeat.NODE in entry_group
+            node_features_group = entry_group[Nfeat.NODE]
             assert node_feature_name in node_features_group
             assert len(numpy.nonzero(node_features_group[node_feature_name][()])) > 0
 
-            assert metafeatures.EDGE in entry_group
-            edge_features_group = entry_group[metafeatures.EDGE]
+            assert Efeat.EDGE in entry_group
+            edge_features_group = entry_group[Efeat.EDGE]
             assert edge_feature_name in edge_features_group
             assert len(numpy.nonzero(edge_features_group[edge_feature_name][()])) > 0
 
-            assert metafeatures.INDEX in edge_features_group
-            assert len(numpy.nonzero(edge_features_group[metafeatures.INDEX][()])) > 0
+            assert Efeat.INDEX in edge_features_group
+            assert len(numpy.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
 
             # check for grid-mapped values
             assert "mapped_features" in entry_group

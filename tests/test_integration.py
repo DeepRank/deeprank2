@@ -11,9 +11,9 @@ from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter
 from deeprankcore.tools.target import compute_targets
-from deeprankcore.domain import nodefeatures as Nfeat
-from deeprankcore.domain import edgefeatures
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.domain import (nodefeatures as Nfeat,
+                                edgefeatures as Efeat,
+                                targettypes as targets)
 import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals
@@ -71,7 +71,7 @@ def test_integration(): # pylint: disable=too-many-locals
         n_train = len(output_paths) - (n_val + n_test)
 
         node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-        edge_features = [edgefeatures.DISTANCE]
+        edge_features = [Efeat.DISTANCE]
 
         dataset_train = HDF5DataSet(
             hdf5_path = output_paths[:n_train],

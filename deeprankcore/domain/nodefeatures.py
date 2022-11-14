@@ -1,3 +1,11 @@
+## main group
+NODE = "node_features"
+
+## metafeatures
+NAME = "_name"
+CHAINID = "_chain_id" # str; former FEATURENAME_CHAIN (was not assigned, but supposedly numeric, now a str)
+POSITION = "_position" # list[3xfloat]; former FEATURENAME_POSITION
+
 ## residue core features
 RESTYPE = "res_type" # AminoAcid object; former FEATURENAME_AMINOACID
 RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 

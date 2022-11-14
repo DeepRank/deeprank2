@@ -6,8 +6,9 @@ import h5py
 from deeprankcore.models.structure import Atom, Residue
 from deeprankcore.models.contact import Contact, AtomicContact, ResidueContact
 from deeprankcore.models.grid import MapMethod, Grid, GridSettings
-from deeprankcore.domain import metafeatures
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.domain import (nodefeatures as Nfeat, 
+                                edgefeatures as Efeat,
+                                targettypes as targets)
 from scipy.spatial import distance_matrix
 
 
@@ -157,14 +158,14 @@ class Graph:
 
             # create groups to hold data
             graph_group = hdf5_file.require_group(self.id)
-            node_features_group = graph_group.create_group(metafeatures.NODE)
-            edge_feature_group = graph_group.create_group(metafeatures.EDGE)
+            node_features_group = graph_group.create_group(Nfeat.NODE)
+            edge_feature_group = graph_group.create_group(Efeat.EDGE)
 
             # store node names and chain_ids
             node_names = numpy.array([str(key) for key in self._nodes]).astype("S")
-            node_features_group.create_dataset(metafeatures.NAME, data=node_names)
+            node_features_group.create_dataset(Nfeat.NAME, data=node_names)
             chain_ids = numpy.array([str(key).split()[1] for key in self._nodes]).astype("S")
-            node_features_group.create_dataset(metafeatures.CHAINID, data=chain_ids)
+            node_features_group.create_dataset(Nfeat.CHAINID, data=chain_ids)
 
             # store node features
             node_key_list = list(self._nodes.keys())
@@ -205,9 +206,9 @@ class Graph:
 
             # store edge names and indices
             edge_feature_group.create_dataset(
-                metafeatures.NAME, data=numpy.array(edge_names).astype("S")
+                Efeat.NAME, data=numpy.array(edge_names).astype("S")
             )
-            edge_feature_group.create_dataset(metafeatures.INDEX, data=edge_indices)
+            edge_feature_group.create_dataset(Efeat.INDEX, data=edge_indices)
 
             # store edge features
             for edge_feature_name in edge_feature_names:
@@ -256,8 +257,8 @@ def build_atomic_graph( # pylint: disable=too-many-locals
 
             node1 = Node(atom1)
             node2 = Node(atom2)
-            node1.features[metafeatures.POSITION] = atom1.position
-            node2.features[metafeatures.POSITION] = atom2.position
+            node1.features[Nfeat.POSITION] = atom1.position
+            node2.features[Nfeat.POSITION] = atom2.position
 
             graph.add_node(node1)
             graph.add_node(node2)
@@ -305,10 +306,10 @@ def build_residue_graph( # pylint: disable=too-many-locals
                 node1 = Node(residue1)
                 node2 = Node(residue2)
 
-                node1.features[metafeatures.POSITION] = numpy.mean(
+                node1.features[Nfeat.POSITION] = numpy.mean(
                     [atom.position for atom in residue1.atoms], axis=0
                 )
-                node2.features[metafeatures.POSITION] = numpy.mean(
+                node2.features[Nfeat.POSITION] = numpy.mean(
                     [atom.position for atom in residue2.atoms], axis=0
                 )
 

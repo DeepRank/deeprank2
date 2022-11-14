@@ -18,12 +18,9 @@ from deeprankcore.query import (
     ProteinProteinInterfaceAtomicQuery,
     ProteinProteinInterfaceResidueQuery
 )
-
-from deeprankcore.domain import metafeatures
-from deeprankcore.domain import nodefeatures as Nfeat
-from deeprankcore.domain import edgefeatures as Efeat
-from deeprankcore.domain import targettypes as targets
-
+from deeprankcore.domain import (nodefeatures as Nfeat,
+                                edgefeatures as Efeat,
+                                targettypes as targets)
 from deeprankcore.features import aminoacid, conservation, contact, surfacearea
 from deeprankcore.DataSet import HDF5DataSet
 
@@ -31,7 +28,7 @@ from deeprankcore.DataSet import HDF5DataSet
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
     assert len(g.nodes) > 0, "no nodes"
-    assert metafeatures.POSITION in g.nodes[0].features
+    assert Nfeat.POSITION in g.nodes[0].features
 
     assert len(g.edges) > 0, "no edges"
     assert Efeat.DISTANCE in g.edges[0].features
@@ -52,28 +49,28 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
             entry_group = f5[list(f5.keys())[0]]
             for feature_name in node_feature_names:
                 assert (
-                    entry_group[f"{metafeatures.NODE}/{feature_name}"][()].size > 0
+                    entry_group[f"{Nfeat.NODE}/{feature_name}"][()].size > 0
                 ), f"no {feature_name} feature"
 
                 assert (
                     len(
                         numpy.nonzero(
-                            entry_group[f"{metafeatures.NODE}/{feature_name}"][()]
+                            entry_group[f"{Nfeat.NODE}/{feature_name}"][()]
                         )
                     )
                     > 0
                 ), f"{feature_name}: all zero"
 
-            assert entry_group[f"{metafeatures.EDGE}/{metafeatures.INDEX}"][()].shape[1] == 2, "wrong edge index shape"
-            assert entry_group[f"{metafeatures.EDGE}/{metafeatures.INDEX}"].shape[0] > 0, "no edge indices"
+            assert entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"][()].shape[1] == 2, "wrong edge index shape"
+            assert entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0] > 0, "no edge indices"
 
             for feature_name in edge_feature_names:
                 assert (
-                    entry_group[f"{metafeatures.EDGE}/{feature_name}"][()].shape[0]
-                    == entry_group[f"{metafeatures.EDGE}/{metafeatures.INDEX}"].shape[0]
+                    entry_group[f"{Efeat.EDGE}/{feature_name}"][()].shape[0]
+                    == entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
                 ), f"not enough edge {feature_name} feature values"
 
-            count_edges_hdf5 = entry_group[f"{metafeatures.EDGE}/{metafeatures.INDEX}"].shape[0]
+            count_edges_hdf5 = entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
 
         dataset = HDF5DataSet(hdf5_path=tmp_path)
         torch_data_entry = dataset[0]
@@ -109,7 +106,7 @@ def test_interface_graph_residue():
     _check_graph_makes_sense(
         g,
         [
-            metafeatures.POSITION,
+            Nfeat.POSITION,
             Nfeat.POLARITY,
             Nfeat.PSSM,
             Nfeat.INFOCONTENT,
@@ -137,7 +134,7 @@ def test_interface_graph_atomic():
     _check_graph_makes_sense(
         g,
         [
-            metafeatures.POSITION,
+            Nfeat.POSITION,
             Nfeat.PSSM,
             Nfeat.BSA,
             Nfeat.INFOCONTENT,
@@ -167,7 +164,7 @@ def test_variant_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            metafeatures.POSITION,
+            Nfeat.POSITION,
             Nfeat.SASA,
             Nfeat.RESTYPE,
             Nfeat.VARIANTRES,
@@ -207,7 +204,7 @@ def test_variant_graph_1A0Z():
     _check_graph_makes_sense(
         g,
         [
-            metafeatures.POSITION,
+            Nfeat.POSITION,
             Nfeat.RESTYPE,
             Nfeat.VARIANTRES,
             Nfeat.SASA,
@@ -245,7 +242,7 @@ def test_variant_graph_9API():
     _check_graph_makes_sense(
         g,
         [
-            metafeatures.POSITION,
+            Nfeat.POSITION,
             Nfeat.RESTYPE,
             Nfeat.VARIANTRES,
             Nfeat.SASA,
@@ -276,7 +273,7 @@ def test_variant_residue_graph_101M():
     _check_graph_makes_sense(
         g,
         [
-            metafeatures.POSITION,
+            Nfeat.POSITION,
             Nfeat.SASA,
             Nfeat.PSSM,
             Nfeat.RESTYPE,

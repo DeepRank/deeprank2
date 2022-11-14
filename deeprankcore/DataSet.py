@@ -9,8 +9,9 @@ from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
-from deeprankcore.domain import metafeatures
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.domain import (nodefeatures as Nfeat,
+                                edgefeatures as Efeat,
+                                targettypes as targets)
 from typing import Callable, List, Union
 
 
@@ -229,7 +230,7 @@ class HDF5DataSet(Dataset):
         """Checks if the required node features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[f"{mol_key}/{metafeatures.NODE}/"].keys())
+        self.available_node_feature = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
         self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
@@ -248,7 +249,7 @@ class HDF5DataSet(Dataset):
         """Checks if the required edge features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[f"{mol_key}/{metafeatures.EDGE}/"].keys())
+        self.available_edge_feature = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
         self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
         f.close()
 
@@ -283,7 +284,7 @@ class HDF5DataSet(Dataset):
             node_data = ()
             for feat in self.node_feature:
                 if feat[0] != '_':  # ignore metafeatures
-                    vals = grp[f"{metafeatures.NODE}/{feat}"][()]
+                    vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
 
@@ -292,8 +293,8 @@ class HDF5DataSet(Dataset):
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
             # edge index, we have to have all the edges i.e : (i,j) and (j,i)
-            if metafeatures.INDEX in grp[metafeatures.EDGE]:
-                ind = grp[f"{metafeatures.EDGE}/{metafeatures.INDEX}"][()]
+            if Efeat.INDEX in grp[Efeat.EDGE]:
+                ind = grp[f"{Efeat.EDGE}/{Efeat.INDEX}"][()]
                 if ind.ndim == 2:
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
@@ -303,12 +304,12 @@ class HDF5DataSet(Dataset):
 
             # edge feature (same issue as above)
             if self.edge_feature is not None and len(self.edge_feature) > 0 and \
-               metafeatures.EDGE in grp:
+               Efeat.EDGE in grp:
 
                 edge_data = ()
                 for feat in self.edge_feature:
                     if feat[0] != '_':   # ignore metafeatures
-                        vals = grp[f"{metafeatures.EDGE}/{feat}"][()]
+                        vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
                         edge_data += (vals,)
@@ -343,7 +344,7 @@ class HDF5DataSet(Dataset):
                                      "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp[f"{metafeatures.NODE}/{metafeatures.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
 
             # cluster
             cluster0 = None
