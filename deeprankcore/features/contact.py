@@ -7,10 +7,13 @@ from deeprankcore.models.structure import Atom
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.contact import ResidueContact, AtomicContact
 from deeprankcore.domain import edgefeatures as Efeat
-from deeprankcore.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0, MAX_COVALENT_DISTANCE
+from deeprankcore.domain.forcefield.parsers import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 
+EPSILON0 = 1.0
+COULOMB_CONSTANT = 332.0636
+MAX_COVALENT_DISTANCE = 2.1
 
 def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 

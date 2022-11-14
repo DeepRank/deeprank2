@@ -1,9 +1,19 @@
 import re
 import logging
-from deeprankcore.models.forcefield.top import TopRowObject
+from typing import Any, Dict
+
 
 logging.getLogger(__name__)
 
+class TopRowObject:
+    def __init__(self, residue_name: str,
+                 atom_name: str, kwargs: Dict[str, Any]):
+        self.residue_name = residue_name
+        self.atom_name = atom_name
+        self.kwargs = kwargs
+
+    def __getitem__(self, key):
+        return self.kwargs[key]
 
 class TopParser:
     _VAR_PATTERN = re.compile(r"([^\s]+)\s*=\s*([^\s\(\)]+|\(.*\))")

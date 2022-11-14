@@ -1,8 +1,6 @@
 import numpy
 from enum import Enum
 
-
-
 class Polarity(Enum):
     "a value to express a residue's polarity"
 

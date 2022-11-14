@@ -1,5 +1,4 @@
 from typing import TextIO
-
 from deeprankcore.models.structure import Residue, Chain
 from deeprankcore.models.pssm import PssmRow, PssmTable
 from deeprankcore.models.amino_acid import amino_acids

@@ -1,7 +1,9 @@
 from typing import Optional, Dict, List
+from deeprankcore.models.amino_acid import AminoAcid, amino_acids
 
-from deeprankcore.models.amino_acid import AminoAcid
-
+amino_acids_by_letter = {
+    amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids
+}
 
 class PssmRow:
     "holds data for one position-specific scoring matrix row"
