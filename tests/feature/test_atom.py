@@ -5,7 +5,7 @@ from deeprankcore.features.atom import add_features
 from deeprankcore.models.graph import build_atomic_graph
 from deeprankcore.models.structure import Chain, Residue
 from deeprankcore.models.pdb import get_structure, get_surrounding_residues
-from deeprankcore.domain.features import nodefeats
+from deeprankcore.domain import nodefeatures
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
@@ -38,5 +38,5 @@ def test_add_features(): # copied first part, up to add_features, from test_sasa
     graph = build_atomic_graph(atoms, "101M-108-atom", 4.5)
     add_features(pdb_path, graph)
 
-    assert not any(numpy.isnan(node.features[nodefeats.ATOMCHARGE]) for node in graph.nodes)
-    assert not any(numpy.isnan(node.features[nodefeats.PDBOCCUPANCY]) for node in graph.nodes)
+    assert not any(numpy.isnan(node.features[nodefeatures.ATOMCHARGE]) for node in graph.nodes)
+    assert not any(numpy.isnan(node.features[nodefeatures.PDBOCCUPANCY]) for node in graph.nodes)

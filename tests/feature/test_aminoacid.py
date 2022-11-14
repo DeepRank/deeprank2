@@ -5,7 +5,7 @@ from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.features.surfacearea import add_features
 from deeprankcore.models.graph import build_residue_graph
 from deeprankcore.models.pdb import get_structure, get_surrounding_residues
-from deeprankcore.domain.features import nodefeats
+from deeprankcore.domain import nodefeatures
 from deeprankcore.features.aminoacid import add_features # noqa
 
 
@@ -30,5 +30,5 @@ def test_add_features():
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
-            assert node.features[nodefeats.DIFFSIZE] > 0
-            assert node.features[nodefeats.DIFFHBDONORS] > 0
+            assert node.features[nodefeatures.DIFFSIZE] > 0
+            assert node.features[nodefeatures.DIFFHBDONORS] > 0

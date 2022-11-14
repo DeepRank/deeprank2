@@ -4,7 +4,7 @@ from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.models.amino_acid import amino_acids
 from deeprankcore.models.structure import Residue, Atom
 from deeprankcore.models.graph import Graph
-from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain import nodefeatures as Nfeat
 
 profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.one_letter_code)
 

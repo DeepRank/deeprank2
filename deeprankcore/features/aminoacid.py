@@ -4,7 +4,7 @@ import numpy
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.models.structure import Atom, Residue
-from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain import nodefeatures as Nfeat
 
 def add_features( # pylint: disable=unused-argument
     pdb_path: str, graph: Graph,

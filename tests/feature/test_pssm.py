@@ -6,7 +6,7 @@ from deeprankcore.models.variant import SingleResidueVariant
 from deeprankcore.features.conservation import add_features
 from deeprankcore.models.graph import build_atomic_graph
 from deeprankcore.models.pdb import get_structure, get_surrounding_residues
-from deeprankcore.domain.features import nodefeats as Nfeat
+from deeprankcore.domain import nodefeatures as Nfeat
 
 
 

@@ -10,7 +10,7 @@ from deeprankcore.models.pdb import get_structure
 from deeprankcore.features.contact import add_features
 from deeprankcore.models.amino_acid import alanine
 from deeprankcore.models.variant import SingleResidueVariant
-from deeprankcore.domain.features import edgefeats as Efeat
+from deeprankcore.domain import edgefeatures as Efeat
 
 
 

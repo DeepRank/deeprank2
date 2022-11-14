@@ -6,7 +6,7 @@ from scipy.spatial import distance_matrix
 from deeprankcore.models.structure import Atom
 from deeprankcore.models.graph import Graph
 from deeprankcore.models.contact import ResidueContact, AtomicContact
-from deeprankcore.domain.features import edgefeats as Efeat
+from deeprankcore.domain import edgefeatures as Efeat
 from deeprankcore.domain.forcefield import atomic_forcefield, COULOMB_CONSTANT, EPSILON0, MAX_COVALENT_DISTANCE
 
 _log = logging.getLogger(__name__)
