@@ -68,7 +68,6 @@ class Node:
         for feature_data in self.features.values():
             if np.any(np.isnan(feature_data)):
                 return True
-
         return False
 
     def add_feature(

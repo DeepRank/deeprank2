@@ -5,7 +5,7 @@ from typing import List
 from deeprankcore.operations.graph import Node, Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
-from deeprankcore.domain import nodefeatures
+from deeprankcore.domain import nodefeatures as Nfeat
 
 freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member
 logging.getLogger(__name__)
@@ -25,7 +25,7 @@ def add_sasa_for_residues(structure: freesasa.Structure, # pylint: disable=c-ext
         if np.isnan(area):
             raise ValueError(f"freesasa returned {area} for {residue}")
 
-        node.features[nodefeatures.SASA] = area
+        node.features[Nfeat.SASA] = area
 
 
 def add_sasa_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
@@ -43,7 +43,7 @@ def add_sasa_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extens
         if np.isnan(area):
             raise ValueError(f"freesasa returned {area} for {atom}")
 
-        node.features[nodefeatures.SASA] = area
+        node.features[Nfeat.SASA] = area
 
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
@@ -111,7 +111,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             sasa_chain_results[chain_id])[area_key] # pylint: disable=c-extension-no-member
         area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key] # pylint: disable=c-extension-no-member
 
-        node.features[nodefeatures.BSA] = area_monomer - area_multimer
+        node.features[Nfeat.BSA] = area_monomer - area_multimer
 
     # SASA
     structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member

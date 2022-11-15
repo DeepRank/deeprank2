@@ -7,7 +7,6 @@ from pdb2sql import StructureSimilarity
 from deeprankcore.domain import targettypes as targets
 
 
-
 def add_target(graph_path, target_name, target_list, sep=" "):
     """Add a target to all the graphs in hdf5 files
 
@@ -80,6 +79,7 @@ def add_target(graph_path, target_name, target_list, sep=" "):
 
         except BaseException:
             print(f"no graph for {hdf5}")
+
 
 def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
 

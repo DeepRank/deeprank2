@@ -80,5 +80,4 @@ class ResidueClassParser:
     def _parse_amino_acids(string: str):
         if string.strip() == "all":
             return string.strip()
-
         return [name.strip() for name in string.split(",")]
