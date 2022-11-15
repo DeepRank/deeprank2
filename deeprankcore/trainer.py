@@ -414,7 +414,7 @@ class Trainer():
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                self.num_edge_features).to(
+                dataset.get(0).num_edge_features).to(
                 self.device)
 
         # classification mode
@@ -425,7 +425,7 @@ class Trainer():
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                self.num_edge_features).to(
+                dataset.get(0).num_edge_features).to(
                 self.device)
 
         # check for compatibility

@@ -97,10 +97,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     trainer.save_model("test.pth.tar")
 
     Trainer(
+        model_class,
         dataset_train,
         dataset_val,
         dataset_test,
-        model_class,
         pretrained_model="test.pth.tar")
 
 class TestTrainer(unittest.TestCase):
