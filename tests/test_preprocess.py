@@ -8,7 +8,7 @@ import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.query import SingleResidueVariantResidueQuery
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
-from tests.utils import PATH_TEST
+from tests._utils import PATH_TEST
 
 
 def preprocess_tester(feature_modules: List):

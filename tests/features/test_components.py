@@ -7,7 +7,7 @@ from deeprankcore.utils.buildgraph import get_structure, get_surrounding_residue
 from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.variant import SingleResidueVariant
-from deeprankcore.features import components, surfacearea
+from deeprankcore.features.components import add_features
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
@@ -38,7 +38,7 @@ def test_atom_features(): # copied first part, up to add_features, from test_sas
     assert len(atoms) > 0
 
     graph = build_atomic_graph(atoms, "101M-108-atom", 4.5)
-    components.add_features(pdb_path, graph)
+    add_features(pdb_path, graph)
 
     assert not any(np.isnan(node.features[Nfeat.ATOMCHARGE]) for node in graph.nodes)
     assert not any(np.isnan(node.features[Nfeat.PDBOCCUPANCY]) for node in graph.nodes)
@@ -61,7 +61,7 @@ def test_aminoacid_features():
 
     graph = build_residue_graph(residues, "101m-25", 4.5)
 
-    surfacearea.add_features(pdb_path, graph, variant)
+    add_features(pdb_path, graph, variant)
 
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER

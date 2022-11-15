@@ -102,7 +102,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             if data_tensor is not None:
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
-    trainer.train(nepoch=10, validate=True)
+    trainer.train(nepoch=3, validate=True)
 
     trainer.save_model("test.pth.tar")
 

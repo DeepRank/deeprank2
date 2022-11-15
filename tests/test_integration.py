@@ -5,7 +5,6 @@ import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.features import components, conservation, exposure, contact, surfacearea
-from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
@@ -15,6 +14,7 @@ from deeprankcore.domain import (nodefeatures as Nfeat,
                                 edgefeatures as Efeat,
                                 targettypes as targets)
 import tempfile
+from tests._utils import PATH_TEST
 
 def test_integration(): # pylint: disable=too-many-locals
     """
