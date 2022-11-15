@@ -110,7 +110,7 @@ def add_bsa(graph: Graph):
         node.features[Nfeat.BSA] = area_monomer - area_multimer
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
 
     """calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
     BSA: the area of the protein, that only gets exposed in monomeric state"""
