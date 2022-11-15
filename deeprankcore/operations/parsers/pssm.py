@@ -1,7 +1,7 @@
 from typing import TextIO
 from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.operations.pssm import PssmRow, PssmTable
+from deeprankcore.operations.pssmdata import PssmRow, PssmTable
 from deeprankcore.domain.aminoacidlist import amino_acids
 
 amino_acids_by_letter = {
