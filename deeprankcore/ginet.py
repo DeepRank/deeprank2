@@ -46,7 +46,6 @@ class GINetConvLayer(torch.nn.Module):
         xcol = self.fc(x[col])
         xrow = self.fc(x[row])
 
-        print('DEBUG EA:', np.array(edge_attr).shape)
         ed = self.fc_edge_attr(edge_attr)
         # create edge feature by concatenating node feature
         alpha = torch.cat([xrow, xcol, ed], dim=1)
