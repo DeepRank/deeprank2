@@ -410,10 +410,10 @@ class Trainer():
         if self.task == targets.REGRESS:
 
             self.output_shape = 1
-            print('DEBUG RR11:', dataset.get(0).num_features)
-            print('DEBUG RR22:', self.num_features)
-            print('DEBUG QQ11:', dataset.get(0).num_edge_features)
-            print('DEBUG QQ22:', self.num_edge_features)
+            print('DEBUG NG:', dataset.get(0).num_features)
+            print('DEBUG NS:', self.num_features)
+            print('DEBUG EG:', dataset.get(0).num_edge_features)
+            print('DEBUG ES:', self.num_edge_features)
             
 
             self.model = Net(
@@ -609,7 +609,7 @@ class Trainer():
         for _, data_batch in enumerate(loader):
 
             data_batch = data_batch.to(self.device)
-            print('DEBUG ', _, data_batch)
+            print('DEBUG DB:', data_batch)
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
 
@@ -836,7 +836,7 @@ class Trainer():
         """
         for fname, mol in tqdm(dataset.index_complexes):
 
-            print('DEBUG T:', fname, mol)
+            # print('DEBUG T:', fname, mol)
             data = load_one_graph(fname, mol, self.node_features, self.edge_features)
 
             if data is None:

@@ -65,8 +65,8 @@ def load_one_graph(fname, mol,
             edge_data = ()
             if edgefeatures == "all":
                 edgefeatures = list(grp[f"{groups.EDGE}"])
-            print('DEBUG N:', fname, mol)
-            print('DEBUG X:', edgefeatures)
+            # print('DEBUG N:', fname, mol)
+            # print('DEBUG X:', edgefeatures)
             for feat in edgefeatures:
                 if feat[0] != '_':   # ignore metafeatures
                     vals = grp[f"{groups.EDGE}/{feat}"][()]
