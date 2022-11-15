@@ -4,7 +4,7 @@ from deeprankcore.features.atom import add_features
 from deeprankcore.operations.graph import build_atomic_graph
 from deeprankcore.molstruct.pdb_structure import Chain
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.operations.pdb import get_structure, get_surrounding_residues
+from deeprankcore.operations.buildgraph import get_structure, get_surrounding_residues
 from deeprankcore.domain import nodefeatures
 
 

@@ -6,7 +6,7 @@ from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.features.surfacearea import add_features
 from deeprankcore.operations.graph import build_residue_graph, build_atomic_graph
-from deeprankcore.operations.pdb import (
+from deeprankcore.operations.buildgraph import (
     get_structure,
     get_residue_contact_pairs,
     get_surrounding_residues)

@@ -7,7 +7,7 @@ import numpy as np
 from deeprankcore.operations.grid import GridSettings, MapMethod
 from deeprankcore.operations.graph import Graph, Edge, Node
 from deeprankcore.molstruct.contact import ResidueContact
-from deeprankcore.operations.pdb import get_structure
+from deeprankcore.operations.buildgraph import get_structure
 from deeprankcore.domain import (nodefeatures as Nfeat,
                                 edgefeatures as Efeat)
 

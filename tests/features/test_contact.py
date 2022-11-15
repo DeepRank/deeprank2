@@ -5,7 +5,7 @@ from deeprankcore.molstruct.pdb_structure import Chain
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.contact import AtomicContact, ResidueContact
 from deeprankcore.operations.graph import Edge, Graph
-from deeprankcore.operations.pdb import get_structure
+from deeprankcore.operations.buildgraph import get_structure
 from deeprankcore.features.contact import add_features
 from deeprankcore.domain.aminoacids import alanine
 from deeprankcore.molstruct.variant import SingleResidueVariant

@@ -5,7 +5,7 @@ from deeprankcore.operations.parsers.pssm import parse_pssm
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.features.conservation import add_features
 from deeprankcore.operations.graph import build_atomic_graph
-from deeprankcore.operations.pdb import get_structure, get_surrounding_residues
+from deeprankcore.operations.buildgraph import get_structure, get_surrounding_residues
 from deeprankcore.domain import nodefeatures as Nfeat
 
 

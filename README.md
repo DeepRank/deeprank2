@@ -142,7 +142,7 @@ output_paths = preprocess(feature_modules, queries, "<output_folder>/<prefix_for
 
 ```
 
-The user is free to implement his/her own query class. Each implementation requires the `build_graph` method to be present.
+The user is free to implement his/her own query class. Each implementation requires the `build` method to be present.
 
 
 ### Data exploration

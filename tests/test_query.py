@@ -101,7 +101,7 @@ def test_interface_graph_residue():
         },
     )
 
-    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -129,7 +129,7 @@ def test_interface_graph_atomic():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -159,7 +159,7 @@ def test_variant_graph_101M():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -199,7 +199,7 @@ def test_variant_graph_1A0Z():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -237,7 +237,7 @@ def test_variant_graph_9API():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -268,7 +268,7 @@ def test_variant_residue_graph_101M():
         targets={targets.BINARY: 0},
     )
 
-    g = query.build_graph([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, aminoacid, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -289,6 +289,6 @@ def test_res_ppi():
     query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/3MRC/3MRC.pdb",
                                                 "M", "P")
 
-    g = query.build_graph([surfacearea, contact])
+    g = query.build([surfacearea, contact])
 
     _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELECTROSTATIC])

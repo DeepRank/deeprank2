@@ -6,7 +6,7 @@ import pdb2sql
 import pickle
 from deeprankcore.operations.graph import Graph
 from deeprankcore.molstruct.aminoacid import AminoAcid
-from deeprankcore.operations.pdb import (
+from deeprankcore.operations.buildgraph import (
     get_residue_contact_pairs,
     get_surrounding_residues,
     get_structure,
@@ -176,7 +176,7 @@ class SingleResidueVariantResidueQuery(Query):
     def get_query_id(self) -> str:
         return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
-    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
+    def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
@@ -310,7 +310,7 @@ class SingleResidueVariantAtomicQuery(Query):
         # This should include the model, chain, residue and atom
         return str(atom)
 
-    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
+    def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
@@ -410,7 +410,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
-    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
+    def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
@@ -499,7 +499,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
-    def build_graph(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
+    def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the pdb structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
