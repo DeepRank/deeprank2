@@ -1,5 +1,5 @@
 from pdb2sql import pdb2sql
-from deeprankcore.utils.parsers import atomic_forcefield
+from deeprankcore.utils.parsing import atomic_forcefield
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.domain.aminoacidlist import arginine, glutamate
 

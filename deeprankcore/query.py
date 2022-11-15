@@ -12,7 +12,7 @@ from deeprankcore.utils.buildgraph import (
     get_structure,
     add_hydrogens,
 )
-from deeprankcore.utils.parsers.pssm import parse_pssm
+from deeprankcore.utils.parsing.pssm import parse_pssm
 from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.molstruct.variant import SingleResidueVariant
 

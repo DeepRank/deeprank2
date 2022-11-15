@@ -7,7 +7,7 @@ from deeprankcore.molstruct.atom import Atom
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
 from deeprankcore.domain import edgefeatures as Efeat
-from deeprankcore.utils.parsers import atomic_forcefield
+from deeprankcore.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 
