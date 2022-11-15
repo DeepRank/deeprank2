@@ -5,7 +5,7 @@ from deeprankcore.features.surfacearea import add_features
 from deeprankcore.operations.graph import build_residue_graph
 from deeprankcore.operations.buildgraph import get_structure, get_surrounding_residues
 from deeprankcore.domain import nodefeatures
-from deeprankcore.features.molecular import add_features # noqa
+from deeprankcore.features.components import add_features # noqa
 
 
 def test_add_features():
