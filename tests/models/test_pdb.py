@@ -52,7 +52,7 @@ def test_get_structure_from_nmr_with_dna():
 
 def test_residue_contact_pairs():
 
-    # get_residue_contact_pairs(pdb_path: str, structure: Structure,
+    # get_residue_contact_pairs(pdb_path: str, structure: PDBStructure,
     # chain_id1: str, chain_id2: str, distance_cutoff: float)
 
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"

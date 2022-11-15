@@ -1,7 +1,7 @@
 from pdb2sql import pdb2sql
 import numpy as np
 from deeprankcore.domain.aminoacids import alanine
-from deeprankcore.molstruct.pdb_structure import Structure, Chain
+from deeprankcore.molstruct.structure import PDBStructure, Chain
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.features.surfacearea import add_features
@@ -44,7 +44,7 @@ def _find_atom_node(graph, chain_id, residue_number, atom_name):
     raise ValueError(f"Not found: {chain_id} {residue_number} {atom_name}")
 
 
-def _load_pdb_structure(pdb_path: str, id_: str) -> Structure:
+def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
     pdb = pdb2sql(pdb_path)
     try:
         return get_structure(pdb, id_)

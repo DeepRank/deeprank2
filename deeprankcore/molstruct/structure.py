@@ -2,7 +2,7 @@ from typing import Optional
 from deeprankcore.operations.pssm import PssmRow
 
 
-class Structure:
+class PDBStructure:
     "represents one entire pdb structure"
 
     def __init__(self, id_: Optional[str] = None):
@@ -52,7 +52,7 @@ class Structure:
 class Chain:
     "represents one pdb chain"
 
-    def __init__(self, model: Structure, id_: Optional[str]):
+    def __init__(self, model: PDBStructure, id_: Optional[str]):
         """
         Args:
             model(deeprank structure object): the model that this chain is part of

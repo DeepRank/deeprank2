@@ -4,7 +4,7 @@ import numpy as np
 import subprocess
 from scipy.spatial import distance_matrix
 from pdb2sql import interface as get_interface
-from deeprankcore.molstruct.pdb_structure import Chain, Structure
+from deeprankcore.molstruct.structure import Chain, PDBStructure
 from deeprankcore.molstruct.atom import Atom, AtomicElement
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.contact import Pair
@@ -41,7 +41,7 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
     Args:
         pdb (pdb2sql object): the pdb structure that we're investigating
         id (str): unique id for the pdb structure
-    Returns (Structure): the structure object, giving access to chains, residues, atoms
+    Returns (PDBStructure): the structure object, giving access to chains, residues, atoms
     """
 
     amino_acids_by_code = {
@@ -54,7 +54,7 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
     chains = {}
     residues = {}
 
-    structure = Structure(id_)
+    structure = PDBStructure(id_)
 
     # Iterate over the atom output from pdb2sql
     for row in pdb.get(
@@ -123,7 +123,7 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
 
 def get_residue_contact_pairs( # pylint: disable=too-many-locals
     pdb_path: str,
-    structure: Structure,
+    structure: PDBStructure,
     chain_id1: str,
     chain_id2: str,
     distance_cutoff: float,

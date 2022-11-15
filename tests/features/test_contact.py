@@ -1,7 +1,7 @@
 from uuid import uuid4
 from pdb2sql import pdb2sql
 import numpy as np
-from deeprankcore.molstruct.pdb_structure import Chain
+from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.contact import AtomicContact, ResidueContact
 from deeprankcore.operations.graph import Edge, Graph

@@ -1,6 +1,6 @@
 from typing import Optional
 import numpy as np
-from deeprankcore.molstruct.pdb_structure import Chain
+from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.operations.pssm import PssmRow
 

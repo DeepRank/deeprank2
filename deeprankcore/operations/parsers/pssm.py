@@ -1,5 +1,5 @@
 from typing import TextIO
-from deeprankcore.molstruct.pdb_structure import Chain
+from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.operations.pssm import PssmRow, PssmTable
 from deeprankcore.domain.aminoacids import amino_acids
