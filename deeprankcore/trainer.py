@@ -186,6 +186,11 @@ class Trainer():
             self.optimizer = None
             self.epoch_saved_model = None
 
+            print('init - if pretrained=None')
+            print('DEBUG x1:', type(dataset_train), dataset_train)
+            print('DEBUG x2:', type(dataset_val), dataset_val)
+            print('DEBUG x3:', type(dataset_test), dataset_test)
+            print('DEBUG x4:', type(Net), Net)
             self._load_model(dataset_train, dataset_val, dataset_test, Net)
 
         else:
@@ -200,6 +205,9 @@ class Trainer():
                     completing the loading of the pretrained model.")
 
             if dataset_test is not None:
+                print('init - if not pretrained=None')
+                print('DEBUG y3:', type(dataset_test), dataset_test)
+                print('DEBUG y4:', type(Net), Net)                
                 self._load_pretrained_model(dataset_test, Net)
             else:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
@@ -217,7 +225,7 @@ class Trainer():
             Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
             the gradient may explode. Defaults to 1e-05.
         """
-
+        print('configure_optimizers')
         self.lr = lr
         self.weight_decay = weight_decay
 
@@ -232,6 +240,9 @@ class Trainer():
 
     def _check_features(self, dataset: HDF5DataSet):
         """Checks if the required features exist"""
+
+        print('_check_features')
+
         f = h5py.File(dataset.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         
@@ -285,7 +296,7 @@ class Trainer():
                     \nProbably, the feature wasn't generated during the preprocessing step. \
                     {miss_node_error}{miss_edge_error}")
 
-    def _load_pretrained_model(self, dataset_test, Net):
+    def _load_pretrained_model(self, dataset_test: HDF5DataSet, Net):
         """
         Loads pretrained model
 
@@ -293,6 +304,10 @@ class Trainer():
             dataset_test: HDF5DataSet object to be tested with the model
             Net (function): neural network
         """
+
+        print('_load_pretrained_model')
+        print('DEBUG z3:', type(dataset_test), dataset_test)
+        print('DEBUG z4:', type(Net), Net)
 
         if self.cluster_nodes is not None: 
             self._PreCluster(dataset_test, method=self.cluster_nodes)
@@ -324,6 +339,12 @@ class Trainer():
         Raises:
             ValueError: Invalid node clustering method.
         """
+
+        print('_load_model')
+        print('DEBUG w1:', type(dataset_train), dataset_train)
+        print('DEBUG w2:', type(dataset_val), dataset_val)
+        print('DEBUG w3:', type(dataset_test), dataset_test)
+        print('DEBUG w4:', type(Net), Net)
 
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
@@ -389,6 +410,11 @@ class Trainer():
         Raises:
             ValueError: Incorrect output shape
         """
+
+        print('_put_model_to_device')
+        print('DEBUG a0:', type(dataset), dataset)
+        print('DEBUG a4:', type(Net), Net)
+
         # get the device
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
@@ -405,7 +431,6 @@ class Trainer():
 
         # regression mode
         if self.task == targets.REGRESS:
-
             self.output_shape = 1
             self.model = Net(
                 dataset.get(0).num_features,
@@ -415,15 +440,12 @@ class Trainer():
 
         # classification mode
         elif self.task == targets.CLASSIF:
-
             self.output_shape = len(self.classes)
-
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
                 dataset.get(0).num_edge_features,
                                 ).to(self.device)
-
 
         # check for compatibility
         for metrics_exporter in self._metrics_exporters:
@@ -434,6 +456,8 @@ class Trainer():
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
+
+        print('set_loss')
         if self.task == targets.REGRESS:
             self.loss = MSELoss()
 
@@ -475,7 +499,7 @@ class Trainer():
             save_model (last, best, optional): save the model. Defaults to 'last'
             hdf5 (str, optional): hdf5 output file
         """
-
+        print('train')
         train_losses = []
         valid_losses = []
 
@@ -550,6 +574,7 @@ class Trainer():
             dataset_test (HDF5Dataset object, required): dataset for testing the model
         """
 
+        print('test')
         with self._metrics_exporters:
             # Loads the test dataset if provided
             if dataset_test is not None:
@@ -586,6 +611,7 @@ class Trainer():
             running loss:
         """
         # Sets the module in evaluation mode
+        print("_eval")
         self.model.eval()
 
         loss_func = self.loss
@@ -658,6 +684,7 @@ class Trainer():
             running loss
         """
 
+        print('_epoch')
         sum_of_losses = 0
         count_predictions = 0
 
@@ -729,11 +756,13 @@ class Trainer():
             loss (float): loss during that epoch
             time (float): timing of the epoch
         """
+        print('_log_epoch_data')
         _log.info(f'{stage} loss {loss} | time {time}')
 
     def _format_output(self, pred, target=None):
         """Format the network output depending on the task (classification/regression)."""
 
+        print('_format_output')
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
@@ -755,7 +784,6 @@ class Trainer():
 
         return pred, target
 
-
     def save_model(self, filename='model.pth.tar'):
         """
         Saves the model to a file
@@ -763,6 +791,7 @@ class Trainer():
         Args:
             filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
         """
+        print('save_model')
         state = {
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
@@ -795,6 +824,7 @@ class Trainer():
         Returns:
             [type]: [description]
         """
+        print('_load_params')
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
@@ -825,6 +855,8 @@ class Trainer():
             dataset (HDF5DataSet object)
             method (str): 'mcl' (Markov Clustering) or 'louvain'
         """
+        print ('_PreCluster')
+        print ('DEBUG 00:', type(dataset))
         for fname, mol in tqdm(dataset.index_complexes):
 
             data = load_one_graph(fname, mol, self.node_features, self.edge_features)
@@ -876,6 +908,7 @@ def _DivideDataSet(dataset, val_size=None):
         HDF5DataSet: [description]
     """
 
+    print('_DivideDataSet')
     if val_size is None:
         val_size = 0.25
     full_size = len(dataset)

@@ -29,10 +29,10 @@ default_edge_features = [edgefeats.DISTANCE]
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
+    model_class,
     train_hdf5_path,
     val_hdf5_path,
     test_hdf5_path,
-    model_class,
     node_features,
     edge_features,
     task,
@@ -114,10 +114,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_sigmoid(self):
         _model_base_test(
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_node_features,
             default_edge_features,
             targets.REGRESS,
@@ -129,10 +129,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet(self):
         _model_base_test(           
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_node_features,
             default_edge_features,
             targets.REGRESS,
@@ -146,10 +146,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_class(self):
         _model_base_test(
-            "tests/data/hdf5/variants.hdf5",
-            "tests/data/hdf5/variants.hdf5",
-            "tests/data/hdf5/variants.hdf5",
             GINet,
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             default_edge_features,
             targets.CLASSIF,
@@ -163,10 +163,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
             FoutNet,
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             default_node_features,
             default_edge_features,
             targets.CLASSIF,
@@ -178,10 +178,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             sGAT,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_node_features,
             default_edge_features,
             targets.REGRESS,
@@ -193,10 +193,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             default_node_features,
             default_edge_features,
             targets.REGRESS,
@@ -209,10 +209,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
                 sGAT,
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 default_node_features,
                 default_edge_features,
                 targets.REGRESS,
@@ -225,10 +225,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_classification(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/data/hdf5/variants.hdf5",
-                "tests/data/hdf5/variants.hdf5",
-                "tests/data/hdf5/variants.hdf5",
                 GINet,
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 default_edge_features,
                 targets.CLASSIF,
@@ -376,10 +376,10 @@ class TestTrainer(unittest.TestCase):
         if torch.cuda.is_available():
 
             _model_base_test(           
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 default_node_features,
                 default_edge_features,
                 targets.REGRESS,
