@@ -105,9 +105,9 @@ def plotly_2d( # noqa
     pos = np.array(
         [v.tolist() for _, v in networkx.get_node_attributes(graph, Nfeat.POSITION).items()]
     )
-    pos2D = manifold_embedding(pos)
-    dict_pos = dict(zip(graph.nodes, pos2D))
-    networkx.set_node_attributes(graph, dict_pos, "pos2D")
+    pos2d = manifold_embedding(pos)
+    dict_pos = dict(zip(graph.nodes, pos2d))
+    networkx.set_node_attributes(graph, dict_pos, "pos2d")
 
     # remove interface edges for clustering
     gtmp = deepcopy(graph)
@@ -169,8 +169,8 @@ def plotly_2d( # noqa
         else:
             continue
 
-        x0, y0 = graph.nodes[edge[0]]["pos2D"]
-        x1, y1 = graph.nodes[edge[1]]["pos2D"]
+        x0, y0 = graph.nodes[edge[0]]["pos2d"]
+        x1, y1 = graph.nodes[edge[1]]["pos2d"]
 
         trace["x"] += (x0, x1, None)
         trace["y"] += (y0, y1, None)
@@ -186,7 +186,7 @@ def plotly_2d( # noqa
                 node_connect[edge[i]] = 1
             else:
                 node_connect[edge[i]] += 1
-    node_trace_A = go.Scatter(
+    node_trace_a = go.Scatter(
         x=[],
         y=[],
         text=[],
@@ -199,7 +199,7 @@ def plotly_2d( # noqa
         ),
     )
     # 'rgb(227,28,28)'
-    node_trace_B = go.Scatter(
+    node_trace_b = go.Scatter(
         x=[],
         y=[],
         text=[],
@@ -212,7 +212,7 @@ def plotly_2d( # noqa
         ),
     )
     # 'rgb(0,102,255)'
-    node_trace = [node_trace_A, node_trace_B]
+    node_trace = [node_trace_a, node_trace_b]
 
     for x, node in enumerate(graph.nodes):
 
@@ -223,7 +223,7 @@ def plotly_2d( # noqa
             if graph.nodes[node][Nfeat.CHAINID] != first_chain: # This is not very pythonic, but somehow I'm stuck on how to do this without enumerating
                 index = 1
         
-        pos = graph.nodes[node]["pos2D"]
+        pos = graph.nodes[node]["pos2d"]
 
         node_trace[index]["x"] += (pos[0],)
         node_trace[index]["y"] += (pos[1],)
@@ -337,7 +337,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
             else:
                 node_connect[edge[i]] += 1
 
-    node_trace_A = go.Scatter3d(
+    node_trace_a = go.Scatter3d(
         x=[],
         y=[],
         z=[],
@@ -352,7 +352,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
         ),
     )
 
-    node_trace_B = go.Scatter3d(
+    node_trace_b = go.Scatter3d(
         x=[],
         y=[],
         z=[],
@@ -367,7 +367,7 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
         ),
     )
 
-    node_trace = [node_trace_A, node_trace_B]
+    node_trace = [node_trace_a, node_trace_b]
 
     for x, node in enumerate(graph.nodes):
 

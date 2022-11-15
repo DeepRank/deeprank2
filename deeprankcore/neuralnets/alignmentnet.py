@@ -165,7 +165,7 @@ class SuperGNN(nn.Module):
 
     # Runs data through layers and return output. Potentially, attention can
     # also be returned
-    def runThroughNetwork(
+    def run_through_network(
         self, edges, edge_attr, node_attr, with_output_attention=False
     ):
         edge_attr, node_attr = self.preprocess(edge_attr, node_attr)
@@ -205,5 +205,5 @@ class AlignmentGNN(SuperGNN):
 
     # Run over all layers, and return the ouput vectors
     def forward(self, edges, edge_attr, node_attr):
-        representations = self.runThroughNetwork(edges, edge_attr, node_attr)
+        representations = self.run_through_network(edges, edge_attr, node_attr)
         return representations

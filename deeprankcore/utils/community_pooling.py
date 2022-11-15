@@ -58,9 +58,9 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
     all_index = range(num_nodes)
     cluster, ncluster = [], 0
 
-    for iB in range(num_batch):
+    for ib in range(num_batch):
 
-        index = torch.tensor(all_index)[batch == iB].tolist()
+        index = torch.tensor(all_index)[batch == ib].tolist()
         subg = g.subgraph(index)
 
         # detect the communities using Louvain method
@@ -186,7 +186,7 @@ def community_pooling(cluster, data):
 
     # determine what the batches has as attributes
     has_internal_edges = hasattr(data, "internal_edge_index")
-    has_pos2D = hasattr(data, "pos2D")
+    has_pos2d = hasattr(data, "pos2d")
     has_pos = hasattr(data, "pos")
     has_cluster = hasattr(data, "cluster0")
 
@@ -208,8 +208,8 @@ def community_pooling(cluster, data):
     # pool the pos
     if has_pos:
         pos = scatter_mean(data.pos, cluster, dim=0)
-    if has_pos2D:
-        pos2D = scatter_mean(data.pos2D, cluster, dim=0)
+    if has_pos2d:
+        pos2d = scatter_mean(data.pos2d, cluster, dim=0)
 
     if has_cluster:
         c0, c1 = data.cluster0, data.cluster1
@@ -228,8 +228,8 @@ def community_pooling(cluster, data):
     else:
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos)
 
-        if has_pos2D:
-            data.pos2D = pos2D
+        if has_pos2d:
+            data.pos2d = pos2d
 
         if has_cluster:
             data.cluster0 = c0

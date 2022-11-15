@@ -30,8 +30,8 @@ class FoutLayer(torch.nn.Module):
         self.out_channels = out_channels
 
         # Wc and Wn are the center and neighbor weight matrix
-        self.Wc = Parameter(torch.Tensor(in_channels, out_channels))
-        self.Wn = Parameter(torch.Tensor(in_channels, out_channels))
+        self.wc = Parameter(torch.Tensor(in_channels, out_channels))
+        self.wn = Parameter(torch.Tensor(in_channels, out_channels))
 
         if bias:
             self.bias = Parameter(torch.Tensor(out_channels))
@@ -42,8 +42,8 @@ class FoutLayer(torch.nn.Module):
 
     def reset_parameters(self):
         size = self.in_channels
-        uniform(size, self.Wc)
-        uniform(size, self.Wn)
+        uniform(size, self.wc)
+        uniform(size, self.wn)
         uniform(size, self.bias)
 
     def forward(self, x, edge_index):
@@ -51,10 +51,10 @@ class FoutLayer(torch.nn.Module):
         num_node = len(x)
 
         # alpha = x * Wc
-        alpha = torch.mm(x, self.Wc)
+        alpha = torch.mm(x, self.wc)
 
         # beta = x * Wn
-        beta = torch.mm(x, self.Wn)
+        beta = torch.mm(x, self.wn)
 
         # gamma_i = 1/Ni Sum_j x_j * Wn
         # there might be a better way than looping over the nodes
