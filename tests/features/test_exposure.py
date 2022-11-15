@@ -3,7 +3,7 @@ from pdb2sql import pdb2sql
 from deeprankcore.features.exposure import add_features
 from deeprankcore.utils.graph import build_residue_graph
 from deeprankcore.utils.buildgraph import get_structure, get_residue_contact_pairs
-from deeprankcore.domain import nodefeatures
+from deeprankcore.domain import nodefeatures as Nfeat
 
 
 def test_add_features():
@@ -27,9 +27,9 @@ def test_add_features():
     add_features(pdb_path, graph)
 
     assert np.any(
-        node.features[nodefeatures.HSE] != 0.0 for node in graph.nodes
+        node.features[Nfeat.HSE] != 0.0 for node in graph.nodes
     )
 
     assert np.any(
-        node.features[nodefeatures.RESDEPTH] != 0.0 for node in graph.nodes
+        node.features[Nfeat.RESDEPTH] != 0.0 for node in graph.nodes
     )

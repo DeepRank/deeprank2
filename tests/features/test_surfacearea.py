@@ -10,7 +10,7 @@ from deeprankcore.utils.buildgraph import (
     get_structure,
     get_residue_contact_pairs,
     get_surrounding_residues)
-from deeprankcore.domain import nodefeatures
+from deeprankcore.domain import nodefeatures as Nfeat
 
 
 
@@ -29,7 +29,6 @@ def _find_residue_node(graph, chain_id, residue_number):
 
     raise ValueError(f"Not found: {chain_id} {residue_number}")
 
-
 def _find_atom_node(graph, chain_id, residue_number, atom_name):
     for node in graph.nodes:
         atom = node.id
@@ -42,7 +41,6 @@ def _find_atom_node(graph, chain_id, residue_number, atom_name):
             return node
 
     raise ValueError(f"Not found: {chain_id} {residue_number} {atom_name}")
-
 
 def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
     pdb = pdb2sql(pdb_path)
@@ -71,7 +69,7 @@ def test_bsa_residue():
     # chain B ASP 93, at interface
     node = _find_residue_node(graph, "B", 93)
 
-    assert node.features[nodefeatures.BSA] > 0.0
+    assert node.features[Nfeat.BSA] > 0.0
 
 
 def test_bsa_atom():
@@ -96,7 +94,8 @@ def test_bsa_atom():
     # chain B ASP 93, at interface
     node = _find_atom_node(graph, "B", 93, "OD1")
 
-    assert node.features[nodefeatures.BSA] > 0.0
+    assert node.features[Nfeat.BSA] > 0.0
+
 
 def test_sasa_residue():
 
@@ -119,18 +118,18 @@ def test_sasa_residue():
 
     # check for NaN
     assert not any(
-        np.isnan(node.features[nodefeatures.SASA]) for node in graph.nodes
+        np.isnan(node.features[Nfeat.SASA]) for node in graph.nodes
     )
 
     # surface residues should have large area
     surface_residue_node = _find_residue_node(graph, "A", 105)
-    assert surface_residue_node.features[nodefeatures.SASA] > 25.0
+    assert surface_residue_node.features[Nfeat.SASA] > 25.0
 
     # buried residues should have small area
     buried_residue_node = _find_residue_node(graph, "A", 72)
     assert (
-        buried_residue_node.features[nodefeatures.SASA] < 25.0
-    ), buried_residue_node.features[nodefeatures.SASA]
+        buried_residue_node.features[Nfeat.SASA] < 25.0
+    ), buried_residue_node.features[Nfeat.SASA]
 
 
 def test_sasa_atom():
@@ -159,15 +158,15 @@ def test_sasa_atom():
 
     # check for NaN
     assert not any(
-        np.isnan(node.features[nodefeatures.SASA]) for node in graph.nodes
+        np.isnan(node.features[Nfeat.SASA]) for node in graph.nodes
     )
 
     # surface atoms should have large area
     surface_atom_node = _find_atom_node(graph, "A", 105, "OE2")
-    assert surface_atom_node.features[nodefeatures.SASA] > 25.0
+    assert surface_atom_node.features[Nfeat.SASA] > 25.0
 
     # buried atoms should have small area
     buried_atom_node = _find_atom_node(graph, "A", 72, "CG")
     assert (
-        buried_atom_node.features[nodefeatures.SASA] == 0.0
-    ), buried_atom_node.features[nodefeatures.SASA]
+        buried_atom_node.features[Nfeat.SASA] == 0.0
+    ), buried_atom_node.features[Nfeat.SASA]

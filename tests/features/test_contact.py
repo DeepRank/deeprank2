@@ -4,11 +4,11 @@ import numpy as np
 from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
+from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.utils.graph import Edge, Graph
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.features.contact import add_features
 from deeprankcore.domain.aminoacidlist import alanine
-from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import edgefeatures as Efeat
 
 

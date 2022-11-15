@@ -2,9 +2,9 @@ import lzma
 import os
 import csv
 import shutil
-from tempfile import mkdtemp
 import logging
 import unittest
+from tempfile import mkdtemp
 from unittest.mock import patch
 from deeprankcore.utils.metrics import (
     MetricsExporterCollection,
