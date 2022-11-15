@@ -11,7 +11,7 @@ from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
-from deeprankcore.neuralnets.sgat import sGAT
+from deeprankcore.neuralnets.sgat import SGAT
 from deeprankcore.utils.metrics import (
     OutputExporter,
     TensorboardBinaryClassificationExporter,
@@ -191,7 +191,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
-            sGAT,
+            SGAT,
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -222,7 +222,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
-                sGAT,
+                SGAT,
                 default_features,
                 [Efeat.DISTANCE],
                 targets.REGRESS,

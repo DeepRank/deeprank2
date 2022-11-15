@@ -8,7 +8,7 @@ from torch_geometric.nn import max_pool_x
 from deeprankcore.utils.community_pooling import get_preloaded_cluster, community_pooling
 
 
-class sGraphAttentionLayer(torch.nn.Module):
+class SGraphAttentionLayer(torch.nn.Module):
 
     """
     This is a new layer that is similar to the graph attention network but simpler
@@ -81,12 +81,12 @@ class sGraphAttentionLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class sGAT(torch.nn.Module):
+class SGAT(torch.nn.Module):
     def __init__(self, input_shape, output_shape=1, input_shape_edge=None): # pylint: disable=unused-argument
         super().__init__()
 
-        self.conv1 = sGraphAttentionLayer(input_shape, 16)
-        self.conv2 = sGraphAttentionLayer(16, 32)
+        self.conv1 = SGraphAttentionLayer(input_shape, 16)
+        self.conv2 = SGraphAttentionLayer(16, 32)
 
         self.fc1 = torch.nn.Linear(32, 64)
         self.fc2 = torch.nn.Linear(64, output_shape)

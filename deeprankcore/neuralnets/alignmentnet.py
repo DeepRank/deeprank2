@@ -1,14 +1,10 @@
 import torch
 from torch import nn
 
+
 __author__ = "Daniel-Tobias Rademaker"
 
-####################################################
-#                 Single GNN-layer                 #
-####################################################
-
-
-class GNN_layer(nn.Module):
+class GNNLayer(nn.Module):
     def __init__( # pylint: disable=too-many-arguments
         self,
         nmb_edge_projection,
@@ -111,9 +107,6 @@ class GNN_layer(nn.Module):
         return output
 
 
-################################################################
-#                      GNN super class                         #
-################################################################
 class SuperGNN(nn.Module):
     def __init__( # pylint: disable=too-many-arguments
         self,
@@ -152,7 +145,7 @@ class SuperGNN(nn.Module):
 
         self.modlist = nn.ModuleList(
             [
-                GNN_layer(
+                GNNLayer(
                     nmb_edge_projection,
                     nmb_hidden_attr,
                     nmb_output_features,
@@ -185,12 +178,7 @@ class SuperGNN(nn.Module):
         return representations
 
 
-######################
-# The alignment GNN  #
-######################
-
-
-class Alignment_GNN(SuperGNN):
+class AlignmentGNN(SuperGNN):
     def __init__( # pylint: disable=too-many-arguments
         self,
         nmb_edge_attr,
@@ -219,35 +207,3 @@ class Alignment_GNN(SuperGNN):
     def forward(self, edges, edge_attr, node_attr):
         representations = self.runThroughNetwork(edges, edge_attr, node_attr)
         return representations
-
-
-if __name__ == "__main__":
-    #####################################
-    #   Example of initializing a gnn   #
-    #####################################
-
-    ##############################
-    #         CONSTANTS          #
-    ##############################
-    MESSAGE_VECTOR_LENGTH = 32
-    NMB_HIDDED_ATTRIBUTES = 32
-    NMB_EDGE_PROJECTION = 32
-    NMB_OUPUT_FEATURES = 32
-    NMB_MLP_NEURONS = 32
-    NMB_GNN_LAYERS = 5
-    NODE_RADIUS = 15
-    ##############################
-
-    NMB_EDGE_ATTIBUTES = 4
-    NMB_NODE_ATTRIBUTES = 3 + 21
-
-    gnn = Alignment_GNN(
-        nmb_edge_attr=NMB_EDGE_ATTIBUTES,
-        nmb_node_attr=NMB_NODE_ATTRIBUTES,
-        nmb_output_features=NMB_OUPUT_FEATURES,
-        nmb_gnn_layers=NMB_GNN_LAYERS,
-        message_vector_length=MESSAGE_VECTOR_LENGTH,
-        nmb_mlp_neurons=NMB_MLP_NEURONS,
-        nmb_hidden_attr=NMB_HIDDED_ATTRIBUTES,
-        nmb_edge_projection=NMB_EDGE_PROJECTION,
-    )
