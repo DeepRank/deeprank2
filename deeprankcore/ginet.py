@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-
+import numpy as np
 from torch_scatter import scatter_mean
 from torch_scatter import scatter_sum
 
@@ -46,6 +46,7 @@ class GINetConvLayer(torch.nn.Module):
         xcol = self.fc(x[col])
         xrow = self.fc(x[row])
 
+        print('DEBUG Q:', np.array(edge_attr).shape)
         ed = self.fc_edge_attr(edge_attr)
         # create edge feature by concatenating node feature
         alpha = torch.cat([xrow, xcol, ed], dim=1)

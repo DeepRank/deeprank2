@@ -397,11 +397,11 @@ class Trainer():
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
+        self.num_features = len(self.node_features)
         self.num_edge_features = len(self.edge_features)
 
         # the target values are optional
         if dataset.get(0).y is not None:
-
             target_shape = dataset.get(0).y.shape[0]
         else:
             target_shape = None
@@ -410,11 +410,16 @@ class Trainer():
         if self.task == targets.REGRESS:
 
             self.output_shape = 1
+            print('DEBUG RR11:', dataset.get(0).num_features)
+            print('DEBUG RR22:', self.num_features)
+            print('DEBUG QQ11:', dataset.get(0).num_edge_features)
+            print('DEBUG QQ22:', self.num_edge_features)
+            
 
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                self.num_edge_features).to(
+                dataset.get(0).num_edge_features).to(
                 self.device)
 
         # classification mode
@@ -604,7 +609,7 @@ class Trainer():
         for _, data_batch in enumerate(loader):
 
             data_batch = data_batch.to(self.device)
-            # print('DEBUG ', _, data_batch)
+            print('DEBUG ', _, data_batch)
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
 
@@ -831,7 +836,8 @@ class Trainer():
         """
         for fname, mol in tqdm(dataset.index_complexes):
 
-            data = load_one_graph(fname, mol)
+            print('DEBUG T:', fname, mol)
+            data = load_one_graph(fname, mol, self.node_features, self.edge_features)
 
             if data is None:
                 f5 = h5py.File(fname, "a")

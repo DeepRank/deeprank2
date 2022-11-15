@@ -13,6 +13,8 @@ _log = logging.getLogger(__name__)
 
 
 def load_one_graph(fname, mol, 
+                    nodefeatures = "all",
+                    edgefeatures = "all",
                     transform = None,
                     edge_features_transform = None,
                     clustering_method = None):
@@ -36,7 +38,9 @@ def load_one_graph(fname, mol,
 
         # node features
         node_data = ()
-        for feat in grp[f"{groups.NODE}"]:
+        if nodefeatures == "all":
+            nodefeatures = grp[f"{groups.NODE}"]
+        for feat in nodefeatures:
             if feat[0] != '_':  # ignore metafeatures
                 vals = grp[f"{groups.NODE}/{feat}"][()]
                 if vals.ndim == 1:
@@ -59,7 +63,11 @@ def load_one_graph(fname, mol,
         # (same issue as above)
         if groups.EDGE in grp and grp[f"{groups.EDGE}"] is not None and len(grp[f"{groups.EDGE}"]) > 0:
             edge_data = ()
-            for feat in grp[f"{groups.EDGE}"]:
+            if edgefeatures == "all":
+                edgefeatures = list(grp[f"{groups.EDGE}"])
+            print('DEBUG N:', fname, mol)
+            print('DEBUG X:', edgefeatures)
+            for feat in edgefeatures:
                 if feat[0] != '_':   # ignore metafeatures
                     vals = grp[f"{groups.EDGE}/{feat}"][()]
                     if vals.ndim == 1:
