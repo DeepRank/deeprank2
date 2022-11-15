@@ -18,6 +18,8 @@ from deeprankcore.community_pooling import community_detection, community_poolin
 from deeprankcore.domain import targettypes as targets
 from deeprankcore.domain.features import groups
 from deeprankcore.dataset import HDF5DataSet
+from deeprankcore.loadonegraph import load_one_graph
+
 
 _log = logging.getLogger(__name__)
 
@@ -228,7 +230,7 @@ class Trainer():
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
-    def _check_features(self, dataset):
+    def _check_features(self, dataset: HDF5DataSet):
         """Checks if the required features exist"""
         f = h5py.File(dataset.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
@@ -250,7 +252,7 @@ class Trainer():
         else:
             for feat in self.node_features:
                 if feat not in self.available_node_features:
-                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info(f"The node feature _{feat}_ was not found in the file {dataset.hdf5_path[0]}.")
                     missing_node_features.append(feat)
 
         # check edge features
@@ -260,7 +262,7 @@ class Trainer():
         elif self.edge_features is not None:
             for feat in self.edge_features:
                 if feat not in self.available_edge_features:
-                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info(f"The edge feature _{feat}_ was not found in the file {dataset.hdf5_path[0]}.")
                     missing_edge_features.append(feat)
 
         # raise error if any features are missing
@@ -278,9 +280,9 @@ class Trainer():
                                     \nAvailable edge features: {self.available_edge_features}"
 
             raise ValueError(
-                f"Not all features could be found in the file {self.hdf5_path[0]}.\
+                f"Not all features could be found in the file {dataset.hdf5_path[0]}.\
                     \nCheck feature_modules passed to the preprocess function. \
-                    Probably, the feature wasn't generated during the preprocessing step. \
+                    \nProbably, the feature wasn't generated during the preprocessing step. \
                     {miss_node_error}{miss_edge_error}")
 
     def _load_pretrained_model(self, dataset_test, Net):
@@ -602,6 +604,7 @@ class Trainer():
         for _, data_batch in enumerate(loader):
 
             data_batch = data_batch.to(self.device)
+            # print('DEBUG ', _, data_batch)
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
 
@@ -828,7 +831,7 @@ class Trainer():
         """
         for fname, mol in tqdm(dataset.index_complexes):
 
-            data = dataset.load_one_graph(fname, mol)
+            data = load_one_graph(fname, mol)
 
             if data is None:
                 f5 = h5py.File(fname, "a")

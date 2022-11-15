@@ -25,6 +25,7 @@ from deeprankcore.domain import targettypes as targets
 _log = logging.getLogger(__name__)
 
 default_node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+default_edge_features = [edgefeats.DISTANCE]
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
@@ -118,7 +119,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_node_features,
-            [edgefeats.DISTANCE],
+            default_edge_features,
             targets.REGRESS,
             targets.IRMSD,
             [OutputExporter(self.work_directory)],
@@ -133,7 +134,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_node_features,
-            [edgefeats.DISTANCE],
+            default_edge_features,
             targets.REGRESS,
             targets.IRMSD,
             [OutputExporter(self.work_directory)],
@@ -150,7 +151,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/variants.hdf5",
             GINet,
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
-            [edgefeats.DISTANCE],
+            default_edge_features,
             targets.CLASSIF,
             targets.BINARY,
             [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -167,7 +168,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             FoutNet,
             default_node_features,
-            [edgefeats.DISTANCE],
+            default_edge_features,
             targets.CLASSIF,
             targets.BINARY,
             [],
@@ -182,7 +183,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             sGAT,
             default_node_features,
-            [edgefeats.DISTANCE],
+            default_edge_features,
             targets.REGRESS,
             targets.IRMSD,
             [],
@@ -197,7 +198,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
             default_node_features,
-            [edgefeats.DISTANCE],
+            default_edge_features,
             targets.REGRESS,
             "BA",
             [OutputExporter(self.work_directory)],
@@ -213,7 +214,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 sGAT,
                 default_node_features,
-                [edgefeats.DISTANCE],
+                default_edge_features,
                 targets.REGRESS,
                 targets.IRMSD,
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -229,7 +230,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/variants.hdf5",
                 GINet,
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
-                [edgefeats.DISTANCE],
+                default_edge_features,
                 targets.CLASSIF,
                 targets.BINARY,
                 [ScatterPlotExporter(self.work_directory)],
@@ -380,7 +381,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
                 default_node_features,
-                [edgefeats.DISTANCE],
+                default_edge_features,
                 targets.REGRESS,
                 targets.IRMSD,
                 [OutputExporter(self.work_directory)],
