@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_scatter import scatter_mean, scatter_sum
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
-from deeprankcore.models.operations.community_pooling import get_preloaded_cluster, community_pooling
+from deeprankcore.operations.community_pooling import get_preloaded_cluster, community_pooling
 
 
 class GINetConvLayer(torch.nn.Module):

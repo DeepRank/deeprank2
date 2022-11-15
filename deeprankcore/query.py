@@ -4,17 +4,17 @@ from typing import Dict, List, Optional, Iterator, Union
 import tempfile
 import pdb2sql
 import pickle
-from deeprankcore.models.graph import Graph
-from deeprankcore.models.structure.aminoacid import AminoAcid
-from deeprankcore.models.operations.pdb import (
+from deeprankcore.operations.graph import Graph
+from deeprankcore.molstruct.aminoacid import AminoAcid
+from deeprankcore.operations.pdb import (
     get_residue_contact_pairs,
     get_surrounding_residues,
     get_structure,
     add_hydrogens,
 )
-from deeprankcore.models.operations.parsers.pssm import parse_pssm
-from deeprankcore.models.graph import build_residue_graph, build_atomic_graph
-from deeprankcore.models.structure.variant import SingleResidueVariant
+from deeprankcore.operations.parsers.pssm import parse_pssm
+from deeprankcore.operations.graph import build_residue_graph, build_atomic_graph
+from deeprankcore.molstruct.variant import SingleResidueVariant
 
 _log = logging.getLogger(__name__)
 

@@ -1,9 +1,9 @@
 from typing import Optional
 import numpy as np
-from deeprankcore.models.graph import Graph
-from deeprankcore.models.structure.variant import SingleResidueVariant
-from deeprankcore.models.structure.atom import Atom
-from deeprankcore.models.structure.residue import Residue
+from deeprankcore.operations.graph import Graph
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
 from deeprankcore.domain import nodefeatures as Nfeat
 
 def add_features( # pylint: disable=unused-argument

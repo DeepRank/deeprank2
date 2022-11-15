@@ -1,5 +1,5 @@
 from typing import Optional, Dict, List
-from deeprankcore.models.structure.aminoacid import AminoAcid
+from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.domain.aminoacids import amino_acids
 
 amino_acids_by_letter = {

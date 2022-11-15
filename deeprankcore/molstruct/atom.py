@@ -1,6 +1,6 @@
 import numpy as np
 from enum import Enum
-from deeprankcore.models.structure.residue import Residue
+from deeprankcore.molstruct.residue import Residue
 
 
 class AtomicElement(Enum):

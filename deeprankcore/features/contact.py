@@ -3,11 +3,11 @@ import logging
 import warnings
 import numpy as np
 from scipy.spatial import distance_matrix
-from deeprankcore.models.structure.atom import Atom
-from deeprankcore.models.graph import Graph
-from deeprankcore.models.contact import ResidueContact, AtomicContact
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.operations.graph import Graph
+from deeprankcore.molstruct.contact import ResidueContact, AtomicContact
 from deeprankcore.domain import edgefeatures as Efeat
-from deeprankcore.models.operations.parsers import atomic_forcefield
+from deeprankcore.operations.parsers import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 

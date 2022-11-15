@@ -2,9 +2,9 @@ import logging
 import freesasa
 import numpy as np
 from typing import List
-from deeprankcore.models.graph import Node, Graph
-from deeprankcore.models.structure.residue import Residue
-from deeprankcore.models.structure.atom import Atom
+from deeprankcore.operations.graph import Node, Graph
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.atom import Atom
 from deeprankcore.domain import nodefeatures
 
 freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member

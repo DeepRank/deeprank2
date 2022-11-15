@@ -1,4 +1,4 @@
-from deeprankcore.models.structure.aminoacid import AminoAcid, Polarity
+from deeprankcore.molstruct.aminoacid import AminoAcid, Polarity
 
 
 alanine = AminoAcid(

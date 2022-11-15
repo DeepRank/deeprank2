@@ -1,10 +1,10 @@
 from typing import Optional
 import numpy as np
-from deeprankcore.models.structure.variant import SingleResidueVariant
+from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain.aminoacids import amino_acids
-from deeprankcore.models.structure.residue import Residue
-from deeprankcore.models.structure.atom import Atom
-from deeprankcore.models.graph import Graph
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.operations.graph import Graph
 from deeprankcore.domain import nodefeatures as Nfeat
 
 profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.one_letter_code)

@@ -2,7 +2,7 @@ import unittest
 import torch
 import numpy as np
 from torch_geometric.data import Data, Batch
-from deeprankcore.models.operations.community_pooling import (
+from deeprankcore.operations.community_pooling import (
     community_detection,
     community_pooling,
     community_detection_per_batch,

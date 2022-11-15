@@ -76,10 +76,10 @@ deeprankcore.models.query module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.models.structure module
+deeprankcore.molstruct module
 ------------------------------------
 
-.. automodule:: deeprankcore.models.structure
+.. automodule:: deeprankcore.molstruct
    :members:
    :undoc-members:
    :show-inheritance:

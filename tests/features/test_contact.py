@@ -1,14 +1,14 @@
 from uuid import uuid4
 from pdb2sql import pdb2sql
 import numpy as np
-from deeprankcore.models.structure.pdb_structure import Chain
-from deeprankcore.models.structure.atom import Atom
-from deeprankcore.models.contact import AtomicContact, ResidueContact
-from deeprankcore.models.graph import Edge, Graph
-from deeprankcore.models.operations.pdb import get_structure
+from deeprankcore.molstruct.pdb_structure import Chain
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.contact import AtomicContact, ResidueContact
+from deeprankcore.operations.graph import Edge, Graph
+from deeprankcore.operations.pdb import get_structure
 from deeprankcore.features.contact import add_features
 from deeprankcore.domain.aminoacids import alanine
-from deeprankcore.models.structure.variant import SingleResidueVariant
+from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import edgefeatures as Efeat
 
 

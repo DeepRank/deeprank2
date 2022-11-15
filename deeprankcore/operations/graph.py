@@ -2,10 +2,10 @@ from typing import Callable, Union, List
 import logging
 import numpy as np
 import h5py
-from deeprankcore.models.structure.atom import Atom
-from deeprankcore.models.structure.residue import Residue
-from deeprankcore.models.contact import Contact, AtomicContact, ResidueContact
-from deeprankcore.models.grid import MapMethod, Grid, GridSettings
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.contact import Contact, AtomicContact, ResidueContact
+from deeprankcore.operations.grid import MapMethod, Grid, GridSettings
 from deeprankcore.domain import (nodefeatures as Nfeat, 
                                 edgefeatures as Efeat,
                                 targettypes as targets)

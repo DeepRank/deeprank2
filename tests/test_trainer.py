@@ -12,7 +12,7 @@ from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
 from deeprankcore.neuralnets.sgat import sGAT
-from deeprankcore.models.metrics import (
+from deeprankcore.operations.metrics import (
     OutputExporter,
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter

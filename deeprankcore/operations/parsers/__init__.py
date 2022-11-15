@@ -1,16 +1,16 @@
 import os
 import logging
-from deeprankcore.models.structure.atom import Atom
-from deeprankcore.models.structure.residue import Residue
-from deeprankcore.models.operations.parsers.top import TopParser
-from deeprankcore.models.operations.parsers.patch import PatchParser, PatchActionType
-from deeprankcore.models.operations.parsers.residue import ResidueClassParser
-from deeprankcore.models.operations.parsers.vdwparam import VanderwaalsParam, ParamParser
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.operations.parsers.top import TopParser
+from deeprankcore.operations.parsers.patch import PatchParser, PatchActionType
+from deeprankcore.operations.parsers.residue import ResidueClassParser
+from deeprankcore.operations.parsers.vdwparam import VanderwaalsParam, ParamParser
 
 
 _log = logging.getLogger(__name__)
 
-_forcefield_directory_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../../domain/forcefield'))
+_forcefield_directory_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../domain/forcefield'))
 
 class AtomicForcefield:
     def __init__(self):

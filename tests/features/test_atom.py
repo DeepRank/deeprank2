@@ -1,10 +1,10 @@
 import numpy as np
 from pdb2sql import pdb2sql
 from deeprankcore.features.atom import add_features
-from deeprankcore.models.graph import build_atomic_graph
-from deeprankcore.models.structure.pdb_structure import Chain
-from deeprankcore.models.structure.residue import Residue
-from deeprankcore.models.operations.pdb import get_structure, get_surrounding_residues
+from deeprankcore.operations.graph import build_atomic_graph
+from deeprankcore.molstruct.pdb_structure import Chain
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.operations.pdb import get_structure, get_surrounding_residues
 from deeprankcore.domain import nodefeatures
 
 
