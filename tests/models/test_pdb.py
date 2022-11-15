@@ -1,5 +1,5 @@
 from pdb2sql import pdb2sql
-from deeprankcore.operations.buildgraph import (
+from deeprankcore.utils.buildgraph import (
     get_structure,
     get_residue_contact_pairs,
     get_surrounding_residues,

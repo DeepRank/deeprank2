@@ -1,11 +1,11 @@
 from pdb2sql import pdb2sql
 import numpy as np
 from deeprankcore.domain.aminoacidlist import alanine
-from deeprankcore.operations.parsers.pssm import parse_pssm
+from deeprankcore.utils.parsers.pssm import parse_pssm
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.features.conservation import add_features
-from deeprankcore.operations.graph import build_atomic_graph
-from deeprankcore.operations.buildgraph import get_structure, get_surrounding_residues
+from deeprankcore.utils.graph import build_atomic_graph
+from deeprankcore.utils.buildgraph import get_structure, get_surrounding_residues
 from deeprankcore.domain import nodefeatures as Nfeat
 
 

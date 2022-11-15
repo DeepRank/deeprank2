@@ -1,8 +1,8 @@
 import numpy as np
 from pdb2sql import pdb2sql
 from deeprankcore.features.exposure import add_features
-from deeprankcore.operations.graph import build_residue_graph
-from deeprankcore.operations.buildgraph import get_structure, get_residue_contact_pairs
+from deeprankcore.utils.graph import build_residue_graph
+from deeprankcore.utils.buildgraph import get_structure, get_residue_contact_pairs
 from deeprankcore.domain import nodefeatures
 
 

@@ -2,7 +2,7 @@ import logging
 import freesasa
 import numpy as np
 from typing import List
-from deeprankcore.operations.graph import Node, Graph
+from deeprankcore.utils.graph import Node, Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.domain import nodefeatures as Nfeat

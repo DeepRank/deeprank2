@@ -6,7 +6,7 @@ from tempfile import mkdtemp
 import logging
 import unittest
 from unittest.mock import patch
-from deeprankcore.operations.metrics import (
+from deeprankcore.utils.metrics import (
     MetricsExporterCollection,
     TensorboardBinaryClassificationExporter,
     OutputExporter,

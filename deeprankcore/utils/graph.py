@@ -5,7 +5,7 @@ import h5py
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.pair import Contact, AtomicContact, ResidueContact
-from deeprankcore.operations.grid import MapMethod, Grid, GridSettings
+from deeprankcore.utils.grid import MapMethod, Grid, GridSettings
 from deeprankcore.domain import (nodefeatures as Nfeat, 
                                 edgefeatures as Efeat,
                                 targettypes as targets)

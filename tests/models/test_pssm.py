@@ -1,6 +1,6 @@
 from pdb2sql import pdb2sql
-from deeprankcore.operations.parsers.pssm import parse_pssm
-from deeprankcore.operations.buildgraph import get_structure
+from deeprankcore.utils.parsers.pssm import parse_pssm
+from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.domain.aminoacidlist import alanine
 
 

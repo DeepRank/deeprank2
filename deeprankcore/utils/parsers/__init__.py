@@ -2,10 +2,10 @@ import os
 import logging
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.operations.parsers.top import TopParser
-from deeprankcore.operations.parsers.patch import PatchParser, PatchActionType
-from deeprankcore.operations.parsers.residue import ResidueClassParser
-from deeprankcore.operations.parsers.vdwparam import VanderwaalsParam, ParamParser
+from deeprankcore.utils.parsers.top import TopParser
+from deeprankcore.utils.parsers.patch import PatchParser, PatchActionType
+from deeprankcore.utils.parsers.residue import ResidueClassParser
+from deeprankcore.utils.parsers.vdwparam import VanderwaalsParam, ParamParser
 
 
 _log = logging.getLogger(__name__)

@@ -1,5 +1,5 @@
 from typing import Optional
-from deeprankcore.operations.pssmdata import PssmRow
+from deeprankcore.utils.pssmdata import PssmRow
 
 
 class PDBStructure:

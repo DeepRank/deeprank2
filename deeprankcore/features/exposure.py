@@ -6,7 +6,7 @@ from Bio.PDB.HSExposure import HSExposureCA
 from deeprankcore.domain import nodefeatures
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.operations.graph import Graph
+from deeprankcore.utils.graph import Graph
 
 
 logging.getLogger(__name__)

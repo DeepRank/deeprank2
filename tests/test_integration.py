@@ -9,7 +9,7 @@ from tests.utils import PATH_TEST
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
-from deeprankcore.operations.metrics import OutputExporter
+from deeprankcore.utils.metrics import OutputExporter
 from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (nodefeatures as Nfeat,
                                 edgefeatures as Efeat,
