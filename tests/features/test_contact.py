@@ -3,7 +3,7 @@ from pdb2sql import pdb2sql
 import numpy as np
 from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.contact import AtomicContact, ResidueContact
+from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
 from deeprankcore.operations.graph import Edge, Graph
 from deeprankcore.operations.buildgraph import get_structure
 from deeprankcore.features.contact import add_features

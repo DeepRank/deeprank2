@@ -5,7 +5,7 @@ import numpy as np
 from scipy.spatial import distance_matrix
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.operations.graph import Graph
-from deeprankcore.molstruct.contact import ResidueContact, AtomicContact
+from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
 from deeprankcore.domain import edgefeatures as Efeat
 from deeprankcore.operations.parsers import atomic_forcefield
 
