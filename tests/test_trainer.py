@@ -92,15 +92,16 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             if data_tensor is not None:
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
-    trainer.train(nepoch=10, validate=True)
-
+    print('start train')
+    trainer.train(nepoch=3, validate=True)
+    print('finished train')
     trainer.save_model("test.pth.tar")
 
     Trainer(
+        model_class,
         dataset_train,
         dataset_val,
         dataset_test,
-        model_class,
         pretrained_model="test.pth.tar")
 
 class TestTrainer(unittest.TestCase):
@@ -160,6 +161,7 @@ class TestTrainer(unittest.TestCase):
         )
 
         assert len(os.listdir(self.work_directory)) > 0
+        assert 1==0
 
     def test_fout(self):
         _model_base_test(

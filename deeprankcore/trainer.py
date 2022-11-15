@@ -187,10 +187,6 @@ class Trainer():
             self.epoch_saved_model = None
 
             print('init - if pretrained=None')
-            print('DEBUG x1:', type(dataset_train), dataset_train)
-            print('DEBUG x2:', type(dataset_val), dataset_val)
-            print('DEBUG x3:', type(dataset_test), dataset_test)
-            print('DEBUG x4:', type(Net), Net)
             self._load_model(dataset_train, dataset_val, dataset_test, Net)
 
         else:
@@ -206,8 +202,6 @@ class Trainer():
 
             if dataset_test is not None:
                 print('init - if not pretrained=None')
-                print('DEBUG y3:', type(dataset_test), dataset_test)
-                print('DEBUG y4:', type(Net), Net)                
                 self._load_pretrained_model(dataset_test, Net)
             else:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
@@ -306,8 +300,6 @@ class Trainer():
         """
 
         print('_load_pretrained_model')
-        print('DEBUG z3:', type(dataset_test), dataset_test)
-        print('DEBUG z4:', type(Net), Net)
 
         if self.cluster_nodes is not None: 
             self._PreCluster(dataset_test, method=self.cluster_nodes)
@@ -341,10 +333,6 @@ class Trainer():
         """
 
         print('_load_model')
-        print('DEBUG w1:', type(dataset_train), dataset_train)
-        print('DEBUG w2:', type(dataset_val), dataset_val)
-        print('DEBUG w3:', type(dataset_test), dataset_test)
-        print('DEBUG w4:', type(Net), Net)
 
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
@@ -363,6 +351,7 @@ class Trainer():
                     "Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # dataloader
+        print('DEBUG 2: ')
         self.train_loader = DataLoader(
             dataset_train, batch_size=self.batch_size, shuffle=self.shuffle
         )
@@ -412,8 +401,6 @@ class Trainer():
         """
 
         print('_put_model_to_device')
-        print('DEBUG a0:', type(dataset), dataset)
-        print('DEBUG a4:', type(Net), Net)
 
         # get the device
         self.device = torch.device(
@@ -512,6 +499,7 @@ class Trainer():
             self.nepoch = nepoch
 
             _log.info('Epoch 0:')
+            print('DEBUG: ', self.train_loader)
             self._eval(self.train_loader, 0, "training")
             if validate:
                 if self.valid_loader is None:
@@ -626,6 +614,7 @@ class Trainer():
         t0 = time()
         for _, data_batch in enumerate(loader):
 
+            print('DB', data_batch)
             data_batch = data_batch.to(self.device)
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
@@ -695,6 +684,7 @@ class Trainer():
         t0 = time()
         for _, data_batch in enumerate(self.train_loader):
 
+            print('DB', data_batch)
             data_batch = data_batch.to(self.device)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
@@ -763,6 +753,8 @@ class Trainer():
         """Format the network output depending on the task (classification/regression)."""
 
         print('_format_output')
+        print(self.classes_to_idx)
+        print('target', target)
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
@@ -772,10 +764,8 @@ class Trainer():
 
         elif self.task == targets.REGRESS:
             if self.transform_sigmoid is True:
-
                 # Sigmoid(x) = 1 / (1 + exp(-x))
                 pred = torch.sigmoid(pred.reshape(-1))
-
             else:
                 pred = pred.reshape(-1)
 
@@ -856,7 +846,6 @@ class Trainer():
             method (str): 'mcl' (Markov Clustering) or 'louvain'
         """
         print ('_PreCluster')
-        print ('DEBUG 00:', type(dataset))
         for fname, mol in tqdm(dataset.index_complexes):
 
             data = load_one_graph(fname, mol, self.node_features, self.edge_features)
