@@ -1,13 +1,18 @@
 from typing import Optional
 import numpy as np
 from deeprankcore.operations.graph import Graph
+from deeprankcore.operations.parsers import atomic_forcefield
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.domain import nodefeatures as Nfeat
+import logging
+
+_log = logging.getLogger(__name__)
 
 def add_features( # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph,
+    pdb_path: str,
+    graph: Graph,
     single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):
 
@@ -17,6 +22,10 @@ def add_features( # pylint: disable=unused-argument
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
+            
+            node.features[Nfeat.ATOMTYPE] = atom.element.onehot
+            node.features[Nfeat.PDBOCCUPANCY] = atom.occupancy
+            node.features[Nfeat.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}") 
 

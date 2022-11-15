@@ -8,7 +8,7 @@ from deeprankcore.molstruct.structure import Chain, PDBStructure
 from deeprankcore.molstruct.atom import Atom, AtomicElement
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.contact import Pair
-from deeprankcore.domain.aminoacids import amino_acids
+from deeprankcore.domain.aminoacidlist import amino_acids
 
 _log = logging.getLogger(__name__)
 

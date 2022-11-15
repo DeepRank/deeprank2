@@ -7,7 +7,7 @@ from typing import List
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.query import SingleResidueVariantResidueQuery
-from deeprankcore.domain.aminoacids import alanine, phenylalanine
+from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from tests.utils import PATH_TEST
 
 

@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List
 from deeprankcore.molstruct.aminoacid import AminoAcid
-from deeprankcore.domain.aminoacids import amino_acids
+from deeprankcore.domain.aminoacidlist import amino_acids
 
 amino_acids_by_letter = {
     amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids

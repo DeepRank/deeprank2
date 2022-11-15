@@ -4,7 +4,7 @@ from deeprankcore.operations.buildgraph import (
     get_residue_contact_pairs,
     get_surrounding_residues,
 )
-from deeprankcore.domain.aminoacids import valine
+from deeprankcore.domain.aminoacidlist import valine
 from deeprankcore.molstruct.atom import AtomicElement
 
 

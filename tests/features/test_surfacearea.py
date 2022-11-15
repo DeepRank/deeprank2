@@ -1,6 +1,6 @@
 from pdb2sql import pdb2sql
 import numpy as np
-from deeprankcore.domain.aminoacids import alanine
+from deeprankcore.domain.aminoacidlist import alanine
 from deeprankcore.molstruct.structure import PDBStructure, Chain
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.variant import SingleResidueVariant

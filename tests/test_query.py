@@ -2,7 +2,7 @@ from tempfile import mkstemp
 import numpy as np
 import os
 import h5py
-from deeprankcore.domain.aminoacids import (
+from deeprankcore.domain.aminoacidlist import (
     alanine,
     arginine,
     asparagine,
@@ -21,7 +21,7 @@ from deeprankcore.query import (
 from deeprankcore.domain import (nodefeatures as Nfeat,
                                 edgefeatures as Efeat,
                                 targettypes as targets)
-from deeprankcore.features import aminoacid, conservation, contact, surfacearea
+from deeprankcore.features import conservation, contact, molecular, surfacearea
 from deeprankcore.DataSet import HDF5DataSet
 
 
@@ -101,7 +101,7 @@ def test_interface_graph_residue():
         },
     )
 
-    g = query.build([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, molecular, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -129,7 +129,7 @@ def test_interface_graph_atomic():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, molecular, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -159,7 +159,7 @@ def test_variant_graph_101M():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, molecular, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -199,7 +199,7 @@ def test_variant_graph_1A0Z():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, molecular, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -237,7 +237,7 @@ def test_variant_graph_9API():
 
     # using a small cutoff here, because atomic graphs are big
 
-    g = query.build([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, molecular, conservation, contact])
 
     _check_graph_makes_sense(
         g,
@@ -268,7 +268,7 @@ def test_variant_residue_graph_101M():
         targets={targets.BINARY: 0},
     )
 
-    g = query.build([surfacearea, aminoacid, conservation, contact])
+    g = query.build([surfacearea, molecular, conservation, contact])
 
     _check_graph_makes_sense(
         g,

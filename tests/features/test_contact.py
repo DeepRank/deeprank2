@@ -7,7 +7,7 @@ from deeprankcore.molstruct.contact import AtomicContact, ResidueContact
 from deeprankcore.operations.graph import Edge, Graph
 from deeprankcore.operations.buildgraph import get_structure
 from deeprankcore.features.contact import add_features
-from deeprankcore.domain.aminoacids import alanine
+from deeprankcore.domain.aminoacidlist import alanine
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import edgefeatures as Efeat
 
