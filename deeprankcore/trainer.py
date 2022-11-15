@@ -397,9 +397,6 @@ class Trainer():
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
-        self.num_features = len(self.node_features)
-        self.num_edge_features = len(self.edge_features)
-
         # the target values are optional
         if dataset.get(0).y is not None:
             target_shape = dataset.get(0).y.shape[0]
@@ -410,17 +407,11 @@ class Trainer():
         if self.task == targets.REGRESS:
 
             self.output_shape = 1
-            print('DEBUG NG:', dataset.get(0).num_features)
-            print('DEBUG NS:', self.num_features)
-            print('DEBUG EG:', dataset.get(0).num_edge_features)
-            print('DEBUG ES:', self.num_edge_features)
-            
-
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                dataset.get(0).num_edge_features).to(
-                self.device)
+                dataset.get(0).num_edge_features,
+                                ).to(self.device)
 
         # classification mode
         elif self.task == targets.CLASSIF:
@@ -430,8 +421,9 @@ class Trainer():
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                self.num_edge_features).to(
-                self.device)
+                dataset.get(0).num_edge_features,
+                                ).to(self.device)
+
 
         # check for compatibility
         for metrics_exporter in self._metrics_exporters:
@@ -609,7 +601,6 @@ class Trainer():
         for _, data_batch in enumerate(loader):
 
             data_batch = data_batch.to(self.device)
-            print('DEBUG DB:', data_batch)
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
 
@@ -836,7 +827,6 @@ class Trainer():
         """
         for fname, mol in tqdm(dataset.index_complexes):
 
-            # print('DEBUG T:', fname, mol)
             data = load_one_graph(fname, mol, self.node_features, self.edge_features)
 
             if data is None:
