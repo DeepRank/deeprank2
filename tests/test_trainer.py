@@ -196,9 +196,9 @@ class TestTrainer(unittest.TestCase):
         # )
         
         warning_message = '''
-        sgat model is not working, it only works if 1 edge feature is present in the DataSet.\n
-        This is true even if only 1 edge feature is used by the trainer, it will still use all edge features in the forward method:\n
-        "data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))", where data.edge_attr are all edge_features
+        sgat model is not working, it only works if 1 edge feature is present in the DataSet.
+        This is true even if only 1 edge feature is used by the trainer, it will still use all edge features in the forward method:
+        "data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))", where data.edge_attr is the daya for all edge_features
         '''
 
         warnings.warn(warning_message)
