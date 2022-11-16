@@ -20,10 +20,10 @@ deeprankcore.tools.BioWrappers module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.tools.CustomizeGraph module
+deeprankcore.tools.customizegraph module
 ----------------------------------------
 
-.. automodule:: deeprankcore.tools.CustomizeGraph
+.. automodule:: deeprankcore.tools.customizegraph
    :members:
    :undoc-members:
    :show-inheritance:
@@ -60,26 +60,18 @@ deeprankcore.tools.pdb module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.tools.pssm module
+deeprankcore.models.pssm module
 ------------------------------
 
-.. automodule:: deeprankcore.tools.pssm
+.. automodule:: deeprankcore.models.pssm
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.tools.pssm\_3dcons\_to\_deeprank module
-----------------------------------------------------
-
-.. automodule:: deeprankcore.tools.pssm_3dcons_to_deeprank
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.tools.score module
+deeprankcore.tools.target module
 -------------------------------
 
-.. automodule:: deeprankcore.tools.score
+.. automodule:: deeprankcore.tools.target
    :members:
    :undoc-members:
    :show-inheritance:
