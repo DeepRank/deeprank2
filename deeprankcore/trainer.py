@@ -621,6 +621,78 @@ class Trainer():
 
             self.complete_exporter.save_all_metrics()
 
+    def _epoch(self, epoch_number: int, pass_name: str) -> float:
+        """
+        Runs a single epoch
+
+        Args:
+            epoch_number (int)
+            pass_name (str): 'training', 'validation' or 'testing'
+
+        Returns:
+            running loss
+        """
+        print('_epoch')
+        sum_of_losses = 0
+        count_predictions = 0
+
+        target_vals = []
+        outputs = []
+        entry_names = []
+
+        t0 = time()
+        for _, data_batch in enumerate(self.train_loader):
+
+            data_batch = data_batch.to(self.device)
+            self.optimizer.zero_grad()
+            pred = self.model(data_batch)
+            pred, data_batch.y = self._format_output(pred, data_batch.y)
+
+            loss_ = self.loss(pred, data_batch.y)
+            loss_.backward()
+            self.optimizer.step()
+
+            count_predictions += pred.shape[0]
+
+            # convert mean back to sum
+            sum_of_losses += loss_.detach().item() * pred.shape[0]
+
+            target_vals += data_batch.y.tolist()
+
+            # Get the outputs for export
+            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
+            if self.task == targets.CLASSIF:
+                pred = F.softmax(pred.detach(), dim=1)
+            else:
+                pred = pred.detach().reshape(-1)
+
+            outputs += pred.tolist()
+
+            # get the data
+            entry_names += data_batch['mol']
+
+        dt = time() - t0
+
+        if count_predictions > 0:
+            epoch_loss = sum_of_losses / count_predictions
+        else:
+            epoch_loss = 0.0
+
+        self._metrics_exporters.process(
+            pass_name, epoch_number, entry_names, outputs, target_vals)
+
+        self.complete_exporter.epoch_process(
+            pass_name,
+            epoch_number,
+            entry_names,
+            outputs,
+            target_vals,
+            epoch_loss)
+
+        self._log_epoch_data(pass_name, epoch_loss, dt)
+
+        return epoch_loss
+
     def _eval( # pylint: disable=too-many-locals
             self,
             loader: DataLoader,
@@ -700,78 +772,6 @@ class Trainer():
         self._log_epoch_data(pass_name, eval_loss, dt)
 
         return eval_loss
-
-    def _epoch(self, epoch_number: int, pass_name: str) -> float:
-        """
-        Runs a single epoch
-
-        Args:
-            epoch_number (int)
-            pass_name (str): 'training', 'validation' or 'testing'
-
-        Returns:
-            running loss
-        """
-        print('_epoch')
-        sum_of_losses = 0
-        count_predictions = 0
-
-        target_vals = []
-        outputs = []
-        entry_names = []
-
-        t0 = time()
-        for _, data_batch in enumerate(self.train_loader):
-
-            data_batch = data_batch.to(self.device)
-            self.optimizer.zero_grad()
-            pred = self.model(data_batch)
-            pred, data_batch.y = self._format_output(pred, data_batch.y)
-
-            loss_ = self.loss(pred, data_batch.y)
-            loss_.backward()
-            self.optimizer.step()
-
-            count_predictions += pred.shape[0]
-
-            # convert mean back to sum
-            sum_of_losses += loss_.detach().item() * pred.shape[0]
-
-            target_vals += data_batch.y.tolist()
-
-            # Get the outputs for export
-            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == targets.CLASSIF:
-                pred = F.softmax(pred.detach(), dim=1)
-            else:
-                pred = pred.detach().reshape(-1)
-
-            outputs += pred.tolist()
-
-            # get the data
-            entry_names += data_batch['mol']
-
-        dt = time() - t0
-
-        if count_predictions > 0:
-            epoch_loss = sum_of_losses / count_predictions
-        else:
-            epoch_loss = 0.0
-
-        self._metrics_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, target_vals)
-
-        self.complete_exporter.epoch_process(
-            pass_name,
-            epoch_number,
-            entry_names,
-            outputs,
-            target_vals,
-            epoch_loss)
-
-        self._log_epoch_data(pass_name, epoch_loss, dt)
-
-        return epoch_loss
 
     @staticmethod
     def _log_epoch_data(stage, loss, time):
