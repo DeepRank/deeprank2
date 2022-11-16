@@ -24,7 +24,6 @@ def space_if_none(value):
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
 
     with warnings.catch_warnings(record=PDBConstructionWarning):
-        warnings.simplefilter("ignore")
         parser = PDBParser()
         structure = parser.get_structure('_tmp', pdb_path)
     
