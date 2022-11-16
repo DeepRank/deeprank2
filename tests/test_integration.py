@@ -75,43 +75,39 @@ def test_integration(): # pylint: disable=too-many-locals
 
         dataset_train = GraphDataset(
             hdf5_path = output_paths[:n_train],
-            node_features = node_features,
-            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         dataset_val = GraphDataset(
             hdf5_path = output_paths[n_train:-n_test],
-            node_features = node_features,
-            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         dataset_test = GraphDataset(
             hdf5_path = output_paths[-n_test],
-            node_features = node_features,
-            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         trainer = Trainer(
+            GINet,
             dataset_train,
             dataset_val,
             dataset_test,
-            GINet,
+            node_features = node_features,
+            edge_features = edge_features,
             batch_size=64,
             metrics_exporters=[OutputExporter(metrics_directory)],
             transform_sigmoid=True,
         )   
 
-        trainer.train(nepoch=5, validate=True) 
+        trainer.train(nepoch=3, validate=True) 
 
         trainer.save_model("test.pth.tar")
 
-        Trainer(dataset_train, dataset_val, dataset_test, GINet, pretrained_model="test.pth.tar")
+        Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
 
         assert len(os.listdir(metrics_directory)) > 0
 

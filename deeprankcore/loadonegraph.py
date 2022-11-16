@@ -12,7 +12,7 @@ from deeprankcore.domain import targettypes as targets
 _log = logging.getLogger(__name__)
 
 
-def load_one_graph(fname, mol, 
+def load_one_graph(fname, mol, # pylint: disable=too-many-arguments, too-many-locals
                     transform = None,
                     target=None,
                     edge_features_transform = None,

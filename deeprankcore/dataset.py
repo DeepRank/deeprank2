@@ -1,15 +1,11 @@
 import sys
 import os
 import logging
-import warnings
-import torch
 import numpy as np
 from torch_geometric.data.dataset import Dataset
-from torch_geometric.data.data import Data
 from tqdm import tqdm
 import h5py
 from ast import literal_eval
-from deeprankcore.domain.features import groups
 from deeprankcore.domain import targettypes as targets
 from typing import Callable, List, Union
 from deeprankcore.loadonegraph import load_one_graph
