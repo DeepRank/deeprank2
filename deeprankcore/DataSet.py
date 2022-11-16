@@ -10,9 +10,8 @@ import torch
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
 from typing import Callable, List, Union
-from deeprankcore.domain import (nodefeatures as Nfeat,
-                                edgefeatures as Efeat,
-                                targettypes as targets)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
+                                targetstorage as targets)
 
 
 _log = logging.getLogger(__name__)

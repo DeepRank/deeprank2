@@ -1,6 +1,6 @@
 import numpy as np
 from pdb2sql import pdb2sql
-from deeprankcore.domain import nodefeatures as Nfeat
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import serine
 from deeprankcore.utils.graph import build_atomic_graph, build_residue_graph
 from deeprankcore.utils.buildgraph import get_structure, get_surrounding_residues

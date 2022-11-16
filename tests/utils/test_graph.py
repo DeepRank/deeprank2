@@ -8,8 +8,7 @@ from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.utils.graph import Graph, Edge, Node
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.molstruct.pair import ResidueContact
-from deeprankcore.domain import (nodefeatures as Nfeat,
-                                edgefeatures as Efeat)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat)
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals

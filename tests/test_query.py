@@ -18,9 +18,8 @@ from deeprankcore.query import (
     ProteinProteinInterfaceAtomicQuery,
     ProteinProteinInterfaceResidueQuery
 )
-from deeprankcore.domain import (nodefeatures as Nfeat,
-                                edgefeatures as Efeat,
-                                targettypes as targets)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
+                                targetstorage as targets)
 from deeprankcore.features import components, conservation, contact, surfacearea
 from deeprankcore.DataSet import HDF5DataSet
 

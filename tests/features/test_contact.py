@@ -9,7 +9,7 @@ from deeprankcore.utils.graph import Edge, Graph
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.features.contact import add_features
 from deeprankcore.domain.aminoacidlist import alanine
-from deeprankcore.domain import edgefeatures as Efeat
+from deeprankcore.domain import edgestorage as Efeat
 
 
 

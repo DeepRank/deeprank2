@@ -17,9 +17,8 @@ from deeprankcore.utils.metrics import (
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
-from deeprankcore.domain import (nodefeatures as Nfeat,
-                                edgefeatures as Efeat,
-                                targettypes as targets)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
+                                targetstorage as targets)
 
 
 _log = logging.getLogger(__name__)

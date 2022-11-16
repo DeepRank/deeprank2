@@ -3,7 +3,7 @@ from pdb2sql import pdb2sql
 from deeprankcore.features.exposure import add_features
 from deeprankcore.utils.graph import build_residue_graph
 from deeprankcore.utils.buildgraph import get_structure, get_residue_contact_pairs
-from deeprankcore.domain import nodefeatures as Nfeat
+from deeprankcore.domain import nodestorage as Nfeat
 
 
 def test_add_features():

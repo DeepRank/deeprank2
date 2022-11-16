@@ -4,7 +4,7 @@ import os
 import numpy as np
 from typing import Dict, Union
 from pdb2sql import StructureSimilarity
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.domain import targetstorage as targets
 
 
 def add_target(graph_path, target_name, target_list, sep=" "):

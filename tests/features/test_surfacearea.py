@@ -10,7 +10,7 @@ from deeprankcore.utils.buildgraph import (
     get_structure,
     get_residue_contact_pairs,
     get_surrounding_residues)
-from deeprankcore.domain import nodefeatures as Nfeat
+from deeprankcore.domain import nodestorage as Nfeat
 
 
 

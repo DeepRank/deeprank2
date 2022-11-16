@@ -5,7 +5,7 @@ from deeprankcore.utils.parsing import atomic_forcefield
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.domain import nodefeatures as Nfeat
+from deeprankcore.domain import nodestorage as Nfeat
 import logging
 
 _log = logging.getLogger(__name__)

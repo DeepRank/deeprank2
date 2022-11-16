@@ -3,7 +3,7 @@ import numpy as np
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import get_surface, residue_depth
 from Bio.PDB.HSExposure import HSExposureCA
-from deeprankcore.domain import nodefeatures as Nfeat
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.utils.graph import Graph

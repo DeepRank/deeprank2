@@ -5,7 +5,7 @@ from typing import List
 from deeprankcore.utils.graph import Node, Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
-from deeprankcore.domain import nodefeatures as Nfeat
+from deeprankcore.domain import nodestorage as Nfeat
 
 freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member
 logging.getLogger(__name__)

@@ -10,9 +10,8 @@ from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter
 from deeprankcore.tools.target import compute_targets
-from deeprankcore.domain import (nodefeatures as Nfeat,
-                                edgefeatures as Efeat,
-                                targettypes as targets)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
+                                targetstorage as targets)
 import tempfile
 from tests._utils import PATH_TEST
 

@@ -9,8 +9,7 @@ import networkx
 import community
 import markov_clustering
 from deeprankcore.tools.visualization.embedding import manifold_embedding
-from deeprankcore.domain import (nodefeatures as Nfeat,
-                                 edgefeatures as Efeat)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat)
 
 
 

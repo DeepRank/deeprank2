@@ -6,9 +6,8 @@ from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.pair import Contact, AtomicContact, ResidueContact
 from deeprankcore.utils.grid import MapMethod, Grid, GridSettings
-from deeprankcore.domain import (nodefeatures as Nfeat, 
-                                edgefeatures as Efeat,
-                                targettypes as targets)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, 
+                                targetstorage as targets)
 from scipy.spatial import distance_matrix
 
 
