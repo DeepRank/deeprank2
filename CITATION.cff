@@ -18,6 +18,11 @@ authors:
     family-names: Baakman
     affiliation: Radboud University Medical Center
     orcid: 'https://orcid.org/0000-0003-4317-1566'
+  - given-names: Dani
+    family-names: Bodor
+    email: d.bodor@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0003-2109-2349'
   - given-names: Daniel
     family-names: Rademaker
     affiliation: Radboud University Medical Center
@@ -34,15 +39,15 @@ authors:
     family-names: Parizi
     affiliation: Radboud University Medical Center
     orcid: 'https://orcid.org/0000-0003-4230-7492'
-  - affiliation: Radboud University Medical Center
-    orcid: 'https://orcid.org/0000-0002-2613-538X'
-    given-names: Li C.
+  - given-names: Li C.
     family-names: Xue
+    affiliation: Radboud University Medical Center
+    orcid: 'https://orcid.org/0000-0002-2613-538X'
 abstract: >-
-  deeprankcore allows ranking of Protein-protein
-  Interface using a graph representation of the
+  deeprankcore allows ranking of protein-protein
+  interface using a graph representation of the
   contact residues or atoms. Graphs of such
-  interfaces are used to train graph neural network
+  interfaces are used to train graph neural networks
   for the prediction of the experimental validity of
   the interface.
 keywords:
