@@ -8,18 +8,17 @@ import warnings
 import torch
 from deeprankcore.Trainer import Trainer
 from deeprankcore.DataSet import HDF5DataSet
-from deeprankcore.ginet import GINet
-from deeprankcore.foutnet import FoutNet
-from deeprankcore.naive_gnn import NaiveNetwork
-from deeprankcore.sGAT import sGAT
-from deeprankcore.models.metrics import (
+from deeprankcore.neuralnets.ginet import GINet
+from deeprankcore.neuralnets.foutnet import FoutNet
+from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
+from deeprankcore.neuralnets.sgat import SGAT
+from deeprankcore.utils.metrics import (
     OutputExporter,
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
-from deeprankcore.domain.features import groups, edgefeats
-from deeprankcore.domain.features import nodefeats as Nfeat
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
+                                targetstorage as targets)
 
 
 _log = logging.getLogger(__name__)
@@ -93,16 +92,16 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         data = dataset_train.get(0)
 
         for name, data_tensor in (("x", data.x), ("y", data.y),
-                                  (groups.INDEX, data.edge_index),
+                                  (Efeat.INDEX, data.edge_index),
                                   ("edge_attr", data.edge_attr),
-                                  (groups.POSITION, data.pos),
+                                  (Nfeat.POSITION, data.pos),
                                   ("cluster0",data.cluster0),
                                   ("cluster1", data.cluster1)):
 
             if data_tensor is not None:
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
-    trainer.train(nepoch=10, validate=True)
+    trainer.train(nepoch=3, validate=True)
 
     trainer.save_model("test.pth.tar")
 
@@ -129,7 +128,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_features,
-            [edgefeats.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
             [OutputExporter(self.work_directory)],
@@ -144,7 +143,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
             default_features,
-            [edgefeats.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
             [OutputExporter(self.work_directory)],
@@ -161,7 +160,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/variants.hdf5",
             GINet,
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
-            [edgefeats.DISTANCE],
+            [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
             [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -178,7 +177,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             FoutNet,
             default_features,
-            [edgefeats.DISTANCE],
+            [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
             [],
@@ -191,9 +190,9 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
-            sGAT,
+            SGAT,
             default_features,
-            [edgefeats.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
             [],
@@ -208,7 +207,7 @@ class TestTrainer(unittest.TestCase):
             "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
             default_features,
-            [edgefeats.DISTANCE],
+            [Efeat.DISTANCE],
             targets.REGRESS,
             "BA",
             [OutputExporter(self.work_directory)],
@@ -222,9 +221,9 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
-                sGAT,
+                SGAT,
                 default_features,
-                [edgefeats.DISTANCE],
+                [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
                 [TensorboardBinaryClassificationExporter(self.work_directory)],
@@ -240,7 +239,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/variants.hdf5",
                 GINet,
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
-                [edgefeats.DISTANCE],
+                [Efeat.DISTANCE],
                 targets.CLASSIF,
                 targets.BINARY,
                 [ScatterPlotExporter(self.work_directory)],
@@ -406,7 +405,7 @@ class TestTrainer(unittest.TestCase):
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
                 default_features,
-                [edgefeats.DISTANCE],
+                [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
                 [OutputExporter(self.work_directory)],

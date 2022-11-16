@@ -3,17 +3,17 @@ from shutil import rmtree
 import os
 import h5py
 from deeprankcore.preprocess import preprocess
-from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from tests.utils import PATH_TEST
+from deeprankcore.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
-from deeprankcore.ginet import GINet
-from deeprankcore.models.metrics import OutputExporter
-from deeprankcore.tools.score import get_all_scores
-from deeprankcore.domain.features import nodefeats as Nfeat
-from deeprankcore.domain.features import edgefeats
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.neuralnets.ginet import GINet
+from deeprankcore.utils.metrics import OutputExporter
+from deeprankcore.tools.target import compute_targets
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
+                                targetstorage as targets)
 import tempfile
+from tests._utils import PATH_TEST
 
 def test_integration(): # pylint: disable=too-many-locals
     """
@@ -37,7 +37,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
     try:
 
-        all_targets = get_all_scores(pdb_path, ref_path)
+        all_targets = compute_targets(pdb_path, ref_path)
 
         count_queries = 5
         queries = []
@@ -68,7 +68,7 @@ def test_integration(): # pylint: disable=too-many-locals
         n_train = len(output_paths) - (n_val + n_test)
 
         node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-        edge_features = [edgefeats.DISTANCE]
+        edge_features = [Efeat.DISTANCE]
 
         dataset_train = HDF5DataSet(
             hdf5_path = output_paths[:n_train],

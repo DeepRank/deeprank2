@@ -52,14 +52,6 @@ deeprankcore.models.metrics module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.models.pair module
--------------------------------
-
-.. automodule:: deeprankcore.models.pair
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 deeprankcore.models.polarity module
 -----------------------------------
 
@@ -84,10 +76,10 @@ deeprankcore.models.query module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.models.structure module
+deeprankcore.molstruct module
 ------------------------------------
 
-.. automodule:: deeprankcore.models.structure
+.. automodule:: deeprankcore.molstruct
    :members:
    :undoc-members:
    :show-inheritance:

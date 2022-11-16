@@ -3,9 +3,8 @@ from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys
 from deeprankcore.Trainer import _DivideDataSet
 from torch_geometric.data.data import Data
 import h5py
-from deeprankcore.domain.features import edgefeats 
-from deeprankcore.domain.features import nodefeats as Nfeat
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
+                                targetstorage as targets)
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
@@ -17,7 +16,7 @@ class TestDataSet(unittest.TestCase):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
-            edge_feature=[edgefeats.DISTANCE],
+            edge_feature=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
         )
@@ -26,7 +25,7 @@ class TestDataSet(unittest.TestCase):
         HDF5DataSet(
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
-            edge_feature=[edgefeats.DISTANCE],
+            edge_feature=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
             dict_filter={targets.IRMSD: "<10"},
@@ -41,7 +40,7 @@ class TestDataSet(unittest.TestCase):
         dataset = HDF5DataSet(
             hdf5_path=self.hdf5_path,
             node_feature=node_feats,
-            edge_feature=[edgefeats.DISTANCE],
+            edge_feature=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
             transform=operator
@@ -54,7 +53,7 @@ class TestDataSet(unittest.TestCase):
         dataset = HDF5DataSet(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
             node_feature=node_feats,
-            edge_feature=[edgefeats.DISTANCE],
+            edge_feature=[Efeat.DISTANCE],
             target=targets.BINARY
         )
 

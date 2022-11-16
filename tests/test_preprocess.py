@@ -3,12 +3,12 @@ from shutil import rmtree
 from os.path import join
 import h5py
 from deeprankcore.preprocess import preprocess
-from deeprankcore.models.query import SingleResidueVariantResidueQuery
-from deeprankcore.models.amino_acid import alanine, phenylalanine
-from tests.utils import PATH_TEST
 from typing import List, Union
 from types import ModuleType
-from deeprankcore.feature import sasa
+from deeprankcore.features import surfacearea
+from deeprankcore.query import SingleResidueVariantResidueQuery
+from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
+from tests._utils import PATH_TEST
 
 
 def preprocess_tester(feature_modules: Union[List[ModuleType], str]):
@@ -61,7 +61,7 @@ def test_preprocess_single_feature():
     Tests preprocessing for single feature.
     """
 
-    preprocess_tester([sasa])
+    preprocess_tester([surfacearea])
 
 
 def test_preprocess_all_features():
