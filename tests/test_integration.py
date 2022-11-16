@@ -13,7 +13,6 @@ from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 import tempfile
-from tests._utils import PATH_TEST
 
 def test_integration(): # pylint: disable=too-many-locals
     """
