@@ -11,12 +11,9 @@ from deeprankcore.models.amino_acid import alanine, phenylalanine
 from tests.utils import PATH_TEST
 
 
-def preprocess_tester(feature_modules: List):
+def test_preprocess():
     """
     Generic function to test preprocessing several PDB files into their feature representation HDF5 file.
-
-    Args:
-        feature_modules: list of feature modules (from .deeprankcore.feature) to be passed to preprocess
     """
 
     output_directory = mkdtemp()
@@ -39,7 +36,7 @@ def preprocess_tester(feature_modules: List):
             )
             queries.append(query)
 
-        output_paths = preprocess(feature_modules, queries, prefix, 10)
+        output_paths = preprocess(queries, prefix, 10)
         assert len(output_paths) > 0
 
         graph_names = []
@@ -53,29 +50,3 @@ def preprocess_tester(feature_modules: List):
 
     finally:
         rmtree(output_directory)
-
-
-def test_preprocess_single_feature():
-    """
-    Tests preprocessing for single feature.
-    """
-
-    imp = importlib.import_module(('deeprankcore.feature.sasa'))
-    preprocess_tester([imp])
-
-
-def test_preprocess_all_features():
-    """
-    Tests preprocessing for all features.
-    """
-
-    # copying this from feature.__init__.py
-    modules = glob.glob(join('./deeprankcore/feature/', "*.py"))
-    modules = [ basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py')]
-
-    feature_modules = []
-    for m in modules:
-        imp = importlib.import_module('deeprankcore.feature.' + m)
-        feature_modules.append(imp)
-
-    preprocess_tester(feature_modules)

@@ -9,8 +9,6 @@ from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import bsa, pssm, amino_acid, biopython
 from deeprankcore.domain import targettypes as targets
 
-feature_modules = [bsa, pssm, biopython, atomic_contact]
-
 queries = []
 
 # Append data points
@@ -54,7 +52,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
 # Generate graphs and save them in hdf5 files
 # The default creates a number of hdf5 files equals to the cpu cores available
 # See deeprankcore.preprocess.preprocess for more details
-output_paths = preprocess(feature_modules, queries, "<output_folder>/<prefix_for_outputs>")
+output_paths = preprocess(queries, "<output_folder>/<prefix_for_outputs>")
 
 ```
 

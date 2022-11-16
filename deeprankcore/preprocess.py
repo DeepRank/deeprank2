@@ -6,9 +6,8 @@ from functools import partial
 from multiprocessing import Pool
 import logging
 import os
-
 import importlib
-
+from os.path import basename, isfile, join
 from deeprankcore.models.query import Query
 
 
@@ -22,24 +21,21 @@ def _preprocess_one_query(prefix: str, feature_names: List[str], query: Query):
     # because only one process may access an hdf5 file at the time:
     output_path = f"{prefix}-{os.getpid()}.hdf5"
 
-    feature_modules = [importlib.import_module(name) for name in feature_names]
+    feature_modules = [
+        importlib.import_module('deeprankcore.feature.' + name) \
+            for name in feature_names]
 
     graph = query.build_graph(feature_modules)
 
     graph.write_to_hdf5(output_path)
 
 
-def preprocess(feature_modules: List, queries: List[Query],
+def preprocess(queries: List[Query],
                prefix: Optional[str] = None,
                process_count: Optional[int] = None):
 
     """
     Args:
-        feature_modules: list of features' modules used to generate features.
-        Each feature's module must implement the add_features function, and
-        features' modules can be found (or should be placed in case of a custom made feature)
-        in deeprankcore.feature folder.
-
         queries: all the queries objects that have to be preprocessed.
 
         prefix: prefix for the output files. ./preprocessed-data- by default.
@@ -58,9 +54,12 @@ def preprocess(feature_modules: List, queries: List[Query],
     if prefix is None:
         prefix = "preprocessed-data"
 
+    feature_modules = glob(join('./deeprankcore/feature/', "*.py"))
+    feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
+
     _log.info('Creating pool function to process the queries...')
     pool_function = partial(_preprocess_one_query, prefix,
-                            [m.__name__ for m in feature_modules])
+                            feature_names)
 
     with Pool(process_count) as pool:
         _log.info('Starting pooling...\n')
