@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from glob import glob
-from typing import Optional, List
+from typing import Optional, List, Union
+from types import ModuleType
 from functools import partial
 from multiprocessing import Pool
 import logging
@@ -29,9 +30,11 @@ def _preprocess_one_query(prefix: str, feature_names: List[str], query: Query):
     graph.write_to_hdf5(output_path)
 
 
-def preprocess(queries: List[Query],
-               prefix: Optional[str] = None,
-               process_count: Optional[int] = None):
+def preprocess(
+    queries: List[Query],
+    prefix: Optional[str] = None,
+    process_count: Optional[int] = None,
+    feature_modules: Union[List[ModuleType], str] = "all"):
 
     """
     Args:
@@ -41,6 +44,13 @@ def preprocess(queries: List[Query],
         
         process_count: how many subprocesses to be run simultaneously.
         By default takes all available cpu cores.
+
+        feature_modules: list of features' modules used to generate features.
+        Each feature's module must implement the add_features function, and
+        features' modules can be found (or should be placed in case of a custom made feature)
+        in deeprankcore.features folder.
+        If "all", all available modules in deeprankcore.features are used to generate the features. 
+        Defaults to "all".
     """
 
     if process_count is None:
@@ -52,9 +62,12 @@ def preprocess(queries: List[Query],
 
     if prefix is None:
         prefix = "preprocessed-data"
-
-    feature_modules = glob(join('./deeprankcore/feature/', "*.py"))
-    feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
+    
+    if feature_modules == "all":
+        feature_modules = glob(join('./deeprankcore/feature/', "*.py"))
+        feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
+    else:
+        feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
 
     _log.info('Creating pool function to process the queries...')
     pool_function = partial(_preprocess_one_query, prefix,

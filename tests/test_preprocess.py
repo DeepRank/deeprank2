@@ -6,11 +6,18 @@ from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import SingleResidueVariantResidueQuery
 from deeprankcore.models.amino_acid import alanine, phenylalanine
 from tests.utils import PATH_TEST
+from typing import List, Union
+from types import ModuleType
+from deeprankcore.feature import sasa
 
 
-def test_preprocess():
+def preprocess_tester(feature_modules: Union[List[ModuleType], str]):
     """
     Generic function to test preprocessing several PDB files into their feature representation HDF5 file.
+
+    Args:
+        feature_modules: list of feature modules (from .deeprankcore.feature) to be passed to preprocess.
+        If "all", all available modules in deeprankcore.features are used to generate the features.
     """
 
     output_directory = mkdtemp()
@@ -33,7 +40,7 @@ def test_preprocess():
             )
             queries.append(query)
 
-        output_paths = preprocess(queries, prefix, 10)
+        output_paths = preprocess(queries, prefix, 10, feature_modules)
         assert len(output_paths) > 0
 
         graph_names = []
@@ -47,3 +54,19 @@ def test_preprocess():
 
     finally:
         rmtree(output_directory)
+
+
+def test_preprocess_single_feature():
+    """
+    Tests preprocessing for single feature.
+    """
+
+    preprocess_tester([sasa])
+
+
+def test_preprocess_all_features():
+    """
+    Tests preprocessing for all features.
+    """
+
+    preprocess_tester("all")
