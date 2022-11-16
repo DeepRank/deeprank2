@@ -25,7 +25,7 @@ from deeprankcore.domain.features import edgefeats as Efeat
 from deeprankcore.domain import targettypes as targets
 
 from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
-from deeprankcore.dataset import GraphDataset
+from deeprankcore.DataSet import GraphDataset
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):

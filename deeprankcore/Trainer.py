@@ -17,7 +17,7 @@ from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExport
 from deeprankcore.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targettypes as targets
 from deeprankcore.domain.features import groups
-from deeprankcore.dataset import GraphDataset
+from deeprankcore.DataSet import GraphDataset
 from deeprankcore.loadonegraph import load_one_graph
 
 

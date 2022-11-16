@@ -7,8 +7,8 @@ import logging
 import warnings
 import torch
 import h5py
-from deeprankcore.trainer import Trainer, _divide_dataset
-from deeprankcore.dataset import GraphDataset
+from deeprankcore.Trainer import Trainer, _divide_dataset
+from deeprankcore.DataSet import GraphDataset
 from deeprankcore.ginet import GINet
 from deeprankcore.foutnet import FoutNet
 from deeprankcore.naive_gnn import NaiveNetwork
