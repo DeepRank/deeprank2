@@ -17,7 +17,7 @@ from deeprankcore.models.metrics import MetricsExporterCollection, MetricsExport
 from deeprankcore.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targettypes as targets
 from deeprankcore.domain.features import groups
-from deeprankcore.dataset import HDF5DataSet
+from deeprankcore.dataset import GraphDataset
 from deeprankcore.loadonegraph import load_one_graph
 
 
@@ -28,9 +28,9 @@ class Trainer():
 
     def __init__(self, # pylint: disable=too-many-arguments
                  Net = None,
-                 dataset_train: HDF5DataSet = None,
-                 dataset_val: HDF5DataSet = None,
-                 dataset_test: HDF5DataSet = None,
+                 dataset_train: GraphDataset = None,
+                 dataset_val: GraphDataset = None,
+                 dataset_test: GraphDataset = None,
                  val_size: Union[float, int] = None,
                 #  test_size = None, # should be implemented equivalent to val_size
                  pretrained_model: str = None,
@@ -52,20 +52,20 @@ class Trainer():
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
 
-            dataset_train (HDF5DataSet object, required): training set used during training.
+            dataset_train (GraphDataset object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
 
-            dataset_val (HDF5DataSet object, optional): evaluation set used during training.
+            dataset_val (GraphDataset object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
 
-            dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
+            dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
 
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
                 to use for validation.
                 - Should be set to 0 if no validation set is needed.
                 - Should be not set (None) if dataset_val is not None.
-                Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
+                Defaults to None, and it is set to 0.25 in _divide_dataset function if no dataset_val is provided.
 
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
 
@@ -82,7 +82,7 @@ class Trainer():
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
             target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
             here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
-            please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
+            please convert the categorical classes into numerical class indices before defining the GraphDataset instance.
             Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification.
@@ -175,7 +175,7 @@ class Trainer():
             self.cluster_nodes = dataset_train.clustering_method
 
             # set neural net
-            self.val_size = val_size # if None, will be set to 0.25 in _DivideDataSet function
+            self.val_size = val_size # if None, will be set to 0.25 in _divide_dataset function
             self.batch_size = batch_size
             self.shuffle = shuffle
 
@@ -203,7 +203,7 @@ class Trainer():
             else:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
 
-    def _check_features(self, dataset: HDF5DataSet):
+    def _check_features(self, dataset: GraphDataset):
         """Checks if the required features exist"""
         print('_check_features')
         f = h5py.File(dataset.hdf5_path[0], "r")
@@ -265,9 +265,9 @@ class Trainer():
         Loads model
 
         Args:
-            dataset_train (str): HDF5DataSet object, training set used during training phase.
-            dataset_val (str): HDF5DataSet object, evaluation set used during training phase.
-            dataset_eval (str): HDF5DataSet object, the independent evaluation set used after
+            dataset_train (str): GraphDataset object, training set used during training phase.
+            dataset_val (str): GraphDataset object, evaluation set used during training phase.
+            dataset_eval (str): GraphDataset object, the independent evaluation set used after
                 training phase. 
             Net (function): neural network.
 
@@ -284,7 +284,7 @@ class Trainer():
                     self._precluster(dataset_val, method=self.cluster_nodes)
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
-                    dataset_train, dataset_val = _DivideDataSet(
+                    dataset_train, dataset_val = _divide_dataset(
                         dataset_train, val_size=self.val_size)
             else:
                 raise ValueError(
@@ -328,11 +328,11 @@ class Trainer():
 
         self.set_loss()
 
-    def _precluster(self, dataset: HDF5DataSet, method: str):
+    def _precluster(self, dataset: GraphDataset, method: str):
         """Pre-clusters nodes of the graphs
 
         Args:
-            dataset (HDF5DataSet object)
+            dataset (GraphDataset object)
             method (str): 'mcl' (Markov Clustering) or 'louvain'
         """
         print ('_precluster')
@@ -376,12 +376,12 @@ class Trainer():
 
             f5.close()
 
-    def _put_model_to_device(self, dataset: HDF5DataSet, Net):
+    def _put_model_to_device(self, dataset: GraphDataset, Net):
         """
         Puts the model on the available device
 
         Args:
-            dataset (str): HDF5DataSet object
+            dataset (str): GraphDataset object
             Net (function): Neural Network
 
         Raises:
@@ -809,7 +809,7 @@ class Trainer():
         Loads pretrained model
 
         Args:
-            dataset_test: HDF5DataSet object to be tested with the model
+            dataset_test: GraphDataset object to be tested with the model
             Net (function): neural network
         """
         print('_load_pretrained_model')
@@ -892,19 +892,19 @@ class Trainer():
 
  
 
-def _DivideDataSet(dataset, val_size=None):
+def _divide_dataset(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
-        dataset (HDF5DataSet): input dataset to be split into training and validation data
+        dataset (GraphDataset): input dataset to be split into training and validation data
         val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to 0.25.
 
     Returns:
-        HDF5DataSet: [description]
+        GraphDataset: [description]
     """
 
-    print('_DivideDataSet')
+    print('_divide_dataset')
     if val_size is None:
         val_size = 0.25
     full_size = len(dataset)

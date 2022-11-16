@@ -6,7 +6,7 @@ from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.feature import amino_acid, atomic_contact, biopython, bsa, pssm, sasa
 from tests.utils import PATH_TEST
-from deeprankcore.dataset import HDF5DataSet
+from deeprankcore.dataset import GraphDataset
 from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.models.metrics import OutputExporter
@@ -73,7 +73,7 @@ def test_integration(): # pylint: disable=too-many-locals
         node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
         edge_features = [edgefeats.DISTANCE]
 
-        dataset_train = HDF5DataSet(
+        dataset_train = GraphDataset(
             hdf5_path = output_paths[:n_train],
             node_features = node_features,
             edge_features = edge_features,
@@ -81,7 +81,7 @@ def test_integration(): # pylint: disable=too-many-locals
             clustering_method = "mcl",
         )
 
-        dataset_val = HDF5DataSet(
+        dataset_val = GraphDataset(
             hdf5_path = output_paths[n_train:-n_test],
             node_features = node_features,
             edge_features = edge_features,
@@ -89,7 +89,7 @@ def test_integration(): # pylint: disable=too-many-locals
             clustering_method = "mcl",
         )
 
-        dataset_test = HDF5DataSet(
+        dataset_test = GraphDataset(
             hdf5_path = output_paths[-n_test],
             node_features = node_features,
             edge_features = edge_features,

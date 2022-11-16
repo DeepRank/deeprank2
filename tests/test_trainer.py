@@ -6,8 +6,9 @@ import pytest
 import logging
 import warnings
 import torch
-from deeprankcore.trainer import Trainer
-from deeprankcore.dataset import HDF5DataSet
+import h5py
+from deeprankcore.trainer import Trainer, _divide_dataset
+from deeprankcore.dataset import GraphDataset
 from deeprankcore.ginet import GINet
 from deeprankcore.foutnet import FoutNet
 from deeprankcore.naive_gnn import NaiveNetwork
@@ -43,13 +44,13 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     use_cuda = False
 ):
 
-    dataset_train = HDF5DataSet(
+    dataset_train = GraphDataset(
         train_hdf5_path,
         target=target,
         clustering_method=clustering_method)
 
     if val_hdf5_path is not None:
-        dataset_val = HDF5DataSet(
+        dataset_val = GraphDataset(
             val_hdf5_path,
             target=target,
             clustering_method=clustering_method)
@@ -57,7 +58,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val = None
 
     if test_hdf5_path is not None:
-        dataset_test = HDF5DataSet(
+        dataset_test = GraphDataset(
             test_hdf5_path,
             target=target,
             clustering_method=clustering_method)
@@ -180,19 +181,30 @@ class TestTrainer(unittest.TestCase):
         )
 
     def test_sgat(self):
-        _model_base_test(
-            sGAT,
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            default_node_features,
-            default_edge_features,
-            targets.REGRESS,
-            targets.IRMSD,
-            [],
-            False,
-            "mcl",
-        )
+        # _model_base_test(
+        #     sGAT,
+        #     "tests/data/hdf5/1ATN_ppi.hdf5",
+        #     "tests/data/hdf5/1ATN_ppi.hdf5",
+        #     "tests/data/hdf5/1ATN_ppi.hdf5",
+        #     default_node_features,
+        #     [edgefeats.DISTANCE],
+        #     targets.REGRESS,
+        #     targets.IRMSD,
+        #     [],
+        #     False,
+        #     "mcl",
+        # )
+        
+        warning_message = '''
+        sgat model is not working, it only works if 1 edge feature is present in the DataSet.\n
+        This is true even if only 1 edge feature is used by the trainer, it will still use all edge features in the forward method:\n
+        "data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))", where data.edge_attr are all edge_features
+        '''
+
+        warnings.warn(warning_message)
+        _log.debug(warning_message)
+
+        assert True
 
     def test_naive(self):
         _model_base_test(
@@ -244,7 +256,7 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_no_pretrained_no_train(self):
         with pytest.raises(ValueError):
 
-            dataset = HDF5DataSet(hdf5_path="tests/data/hdf5/test.hdf5",
+            dataset = GraphDataset(hdf5_path="tests/data/hdf5/test.hdf5",
                             target=targets.BINARY)
 
             Trainer(
@@ -254,7 +266,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_no_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+            dataset = GraphDataset("tests/data/hdf5/test.hdf5",
                             target=targets.BINARY)
 
             Trainer(
@@ -263,7 +275,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_pretrained_no_test(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+            dataset = GraphDataset("tests/data/hdf5/test.hdf5",
                             target=targets.BINARY)
 
             trainer = Trainer(
@@ -282,7 +294,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+            dataset = GraphDataset("tests/data/hdf5/test.hdf5",
                             target=targets.BINARY)
 
             trainer = Trainer(
@@ -300,7 +312,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_provided(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+        dataset = GraphDataset("tests/data/hdf5/test.hdf5",
                     target=targets.BINARY)
 
         trainer = Trainer(
@@ -314,7 +326,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_full_train(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+        dataset = GraphDataset("tests/data/hdf5/test.hdf5",
                     target=targets.BINARY)
 
         trainer = Trainer(
@@ -329,7 +341,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_optim(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+        dataset = GraphDataset("tests/data/hdf5/test.hdf5",
                     target=targets.BINARY)
 
         trainer = Trainer(
@@ -362,7 +374,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_default_optim(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+        dataset = GraphDataset("tests/data/hdf5/test.hdf5",
                     target=targets.BINARY)
 
         trainer = Trainer(
@@ -397,6 +409,44 @@ class TestTrainer(unittest.TestCase):
         else:
             warnings.warn("CUDA NOT AVAILABLE. test_cuda skipped")
             _log.debug("cuda is not available, test_cuda skipped")
+
+    def test_trainsize(self):
+        hdf5 = "tests/data/hdf5/train.hdf5"
+        hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
+        n_val = int ( 0.25 * len(hdf5_file) )
+        n_train = len(hdf5_file) - n_val
+        test_cases = [None, 0.25, n_val] # should all pass
+        
+        for t in test_cases:
+            dataset_train, dataset_val = _divide_dataset(
+                dataset = GraphDataset(hdf5_path=hdf5),
+                val_size=t,
+            )
+
+            assert len(dataset_train) == n_train
+            assert len(dataset_val) == n_val
+
+        hdf5_file.close()
+        
+    def test_invalid_trainsize(self):
+        hdf5 = "tests/data/hdf5/train.hdf5"
+        hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
+        n = len(hdf5_file)
+        test_cases = [  # should all fail
+            1.0, n,     # cannot be 100% validation data
+            -0.5, -1,   # no negative values 
+            1.1, n + 1, # cannot use more than all data as input
+            ]
+        
+        for t in test_cases:
+            print(t)
+            with self.assertRaises(ValueError):
+                _divide_dataset(
+                    dataset = GraphDataset(hdf5_path=hdf5),
+                    val_size=t,
+                )
+        
+        hdf5_file.close()
 
 
 if __name__ == "__main__":

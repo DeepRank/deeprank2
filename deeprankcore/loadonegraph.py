@@ -91,7 +91,7 @@ def load_one_graph(fname, mol,
                 except Exception as e: # be more specific about which exception we are trying to catch
                     _log.error(e)
                     _log.info('If your target variable contains categorical classes, \
-                    please convert them into class indices before defining the HDF5DataSet instance.')
+                    please convert them into class indices before defining the GraphDataset instance.')
             else:
                 possible_targets = grp[targets.VALUES].keys()
                 raise ValueError(f"Target {target} not found in entry {mol} in file {fname}." \

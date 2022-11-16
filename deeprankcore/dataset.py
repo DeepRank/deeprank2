@@ -51,7 +51,7 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-class HDF5DataSet(Dataset):
+class GraphDataset(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
         hdf5_path: Union[List[str], str],

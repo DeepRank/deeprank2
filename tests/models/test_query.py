@@ -25,7 +25,7 @@ from deeprankcore.domain.features import edgefeats as Efeat
 from deeprankcore.domain import targettypes as targets
 
 from deeprankcore.feature import sasa, atomic_contact, bsa, pssm, amino_acid
-from deeprankcore.dataset import HDF5DataSet
+from deeprankcore.dataset import GraphDataset
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
@@ -75,7 +75,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             count_edges_hdf5 = entry_group[f"{groups.EDGE}/{groups.INDEX}"].shape[0]
 
-        dataset = HDF5DataSet(hdf5_path=tmp_path)
+        dataset = GraphDataset(hdf5_path=tmp_path)
         torch_data_entry = dataset[0]
         assert torch_data_entry is not None
 
