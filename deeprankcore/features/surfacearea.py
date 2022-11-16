@@ -46,12 +46,8 @@ def add_sasa_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extens
         node.features[Nfeat.SASA] = area
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
+def add_bsa(graph: Graph):
 
-    """calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
-    BSA: the area of the protein, that only gets exposed in monomeric state"""
-
-    # BSA
     sasa_complete_structure = freesasa.Structure() # pylint: disable=c-extension-no-member
     sasa_chain_structures = {}
 
@@ -112,6 +108,15 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key] # pylint: disable=c-extension-no-member
 
         node.features[Nfeat.BSA] = area_monomer - area_multimer
+
+
+def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
+
+    """calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
+    BSA: the area of the protein, that only gets exposed in monomeric state"""
+
+    # BSA
+    add_bsa(graph)
 
     # SASA
     structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member
