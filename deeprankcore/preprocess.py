@@ -64,7 +64,7 @@ def preprocess(
         prefix = "preprocessed-data"
     
     if feature_modules == "all":
-        feature_modules = glob(join('./deeprankcore/feature/', "*.py"))
+        feature_modules = glob(join('./deeprankcore/features/', "*.py"))
         feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
     else:
         feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
