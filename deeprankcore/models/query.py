@@ -368,7 +368,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         chain_id1: str,
         chain_id2: str,
         pssm_paths: Optional[Dict[str, str]] = None,
-        interface_distance_cutoff: Optional[float] = 5.5,
+        distance_cutoff: Optional[float] = 5.5,
         targets: Optional[Dict[str, float]] = None,
     ):
         """
@@ -377,7 +377,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             chain_id1(str): the pdb chain identifier of the first protein of interest
             chain_id2(str): the pdb chain identifier of the second protein of interest
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            interface_distance_cutoff(float): max distance in Ångström between two interacting atoms of the two proteins
+            distance_cutoff(float): max distance in Ångström between two interacting atoms of the two proteins
             targets(dict, optional): named target values associated with this query
         """
 
@@ -392,7 +392,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         self._pssm_paths = pssm_paths
 
-        self._interface_distance_cutoff = interface_distance_cutoff
+        self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
         return f"atom-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
@@ -423,7 +423,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             structure,
             self._chain_id1,
             self._chain_id2,
-            self._interface_distance_cutoff,
+            self._distance_cutoff,
         )
         if len(interface_pairs) == 0:
             raise ValueError("no interface residues found")
@@ -436,7 +436,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         # build the graph
         graph = build_atomic_graph(
-            atoms_selected, self.get_query_id(), self._interface_distance_cutoff
+            atoms_selected, self.get_query_id(), self._distance_cutoff
         )
 
         # add data to the graph
@@ -457,7 +457,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         chain_id1: str,
         chain_id2: str,
         pssm_paths: Optional[Dict[str, str]] = None,
-        interface_distance_cutoff: float = 10,
+        distance_cutoff: float = 10,
         targets: Optional[Dict[str, float]] = None,
     ):
         """
@@ -466,7 +466,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             chain_id1(str): the pdb chain identifier of the first protein of interest
             chain_id2(str): the pdb chain identifier of the second protein of interest
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            interface_distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
+            distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
             targets(dict, optional): named target values associated with this query
         """
 
@@ -481,7 +481,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         self._pssm_paths = pssm_paths
 
-        self._interface_distance_cutoff = interface_distance_cutoff
+        self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
         return f"residue-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
@@ -512,7 +512,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             structure,
             self._chain_id1,
             self._chain_id2,
-            self._interface_distance_cutoff,
+            self._distance_cutoff,
         )
 
         if len(interface_pairs) == 0:
@@ -526,7 +526,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         # build the graph
         graph = build_residue_graph(
-            residues_selected, self.get_query_id(), self._interface_distance_cutoff
+            residues_selected, self.get_query_id(), self._distance_cutoff
         )
 
         # add data to the graph

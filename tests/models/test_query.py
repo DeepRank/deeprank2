@@ -127,7 +127,7 @@ def test_interface_graph_atomic():
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
             "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
         },
-        interface_distance_cutoff=4.5,
+        distance_cutoff=4.5,
     )
 
     # using a small cutoff here, because atomic graphs are big
