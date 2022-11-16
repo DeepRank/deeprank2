@@ -105,6 +105,8 @@ class sGAT(torch.nn.Module):
         # act = nn.LeakyReLU(0.25)
 
         # first conv block
+        print('DEBUG sgat', len(data.x[0]), len(data.edge_index[0]), len(data.edge_attr[0]))
+        print('DEBUG sgat', len(data.x), len(data.edge_index), len(data.edge_attr))
         data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))
         cluster = get_preloaded_cluster(data.cluster0, data.batch)
         data = community_pooling(cluster, data)
