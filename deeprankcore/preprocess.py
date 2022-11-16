@@ -22,8 +22,7 @@ def _preprocess_one_query(prefix: str, feature_names: List[str], query: Query):
     output_path = f"{prefix}-{os.getpid()}.hdf5"
 
     feature_modules = [
-        importlib.import_module('deeprankcore.feature.' + name) \
-            for name in feature_names]
+        importlib.import_module('deeprankcore.feature.' + name) for name in feature_names]
 
     graph = query.build_graph(feature_modules)
 

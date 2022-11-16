@@ -1,9 +1,6 @@
 from tempfile import mkdtemp
 from shutil import rmtree
-from os.path import basename, isfile, join
-import glob
-import importlib
-from typing import List
+from os.path import join
 import h5py
 from deeprankcore.preprocess import preprocess
 from deeprankcore.models.query import SingleResidueVariantResidueQuery
