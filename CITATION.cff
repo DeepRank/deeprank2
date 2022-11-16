@@ -3,7 +3,7 @@
 
 cff-version: 1.2.0
 doi: 10.5281/zenodo.6772110
-title: Deeprank-Core
+title: DeeprankCore
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -39,7 +39,7 @@ authors:
     given-names: Li C.
     family-names: Xue
 abstract: >-
-  deeprank-core allows ranking of Protein-protein
+  deeprankcore allows ranking of Protein-protein
   Interface using a graph representation of the
   contact residues or atoms. Graphs of such
   interfaces are used to train graph neural network
