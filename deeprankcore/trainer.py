@@ -408,6 +408,12 @@ class Trainer():
         # regression mode
         if self.task == targets.REGRESS:
             self.output_shape = 1
+            print('DEBUG MODEL')
+            print(
+                dataset.get(0).num_features,
+                self.output_shape,
+                dataset.get(0).num_edge_features,
+                    )
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,

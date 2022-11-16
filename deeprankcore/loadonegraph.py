@@ -29,8 +29,6 @@ def load_one_graph(fname, mol,
         Return None if features cannot be loaded.
     """
 
-    print('load_one_graph', target)
-
     # get the device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
