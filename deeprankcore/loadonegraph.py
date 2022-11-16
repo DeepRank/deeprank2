@@ -13,8 +13,8 @@ _log = logging.getLogger(__name__)
 
 
 def load_one_graph(fname, mol, # pylint: disable=too-many-arguments, too-many-locals
-                    transform = None,
                     target=None,
+                    transform = None,
                     edge_features_transform = None,
                     clustering_method = None):
     """Loads one graph

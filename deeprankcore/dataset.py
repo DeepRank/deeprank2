@@ -135,9 +135,12 @@ class GraphDataset(Dataset):
         fname, mol = self.index_complexes[index]
         data = load_one_graph(fname, mol, 
                                 target = self.target,
+                                transform = self.transform,
                                 edge_features_transform = self.edge_features_transform,
                                 clustering_method = self.clustering_method)
         return data
+
+
 
     def _check_hdf5_files(self):
         """Checks if the data contained in the hdf5 file is valid."""

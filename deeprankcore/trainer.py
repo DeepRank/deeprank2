@@ -339,7 +339,11 @@ class Trainer():
         print('self.target', self.target)
         for fname, mol in tqdm(dataset.index_complexes):
 
-            data = load_one_graph(fname, mol, target=self.target)
+            data = load_one_graph(fname, mol, 
+                                target = self.target,
+                                transform = dataset.transform,
+                                edge_features_transform = dataset.edge_features_transform,
+                                clustering_method = dataset.clustering_method)
 
             if data is None:
                 f5 = h5py.File(fname, "a")
