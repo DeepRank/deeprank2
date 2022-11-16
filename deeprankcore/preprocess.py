@@ -9,7 +9,7 @@ import logging
 import os
 import importlib
 from os.path import basename, isfile, join
-from deeprankcore.models.query import Query
+from deeprankcore.query import Query
 
 
 _log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def _preprocess_one_query(prefix: str, feature_names: List[str], query: Query):
     output_path = f"{prefix}-{os.getpid()}.hdf5"
 
     feature_modules = [
-        importlib.import_module('deeprankcore.feature.' + name) for name in feature_names]
+        importlib.import_module('deeprankcore.features.' + name) for name in feature_names]
 
     graph = query.build(feature_modules)
 

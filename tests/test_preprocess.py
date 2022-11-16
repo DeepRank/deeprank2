@@ -16,7 +16,7 @@ def preprocess_tester(feature_modules: Union[List[ModuleType], str]):
     Generic function to test preprocessing several PDB files into their feature representation HDF5 file.
 
     Args:
-        feature_modules: list of feature modules (from .deeprankcore.feature) to be passed to preprocess.
+        feature_modules: list of feature modules (from .deeprankcore.features) to be passed to preprocess.
         If "all", all available modules in deeprankcore.features are used to generate the features.
     """
 

@@ -89,7 +89,7 @@ class HDF5DataSet(Dataset):
             Defaults to None.
 
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
-            target given to the Query class as input (see: deeprankcore.models.query); in the latter case, specify
+            target given to the Query class as input (see: deeprankcore.query); in the latter case, specify
             here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
             please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
             Defaults to None.

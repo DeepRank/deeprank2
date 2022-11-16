@@ -3,7 +3,7 @@ from shutil import rmtree
 import os
 import h5py
 from deeprankcore.preprocess import preprocess
-from tests.utils import PATH_TEST
+from tests._utils import PATH_TEST
 from deeprankcore.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
