@@ -67,29 +67,29 @@ def test_integration(): # pylint: disable=too-many-locals
         n_test = 1
         n_train = len(output_paths) - (n_val + n_test)
 
-        #node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-        #edge_features = [Efeat.DISTANCE]
+        node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+        edge_features = [Efeat.DISTANCE]
 
         dataset_train = HDF5DataSet(
             hdf5_path = output_paths[:n_train],
-            #node_feature = node_features,
-            #edge_feature = edge_features,
+            node_feature = node_features,
+            edge_feature = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         dataset_val = HDF5DataSet(
             hdf5_path = output_paths[n_train:-n_test],
-            #node_feature = node_features,
-            #edge_feature = edge_features,
+            node_feature = node_features,
+            edge_feature = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         dataset_test = HDF5DataSet(
             hdf5_path = output_paths[-n_test],
-            #node_feature = node_features,
-            #edge_feature = edge_features,
+            node_feature = node_features,
+            edge_feature = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )

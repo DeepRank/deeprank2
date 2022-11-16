@@ -68,6 +68,8 @@ def preprocess(
         feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
     else:
         feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
+    
+    print(feature_names)
 
     _log.info('Creating pool function to process the queries...')
     pool_function = partial(_preprocess_one_query, prefix,
