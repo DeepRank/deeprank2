@@ -157,7 +157,7 @@ def test_variant_graph_101M():
         {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
         radius=5.0,
-        external_distance_cutoff=5.0,
+        distance_cutoff=5.0,
     )
 
     # using a small cutoff here, because atomic graphs are big
@@ -196,7 +196,7 @@ def test_variant_graph_1A0Z():
             "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
         },
         targets={targets.BINARY: 1},
-        external_distance_cutoff=5.0,
+        distance_cutoff=5.0,
         radius=5.0,
     )
 
@@ -234,7 +234,7 @@ def test_variant_graph_9API():
             "B": "tests/data/pssm/9api/9api.B.pdb.pssm",
         },
         targets={targets.BINARY: 0},
-        external_distance_cutoff=5.0,
+        distance_cutoff=5.0,
         radius=5.0,
     )
 

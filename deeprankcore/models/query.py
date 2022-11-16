@@ -130,7 +130,7 @@ class SingleResidueVariantResidueQuery(Query):
         variant_amino_acid: AminoAcid,
         pssm_paths: Optional[Dict[str, str]] = None,
         radius: Optional[float] = 10.0,
-        external_distance_cutoff: Optional[float] = 4.5,
+        distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
     ):
         """
@@ -143,7 +143,7 @@ class SingleResidueVariantResidueQuery(Query):
             variant_amino_acid(deeprank amino acid object): the variant amino acid
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
             radius(float): in Ångström, determines how many residues will be included in the graph
-            external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
+            distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
             targets(dict(str,float)): named target values associated with this query
         """
 
@@ -161,7 +161,7 @@ class SingleResidueVariantResidueQuery(Query):
         self._variant_amino_acid = variant_amino_acid
 
         self._radius = radius
-        self._external_distance_cutoff = external_distance_cutoff
+        self._distance_cutoff = distance_cutoff
 
     @property
     def residue_id(self) -> str:
@@ -208,7 +208,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         # build the graph
         graph = build_residue_graph(
-            residues, self.get_query_id(), self._external_distance_cutoff
+            residues, self.get_query_id(), self._distance_cutoff
         )
 
         # add data to the graph
@@ -233,7 +233,7 @@ class SingleResidueVariantAtomicQuery(Query):
         variant_amino_acid: AminoAcid,
         pssm_paths: Optional[Dict[str, str]] = None,
         radius: Optional[float] = 10.0,
-        external_distance_cutoff: Optional[float] = 4.5,
+        distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
     ):
         """
@@ -246,9 +246,7 @@ class SingleResidueVariantAtomicQuery(Query):
             variant_amino_acid(deeprank amino acid object): the variant amino acid
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
             radius(float): in Ångström, determines how many residues will be included in the graph
-            external_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
-            internal_distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an internal edge in the graph
-            (must be shorter than external)
+            distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
             targets(dict(str,float)): named target values associated with this query
         """
 
@@ -267,7 +265,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         self._radius = radius
 
-        self._external_distance_cutoff = external_distance_cutoff
+        self._distance_cutoff = distance_cutoff
 
     @property
     def residue_id(self) -> str:
@@ -349,7 +347,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         # build the graph
         graph = build_atomic_graph(
-            atoms, self.get_query_id(), self._external_distance_cutoff
+            atoms, self.get_query_id(), self._distance_cutoff
         )
 
         # add data to the graph
