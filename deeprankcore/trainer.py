@@ -186,7 +186,6 @@ class Trainer():
             self.optimizer = None
             self.epoch_saved_model = None
 
-            print('init - if pretrained=None')
             self._load_model(dataset_train, dataset_val, dataset_test, Net)
 
         else:
@@ -201,42 +200,13 @@ class Trainer():
                     completing the loading of the pretrained model.")
 
             if dataset_test is not None:
-                print('init - if not pretrained=None')
                 self._load_pretrained_model(dataset_test, Net)
             else:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
 
-    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
-
-        """Configure optimizer and its main parameters.
-        Parameters
-        ----------
-        optimizer (optional) : object from torch.optim
-            PyTorch optimizer. Defaults to Adam.
-        lr (optional) : float
-            Learning rate. Defaults to 0.01.
-        weight_decay (optional) : float
-            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
-            the gradient may explode. Defaults to 1e-05.
-        """
-        print('configure_optimizers')
-        self.lr = lr
-        self.weight_decay = weight_decay
-
-        if optimizer is None:
-            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
-        else:
-            try:
-                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
-            except Exception as e:
-                _log.error(e)
-                _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
-
     def _check_features(self, dataset: HDF5DataSet):
         """Checks if the required features exist"""
-
         print('_check_features')
-
         f = h5py.File(dataset.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
         
@@ -290,7 +260,7 @@ class Trainer():
                     \nProbably, the feature wasn't generated during the preprocessing step. \
                     {miss_node_error}{miss_edge_error}")
 
-    def _load_pretrained_model(self, dataset_test: HDF5DataSet, Net):
+    def _load_pretrained_model(self, dataset_test, Net):
         """
         Loads pretrained model
 
@@ -298,11 +268,9 @@ class Trainer():
             dataset_test: HDF5DataSet object to be tested with the model
             Net (function): neural network
         """
-
         print('_load_pretrained_model')
-
         if self.cluster_nodes is not None: 
-            self._PreCluster(dataset_test, method=self.cluster_nodes)
+            self._precluster(dataset_test, method=self.cluster_nodes)
 
         self.test_loader = DataLoader(dataset_test)
 
@@ -331,16 +299,14 @@ class Trainer():
         Raises:
             ValueError: Invalid node clustering method.
         """
-
         print('_load_model')
-
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
                 _log.info("Loading clusters")
-                self._PreCluster(dataset_train, method=self.cluster_nodes)
+                self._precluster(dataset_train, method=self.cluster_nodes)
 
                 if dataset_val is not None:
-                    self._PreCluster(dataset_val, method=self.cluster_nodes)
+                    self._precluster(dataset_val, method=self.cluster_nodes)
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     dataset_train, dataset_val = _DivideDataSet(
@@ -351,7 +317,6 @@ class Trainer():
                     "Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # dataloader
-        print('DEBUG 2: ')
         self.train_loader = DataLoader(
             dataset_train, batch_size=self.batch_size, shuffle=self.shuffle
         )
@@ -370,7 +335,7 @@ class Trainer():
             _log.info("Loading independent testing dataset...")
 
             if self.cluster_nodes in ('mcl', 'louvain'):
-                self._PreCluster(dataset_test, method=self.cluster_nodes)
+                self._precluster(dataset_test, method=self.cluster_nodes)
 
             self.test_loader = DataLoader(
                 dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
@@ -388,6 +353,53 @@ class Trainer():
 
         self.set_loss()
 
+    def _precluster(self, dataset: HDF5DataSet, method: str):
+        """Pre-clusters nodes of the graphs
+
+        Args:
+            dataset (HDF5DataSet object)
+            method (str): 'mcl' (Markov Clustering) or 'louvain'
+        """
+        print ('_precluster')
+        for fname, mol in tqdm(dataset.index_complexes):
+
+            data = load_one_graph(fname, mol)
+
+            if data is None:
+                f5 = h5py.File(fname, "a")
+                try:
+                    _log.info(f"deleting {mol}")
+                    del f5[mol]
+                except BaseException:
+                    _log.info(f"{mol} not found")
+                f5.close()
+                continue
+
+            f5 = h5py.File(fname, "a")
+            grp = f5[mol]
+
+            clust_grp = grp.require_group("clustering")
+
+            if method.lower() in clust_grp:
+                #_log.info(f"Deleting previous data for mol {mol} method {method}")
+                del clust_grp[method.lower()]
+
+            method_grp = clust_grp.create_group(method.lower())
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_0", data=cluster.cpu())
+
+            data = community_pooling(cluster, data)
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_1", data=cluster.cpu())
+
+            f5.close()
+
     def _put_model_to_device(self, dataset: HDF5DataSet, Net):
         """
         Puts the model on the available device
@@ -399,10 +411,8 @@ class Trainer():
         Raises:
             ValueError: Incorrect output shape
         """
-
-        print('_put_model_to_device')
-
         # get the device
+        print('_put_model_to_device')
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
@@ -410,11 +420,13 @@ class Trainer():
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
-        # the target values are optional
-        if dataset.get(0).y is not None:
-            target_shape = dataset.get(0).y.shape[0]
-        else:
-            target_shape = None
+        self.num_edge_features = len(self.edge_features)
+
+        # # the target values are optional
+        # if dataset.get(0).y is not None:
+        #     target_shape = dataset.get(0).y.shape[0]
+        # else:
+        #     target_shape = None
 
         # regression mode
         if self.task == targets.REGRESS:
@@ -422,8 +434,8 @@ class Trainer():
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                dataset.get(0).num_edge_features,
-                                ).to(self.device)
+                dataset.get(0).num_edge_features).to(
+                self.device)
 
         # classification mode
         elif self.task == targets.CLASSIF:
@@ -431,19 +443,47 @@ class Trainer():
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                dataset.get(0).num_edge_features,
-                                ).to(self.device)
+                dataset.get(0).num_edge_features).to(
+                self.device)
 
-        # check for compatibility
-        for metrics_exporter in self._metrics_exporters:
-            if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
-                raise ValueError(f"metrics exporter of type {type(metrics_exporter)} "
-                                 f"is not compatible with output shape {self.output_shape} "
-                                 f"and target shape {target_shape}")
+        # # check for compatibility
+        # for metrics_exporter in self._metrics_exporters:
+        #     if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
+        #         raise ValueError(f"metrics exporter of type {type(metrics_exporter)} "
+        #                          f"is not compatible with output shape {self.output_shape} "
+        #                          f"and target shape {target_shape}")
+        
+        pass
+
+    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
+
+        """Configure optimizer and its main parameters.
+        Parameters
+        ----------
+        optimizer (optional) : object from torch.optim
+            PyTorch optimizer. Defaults to Adam.
+        lr (optional) : float
+            Learning rate. Defaults to 0.01.
+        weight_decay (optional) : float
+            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
+            the gradient may explode. Defaults to 1e-05.
+        """
+        print('configure_optimizers')
+
+        self.lr = lr
+        self.weight_decay = weight_decay
+
+        if optimizer is None:
+            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+        else:
+            try:
+                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
+            except Exception as e:
+                _log.error(e)
+                _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
-
         print('set_loss')
         if self.task == targets.REGRESS:
             self.loss = MSELoss()
@@ -468,6 +508,34 @@ class Trainer():
             # Note that non-linear activation is automatically applied in CrossEntropyLoss
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
+
+
+    def test(self, dataset_test=None):
+        """
+        Tests the model
+
+        Args:
+            dataset_test (HDF5Dataset object, required): dataset for testing the model
+        """
+        print('test')
+        with self._metrics_exporters:
+            # Loads the test dataset if provided
+            if dataset_test is not None:
+
+                if self.cluster_nodes in ('mcl', 'louvain'):
+                    self._precluster(dataset_test, method=self.cluster_nodes)
+
+                self.test_loader = DataLoader(
+                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                )
+
+            elif (dataset_test is None) and (self.test_loader is None):
+                raise ValueError("No test dataset provided.")
+                
+            # Run test
+            self._eval(self.test_loader, 0, "testing")
+
+            self.complete_exporter.save_all_metrics()
 
     def train(
         self,
@@ -499,7 +567,6 @@ class Trainer():
             self.nepoch = nepoch
 
             _log.info('Epoch 0:')
-            print('DEBUG: ', self.train_loader)
             self._eval(self.train_loader, 0, "training")
             if validate:
                 if self.valid_loader is None:
@@ -554,34 +621,6 @@ class Trainer():
 
             self.complete_exporter.save_all_metrics()
 
-    def test(self, dataset_test=None):
-        """
-        Tests the model
-
-        Args:
-            dataset_test (HDF5Dataset object, required): dataset for testing the model
-        """
-
-        print('test')
-        with self._metrics_exporters:
-            # Loads the test dataset if provided
-            if dataset_test is not None:
-
-                if self.cluster_nodes in ('mcl', 'louvain'):
-                    self._PreCluster(dataset_test, method=self.cluster_nodes)
-
-                self.test_loader = DataLoader(
-                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
-                )
-
-            elif (dataset_test is None) and (self.test_loader is None):
-                raise ValueError("No test dataset provided.")
-                
-            # Run test
-            self._eval(self.test_loader, 0, "testing")
-
-            self.complete_exporter.save_all_metrics()
-
     def _eval( # pylint: disable=too-many-locals
             self,
             loader: DataLoader,
@@ -599,7 +638,7 @@ class Trainer():
             running loss:
         """
         # Sets the module in evaluation mode
-        print("_eval")
+        print('_eval')
         self.model.eval()
 
         loss_func = self.loss
@@ -614,9 +653,10 @@ class Trainer():
         t0 = time()
         for _, data_batch in enumerate(loader):
 
-            print('DB', data_batch)
             data_batch = data_batch.to(self.device)
+            # print('DEBUG ', _, data_batch)
             pred = self.model(data_batch)
+            print('data_batch.y', data_batch.y)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
 
             # Check if a target value was provided (i.e. benchmarck scenario)
@@ -672,7 +712,6 @@ class Trainer():
         Returns:
             running loss
         """
-
         print('_epoch')
         sum_of_losses = 0
         count_predictions = 0
@@ -684,7 +723,6 @@ class Trainer():
         t0 = time()
         for _, data_batch in enumerate(self.train_loader):
 
-            print('DB', data_batch)
             data_batch = data_batch.to(self.device)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
@@ -746,7 +784,6 @@ class Trainer():
             loss (float): loss during that epoch
             time (float): timing of the epoch
         """
-        print('_log_epoch_data')
         _log.info(f'{stage} loss {loss} | time {time}')
 
     def _format_output(self, pred, target=None):
@@ -755,6 +792,7 @@ class Trainer():
         print('_format_output')
         print(self.classes_to_idx)
         print('target', target)
+
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
@@ -764,8 +802,10 @@ class Trainer():
 
         elif self.task == targets.REGRESS:
             if self.transform_sigmoid is True:
+
                 # Sigmoid(x) = 1 / (1 + exp(-x))
                 pred = torch.sigmoid(pred.reshape(-1))
+
             else:
                 pred = pred.reshape(-1)
 
@@ -773,6 +813,7 @@ class Trainer():
             target = target.to(self.device)
 
         return pred, target
+
 
     def save_model(self, filename='model.pth.tar'):
         """
@@ -837,53 +878,6 @@ class Trainer():
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
-
-    def _PreCluster(self, dataset: HDF5DataSet, method: str):
-        """Pre-clusters nodes of the graphs
-
-        Args:
-            dataset (HDF5DataSet object)
-            method (str): 'mcl' (Markov Clustering) or 'louvain'
-        """
-        print ('_PreCluster')
-        for fname, mol in tqdm(dataset.index_complexes):
-
-            data = load_one_graph(fname, mol, self.node_features, self.edge_features)
-
-            if data is None:
-                f5 = h5py.File(fname, "a")
-                try:
-                    _log.info(f"deleting {mol}")
-                    del f5[mol]
-                except BaseException:
-                    _log.info(f"{mol} not found")
-                f5.close()
-                continue
-
-            f5 = h5py.File(fname, "a")
-            grp = f5[mol]
-
-            clust_grp = grp.require_group("clustering")
-
-            if method.lower() in clust_grp:
-                #_log.info(f"Deleting previous data for mol {mol} method {method}")
-                del clust_grp[method.lower()]
-
-            method_grp = clust_grp.create_group(method.lower())
-
-            cluster = community_detection(
-                data.edge_index, data.num_nodes, method=method
-            )
-            method_grp.create_dataset("depth_0", data=cluster.cpu())
-
-            data = community_pooling(cluster, data)
-
-            cluster = community_detection(
-                data.edge_index, data.num_nodes, method=method
-            )
-            method_grp.create_dataset("depth_1", data=cluster.cpu())
-
-            f5.close()
 
 def _DivideDataSet(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
