@@ -57,6 +57,7 @@ class HDF5DataSet(Dataset):
         hdf5_path: Union[List[str], str],
         root: str = "./",
         transform: Callable = None,
+        target = None,
         pre_transform: Callable = None,
         dict_filter: dict = None,
         tqdm: bool = True,
@@ -101,6 +102,7 @@ class HDF5DataSet(Dataset):
         if not isinstance(hdf5_path, list):
             self.hdf5_path = [hdf5_path]
 
+        self.target=target
         self.dict_filter = dict_filter
         self.tqdm = tqdm
         self.subset = subset
@@ -136,6 +138,7 @@ class HDF5DataSet(Dataset):
 
         fname, mol = self.index_complexes[index]
         data = load_one_graph(fname, mol, 
+                                target = self.target,
                                 edge_features_transform = self.edge_features_transform,
                                 clustering_method = self.clustering_method)
         return data

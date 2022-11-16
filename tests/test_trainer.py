@@ -45,11 +45,13 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
 
     dataset_train = HDF5DataSet(
         train_hdf5_path,
+        target=target,
         clustering_method=clustering_method)
 
     if val_hdf5_path is not None:
         dataset_val = HDF5DataSet(
             val_hdf5_path,
+            target=target,
             clustering_method=clustering_method)
     else:
         dataset_val = None
@@ -57,6 +59,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     if test_hdf5_path is not None:
         dataset_test = HDF5DataSet(
             test_hdf5_path,
+            target=target,
             clustering_method=clustering_method)
     else:
         dataset_test = None
@@ -68,7 +71,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_test,
         node_features=node_features,
         edge_features=edge_features,
-        target=target,
         task=task,
         batch_size=64,
         metrics_exporters=metrics_exporters,
@@ -161,7 +163,6 @@ class TestTrainer(unittest.TestCase):
         )
 
         assert len(os.listdir(self.work_directory)) > 0
-        assert 1==0
 
     def test_fout(self):
         _model_base_test(
@@ -243,35 +244,34 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_no_pretrained_no_train(self):
         with pytest.raises(ValueError):
 
-            dataset = HDF5DataSet(hdf5_path="tests/data/hdf5/test.hdf5")
+            dataset = HDF5DataSet(hdf5_path="tests/data/hdf5/test.hdf5",
+                            target=targets.BINARY)
 
             Trainer(
                 Net = NaiveNetwork,
                 dataset_test = dataset,
-                target=targets.BINARY,
             )
 
     def test_incompatible_no_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5")
+            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+                            target=targets.BINARY)
 
             Trainer(
                 dataset_train = dataset,
-                target=targets.BINARY,
             )
 
     def test_incompatible_pretrained_no_test(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet(
-                "tests/data/hdf5/test.hdf5")
+            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+                            target=targets.BINARY)
 
             trainer = Trainer(
                 Net = GINet,
                 dataset_train = dataset,
-                target=targets.BINARY,
             )
 
-            trainer.train(nepoch=10, validate=True)
+            trainer.train(nepoch=3, validate=True)
 
             trainer.save_model("test.pth.tar")
 
@@ -282,15 +282,15 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5")
+            dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+                            target=targets.BINARY)
 
             trainer = Trainer(
                 Net = GINet,
                 dataset_train = dataset,
-                target=targets.BINARY,
             )
 
-            trainer.train(nepoch=10, validate=True)
+            trainer.train(nepoch=3, validate=True)
 
             trainer.save_model("test.pth.tar")
 
@@ -300,12 +300,12 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_provided(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5")
+        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+                    target=targets.BINARY)
 
         trainer = Trainer(
             Net = GINet,
             dataset_train = dataset,
-            target=targets.BINARY,
             batch_size = 1
         )
 
@@ -314,12 +314,12 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_full_train(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5")
+        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+                    target=targets.BINARY)
 
         trainer = Trainer(
             Net = GINet,
             dataset_train = dataset,
-            target=targets.BINARY,
             val_size = 0,
             batch_size = 1
         )
@@ -329,12 +329,12 @@ class TestTrainer(unittest.TestCase):
 
     def test_optim(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5")
+        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+                    target=targets.BINARY)
 
         trainer = Trainer(
             Net = NaiveNetwork,
             dataset_train = dataset,
-            target=targets.BINARY,
         )
 
         optimizer = torch.optim.Adamax
@@ -347,7 +347,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer.lr == lr
         assert trainer.weight_decay == weight_decay
 
-        trainer.train(nepoch=10, validate=True)
+        trainer.train(nepoch=3, validate=True)
 
         trainer.save_model("test.pth.tar")
 
@@ -362,12 +362,12 @@ class TestTrainer(unittest.TestCase):
 
     def test_default_optim(self):
 
-        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5")
+        dataset = HDF5DataSet("tests/data/hdf5/test.hdf5",
+                    target=targets.BINARY)
 
         trainer = Trainer(
             Net = NaiveNetwork,
             dataset_train = dataset,
-            target=targets.BINARY
         )
 
         assert isinstance(trainer.optimizer, torch.optim.Adam)

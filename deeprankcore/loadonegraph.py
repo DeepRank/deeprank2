@@ -14,6 +14,7 @@ _log = logging.getLogger(__name__)
 
 def load_one_graph(fname, mol, 
                     transform = None,
+                    target=None,
                     edge_features_transform = None,
                     clustering_method = None):
     """Loads one graph
@@ -27,6 +28,8 @@ def load_one_graph(fname, mol,
         the internal and external edge features, the target and the xyz coordinates.
         Return None if features cannot be loaded.
     """
+
+    print('load_one_graph', target)
 
     # get the device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -81,21 +84,21 @@ def load_one_graph(fname, mol,
                 with a more up to date version of this software.""", DeprecationWarning)
 
         # target
-        if targets.VALUES in grp:
-            target_values = ()
-            for target in grp[f"{targets.VALUES}"]:
-                if target != 'cluster': # should be defined by a variable; but can't find where the word cluster is defined for the molecular cluster
-                    try:
-                        target_value = torch.tensor([grp[f"{targets.VALUES}/{target}"][()]], dtype=torch.float).contiguous().to(device)
-                        target_values += (target_value, )
-                    except Exception as e: # be more specific about which exception we are trying to catch
-                        _log.error(e)
-                        _log.info('If your target variable contains categorical classes, \
-                        please convert them into class indices before defining the HDF5DataSet instance.')
-            y = target_values
+        if target is None:
+            y = None
         else:
-            raise ValueError(f"No targets in entry {mol} in file {fname}." +
-                                "\n Use the query class to add target values to input data.")
+            if targets.VALUES in grp and target in grp[targets.VALUES]:
+                try:
+                    y = torch.tensor([grp[f"{targets.VALUES}/{target}"][()]], dtype=torch.float).contiguous().to(device)
+                except Exception as e: # be more specific about which exception we are trying to catch
+                    _log.error(e)
+                    _log.info('If your target variable contains categorical classes, \
+                    please convert them into class indices before defining the HDF5DataSet instance.')
+            else:
+                possible_targets = grp[targets.VALUES].keys()
+                raise ValueError(f"Target {target} not found in entry {mol} in file {fname}." \
+                                 f"\nAvailable targets are {possible_targets}." \
+                                  "\nUse the query class to add target values to input data.")
 
         # positions
         pos = torch.tensor(grp[f"{groups.NODE}/{groups.POSITION}/"][()], dtype=torch.float).contiguous().to(device)

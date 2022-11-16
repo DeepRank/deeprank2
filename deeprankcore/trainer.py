@@ -27,7 +27,7 @@ _log = logging.getLogger(__name__)
 class Trainer():
 
     def __init__(self, # pylint: disable=too-many-arguments
-                 Net,
+                 Net = None,
                  dataset_train: HDF5DataSet = None,
                  dataset_val: HDF5DataSet = None,
                  dataset_test: HDF5DataSet = None,
@@ -36,7 +36,6 @@ class Trainer():
                  pretrained_model: str = None,
                  node_features: Union[List[str], str] = "all",
                  edge_features: Union[List[str], str] = "all",
-                 target: str = None,
                  task: str = None,
                  classes: List = None,
                  batch_size: int = 32,
@@ -140,7 +139,7 @@ class Trainer():
 
             # set target, task, and classes
             ## target
-            self.target = target
+            self.target = dataset_train.target
             
             ## task
             if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
@@ -260,30 +259,6 @@ class Trainer():
                     \nProbably, the feature wasn't generated during the preprocessing step. \
                     {miss_node_error}{miss_edge_error}")
 
-    def _load_pretrained_model(self, dataset_test, Net):
-        """
-        Loads pretrained model
-
-        Args:
-            dataset_test: HDF5DataSet object to be tested with the model
-            Net (function): neural network
-        """
-        print('_load_pretrained_model')
-        if self.cluster_nodes is not None: 
-            self._precluster(dataset_test, method=self.cluster_nodes)
-
-        self.test_loader = DataLoader(dataset_test)
-
-        _log.info("Testing set loaded\n")
-        
-        self._put_model_to_device(dataset_test, Net)
-
-        self.set_loss()
-
-        # load the model and the optimizer state
-        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
-        self.model.load_state_dict(self.model_load_state_dict)
-
     def _load_model(self, dataset_train, dataset_val, dataset_test, Net):
         
         """
@@ -361,9 +336,10 @@ class Trainer():
             method (str): 'mcl' (Markov Clustering) or 'louvain'
         """
         print ('_precluster')
+        print('self.target', self.target)
         for fname, mol in tqdm(dataset.index_complexes):
 
-            data = load_one_graph(fname, mol)
+            data = load_one_graph(fname, mol, target=self.target)
 
             if data is None:
                 f5 = h5py.File(fname, "a")
@@ -422,11 +398,12 @@ class Trainer():
 
         self.num_edge_features = len(self.edge_features)
 
-        # # the target values are optional
-        # if dataset.get(0).y is not None:
-        #     target_shape = dataset.get(0).y.shape[0]
-        # else:
-        #     target_shape = None
+        # the target values are optional
+        if dataset.get(0).y is not None:
+            target_shape = dataset.get(0).y.shape[0]
+        else:
+            target_shape = None
+        
 
         # regression mode
         if self.task == targets.REGRESS:
@@ -434,8 +411,8 @@ class Trainer():
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                dataset.get(0).num_edge_features).to(
-                self.device)
+                dataset.get(0).num_edge_features,
+                    ).to(self.device)
 
         # classification mode
         elif self.task == targets.CLASSIF:
@@ -443,15 +420,16 @@ class Trainer():
             self.model = Net(
                 dataset.get(0).num_features,
                 self.output_shape,
-                dataset.get(0).num_edge_features).to(
-                self.device)
+                dataset.get(0).num_edge_features,
+                    ).to(self.device)
 
-        # # check for compatibility
-        # for metrics_exporter in self._metrics_exporters:
-        #     if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
-        #         raise ValueError(f"metrics exporter of type {type(metrics_exporter)} "
-        #                          f"is not compatible with output shape {self.output_shape} "
-        #                          f"and target shape {target_shape}")
+
+        # check for compatibility
+        for metrics_exporter in self._metrics_exporters:
+            if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
+                raise ValueError(f"metrics exporter of type {type(metrics_exporter)} "
+                                 f"is not compatible with output shape {self.output_shape} "
+                                 f"and target shape {target_shape}")
         
         pass
 
@@ -509,33 +487,6 @@ class Trainer():
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
-
-    def test(self, dataset_test=None):
-        """
-        Tests the model
-
-        Args:
-            dataset_test (HDF5Dataset object, required): dataset for testing the model
-        """
-        print('test')
-        with self._metrics_exporters:
-            # Loads the test dataset if provided
-            if dataset_test is not None:
-
-                if self.cluster_nodes in ('mcl', 'louvain'):
-                    self._precluster(dataset_test, method=self.cluster_nodes)
-
-                self.test_loader = DataLoader(
-                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
-                )
-
-            elif (dataset_test is None) and (self.test_loader is None):
-                raise ValueError("No test dataset provided.")
-                
-            # Run test
-            self._eval(self.test_loader, 0, "testing")
-
-            self.complete_exporter.save_all_metrics()
 
     def train(
         self,
@@ -726,9 +677,9 @@ class Trainer():
         for _, data_batch in enumerate(loader):
 
             data_batch = data_batch.to(self.device)
-            # print('DEBUG ', _, data_batch)
-            pred = self.model(data_batch)
+            print('DEBUG ', _, data_batch)
             print('data_batch.y', data_batch.y)
+            pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
 
             # Check if a target value was provided (i.e. benchmarck scenario)
@@ -784,6 +735,7 @@ class Trainer():
             loss (float): loss during that epoch
             time (float): timing of the epoch
         """
+        print('_log_epoch_data')
         _log.info(f'{stage} loss {loss} | time {time}')
 
     def _format_output(self, pred, target=None):
@@ -845,6 +797,31 @@ class Trainer():
 
         torch.save(state, filename)
 
+
+    def _load_pretrained_model(self, dataset_test, Net):
+        """
+        Loads pretrained model
+
+        Args:
+            dataset_test: HDF5DataSet object to be tested with the model
+            Net (function): neural network
+        """
+        print('_load_pretrained_model')
+        if self.cluster_nodes is not None: 
+            self._precluster(dataset_test, method=self.cluster_nodes)
+
+        self.test_loader = DataLoader(dataset_test)
+
+        _log.info("Testing set loaded\n")
+        
+        self._put_model_to_device(dataset_test, Net)
+
+        self.set_loss()
+
+        # load the model and the optimizer state
+        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
+        self.model.load_state_dict(self.model_load_state_dict)
+
     def _load_params(self, filename):
         """
         Loads the parameters of a pretrained model
@@ -878,6 +855,36 @@ class Trainer():
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
+
+
+    def test(self, dataset_test=None):
+        """
+        Tests the model
+
+        Args:
+            dataset_test (HDF5Dataset object, required): dataset for testing the model
+        """
+        print('test')
+        with self._metrics_exporters:
+            # Loads the test dataset if provided
+            if dataset_test is not None:
+
+                if self.cluster_nodes in ('mcl', 'louvain'):
+                    self._precluster(dataset_test, method=self.cluster_nodes)
+
+                self.test_loader = DataLoader(
+                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                )
+
+            elif (dataset_test is None) and (self.test_loader is None):
+                raise ValueError("No test dataset provided.")
+                
+            # Run test
+            self._eval(self.test_loader, 0, "testing")
+
+            self.complete_exporter.save_all_metrics()
+
+ 
 
 def _DivideDataSet(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
