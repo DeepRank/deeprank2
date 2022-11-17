@@ -1,5 +1,6 @@
 from tempfile import mkdtemp
 from shutil import rmtree
+import warnings
 import os
 import h5py
 from deeprankcore.preprocess import preprocess
@@ -41,7 +42,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
         all_targets = compute_targets(pdb_path, ref_path)
 
-        count_queries = 5
+        count_queries = 3
         queries = []
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
@@ -106,11 +107,11 @@ def test_integration(): # pylint: disable=too-many-locals
             transform_sigmoid=True,
         )   
 
-        trainer.train(nepoch=5, validate=True) 
+        with warnings.catch_warnings(record=UserWarning):
+            trainer.train(nepoch=3, validate=True) 
+            trainer.save_model("test.pth.tar")
 
-        trainer.save_model("test.pth.tar")
-
-        Trainer(dataset_train, dataset_val, dataset_test, GINet, pretrained_model="test.pth.tar")
+            Trainer(dataset_train, dataset_val, dataset_test, GINet, pretrained_model="test.pth.tar")
 
         assert len(os.listdir(metrics_directory)) > 0
 

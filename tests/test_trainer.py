@@ -101,16 +101,16 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             if data_tensor is not None:
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
-    trainer.train(nepoch=3, validate=True)
+    with warnings.catch_warnings(record=UserWarning):
+        trainer.train(nepoch=3, validate=True)
+        trainer.save_model("test.pth.tar")
 
-    trainer.save_model("test.pth.tar")
-
-    Trainer(
-        dataset_train,
-        dataset_val,
-        dataset_test,
-        model_class,
-        pretrained_model="test.pth.tar")
+        Trainer(
+            dataset_train,
+            dataset_val,
+            dataset_test,
+            model_class,
+            pretrained_model="test.pth.tar")
 
 class TestTrainer(unittest.TestCase):
     @classmethod
@@ -283,14 +283,14 @@ class TestTrainer(unittest.TestCase):
                 Net = GINet,
             )
 
-            trainer.train(nepoch=10, validate=True)
+            with warnings.catch_warnings(record=UserWarning):
+                trainer.train(nepoch=3, validate=True)
+                trainer.save_model("test.pth.tar")
 
-            trainer.save_model("test.pth.tar")
-
-            Trainer(
-                dataset_train = dataset,
-                Net = GINet,
-                pretrained_model="test.pth.tar")
+                Trainer(
+                    dataset_train = dataset,
+                    Net = GINet,
+                    pretrained_model="test.pth.tar")
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
@@ -304,13 +304,13 @@ class TestTrainer(unittest.TestCase):
                 Net = GINet,
             )
 
-            trainer.train(nepoch=10, validate=True)
+            with warnings.catch_warnings(record=UserWarning):
+                trainer.train(nepoch=3, validate=True)
+                trainer.save_model("test.pth.tar")
 
-            trainer.save_model("test.pth.tar")
-
-            Trainer(
-                dataset_test = dataset,
-                pretrained_model="test.pth.tar")
+                Trainer(
+                    dataset_test = dataset,
+                    pretrained_model="test.pth.tar")
 
     def test_no_valid_provided(self):
 
@@ -367,14 +367,14 @@ class TestTrainer(unittest.TestCase):
         assert trainer.lr == lr
         assert trainer.weight_decay == weight_decay
 
-        trainer.train(nepoch=10, validate=True)
+        with warnings.catch_warnings(record=UserWarning):
+            trainer.train(nepoch=3, validate=True)
+            trainer.save_model("test.pth.tar")
 
-        trainer.save_model("test.pth.tar")
-
-        trainer_pretrained = Trainer(
-            dataset_test=dataset,
-            Net = NaiveNetwork,
-            pretrained_model="test.pth.tar")
+            trainer_pretrained = Trainer(
+                dataset_test=dataset,
+                Net = NaiveNetwork,
+                pretrained_model="test.pth.tar")
 
         assert isinstance(trainer_pretrained.optimizer, optimizer)
         assert trainer_pretrained.lr == lr
