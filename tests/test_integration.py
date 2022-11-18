@@ -54,7 +54,7 @@ def test_integration(): # pylint: disable=too-many-locals
             )
             queries.append(query)
 
-        output_paths = preprocess(feature_modules, queries, prefix, count_queries)
+        output_paths = preprocess(feature_modules, queries, prefix, count_queries, False)
         assert len(output_paths) > 0
 
         graph_names = []
