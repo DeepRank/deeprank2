@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from glob import glob
-from typing import Optional, List
+from typing import Optional, List, Union
+from types import ModuleType
 from functools import partial
 from multiprocessing import Pool
 import logging
 import os
 import importlib
+from os.path import basename, isfile, join
 from deeprankcore.query import Query
 
 
@@ -20,30 +22,35 @@ def _preprocess_one_query(prefix: str, feature_names: List[str], query: Query):
     # because only one process may access an hdf5 file at the time:
     output_path = f"{prefix}-{os.getpid()}.hdf5"
 
-    feature_modules = [importlib.import_module(name) for name in feature_names]
+    feature_modules = [
+        importlib.import_module('deeprankcore.features.' + name) for name in feature_names]
 
     graph = query.build(feature_modules)
 
     graph.write_to_hdf5(output_path)
 
 
-def preprocess(feature_modules: List, queries: List[Query],
-               prefix: Optional[str] = None,
-               process_count: Optional[int] = None):
+def preprocess(
+    queries: List[Query],
+    prefix: Optional[str] = None,
+    process_count: Optional[int] = None,
+    feature_modules: Union[List[ModuleType], str] = "all"):
 
     """
     Args:
-        feature_modules: list of features' modules used to generate features.
-        Each feature's module must implement the add_features function, and
-        features' modules can be found (or should be placed in case of a custom made feature)
-        in deeprankcore.feature folder.
-
         queries: all the queries objects that have to be preprocessed.
 
         prefix: prefix for the output files. ./preprocessed-data- by default.
         
         process_count: how many subprocesses to be run simultaneously.
         By default takes all available cpu cores.
+
+        feature_modules: list of features' modules used to generate features.
+        Each feature's module must implement the add_features function, and
+        features' modules can be found (or should be placed in case of a custom made feature)
+        in deeprankcore.features folder.
+        If "all", all available modules in deeprankcore.features are used to generate the features. 
+        Defaults to "all".
     """
 
     if process_count is None:
@@ -55,10 +62,18 @@ def preprocess(feature_modules: List, queries: List[Query],
 
     if prefix is None:
         prefix = "preprocessed-data"
+    
+    if feature_modules == "all":
+        feature_modules = glob(join('./deeprankcore/features/', "*.py"))
+        feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
+    else:
+        feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
+    
+    print(feature_names)
 
     _log.info('Creating pool function to process the queries...')
     pool_function = partial(_preprocess_one_query, prefix,
-                            [m.__name__ for m in feature_modules])
+                            feature_names)
 
     with Pool(process_count) as pool:
         _log.info('Starting pooling...\n')

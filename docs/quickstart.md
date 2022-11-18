@@ -5,11 +5,8 @@ The process of generating graphs takes as input `.pdb` files representing protei
 
 ```python
 from deeprankcore.preprocess import preprocess
-from deeprankcore.models.query import ProteinProteinInterfaceResidueQuery
-from deeprankcore.feature import bsa, pssm, amino_acid, biopython
+from deeprankcore.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.domain import targettypes as targets
-
-feature_modules = [bsa, pssm, biopython, atomic_contact]
 
 queries = []
 
@@ -54,7 +51,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
 # Generate graphs and save them in hdf5 files
 # The default creates a number of hdf5 files equals to the cpu cores available
 # See deeprankcore.preprocess.preprocess for more details
-output_paths = preprocess(feature_modules, queries, "<output_folder>/<prefix_for_outputs>")
+output_paths = preprocess(queries, "<output_folder>/<prefix_for_outputs>")
 
 ```
 
@@ -113,7 +110,7 @@ Training can be performed using one of the already existing GNNs, for example GI
 ```python
 from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
-from deeprankcore.models.metrics import OutputExporter, ScatterPlotExporter
+from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
 
 metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]

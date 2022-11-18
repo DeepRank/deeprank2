@@ -4,8 +4,8 @@ import warnings
 import os
 import h5py
 from deeprankcore.preprocess import preprocess
+from tests._utils import PATH_TEST
 from deeprankcore.query import ProteinProteinInterfaceResidueQuery
-from deeprankcore.features import components, conservation, exposure, contact, surfacearea
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
@@ -14,7 +14,6 @@ from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 import tempfile
-from tests._utils import PATH_TEST
 
 def test_integration(): # pylint: disable=too-many-locals
     """
@@ -36,8 +35,6 @@ def test_integration(): # pylint: disable=too-many-locals
 
     prefix = os.path.join(output_directory, "test-preprocess")
 
-    feature_modules = [components, contact, exposure, surfacearea, conservation]
-
     try:
 
         all_targets = compute_targets(pdb_path, ref_path)
@@ -54,7 +51,7 @@ def test_integration(): # pylint: disable=too-many-locals
             )
             queries.append(query)
 
-        output_paths = preprocess(feature_modules, queries, prefix, count_queries)
+        output_paths = preprocess(queries, prefix, count_queries)
         assert len(output_paths) > 0
 
         graph_names = []

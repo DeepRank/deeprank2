@@ -1,22 +1,23 @@
 from tempfile import mkdtemp
 from shutil import rmtree
-from os.path import basename, isfile, join
-import glob
-import importlib
-from typing import List
+from os.path import join
 import h5py
 from deeprankcore.preprocess import preprocess
+from typing import List, Union
+from types import ModuleType
+from deeprankcore.features import surfacearea
 from deeprankcore.query import SingleResidueVariantResidueQuery
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from tests._utils import PATH_TEST
 
 
-def preprocess_tester(feature_modules: List):
+def preprocess_tester(feature_modules: Union[List[ModuleType], str]):
     """
     Generic function to test preprocessing several PDB files into their feature representation HDF5 file.
 
     Args:
-        feature_modules: list of feature modules (from .deeprankcore.feature) to be passed to preprocess
+        feature_modules: list of feature modules (from .deeprankcore.features) to be passed to preprocess.
+        If "all", all available modules in deeprankcore.features are used to generate the features.
     """
 
     output_directory = mkdtemp()
@@ -39,7 +40,7 @@ def preprocess_tester(feature_modules: List):
             )
             queries.append(query)
 
-        output_paths = preprocess(feature_modules, queries, prefix, 10)
+        output_paths = preprocess(queries, prefix, 10, feature_modules)
         assert len(output_paths) > 0
 
         graph_names = []
@@ -60,8 +61,7 @@ def test_preprocess_single_feature():
     Tests preprocessing for single feature.
     """
 
-    imp = importlib.import_module(('deeprankcore.features.surfacearea'))
-    preprocess_tester([imp])
+    preprocess_tester([surfacearea])
 
 
 def test_preprocess_all_features():
@@ -69,13 +69,4 @@ def test_preprocess_all_features():
     Tests preprocessing for all features.
     """
 
-    # copying this from feature.__init__.py
-    modules = glob.glob(join('./deeprankcore/features/', "*.py"))
-    modules = [ basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py')]
-
-    feature_modules = []
-    for m in modules:
-        imp = importlib.import_module('deeprankcore.features.' + m)
-        feature_modules.append(imp)
-
-    preprocess_tester(feature_modules)
+    preprocess_tester("all")
