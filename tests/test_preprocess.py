@@ -9,7 +9,6 @@ from deeprankcore.features import surfacearea
 from deeprankcore.query import SingleResidueVariantResidueQuery
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from tests._utils import PATH_TEST
-from os.path import join
 
 
 def preprocess_tester(count: int, combine_files: bool, feature_modules: Union[List[ModuleType], str]):

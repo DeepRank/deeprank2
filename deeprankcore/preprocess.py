@@ -94,9 +94,9 @@ def preprocess(
         dupl_ids = {}
         for output_path in output_paths:
             with h5py.File(f"{prefix}.hdf5",'a') as f_dest, h5py.File(output_path,'r') as f_src:
-                for key in f_src.keys():
+                for key, value in f_src.items():
                     try:
-                        f_src.copy(f_src[key],f_dest)
+                        f_src.copy(value,f_dest)
                     except RuntimeError:
                         if key not in dupl_ids:
                             dupl_ids[key] = 2
@@ -106,5 +106,4 @@ def preprocess(
             os.remove(output_path)
         return glob(f"{prefix}.hdf5")
 
-    else:
-        return output_paths
+    return output_paths
