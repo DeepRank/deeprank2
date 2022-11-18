@@ -12,26 +12,42 @@ Subpackages
 Submodules
 ----------
 
-deeprankcore.domain.amino\_acid module
+deeprankcore.domain.aminoacidlist module
 --------------------------------------
 
-.. automodule:: deeprankcore.models.amino_acid
+.. automodule:: deeprankcore.domain.aminoacidlist
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.domain.feature module
+deeprankcore.domain.features module
 ----------------------------------
 
-.. automodule:: deeprankcore.domain.feature
+.. automodule:: deeprankcore.domain.features
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.domain.storage module
+deeprankcore.domain.edgestorage module
 ----------------------------------
 
-.. automodule:: deeprankcore.domain.storage
+.. automodule:: deeprankcore.domain.edgestorage
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deeprankcore.domain.nodestorage module
+----------------------------------
+
+.. automodule:: deeprankcore.domain.nodestorage
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deeprankcore.domain.targetstorage module
+----------------------------------
+
+.. automodule:: deeprankcore.domain.targetstorage
    :members:
    :undoc-members:
    :show-inheritance:
