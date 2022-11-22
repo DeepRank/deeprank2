@@ -69,7 +69,7 @@ def test_querycollection_process():
 
     collection, output_directory, _ = querycollection_tester(n_queries, n_cpus, combine_files, feature_modules)
     
-    assert type(collection.queries) == list
+    assert isinstance(collection.queries, list)
     assert len(collection.queries) == n_queries
     for query in collection.queries:
         assert issubclass(type(query), Query)
