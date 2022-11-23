@@ -22,7 +22,6 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-
     def __init__( # pylint: disable=too-many-arguments, too-many-locals # noqa: MC0001
             self, 
             Net = None,
@@ -447,7 +446,6 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-
     def train(
         self,
         nepoch: Optional[int] = 1,
@@ -719,7 +717,6 @@ class Trainer():
         return pred, target
 
 
-
     def save_model(self, filename='model.pth.tar'):
         """
         Saves the model to a file
@@ -775,7 +772,6 @@ class Trainer():
             self._eval(self.test_loader, 0, "testing")
 
             self.complete_exporter.save_all_metrics()
-
 
 
     def _load_pretrained_model(self, dataset_test: GraphDataset, Net):
@@ -834,8 +830,6 @@ class Trainer():
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
-
-
 
 
 def _divide_dataset(dataset, val_size=None):
