@@ -207,8 +207,13 @@ class QueryCollection:
             # returns the set of CPUs available considering the sched_setaffinity Linux system call,
             # which limits which CPUs a process and its children can run on.
             subprocesses = len(os.sched_getaffinity(0))
+        else:
+            subprocesses_available = len(os.sched_getaffinity(0))
+            if subprocesses > subprocesses_available:
+                _log.warning(f'\nTried to set {subprocesses} CPUs, but only {subprocesses_available} are available.')
+                subprocesses = subprocesses_available
 
-        _log.info(f'\nSet of CPU processors available: {subprocesses}.')
+        _log.info(f'\nNumber of CPUs for processing the queries set to: {subprocesses}.')
 
         if prefix is None:
             prefix = "processed-queries"
