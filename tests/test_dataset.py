@@ -19,7 +19,7 @@ class TestDataSet(unittest.TestCase):
         GraphDataset(
             hdf5_path=self.hdf5_path,
             target=targets.IRMSD,
-            dict_filter={targets.IRMSD: "<10"},
+            target_filter={targets.IRMSD: "<10"},
         )
 
     def test_transform(self):
