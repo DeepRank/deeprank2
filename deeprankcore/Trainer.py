@@ -14,7 +14,8 @@ import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from deeprankcore.utils.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
-from deeprankcore.domain import targetstorage as targets
+from deeprankcore.domain import (targetstorage as targets, edgestorage as Efeat,
+                                nodestorage as Nfeat)
 from deeprankcore.DataSet import GraphDataset
 
 _log = logging.getLogger(__name__)
@@ -150,6 +151,10 @@ class Trainer():
             self.subset = dataset_train.subset
             self.node_features = node_features
             self.edge_features = edge_features
+            for dataset in [dataset_train, dataset_val, dataset_test]:
+                if dataset:
+                    self._check_features(dataset)
+
             self.cluster_nodes = dataset_train.clustering_method
             self.epoch_saved_model = None
 
@@ -170,6 +175,62 @@ class Trainer():
                 self._load_pretrained_model(dataset_test, Net)
             else:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
+
+    def _check_features(self, dataset: GraphDataset):
+        """Checks if the required features exist"""
+        print('_check_features')
+        f = h5py.File(dataset.hdf5_path[0], "r")
+        mol_key = list(f.keys())[0]
+        
+        # read available node features
+        self.available_node_features = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
+        self.available_node_features = [key for key in self.available_node_features if key[0] != '_'] # ignore metafeatures
+        
+        # read available edge features
+        self.available_edge_features = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
+        self.available_edge_features = [key for key in self.available_edge_features if key[0] != '_'] # ignore metafeatures
+
+        f.close()
+
+        # check node features
+        missing_node_features = []
+        if self.node_features == "all":
+            self.node_features = self.available_node_features
+        else:
+            for feat in self.node_features:
+                if feat not in self.available_node_features:
+                    _log.info(f"The node feature _{feat}_ was not found in the file {dataset.hdf5_path[0]}.")
+                    missing_node_features.append(feat)
+
+        # check edge features
+        missing_edge_features = []
+        if self.edge_features == "all":
+            self.edge_features = self.available_edge_features
+        elif self.edge_features is not None:
+            for feat in self.edge_features:
+                if feat not in self.available_edge_features:
+                    _log.info(f"The edge feature _{feat}_ was not found in the file {dataset.hdf5_path[0]}.")
+                    missing_edge_features.append(feat)
+
+        # raise error if any features are missing
+        if missing_node_features + missing_edge_features:
+            miss_node_error, miss_edge_error = "", ""
+            _log.info("\nCheck feature_modules passed to the preprocess function.\
+                Probably, the feature wasn't generated during the preprocessing step.")
+            if missing_node_features:
+                _log.info(f"\nAvailable node features: {self.available_node_features}\n")
+                miss_node_error = f"\nMissing node features: {missing_node_features} \
+                                    \nAvailable node features: {self.available_node_features}"
+            if missing_edge_features:
+                _log.info(f"\nAvailable node features: {self.available_edge_features}\n")
+                miss_edge_error = f"\nMissing edge features: {missing_edge_features} \
+                                    \nAvailable edge features: {self.available_edge_features}"
+
+            raise ValueError(
+                f"Not all features could be found in the file {dataset.hdf5_path[0]}.\
+                    \nCheck feature_modules passed to the preprocess function. \
+                    \nProbably, the feature wasn't generated during the preprocessing step. \
+                    {miss_node_error}{miss_edge_error}")
 
     def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
 

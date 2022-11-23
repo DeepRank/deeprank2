@@ -122,17 +122,10 @@ class GraphDataset(Dataset):
         # check if the files are ok
         self._check_hdf5_files()
 
-        # check the selection of features
-        self._check_node_feature()
-        self._check_edge_feature()
-
         # create the indexing system
         # alows to associate each mol to an index
         # and get fname and mol name from the index
         self._create_index_molecules()
-
-        # get the device
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def len(self):
         """Gets the length of the dataset
@@ -173,40 +166,6 @@ class GraphDataset(Dataset):
 
         for name in remove_file:
             self.hdf5_path.remove(name)
-
-    def _check_node_feature(self):
-        """Checks if the required node features exist"""
-        f = h5py.File(self.hdf5_path[0], "r")
-        mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
-        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
-        f.close()
-
-        if self.node_feature == "all":
-            self.node_feature = self.available_node_feature
-        else:
-            for feat in self.node_feature:
-                if feat not in self.available_node_feature:
-                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info(f"\nPossible node features: {self.available_node_feature}\n")
-                    sys.exit()
-
-    def _check_edge_feature(self):
-        """Checks if the required edge features exist"""
-        f = h5py.File(self.hdf5_path[0], "r")
-        mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
-        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
-        f.close()
-
-        if self.edge_feature == "all":
-            self.edge_feature = self.available_edge_feature
-        elif self.edge_feature is not None:
-            for feat in self.edge_feature:
-                if feat not in self.available_edge_feature:
-                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
-                    sys.exit()
 
     def load_one_graph(self, fname, mol): # noqa
         """Loads one graph
