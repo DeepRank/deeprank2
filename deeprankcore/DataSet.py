@@ -68,38 +68,38 @@ class GraphDataset(Dataset):
 
         Args:
             root (str, optional): Root directory where the dataset should be
-            saved. Defaults to "./"
+                saved. Defaults to "./"
 
             hdf5_path (str, optional): Path to hdf5 file(s). For multiple hdf5 files, 
-            insert the paths in a list. Defaults to None.
+                insert the paths in a list. Defaults to None.
 
             transform (callable, optional): A function/transform that takes in
-            a torch_geometric.data.Data object and returns a transformed version.
-            The data object will be transformed before every access. Defaults to None.
+                a torch_geometric.data.Data object and returns a transformed version.
+                The data object will be transformed before every access. Defaults to None.
 
             pre_transform (callable, optional):  A function/transform that takes in
-            a torch_geometric.data.Data object and returns a transformed version.
-            The data object will be transformed before being saved to disk. Defaults to None.
+                a torch_geometric.data.Data object and returns a transformed version.
+                The data object will be transformed before being saved to disk. Defaults to None.
 
             dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
-            Defaults to None.
+                Defaults to None.
 
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
-            target given to the Query class as input (see: deeprankcore.query); in the latter case, specify
-            here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
-            please convert the categorical classes into numerical class indices before defining the GraphDataset instance.
-            Defaults to None.
+                target given to the Query class as input (see: deeprankcore.query); in the latter case, specify
+                here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
+                please convert the categorical classes into numerical class indices before defining the GraphDataset instance.
+                Defaults to None.
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
-            or 'louvain' algorithm). Note that this parameter can be None only if the neural
-            network doesn't expects clusters (e.g. naive_gnn). Defaults to "mcl".
+                or 'louvain' algorithm). Note that this parameter can be None only if the neural
+                network doesn't expects clusters (e.g. naive_gnn). Defaults to "mcl".
 
             edge_feature_transform (function, optional): transformation applied to the edge features.
-            Defaults to lambdax:np.tanh(-x/2+2)+1.
+                Defaults to lambdax:np.tanh(-x/2+2)+1.
         """
         super().__init__(root, transform, pre_transform)
 

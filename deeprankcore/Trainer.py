@@ -45,14 +45,18 @@ class Trainer():
         Args:
             dataset_train (GraphDataset object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
+
             dataset_val (GraphDataset object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
+
             dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
+
             Net (function, required): neural network class (ex. GINet, Foutnet etc.).
                 It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
                 to use for validation.
                 - Should be set to 0 if no validation set is needed.
@@ -67,23 +71,28 @@ class Trainer():
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
-                    The user can either input a list of weights or let DeepRanl-GNN (True) define weights
-                    based on the dataset content. Defaults to None.
+                The user can either input a list of weights or let DeepRanl-GNN (True) define weights
+                based on the dataset content. Defaults to None.
+
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+
             batch_size (int, optional): defaults to 32.
+
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
 
             node_features (str or list, optional): consider all pre-computed node features ("all")
-            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
-            The complete list can be found in deeprankcore/domain/features.py
+                or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
+                The complete list can be found in deeprankcore/domain/features.py
 
             edge_features (list, optional): consider all pre-computed edge features ("all")
-            or some defined edge features (provide a list, example: ["dist", "coulomb"]).
-            The complete list can be found in deeprankcore/domain/features.py
+                or some defined edge features (provide a list, example: ["dist", "coulomb"]).
+                The complete list can be found in deeprankcore/domain/features.py
 
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
+
             metrics_exporters: the metrics exporters to use for generating metrics output
+
             output_dir: location for metrics file (see ConciseOutputExporter class)
         """
         if metrics_exporters is not None:
