@@ -16,7 +16,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        targets.BINARY: 0
+        "binary": 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -28,7 +28,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        targets.BINARY: 1
+        "binary": 1
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -40,7 +40,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        targets.BINARY: 0
+        "binary": 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -77,30 +77,19 @@ Now the GraphDataset objects can be defined:
 
 ```python
 from deeprankcore.DataSet import GraphDataset
-from deeprankcore.domain.features import nodefeats as Nfeat
-from deeprankcore.domain.features import edgefeats as Efeat
-
-node_features = [Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-edge_features = [Efeat.DISTANCE]
 
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
-    target = targets.BINARY
+    target = "binary"
 )
 dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
-    target = targets.BINARY
+    target = "binary"
 )
 dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
-    target = targets.BINARY
+    target = "binary"
 )
 ```
 ## Training
@@ -111,16 +100,21 @@ Training can be performed using one of the already existing GNNs, for example GI
 from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
+from deeprankcore.domain.features import nodefeats as Nfeat, edgefeats as Efeat
+
+node_features = [Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+edge_features = [Efeat.DISTANCE]
 
 metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
 trainer = Trainer(
+    GINet,
     dataset_train,
     dataset_val,
     dataset_test,
-    GINet,
-    batch_size = 64,
+    node_feature = node_features,
+    edge_feature = edge_features,
     metrics_exporters = metrics_exporters
 )
 

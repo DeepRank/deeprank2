@@ -215,27 +215,18 @@ Now the GraphDataset objects can be defined:
 ```python
 from deeprankcore.DataSet import GraphDataset
 
-node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
-edge_features = ["distance"]
-
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
     target = "binary"
 )
 dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
     target = "binary"
 
 )
 dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
     target = "binary"
 )
 ```
@@ -249,15 +240,19 @@ from deeprankcore.Trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
 
+node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
+edge_features = ["distance"]
+
 metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
 trainer = Trainer(
+    GINet,
     dataset_train,
     dataset_val,
     dataset_test,
-    GINet,
-    batch_size = 64,
+    node_features = node_features,
+    edge_features = edge_features,
     metrics_exporters = metrics_exporters
 )
 
