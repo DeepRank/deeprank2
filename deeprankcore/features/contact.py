@@ -40,14 +40,14 @@ def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> n
     sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms]
     epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
-    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons)) # sqrt(eps1*eps2)
+    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
     intra_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
     
     # calculate inter potentials
     sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms]
     epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
-    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons)) # sqrt(eps1*eps2)
+    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
     inter_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
     lennard_jones_potentials = {'intra': intra_potentials, 'inter': inter_potentials}
@@ -69,6 +69,10 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             contact = edge.id
             for atom in (contact.residue1.atoms + contact.residue2.atoms):
                 all_atoms.add(atom)
+    else:
+        raise TypeError(
+            f"Unexpected edge type: {type(graph.edges[0].id)}")
+
     ## convert the set to a list
     all_atoms = list(all_atoms)
 
@@ -93,10 +97,10 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             atom1_index = all_atoms[contact.atom1]
             atom2_index = all_atoms[contact.atom2]
             ## set features
-            edge.features[Efeat.SAMERES] = float( contact.atom1.residue == contact.atom2.residue) # 1.0 for True; 0.0 for False
-            edge.features[Efeat.SAMECHAIN] = float( contact.atom1.residue.chain == contact.atom1.residue.chain ) # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMERES] = float( contact.atom1.residue == contact.atom2.residue)  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMECHAIN] = float( contact.atom1.residue.chain == contact.atom1.residue.chain )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = interatomic_distances[atom1_index, atom2_index]
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE ) # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_potentials[atom1_index, atom2_index]
             if edge.features[Efeat.SAMERES]:
                 edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_potentials['intra'][atom1_index, atom2_index]
@@ -110,12 +114,8 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             atom1_indices = [all_atoms[atom] for atom in contact.residue1.atoms]
             atom2_indices = [all_atoms[atom] for atom in contact.residue2.atoms]
             ## set features
-            edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain ) # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE ) # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = np.sum([[interatomic_electrostatic_potentials[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
             edge.features[Efeat.VANDERWAALS] = np.sum([[interatomic_vanderwaals_potentials['inter'][a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-
-    else:
-        raise TypeError(
-            f"Unexpected edge type: {type(contact)} for {edge}")
