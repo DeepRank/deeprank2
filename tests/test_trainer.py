@@ -7,7 +7,7 @@ import logging
 import warnings
 import torch
 from deeprankcore.trainer import Trainer
-from deeprankcore.dataset_ import GraphDataset
+from deeprankcore.dataset import GraphDataset
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork

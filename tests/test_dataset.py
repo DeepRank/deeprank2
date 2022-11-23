@@ -1,5 +1,5 @@
 import unittest
-from deeprankcore.dataset_ import GraphDataset, save_hdf5_keys
+from deeprankcore.dataset import GraphDataset, save_hdf5_keys
 from deeprankcore.trainer import _DivideDataSet
 from torch_geometric.data.data import Data
 import h5py
