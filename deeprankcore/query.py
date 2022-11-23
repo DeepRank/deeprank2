@@ -250,7 +250,7 @@ class QueryCollection:
                 os.remove(output_path)
             return glob(f"{prefix}.hdf5")
 
-        return output_paths, processes
+        return output_paths
 
 
 class SingleResidueVariantResidueQuery(Query):
