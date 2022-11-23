@@ -180,22 +180,25 @@ class GraphDataset(Dataset):
             Return None if features cannot be loaded.
         """
 
+        # get the device
+        device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
+
         with h5py.File(fname, 'r') as f5:
             grp = f5[mol]
 
             # node features
             node_data = ()
-            for feat in self.node_feature:
+            for feat in grp[f"{Nfeat.NODE}"]:
                 if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
-
                     node_data += (vals,)
+            x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(device)
 
-            x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
-
-            # edge index, we have to have all the edges i.e : (i,j) and (j,i)
+            # edge index
+            # make sure edges all are mirrored, i.e : (i,j) and (j,i)
             if Efeat.INDEX in grp[Efeat.EDGE]:
                 ind = grp[f"{Efeat.EDGE}/{Efeat.INDEX}"][()]
                 if ind.ndim == 2:
@@ -203,26 +206,28 @@ class GraphDataset(Dataset):
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
             else:
                 edge_index = torch.empty((2, 0), dtype=torch.long)
-            edge_index = edge_index.to(self.device)
+            edge_index = edge_index.to(device)
 
-            # edge feature (same issue as above)
-            if self.edge_feature is not None and len(self.edge_feature) > 0 and \
-               Efeat.EDGE in grp:
-
+            # edge feature
+            # make sure edges all are mirrored, i.e : (i,j) and (j,i)
+            if (Efeat.EDGE in grp
+                    and grp[f"{Efeat.EDGE}"] is not None
+                    and len(grp[f"{Efeat.EDGE}"]) > 0):
                 edge_data = ()
-                for feat in self.edge_feature:
-                    if feat[0] != '_':   # ignore metafeatures
+                for feat in grp[f"{Efeat.EDGE}"]:
+                    if feat[0] != '_':  # ignore metafeatures
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
                         edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
-                edge_data = self.edge_feature_transform(edge_data)
+                if self.edge_feature_transform is not None:
+                    edge_data = self.edge_feature_transform(edge_data)
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
-            edge_attr = edge_attr.to(self.device)
+            edge_attr = edge_attr.to(device)
 
             if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
                 warnings.warn(
@@ -236,7 +241,7 @@ class GraphDataset(Dataset):
             else:
                 if targets.VALUES in grp and self.target in grp[targets.VALUES]:
                     try:
-                        y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
+                        y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(device)
                     except Exception as e:
                         _log.error(e)
                         _log.info('If your target variable contains categorical classes, \
@@ -247,7 +252,7 @@ class GraphDataset(Dataset):
                                      "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous().to(device)
 
             # cluster
             cluster0 = None
@@ -261,17 +266,15 @@ class GraphDataset(Dataset):
                             ):
 
                             cluster0 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(device)
                             cluster1 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(device)
                         else:
                             _log.warning("no clusters detected")
                     else:
                         _log.warning(f"no clustering/{self.clustering_method} detected")
                 else:
                     _log.warning("no clustering group found")
-            else:
-                _log.warning("no cluster method set")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
