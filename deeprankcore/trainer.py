@@ -23,23 +23,25 @@ _log = logging.getLogger(__name__)
 
 class Trainer():
 
-    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals # noqa: MC0001
-                Net = None,
-                dataset_train: GraphDataset = None,
-                dataset_val: GraphDataset = None,
-                dataset_test: GraphDataset = None,
-                val_size: Union[float, int] = None,
-                task: str = None,
-                classes: List = None,
-                class_weights = None,
-                pretrained_model = None,
-                batch_size = 32,
-                shuffle = True,
-                node_features: Union[List[str], str] = "all",
-                edge_features: Union[List[str], str] = "all",
-                transform_sigmoid: Optional[bool] = False,
-                metrics_exporters: Optional[List[MetricsExporter]] = None,
-                output_dir = './metrics'):
+    def __init__( # pylint: disable=too-many-arguments, too-many-locals # noqa: MC0001
+            self, 
+            Net = None,
+            dataset_train: GraphDataset = None,
+            dataset_val: GraphDataset = None,
+            dataset_test: GraphDataset = None,
+            val_size: Union[float, int] = None,
+            task: str = None,
+            classes: List = None,
+            class_weights: bool = False,
+            pretrained_model = None,
+            batch_size: int = 32,
+            shuffle: bool = True,
+            node_features: Union[List[str], str] = "all",
+            edge_features: Union[List[str], str] = "all",
+            transform_sigmoid: Optional[bool] = False,
+            metrics_exporters: Optional[List[MetricsExporter]] = None,
+            output_dir = './metrics'
+        ):
         """Class from which the network is trained, evaluated and tested
 
         Args:
@@ -747,7 +749,7 @@ class Trainer():
 
         torch.save(state, filename)
 
-    def test(self, dataset_test: GraphDataset=None):
+    def test(self, dataset_test: GraphDataset = None):
         """
         Tests the model
 
