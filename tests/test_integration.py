@@ -3,9 +3,8 @@ from shutil import rmtree
 import warnings
 import os
 import h5py
-from deeprankcore.preprocess import preprocess
 from tests._utils import PATH_TEST
-from deeprankcore.query import ProteinProteinInterfaceResidueQuery
+from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
@@ -17,7 +16,7 @@ import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals
     """
-    Tests preprocessing several PDB files into their features representation HDF5 file.
+    Tests processing several PDB files into their features representation HDF5 file.
 
     Then uses HDF5 generated files to train and test a GINet network.
 
@@ -33,14 +32,14 @@ def test_integration(): # pylint: disable=too-many-locals
     output_directory = mkdtemp()
     metrics_directory = tempfile.mkdtemp()
 
-    prefix = os.path.join(output_directory, "test-preprocess")
+    prefix = os.path.join(output_directory, "test-queries-process")
 
     try:
 
         all_targets = compute_targets(pdb_path, ref_path)
 
         count_queries = 3
-        queries = []
+        queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
                 pdb_path,
@@ -49,9 +48,9 @@ def test_integration(): # pylint: disable=too-many-locals
                 pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
                 targets = all_targets
             )
-            queries.append(query)
+            queries.add(query)
 
-        output_paths = preprocess(queries, prefix, count_queries, False)
+        output_paths = queries.process(prefix, count_queries, False)
         assert len(output_paths) > 0
 
         graph_names = []
