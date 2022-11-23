@@ -183,7 +183,7 @@ class QueryCollection:
         process_count: Optional[int] = None,
         combine_files: bool = True,
         feature_modules: List[ModuleType] = None
-        ):
+        ) -> List[str]:
 
         """
         Args:

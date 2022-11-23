@@ -101,11 +101,27 @@ def test_querycollection_process_combine_files_true():
     Tests processing for combining hdf5 files into one.
     """
 
-    _, output_directory, output_paths = querycollection_tester()
+    _, output_directory_t, output_paths_t = querycollection_tester()
 
-    assert len(output_paths) == 1
+    _, output_directory_f, output_paths_f = querycollection_tester(combine_files = False)
 
-    rmtree(output_directory)
+    assert len(output_paths_t) == 1
+
+    keys_t = {}
+    with h5py.File(output_paths_t[0],'r') as file_t:
+        for key, value in file_t.items():
+            keys_t[key] = value
+
+    keys_f = {}
+    for output_path in output_paths_f:
+        with h5py.File(output_path,'r') as file_f:
+            for key, value in file_f.items():
+                keys_f[key] = value
+
+    assert keys_t == keys_f
+
+    rmtree(output_directory_t)
+    rmtree(output_directory_f)
 
 
 def test_querycollection_process_combine_files_false():
