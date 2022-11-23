@@ -213,7 +213,7 @@ class QueryCollection:
         if prefix is None:
             prefix = "processed-queries"
         
-        if feature_modules == None:
+        if feature_modules is None:
             feature_modules = glob(join('./deeprankcore/features/', "*.py"))
             feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
         else:
