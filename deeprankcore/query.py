@@ -177,7 +177,7 @@ class QueryCollection:
 
         graph.write_to_hdf5(output_path)
 
-    def process(
+    def process( # pylint: disable=too-many-locals
         self, 
         prefix: Optional[str] = None,
         process_count: Optional[int] = None,
