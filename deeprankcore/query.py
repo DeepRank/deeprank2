@@ -182,7 +182,7 @@ class QueryCollection:
         prefix: Optional[str] = None,
         process_count: Optional[int] = None,
         combine_files: bool = True,
-        feature_modules: Union[List[ModuleType], str] = "all"
+        feature_modules: List[ModuleType] = None
         ):
 
         """
@@ -199,8 +199,8 @@ class QueryCollection:
                 Each feature's module must implement the add_features function, and
                 features' modules can be found (or should be placed in case of a custom made feature)
                 in deeprankcore.features folder.
-                If "all", all available modules in deeprankcore.features are used to generate the features. 
-                Defaults to "all".
+                If None, all available modules in deeprankcore.features are used to generate the features. 
+                Defaults to None.
         """
 
         if process_count is None:
@@ -213,7 +213,7 @@ class QueryCollection:
         if prefix is None:
             prefix = "processed-queries"
         
-        if feature_modules == "all":
+        if feature_modules == None:
             feature_modules = glob(join('./deeprankcore/features/', "*.py"))
             feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
         else:

@@ -8,7 +8,7 @@ from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from tests._utils import PATH_TEST
 
 
-def querycollection_tester(n_queries, n_cpus, combine_files, feature_modules):
+def querycollection_tester(n_queries = 10, n_cpus = 3, combine_files = True, feature_modules = None):
     """
     Generic function to test QueryCollection class.
 
@@ -21,7 +21,7 @@ def querycollection_tester(n_queries, n_cpus, combine_files, feature_modules):
             By default, the hdf5 files generated are combined into one, and then deleted.
 
         feature_modules: list of feature modules (from .deeprankcore.features) to be passed to process.
-            If "all", all available modules in deeprankcore.features are used to generate the features.
+            If None, all available modules in deeprankcore.features are used to generate the features.
     """
 
     output_directory = mkdtemp()
@@ -62,12 +62,9 @@ def test_querycollection_process():
     Tests processing method of QueryCollection class.
     """
 
-    n_queries = 10
-    n_cpus = 3
-    combine_files = True
-    feature_modules = "all"
+    n_queries = 5
 
-    collection, output_directory, _ = querycollection_tester(n_queries, n_cpus, combine_files, feature_modules)
+    collection, output_directory, _ = querycollection_tester(n_queries)
     
     assert isinstance(collection.queries, list)
     assert len(collection.queries) == n_queries
@@ -82,12 +79,9 @@ def test_querycollection_process_single_feature_module():
     Tests processing for generating a single feature.
     """
 
-    n_queries = 10
-    n_cpus = 3
-    combine_files = True
     feature_modules = [surfacearea]
 
-    _, output_directory, _ = querycollection_tester(n_queries, n_cpus, combine_files, feature_modules)
+    _, output_directory, _ = querycollection_tester(feature_modules = feature_modules)
 
     rmtree(output_directory)
 
@@ -97,12 +91,7 @@ def test_querycollection_process_all_features_modules():
     Tests processing for generating all features.
     """
 
-    n_queries = 10
-    n_cpus = 3
-    combine_files = True
-    feature_modules = "all"
-
-    _, output_directory, _ = querycollection_tester(n_queries, n_cpus, combine_files, feature_modules)
+    _, output_directory, _ = querycollection_tester()
 
     rmtree(output_directory)
 
@@ -112,12 +101,7 @@ def test_querycollection_process_combine_files_true():
     Tests processing for combining hdf5 files into one.
     """
 
-    n_queries = 10
-    n_cpus = 3
-    combine_files = True
-    feature_modules = "all"
-
-    _, output_directory, output_paths = querycollection_tester(n_queries, n_cpus, combine_files, feature_modules)
+    _, output_directory, output_paths = querycollection_tester()
 
     assert len(output_paths) == 1
 
@@ -129,12 +113,10 @@ def test_querycollection_process_combine_files_false():
     Tests processing for keeping all generated hdf5 files .
     """
 
-    n_queries = 10
     n_cpus = 3
     combine_files = False
-    feature_modules = "all"
 
-    _, output_directory, output_paths = querycollection_tester(n_queries, n_cpus, combine_files, feature_modules)
+    _, output_directory, output_paths = querycollection_tester(n_cpus = n_cpus, combine_files = combine_files)
 
     assert len(output_paths) == n_cpus
 
