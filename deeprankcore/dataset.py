@@ -57,7 +57,7 @@ class GraphDataset(Dataset):
         root: str = "./",
         transform: Callable = None,
         pre_transform: Callable = None,
-        dict_filter: dict = None,
+        target_filter: dict = None,
         target: str = None,
         tqdm: bool = True,
         subset: list = None,
@@ -81,7 +81,7 @@ class GraphDataset(Dataset):
                 a torch_geometric.data.Data object and returns a transformed version.
                 The data object will be transformed before being saved to disk. Defaults to None.
 
-            dict_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
+            target_filter (dictionary, optional): Dictionary of type [name: cond] to filter the molecules.
                 Defaults to None.
 
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
@@ -110,7 +110,7 @@ class GraphDataset(Dataset):
 
         self.target = target
 
-        self.dict_filter = dict_filter
+        self.target_filter = target_filter
         self.tqdm = tqdm
         self.subset = subset
 
@@ -329,7 +329,7 @@ class GraphDataset(Dataset):
     def _filter(self, molgrp):
         """Filters the molecule according to a dictionary.
 
-        The filter is based on the attribute self.dict_filter
+        The filter is based on the attribute self.target_filter
         that must be either of the form: { 'name' : cond } or None
 
         Args:
@@ -339,11 +339,10 @@ class GraphDataset(Dataset):
         Raises:
             ValueError: If an unsuported condition is provided
         """
-        if self.dict_filter is None:
+        if self.target_filter is None:
             return True
 
-        for cond_name, cond_vals in self.dict_filter.items():
-
+        for cond_name, cond_vals in self.target_filter.items():
             try:
                 molgrp[targets.VALUES][cond_name][()]
             except KeyError:
@@ -354,15 +353,12 @@ class GraphDataset(Dataset):
 
             # if we have a string it's more complicated
             if isinstance(cond_vals, str):
-
                 ops = [">", "<", "=="]
                 new_cond_vals = cond_vals
                 for o in ops:
                     new_cond_vals = new_cond_vals.replace(o, "val" + o)
-
                 if not literal_eval(new_cond_vals):
                     return False
             else:
                 raise ValueError("Conditions not supported", cond_vals)
-
         return True
