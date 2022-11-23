@@ -8,7 +8,7 @@ from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from tests._utils import PATH_TEST
 
 
-def querycollection_tester(n_queries = 10, n_cpus = 3, combine_files = True, feature_modules = None):
+def querycollection_tester(n_queries = 10, feature_modules = None, n_cpus = 3, combine_files = True):
     """
     Generic function to test QueryCollection class.
 
@@ -40,7 +40,7 @@ def querycollection_tester(n_queries = 10, n_cpus = 3, combine_files = True, fea
                 pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
                 ))
 
-        output_paths = collection.process(prefix, n_cpus, combine_files, feature_modules)
+        output_paths = collection.process(prefix, feature_modules, n_cpus, combine_files)
         assert len(output_paths) > 0
 
         graph_names = []
