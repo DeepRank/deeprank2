@@ -24,11 +24,11 @@ _log = logging.getLogger(__name__)
 class Trainer():
 
     def __init__(self, # pylint: disable=too-many-arguments
+                Net = None,
                 dataset_train: GraphDataset = None,
                 dataset_val: GraphDataset = None,
                 dataset_test: GraphDataset = None,
-                Net = None,
-                val_size = None,
+                val_size: Union[float, int] = None,
                 task: str = None,
                 classes: List = None,
                 class_weights = None,
@@ -43,6 +43,11 @@ class Trainer():
         """Class from which the network is trained, evaluated and tested
 
         Args:
+            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
+                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
+                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+
             dataset_train (GraphDataset object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
 
@@ -51,11 +56,6 @@ class Trainer():
                 validation set during training, using val_size parameter
 
             dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
-
-            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
-                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
-                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
 
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
                 to use for validation.
@@ -95,10 +95,10 @@ class Trainer():
 
             output_dir: location for metrics file (see ConciseOutputExporter class)
         """
+
         if metrics_exporters is not None:
             self._metrics_exporters = MetricsExporterCollection(
                 *metrics_exporters)
-                
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
@@ -112,40 +112,33 @@ class Trainer():
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
 
         if pretrained_model is None:
-
-            if dataset_train is None:
-                raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
-            
             if Net is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
+            if dataset_train is None:
+                raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
 
-            self.target = dataset_train.target  # already defined in HDF5DatSet object
+            self.target = dataset_train.target
             if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
                 self.task = targets.REGRESS
             elif self.target in [targets.BINARY, targets.CAPRI]:
                 self.task = targets.CLASSIF
             else:
                 self.task = task
+
+            if self.task != task:
+                warnings.warn(f"Target {self.target} expects {self.task}, but was set to task {task} by user.\n" +
+                    f"User set task is ignored and {self.task} will be used.")
             
             if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
                 raise ValueError(
-                    f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
-                    "Example: \n\t"
-                    ""
-                    "model = NeuralNet(dataset, GINet,"
-                    "                  target='physiological_assembly',"
-                    "                  task='classif')")
-            
-            if self.task == targets.CLASSIF:
+                    f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
+            elif self.task == targets.CLASSIF:
                 if classes is None:
                     self.classes = [0, 1]
                 else:
                     self.classes = classes
-
-                self.classes_to_idx = {
-                    i: idx for idx, i in enumerate(self.classes)
-                }
-            else:
+                self.classes_to_idx = {i: idx for idx, i in enumerate(self.classes)}
+            elif self.task == targets.REGRESS:
                 self.classes = None
                 self.classes_to_idx = None
 
@@ -176,14 +169,15 @@ class Trainer():
                 warnings.warn("Pretrained model loaded. dataset_train will be ignored.")
             if dataset_val is not None:
                 warnings.warn("Pretrained model loaded. dataset_val will be ignored.")
+
             if Net is None:
                 raise ValueError("No neural network class found. Please add it for \
                     completing the loading of the pretrained model.")
 
-            if dataset_test is not None:
-                self._load_pretrained_model(dataset_test, Net)
-            else:
+            if dataset_test is None:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
+            else:    
+                self._load_pretrained_model(dataset_test, Net)
 
     def _check_features(self, dataset: GraphDataset):
         """Checks if the required features exist"""
