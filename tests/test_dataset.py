@@ -1,7 +1,7 @@
 import unittest
-from deeprankcore.dataset import GraphDataset, save_hdf5_keys
-from torch_geometric.data.data import Data
 import h5py
+from torch_geometric.data.data import Data
+from deeprankcore.dataset import GraphDataset, save_hdf5_keys
 from deeprankcore.domain import targetstorage as targets
 
 

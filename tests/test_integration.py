@@ -3,8 +3,8 @@ from shutil import rmtree
 import warnings
 import os
 import h5py
-from deeprankcore.preprocess import preprocess
 from tests._utils import PATH_TEST
+from deeprankcore.preprocess import preprocess
 from deeprankcore.query import ProteinProteinInterfaceResidueQuery
 from deeprankcore.dataset import GraphDataset
 from deeprankcore.trainer import Trainer
@@ -13,7 +13,6 @@ from deeprankcore.utils.metrics import OutputExporter
 from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
-import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals
     """
@@ -31,7 +30,7 @@ def test_integration(): # pylint: disable=too-many-locals
     chain_id2 = "B"
 
     output_directory = mkdtemp()
-    metrics_directory = tempfile.mkdtemp()
+    metrics_directory = mkdtemp()
 
     prefix = os.path.join(output_directory, "test-preprocess")
 

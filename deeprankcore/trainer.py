@@ -23,7 +23,7 @@ _log = logging.getLogger(__name__)
 
 class Trainer():
 
-    def __init__(self, # pylint: disable=too-many-arguments
+    def __init__(self, # pylint: disable=too-many-arguments, too-many-locals # noqa: MC0001
                 Net = None,
                 dataset_train: GraphDataset = None,
                 dataset_val: GraphDataset = None,
@@ -132,7 +132,7 @@ class Trainer():
             if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
                 raise ValueError(
                     f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
-            elif self.task == targets.CLASSIF:
+            if self.task == targets.CLASSIF:
                 if classes is None:
                     self.classes = [0, 1]
                 else:
@@ -173,11 +173,10 @@ class Trainer():
             if Net is None:
                 raise ValueError("No neural network class found. Please add it for \
                     completing the loading of the pretrained model.")
-
             if dataset_test is None:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
-            else:    
-                self._load_pretrained_model(dataset_test, Net)
+            
+            self._load_pretrained_model(dataset_test, Net)
 
     def _check_features(self, dataset: GraphDataset):
         """Checks if the required features exist"""

@@ -7,7 +7,7 @@ import logging
 import warnings
 import torch
 import h5py
-from deeprankcore.trainer import Trainer
+from deeprankcore.trainer import Trainer, _divide_dataset
 from deeprankcore.dataset import GraphDataset
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
@@ -20,7 +20,6 @@ from deeprankcore.utils.metrics import (
 )
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
-from deeprankcore.trainer import _divide_dataset
 
 
 _log = logging.getLogger(__name__)
@@ -72,6 +71,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_test,
         node_features=node_features,
         edge_features=edge_features,
+        task=task,
         batch_size=64,
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
