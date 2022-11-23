@@ -8,7 +8,7 @@ from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from tests._utils import PATH_TEST
 
 
-def querycollection_tester(n_queries = 10, feature_modules = None, n_cpus = 3, combine_output = True):
+def querycollection_tester(n_queries = 10, feature_modules = None, subprocesses = 1, combine_output = True):
     """
     Generic function to test QueryCollection class.
 
@@ -40,7 +40,7 @@ def querycollection_tester(n_queries = 10, feature_modules = None, n_cpus = 3, c
                 pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
                 ))
 
-        output_paths = collection.process(prefix, feature_modules, n_cpus, combine_output)
+        output_paths = collection.process(prefix, feature_modules, subprocesses, combine_output)
         assert len(output_paths) > 0
 
         graph_names = []
@@ -51,6 +51,7 @@ def querycollection_tester(n_queries = 10, feature_modules = None, n_cpus = 3, c
         for query in collection.queries:
             query_id = query.get_query_id()
             assert query_id in graph_names, f"missing in output: {query_id}"
+
     except Exception as e:
         print(e)
 
@@ -129,11 +130,11 @@ def test_querycollection_process_combine_output_false():
     Tests processing for keeping all generated hdf5 files .
     """
 
-    n_cpus = 3
+    subprocesses = 3
     combine_output = False
 
-    _, output_directory, output_paths = querycollection_tester(n_cpus = n_cpus, combine_output = combine_output)
+    _, output_directory, output_paths = querycollection_tester(subprocesses = subprocesses, combine_output = combine_output)
 
-    assert len(output_paths) == n_cpus
+    assert len(output_paths) == subprocesses
 
     rmtree(output_directory)
