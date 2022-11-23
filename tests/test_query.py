@@ -21,7 +21,7 @@ from deeprankcore.query import (
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 from deeprankcore.features import components, conservation, contact, surfacearea
-from deeprankcore.DataSet import GraphDataset
+from deeprankcore.dataset_ import GraphDataset
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):

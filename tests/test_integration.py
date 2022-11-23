@@ -6,8 +6,8 @@ import h5py
 from deeprankcore.preprocess import preprocess
 from tests._utils import PATH_TEST
 from deeprankcore.query import ProteinProteinInterfaceResidueQuery
-from deeprankcore.DataSet import GraphDataset
-from deeprankcore.Trainer import Trainer
+from deeprankcore.dataset_ import GraphDataset
+from deeprankcore.trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter
 from deeprankcore.tools.target import compute_targets

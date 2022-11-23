@@ -16,7 +16,7 @@ from deeprankcore.utils.metrics import MetricsExporterCollection, MetricsExporte
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import (targetstorage as targets, edgestorage as Efeat,
                                 nodestorage as Nfeat)
-from deeprankcore.DataSet import GraphDataset
+from deeprankcore.dataset_ import GraphDataset
 
 _log = logging.getLogger(__name__)
 
