@@ -125,7 +125,7 @@ class Trainer():
             else:
                 self.task = task
 
-            if self.task != task:
+            if task != self.task and task is not None:
                 warnings.warn(f"Target {self.target} expects {self.task}, but was set to task {task} by user.\n" +
                     f"User set task is ignored and {self.task} will be used.")
             
@@ -224,7 +224,7 @@ class Trainer():
                 miss_node_error = f"\nMissing node features: {missing_node_features} \
                                     \nAvailable node features: {self.available_node_features}"
             if missing_edge_features:
-                _log.info(f"\nAvailable node features: {self.available_edge_features}\n")
+                _log.info(f"\nAvailable edge features: {self.available_edge_features}\n")
                 miss_edge_error = f"\nMissing edge features: {missing_edge_features} \
                                     \nAvailable edge features: {self.available_edge_features}"
 
@@ -234,7 +234,7 @@ class Trainer():
                     \nProbably, the feature wasn't generated during the preprocessing step. \
                     {miss_node_error}{miss_edge_error}")
 
-    def _load_model(self, dataset_train, dataset_val, dataset_test, Net):
+    def _load_model(self, dataset_train: GraphDataset, dataset_val: GraphDataset, dataset_test: GraphDataset, Net):
         
         """
         Loads model
@@ -303,7 +303,7 @@ class Trainer():
 
         self.set_loss()
 
-    def _precluster(self, dataset, method):
+    def _precluster(self, dataset: GraphDataset, method):
         """Pre-clusters nodes of the graphs
 
         Args:
@@ -349,7 +349,7 @@ class Trainer():
 
             f5.close()
 
-    def _put_model_to_device(self, dataset, Net):
+    def _put_model_to_device(self, dataset: GraphDataset, Net):
         """
         Puts the model on the available device
 
@@ -368,36 +368,21 @@ class Trainer():
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
-        self.num_edge_features = len(self.edge_feature)
-
         # the target values are optional
         if dataset.get(0).y is not None:
-
             target_shape = dataset.get(0).y.shape[0]
         else:
             target_shape = None
 
-        # regression mode
-        if self.task == targets.REGRESS:
-
-            self.output_shape = 1
-
-            self.model = Net(
-                dataset.get(0).num_features,
-                self.output_shape,
-                self.num_edge_features).to(
-                self.device)
-
-        # classification mode
-        elif self.task == targets.CLASSIF:
-
+        if self.task == targets.CLASSIF:
             self.output_shape = len(self.classes)
-
-            self.model = Net(
-                dataset.get(0).num_features,
-                self.output_shape,
-                self.num_edge_features).to(
-                self.device)
+        elif self.task == targets.REGRESS:
+            self.output_shape = 1
+        self.model = Net(
+            dataset.get(0).num_features,
+            self.output_shape,
+            dataset.get(0).num_edge_features,
+        ).to(self.device)
 
         # check for compatibility
         for metrics_exporter in self._metrics_exporters:
@@ -744,8 +729,8 @@ class Trainer():
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
-            "node": self.node_feature,
-            "edge": self.edge_feature,
+            "node": self.node_features,
+            "edge": self.edge_features,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,
@@ -762,7 +747,7 @@ class Trainer():
 
         torch.save(state, filename)
 
-    def test(self, dataset_test=None):
+    def test(self, dataset_test: GraphDataset=None):
         """
         Tests the model
 
@@ -791,7 +776,7 @@ class Trainer():
 
 
 
-    def _load_pretrained_model(self, dataset_test, Net):
+    def _load_pretrained_model(self, dataset_test: GraphDataset, Net):
         """
         Loads pretrained model
 
@@ -830,8 +815,8 @@ class Trainer():
 
         state = torch.load(filename, map_location=torch.device(self.device))
 
-        self.node_feature = state["node"]
-        self.edge_feature = state["edge"]
+        self.node_features = state["node"]
+        self.edge_features = state["edge"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
