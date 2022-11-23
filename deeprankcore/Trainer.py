@@ -1,5 +1,5 @@
 from time import time
-from typing import List, Optional
+from typing import List, Optional, Union
 import logging
 import warnings
 from tqdm import tqdm
@@ -15,6 +15,7 @@ from torch_geometric.loader import DataLoader
 from deeprankcore.utils.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targetstorage as targets
+from deeprankcore.DataSet import GraphDataset
 
 _log = logging.getLogger(__name__)
 
@@ -22,18 +23,22 @@ _log = logging.getLogger(__name__)
 class Trainer():
 
     def __init__(self, # pylint: disable=too-many-arguments
-                 dataset_train = None,
-                 dataset_val = None,
-                 dataset_test = None,
-                 Net = None,
-                 val_size = None,
-                 class_weights = None,
-                 pretrained_model = None,
-                 batch_size = 32,
-                 shuffle = True,
-                 transform_sigmoid: Optional[bool] = False,
-                 metrics_exporters: Optional[List[MetricsExporter]] = None,
-                 output_dir = './metrics'):
+                dataset_train: GraphDataset = None,
+                dataset_val: GraphDataset = None,
+                dataset_test: GraphDataset = None,
+                Net = None,
+                val_size = None,
+                task: str = None,
+                classes: List = None,
+                class_weights = None,
+                pretrained_model = None,
+                batch_size = 32,
+                shuffle = True,
+                node_features: Union[List[str], str] = "all",
+                edge_features: Union[List[str], str] = "all",
+                transform_sigmoid: Optional[bool] = False,
+                metrics_exporters: Optional[List[MetricsExporter]] = None,
+                output_dir = './metrics'):
         """Class from which the network is trained, evaluated and tested
 
         Args:
@@ -52,12 +57,29 @@ class Trainer():
                 - Should be set to 0 if no validation set is needed.
                 - Should be not set (None) if dataset_val is not None.
                 Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
+
+            task (str, optional): 'regress' for regression or 'classif' for classification.
+                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq']
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+
+            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
+
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
             batch_size (int, optional): defaults to 32.
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
+
+            node_features (str or list, optional): consider all pre-computed node features ("all")
+            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
+            The complete list can be found in deeprankcore/domain/features.py
+
+            edge_features (list, optional): consider all pre-computed edge features ("all")
+            or some defined edge features (provide a list, example: ["dist", "coulomb"]).
+            The complete list can be found in deeprankcore/domain/features.py
+
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
             metrics_exporters: the metrics exporters to use for generating metrics output
@@ -88,9 +110,35 @@ class Trainer():
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
             self.target = dataset_train.target  # already defined in HDF5DatSet object
-            self.task = dataset_train.task
-            self.classes = dataset_train.classes
-            self.classes_to_idx = dataset_train.classes_to_idx
+            if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+                self.task = targets.REGRESS
+            elif self.target in [targets.BINARY, targets.CAPRI]:
+                self.task = targets.CLASSIF
+            else:
+                self.task = task
+            
+            if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
+                raise ValueError(
+                    f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
+                    "Example: \n\t"
+                    ""
+                    "model = NeuralNet(dataset, GINet,"
+                    "                  target='physiological_assembly',"
+                    "                  task='classif')")
+            
+            if self.task == targets.CLASSIF:
+                if classes is None:
+                    self.classes = [0, 1]
+                else:
+                    self.classes = classes
+
+                self.classes_to_idx = {
+                    i: idx for idx, i in enumerate(self.classes)
+                }
+            else:
+                self.classes = None
+                self.classes_to_idx = None
+
             self.optimizer = None
             self.batch_size = batch_size
             self.val_size = val_size            # if None, will be set to 0.25 in _DivideDataSet function
@@ -100,8 +148,8 @@ class Trainer():
             self.transform_sigmoid = transform_sigmoid
 
             self.subset = dataset_train.subset
-            self.node_feature = dataset_train.node_feature
-            self.edge_feature = dataset_train.edge_feature
+            self.node_features = node_features
+            self.edge_features = edge_features
             self.cluster_nodes = dataset_train.clustering_method
             self.epoch_saved_model = None
 

@@ -53,18 +53,14 @@ def save_hdf5_keys(
 class GraphDataset(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
-        hdf5_path,
+        hdf5_path: Union[List[str], str],
         root: str = "./",
         transform: Callable = None,
         pre_transform: Callable = None,
         dict_filter: dict = None,
         target: str = None,
-        task: str = None,
-        classes: List = None,
         tqdm: bool = True,
         subset: list = None,
-        node_feature: Union[List[str], str] = "all",
-        edge_feature: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
         edge_feature_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
     ):
@@ -94,24 +90,9 @@ class GraphDataset(Dataset):
             please convert the categorical classes into numerical class indices before defining the GraphDataset instance.
             Defaults to None.
 
-            task (str, optional): 'regress' for regression or 'classif' for classification.
-                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq']
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
-
-            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
-
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
-
-            node_feature (str or list, optional): consider all pre-computed node features ("all")
-            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
-            The complete list can be found in deeprankcore/domain/features.py
-
-            edge_feature (list, optional): consider all pre-computed edge features ("all")
-            or some defined edge features (provide a list, example: ["dist", "coulomb"]).
-            The complete list can be found in deeprankcore/domain/features.py
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
             or 'louvain' algorithm). Note that this parameter can be None only if the neural
@@ -128,42 +109,10 @@ class GraphDataset(Dataset):
             self.hdf5_path = [hdf5_path]
 
         self.target = target
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
-            self.task = targets.REGRESS
-        elif self.target in [targets.BINARY, targets.CAPRI]:
-            self.task = targets.CLASSIF
-        else:
-            self.task = task
-        
-        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
-            raise ValueError(
-                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
-                "Example: \n\t"
-                ""
-                "model = NeuralNet(dataset, GINet,"
-                "                  target='physiological_assembly',"
-                "                  task='classif')")
-        
-        if self.task == targets.CLASSIF:
-            if classes is None:
-                self.classes = [0, 1]
-            else:
-                self.classes = classes
-
-            self.classes_to_idx = {
-                i: idx for idx, i in enumerate(self.classes)
-            }
-        else:
-            self.classes = None
-            self.classes_to_idx = None
 
         self.dict_filter = dict_filter
         self.tqdm = tqdm
         self.subset = subset
-
-        self.node_feature = node_feature
-
-        self.edge_feature = edge_feature
 
         self.edge_feature_transform = edge_feature_transform
         self._transform = transform
