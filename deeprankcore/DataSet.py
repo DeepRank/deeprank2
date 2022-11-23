@@ -50,7 +50,7 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-class HDF5DataSet(Dataset):
+class GraphDataset(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
         hdf5_path,
@@ -91,7 +91,7 @@ class HDF5DataSet(Dataset):
             target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
             target given to the Query class as input (see: deeprankcore.query); in the latter case, specify
             here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
-            please convert the categorical classes into numerical class indices before defining the HDF5DataSet instance.
+            please convert the categorical classes into numerical class indices before defining the GraphDataset instance.
             Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification.
@@ -332,7 +332,7 @@ class HDF5DataSet(Dataset):
                     except Exception as e:
                         _log.error(e)
                         _log.info('If your target variable contains categorical classes, \
-                        please convert them into class indices before defining the HDF5DataSet instance.')
+                        please convert them into class indices before defining the GraphDataset instance.')
                 else:
                     possible_targets = grp[targets.VALUES].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +

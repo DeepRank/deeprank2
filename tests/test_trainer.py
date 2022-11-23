@@ -7,7 +7,7 @@ import logging
 import warnings
 import torch
 from deeprankcore.Trainer import Trainer
-from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.DataSet import GraphDataset
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
@@ -41,7 +41,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     use_cuda = False
 ):
 
-    dataset_train = HDF5DataSet(
+    dataset_train = GraphDataset(
         hdf5_path=train_hdf5_path,
         root="./",
         node_feature=node_features,
@@ -51,7 +51,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         clustering_method=clustering_method)
 
     if val_hdf5_path is not None:
-        dataset_val = HDF5DataSet(
+        dataset_val = GraphDataset(
             hdf5_path=val_hdf5_path,
             root="./",
             node_feature=node_features,
@@ -63,7 +63,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val = None
 
     if test_hdf5_path is not None:
-        dataset_test = HDF5DataSet(
+        dataset_test = GraphDataset(
             hdf5_path=test_hdf5_path,
             root="./",
             node_feature=node_features,
@@ -250,7 +250,7 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_no_pretrained_no_train(self):
         with pytest.raises(ValueError):
 
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
@@ -262,7 +262,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_no_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
@@ -273,7 +273,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_pretrained_no_test(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
@@ -294,7 +294,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 root="./")
@@ -314,7 +314,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_provided(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
@@ -330,7 +330,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_full_train(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
@@ -347,7 +347,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_optim(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
@@ -382,7 +382,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_default_optim(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             root="./")
