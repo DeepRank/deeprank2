@@ -235,11 +235,12 @@ class QueryCollection:
                 with h5py.File(f"{prefix}.hdf5",'a') as f_dest, h5py.File(output_path,'r') as f_src:
                     for key, value in f_src.items():
                         try:
-                            f_src.copy(value,f_dest)
-                        except RuntimeError:
+                            f_src.copy(value, f_dest)
+                        except RuntimeError as e:
                             if key not in dupl_ids:
                                 dupl_ids[key] = 2
-                            f_src.copy(f_src[key],f_dest,name=key+"_"+str(dupl_ids[key]))
+                            f_src.copy(value, f_dest,name = key + "_" + str(dupl_ids[key]))
+                            _log.error(e)
                             _log.info(f'{key} Group id has already been added to the file. Renaming Group as {key+"_"+str(dupl_ids)}')
                             dupl_ids[key] += 1
                 os.remove(output_path)
