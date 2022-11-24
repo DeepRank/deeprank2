@@ -50,7 +50,7 @@ def test_integration(): # pylint: disable=too-many-locals
             )
             queries.add(query)
 
-        output_paths = queries.process(prefix = prefix, processes = count_queries, combine_output = False)
+        output_paths = queries.process(prefix = prefix, cpu_count = count_queries, combine_output = False)
         assert len(output_paths) > 0
 
         graph_names = []
