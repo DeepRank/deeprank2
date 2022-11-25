@@ -712,15 +712,15 @@ class Trainer():
 
         state = torch.load(self.pretrained_model, map_location=torch.device(self.device))
 
-        self.node_features = state["node"]
-        self.edge_features = state["edge"]
+        self.node_features = state["node_features"]
+        self.edge_features = state["edge_features"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.subset = state["subset"]
-        self.class_weights = state["class_weight"]
+        self.class_weights = state["class_weights"]
         self.task = state["task"]
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
@@ -742,12 +742,12 @@ class Trainer():
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
-            "node": self.node_features,
-            "edge": self.edge_features,
+            "node_features": self.node_features,
+            "edge_features": self.edge_features,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,
-            "class_weight": self.class_weights,
+            "class_weights": self.class_weights,
             "batch_size": self.batch_size,
             "val_size": self.val_size,
             "lr": self.lr,
