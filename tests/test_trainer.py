@@ -420,6 +420,55 @@ class TestTrainer(unittest.TestCase):
             warnings.warn("CUDA NOT AVAILABLE. test_cuda skipped")
             _log.debug("cuda is not available, test_cuda skipped")
 
+    def test_dataset_equivalence_no_pretrained(self):
+        with pytest.raises(ValueError):
+            dataset_train = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
+            )
+            
+            dataset_val = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE]
+            )
+
+            Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_train,
+                dataset_val = dataset_val,
+            )
+
+    def test_dataset_equivalence_pretrained(self):
+        with pytest.raises(ValueError):
+            dataset_train = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
+            )
+            
+            dataset_test = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE]
+            )
+
+            trainer = Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_train,
+            )
+
+            with warnings.catch_warnings(record=UserWarning):
+                trainer.train(nepoch=3, validate=True)
+                trainer.save_model("test.pth.tar")
+
+                Trainer(
+                    neuralnet = GINet,
+                    dataset_train = dataset_train,
+                    dataset_test = dataset_test,
+                    pretrained_model="test.pth.tar")
+
 
 if __name__ == "__main__":
     unittest.main()
