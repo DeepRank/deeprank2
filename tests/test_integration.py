@@ -72,24 +72,24 @@ def test_integration(): # pylint: disable=too-many-locals
 
         dataset_train = GraphDataset(
             hdf5_path = output_paths[:n_train],
-            node_feature = node_features,
-            edge_feature = edge_features,
+            node_features = node_features,
+            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         dataset_val = GraphDataset(
             hdf5_path = output_paths[n_train:-n_test],
-            node_feature = node_features,
-            edge_feature = edge_features,
+            node_features = node_features,
+            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         dataset_test = GraphDataset(
             hdf5_path = output_paths[-n_test],
-            node_feature = node_features,
-            edge_feature = edge_features,
+            node_features = node_features,
+            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )

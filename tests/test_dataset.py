@@ -15,8 +15,8 @@ class TestDataSet(unittest.TestCase):
     def test_dataset(self):
         GraphDataset(
             hdf5_path=self.hdf5_path,
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
         )
@@ -24,8 +24,8 @@ class TestDataSet(unittest.TestCase):
     def test_dataset_filter(self):
         GraphDataset(
             hdf5_path=self.hdf5_path,
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
             dict_filter={targets.IRMSD: "<10"},
@@ -39,8 +39,8 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GraphDataset(
             hdf5_path=self.hdf5_path,
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
             transform=operator
@@ -52,8 +52,8 @@ class TestDataSet(unittest.TestCase):
     def test_multi_file_dataset(self):
         dataset = GraphDataset(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.BINARY
         )
 

@@ -100,8 +100,8 @@ class Trainer():
             self.transform_sigmoid = transform_sigmoid
 
             self.subset = dataset_train.subset
-            self.node_feature = dataset_train.node_feature
-            self.edge_feature = dataset_train.edge_feature
+            self.node_features = dataset_train.node_features
+            self.edge_features = dataset_train.edge_features
             self.cluster_nodes = dataset_train.clustering_method
             self.epoch_saved_model = None
 
@@ -261,7 +261,7 @@ class Trainer():
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
-        self.num_edge_features = len(self.edge_feature)
+        self.num_edge_features = len(self.edge_features)
 
         # the target values are optional
         if dataset.get(0).y is not None:
@@ -635,8 +635,8 @@ class Trainer():
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
-            "node": self.node_feature,
-            "edge": self.edge_feature,
+            "node": self.node_features,
+            "edge": self.edge_features,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,
@@ -668,8 +668,8 @@ class Trainer():
 
         state = torch.load(filename, map_location=torch.device(self.device))
 
-        self.node_feature = state["node"]
-        self.edge_feature = state["edge"]
+        self.node_features = state["node"]
+        self.edge_features = state["edge"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]

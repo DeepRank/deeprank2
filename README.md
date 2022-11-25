@@ -222,21 +222,21 @@ edge_features = ["distance"]
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
+    node_features = node_features,
+    edge_features = edge_features,
     target = "binary"
 )
 dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
+    node_features = node_features,
+    edge_features = edge_features,
     target = "binary"
 
 )
 dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
+    node_features = node_features,
+    edge_features = edge_features,
     target = "binary"
 )
 ```
