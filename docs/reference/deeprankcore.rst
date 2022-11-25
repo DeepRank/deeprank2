@@ -96,10 +96,10 @@ deeprankcore.naive\_gnn module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.preprocess module
+deeprankcore.query module
 ------------------------------
 
-.. automodule:: deeprankcore.preprocess
+.. automodule:: deeprankcore.query
    :members:
    :undoc-members:
    :show-inheritance:

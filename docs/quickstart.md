@@ -4,43 +4,41 @@
 The process of generating graphs takes as input `.pdb` files representing protein-protein structural complexes and the correspondent Position-Specific Scoring Matrices (PSSMs) in the form of `.pssm` files. Query objects describe how the graphs should be built.
 
 ```python
-from deeprankcore.preprocess import preprocess
-from deeprankcore.query import ProteinProteinInterfaceResidueQuery
-from deeprankcore.domain import targettypes as targets
+from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
 
-queries = []
+queries = QueryCollection()
 
 # Append data points
-queries.append(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceResidueQuery(
     pdb_path = "1ATN_1w.pdb",
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        targets.BINARY: 0
+        "binary": 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
         "B": "1ATN.B.pdb.pssm"
     }
 ))
-queries.append(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceResidueQuery(
     pdb_path = "1ATN_2w.pdb",
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        targets.BINARY: 1
+        "binary": 1
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
         "B": "1ATN.B.pdb.pssm"
     }
 ))
-queries.append(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceResidueQuery(
     pdb_path = "1ATN_3w.pdb",
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
-        targets.BINARY: 0
+        "binary": 0
     },
     pssm_paths = {
         "A": "1ATN.A.pdb.pssm",
@@ -49,9 +47,7 @@ queries.append(ProteinProteinInterfaceResidueQuery(
 ))
 
 # Generate graphs and save them in hdf5 files
-# The default creates a number of hdf5 files equals to the cpu cores available
-# See deeprankcore.preprocess.preprocess for more details
-output_paths = preprocess(queries, "<output_folder>/<prefix_for_outputs>")
+output_paths = queries.process("<output_folder>/<prefix_for_outputs>")
 
 ```
 
