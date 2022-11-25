@@ -54,7 +54,7 @@ class GraphDataset(Dataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
         hdf5_path: Union[str,list],
-        subset: list = None,
+        subset: List[str] = None,
         target: str = None,
         task: str = None,
         node_features: Union[List[str], str] = "all",

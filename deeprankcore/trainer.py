@@ -98,7 +98,7 @@ class Trainer():
         if pretrained_model is None:
             if self.dataset_train is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
-            if neuralnet is None:
+            if self.neuralnet is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
             self.target = self.dataset_train.target
@@ -140,7 +140,6 @@ class Trainer():
             if self.target is None:
                 raise ValueError("No target set. Make sure the pretrained model explicitly defines the target to train against.")
 
-            
             self._check_dataset_equivalence()
             self._load_pretrained_model()
 
@@ -540,7 +539,7 @@ class Trainer():
             pass_name (str): 'training', 'validation' or 'testing'
 
         Returns:
-            running loss:
+            running loss
         """
         
         # Sets the module in evaluation mode
