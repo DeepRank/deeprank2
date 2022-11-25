@@ -21,8 +21,8 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-    def __init__(
-                self, # pylint: disable=too-many-arguments
+    def __init__( # pylint: disable=too-many-arguments
+                self,
                 neuralnet = None,
                 dataset_train: GraphDataset = None,
                 dataset_val: GraphDataset = None,
@@ -202,6 +202,30 @@ class Trainer():
 
         self.set_loss()
 
+    def _load_pretrained_model(self, dataset_test, neuralnet):
+        """
+        Loads pretrained model
+
+        Args:
+            dataset_test: GraphDataset object to be tested with the model
+            neuralnet (function): neural network
+        """
+
+        if self.cluster_nodes is not None: 
+            self._precluster(dataset_test, method=self.cluster_nodes)
+
+        self.test_loader = DataLoader(dataset_test)
+
+        _log.info("Testing set loaded\n")
+        
+        self._put_model_to_device(dataset_test, neuralnet)
+
+        self.set_loss()
+
+        # load the model and the optimizer state
+        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
+        self.model.load_state_dict(self.model_load_state_dict)
+
     def _precluster(self, dataset, method):
         """Pre-clusters nodes of the graphs
 
@@ -305,6 +329,7 @@ class Trainer():
                                  f"is not compatible with output shape {self.output_shape} "
                                  f"and target shape {target_shape}")
 
+
     def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
 
         """Configure optimizer and its main parameters.
@@ -330,30 +355,6 @@ class Trainer():
             except Exception as e:
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
-
-    def _load_pretrained_model(self, dataset_test, neuralnet):
-        """
-        Loads pretrained model
-
-        Args:
-            dataset_test: GraphDataset object to be tested with the model
-            neuralnet (function): neural network
-        """
-
-        if self.cluster_nodes is not None: 
-            self._precluster(dataset_test, method=self.cluster_nodes)
-
-        self.test_loader = DataLoader(dataset_test)
-
-        _log.info("Testing set loaded\n")
-        
-        self._put_model_to_device(dataset_test, neuralnet)
-
-        self.set_loss()
-
-        # load the model and the optimizer state
-        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
-        self.model.load_state_dict(self.model_load_state_dict)
 
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
