@@ -64,7 +64,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
         n_val = 1
         n_test = 1
-        n_train = len(output_paths) - (n_val + n_test)
+        n_train = len(queries.queries) - (n_val + n_test)
 
         node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
         edge_features = [Efeat.DISTANCE]
