@@ -44,7 +44,7 @@ class Trainer():
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
 
-            dataset_train (GraphDataset object, required): training set used during training.
+            dataset_train (GraphDataset object, optional): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
 
             dataset_val (GraphDataset object, optional): evaluation set used during training.
@@ -93,8 +93,7 @@ class Trainer():
         self.dataset_train = dataset_train
         self.dataset_val = dataset_val
         self.dataset_test = dataset_test
-        self._check_dataset_equivalence()
-        
+
         if (val_size is not None) and (dataset_val is not None):
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
 
@@ -122,6 +121,7 @@ class Trainer():
             self.clustering_method = self.dataset_train.clustering_method
             self.epoch_saved_model = None
 
+            self._check_dataset_equivalence()
             self._load_model()
 
         else:
@@ -136,8 +136,9 @@ class Trainer():
                 raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
             if dataset_test is None:
                 raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
-
-            self._load_pretrained_model(dataset_test, neuralnet)
+            
+            self._check_dataset_equivalence()
+            self._load_pretrained_model()
 
 
     def _load_model(self):
@@ -203,20 +204,19 @@ class Trainer():
         self.set_loss()
 
     def _check_dataset_equivalence(self):
-        reference = self.dataset_train
         for other in [self.dataset_val, self.dataset_test]:
             if other is not None:
-                if (other.target == reference.target
-                    and other.node_features == reference.node_features
-                    and other.edge_features == reference.edge_features
-                    and other.clustering_method == reference.clustering_method
-                    and other.task == reference.task
-                    and other.classes == reference.classes
+                if (other.target == self.target
+                    and other.node_features == self.node_features
+                    and other.edge_features == self.edge_features
+                    and other.clustering_method == self.clustering_method
+                    and other.task == self.task
+                    and other.classes == self.classes
                     ):
                     pass
                 else:
                     raise ValueError(
-                        f"""Dataset {reference} and {other} are not equivalent.\n
+                        f"""Training dataset is not equivalent to {other}.\n
                         Use datasets with equivalent target, node_features, and edge_features,\n
                         and identical clustering_method, task, and classes."""
                         )
@@ -696,12 +696,9 @@ class Trainer():
 
             self.complete_exporter.save_all_metrics()
 
-    def _load_params(self, filename):
+    def _load_params(self):
         """
         Loads the parameters of a pretrained model
-
-        Args:
-            filename ([type]): [description]
 
         Returns:
             [type]: [description]
@@ -709,7 +706,7 @@ class Trainer():
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
-        state = torch.load(filename, map_location=torch.device(self.device))
+        state = torch.load(self.pretrained_model, map_location=torch.device(self.device))
 
         self.node_features = state["node"]
         self.edge_features = state["edge"]

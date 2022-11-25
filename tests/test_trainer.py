@@ -372,8 +372,8 @@ class TestTrainer(unittest.TestCase):
             trainer.save_model("test.pth.tar")
 
             trainer_pretrained = Trainer(
-                dataset_test=dataset,
                 neuralnet = NaiveNetwork,
+                dataset_test=dataset,
                 pretrained_model="test.pth.tar")
 
         assert isinstance(trainer_pretrained.optimizer, optimizer)
