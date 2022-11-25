@@ -193,12 +193,11 @@ class GraphDataset(Dataset):
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
-
                     node_data += (vals,)
-
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
-            # edge index, we have to have all the edges i.e : (i,j) and (j,i)
+            # edge index,
+            # we have to have all the edges i.e : (i,j) and (j,i)
             if Efeat.INDEX in grp[Efeat.EDGE]:
                 ind = grp[f"{Efeat.EDGE}/{Efeat.INDEX}"][()]
                 if ind.ndim == 2:
@@ -208,10 +207,11 @@ class GraphDataset(Dataset):
                 edge_index = torch.empty((2, 0), dtype=torch.long)
             edge_index = edge_index.to(self.device)
 
-            # edge feature (same issue as above)
-            if self.edge_features is not None and len(self.edge_features) > 0 and \
-               Efeat.EDGE in grp:
-
+            # edge feature
+            # we have to have all the edges i.e : (i,j) and (j,i)
+            if (self.edge_features is not None 
+                    and len(self.edge_features) > 0 
+                    and Efeat.EDGE in grp):
                 edge_data = ()
                 for feat in self.edge_features:
                     if feat[0] != '_':   # ignore metafeatures
@@ -229,9 +229,9 @@ class GraphDataset(Dataset):
 
             if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
                 warnings.warn(
-                    """Internal edges are not supported anymore.
-                    You should probably prepare the hdf5 file
-                    with a more up to date version of this software.""", DeprecationWarning)
+                    """Internal edges are not supported anymore.\n
+                    You should probably prepare hdf5 files with a more up to date version of this software.""", 
+                    DeprecationWarning)
 
             # target
             if self.target is None:
@@ -387,7 +387,6 @@ class GraphDataset(Dataset):
                 _log.info(f"\nAvailable edge features: {self.available_edge_features}\n")
                 miss_edge_error = f"\nMissing edge features: {missing_edge_features} \
                                     \nAvailable edge features: {self.available_edge_features}"
-
             raise ValueError(
                 f"Not all features could be found in the file {self.hdf5_path[0]}.\
                     \nCheck feature_modules passed to the preprocess function. \
