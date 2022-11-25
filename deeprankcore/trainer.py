@@ -34,7 +34,7 @@ class Trainer():
                 shuffle: bool = True,
                 transform_sigmoid: Optional[bool] = False,
                 metrics_exporters: Optional[List[MetricsExporter]] = None,
-                output_dir: str = './metrics'
+                metrics_output_dir: str = './metrics'
             ):
         """Class from which the network is trained, evaluated and tested
 
@@ -75,7 +75,7 @@ class Trainer():
 
             metrics_exporters: the metrics exporters to use for generating metrics output
 
-            output_dir: location for metrics file (see ConciseOutputExporter class)
+            metrics_output_dir: location for metrics file (see ConciseOutputExporter class)
         """
         if metrics_exporters is not None:
             self._metrics_exporters = MetricsExporterCollection(
@@ -83,11 +83,11 @@ class Trainer():
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
-        self.output_dir = output_dir
-        if not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
+        self.metrics_output_dir = metrics_output_dir
+        if not os.path.exists(self.metrics_output_dir):
+            os.makedirs(self.metrics_output_dir)
 
-        self.complete_exporter = ConciseOutputExporter(self.output_dir)
+        self.complete_exporter = ConciseOutputExporter(self.metrics_output_dir)
 
         if (val_size is not None) and (dataset_val is not None):
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
