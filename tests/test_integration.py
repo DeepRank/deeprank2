@@ -3,9 +3,8 @@ from shutil import rmtree
 import warnings
 import os
 import h5py
-from deeprankcore.preprocess import preprocess
 from tests._utils import PATH_TEST
-from deeprankcore.query import ProteinProteinInterfaceResidueQuery
+from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
 from deeprankcore.DataSet import HDF5DataSet
 from deeprankcore.Trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
@@ -17,7 +16,7 @@ import tempfile
 
 def test_integration(): # pylint: disable=too-many-locals
     """
-    Tests preprocessing several PDB files into their features representation HDF5 file.
+    Tests processing several PDB files into their features representation HDF5 file.
 
     Then uses HDF5 generated files to train and test a GINet network.
 
@@ -33,14 +32,14 @@ def test_integration(): # pylint: disable=too-many-locals
     output_directory = mkdtemp()
     metrics_directory = tempfile.mkdtemp()
 
-    prefix = os.path.join(output_directory, "test-preprocess")
+    prefix = os.path.join(output_directory, "test-queries-process")
 
     try:
 
         all_targets = compute_targets(pdb_path, ref_path)
 
-        count_queries = 3
-        queries = []
+        count_queries = 5
+        queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
                 pdb_path,
@@ -49,9 +48,9 @@ def test_integration(): # pylint: disable=too-many-locals
                 pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
                 targets = all_targets
             )
-            queries.append(query)
+            queries.add(query)
 
-        output_paths = preprocess(queries, prefix, count_queries)
+        output_paths = queries.process(prefix = prefix)
         assert len(output_paths) > 0
 
         graph_names = []
@@ -63,15 +62,11 @@ def test_integration(): # pylint: disable=too-many-locals
             query_id = query.get_query_id()
             assert query_id in graph_names, f"missing in output: {query_id}"
 
-        n_val = 1
-        n_test = 1
-        n_train = len(output_paths) - (n_val + n_test)
-
         node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
         edge_features = [Efeat.DISTANCE]
 
         dataset_train = HDF5DataSet(
-            hdf5_path = output_paths[:n_train],
+            hdf5_path = output_paths,
             node_feature = node_features,
             edge_feature = edge_features,
             target = targets.BINARY,
@@ -79,7 +74,7 @@ def test_integration(): # pylint: disable=too-many-locals
         )
 
         dataset_val = HDF5DataSet(
-            hdf5_path = output_paths[n_train:-n_test],
+            hdf5_path = output_paths,
             node_feature = node_features,
             edge_feature = edge_features,
             target = targets.BINARY,
@@ -87,7 +82,7 @@ def test_integration(): # pylint: disable=too-many-locals
         )
 
         dataset_test = HDF5DataSet(
-            hdf5_path = output_paths[-n_test],
+            hdf5_path = output_paths,
             node_feature = node_features,
             edge_feature = edge_features,
             target = targets.BINARY,
