@@ -212,7 +212,7 @@ class Trainer():
     def _check_dataset_equivalence(self):
         for other in [self.dataset_val, self.dataset_test]:
             if other is not None:
-                if (other.target == self.target # pylint disable = too-many-boolean-expressions
+                if (other.target == self.target # pylint: disable = too-many-boolean-expressions
                     and other.node_features == self.node_features
                     and other.edge_features == self.edge_features
                     and other.clustering_method == self.clustering_method
