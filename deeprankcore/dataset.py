@@ -340,39 +340,60 @@ class HDF5DataSet(Dataset):
             self.classes = None
             self.classes_to_idx = None
 
-    def _check_node_feature(self):
-        """Checks if the required node features exist"""
+    def _check_features(self):
+        """Checks if the required features exist"""
         f = h5py.File(self.hdf5_path[0], "r")
         mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
-        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
+        
+        # read available node features
+        self.available_node_features = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
+        self.available_node_features = [key for key in self.available_node_features if key[0] != '_']  # ignore metafeatures
+        
+        # read available edge features
+        self.available_edge_features = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
+        self.available_edge_features = [key for key in self.available_edge_features if key[0] != '_']  # ignore metafeatures
+
         f.close()
 
+        # check node features
+        missing_node_features = []
         if self.node_features == "all":
-            self.node_features = self.available_node_feature
+            self.node_features = self.available_node_features
         else:
             for feat in self.node_features:
-                if feat not in self.available_node_feature:
+                if feat not in self.available_node_features:
                     _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info(f"\nPossible node features: {self.available_node_feature}\n")
-                    sys.exit()
+                    missing_node_features.append(feat)
 
-    def _check_edge_feature(self):
-        """Checks if the required edge features exist"""
-        f = h5py.File(self.hdf5_path[0], "r")
-        mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
-        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
-        f.close()
-
+        # check edge features
+        missing_edge_features = []
         if self.edge_features == "all":
-            self.edge_features = self.available_edge_feature
+            self.edge_features = self.available_edge_features
         elif self.edge_features is not None:
             for feat in self.edge_features:
-                if feat not in self.available_edge_feature:
+                if feat not in self.available_edge_features:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
-                    sys.exit()
+                    missing_edge_features.append(feat)
+
+        # raise error if any features are missing
+        if missing_node_features + missing_edge_features:
+            miss_node_error, miss_edge_error = "", ""
+            _log.info("\nCheck feature_modules passed to the preprocess function.\
+                Probably, the feature wasn't generated during the preprocessing step.")
+            if missing_node_features:
+                _log.info(f"\nAvailable node features: {self.available_node_features}\n")
+                miss_node_error = f"\nMissing node features: {missing_node_features} \
+                                    \nAvailable node features: {self.available_node_features}"
+            if missing_edge_features:
+                _log.info(f"\nAvailable edge features: {self.available_edge_features}\n")
+                miss_edge_error = f"\nMissing edge features: {missing_edge_features} \
+                                    \nAvailable edge features: {self.available_edge_features}"
+
+            raise ValueError(
+                f"Not all features could be found in the file {self.hdf5_path[0]}.\
+                    \nCheck feature_modules passed to the preprocess function. \
+                    \nProbably, the feature wasn't generated during the preprocessing step. \
+                    {miss_node_error}{miss_edge_error}")
 
     def _create_index_molecules(self):
         """Creates the indexing of each molecule in the dataset.
