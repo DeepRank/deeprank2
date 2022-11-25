@@ -43,7 +43,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
 
     dataset_train = GraphDataset(
         hdf5_path=train_hdf5_path,
-        root="./",
         node_features=node_features,
         edge_features=edge_features,
         task = task,
@@ -53,7 +52,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     if val_hdf5_path is not None:
         dataset_val = GraphDataset(
             hdf5_path=val_hdf5_path,
-            root="./",
             node_features=node_features,
             edge_features=edge_features,
             task = task,
@@ -65,7 +63,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     if test_hdf5_path is not None:
         dataset_test = GraphDataset(
             hdf5_path=test_hdf5_path,
-            root="./",
             node_features=node_features,
             edge_features=edge_features,
             target=target,
@@ -253,7 +250,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             Trainer(
                 neuralnet = NaiveNetwork,
@@ -265,7 +262,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             Trainer(
                 dataset_train = dataset,
@@ -276,7 +273,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             trainer = Trainer(
                 neuralnet = GINet,
@@ -297,7 +294,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             trainer = Trainer(
                 neuralnet = GINet,
@@ -317,7 +314,7 @@ class TestTrainer(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
             neuralnet = GINet,
@@ -333,7 +330,7 @@ class TestTrainer(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
             neuralnet = GINet,
@@ -350,7 +347,7 @@ class TestTrainer(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
             neuralnet = NaiveNetwork,
@@ -385,7 +382,7 @@ class TestTrainer(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
             neuralnet = NaiveNetwork,
