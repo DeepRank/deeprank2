@@ -28,7 +28,7 @@ class TestDataSet(unittest.TestCase):
             edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
-            dict_filter={targets.IRMSD: "<10"},
+            target_filter={targets.IRMSD: "<10"},
         )
 
     def test_transform(self):

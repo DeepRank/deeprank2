@@ -27,10 +27,10 @@ default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nf
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
+    model_class,
     train_hdf5_path,
     val_hdf5_path,
     test_hdf5_path,
-    model_class,
     node_features,
     edge_features,
     task,
@@ -75,10 +75,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_test = None
 
     trainer = Trainer(
+        model_class,
         dataset_train,
         dataset_val,
         dataset_test,
-        model_class,
         batch_size=64,
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
@@ -106,10 +106,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         trainer.save_model("test.pth.tar")
 
         Trainer(
+            model_class,
             dataset_train,
             dataset_val,
             dataset_test,
-            model_class,
             pretrained_model="test.pth.tar")
 
 class TestTrainer(unittest.TestCase):
@@ -123,10 +123,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_sigmoid(self):
         _model_base_test(
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -138,10 +138,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet(self):
         _model_base_test(           
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -155,10 +155,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_class(self):
         _model_base_test(
-            "tests/data/hdf5/variants.hdf5",
-            "tests/data/hdf5/variants.hdf5",
-            "tests/data/hdf5/variants.hdf5",
             GINet,
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             [Efeat.DISTANCE],
             targets.CLASSIF,
@@ -172,10 +172,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
             FoutNet,
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.CLASSIF,
@@ -187,10 +187,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             SGAT,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -202,10 +202,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -218,10 +218,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
                 SGAT,
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 default_features,
                 [Efeat.DISTANCE],
                 targets.REGRESS,
@@ -234,10 +234,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_classification(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/data/hdf5/variants.hdf5",
-                "tests/data/hdf5/variants.hdf5",
-                "tests/data/hdf5/variants.hdf5",
                 GINet,
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 [Efeat.DISTANCE],
                 targets.CLASSIF,
@@ -256,8 +256,8 @@ class TestTrainer(unittest.TestCase):
                 root="./")
 
             Trainer(
-                dataset_test = dataset,
                 neuralnet = NaiveNetwork,
+                dataset_test = dataset,
             )
 
     def test_incompatible_no_pretrained_no_Net(self):
@@ -279,8 +279,8 @@ class TestTrainer(unittest.TestCase):
                 root="./")
 
             trainer = Trainer(
-                dataset_train = dataset,
                 neuralnet = GINet,
+                dataset_train = dataset,
             )
 
             with warnings.catch_warnings(record=UserWarning):
@@ -288,8 +288,8 @@ class TestTrainer(unittest.TestCase):
                 trainer.save_model("test.pth.tar")
 
                 Trainer(
-                    dataset_train = dataset,
                     neuralnet = GINet,
+                    dataset_train = dataset,
                     pretrained_model="test.pth.tar")
 
     def test_incompatible_pretrained_no_Net(self):
@@ -300,8 +300,8 @@ class TestTrainer(unittest.TestCase):
                 root="./")
 
             trainer = Trainer(
-                dataset_train = dataset,
                 neuralnet = GINet,
+                dataset_train = dataset,
             )
 
             with warnings.catch_warnings(record=UserWarning):
@@ -320,8 +320,8 @@ class TestTrainer(unittest.TestCase):
             root="./")
 
         trainer = Trainer(
-            dataset_train = dataset,
             neuralnet = GINet,
+            dataset_train = dataset,
             batch_size = 1
         )
 
@@ -336,8 +336,8 @@ class TestTrainer(unittest.TestCase):
             root="./")
 
         trainer = Trainer(
-            dataset_train = dataset,
             neuralnet = GINet,
+            dataset_train = dataset,
             val_size = 0,
             batch_size = 1
         )
@@ -353,8 +353,8 @@ class TestTrainer(unittest.TestCase):
             root="./")
 
         trainer = Trainer(
-            dataset_train = dataset,
             neuralnet = NaiveNetwork,
+            dataset_train = dataset,
         )
 
         optimizer = torch.optim.Adamax
@@ -388,8 +388,8 @@ class TestTrainer(unittest.TestCase):
             root="./")
 
         trainer = Trainer(
-            dataset_train = dataset,
             neuralnet = NaiveNetwork,
+            dataset_train = dataset,
         )
 
         assert isinstance(trainer.optimizer, torch.optim.Adam)
@@ -400,10 +400,10 @@ class TestTrainer(unittest.TestCase):
         if torch.cuda.is_available():
 
             _model_base_test(           
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 default_features,
                 [Efeat.DISTANCE],
                 targets.REGRESS,

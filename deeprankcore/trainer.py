@@ -21,13 +21,12 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-
     def __init__(
                 self, # pylint: disable=too-many-arguments
+                neuralnet = None,
                 dataset_train: GraphDataset = None,
                 dataset_val: GraphDataset = None,
                 dataset_test: GraphDataset = None,
-                neuralnet = None,
                 val_size: Union[float,int] = None,
                 class_weights: Union[bool, List] = None,
                 pretrained_model: str = None,
@@ -35,10 +34,16 @@ class Trainer():
                 shuffle: bool = True,
                 transform_sigmoid: Optional[bool] = False,
                 metrics_exporters: Optional[List[MetricsExporter]] = None,
-                output_dir: str = './metrics'):
+                output_dir: str = './metrics'
+            ):
         """Class from which the network is trained, evaluated and tested
 
         Args:
+            neuralnet (function, required): neural network class (ex. GINet, Foutnet etc.).
+                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
+                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+
             dataset_train (GraphDataset object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
 
@@ -47,11 +52,6 @@ class Trainer():
                 validation set during training, using val_size parameter
 
             dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
-
-            neuralnet (function, required): neural network class (ex. GINet, Foutnet etc.).
-                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
-                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
 
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
                 to use for validation.
@@ -80,7 +80,6 @@ class Trainer():
         if metrics_exporters is not None:
             self._metrics_exporters = MetricsExporterCollection(
                 *metrics_exporters)
-                
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
@@ -94,10 +93,8 @@ class Trainer():
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
 
         if pretrained_model is None:
-
             if dataset_train is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
-            
             if neuralnet is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
@@ -125,17 +122,16 @@ class Trainer():
             self._load_params(pretrained_model)
 
             if dataset_train is not None:
-                warnings.warn("Pretrained model loaded. dataset_train will be ignored.")
+                warnings.warn("Pretrained model loaded: dataset_train will be ignored.")
             if dataset_val is not None:
-                warnings.warn("Pretrained model loaded. dataset_val will be ignored.")
+                warnings.warn("Pretrained model loaded: dataset_val will be ignored.")
             if neuralnet is None:
-                raise ValueError("No neural network class found. Please add it for \
-                    completing the loading of the pretrained model.")
+                raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
+            if dataset_test is None:
+                raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
 
-            if dataset_test is not None:
-                self._load_pretrained_model(dataset_test, neuralnet)
-            else:
-                raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
+            self._load_pretrained_model(dataset_test, neuralnet)
+            
 
     def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
 
