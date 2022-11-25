@@ -27,7 +27,7 @@ class Trainer():
                 dataset_train: GraphDataset = None,
                 dataset_val: GraphDataset = None,
                 dataset_test: GraphDataset = None,
-                Net = None,
+                neuralnet = None,
                 val_size: Union[float,int] = None,
                 class_weights: Union[bool, List] = None,
                 pretrained_model: str = None,
@@ -48,7 +48,7 @@ class Trainer():
 
             dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
 
-            Net (function, required): neural network class (ex. GINet, Foutnet etc.).
+            neuralnet (function, required): neural network class (ex. GINet, Foutnet etc.).
                 It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
@@ -98,7 +98,7 @@ class Trainer():
             if dataset_train is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
             
-            if Net is None:
+            if neuralnet is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
             self.target = dataset_train.target  # already defined in HDF5DatSet object
@@ -119,7 +119,7 @@ class Trainer():
             self.cluster_nodes = dataset_train.clustering_method
             self.epoch_saved_model = None
 
-            self._load_model(dataset_train, dataset_val, dataset_test, Net)
+            self._load_model(dataset_train, dataset_val, dataset_test, neuralnet)
 
         else:
             self._load_params(pretrained_model)
@@ -128,12 +128,12 @@ class Trainer():
                 warnings.warn("Pretrained model loaded. dataset_train will be ignored.")
             if dataset_val is not None:
                 warnings.warn("Pretrained model loaded. dataset_val will be ignored.")
-            if Net is None:
+            if neuralnet is None:
                 raise ValueError("No neural network class found. Please add it for \
                     completing the loading of the pretrained model.")
 
             if dataset_test is not None:
-                self._load_pretrained_model(dataset_test, Net)
+                self._load_pretrained_model(dataset_test, neuralnet)
             else:
                 raise ValueError("No dataset_test found. Please add it for evaluating the pretrained model.")
 
@@ -163,13 +163,13 @@ class Trainer():
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
-    def _load_pretrained_model(self, dataset_test, Net):
+    def _load_pretrained_model(self, dataset_test, neuralnet):
         """
         Loads pretrained model
 
         Args:
             dataset_test: GraphDataset object to be tested with the model
-            Net (function): neural network
+            neuralnet (function): neural network
         """
 
         if self.cluster_nodes is not None: 
@@ -179,7 +179,7 @@ class Trainer():
 
         _log.info("Testing set loaded\n")
         
-        self._put_model_to_device(dataset_test, Net)
+        self._put_model_to_device(dataset_test, neuralnet)
 
         self.set_loss()
 
@@ -187,7 +187,7 @@ class Trainer():
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def _load_model(self, dataset_train, dataset_val, dataset_test, Net):
+    def _load_model(self, dataset_train, dataset_val, dataset_test, neuralnet):
         
         """
         Loads model
@@ -197,7 +197,7 @@ class Trainer():
             dataset_val (str): GraphDataset object, evaluation set used during training phase.
             dataset_eval (str): GraphDataset object, the independent evaluation set used after
                 training phase. 
-            Net (function): neural network.
+            neuralnet (function): neural network.
 
         Raises:
             ValueError: Invalid node clustering method.
@@ -249,20 +249,20 @@ class Trainer():
             _log.info("No independent testing set loaded")
             self.test_loader = None
 
-        self._put_model_to_device(dataset_train, Net)
+        self._put_model_to_device(dataset_train, neuralnet)
 
         # optimizer
         self.configure_optimizers()
 
         self.set_loss()
 
-    def _put_model_to_device(self, dataset, Net):
+    def _put_model_to_device(self, dataset, neuralnet):
         """
         Puts the model on the available device
 
         Args:
             dataset (str): GraphDataset object
-            Net (function): Neural Network
+            neuralnet (function): Neural Network
 
         Raises:
             ValueError: Incorrect output shape
@@ -289,7 +289,7 @@ class Trainer():
 
             self.output_shape = 1
 
-            self.model = Net(
+            self.model = neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
                 self.num_edge_features).to(
@@ -300,7 +300,7 @@ class Trainer():
 
             self.output_shape = len(self.classes)
 
-            self.model = Net(
+            self.model = neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
                 self.num_edge_features).to(
