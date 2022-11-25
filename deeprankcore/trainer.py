@@ -37,12 +37,12 @@ class Trainer():
         """Class from which the network is trained, evaluated and tested
 
         Args:
-            dataset_train (HDF5DataSet object, required): training set used during training.
+            dataset_train (GraphDataset object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
-            dataset_val (HDF5DataSet object, optional): evaluation set used during training.
+            dataset_val (GraphDataset object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
-            dataset_test (HDF5DataSet object, optional): independent evaluation set. Defaults to None.
+            dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
             Net (function, required): neural network class (ex. GINet, Foutnet etc.).
                 It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
@@ -154,7 +154,7 @@ class Trainer():
         Loads pretrained model
 
         Args:
-            dataset_test: HDF5DataSet object to be tested with the model
+            dataset_test: GraphDataset object to be tested with the model
             Net (function): neural network
         """
 
@@ -179,9 +179,9 @@ class Trainer():
         Loads model
 
         Args:
-            dataset_train (str): HDF5DataSet object, training set used during training phase.
-            dataset_val (str): HDF5DataSet object, evaluation set used during training phase.
-            dataset_eval (str): HDF5DataSet object, the independent evaluation set used after
+            dataset_train (str): GraphDataset object, training set used during training phase.
+            dataset_val (str): GraphDataset object, evaluation set used during training phase.
+            dataset_eval (str): GraphDataset object, the independent evaluation set used after
                 training phase. 
             Net (function): neural network.
 
@@ -247,7 +247,7 @@ class Trainer():
         Puts the model on the available device
 
         Args:
-            dataset (str): HDF5DataSet object
+            dataset (str): GraphDataset object
             Net (function): Neural Network
 
         Raises:
@@ -690,7 +690,7 @@ class Trainer():
         """Pre-clusters nodes of the graphs
 
         Args:
-            dataset (HDF5DataSet object)
+            dataset (GraphDataset object)
             method (srt): 'mcl' (Markov Clustering) or 'louvain'
         """
         for fname, mol in tqdm(dataset.index_complexes):
@@ -736,12 +736,12 @@ def _DivideDataSet(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
-        dataset (HDF5DataSet): input dataset to be split into training and validation data
+        dataset (GraphDataset): input dataset to be split into training and validation data
         val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to 0.25.
 
     Returns:
-        HDF5DataSet: [description]
+        GraphDataset: [description]
     """
 
     if val_size is None:

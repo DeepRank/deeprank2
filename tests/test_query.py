@@ -21,7 +21,7 @@ from deeprankcore.query import (
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 from deeprankcore.features import components, conservation, contact, surfacearea
-from deeprankcore.dataset import HDF5DataSet
+from deeprankcore.dataset import GraphDataset
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
@@ -71,7 +71,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             count_edges_hdf5 = entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
 
-        dataset = HDF5DataSet(hdf5_path=tmp_path)
+        dataset = GraphDataset(hdf5_path=tmp_path)
         torch_data_entry = dataset[0]
         assert torch_data_entry is not None
 

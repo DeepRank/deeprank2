@@ -211,29 +211,29 @@ save_hdf5_keys("<original_hdf5_path.hdf5>", valid_ids, "<val_hdf5_path.hdf5>")
 save_hdf5_keys("<original_hdf5_path.hdf5>", test_ids, "<test_hdf5_path.hdf5>")
 ```
 
-Now the HDF5DataSet objects can be defined:
+Now the GraphDataset objects can be defined:
 
 ```python
-from deeprankcore.dataset import HDF5DataSet
+from deeprankcore.dataset import GraphDataset
 
 node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
 edge_features = ["distance"]
 
-# Creating HDF5DataSet objects
-dataset_train = HDF5DataSet(
+# Creating GraphDataset objects
+dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
     target = "binary"
 )
-dataset_val = HDF5DataSet(
+dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
     target = "binary"
 
 )
-dataset_test = HDF5DataSet(
+dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_feature = node_features,
     edge_feature = edge_features,
