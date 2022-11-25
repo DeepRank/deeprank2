@@ -138,40 +138,8 @@ class HDF5DataSet(Dataset):
         self.edge_features_transform = edge_features_transform
         self.target_filter = target_filter
 
-
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
-            self.task = targets.REGRESS
-        elif self.target in [targets.BINARY, targets.CAPRI]:
-            self.task = targets.CLASSIF
-        else:
-            self.task = task
-        
-        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
-            raise ValueError(
-                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task} \n\t"
-                "Example: \n\t"
-                ""
-                "model = NeuralNet(dataset, GINet,"
-                "                  target='physiological_assembly',"
-                "                  task='classif')")
-        
-        if self.task == targets.CLASSIF:
-            if classes is None:
-                self.classes = [0, 1]
-            else:
-                self.classes = classes
-
-            self.classes_to_idx = {
-                i: idx for idx, i in enumerate(self.classes)
-            }
-        else:
-            self.classes = None
-            self.classes_to_idx = None
-
-        # check if the files are ok
         self._check_hdf5_files()
-
-        # check the selection of features
+        self._check_task_and_classes(task,classes)
         self._check_node_feature()
         self._check_edge_feature()
 
@@ -343,6 +311,34 @@ class HDF5DataSet(Dataset):
 
         for name in remove_file:
             self.hdf5_path.remove(name)
+
+    def _check_task_and_classes(self, task, classes):
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+            self.task = targets.REGRESS
+        elif self.target in [targets.BINARY, targets.CAPRI]:
+            self.task = targets.CLASSIF
+        else:
+            self.task = task
+        
+        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
+            raise ValueError(
+                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
+        if task != self.task and task is not None:
+            warnings.warn(f"Target {self.target} expects {self.task}, but was set to task {task} by user.\n" +
+                f"User set task is ignored and {self.task} will be used.")
+
+        if self.task == targets.CLASSIF:
+            if classes is None:
+                self.classes = [0, 1]
+            else:
+                self.classes = classes
+
+            self.classes_to_idx = {
+                i: idx for idx, i in enumerate(self.classes)
+            }
+        else:
+            self.classes = None
+            self.classes_to_idx = None
 
     def _check_node_feature(self):
         """Checks if the required node features exist"""
