@@ -93,6 +93,8 @@ class Trainer():
         self.dataset_train = dataset_train
         self.dataset_val = dataset_val
         self.dataset_test = dataset_test
+        self._check_dataset_equivalence()
+        
         if (val_size is not None) and (dataset_val is not None):
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
 
@@ -199,6 +201,25 @@ class Trainer():
         self.configure_optimizers()
 
         self.set_loss()
+
+    def _check_dataset_equivalence(self):
+        reference = self.dataset_train
+        for other in [self.dataset_val, self.dataset_test]:
+            if other is not None:
+                if (other.target == reference.target
+                    and other.node_features == reference.node_features
+                    and other.edge_features == reference.edge_features
+                    and other.clustering_method == reference.clustering_method
+                    and other.task == reference.task
+                    and other.classes == reference.classes
+                    ):
+                    pass
+                else:
+                    raise ValueError(
+                        f"""Dataset {reference} and {other} are not equivalent.\n
+                        Use datasets with equivalent target, node_features, and edge_features,\n
+                        and identical clustering_method, task, and classes."""
+                        )
 
     def _load_pretrained_model(self):
         """
