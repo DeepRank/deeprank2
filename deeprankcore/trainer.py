@@ -1,5 +1,5 @@
 from time import time
-from typing import List, Optional
+from typing import List, Optional, Union
 import logging
 import warnings
 from tqdm import tqdm
@@ -15,52 +15,66 @@ from torch_geometric.loader import DataLoader
 from deeprankcore.utils.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targetstorage as targets
+from deeprankcore.dataset import GraphDataset
 
 _log = logging.getLogger(__name__)
 
 
 class Trainer():
 
-    def __init__(self, # pylint: disable=too-many-arguments
-                 dataset_train = None,
-                 dataset_val = None,
-                 dataset_test = None,
-                 Net = None,
-                 val_size = None,
-                 class_weights = None,
-                 pretrained_model = None,
-                 batch_size = 32,
-                 shuffle = True,
-                 transform_sigmoid: Optional[bool] = False,
-                 metrics_exporters: Optional[List[MetricsExporter]] = None,
-                 output_dir = './metrics'):
+    def __init__(
+                self, # pylint: disable=too-many-arguments
+                dataset_train: GraphDataset = None,
+                dataset_val: GraphDataset = None,
+                dataset_test: GraphDataset = None,
+                Net = None,
+                val_size: Union[float,int] = None,
+                class_weights: Union[bool, List] = None,
+                pretrained_model: str = None,
+                batch_size: int = 32,
+                shuffle: bool = True,
+                transform_sigmoid: Optional[bool] = False,
+                metrics_exporters: Optional[List[MetricsExporter]] = None,
+                output_dir: str = './metrics'):
         """Class from which the network is trained, evaluated and tested
 
         Args:
             dataset_train (GraphDataset object, required): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
+
             dataset_val (GraphDataset object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
+
             dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
+
             Net (function, required): neural network class (ex. GINet, Foutnet etc.).
                 It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
                 to use for validation.
                 - Should be set to 0 if no validation set is needed.
                 - Should be not set (None) if dataset_val is not None.
                 Defaults to None, and it is set to 0.25 in _divide_dataset function if no dataset_val is provided.
+
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
-                    The user can either input a list of weights or let DeepRanl-GNN (True) define weights
-                    based on the dataset content. Defaults to None.
+                    The user can either input a list of weights or let DeepRank-GNN (True) define weights
+                    based on the dataset content. 
+                    Defaults to None.
+
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+
             batch_size (int, optional): defaults to 32.
+
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
+
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
+
             metrics_exporters: the metrics exporters to use for generating metrics output
+
             output_dir: location for metrics file (see ConciseOutputExporter class)
         """
         if metrics_exporters is not None:
