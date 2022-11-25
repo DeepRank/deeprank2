@@ -206,7 +206,7 @@ class Trainer():
     def _check_dataset_equivalence(self):
         for other in [self.dataset_val, self.dataset_test]:
             if other is not None:
-                if (other.target == self.target
+                if (other.target == self.target # pylint disable = too-many-boolean-expressions
                     and other.node_features == self.node_features
                     and other.edge_features == self.edge_features
                     and other.clustering_method == self.clustering_method
@@ -217,8 +217,8 @@ class Trainer():
                 else:
                     raise ValueError(
                         f"""Training dataset is not equivalent to {other}.\n
-                        Use datasets with equivalent target, node_features, and edge_features,\n
-                        and identical clustering_method, task, and classes."""
+                        Check datasets passed to Trainer class and ensure that the same (non-default) \n
+                        target, node_features, edge_features, clustering_method, task, and classes are used."""
                         )
 
     def _load_pretrained_model(self):
