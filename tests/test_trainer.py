@@ -257,7 +257,7 @@ class TestTrainer(unittest.TestCase):
 
             Trainer(
                 dataset_test = dataset,
-                Net = NaiveNetwork,
+                neuralnet = NaiveNetwork,
             )
 
     def test_incompatible_no_pretrained_no_Net(self):
@@ -280,7 +280,7 @@ class TestTrainer(unittest.TestCase):
 
             trainer = Trainer(
                 dataset_train = dataset,
-                Net = GINet,
+                neuralnet = GINet,
             )
 
             with warnings.catch_warnings(record=UserWarning):
@@ -289,7 +289,7 @@ class TestTrainer(unittest.TestCase):
 
                 Trainer(
                     dataset_train = dataset,
-                    Net = GINet,
+                    neuralnet = GINet,
                     pretrained_model="test.pth.tar")
 
     def test_incompatible_pretrained_no_Net(self):
@@ -301,7 +301,7 @@ class TestTrainer(unittest.TestCase):
 
             trainer = Trainer(
                 dataset_train = dataset,
-                Net = GINet,
+                neuralnet = GINet,
             )
 
             with warnings.catch_warnings(record=UserWarning):
@@ -321,7 +321,7 @@ class TestTrainer(unittest.TestCase):
 
         trainer = Trainer(
             dataset_train = dataset,
-            Net = GINet,
+            neuralnet = GINet,
             batch_size = 1
         )
 
@@ -337,7 +337,7 @@ class TestTrainer(unittest.TestCase):
 
         trainer = Trainer(
             dataset_train = dataset,
-            Net = GINet,
+            neuralnet = GINet,
             val_size = 0,
             batch_size = 1
         )
@@ -354,7 +354,7 @@ class TestTrainer(unittest.TestCase):
 
         trainer = Trainer(
             dataset_train = dataset,
-            Net = NaiveNetwork,
+            neuralnet = NaiveNetwork,
         )
 
         optimizer = torch.optim.Adamax
@@ -373,7 +373,7 @@ class TestTrainer(unittest.TestCase):
 
             trainer_pretrained = Trainer(
                 dataset_test=dataset,
-                Net = NaiveNetwork,
+                neuralnet = NaiveNetwork,
                 pretrained_model="test.pth.tar")
 
         assert isinstance(trainer_pretrained.optimizer, optimizer)
@@ -389,7 +389,7 @@ class TestTrainer(unittest.TestCase):
 
         trainer = Trainer(
             dataset_train = dataset,
-            Net = NaiveNetwork,
+            neuralnet = NaiveNetwork,
         )
 
         assert isinstance(trainer.optimizer, torch.optim.Adam)
