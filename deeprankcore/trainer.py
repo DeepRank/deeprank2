@@ -158,7 +158,6 @@ class Trainer():
             if self.clustering_method in ('mcl', 'louvain'):
                 _log.info("Loading clusters")
                 self._precluster(self.dataset_train)
-
                 if self.dataset_val is not None:
                     self._precluster(self.dataset_val)
                 else:
@@ -187,24 +186,18 @@ class Trainer():
         # independent validation dataset
         if self.dataset_test is not None:
             _log.info("Loading independent testing dataset...")
-
             if self.clustering_method in ('mcl', 'louvain'):
                 self._precluster(self.dataset_test)
-
             self.test_loader = DataLoader(
                 self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
             )
             _log.info("Testing set loaded\n")
-
         else:
             _log.info("No independent testing set loaded")
             self.test_loader = None
 
         self._put_model_to_device(self.dataset_train)
-
-        # optimizer
         self.configure_optimizers()
-
         self.set_loss()
 
     def _check_dataset_equivalence(self):
@@ -232,13 +225,9 @@ class Trainer():
 
         if self.clustering_method is not None: 
             self._precluster(self.dataset_test)
-
         self.test_loader = DataLoader(self.dataset_test)
-
         _log.info("Testing set loaded\n")
-        
         self._put_model_to_device(self.dataset_test)
-
         self.set_loss()
 
         # load the model and the optimizer state
@@ -252,7 +241,6 @@ class Trainer():
             dataset (GraphDataset object)
         """
         for fname, mol in tqdm(dataset.index_complexes):
-
             data = dataset.load_one_graph(fname, mol)
 
             if data is None:
@@ -267,7 +255,6 @@ class Trainer():
 
             f5 = h5py.File(fname, "a")
             grp = f5[mol]
-
             clust_grp = grp.require_group("clustering")
 
             if self.clustering_method.lower() in clust_grp:
@@ -275,14 +262,11 @@ class Trainer():
                 del clust_grp[self.clustering_method.lower()]
 
             method_grp = clust_grp.create_group(self.clustering_method.lower())
-
             cluster = community_detection(
                 data.edge_index, data.num_nodes, method=self.clustering_method
             )
             method_grp.create_dataset("depth_0", data=cluster.cpu())
-
             data = community_pooling(cluster, data)
-
             cluster = community_detection(
                 data.edge_index, data.num_nodes, method=self.clustering_method
             )
@@ -296,7 +280,6 @@ class Trainer():
 
         Args:
             dataset (str): GraphDataset object
-            neuralnet (function): Neural Network
 
         Raises:
             ValueError: Incorrect output shape
@@ -313,53 +296,52 @@ class Trainer():
 
         # the target values are optional
         if dataset.get(0).y is not None:
-
             target_shape = dataset.get(0).y.shape[0]
         else:
             target_shape = None
 
         # regression mode
         if self.task == targets.REGRESS:
-
             self.output_shape = 1
-
             self.model = self.neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
-                self.num_edge_features).to(
-                self.device)
+                self.num_edge_features
+            ).to(self.device)
 
         # classification mode
         elif self.task == targets.CLASSIF:
-
             self.output_shape = len(self.classes)
-
             self.model = self.neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
-                self.num_edge_features).to(
-                self.device)
+                self.num_edge_features
+            ).to(self.device)
 
         # check for compatibility
         for metrics_exporter in self._metrics_exporters:
             if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
-                raise ValueError(f"metrics exporter of type {type(metrics_exporter)} "
-                                 f"is not compatible with output shape {self.output_shape} "
-                                 f"and target shape {target_shape}")
+                raise ValueError(f"""metrics exporter of type {type(metrics_exporter)}\n
+                                 is not compatible with output shape {self.output_shape}\n
+                                 and target shape {target_shape}""")
 
 
-    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
+    def configure_optimizers(self, optimizer = None, lr: float = 0.001, weight_decay: float = 1e-05):
 
-        """Configure optimizer and its main parameters.
-        Parameters
-        ----------
-        optimizer (optional) : object from torch.optim
-            PyTorch optimizer. Defaults to Adam.
-        lr (optional) : float
-            Learning rate. Defaults to 0.01.
-        weight_decay (optional) : float
-            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
-            the gradient may explode. Defaults to 1e-05.
+        """
+        Configure optimizer and its main parameters.
+
+        Args:
+            optimizer (optional): PyTorch optimizer object (from torch.optim)
+                Defaults to Adam.
+
+            lr (float, optional): Learning rate.
+                Defaults to 0.01.
+
+            weight_decay (float, optional): Weight decay (L2 penalty). 
+                Weight decay is fundamental for GNNs, otherwise, parameters can become 
+                too big and the gradient may explode. 
+                Defaults to 1e-05.
         """
 
         self.lr = lr
@@ -375,13 +357,16 @@ class Trainer():
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
 
     def set_loss(self):
-        """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
+
+        """
+        Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification).
+        """
+        
         if self.task == targets.REGRESS:
             self.loss = MSELoss()
 
         elif self.task == targets.CLASSIF:
-
-            # assign weights to each class
+            # Assign weights to each class
             self.weights = None
             if self.class_weights:
                 targets_all = []
@@ -414,10 +399,13 @@ class Trainer():
 
         Args:
             nepoch (int, optional): number of epochs. Defaults to 1.
-            validate (bool, optional): perform validation. If True, there must be
-                a validation set. Defaults to False.
-            save_model (last, best, optional): save the model. Defaults to 'last'
-            hdf5 (str, optional): hdf5 output file
+
+            validate (bool, optional): perform validation. 
+                If True, there must be a validation set. 
+                Defaults to False.
+
+            save_model (str: 'last' or 'best;, optional): save the model. 
+                Defaults to 'last'
         """
 
         train_losses = []
@@ -427,10 +415,8 @@ class Trainer():
             model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._metrics_exporters:
-
             # Number of epochs
             self.nepoch = nepoch
-
             _log.info('Epoch 0:')
             self._eval(self.train_loader, 0, "training")
             if validate:
@@ -440,33 +426,23 @@ class Trainer():
 
             # Loop over epochs
             for epoch in range(1, nepoch + 1):
-
                 _log.info(f'Epoch {epoch}:')
 
-                # Sets the module in training mode
+                # Set the module in training mode
                 self.model.train()
-
                 loss_ = self._epoch(epoch, "training")
-
                 train_losses.append(loss_)
 
                 # Validate the model
                 if validate:
-
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
-
                     valid_losses.append(loss_)
-
-                    # save the best model (i.e. lowest loss value on validation
-                    # data)
                     if save_model == 'best':
-
                         if min(valid_losses) == loss_:
                             self.save_model(model_path)
                             self.epoch_saved_model = epoch
                 else:
-                    # if no validation set, saves the best performing model on
-                    # the training set
+                    # if no validation set, save the best performing model on the training set
                     if save_model == 'best':
                         if min(train_losses) == loss_: # noqa
                             _log.warning(
@@ -500,28 +476,22 @@ class Trainer():
 
         sum_of_losses = 0
         count_predictions = 0
-
         target_vals = []
         outputs = []
         entry_names = []
-
         t0 = time()
         for _, data_batch in enumerate(self.train_loader):
-
             data_batch = data_batch.to(self.device)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
-
             loss_ = self.loss(pred, data_batch.y)
             loss_.backward()
             self.optimizer.step()
-
             count_predictions += pred.shape[0]
 
             # convert mean back to sum
             sum_of_losses += loss_.detach().item() * pred.shape[0]
-
             target_vals += data_batch.y.tolist()
 
             # Get the outputs for export
@@ -530,14 +500,12 @@ class Trainer():
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
-
             outputs += pred.tolist()
 
-            # get the data
+            # Get the data
             entry_names += data_batch['mol']
 
         dt = time() - t0
-
         if count_predictions > 0:
             epoch_loss = sum_of_losses / count_predictions
         else:
@@ -545,7 +513,6 @@ class Trainer():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals)
-
         self.complete_exporter.epoch_process(
             pass_name,
             epoch_number,
@@ -553,7 +520,6 @@ class Trainer():
             outputs,
             target_vals,
             epoch_loss)
-
         self._log_epoch_data(pass_name, epoch_loss, dt)
 
         return epoch_loss
@@ -562,33 +528,31 @@ class Trainer():
             self,
             loader: DataLoader,
             epoch_number: int,
-            pass_name: str) -> float:
+            pass_name: str
+        ) -> float:
+
         """
         Evaluates the model
 
         Args:
-            loader: data to evaluate on
-            epoch_number: number for this epoch, used for storing the metrics
-            pass_name: 'training', 'validation' or 'testing'
+            loader (Dataloader): data to evaluate on
+            epoch_number (int): number for this epoch, used for storing the metrics
+            pass_name (str): 'training', 'validation' or 'testing'
 
         Returns:
             running loss:
         """
+        
         # Sets the module in evaluation mode
         self.model.eval()
-
         loss_func = self.loss
-
         target_vals = []
         outputs = []
         entry_names = []
-
         sum_of_losses = 0
         count_predictions = 0
-
         t0 = time()
         for _, data_batch in enumerate(loader):
-
             data_batch = data_batch.to(self.device)
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
@@ -597,7 +561,6 @@ class Trainer():
             if data_batch.y is not None:
                 target_vals += data_batch.y.tolist()
                 loss_ = loss_func(pred, data_batch.y)
-
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
 
@@ -607,14 +570,12 @@ class Trainer():
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
-
             outputs += pred.tolist()
 
             # get the data
             entry_names += data_batch['mol']
 
         dt = time() - t0
-
         if count_predictions > 0:
             eval_loss = sum_of_losses / count_predictions
         else:
@@ -622,7 +583,6 @@ class Trainer():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals)
-
         self.complete_exporter.epoch_process(
             pass_name,
             epoch_number,
@@ -630,26 +590,27 @@ class Trainer():
             outputs,
             target_vals,
             eval_loss)
-
         self._log_epoch_data(pass_name, eval_loss, dt)
 
         return eval_loss
 
     @staticmethod
-    def _log_epoch_data(stage, loss, time):
+    def _log_epoch_data(stage: str, loss: float, time: float):
         """
         Prints the data of each epoch
 
         Args:
             stage (str): train or valid
-            epoch (int): epoch number
             loss (float): loss during that epoch
             time (float): timing of the epoch
         """
         _log.info(f'{stage} loss {loss} | time {time}')
 
     def _format_output(self, pred, target=None):
-        """Format the network output depending on the task (classification/regression)."""
+
+        """
+        Format the network output depending on the task (classification/regression).
+        """
 
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
@@ -673,31 +634,24 @@ class Trainer():
         return pred, target
 
 
-    def test(self, dataset_test=None):
+    def test(self):
         """
         Tests the model
-
-        Args:
-            dataset_test (HDF5Dataset object, required): dataset for testing the model
         """
 
         with self._metrics_exporters:
             # Loads the test dataset if provided
-            if dataset_test is not None:
-
+            if self.dataset_test is not None:
                 if self.clustering_method in ('mcl', 'louvain'):
                     self._precluster(self.dataset_test)
-
                 self.test_loader = DataLoader(
-                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                    self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
                 )
-
-            elif (dataset_test is None) and (self.test_loader is None):
+            elif self.test_loader is None:
                 raise ValueError("No test dataset provided.")
                 
             # Run test
             self._eval(self.test_loader, 0, "testing")
-
             self.complete_exporter.save_all_metrics()
 
     def _load_params(self):
@@ -761,11 +715,12 @@ class Trainer():
         torch.save(state, filename)
 
 
-def _divide_dataset(dataset, val_size=None):
+def _divide_dataset(dataset: GraphDataset, val_size: Union[float, int] = None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
         dataset (GraphDataset): input dataset to be split into training and validation data
+        
         val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to 0.25.
 
