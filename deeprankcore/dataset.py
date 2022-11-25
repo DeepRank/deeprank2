@@ -203,60 +203,6 @@ class HDF5DataSet(Dataset):
         data = self.load_one_graph(fname, mol)
         return data
 
-    def _check_hdf5_files(self):
-        """Checks if the data contained in the hdf5 file is valid."""
-        _log.info("\nChecking dataset Integrity...")
-        remove_file = []
-        for fname in self.hdf5_path:
-            try:
-                f = h5py.File(fname, "r")
-                mol_names = list(f.keys())
-                if len(mol_names) == 0:
-                    _log.info(f"    -> {fname} is empty ")
-                    remove_file.append(fname)
-                f.close()
-            except Exception as e:
-                _log.error(e)
-                _log.info(f"    -> {fname} is corrupted ")
-                remove_file.append(fname)
-
-        for name in remove_file:
-            self.hdf5_path.remove(name)
-
-    def _check_node_feature(self):
-        """Checks if the required node features exist"""
-        f = h5py.File(self.hdf5_path[0], "r")
-        mol_key = list(f.keys())[0]
-        self.available_node_feature = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
-        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
-        f.close()
-
-        if self.node_features == "all":
-            self.node_features = self.available_node_feature
-        else:
-            for feat in self.node_features:
-                if feat not in self.available_node_feature:
-                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info(f"\nPossible node features: {self.available_node_feature}\n")
-                    sys.exit()
-
-    def _check_edge_feature(self):
-        """Checks if the required edge features exist"""
-        f = h5py.File(self.hdf5_path[0], "r")
-        mol_key = list(f.keys())[0]
-        self.available_edge_feature = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
-        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
-        f.close()
-
-        if self.edge_features == "all":
-            self.edge_features = self.available_edge_feature
-        elif self.edge_features is not None:
-            for feat in self.edge_features:
-                if feat not in self.available_edge_feature:
-                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
-                    _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
-                    sys.exit()
-
     def load_one_graph(self, fname, mol): # noqa
         """Loads one graph
 
@@ -377,6 +323,60 @@ class HDF5DataSet(Dataset):
             data = self._transform(data)
 
         return data
+
+    def _check_hdf5_files(self):
+        """Checks if the data contained in the hdf5 file is valid."""
+        _log.info("\nChecking dataset Integrity...")
+        remove_file = []
+        for fname in self.hdf5_path:
+            try:
+                f = h5py.File(fname, "r")
+                mol_names = list(f.keys())
+                if len(mol_names) == 0:
+                    _log.info(f"    -> {fname} is empty ")
+                    remove_file.append(fname)
+                f.close()
+            except Exception as e:
+                _log.error(e)
+                _log.info(f"    -> {fname} is corrupted ")
+                remove_file.append(fname)
+
+        for name in remove_file:
+            self.hdf5_path.remove(name)
+
+    def _check_node_feature(self):
+        """Checks if the required node features exist"""
+        f = h5py.File(self.hdf5_path[0], "r")
+        mol_key = list(f.keys())[0]
+        self.available_node_feature = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
+        self.available_node_feature = [key for key in self.available_node_feature if key[0] != '_'] # ignore metafeatures
+        f.close()
+
+        if self.node_features == "all":
+            self.node_features = self.available_node_feature
+        else:
+            for feat in self.node_features:
+                if feat not in self.available_node_feature:
+                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info(f"\nPossible node features: {self.available_node_feature}\n")
+                    sys.exit()
+
+    def _check_edge_feature(self):
+        """Checks if the required edge features exist"""
+        f = h5py.File(self.hdf5_path[0], "r")
+        mol_key = list(f.keys())[0]
+        self.available_edge_feature = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
+        self.available_edge_feature = [key for key in self.available_edge_feature if key[0] != '_'] # ignore metafeatures
+        f.close()
+
+        if self.edge_features == "all":
+            self.edge_features = self.available_edge_feature
+        elif self.edge_features is not None:
+            for feat in self.edge_features:
+                if feat not in self.available_edge_feature:
+                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info(f"\nPossible edge features: {self.available_edge_feature}\n")
+                    sys.exit()
 
     def _create_index_molecules(self):
         """Creates the indexing of each molecule in the dataset.
