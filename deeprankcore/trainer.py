@@ -159,7 +159,7 @@ class Trainer():
         """
 
         if self.cluster_nodes is not None: 
-            self._PreCluster(dataset_test, method=self.cluster_nodes)
+            self._precluster(dataset_test, method=self.cluster_nodes)
 
         self.test_loader = DataLoader(dataset_test)
 
@@ -192,10 +192,10 @@ class Trainer():
         if self.cluster_nodes is not None:
             if self.cluster_nodes in ('mcl', 'louvain'):
                 _log.info("Loading clusters")
-                self._PreCluster(dataset_train, method=self.cluster_nodes)
+                self._precluster(dataset_train, method=self.cluster_nodes)
 
                 if dataset_val is not None:
-                    self._PreCluster(dataset_val, method=self.cluster_nodes)
+                    self._precluster(dataset_val, method=self.cluster_nodes)
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     dataset_train, dataset_val = _divide_dataset(
@@ -224,7 +224,7 @@ class Trainer():
             _log.info("Loading independent testing dataset...")
 
             if self.cluster_nodes in ('mcl', 'louvain'):
-                self._PreCluster(dataset_test, method=self.cluster_nodes)
+                self._precluster(dataset_test, method=self.cluster_nodes)
 
             self.test_loader = DataLoader(
                 dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
@@ -423,7 +423,7 @@ class Trainer():
             if dataset_test is not None:
 
                 if self.cluster_nodes in ('mcl', 'louvain'):
-                    self._PreCluster(dataset_test, method=self.cluster_nodes)
+                    self._precluster(dataset_test, method=self.cluster_nodes)
 
                 self.test_loader = DataLoader(
                     dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
@@ -686,7 +686,7 @@ class Trainer():
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
 
-    def _PreCluster(self, dataset, method):
+    def _precluster(self, dataset, method):
         """Pre-clusters nodes of the graphs
 
         Args:
