@@ -229,12 +229,6 @@ class GraphDataset(Dataset):
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
             edge_attr = edge_attr.to(self.device)
 
-            if any(key in grp for key in ("internal_edge_index", "internal_edge_data")):
-                warnings.warn(
-                    """Internal edges are not supported anymore.\n
-                    You should probably prepare hdf5 files with a more up to date version of this software.""", 
-                    DeprecationWarning)
-
             # target
             if self.target is None:
                 y = None
