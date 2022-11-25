@@ -117,6 +117,10 @@ class Query:
     def model_id(self) -> str:
         return self._model_id
 
+    @model_id.setter
+    def model_id(self, value):
+        self._model_id = value
+
     @property
     def targets(self) -> Dict[str, float]:
         return self._targets
@@ -134,12 +138,23 @@ class QueryCollection:
     def __init__(self):
         self._queries = []
         self.cpu_count = None
+        self.ids_count = {}
 
     def add(self, query: Query):
         """ Adds new query to the collection of all generated queries.
             Args:
                 query (Query): must be a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
         """
+        query_id = query.get_query_id()
+
+        if query_id not in self.ids_count:
+            self.ids_count[query_id] = 1
+        else:
+            self.ids_count[query_id] += 1
+            new_id = query.model_id + "_" + str(self.ids_count[query_id])
+            query.model_id = new_id
+            _log.warning(f'Query with id {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+
         self._queries.append(query)
 
     def export_dict(self, dataset_path: str):
@@ -178,7 +193,7 @@ class QueryCollection:
 
         graph.write_to_hdf5(output_path)
 
-    def process( # pylint: disable=too-many-locals
+    def process(
         self, 
         prefix: Optional[str] = None,
         feature_modules: List[ModuleType] = None,
@@ -237,19 +252,10 @@ class QueryCollection:
         output_paths = glob(f"{prefix}-*.hdf5")
 
         if combine_output:
-            dupl_ids = {}
             for output_path in output_paths:
                 with h5py.File(f"{prefix}.hdf5",'a') as f_dest, h5py.File(output_path,'r') as f_src:
-                    for key, value in f_src.items():
-                        try:
-                            f_src.copy(value, f_dest)
-                        except RuntimeError as e:
-                            if key not in dupl_ids:
-                                dupl_ids[key] = 2
-                            f_src.copy(value, f_dest,name = key + "_" + str(dupl_ids[key]))
-                            _log.error(e)
-                            _log.info(f'{key} Group id has already been added to the file. Renaming Group as {key+"_"+str(dupl_ids)}')
-                            dupl_ids[key] += 1
+                    for _, value in f_src.items():
+                        f_src.copy(value, f_dest)
                 os.remove(output_path)
             return glob(f"{prefix}.hdf5")
 
@@ -416,7 +422,7 @@ class SingleResidueVariantAtomicQuery(Query):
         return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        return "{self.model_id,}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
+        return f"{self.model_id,}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
     def __eq__(self, other) -> bool:
         return (

@@ -38,7 +38,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
         all_targets = compute_targets(pdb_path, ref_path)
 
-        count_queries = 3
+        count_queries = 5
         queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
