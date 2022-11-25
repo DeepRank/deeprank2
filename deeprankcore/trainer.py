@@ -131,57 +131,7 @@ class Trainer():
                 raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
 
             self._load_pretrained_model(dataset_test, neuralnet)
-            
 
-    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
-
-        """Configure optimizer and its main parameters.
-        Parameters
-        ----------
-        optimizer (optional) : object from torch.optim
-            PyTorch optimizer. Defaults to Adam.
-        lr (optional) : float
-            Learning rate. Defaults to 0.01.
-        weight_decay (optional) : float
-            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
-            the gradient may explode. Defaults to 1e-05.
-        """
-
-        self.lr = lr
-        self.weight_decay = weight_decay
-
-        if optimizer is None:
-            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
-        else:
-            try:
-                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
-            except Exception as e:
-                _log.error(e)
-                _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
-
-    def _load_pretrained_model(self, dataset_test, neuralnet):
-        """
-        Loads pretrained model
-
-        Args:
-            dataset_test: GraphDataset object to be tested with the model
-            neuralnet (function): neural network
-        """
-
-        if self.cluster_nodes is not None: 
-            self._precluster(dataset_test, method=self.cluster_nodes)
-
-        self.test_loader = DataLoader(dataset_test)
-
-        _log.info("Testing set loaded\n")
-        
-        self._put_model_to_device(dataset_test, neuralnet)
-
-        self.set_loss()
-
-        # load the model and the optimizer state
-        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
-        self.model.load_state_dict(self.model_load_state_dict)
 
     def _load_model(self, dataset_train, dataset_val, dataset_test, neuralnet):
         
@@ -252,6 +202,52 @@ class Trainer():
 
         self.set_loss()
 
+    def _precluster(self, dataset, method):
+        """Pre-clusters nodes of the graphs
+
+        Args:
+            dataset (GraphDataset object)
+            method (srt): 'mcl' (Markov Clustering) or 'louvain'
+        """
+        for fname, mol in tqdm(dataset.index_complexes):
+
+            data = dataset.load_one_graph(fname, mol)
+
+            if data is None:
+                f5 = h5py.File(fname, "a")
+                try:
+                    _log.info(f"deleting {mol}")
+                    del f5[mol]
+                except BaseException:
+                    _log.info(f"{mol} not found")
+                f5.close()
+                continue
+
+            f5 = h5py.File(fname, "a")
+            grp = f5[mol]
+
+            clust_grp = grp.require_group("clustering")
+
+            if method.lower() in clust_grp:
+                #_log.info(f"Deleting previous data for mol {mol} method {method}")
+                del clust_grp[method.lower()]
+
+            method_grp = clust_grp.create_group(method.lower())
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_0", data=cluster.cpu())
+
+            data = community_pooling(cluster, data)
+
+            cluster = community_detection(
+                data.edge_index, data.num_nodes, method=method
+            )
+            method_grp.create_dataset("depth_1", data=cluster.cpu())
+
+            f5.close()
+
     def _put_model_to_device(self, dataset, neuralnet):
         """
         Puts the model on the available device
@@ -309,6 +305,56 @@ class Trainer():
                                  f"is not compatible with output shape {self.output_shape} "
                                  f"and target shape {target_shape}")
 
+    def configure_optimizers(self, optimizer = None, lr = 0.001, weight_decay = 1e-05):
+
+        """Configure optimizer and its main parameters.
+        Parameters
+        ----------
+        optimizer (optional) : object from torch.optim
+            PyTorch optimizer. Defaults to Adam.
+        lr (optional) : float
+            Learning rate. Defaults to 0.01.
+        weight_decay (optional) : float
+            Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and
+            the gradient may explode. Defaults to 1e-05.
+        """
+
+        self.lr = lr
+        self.weight_decay = weight_decay
+
+        if optimizer is None:
+            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+        else:
+            try:
+                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
+            except Exception as e:
+                _log.error(e)
+                _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+
+    def _load_pretrained_model(self, dataset_test, neuralnet):
+        """
+        Loads pretrained model
+
+        Args:
+            dataset_test: GraphDataset object to be tested with the model
+            neuralnet (function): neural network
+        """
+
+        if self.cluster_nodes is not None: 
+            self._precluster(dataset_test, method=self.cluster_nodes)
+
+        self.test_loader = DataLoader(dataset_test)
+
+        _log.info("Testing set loaded\n")
+        
+        self._put_model_to_device(dataset_test, neuralnet)
+
+        self.set_loss()
+
+        # load the model and the optimizer state
+        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
+        self.model.load_state_dict(self.model_load_state_dict)
+
     def set_loss(self):
         """Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification)."""
         if self.task == targets.REGRESS:
@@ -335,6 +381,7 @@ class Trainer():
             # Note that non-linear activation is automatically applied in CrossEntropyLoss
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
+
 
     def train(
         self,
@@ -420,32 +467,77 @@ class Trainer():
 
             self.complete_exporter.save_all_metrics()
 
-    def test(self, dataset_test=None):
+    def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
-        Tests the model
+        Runs a single epoch
 
         Args:
-            dataset_test (HDF5Dataset object, required): dataset for testing the model
+            epoch_number (int)
+            pass_name (str): 'training', 'validation' or 'testing'
+
+        Returns:
+            running loss
         """
 
-        with self._metrics_exporters:
-            # Loads the test dataset if provided
-            if dataset_test is not None:
+        sum_of_losses = 0
+        count_predictions = 0
 
-                if self.cluster_nodes in ('mcl', 'louvain'):
-                    self._precluster(dataset_test, method=self.cluster_nodes)
+        target_vals = []
+        outputs = []
+        entry_names = []
 
-                self.test_loader = DataLoader(
-                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
-                )
+        t0 = time()
+        for _, data_batch in enumerate(self.train_loader):
 
-            elif (dataset_test is None) and (self.test_loader is None):
-                raise ValueError("No test dataset provided.")
-                
-            # Run test
-            self._eval(self.test_loader, 0, "testing")
+            data_batch = data_batch.to(self.device)
+            self.optimizer.zero_grad()
+            pred = self.model(data_batch)
+            pred, data_batch.y = self._format_output(pred, data_batch.y)
 
-            self.complete_exporter.save_all_metrics()
+            loss_ = self.loss(pred, data_batch.y)
+            loss_.backward()
+            self.optimizer.step()
+
+            count_predictions += pred.shape[0]
+
+            # convert mean back to sum
+            sum_of_losses += loss_.detach().item() * pred.shape[0]
+
+            target_vals += data_batch.y.tolist()
+
+            # Get the outputs for export
+            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
+            if self.task == targets.CLASSIF:
+                pred = F.softmax(pred.detach(), dim=1)
+            else:
+                pred = pred.detach().reshape(-1)
+
+            outputs += pred.tolist()
+
+            # get the data
+            entry_names += data_batch['mol']
+
+        dt = time() - t0
+
+        if count_predictions > 0:
+            epoch_loss = sum_of_losses / count_predictions
+        else:
+            epoch_loss = 0.0
+
+        self._metrics_exporters.process(
+            pass_name, epoch_number, entry_names, outputs, target_vals)
+
+        self.complete_exporter.epoch_process(
+            pass_name,
+            epoch_number,
+            entry_names,
+            outputs,
+            target_vals,
+            epoch_loss)
+
+        self._log_epoch_data(pass_name, epoch_loss, dt)
+
+        return epoch_loss
 
     def _eval( # pylint: disable=too-many-locals
             self,
@@ -524,78 +616,6 @@ class Trainer():
 
         return eval_loss
 
-    def _epoch(self, epoch_number: int, pass_name: str) -> float:
-        """
-        Runs a single epoch
-
-        Args:
-            epoch_number (int)
-            pass_name (str): 'training', 'validation' or 'testing'
-
-        Returns:
-            running loss
-        """
-
-        sum_of_losses = 0
-        count_predictions = 0
-
-        target_vals = []
-        outputs = []
-        entry_names = []
-
-        t0 = time()
-        for _, data_batch in enumerate(self.train_loader):
-
-            data_batch = data_batch.to(self.device)
-            self.optimizer.zero_grad()
-            pred = self.model(data_batch)
-            pred, data_batch.y = self._format_output(pred, data_batch.y)
-
-            loss_ = self.loss(pred, data_batch.y)
-            loss_.backward()
-            self.optimizer.step()
-
-            count_predictions += pred.shape[0]
-
-            # convert mean back to sum
-            sum_of_losses += loss_.detach().item() * pred.shape[0]
-
-            target_vals += data_batch.y.tolist()
-
-            # Get the outputs for export
-            # Remember that non-linear activation is automatically applied in CrossEntropyLoss
-            if self.task == targets.CLASSIF:
-                pred = F.softmax(pred.detach(), dim=1)
-            else:
-                pred = pred.detach().reshape(-1)
-
-            outputs += pred.tolist()
-
-            # get the data
-            entry_names += data_batch['mol']
-
-        dt = time() - t0
-
-        if count_predictions > 0:
-            epoch_loss = sum_of_losses / count_predictions
-        else:
-            epoch_loss = 0.0
-
-        self._metrics_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, target_vals)
-
-        self.complete_exporter.epoch_process(
-            pass_name,
-            epoch_number,
-            entry_names,
-            outputs,
-            target_vals,
-            epoch_loss)
-
-        self._log_epoch_data(pass_name, epoch_loss, dt)
-
-        return epoch_loss
-
     @staticmethod
     def _log_epoch_data(stage, loss, time):
         """
@@ -634,34 +654,32 @@ class Trainer():
         return pred, target
 
 
-    def save_model(self, filename='model.pth.tar'):
+    def test(self, dataset_test=None):
         """
-        Saves the model to a file
+        Tests the model
 
         Args:
-            filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
+            dataset_test (HDF5Dataset object, required): dataset for testing the model
         """
-        state = {
-            "model_state": self.model.state_dict(),
-            "optimizer": self.optimizer,
-            "optimizer_state": self.optimizer.state_dict(),
-            "node": self.node_features,
-            "edge": self.edge_features,
-            "target": self.target,
-            "task": self.task,
-            "classes": self.classes,
-            "class_weight": self.class_weights,
-            "batch_size": self.batch_size,
-            "val_size": self.val_size,
-            "lr": self.lr,
-            "weight_decay": self.weight_decay,
-            "subset": self.subset,
-            "shuffle": self.shuffle,
-            "cluster_nodes": self.cluster_nodes,
-            "transform_sigmoid": self.transform_sigmoid,
-        }
 
-        torch.save(state, filename)
+        with self._metrics_exporters:
+            # Loads the test dataset if provided
+            if dataset_test is not None:
+
+                if self.cluster_nodes in ('mcl', 'louvain'):
+                    self._precluster(dataset_test, method=self.cluster_nodes)
+
+                self.test_loader = DataLoader(
+                    dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                )
+
+            elif (dataset_test is None) and (self.test_loader is None):
+                raise ValueError("No test dataset provided.")
+                
+            # Run test
+            self._eval(self.test_loader, 0, "testing")
+
+            self.complete_exporter.save_all_metrics()
 
     def _load_params(self, filename):
         """
@@ -696,51 +714,36 @@ class Trainer():
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
 
-    def _precluster(self, dataset, method):
-        """Pre-clusters nodes of the graphs
+
+    def save_model(self, filename='model.pth.tar'):
+        """
+        Saves the model to a file
 
         Args:
-            dataset (GraphDataset object)
-            method (srt): 'mcl' (Markov Clustering) or 'louvain'
+            filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
         """
-        for fname, mol in tqdm(dataset.index_complexes):
+        state = {
+            "model_state": self.model.state_dict(),
+            "optimizer": self.optimizer,
+            "optimizer_state": self.optimizer.state_dict(),
+            "node": self.node_features,
+            "edge": self.edge_features,
+            "target": self.target,
+            "task": self.task,
+            "classes": self.classes,
+            "class_weight": self.class_weights,
+            "batch_size": self.batch_size,
+            "val_size": self.val_size,
+            "lr": self.lr,
+            "weight_decay": self.weight_decay,
+            "subset": self.subset,
+            "shuffle": self.shuffle,
+            "cluster_nodes": self.cluster_nodes,
+            "transform_sigmoid": self.transform_sigmoid,
+        }
 
-            data = dataset.load_one_graph(fname, mol)
+        torch.save(state, filename)
 
-            if data is None:
-                f5 = h5py.File(fname, "a")
-                try:
-                    _log.info(f"deleting {mol}")
-                    del f5[mol]
-                except BaseException:
-                    _log.info(f"{mol} not found")
-                f5.close()
-                continue
-
-            f5 = h5py.File(fname, "a")
-            grp = f5[mol]
-
-            clust_grp = grp.require_group("clustering")
-
-            if method.lower() in clust_grp:
-                #_log.info(f"Deleting previous data for mol {mol} method {method}")
-                del clust_grp[method.lower()]
-
-            method_grp = clust_grp.create_group(method.lower())
-
-            cluster = community_detection(
-                data.edge_index, data.num_nodes, method=method
-            )
-            method_grp.create_dataset("depth_0", data=cluster.cpu())
-
-            data = community_pooling(cluster, data)
-
-            cluster = community_detection(
-                data.edge_index, data.num_nodes, method=method
-            )
-            method_grp.create_dataset("depth_1", data=cluster.cpu())
-
-            f5.close()
 
 def _divide_dataset(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
