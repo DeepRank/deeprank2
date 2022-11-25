@@ -16,10 +16,10 @@ Subpackages
 Submodules
 ----------
 
-deeprankcore.DataSet module
+deeprankcore.dataset module
 ---------------------------
 
-.. automodule:: deeprankcore.DataSet
+.. automodule:: deeprankcore.dataset
    :members:
    :undoc-members:
    :show-inheritance:
@@ -40,10 +40,10 @@ deeprankcore.Metrics module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.Trainer module
+deeprankcore.trainer module
 -----------------------------
 
-.. automodule:: deeprankcore.Trainer
+.. automodule:: deeprankcore.trainer
    :members:
    :undoc-members:
    :show-inheritance:

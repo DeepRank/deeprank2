@@ -204,7 +204,7 @@ Data can be split in sets implementing custom splits according to the specific a
 Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file), then the corresponding graphs can be saved in hdf5 files containing only references (external links) to the original one. For example:
 
 ```python
-from deeprankcore.DataSet import save_hdf5_keys
+from deeprankcore.dataset import save_hdf5_keys
 
 save_hdf5_keys("<original_hdf5_path.hdf5>", train_ids, "<train_hdf5_path.hdf5>")
 save_hdf5_keys("<original_hdf5_path.hdf5>", valid_ids, "<val_hdf5_path.hdf5>")
@@ -214,7 +214,7 @@ save_hdf5_keys("<original_hdf5_path.hdf5>", test_ids, "<test_hdf5_path.hdf5>")
 Now the HDF5DataSet objects can be defined:
 
 ```python
-from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.dataset import HDF5DataSet
 
 node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
 edge_features = ["distance"]
@@ -246,7 +246,7 @@ dataset_test = HDF5DataSet(
 Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
 
 ```python
-from deeprankcore.Trainer import Trainer
+from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
 

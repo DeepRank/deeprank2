@@ -6,8 +6,8 @@ import pytest
 import logging
 import warnings
 import torch
-from deeprankcore.Trainer import Trainer
-from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.trainer import Trainer
+from deeprankcore.dataset import HDF5DataSet
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork

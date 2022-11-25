@@ -66,7 +66,7 @@ Assuming that the training, validation and testing ids have been chosen (keys of
 
 ```python
 
-from deeprankcore.DataSet import save_hdf5_keys
+from deeprankcore.dataset import save_hdf5_keys
 
 save_hdf5_keys("<original_hdf5_path.hdf5>", train_ids, "<train_hdf5_path.hdf5>")
 save_hdf5_keys("<original_hdf5_path.hdf5>", valid_ids, "<val_hdf5_path.hdf5>")
@@ -76,7 +76,7 @@ save_hdf5_keys("<original_hdf5_path.hdf5>", test_ids, "<test_hdf5_path.hdf5>")
 Now the HDF5DataSet objects can be defined:
 
 ```python
-from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.dataset import HDF5DataSet
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats as Efeat
 
@@ -108,7 +108,7 @@ dataset_test = HDF5DataSet(
 Training can be performed using one of the already existing GNNs, for example GINet:
 
 ```python
-from deeprankcore.Trainer import Trainer
+from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
 

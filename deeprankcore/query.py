@@ -29,7 +29,7 @@ class Query:
     The compute_targets function under deeprankcore.tools.target is a nice way to get started. It will output a directory that can serve
     as input for the targets argument.
 
-    Currently, the Trainer class under deeprankcore.Trainer can work with target values, that have one of the following names:
+    Currently, the Trainer class under deeprankcore. Trainer can work with target values, that have one of the following names:
 
       for classification:
        - bin_class (scalar value is expected to be either 0 or 1)
