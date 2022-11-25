@@ -28,7 +28,7 @@ class Trainer():
                 dataset_val: GraphDataset = None,
                 dataset_test: GraphDataset = None,
                 val_size: Union[float,int] = None,
-                class_weights: Union[bool, List] = None,
+                class_weights: bool = False,
                 pretrained_model: str = None,
                 batch_size: int = 32,
                 shuffle: bool = True,
@@ -59,10 +59,8 @@ class Trainer():
                 - Should be not set (None) if dataset_val is not None.
                 Defaults to None, and it is set to 0.25 in _divide_dataset function if no dataset_val is provided.
 
-            class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
-                    The user can either input a list of weights or let DeepRank-GNN (True) define weights
-                    based on the dataset content. 
-                    Defaults to None.
+            class_weights (bool): assign class weights based on the dataset content. 
+                Defaults to False.
 
             pretrained_model (str, optional): path to pre-trained model. Defaults to None.
 
@@ -383,7 +381,7 @@ class Trainer():
 
         elif self.task == targets.CLASSIF:
 
-            # assign weights to each class in case of unbalanced dataset
+            # assign weights to each class
             self.weights = None
             if self.class_weights:
                 targets_all = []
