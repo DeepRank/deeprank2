@@ -50,7 +50,7 @@ def test_integration(): # pylint: disable=too-many-locals
             )
             queries.add(query)
 
-        output_paths = queries.process(prefix = prefix, cpu_count = count_queries, combine_output = False)
+        output_paths = queries.process(prefix = prefix)
         assert len(output_paths) > 0
 
         graph_names = []
@@ -62,15 +62,11 @@ def test_integration(): # pylint: disable=too-many-locals
             query_id = query.get_query_id()
             assert query_id in graph_names, f"missing in output: {query_id}"
 
-        n_val = 1
-        n_test = 1
-        n_train = len(queries.queries) - (n_val + n_test)
-
         node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
         edge_features = [Efeat.DISTANCE]
 
         dataset_train = HDF5DataSet(
-            hdf5_path = output_paths[:n_train],
+            hdf5_path = output_paths,
             node_feature = node_features,
             edge_feature = edge_features,
             target = targets.BINARY,
@@ -78,7 +74,7 @@ def test_integration(): # pylint: disable=too-many-locals
         )
 
         dataset_val = HDF5DataSet(
-            hdf5_path = output_paths[n_train:-n_test],
+            hdf5_path = output_paths,
             node_feature = node_features,
             edge_feature = edge_features,
             target = targets.BINARY,
@@ -86,7 +82,7 @@ def test_integration(): # pylint: disable=too-many-locals
         )
 
         dataset_test = HDF5DataSet(
-            hdf5_path = output_paths[-n_test],
+            hdf5_path = output_paths,
             node_feature = node_features,
             edge_feature = edge_features,
             target = targets.BINARY,
