@@ -56,10 +56,10 @@ class GraphDataset(Dataset):
         hdf5_path: Union[str,list],
         subset: list = None,
         target: str = None,
+        task: str = None,
         node_features: Union[List[str], str] = "all",
         edge_features: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
-        task: str = None,
         classes: List = None,
         tqdm: bool = True,
         root: str = "./",
@@ -76,11 +76,18 @@ class GraphDataset(Dataset):
 
             subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
-            target (str, optional): irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined
-                target given to the Query class as input (see: deeprankcore.query); in the latter case, specify
-                here its name. Only numerical target variables are supported, not categorical. If the latter is your case,
-                please convert the categorical classes into numerical class indices before defining the GraphDataset instance.
+            target (str, optional): default options: irmsd, lrmsd, fnat, bin, capri_class or dockq. 
+                It can also be a custom-defined target given to the Query class as input (see: deeprankcore.query); 
+                in this case, the task parameter needs to be explicitly specified as well.
+                Only numerical target variables are supported, not categorical. If the latter is your case, please convert 
+                the categorical classes into numerical class indices before defining the GraphDataset instance.
                 Defaults to None.
+
+            task (str, optional): 'regress' for regression or 'classif' for classification.
+                Required if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise
+                this setting is ignored.
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
             node_features (str or list, optional): consider all pre-computed node features ("all")
                 or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
@@ -93,11 +100,6 @@ class GraphDataset(Dataset):
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
                 or 'louvain' algorithm). Note that this parameter can be None only if the neural
                 network doesn't expects clusters (e.g. naive_gnn). Defaults to "mcl".
-
-            task (str, optional): 'regress' for regression or 'classif' for classification.
-                Used only if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq']
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
