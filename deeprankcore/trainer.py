@@ -51,7 +51,7 @@ class Trainer():
                 to use for validation.
                 - Should be set to 0 if no validation set is needed.
                 - Should be not set (None) if dataset_val is not None.
-                Defaults to None, and it is set to 0.25 in _DivideDataSet function if no dataset_val is provided.
+                Defaults to None, and it is set to 0.25 in _divide_dataset function if no dataset_val is provided.
             class_weights ([list or bool], optional): weights provided to the cross entropy loss function.
                     The user can either input a list of weights or let DeepRanl-GNN (True) define weights
                     based on the dataset content. Defaults to None.
@@ -93,7 +93,7 @@ class Trainer():
             self.classes_to_idx = dataset_train.classes_to_idx
             self.optimizer = None
             self.batch_size = batch_size
-            self.val_size = val_size            # if None, will be set to 0.25 in _DivideDataSet function
+            self.val_size = val_size            # if None, will be set to 0.25 in _divide_dataset function
             self.class_weights = class_weights
 
             self.shuffle = shuffle
@@ -198,7 +198,7 @@ class Trainer():
                     self._PreCluster(dataset_val, method=self.cluster_nodes)
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
-                    dataset_train, dataset_val = _DivideDataSet(
+                    dataset_train, dataset_val = _divide_dataset(
                         dataset_train, val_size=self.val_size)
             else:
                 raise ValueError(
@@ -732,7 +732,7 @@ class Trainer():
 
             f5.close()
 
-def _DivideDataSet(dataset, val_size=None):
+def _divide_dataset(dataset, val_size=None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:

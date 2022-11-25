@@ -1,6 +1,6 @@
 import unittest
 from deeprankcore.dataset import GraphDataset, save_hdf5_keys
-from deeprankcore.trainer import _DivideDataSet
+from deeprankcore.trainer import _divide_dataset
 from torch_geometric.data.data import Data
 import h5py
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
@@ -100,7 +100,7 @@ class TestDataSet(unittest.TestCase):
         test_cases = [None, 0.25, n_val]
         
         for t in test_cases:
-            dataset_train, dataset_val =_DivideDataSet(
+            dataset_train, dataset_val =_divide_dataset(
                 dataset = GraphDataset(hdf5_path=hdf5),
                 val_size=t,
             )
@@ -124,7 +124,7 @@ class TestDataSet(unittest.TestCase):
         for t in test_cases:
             print(t)
             with self.assertRaises(ValueError):
-                _DivideDataSet(
+                _divide_dataset(
                     dataset = GraphDataset(hdf5_path=hdf5),
                     val_size=t,
                 )
