@@ -66,7 +66,7 @@ Released on June 28, 2022
 * QueryDataset class #53
 * Unit tests for NeuralNet class #86
 * Error message if you pick the wrong metrics #110
-* Unit tests for GraphDataset class parameters #82
+* Unit tests for HDF5Dataset class parameters #82
 * Installation from PyPI in the readme #122
 
 ### Changed
@@ -76,7 +76,7 @@ Released on June 28, 2022
 * `multiprocessing.Queue` has been replaced with `multiprocessing.pool.map` in PreProcessor #56
 * `test_preprocess.py` does not fail anymore on Mac M1 #74
 * It's now possible to pass your own train/test split to NeuralNet class #81
-* GraphDataset class now is used in the UX #83
+* HDF5Dataset class now is used in the UX #83
 * IndexError running `NeuralNet.train()` has been fixed #89
 * pip installation has been fixed
 * Repository has been renamed deeprank-core, and the package deeprankcore #101
