@@ -261,6 +261,17 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
+            )
+
+            Trainer(
+                neuralnet = NaiveNetwork,
+                dataset_train = dataset,
+            )
+
+    def test_incompatible_no_pretrained_no_target(self):
+        with pytest.raises(ValueError):
+            dataset = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
             )
 

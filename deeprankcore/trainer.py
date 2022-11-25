@@ -121,6 +121,9 @@ class Trainer():
             self.clustering_method = self.dataset_train.clustering_method
             self.epoch_saved_model = None
 
+            if self.target is None:
+                raise ValueError("No target set. You need to choose a target (set in GraphDataset) for training.")
+
             self._check_dataset_equivalence()
             self._load_model()
 
@@ -128,14 +131,17 @@ class Trainer():
             self.pretrained_model = pretrained_model
             self._load_params()
 
-            if dataset_train is not None:
+            if self.dataset_train is not None:
                 warnings.warn("Pretrained model loaded: dataset_train will be ignored.")
-            if dataset_val is not None:
+            if self.dataset_val is not None:
                 warnings.warn("Pretrained model loaded: dataset_val will be ignored.")
-            if neuralnet is None:
+            if self.neuralnet is None:
                 raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
-            if dataset_test is None:
+            if self.dataset_test is None:
                 raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
+            if self.target is None:
+                raise ValueError("No target set. Make sure the pretrained model explicitly defines the target to train against.")
+
             
             self._check_dataset_equivalence()
             self._load_pretrained_model()
