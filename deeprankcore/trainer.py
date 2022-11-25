@@ -89,19 +89,23 @@ class Trainer():
 
         self.complete_exporter = ConciseOutputExporter(self.metrics_output_dir)
 
+        self.neuralnet = neuralnet
+        self.dataset_train = dataset_train
+        self.dataset_val = dataset_val
+        self.dataset_test = dataset_test
         if (val_size is not None) and (dataset_val is not None):
             raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
 
         if pretrained_model is None:
-            if dataset_train is None:
+            if self.dataset_train is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
             if neuralnet is None:
                 raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
 
-            self.target = dataset_train.target  # already defined in HDF5DatSet object
-            self.task = dataset_train.task
-            self.classes = dataset_train.classes
-            self.classes_to_idx = dataset_train.classes_to_idx
+            self.target = self.dataset_train.target
+            self.task = self.dataset_train.task
+            self.classes = self.dataset_train.classes
+            self.classes_to_idx = self.dataset_train.classes_to_idx
             self.optimizer = None
             self.batch_size = batch_size
             self.val_size = val_size            # if None, will be set to 0.25 in _divide_dataset function
@@ -110,16 +114,17 @@ class Trainer():
             self.shuffle = shuffle
             self.transform_sigmoid = transform_sigmoid
 
-            self.subset = dataset_train.subset
-            self.node_features = dataset_train.node_features
-            self.edge_features = dataset_train.edge_features
-            self.cluster_nodes = dataset_train.clustering_method
+            self.subset = self.dataset_train.subset
+            self.node_features = self.dataset_train.node_features
+            self.edge_features = self.dataset_train.edge_features
+            self.clustering_method = self.dataset_train.clustering_method
             self.epoch_saved_model = None
 
-            self._load_model(dataset_train, dataset_val, dataset_test, neuralnet)
+            self._load_model()
 
         else:
-            self._load_params(pretrained_model)
+            self.pretrained_model = pretrained_model
+            self._load_params()
 
             if dataset_train is not None:
                 warnings.warn("Pretrained model loaded: dataset_train will be ignored.")
@@ -133,61 +138,54 @@ class Trainer():
             self._load_pretrained_model(dataset_test, neuralnet)
 
 
-    def _load_model(self, dataset_train, dataset_val, dataset_test, neuralnet):
+    def _load_model(self):
         
         """
         Loads model
-
-        Args:
-            dataset_train (str): GraphDataset object, training set used during training phase.
-            dataset_val (str): GraphDataset object, evaluation set used during training phase.
-            dataset_eval (str): GraphDataset object, the independent evaluation set used after
-                training phase. 
-            neuralnet (function): neural network.
 
         Raises:
             ValueError: Invalid node clustering method.
         """
 
-        if self.cluster_nodes is not None:
-            if self.cluster_nodes in ('mcl', 'louvain'):
+        if self.clustering_method is not None:
+            if self.clustering_method in ('mcl', 'louvain'):
                 _log.info("Loading clusters")
-                self._precluster(dataset_train, method=self.cluster_nodes)
+                self._precluster(self.dataset_train)
 
-                if dataset_val is not None:
-                    self._precluster(dataset_val, method=self.cluster_nodes)
+                if self.dataset_val is not None:
+                    self._precluster(self.dataset_val)
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
-                    dataset_train, dataset_val = _divide_dataset(
-                        dataset_train, val_size=self.val_size)
+                    self.dataset_train, self.dataset_val = _divide_dataset(
+                        self.dataset_train, val_size=self.val_size)
             else:
                 raise ValueError(
                     "Invalid node clustering method. \n\t"
-                    "Please set cluster_nodes to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
+                    "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # dataloader
         self.train_loader = DataLoader(
-            dataset_train, batch_size=self.batch_size, shuffle=self.shuffle
+            self.dataset_train, batch_size=self.batch_size, shuffle=self.shuffle
         )
         _log.info("Training set loaded\n")
 
-        if dataset_val is not None:
+        if self.dataset_val is not None:
             self.valid_loader = DataLoader(
-                dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
+                self.dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
             )
             _log.info("Validation set loaded\n")
         else:
             self.valid_loader = None
 
         # independent validation dataset
-        if dataset_test is not None:
+        if self.dataset_test is not None:
             _log.info("Loading independent testing dataset...")
 
-            if self.cluster_nodes in ('mcl', 'louvain'):
-                self._precluster(dataset_test, method=self.cluster_nodes)
+            if self.clustering_method in ('mcl', 'louvain'):
+                self._precluster(self.dataset_test)
 
             self.test_loader = DataLoader(
-                dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
             )
             _log.info("Testing set loaded\n")
 
@@ -195,30 +193,26 @@ class Trainer():
             _log.info("No independent testing set loaded")
             self.test_loader = None
 
-        self._put_model_to_device(dataset_train, neuralnet)
+        self._put_model_to_device(self.dataset_train)
 
         # optimizer
         self.configure_optimizers()
 
         self.set_loss()
 
-    def _load_pretrained_model(self, dataset_test, neuralnet):
+    def _load_pretrained_model(self):
         """
         Loads pretrained model
-
-        Args:
-            dataset_test: GraphDataset object to be tested with the model
-            neuralnet (function): neural network
         """
 
-        if self.cluster_nodes is not None: 
-            self._precluster(dataset_test, method=self.cluster_nodes)
+        if self.clustering_method is not None: 
+            self._precluster(self.dataset_test)
 
-        self.test_loader = DataLoader(dataset_test)
+        self.test_loader = DataLoader(self.dataset_test)
 
         _log.info("Testing set loaded\n")
         
-        self._put_model_to_device(dataset_test, neuralnet)
+        self._put_model_to_device(self.dataset_test)
 
         self.set_loss()
 
@@ -226,12 +220,11 @@ class Trainer():
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def _precluster(self, dataset, method):
+    def _precluster(self, dataset: GraphDataset):
         """Pre-clusters nodes of the graphs
 
         Args:
             dataset (GraphDataset object)
-            method (srt): 'mcl' (Markov Clustering) or 'louvain'
         """
         for fname, mol in tqdm(dataset.index_complexes):
 
@@ -252,27 +245,27 @@ class Trainer():
 
             clust_grp = grp.require_group("clustering")
 
-            if method.lower() in clust_grp:
+            if self.clustering_method.lower() in clust_grp:
                 #_log.info(f"Deleting previous data for mol {mol} method {method}")
-                del clust_grp[method.lower()]
+                del clust_grp[self.clustering_method.lower()]
 
-            method_grp = clust_grp.create_group(method.lower())
+            method_grp = clust_grp.create_group(self.clustering_method.lower())
 
             cluster = community_detection(
-                data.edge_index, data.num_nodes, method=method
+                data.edge_index, data.num_nodes, method=self.clustering_method
             )
             method_grp.create_dataset("depth_0", data=cluster.cpu())
 
             data = community_pooling(cluster, data)
 
             cluster = community_detection(
-                data.edge_index, data.num_nodes, method=method
+                data.edge_index, data.num_nodes, method=self.clustering_method
             )
             method_grp.create_dataset("depth_1", data=cluster.cpu())
 
             f5.close()
 
-    def _put_model_to_device(self, dataset, neuralnet):
+    def _put_model_to_device(self, dataset: GraphDataset):
         """
         Puts the model on the available device
 
@@ -305,7 +298,7 @@ class Trainer():
 
             self.output_shape = 1
 
-            self.model = neuralnet(
+            self.model = self.neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
                 self.num_edge_features).to(
@@ -316,7 +309,7 @@ class Trainer():
 
             self.output_shape = len(self.classes)
 
-            self.model = neuralnet(
+            self.model = self.neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
                 self.num_edge_features).to(
@@ -667,8 +660,8 @@ class Trainer():
             # Loads the test dataset if provided
             if dataset_test is not None:
 
-                if self.cluster_nodes in ('mcl', 'louvain'):
-                    self._precluster(dataset_test, method=self.cluster_nodes)
+                if self.clustering_method in ('mcl', 'louvain'):
+                    self._precluster(self.dataset_test)
 
                 self.test_loader = DataLoader(
                     dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
@@ -709,7 +702,7 @@ class Trainer():
         self.task = state["task"]
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
-        self.cluster_nodes = state["cluster_nodes"]
+        self.clustering_method = state["clustering_method"]
         self.transform_sigmoid = state["transform_sigmoid"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
@@ -739,7 +732,7 @@ class Trainer():
             "weight_decay": self.weight_decay,
             "subset": self.subset,
             "shuffle": self.shuffle,
-            "cluster_nodes": self.cluster_nodes,
+            "clustering_method": self.clustering_method,
             "transform_sigmoid": self.transform_sigmoid,
         }
 
