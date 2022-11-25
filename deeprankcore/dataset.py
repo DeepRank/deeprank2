@@ -140,8 +140,7 @@ class GraphDataset(Dataset):
 
         self._check_hdf5_files()
         self._check_task_and_classes(task,classes)
-        self._check_node_feature()
-        self._check_edge_feature()
+        self._check_features()
 
         # create the indexing system
         # alows to associate each mol to an index
