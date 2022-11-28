@@ -11,29 +11,27 @@ from deeprankcore.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 
-EPSILON0 = 1.0
-COULOMB_CONSTANT = 332.0636
 MAX_COVALENT_DISTANCE = 2.1
 
 def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 
         Calculate Coulomb potentials between between all Atoms in atom.
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
+        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
+            However, the potential tends to 0 at large distance.
     """
 
-    # find charges
+    EPSILON0 = 1.0
+    COULOMB_CONSTANT = 332.0636
     charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
-
-    # calculate potentials
     coulomb_potentials = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
-
     return coulomb_potentials
 
 
 def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 
         Calculate Lennard-Jones potentials between all Atoms in atom.
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite (but the potential tends to 0 at large distance)
+        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
+            However, the potential tends to 0 at large distance.
     """
 
     # calculate intra potentials
@@ -55,10 +53,8 @@ def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> n
 
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
-    # get a set of all the atoms involved with a unique index
-    ## create an empty set
+    # assign each atoms (from all edges) a unique index
     all_atoms = set() 
-    ## add all atoms of all edges to the set
     if isinstance(graph.edges[0].id, AtomicContact):
         for edge in graph.edges:
             contact = edge.id
@@ -72,30 +68,24 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
     else:
         raise TypeError(
             f"Unexpected edge type: {type(graph.edges[0].id)}")
-
-    ## convert the set to a list
     all_atoms = list(all_atoms)
+    atom_dict = {all_atoms[i]: i for i in range(len(all_atoms))}
 
-
-    # make calculations once per graph
-    ## calculate the pairwise distances between all atoms
-    positions = [atom.position for atom in all_atoms]
-    interatomic_distances = distance_matrix(positions, positions)
-    ## calculate the pairwise potentials between all atoms
+    # make pairwise calculations between all atoms in the set
     with warnings.catch_warnings(record=RuntimeWarning):
         warnings.simplefilter("ignore")
+        positions = [atom.position for atom in all_atoms]
+        interatomic_distances = distance_matrix(positions, positions)
         interatomic_electrostatic_potentials = _get_coulomb_potentials(all_atoms, interatomic_distances)
         interatomic_vanderwaals_potentials = _get_lennard_jones_potentials(all_atoms, interatomic_distances)
 
-    # generate dictionary with an index for each unique atom
-    all_atoms = {all_atoms[i]: i for i in range(len(all_atoms))}
-
+    # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
         for edge in graph.edges:        
             ## find the indices
             contact = edge.id
-            atom1_index = all_atoms[contact.atom1]
-            atom2_index = all_atoms[contact.atom2]
+            atom1_index = atom_dict[contact.atom1]
+            atom2_index = atom_dict[contact.atom2]
             ## set features
             edge.features[Efeat.SAMERES] = float( contact.atom1.residue == contact.atom2.residue)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.SAMECHAIN] = float( contact.atom1.residue.chain == contact.atom1.residue.chain )  # 1.0 for True; 0.0 for False
@@ -111,8 +101,8 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         for edge in graph.edges:        
             ## find the indices
             contact = edge.id
-            atom1_indices = [all_atoms[atom] for atom in contact.residue1.atoms]
-            atom2_indices = [all_atoms[atom] for atom in contact.residue2.atoms]
+            atom1_indices = [atom_dict[atom] for atom in contact.residue1.atoms]
+            atom2_indices = [atom_dict[atom] for atom in contact.residue2.atoms]
             ## set features
             edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
