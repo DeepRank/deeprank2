@@ -36,8 +36,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
     edge01 = Edge(contact01)
 
     # add features to the nodes and edge
-    node_feature_name = "node_feature"
-    edge_feature_name = "edge_feature"
+    node_feature_name = "node_features"
+    edge_feature_name = "edge_features"
 
     node0.features[node_feature_name] = np.array([0.1])
     node1.features[node_feature_name] = np.array([1.0])

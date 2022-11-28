@@ -62,40 +62,40 @@ Assuming that the training, validation and testing ids have been chosen (keys of
 
 ```python
 
-from deeprankcore.DataSet import save_hdf5_keys
+from deeprankcore.dataset import save_hdf5_keys
 
 save_hdf5_keys("<original_hdf5_path.hdf5>", train_ids, "<train_hdf5_path.hdf5>")
 save_hdf5_keys("<original_hdf5_path.hdf5>", valid_ids, "<val_hdf5_path.hdf5>")
 save_hdf5_keys("<original_hdf5_path.hdf5>", test_ids, "<test_hdf5_path.hdf5>")
 ```
 
-Now the HDF5DataSet objects can be defined:
+Now the GraphDataset objects can be defined:
 
 ```python
-from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.dataset import GraphDataset
 from deeprankcore.domain.features import nodefeats as Nfeat
 from deeprankcore.domain.features import edgefeats as Efeat
 
 node_features = [Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 edge_features = [Efeat.DISTANCE]
 
-# Creating HDF5DataSet objects
-dataset_train = HDF5DataSet(
+# Creating GraphDataset objects
+dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
+    node_features = node_features,
+    edge_features = edge_features,
     target = targets.BINARY
 )
-dataset_val = HDF5DataSet(
+dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
+    node_features = node_features,
+    edge_features = edge_features,
     target = targets.BINARY
 )
-dataset_test = HDF5DataSet(
+dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
-    node_feature = node_features,
-    edge_feature = edge_features,
+    node_features = node_features,
+    edge_features = edge_features,
     target = targets.BINARY
 )
 ```
@@ -104,7 +104,7 @@ dataset_test = HDF5DataSet(
 Training can be performed using one of the already existing GNNs, for example GINet:
 
 ```python
-from deeprankcore.Trainer import Trainer
+from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
 
@@ -112,10 +112,10 @@ metrics_output_directory = "./metrics"
 metrics_exporters = [OutputExporter(metrics_output_directory)]
 
 trainer = Trainer(
+    GINet,
     dataset_train,
     dataset_val,
     dataset_test,
-    GINet,
     batch_size = 64,
     metrics_exporters = metrics_exporters
 )
@@ -141,7 +141,7 @@ def normalized_cut_2d(edge_index, pos):
 
 class CustomNet(torch.nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
+        super().__init__()
         self.conv1 = SplineConv(d.num_features, 32, dim=2, kernel_size=5)
         self.conv2 = SplineConv(32, 64, dim=2, kernel_size=5)
         self.fc1 = torch.nn.Linear(64, 128)
@@ -165,10 +165,10 @@ class CustomNet(torch.nn.Module):
 
 
 trainer = Trainer(
+    CustomNet,
     dataset_train,
     dataset_val,
     dataset_test,
-    CustomNet,
     batch_size = 64,
     metrics_exporters = metrics_exporters
 )

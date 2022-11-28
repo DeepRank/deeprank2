@@ -6,8 +6,8 @@ import pytest
 import logging
 import warnings
 import torch
-from deeprankcore.Trainer import Trainer
-from deeprankcore.DataSet import HDF5DataSet
+from deeprankcore.trainer import Trainer
+from deeprankcore.dataset import GraphDataset
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
@@ -27,10 +27,10 @@ default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nf
 
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
+    model_class,
     train_hdf5_path,
     val_hdf5_path,
     test_hdf5_path,
-    model_class,
     node_features,
     edge_features,
     task,
@@ -41,21 +41,19 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     use_cuda = False
 ):
 
-    dataset_train = HDF5DataSet(
+    dataset_train = GraphDataset(
         hdf5_path=train_hdf5_path,
-        root="./",
-        node_feature=node_features,
-        edge_feature=edge_features,
+        node_features=node_features,
+        edge_features=edge_features,
         task = task,
         target=target,
         clustering_method=clustering_method)
 
     if val_hdf5_path is not None:
-        dataset_val = HDF5DataSet(
+        dataset_val = GraphDataset(
             hdf5_path=val_hdf5_path,
-            root="./",
-            node_feature=node_features,
-            edge_feature=edge_features,
+            node_features=node_features,
+            edge_features=edge_features,
             task = task,
             target=target,
             clustering_method=clustering_method)
@@ -63,11 +61,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val = None
 
     if test_hdf5_path is not None:
-        dataset_test = HDF5DataSet(
+        dataset_test = GraphDataset(
             hdf5_path=test_hdf5_path,
-            root="./",
-            node_feature=node_features,
-            edge_feature=edge_features,
+            node_features=node_features,
+            edge_features=edge_features,
             target=target,
             task=task,
             clustering_method=clustering_method)
@@ -75,10 +72,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_test = None
 
     trainer = Trainer(
+        model_class,
         dataset_train,
         dataset_val,
         dataset_test,
-        model_class,
         batch_size=64,
         metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
@@ -106,10 +103,10 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         trainer.save_model("test.pth.tar")
 
         Trainer(
+            model_class,
             dataset_train,
             dataset_val,
             dataset_test,
-            model_class,
             pretrained_model="test.pth.tar")
 
 class TestTrainer(unittest.TestCase):
@@ -123,10 +120,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_sigmoid(self):
         _model_base_test(
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -138,10 +135,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet(self):
         _model_base_test(           
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             GINet,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -155,10 +152,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_ginet_class(self):
         _model_base_test(
-            "tests/data/hdf5/variants.hdf5",
-            "tests/data/hdf5/variants.hdf5",
-            "tests/data/hdf5/variants.hdf5",
             GINet,
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
+            "tests/data/hdf5/variants.hdf5",
             [Nfeat.POLARITY, Nfeat.INFOCONTENT, Nfeat.PSSM],
             [Efeat.DISTANCE],
             targets.CLASSIF,
@@ -172,10 +169,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
             FoutNet,
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.CLASSIF,
@@ -187,10 +184,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
-            "tests/data/hdf5/1ATN_ppi.hdf5",
             SGAT,
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
+            "tests/data/hdf5/1ATN_ppi.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -202,10 +199,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
-            "tests/data/hdf5/test.hdf5",
             NaiveNetwork,
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
+            "tests/data/hdf5/test.hdf5",
             default_features,
             [Efeat.DISTANCE],
             targets.REGRESS,
@@ -218,10 +215,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
                 SGAT,
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 default_features,
                 [Efeat.DISTANCE],
                 targets.REGRESS,
@@ -234,10 +231,10 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_classification(self):
         with pytest.raises(ValueError):
             _model_base_test(
-                "tests/data/hdf5/variants.hdf5",
-                "tests/data/hdf5/variants.hdf5",
-                "tests/data/hdf5/variants.hdf5",
                 GINet,
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
+                "tests/data/hdf5/variants.hdf5",
                 [Nfeat.RESSIZE, Nfeat.POLARITY, Nfeat.SASA, Nfeat.INFOCONTENT, Nfeat.PSSM],
                 [Efeat.DISTANCE],
                 targets.CLASSIF,
@@ -250,22 +247,33 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_no_pretrained_no_train(self):
         with pytest.raises(ValueError):
 
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             Trainer(
+                neuralnet = NaiveNetwork,
                 dataset_test = dataset,
-                Net = NaiveNetwork,
             )
 
     def test_incompatible_no_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+            )
+
+            Trainer(
+                neuralnet = NaiveNetwork,
+                dataset_train = dataset,
+            )
+
+    def test_incompatible_no_pretrained_no_target(self):
+        with pytest.raises(ValueError):
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             Trainer(
                 dataset_train = dataset,
@@ -273,14 +281,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_pretrained_no_test(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             trainer = Trainer(
+                neuralnet = GINet,
                 dataset_train = dataset,
-                Net = GINet,
             )
 
             with warnings.catch_warnings(record=UserWarning):
@@ -288,20 +296,20 @@ class TestTrainer(unittest.TestCase):
                 trainer.save_model("test.pth.tar")
 
                 Trainer(
+                    neuralnet = GINet,
                     dataset_train = dataset,
-                    Net = GINet,
                     pretrained_model="test.pth.tar")
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
-            dataset = HDF5DataSet(
+            dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                root="./")
+            )
 
             trainer = Trainer(
+                neuralnet = GINet,
                 dataset_train = dataset,
-                Net = GINet,
             )
 
             with warnings.catch_warnings(record=UserWarning):
@@ -314,14 +322,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_provided(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
+            neuralnet = GINet,
             dataset_train = dataset,
-            Net = GINet,
             batch_size = 1
         )
 
@@ -330,14 +338,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_no_valid_full_train(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
+            neuralnet = GINet,
             dataset_train = dataset,
-            Net = GINet,
             val_size = 0,
             batch_size = 1
         )
@@ -347,14 +355,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_optim(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
+            neuralnet = NaiveNetwork,
             dataset_train = dataset,
-            Net = NaiveNetwork,
         )
 
         optimizer = torch.optim.Adamax
@@ -372,8 +380,8 @@ class TestTrainer(unittest.TestCase):
             trainer.save_model("test.pth.tar")
 
             trainer_pretrained = Trainer(
+                neuralnet = NaiveNetwork,
                 dataset_test=dataset,
-                Net = NaiveNetwork,
                 pretrained_model="test.pth.tar")
 
         assert isinstance(trainer_pretrained.optimizer, optimizer)
@@ -382,14 +390,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_default_optim(self):
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
-            root="./")
+        )
 
         trainer = Trainer(
+            neuralnet = NaiveNetwork,
             dataset_train = dataset,
-            Net = NaiveNetwork,
         )
 
         assert isinstance(trainer.optimizer, torch.optim.Adam)
@@ -400,10 +408,10 @@ class TestTrainer(unittest.TestCase):
         if torch.cuda.is_available():
 
             _model_base_test(           
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
-                "tests/data/hdf5/1ATN_ppi.hdf5",
                 GINet,
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
+                "tests/data/hdf5/1ATN_ppi.hdf5",
                 default_features,
                 [Efeat.DISTANCE],
                 targets.REGRESS,
@@ -419,6 +427,55 @@ class TestTrainer(unittest.TestCase):
         else:
             warnings.warn("CUDA NOT AVAILABLE. test_cuda skipped")
             _log.debug("cuda is not available, test_cuda skipped")
+
+    def test_dataset_equivalence_no_pretrained(self):
+        with pytest.raises(ValueError):
+            dataset_train = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
+            )
+            
+            dataset_val = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE]
+            )
+
+            Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_train,
+                dataset_val = dataset_val,
+            )
+
+    def test_dataset_equivalence_pretrained(self):
+        with pytest.raises(ValueError):
+            dataset_train = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
+            )
+            
+            dataset_test = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5",
+                target=targets.BINARY,
+                edge_features=[Efeat.DISTANCE]
+            )
+
+            trainer = Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_train,
+            )
+
+            with warnings.catch_warnings(record=UserWarning):
+                trainer.train(nepoch=3, validate=True)
+                trainer.save_model("test.pth.tar")
+
+                Trainer(
+                    neuralnet = GINet,
+                    dataset_train = dataset_train,
+                    dataset_test = dataset_test,
+                    pretrained_model="test.pth.tar")
 
 
 if __name__ == "__main__":

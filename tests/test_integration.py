@@ -5,8 +5,8 @@ import os
 import h5py
 from tests._utils import PATH_TEST
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
-from deeprankcore.DataSet import HDF5DataSet
-from deeprankcore.Trainer import Trainer
+from deeprankcore.dataset import GraphDataset
+from deeprankcore.trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.utils.metrics import OutputExporter
 from deeprankcore.tools.target import compute_targets
@@ -65,35 +65,36 @@ def test_integration(): # pylint: disable=too-many-locals
         node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
         edge_features = [Efeat.DISTANCE]
 
-        dataset_train = HDF5DataSet(
+
+        dataset_train = GraphDataset(
             hdf5_path = output_paths,
-            node_feature = node_features,
-            edge_feature = edge_features,
+            node_features = node_features,
+            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
-        dataset_val = HDF5DataSet(
+        dataset_val = GraphDataset(
             hdf5_path = output_paths,
-            node_feature = node_features,
-            edge_feature = edge_features,
+            node_features = node_features,
+            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
-        dataset_test = HDF5DataSet(
+        dataset_test = GraphDataset(
             hdf5_path = output_paths,
-            node_feature = node_features,
-            edge_feature = edge_features,
+            node_features = node_features,
+            edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
         trainer = Trainer(
+            GINet,
             dataset_train,
             dataset_val,
             dataset_test,
-            GINet,
             batch_size=64,
             metrics_exporters=[OutputExporter(metrics_directory)],
             transform_sigmoid=True,
@@ -103,7 +104,7 @@ def test_integration(): # pylint: disable=too-many-locals
             trainer.train(nepoch=3, validate=True) 
             trainer.save_model("test.pth.tar")
 
-            Trainer(dataset_train, dataset_val, dataset_test, GINet, pretrained_model="test.pth.tar")
+            Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
 
         assert len(os.listdir(metrics_directory)) > 0
 

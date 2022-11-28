@@ -1,6 +1,6 @@
 import unittest
-from deeprankcore.DataSet import HDF5DataSet, save_hdf5_keys
-from deeprankcore.Trainer import _DivideDataSet
+from deeprankcore.dataset import GraphDataset, save_hdf5_keys
+from deeprankcore.trainer import _divide_dataset
 from torch_geometric.data.data import Data
 import h5py
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
@@ -13,22 +13,22 @@ class TestDataSet(unittest.TestCase):
         self.hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5"
 
     def test_dataset(self):
-        HDF5DataSet(
+        GraphDataset(
             hdf5_path=self.hdf5_path,
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
         )
 
     def test_dataset_filter(self):
-        HDF5DataSet(
+        GraphDataset(
             hdf5_path=self.hdf5_path,
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
-            dict_filter={targets.IRMSD: "<10"},
+            target_filter={targets.IRMSD: "<10"},
         )
 
     def test_transform(self):
@@ -37,10 +37,10 @@ class TestDataSet(unittest.TestCase):
             data.x = data.x / 10
             return data
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path=self.hdf5_path,
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
             transform=operator
@@ -50,10 +50,10 @@ class TestDataSet(unittest.TestCase):
         assert dataset.get(0) is not None
 
     def test_multi_file_dataset(self):
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
-            node_feature=node_feats,
-            edge_feature=[Efeat.DISTANCE],
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
             target=targets.BINARY
         )
 
@@ -100,8 +100,8 @@ class TestDataSet(unittest.TestCase):
         test_cases = [None, 0.25, n_val]
         
         for t in test_cases:
-            dataset_train, dataset_val =_DivideDataSet(
-                dataset = HDF5DataSet(hdf5_path=hdf5),
+            dataset_train, dataset_val =_divide_dataset(
+                dataset = GraphDataset(hdf5_path=hdf5),
                 val_size=t,
             )
 
@@ -124,8 +124,8 @@ class TestDataSet(unittest.TestCase):
         for t in test_cases:
             print(t)
             with self.assertRaises(ValueError):
-                _DivideDataSet(
-                    dataset = HDF5DataSet(hdf5_path=hdf5),
+                _divide_dataset(
+                    dataset = GraphDataset(hdf5_path=hdf5),
                     val_size=t,
                 )
         
@@ -137,7 +137,7 @@ class TestDataSet(unittest.TestCase):
         n = 10
         subset = hdf5_keys[:n]
 
-        dataset = HDF5DataSet(
+        dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/train.hdf5",
             subset=subset,
         )
