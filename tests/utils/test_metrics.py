@@ -37,9 +37,10 @@ class TestMetrics(unittest.TestCase):
         entry_names = ["entry1", "entry2", "entry3"]
         outputs = [[0.2, 0.1], [0.3, 0.8], [0.8, 0.9]]
         targets = [0, 1, 1]
+        loss = 0.1
 
         with collection:
-            collection.process(pass_name, epoch_number, entry_names, outputs, targets)
+            collection.process(pass_name, epoch_number, entry_names, outputs, targets, loss)
 
         assert len(os.listdir(self._work_dir)) == 2  # tensorboard & table
 
@@ -52,10 +53,11 @@ class TestMetrics(unittest.TestCase):
         entry_names = ["entry1", "entry2", "entry3"]
         outputs = [[0.2, 0.1], [0.3, 0.8], [0.8, 0.9]]
         targets = [0, 1, 1]
+        loss = 0.1
 
         with output_exporter:
             output_exporter.process(
-                pass_name, epoch_number, entry_names, outputs, targets
+                pass_name, epoch_number, entry_names, outputs, targets, loss
             )
 
         with lzma.open(
@@ -86,6 +88,7 @@ class TestMetrics(unittest.TestCase):
         entry_names = ["entry1", "entry2", "entry3"]
         outputs = [[0.2, 0.1], [0.3, 0.8], [0.8, 0.9]]
         targets = [0, 1, 1]
+        loss = 0.1
 
         def _check_scalar(name, scalar, timestep): # pylint: disable=unused-argument
             if name == f"{pass_name} cross entropy loss":
@@ -97,7 +100,7 @@ class TestMetrics(unittest.TestCase):
 
         with tensorboard_exporter:
             tensorboard_exporter.process(
-                pass_name, epoch_number, entry_names, outputs, targets
+                pass_name, epoch_number, entry_names, outputs, targets, loss
             )
         assert mock_add_scalar.called
 
@@ -114,6 +117,7 @@ class TestMetrics(unittest.TestCase):
                 ["entry1", "entry1", "entry2"],
                 [0.1, 0.65, 0.98],
                 [0.0, 0.5, 1.0],
+                0.1
             )
 
             scatterplot_exporter.process(
@@ -122,6 +126,7 @@ class TestMetrics(unittest.TestCase):
                 ["entryA", "entryB", "entryC"],
                 [0.3, 0.35, 0.25],
                 [0.0, 0.5, 1.0],
+                0.1
             )
 
         assert os.path.isfile(scatterplot_exporter.get_filename(epoch_number))

@@ -27,7 +27,7 @@ class MetricsExporter:
         pass # pylint: disable=unnecessary-pass
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         "the entry_names, output_values, target_values MUST have the same length"
         pass # pylint: disable=unnecessary-pass
 
@@ -54,9 +54,9 @@ class MetricsExporterCollection:
             metrics_exporter.__exit__(exception_type, exception, traceback)
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         for metrics_exporter in self._metrics_exporters:
-            metrics_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values)
+            metrics_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values, loss)
 
     def __iter__(self):
         return iter(self._metrics_exporters)
@@ -85,11 +85,11 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
         self._writer.__exit__(exception_type, exception, traceback)
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments, too-many-locals
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         "write to tensorboard"
 
-        loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
-        self._writer.add_scalar(f"{pass_name} cross entropy loss", loss, epoch_number)
+        ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
+        self._writer.add_scalar(f"{pass_name} cross entropy loss", ce_loss, epoch_number)
 
         probabilities = []
         fp, fn, tp, tn = 0, 0, 0, 0
@@ -157,7 +157,7 @@ class OutputExporter(MetricsExporter):
         return os.path.join(self._directory_path, f"output-{pass_name}-epoch-{epoch_number}.csv.xz")
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         "write the output to the table"
 
         with lzma.open(self.get_filename(pass_name, epoch_number), 'wt', newline='\n') as f:
@@ -234,7 +234,7 @@ class ScatterPlotExporter(MetricsExporter):
         pyplot.close()
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         "make the plot, if the epoch matches with the interval"
 
         if epoch_number % self._epoch_interval == 0:

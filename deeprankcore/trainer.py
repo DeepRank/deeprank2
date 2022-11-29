@@ -511,7 +511,7 @@ class Trainer():
             epoch_loss = 0.0
 
         self._metrics_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, target_vals)
+            pass_name, epoch_number, entry_names, outputs, target_vals, epoch_loss)
         self.complete_exporter.epoch_process(
             pass_name,
             epoch_number,
@@ -581,7 +581,7 @@ class Trainer():
             eval_loss = 0.0
 
         self._metrics_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, target_vals)
+            pass_name, epoch_number, entry_names, outputs, target_vals, eval_loss)
         self.complete_exporter.epoch_process(
             pass_name,
             epoch_number,
