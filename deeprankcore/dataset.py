@@ -91,11 +91,11 @@ class GraphDataset(Dataset):
 
             node_features (str or list, optional): consider all pre-computed node features ("all")
                 or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
-                The complete list can be found in deeprankcore/domain/features.py
+                The complete list can be found in deeprankcore/domain/nodestorage.py
 
             edge_features (list, optional): consider all pre-computed edge features ("all")
                 or some defined edge features (provide a list, example: ["dist", "coulomb"]).
-                The complete list can be found in deeprankcore/domain/features.py
+                The complete list can be found in deeprankcore/domain/edgestorage.py
 
             clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
                 or 'louvain' algorithm). Note that this parameter can be None only if the neural
