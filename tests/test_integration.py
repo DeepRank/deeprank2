@@ -8,7 +8,7 @@ from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQu
 from deeprankcore.dataset import GraphDataset
 from deeprankcore.trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
-from deeprankcore.utils.metrics import OutputExporter
+from deeprankcore.utils.exporters import CSVOutputExporter
 from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
@@ -29,10 +29,10 @@ def test_integration(): # pylint: disable=too-many-locals
     chain_id1 = "A"
     chain_id2 = "B"
 
-    output_directory = mkdtemp()
-    metrics_directory = tempfile.mkdtemp()
+    hdf5_directory = mkdtemp()
+    output_directory = tempfile.mkdtemp()
 
-    prefix = os.path.join(output_directory, "test-queries-process")
+    prefix = os.path.join(hdf5_directory, "test-queries-process")
 
     try:
 
@@ -50,11 +50,11 @@ def test_integration(): # pylint: disable=too-many-locals
             )
             queries.add(query)
 
-        output_paths = queries.process(prefix = prefix)
-        assert len(output_paths) > 0
+        hdf5_paths = queries.process(prefix = prefix)
+        assert len(hdf5_paths) > 0
 
         graph_names = []
-        for path in output_paths:
+        for path in hdf5_paths:
             with h5py.File(path, "r") as f5:
                 graph_names += list(f5.keys())
 
@@ -67,7 +67,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
 
         dataset_train = GraphDataset(
-            hdf5_path = output_paths,
+            hdf5_path = hdf5_paths,
             node_features = node_features,
             edge_features = edge_features,
             target = targets.BINARY,
@@ -75,7 +75,7 @@ def test_integration(): # pylint: disable=too-many-locals
         )
 
         dataset_val = GraphDataset(
-            hdf5_path = output_paths,
+            hdf5_path = hdf5_paths,
             node_features = node_features,
             edge_features = edge_features,
             target = targets.BINARY,
@@ -83,14 +83,14 @@ def test_integration(): # pylint: disable=too-many-locals
         )
 
         dataset_test = GraphDataset(
-            hdf5_path = output_paths,
+            hdf5_path = hdf5_paths,
             node_features = node_features,
             edge_features = edge_features,
             target = targets.BINARY,
             clustering_method = "mcl",
         )
 
-        metrics_exporters = [OutputExporter(metrics_directory)]
+        output_exporters = [CSVOutputExporter(output_directory)]
 
         trainer = Trainer(
             GINet,
@@ -98,7 +98,7 @@ def test_integration(): # pylint: disable=too-many-locals
             dataset_val,
             dataset_test,
             batch_size=64,
-            metrics_exporters=metrics_exporters
+            output_exporters=output_exporters
         )   
 
         with warnings.catch_warnings(record=UserWarning):
@@ -107,7 +107,7 @@ def test_integration(): # pylint: disable=too-many-locals
 
             Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
 
-        assert len(os.listdir(metrics_directory)) > 0
+        assert len(os.listdir(output_directory)) > 0
 
     finally:
-        rmtree(output_directory)
+        rmtree(hdf5_directory)

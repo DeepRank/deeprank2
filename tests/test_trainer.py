@@ -12,8 +12,8 @@ from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
 from deeprankcore.neuralnets.sgat import SGAT
-from deeprankcore.utils.metrics import (
-    OutputExporter,
+from deeprankcore.utils.exporters import (
+    CSVOutputExporter,
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
@@ -35,7 +35,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     task,
     target,
     transform_sigmoid,
-    metrics_exporters,
+    output_exporters,
     clustering_method,
     use_cuda = False
 ):
@@ -77,7 +77,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_test,
         batch_size=64,
         transform_sigmoid=transform_sigmoid,
-        metrics_exporters=metrics_exporters,
+        output_exporters=output_exporters,
     )
 
     if use_cuda:
@@ -128,7 +128,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             targets.IRMSD,
             True,
-            [OutputExporter(self.work_directory)],
+            [CSVOutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -143,7 +143,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             targets.IRMSD,
             False,
-            [OutputExporter(self.work_directory)],
+            [CSVOutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -207,7 +207,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             "BA",
             False,
-            [OutputExporter(self.work_directory)],
+            [CSVOutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -416,7 +416,7 @@ class TestTrainer(unittest.TestCase):
                 targets.REGRESS,
                 targets.IRMSD,
                 False,
-                [OutputExporter(self.work_directory)],
+                [CSVOutputExporter(self.work_directory)],
                 "mcl",
                 True
             )

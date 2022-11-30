@@ -15,13 +15,13 @@ import pandas as pd
 _log = logging.getLogger(__name__)
 
 
-class MetricsExporter:
+class OutputExporter:
     "The class implements an object, to be called when a neural network generates output"
 
     def __init__(self, directory_path: str = None):
         
         if directory_path is None:
-            directory_path = "./metrics"
+            directory_path = "./output"
         self._directory_path = directory_path
 
         if not os.path.exists(self._directory_path):
@@ -48,32 +48,32 @@ class MetricsExporter:
         return True
 
 
-class MetricsExporterCollection:
-    "allows a series of metrics exporters to be used at the same time"
+class OutputExporterCollection:
+    "allows a series of output exporters to be used at the same time"
 
-    def __init__(self, *args: List[MetricsExporter]):
-        self._metrics_exporters = args
+    def __init__(self, *args: List[OutputExporter]):
+        self._output_exporters = args
 
     def __enter__(self):
-        for metrics_exporter in self._metrics_exporters:
-            metrics_exporter.__enter__()
+        for output_exporter in self._output_exporters:
+            output_exporter.__enter__()
 
         return self
 
     def __exit__(self, exception_type, exception, traceback):
-        for metrics_exporter in self._metrics_exporters:
-            metrics_exporter.__exit__(exception_type, exception, traceback)
+        for output_exporter in self._output_exporters:
+            output_exporter.__exit__(exception_type, exception, traceback)
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
                 entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
-        for metrics_exporter in self._metrics_exporters:
-            metrics_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values, loss)
+        for output_exporter in self._output_exporters:
+            output_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values, loss)
 
     def __iter__(self):
-        return iter(self._metrics_exporters)
+        return iter(self._output_exporters)
 
 
-class TensorboardBinaryClassificationExporter(MetricsExporter):
+class TensorboardBinaryClassificationExporter(OutputExporter):
     """ Exports to tensorboard, works for binary classification only.
 
         Currently outputs to tensorboard:
@@ -147,46 +147,8 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
         return output_data_shape == 2 and target_data_shape == 1
 
 
-class OutputExporter(MetricsExporter):
-    """ A metrics exporter that writes CSV output tables, containing every single data point.
-
-        Included are:
-            - entry names
-            - output values
-            - target values
-
-        The user can load these output tables in excel.
-
-        Outputs are done per epoch.
-    """
-
-    def __init__(self, directory_path: str):
-        super().__init__(directory_path)
-
-    def get_filename(self, pass_name, epoch_number):
-        "returns the filename for the table"
-        return os.path.join(self._directory_path, f"output-{pass_name}-epoch-{epoch_number}.csv.xz")
-
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
-        "write the output to the table"
-
-        with lzma.open(self.get_filename(pass_name, epoch_number), 'wt', newline='\n') as f:
-            w = csv.writer(f, delimiter=',')
-
-            w.writerow(["entry", "output", "target"])
-
-            for entry_index, entry_name in enumerate(entry_names):
-                output_value = output_values[entry_index]
-                target_value = target_values[entry_index]
-
-                _log.debug(f"writerow [{entry_name}, {output_value}, {target_value}]") # pylint: disable=logging-fstring-interpolation
-
-                w.writerow([entry_name, str(output_value), str(target_value)])
-
-
-class ScatterPlotExporter(MetricsExporter):
-    """ A metrics exporter that ocasionally makes scatter plots, containing every single data point.
+class ScatterPlotExporter(OutputExporter):
+    """ An output exporter that ocasionally makes scatter plots, containing every single data point.
 
         On the X-axis: targets values
         On the Y-axis: output values
@@ -262,8 +224,8 @@ class ScatterPlotExporter(MetricsExporter):
         return output_data_shape == 1 and target_data_shape == 1
 
 
-class ConciseOutputExporter(MetricsExporter):
-    """ A metrics exporter that writes an hdf5 file containing every single data point.
+class HDF5OutputExporter(OutputExporter):
+    """ An output exporter that writes an hdf5 file containing every single data point.
 
         Results saved are:
             - phase (train/valid/test)
@@ -273,7 +235,7 @@ class ConciseOutputExporter(MetricsExporter):
             - target value
             - loss per epoch
 
-        The user can then load the csv table into a Pandas df, and plotting metrics
+        The user can then load the csv table into a Pandas df, and plotting various kind of metrics
     """
 
     def __init__(
@@ -302,11 +264,49 @@ class ConciseOutputExporter(MetricsExporter):
 
         self.df = pd.concat([self.df, df_epoch])
 
-    def save_all_metrics(self, phase: str):
+    def save_all_outputs(self, phase: str):
 
         self.df.to_hdf(
-            os.path.join(self._directory_path, 'metrics.hdf5'),
+            os.path.join(self._directory_path, 'output_exporter.hdf5'),
             key=phase,
             mode='a')
         # reset df
         self.df = pd.DataFrame(data=self.d)
+
+
+class CSVOutputExporter(OutputExporter):
+    """ An output exporter that writes CSV output tables, containing every single data point.
+
+        Included are:
+            - entry names
+            - output values
+            - target values
+
+        The user can load these output tables in excel.
+
+        Outputs are done per epoch.
+    """
+
+    def __init__(self, directory_path: str):
+        super().__init__(directory_path)
+
+    def get_filename(self, pass_name, epoch_number):
+        "returns the filename for the table"
+        return os.path.join(self._directory_path, f"output-{pass_name}-epoch-{epoch_number}.csv.xz")
+
+    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
+        "write the output to the table"
+
+        with lzma.open(self.get_filename(pass_name, epoch_number), 'wt', newline='\n') as f:
+            w = csv.writer(f, delimiter=',')
+
+            w.writerow(["entry", "output", "target"])
+
+            for entry_index, entry_name in enumerate(entry_names):
+                output_value = output_values[entry_index]
+                target_value = target_values[entry_index]
+
+                _log.debug(f"writerow [{entry_name}, {output_value}, {target_value}]") # pylint: disable=logging-fstring-interpolation
+
+                w.writerow([entry_name, str(output_value), str(target_value)])

@@ -106,10 +106,10 @@ Training can be performed using one of the already existing GNNs, for example GI
 ```python
 from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
-from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
+from deeprankcore.utils.exporters import CSVOutputExporter, ScatterPlotExporter
 
-metrics_output_directory = "./metrics"
-metrics_exporters = [OutputExporter(metrics_output_directory)]
+output_directory = "./output"
+output_exporters = [CSVOutputExporter(output_directory)]
 
 trainer = Trainer(
     GINet,
@@ -117,7 +117,7 @@ trainer = Trainer(
     dataset_val,
     dataset_test,
     batch_size = 64,
-    metrics_exporters = metrics_exporters
+    output_exporters = output_exporters
 )
 
 trainer.train(nepoch = 50, validate = True)
@@ -170,7 +170,7 @@ trainer = Trainer(
     dataset_val,
     dataset_test,
     batch_size = 64,
-    metrics_exporters = metrics_exporters
+    output_exporters = output_exporters
 )
 
 trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)

@@ -6,17 +6,17 @@ import logging
 import unittest
 from tempfile import mkdtemp
 from unittest.mock import patch
-from deeprankcore.utils.metrics import (
-    MetricsExporterCollection,
+from deeprankcore.utils.exporters import (
+    OutputExporterCollection,
     TensorboardBinaryClassificationExporter,
-    OutputExporter,
+    CSVOutputExporter,
     ScatterPlotExporter,
 )
 
 logging.getLogger(__name__)
 
 
-class TestMetrics(unittest.TestCase):
+class TestOutputExporters(unittest.TestCase):
     def setUp(self):
         self._work_dir = mkdtemp()
 
@@ -26,10 +26,10 @@ class TestMetrics(unittest.TestCase):
     def test_collection(self):
         exporters = [
             TensorboardBinaryClassificationExporter(self._work_dir),
-            OutputExporter(self._work_dir),
+            CSVOutputExporter(self._work_dir),
         ]
 
-        collection = MetricsExporterCollection(*exporters)
+        collection = OutputExporterCollection(*exporters)
 
         pass_name = "test"
         epoch_number = 0
@@ -45,7 +45,7 @@ class TestMetrics(unittest.TestCase):
         assert len(os.listdir(self._work_dir)) == 2  # tensorboard & table
 
     def test_output_table(self):
-        output_exporter = OutputExporter(self._work_dir)
+        output_exporter = CSVOutputExporter(self._work_dir)
 
         pass_name = "test"
         epoch_number = 0

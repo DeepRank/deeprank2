@@ -11,7 +11,7 @@ from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-from deeprankcore.utils.metrics import MetricsExporterCollection, MetricsExporter, ConciseOutputExporter
+from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targetstorage as targets
 from deeprankcore.dataset import GraphDataset
@@ -32,7 +32,7 @@ class Trainer():
                 batch_size: int = 32,
                 shuffle: bool = True,
                 transform_sigmoid: Optional[bool] = False,
-                metrics_exporters: Optional[List[MetricsExporter]] = None,
+                output_exporters: Optional[List[OutputExporter]] = None,
             ):
         """Class from which the network is trained, evaluated and tested
 
@@ -69,16 +69,16 @@ class Trainer():
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
 
-            metrics_exporters: the metrics exporters to use for generating metrics output.
-                Defaults to ConciseOutputExporter, which saves results in an hdf5 file stored in the directory
+            output_exporters: the output exporters to use for saving/exploring predictions and losses over the epochs.
+                Defaults to HDF5OutputExporter, which saves results in an hdf5 file stored in the directory
                 passed to the exporter.
         """
 
-        if metrics_exporters is not None:
-            self._metrics_exporters = MetricsExporterCollection(
-                *metrics_exporters)
+        if output_exporters is not None:
+            self._output_exporters = OutputExporterCollection(
+                *output_exporters)
         else:
-            self._metrics_exporters = MetricsExporterCollection(ConciseOutputExporter('./metrics'))
+            self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
 
         self.neuralnet = neuralnet
         self.dataset_train = dataset_train
@@ -311,9 +311,9 @@ class Trainer():
             ).to(self.device)
 
         # check for compatibility
-        for metrics_exporter in self._metrics_exporters:
-            if not metrics_exporter.is_compatible_with(self.output_shape, target_shape):
-                raise ValueError(f"""metrics exporter of type {type(metrics_exporter)}\n
+        for output_exporter in self._output_exporters:
+            if not output_exporter.is_compatible_with(self.output_shape, target_shape):
+                raise ValueError(f"""output exporter of type {type(output_exporter)}\n
                                  is not compatible with output shape {self.output_shape}\n
                                  and target shape {target_shape}""")
 
@@ -407,7 +407,7 @@ class Trainer():
             model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         phase = "training"
-        with self._metrics_exporters:
+        with self._output_exporters:
             # Number of epochs
             self.nepoch = nepoch
             _log.info('Epoch 0:')
@@ -453,9 +453,9 @@ class Trainer():
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
 
-            for exporter in self._metrics_exporters:
-                if isinstance(exporter, ConciseOutputExporter):
-                    self.df = exporter.save_all_metrics(phase)
+            for exporter in self._output_exporters:
+                if isinstance(exporter, HDF5OutputExporter):
+                    self.df = exporter.save_all_outputs(phase)
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
@@ -506,7 +506,7 @@ class Trainer():
         else:
             epoch_loss = 0.0
 
-        self._metrics_exporters.process(
+        self._output_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals, epoch_loss)
         self._log_epoch_data(pass_name, epoch_loss, dt)
 
@@ -524,7 +524,7 @@ class Trainer():
 
         Args:
             loader (Dataloader): data to evaluate on
-            epoch_number (int): number for this epoch, used for storing the metrics
+            epoch_number (int): number for this epoch, used for storing the outputs
             pass_name (str): 'training', 'validation' or 'testing'
 
         Returns:
@@ -569,7 +569,7 @@ class Trainer():
         else:
             eval_loss = 0.0
 
-        self._metrics_exporters.process(
+        self._output_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals, eval_loss)
         self._log_epoch_data(pass_name, eval_loss, dt)
 
@@ -621,7 +621,7 @@ class Trainer():
         """
 
         phase = "testing"
-        with self._metrics_exporters:
+        with self._output_exporters:
             # Loads the test dataset if provided
             if self.dataset_test is not None:
                 if self.clustering_method in ('mcl', 'louvain'):
@@ -635,9 +635,9 @@ class Trainer():
             # Run test
             self._eval(self.test_loader, 0, "testing")
 
-            for exporter in self._metrics_exporters:
-                if isinstance(exporter, ConciseOutputExporter):
-                    exporter.save_all_metrics(phase)
+            for exporter in self._output_exporters:
+                if isinstance(exporter, HDF5OutputExporter):
+                    exporter.save_all_outputs(phase)
 
     def _load_params(self):
         """
