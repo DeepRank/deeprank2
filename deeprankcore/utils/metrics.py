@@ -31,7 +31,7 @@ class MetricsExporter:
         "the entry_names, output_values, target_values MUST have the same length"
         pass # pylint: disable=unnecessary-pass
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:  # pylint: disable=unused-argument
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:  # pylint: disable=unused-argument
         "true if this exporter can work with the given data shapes"
 
         return True
@@ -254,15 +254,14 @@ class ScatterPlotExporter(MetricsExporter):
 
 
 class ConciseOutputExporter(MetricsExporter):
-    # tbd: if either we want to uniform it with MetricsExporter interface, or if we want to delete the other exporters
-    """ A metrics exporter that writes a CSV output table, containing every single data point.
+    """ A metrics exporter that writes an hdf5 file containing every single data point.
 
-        Included are:
+        Results saved are:
             - phase (train/valid/test)
             - epoch
-            - entry names
+            - entry name
             - output values
-            - target values
+            - target value
             - loss per epoch
 
         The user can then load the csv table into a Pandas df, and plotting metrics
@@ -273,10 +272,10 @@ class ConciseOutputExporter(MetricsExporter):
         directory_path: str):
 
         self._directory_path = directory_path
-        d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
-        self.df = pd.DataFrame(data=d)
+        self.d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
+        self.df = pd.DataFrame(data=self.d)
 
-    def epoch_process( # pylint: disable=too-many-arguments
+    def process( # pylint: disable=too-many-arguments
         self,
         pass_name: str,
         epoch_number: int, 
@@ -294,9 +293,11 @@ class ConciseOutputExporter(MetricsExporter):
 
         self.df = pd.concat([self.df, df_epoch])
 
-    def save_all_metrics(self):
+    def save_all_metrics(self, phase: str):
 
         self.df.to_hdf(
             os.path.join(self._directory_path, 'metrics.hdf5'),
-            key='metrics',
-            mode='w')
+            key=phase,
+            mode='a')
+        # reset df
+        self.df = pd.DataFrame(data=self.d)

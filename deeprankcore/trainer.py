@@ -33,7 +33,7 @@ class Trainer():
                 batch_size: int = 32,
                 shuffle: bool = True,
                 transform_sigmoid: Optional[bool] = False,
-                metrics_exporters: Optional[List[MetricsExporter]] = None,
+                metrics_exporters: Optional[List[MetricsExporter]] = [ConciseOutputExporter],
                 metrics_output_dir: str = './metrics'
             ):
         """Class from which the network is trained, evaluated and tested
@@ -71,21 +71,29 @@ class Trainer():
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
 
-            metrics_exporters: the metrics exporters to use for generating metrics output
+            metrics_exporters: the metrics exporters to use for generating metrics output.
+                Defaults to ConciseOutputExporter, which saves results in an hdf5 file stored in metrics_output_dir.
 
             metrics_output_dir: location for metrics file (see ConciseOutputExporter class)
         """
+        self.metrics_output_dir = metrics_output_dir
+        if not os.path.exists(self.metrics_output_dir):
+            os.makedirs(self.metrics_output_dir)
+
         if metrics_exporters is not None:
+            metrics_exporter_instances = []
+            for metrics_exporter in metrics_exporters:
+                metrics_exporter_instance = metrics_exporter(self.metrics_output_dir)
+                metrics_exporter_instances.append(metrics_exporter_instance)
+                
             self._metrics_exporters = MetricsExporterCollection(
-                *metrics_exporters)
+                *metrics_exporter_instances)
         else:
             self._metrics_exporters = MetricsExporterCollection()
 
         self.metrics_output_dir = metrics_output_dir
         if not os.path.exists(self.metrics_output_dir):
             os.makedirs(self.metrics_output_dir)
-
-        self.complete_exporter = ConciseOutputExporter(self.metrics_output_dir)
 
         self.neuralnet = neuralnet
         self.dataset_train = dataset_train
@@ -413,6 +421,7 @@ class Trainer():
         if model_path is None:
             model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
+        phase = "training"
         with self._metrics_exporters:
             # Number of epochs
             self.nepoch = nepoch
@@ -429,7 +438,7 @@ class Trainer():
 
                 # Set the module in training mode
                 self.model.train()
-                loss_ = self._epoch(epoch, "training")
+                loss_ = self._epoch(epoch, phase)
                 train_losses.append(loss_)
 
                 # Validate the model
@@ -459,7 +468,9 @@ class Trainer():
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
 
-            self.complete_exporter.save_all_metrics()
+            for exporter in self._metrics_exporters:
+                if isinstance(exporter, ConciseOutputExporter):
+                    self.df = exporter.save_all_metrics(phase)
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
@@ -512,13 +523,6 @@ class Trainer():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals, epoch_loss)
-        self.complete_exporter.epoch_process(
-            pass_name,
-            epoch_number,
-            entry_names,
-            outputs,
-            target_vals,
-            epoch_loss)
         self._log_epoch_data(pass_name, epoch_loss, dt)
 
         return epoch_loss
@@ -582,13 +586,6 @@ class Trainer():
 
         self._metrics_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals, eval_loss)
-        self.complete_exporter.epoch_process(
-            pass_name,
-            epoch_number,
-            entry_names,
-            outputs,
-            target_vals,
-            eval_loss)
         self._log_epoch_data(pass_name, eval_loss, dt)
 
         return eval_loss
@@ -638,6 +635,7 @@ class Trainer():
         Tests the model
         """
 
+        phase = "testing"
         with self._metrics_exporters:
             # Loads the test dataset if provided
             if self.dataset_test is not None:
@@ -651,7 +649,10 @@ class Trainer():
                 
             # Run test
             self._eval(self.test_loader, 0, "testing")
-            self.complete_exporter.save_all_metrics()
+
+            for exporter in self._metrics_exporters:
+                if isinstance(exporter, ConciseOutputExporter):
+                    exporter.save_all_metrics(phase)
 
     def _load_params(self):
         """
