@@ -6,7 +6,6 @@ from tqdm import tqdm
 import h5py
 import copy
 import numpy as np
-import os
 import torch
 from torch import nn
 from torch.nn import MSELoss
@@ -33,8 +32,7 @@ class Trainer():
                 batch_size: int = 32,
                 shuffle: bool = True,
                 transform_sigmoid: Optional[bool] = False,
-                metrics_exporters: Optional[List[MetricsExporter]] = [ConciseOutputExporter],
-                metrics_output_dir: str = './metrics'
+                metrics_exporters: Optional[List[MetricsExporter]] = None,
             ):
         """Class from which the network is trained, evaluated and tested
 
@@ -72,28 +70,15 @@ class Trainer():
                 This can speed up the optimization and puts the value between 0 and 1.
 
             metrics_exporters: the metrics exporters to use for generating metrics output.
-                Defaults to ConciseOutputExporter, which saves results in an hdf5 file stored in metrics_output_dir.
-
-            metrics_output_dir: location for metrics file (see ConciseOutputExporter class)
+                Defaults to ConciseOutputExporter, which saves results in an hdf5 file stored in the directory
+                passed to the exporter.
         """
-        self.metrics_output_dir = metrics_output_dir
-        if not os.path.exists(self.metrics_output_dir):
-            os.makedirs(self.metrics_output_dir)
 
         if metrics_exporters is not None:
-            metrics_exporter_instances = []
-            for metrics_exporter in metrics_exporters:
-                metrics_exporter_instance = metrics_exporter(self.metrics_output_dir)
-                metrics_exporter_instances.append(metrics_exporter_instance)
-                
             self._metrics_exporters = MetricsExporterCollection(
-                *metrics_exporter_instances)
+                *metrics_exporters)
         else:
-            self._metrics_exporters = MetricsExporterCollection()
-
-        self.metrics_output_dir = metrics_output_dir
-        if not os.path.exists(self.metrics_output_dir):
-            os.makedirs(self.metrics_output_dir)
+            self._metrics_exporters = MetricsExporterCollection(ConciseOutputExporter('./metrics'))
 
         self.neuralnet = neuralnet
         self.dataset_train = dataset_train

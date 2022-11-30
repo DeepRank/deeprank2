@@ -18,6 +18,15 @@ _log = logging.getLogger(__name__)
 class MetricsExporter:
     "The class implements an object, to be called when a neural network generates output"
 
+    def __init__(self, directory_path: str = None):
+        
+        if directory_path is None:
+            directory_path = "./metrics"
+        self._directory_path = directory_path
+
+        if not os.path.exists(self._directory_path):
+            os.makedirs(self._directory_path)
+
     def __enter__(self):
         "overridable"
         return self
@@ -31,9 +40,11 @@ class MetricsExporter:
         "the entry_names, output_values, target_values MUST have the same length"
         pass # pylint: disable=unnecessary-pass
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:  # pylint: disable=unused-argument
+    def is_compatible_with( # pylint: disable=unused-argument
+        self,
+        output_data_shape: int,
+        target_data_shape: Optional[int] = None) -> bool:
         "true if this exporter can work with the given data shapes"
-
         return True
 
 
@@ -74,7 +85,7 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
     """
 
     def __init__(self, directory_path: str):
-        self._directory_path = directory_path
+        super().__init__(directory_path)
         self._writer = SummaryWriter(log_dir=directory_path)
 
     def __enter__(self):
@@ -130,7 +141,7 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
             roc_auc = roc_auc_score(target_values, probabilities)
             self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
         "for regression, target data is needed and output data must be a list of two-dimensional values"
 
         return output_data_shape == 2 and target_data_shape == 1
@@ -150,7 +161,7 @@ class OutputExporter(MetricsExporter):
     """
 
     def __init__(self, directory_path: str):
-        self._directory_path = directory_path
+        super().__init__(directory_path)
 
     def get_filename(self, pass_name, epoch_number):
         "returns the filename for the table"
@@ -186,9 +197,8 @@ class ScatterPlotExporter(MetricsExporter):
                 directory_path: where to store the plots
                 epoch_interval: how often to make a plot, 5 means: every 5 epochs
         """
-
+        super().__init__(directory_path)
         self._epoch_interval = epoch_interval
-        self._directory_path = directory_path
 
     def __enter__(self):
         self._plot_data = {}
@@ -216,7 +226,6 @@ class ScatterPlotExporter(MetricsExporter):
             return "green"
 
         return random.choice(["yellow", "cyan", "magenta"])
-
 
     @staticmethod
     def _plot(epoch_number: int, data: Dict[str, Tuple[List[float], List[float]]], png_path: str):
@@ -247,7 +256,7 @@ class ScatterPlotExporter(MetricsExporter):
             path = self.get_filename(epoch_number)
             self._plot(epoch_number, self._plot_data[epoch_number], path)
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
         "for regression, target data is needed and output data must be a list of one-dimensional values"
 
         return output_data_shape == 1 and target_data_shape == 1
@@ -271,7 +280,7 @@ class ConciseOutputExporter(MetricsExporter):
         self,
         directory_path: str):
 
-        self._directory_path = directory_path
+        super().__init__(directory_path)
         self.d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
         self.df = pd.DataFrame(data=self.d)
 

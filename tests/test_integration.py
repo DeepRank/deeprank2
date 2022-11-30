@@ -90,14 +90,15 @@ def test_integration(): # pylint: disable=too-many-locals
             clustering_method = "mcl",
         )
 
+        metrics_exporters = [OutputExporter(metrics_directory)]
+
         trainer = Trainer(
             GINet,
             dataset_train,
             dataset_val,
             dataset_test,
             batch_size=64,
-            metrics_exporters=[OutputExporter],
-            metrics_output_dir=metrics_directory
+            metrics_exporters=metrics_exporters
         )   
 
         with warnings.catch_warnings(record=UserWarning):

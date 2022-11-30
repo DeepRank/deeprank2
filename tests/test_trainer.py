@@ -25,7 +25,6 @@ _log = logging.getLogger(__name__)
 
 default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
-
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     model_class,
     train_hdf5_path,
@@ -37,7 +36,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     target,
     transform_sigmoid,
     metrics_exporters,
-    metrics_output_dir,
     clustering_method,
     use_cuda = False
 ):
@@ -80,7 +78,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         batch_size=64,
         transform_sigmoid=transform_sigmoid,
         metrics_exporters=metrics_exporters,
-        metrics_output_dir=metrics_output_dir,
     )
 
     if use_cuda:
@@ -131,8 +128,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             targets.IRMSD,
             True,
-            [OutputExporter],
-            self.work_directory,
+            [OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -147,8 +143,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             targets.IRMSD,
             False,
-            [OutputExporter],
-            self.work_directory,
+            [OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -165,8 +160,7 @@ class TestTrainer(unittest.TestCase):
             targets.CLASSIF,
             targets.BINARY,
             False,
-            [TensorboardBinaryClassificationExporter],
-            self.work_directory,
+            [TensorboardBinaryClassificationExporter(self.work_directory)],
             "mcl",
         )
 
@@ -184,7 +178,6 @@ class TestTrainer(unittest.TestCase):
             targets.BINARY,
             False,
             None,
-            self.work_directory,
             "mcl",
         )
 
@@ -200,7 +193,6 @@ class TestTrainer(unittest.TestCase):
             targets.IRMSD,
             False,
             None,
-            self.work_directory,
             "mcl",
         )
 
@@ -215,8 +207,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             "BA",
             False,
-            [OutputExporter],
-            self.work_directory,
+            [OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -232,8 +223,7 @@ class TestTrainer(unittest.TestCase):
                 targets.REGRESS,
                 targets.IRMSD,
                 False,
-                [TensorboardBinaryClassificationExporter],
-                self.work_directory,
+                [TensorboardBinaryClassificationExporter(self.work_directory)],
                 "mcl",
             )
 
@@ -249,8 +239,7 @@ class TestTrainer(unittest.TestCase):
                 targets.CLASSIF,
                 targets.BINARY,
                 False,
-                [ScatterPlotExporter],
-                self.work_directory,
+                [ScatterPlotExporter(self.work_directory)],
                 "mcl",
             )
 
@@ -427,8 +416,7 @@ class TestTrainer(unittest.TestCase):
                 targets.REGRESS,
                 targets.IRMSD,
                 False,
-                [OutputExporter],
-                self.work_directory,
+                [OutputExporter(self.work_directory)],
                 "mcl",
                 True
             )
