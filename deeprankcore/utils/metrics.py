@@ -51,7 +51,7 @@ class MetricsExporter:
 class MetricsExporterCollection:
     "allows a series of metrics exporters to be used at the same time"
 
-    def __init__(self, *args: Tuple[MetricsExporter]):
+    def __init__(self, *args: List[MetricsExporter]):
         self._metrics_exporters = args
 
     def __enter__(self):
@@ -269,7 +269,7 @@ class ConciseOutputExporter(MetricsExporter):
             - phase (train/valid/test)
             - epoch
             - entry name
-            - output values
+            - output value/s
             - target value
             - loss per epoch
 
