@@ -96,8 +96,8 @@ def test_integration(): # pylint: disable=too-many-locals
             dataset_val,
             dataset_test,
             batch_size=64,
-            metrics_exporters=[OutputExporter(metrics_directory)],
-            transform_sigmoid=True,
+            metrics_exporters=[OutputExporter],
+            metrics_output_dir=metrics_directory
         )   
 
         with warnings.catch_warnings(record=UserWarning):

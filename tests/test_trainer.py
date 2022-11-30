@@ -35,8 +35,9 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     edge_features,
     task,
     target,
-    metrics_exporters,
     transform_sigmoid,
+    metrics_exporters,
+    metrics_output_dir,
     clustering_method,
     use_cuda = False
 ):
@@ -77,8 +78,9 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val,
         dataset_test,
         batch_size=64,
-        metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
+        metrics_exporters=metrics_exporters,
+        metrics_output_dir=metrics_output_dir,
     )
 
     if use_cuda:
@@ -128,8 +130,9 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
-            [OutputExporter(self.work_directory)],
             True,
+            [OutputExporter],
+            self.work_directory,
             "mcl",
         )
 
@@ -143,8 +146,9 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
-            [OutputExporter(self.work_directory)],
             False,
+            [OutputExporter],
+            self.work_directory,
             "mcl",
         )
 
@@ -160,8 +164,9 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
-            [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
+            [TensorboardBinaryClassificationExporter],
+            self.work_directory,
             "mcl",
         )
 
@@ -177,8 +182,9 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
-            [],
             False,
+            None,
+            self.work_directory,
             "mcl",
         )
 
@@ -192,8 +198,9 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
-            [],
             False,
+            None,
+            self.work_directory,
             "mcl",
         )
 
@@ -207,9 +214,10 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             "BA",
-            [OutputExporter(self.work_directory)],
             False,
-            None,
+            [OutputExporter],
+            self.work_directory,
+            "mcl",
         )
 
     def test_incompatible_regression(self):
@@ -223,8 +231,9 @@ class TestTrainer(unittest.TestCase):
                 [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
-                [TensorboardBinaryClassificationExporter(self.work_directory)],
                 False,
+                [TensorboardBinaryClassificationExporter],
+                self.work_directory,
                 "mcl",
             )
 
@@ -239,8 +248,9 @@ class TestTrainer(unittest.TestCase):
                 [Efeat.DISTANCE],
                 targets.CLASSIF,
                 targets.BINARY,
-                [ScatterPlotExporter(self.work_directory)],
                 False,
+                [ScatterPlotExporter],
+                self.work_directory,
                 "mcl",
             )
 
@@ -416,10 +426,11 @@ class TestTrainer(unittest.TestCase):
                 [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
-                [OutputExporter(self.work_directory)],
                 False,
+                [OutputExporter],
+                self.work_directory,
                 "mcl",
-                True # use_cuda
+                True
             )
 
             assert len(os.listdir(self.work_directory)) > 0
