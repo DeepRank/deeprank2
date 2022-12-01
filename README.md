@@ -216,26 +216,27 @@ from deeprankcore.dataset import GraphDataset
 
 node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
 edge_features = ["distance"]
+target = "binary"
 
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = "binary"
+    target = target
 )
 dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = "binary"
+    target = target
 
 )
 dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = "binary"
+    target = target
 )
 ```
 
@@ -246,21 +247,18 @@ Let's define a Trainer instance, using for example of the already existing GNNs,
 ```python
 from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
-from deeprankcore.utils.exporters import HDF5OutputExporter
-
-output_directory = "./output"
-output_exporters = [HDF5OutputExporter(output_directory)]
 
 trainer = Trainer(
     GINet,
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64,
-    output_exporters = output_exporters
+    batch_size = 64
 )
 
 ```
+
+By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
 
 Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
 
@@ -322,8 +320,7 @@ trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64,
-    output_exporters = output_exporters
+    batch_size = 64
 )
 
 trainer.train(nepoch=50)
