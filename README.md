@@ -278,7 +278,6 @@ trainer.save_model(filename = "<output_model_path.pth.tar>")
 
 ```
 
-
 #### Custom GNN
 
 It is also possible to define new network architectures:

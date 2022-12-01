@@ -406,7 +406,6 @@ class Trainer():
         if model_path is None:
             model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
-        phase = "training"
         with self._output_exporters:
             # Number of epochs
             self.nepoch = nepoch
@@ -423,7 +422,7 @@ class Trainer():
 
                 # Set the module in training mode
                 self.model.train()
-                loss_ = self._epoch(epoch, phase)
+                loss_ = self._epoch(epoch, "training")
                 train_losses.append(loss_)
 
                 # Validate the model
@@ -616,7 +615,6 @@ class Trainer():
         Tests the model
         """
 
-        phase = "testing"
         with self._output_exporters:
             # Loads the test dataset if provided
             if self.dataset_test is not None:

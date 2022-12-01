@@ -1,6 +1,4 @@
-import lzma
 import os
-import csv
 import shutil
 import logging
 import unittest
