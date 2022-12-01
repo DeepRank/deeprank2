@@ -238,12 +238,29 @@ class HDF5OutputExporter(OutputExporter):
         The user can then load the csv table into a Pandas df, and plotting various kind of metrics
     """
 
-    def __init__(
-        self,
-        directory_path: str):
+    def __init__(self, directory_path: str):
 
+        self.phase = None
         super().__init__(directory_path)
+
+    def __enter__(self):
+
         self.d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
+        self.df = pd.DataFrame(data=self.d)
+
+        return self
+
+    def __exit__(self, exception_type, exception, traceback):
+
+        if self.phase == 'validation':
+            self.phase = 'training'
+
+        self.df.to_hdf(
+            os.path.join(self._directory_path, 'output_exporter.hdf5'),
+            key=self.phase,
+            mode='a')
+
+        # reset df
         self.df = pd.DataFrame(data=self.d)
 
     def process( # pylint: disable=too-many-arguments
@@ -255,6 +272,7 @@ class HDF5OutputExporter(OutputExporter):
         target_values: List[Any],
         loss: float):
 
+        self.phase = pass_name
         pass_name = [pass_name] * len(output_values)
         loss = [loss] * len(output_values)
         epoch_number = [epoch_number] * len(output_values)
@@ -263,15 +281,6 @@ class HDF5OutputExporter(OutputExporter):
         df_epoch = pd.DataFrame(data=d_epoch)
 
         self.df = pd.concat([self.df, df_epoch])
-
-    def save_all_outputs(self, phase: str):
-
-        self.df.to_hdf(
-            os.path.join(self._directory_path, 'output_exporter.hdf5'),
-            key=phase,
-            mode='a')
-        # reset df
-        self.df = pd.DataFrame(data=self.d)
 
 
 class CSVOutputExporter(OutputExporter):

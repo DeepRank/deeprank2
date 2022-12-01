@@ -453,10 +453,6 @@ class Trainer():
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
 
-            for exporter in self._output_exporters:
-                if isinstance(exporter, HDF5OutputExporter):
-                    self.df = exporter.save_all_outputs(phase)
-
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
         Runs a single epoch
@@ -634,10 +630,6 @@ class Trainer():
                 
             # Run test
             self._eval(self.test_loader, 0, "testing")
-
-            for exporter in self._output_exporters:
-                if isinstance(exporter, HDF5OutputExporter):
-                    exporter.save_all_outputs(phase)
 
     def _load_params(self):
         """
