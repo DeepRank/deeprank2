@@ -12,8 +12,7 @@ from deeprankcore.utils.exporters import (
     OutputExporterCollection,
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter,
-    HDF5OutputExporter,
-    CSVOutputExporter,
+    HDF5OutputExporter
 )
 
 logging.getLogger(__name__)
@@ -29,7 +28,7 @@ class TestOutputExporters(unittest.TestCase):
     def test_collection(self):
         exporters = [
             TensorboardBinaryClassificationExporter(self._work_dir),
-            CSVOutputExporter(self._work_dir),
+            HDF5OutputExporter(self._work_dir),
         ]
 
         collection = OutputExporterCollection(*exporters)
@@ -153,37 +152,3 @@ class TestOutputExporters(unittest.TestCase):
         # assert there are 6 columns ('phase', 'epoch', 'entry', 'output', 'target', 'loss')
         assert df_test_1[df_test_1.phase == pass_name_1].shape[1] == 6
         assert df_test_2[df_test_2.phase == pass_name_2].shape[1] == 6
-
-    def test_csv_output(self):
-        output_exporter = CSVOutputExporter(self._work_dir)
-
-        pass_name = "test"
-        epoch_number = 0
-
-        entry_names = ["entry1", "entry2", "entry3"]
-        outputs = [[0.2, 0.1], [0.3, 0.8], [0.8, 0.9]]
-        targets = [0, 1, 1]
-        loss = 0.1
-
-        with output_exporter:
-            output_exporter.process(
-                pass_name, epoch_number, entry_names, outputs, targets, loss
-            )
-
-        with lzma.open(
-            output_exporter.get_filename(pass_name, epoch_number), "rt", newline="\n"
-        ) as table_file:
-            r = csv.reader(table_file, delimiter=",")
-            header = next(r)
-            columns = {name: [] for name in header}
-            for row in r:
-                for column_index, column_name in enumerate(header):
-                    columns[column_name].append(row[column_index])
-
-        assert columns["entry"] == entry_names, f"{columns['entry']} != {entry_names}"
-        assert columns["output"] == [
-            str(z) for z in outputs
-        ], f"columns['output'] != {outputs}"
-        assert columns["target"] == [
-            str(y) for y in targets
-        ], f"columns['target'] != {targets}"

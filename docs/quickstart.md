@@ -106,10 +106,10 @@ Training can be performed using one of the already existing GNNs, for example GI
 ```python
 from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
-from deeprankcore.utils.exporters import CSVOutputExporter, ScatterPlotExporter
+from deeprankcore.utils.exporters import HDF5OutputExporter
 
 output_directory = "./output"
-output_exporters = [CSVOutputExporter(output_directory)]
+output_exporters = [HDF5OutputExporter(output_directory)]
 
 trainer = Trainer(
     GINet,

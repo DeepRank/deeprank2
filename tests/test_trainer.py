@@ -13,7 +13,7 @@ from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
 from deeprankcore.neuralnets.sgat import SGAT
 from deeprankcore.utils.exporters import (
-    CSVOutputExporter,
+    HDF5OutputExporter,
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
@@ -128,7 +128,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             targets.IRMSD,
             True,
-            [CSVOutputExporter(self.work_directory)],
+            [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -143,7 +143,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             targets.IRMSD,
             False,
-            [CSVOutputExporter(self.work_directory)],
+            [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -207,7 +207,7 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             "BA",
             False,
-            [CSVOutputExporter(self.work_directory)],
+            [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -416,7 +416,7 @@ class TestTrainer(unittest.TestCase):
                 targets.REGRESS,
                 targets.IRMSD,
                 False,
-                [CSVOutputExporter(self.work_directory)],
+                [HDF5OutputExporter(self.work_directory)],
                 "mcl",
                 True
             )

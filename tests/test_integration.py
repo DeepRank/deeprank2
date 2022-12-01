@@ -8,7 +8,7 @@ from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQu
 from deeprankcore.dataset import GraphDataset
 from deeprankcore.trainer import Trainer
 from deeprankcore.neuralnets.ginet import GINet
-from deeprankcore.utils.exporters import CSVOutputExporter
+from deeprankcore.utils.exporters import HDF5OutputExporter
 from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
@@ -90,7 +90,7 @@ def test_integration(): # pylint: disable=too-many-locals
             clustering_method = "mcl",
         )
 
-        output_exporters = [CSVOutputExporter(output_directory)]
+        output_exporters = [HDF5OutputExporter(output_directory)]
 
         trainer = Trainer(
             GINet,
