@@ -57,10 +57,7 @@ runs:
         cd ../..
         # Only way to install msms is through conda
         conda install -c bioconda msms
-        # We install pytorch with conda because otherwise it breaks
-        # Build is failing on pytorch 1.13 (as of 3 Nov 2022), hardcode pytorch 1.12.1 for now
         conda install pytorch torchvision torchaudio cpuonly -c pytorch
-        # Pytorch Geometric
         conda install pyg -c pyg
         # In the future, release h5xplorer on PyPI
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
