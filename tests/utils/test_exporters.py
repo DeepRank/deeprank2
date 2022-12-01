@@ -71,7 +71,6 @@ class TestOutputExporters(unittest.TestCase):
         assert mock_add_scalar.called
 
     def test_scatter_plot(self):
-
         scatterplot_exporter = ScatterPlotExporter(self._work_dir)
 
         epoch_number = 0
@@ -98,7 +97,6 @@ class TestOutputExporters(unittest.TestCase):
         assert os.path.isfile(scatterplot_exporter.get_filename(epoch_number))
 
     def test_hdf5_output(self):
-
         output_exporter = HDF5OutputExporter(self._work_dir)
         path_output_exporter = os.path.join(self._work_dir, 'output_exporter.hdf5')
         entry_names = ["entry1", "entry2", "entry3"]

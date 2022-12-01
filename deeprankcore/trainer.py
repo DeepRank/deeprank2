@@ -69,9 +69,9 @@ class Trainer():
             transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
                 This can speed up the optimization and puts the value between 0 and 1.
 
-            output_exporters: the output exporters to use for saving/exploring predictions and losses over the epochs.
-                Defaults to HDF5OutputExporter, which saves results in an hdf5 file stored in the directory
-                passed to the exporter.
+            output_exporters: the output exporters to use for saving/exploring/plotting predictions/targets/losses
+                over the epochs. Defaults to HDF5OutputExporter, which saves all the results in an hdf5 file stored
+                in ./output directory.
         """
 
         if output_exporters is not None:

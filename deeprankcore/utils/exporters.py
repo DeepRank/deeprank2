@@ -14,7 +14,7 @@ _log = logging.getLogger(__name__)
 
 
 class OutputExporter:
-    "The class implements an object, to be called when a neural network generates output"
+    "The class implements a general exporter to be called when a neural network generates outputs"
 
     def __init__(self, directory_path: str = None):
         
@@ -47,7 +47,7 @@ class OutputExporter:
 
 
 class OutputExporterCollection:
-    "allows a series of output exporters to be used at the same time"
+    "It allows a series of output exporters to be used at the same time"
 
     def __init__(self, *args: List[OutputExporter]):
         self._output_exporters = args
@@ -72,14 +72,14 @@ class OutputExporterCollection:
 
 
 class TensorboardBinaryClassificationExporter(OutputExporter):
-    """ Exports to tensorboard, works for binary classification only.
+    """ Exporter for tensorboard, works for binary classification only.
 
         Currently outputs to tensorboard:
          - Mathews Correlation Coefficient (MCC)
          - Accuracy
          - ROC area under the curve
 
-        Outputs are done per epoch.
+        Outputs are computed for each epoch.
     """
 
     def __init__(self, directory_path: str):
@@ -146,7 +146,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
 
 
 class ScatterPlotExporter(OutputExporter):
-    """ An output exporter that ocasionally makes scatter plots, containing every single data point.
+    """ An output exporter that can make scatter plots, containing every single data point.
 
         On the X-axis: targets values
         On the Y-axis: output values
@@ -223,7 +223,10 @@ class ScatterPlotExporter(OutputExporter):
 
 
 class HDF5OutputExporter(OutputExporter):
-    """ An output exporter that writes an hdf5 file containing every single data point.
+    """ An output exporter that saves every single data point in an hdf5 file.
+        It is the most general output exporter implemented, and the information
+        contained in the hdf5 file generated allows the user to compute any kind
+        of metrics, for both classification and regression.
 
         Results saved are:
             - phase (train/valid/test)
@@ -233,7 +236,7 @@ class HDF5OutputExporter(OutputExporter):
             - target value
             - loss per epoch
 
-        The user can then load the csv table into a Pandas df, and plotting various kind of metrics
+        The user can then read the content of the hdf5 file into a Pandas dataframe.
     """
 
     def __init__(self, directory_path: str):
