@@ -191,9 +191,12 @@ class QueryCollection:
         feature_modules = [
             importlib.import_module('deeprankcore.features.' + name) for name in feature_names]
 
-        graph = query.build(feature_modules)
-
-        graph.write_to_hdf5(output_path)
+        try:
+            graph = query.build(feature_modules)
+            graph.write_to_hdf5(output_path)
+        except ValueError as e:
+            _log.error(e)
+            _log.warning(f'Query {query.get_query_id()}\'s graph was not saved in the hdf5 file; check the query\'s files')
 
     def process(
         self, 
