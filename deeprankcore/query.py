@@ -9,8 +9,9 @@ from types import ModuleType
 from functools import partial
 from multiprocessing import Pool
 import importlib
-from os.path import basename, isfile, join
+from os.path import basename
 import h5py
+import pkgutil
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.utils.buildgraph import (
@@ -22,6 +23,7 @@ from deeprankcore.utils.buildgraph import (
 from deeprankcore.utils.parsing.pssm import parse_pssm
 from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.molstruct.variant import SingleResidueVariant
+import deeprankcore.features
 
 
 _log = logging.getLogger(__name__)
@@ -236,8 +238,7 @@ class QueryCollection:
             prefix = "processed-queries"
         
         if feature_modules is None:
-            feature_modules = glob(join('./deeprankcore/features/', "*.py"))
-            feature_names = [basename(f)[:-3] for f in feature_modules if isfile(f) and not f.endswith('__init__.py')]
+            feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__)]
         else:
             feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
 
