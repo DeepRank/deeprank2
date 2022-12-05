@@ -183,8 +183,6 @@ class QueryCollection:
         feature_names: List[str],
         query: Query):
 
-        _log.info(f'\nProcess query with process ID {os.getpid()}.')
-
         # because only one process may access an hdf5 file at the time:
         output_path = f"{prefix}-{os.getpid()}.hdf5"
 
