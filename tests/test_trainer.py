@@ -12,8 +12,8 @@ from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
 from deeprankcore.neuralnets.sgat import SGAT
-from deeprankcore.utils.metrics import (
-    OutputExporter,
+from deeprankcore.utils.exporters import (
+    HDF5OutputExporter,
     TensorboardBinaryClassificationExporter,
     ScatterPlotExporter
 )
@@ -25,7 +25,6 @@ _log = logging.getLogger(__name__)
 
 default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
-
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     model_class,
     train_hdf5_path,
@@ -35,8 +34,8 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     edge_features,
     task,
     target,
-    metrics_exporters,
     transform_sigmoid,
+    output_exporters,
     clustering_method,
     use_cuda = False
 ):
@@ -77,8 +76,8 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val,
         dataset_test,
         batch_size=64,
-        metrics_exporters=metrics_exporters,
         transform_sigmoid=transform_sigmoid,
+        output_exporters=output_exporters,
     )
 
     if use_cuda:
@@ -128,8 +127,8 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
-            [OutputExporter(self.work_directory)],
             True,
+            [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -143,8 +142,8 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
-            [OutputExporter(self.work_directory)],
             False,
+            [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
 
@@ -160,8 +159,8 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
-            [TensorboardBinaryClassificationExporter(self.work_directory)],
             False,
+            [TensorboardBinaryClassificationExporter(self.work_directory)],
             "mcl",
         )
 
@@ -177,8 +176,8 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.CLASSIF,
             targets.BINARY,
-            [],
             False,
+            None,
             "mcl",
         )
 
@@ -192,8 +191,8 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             targets.IRMSD,
-            [],
             False,
+            None,
             "mcl",
         )
 
@@ -207,9 +206,9 @@ class TestTrainer(unittest.TestCase):
             [Efeat.DISTANCE],
             targets.REGRESS,
             "BA",
-            [OutputExporter(self.work_directory)],
             False,
-            None,
+            [HDF5OutputExporter(self.work_directory)],
+            "mcl",
         )
 
     def test_incompatible_regression(self):
@@ -223,8 +222,8 @@ class TestTrainer(unittest.TestCase):
                 [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
-                [TensorboardBinaryClassificationExporter(self.work_directory)],
                 False,
+                [TensorboardBinaryClassificationExporter(self.work_directory)],
                 "mcl",
             )
 
@@ -239,8 +238,8 @@ class TestTrainer(unittest.TestCase):
                 [Efeat.DISTANCE],
                 targets.CLASSIF,
                 targets.BINARY,
-                [ScatterPlotExporter(self.work_directory)],
                 False,
+                [ScatterPlotExporter(self.work_directory)],
                 "mcl",
             )
 
@@ -416,10 +415,10 @@ class TestTrainer(unittest.TestCase):
                 [Efeat.DISTANCE],
                 targets.REGRESS,
                 targets.IRMSD,
-                [OutputExporter(self.work_directory)],
                 False,
+                [HDF5OutputExporter(self.work_directory)],
                 "mcl",
-                True # use_cuda
+                True
             )
 
             assert len(os.listdir(self.work_directory)) > 0

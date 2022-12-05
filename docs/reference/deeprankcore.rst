@@ -32,14 +32,6 @@ deeprankcore.GraphGenMP module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.Metrics module
----------------------------
-
-.. automodule:: deeprankcore.Metrics
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 deeprankcore.trainer module
 -----------------------------
 

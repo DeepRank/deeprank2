@@ -1,6 +1,4 @@
-import lzma
 import os
-import csv
 from typing import List, Tuple, Any, Dict, Optional
 from math import sqrt
 import logging
@@ -15,8 +13,17 @@ import pandas as pd
 _log = logging.getLogger(__name__)
 
 
-class MetricsExporter:
-    "The class implements an object, to be called when a neural network generates output"
+class OutputExporter:
+    "The class implements a general exporter to be called when a neural network generates outputs"
+
+    def __init__(self, directory_path: str = None):
+        
+        if directory_path is None:
+            directory_path = "./output"
+        self._directory_path = directory_path
+
+        if not os.path.exists(self._directory_path):
+            os.makedirs(self._directory_path)
 
     def __enter__(self):
         "overridable"
@@ -27,54 +34,56 @@ class MetricsExporter:
         pass # pylint: disable=unnecessary-pass
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         "the entry_names, output_values, target_values MUST have the same length"
         pass # pylint: disable=unnecessary-pass
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:  # pylint: disable=unused-argument
+    def is_compatible_with( # pylint: disable=unused-argument
+        self,
+        output_data_shape: int,
+        target_data_shape: Optional[int] = None) -> bool:
         "true if this exporter can work with the given data shapes"
-
         return True
 
 
-class MetricsExporterCollection:
-    "allows a series of metrics exporters to be used at the same time"
+class OutputExporterCollection:
+    "It allows a series of output exporters to be used at the same time"
 
-    def __init__(self, *args: Tuple[MetricsExporter]):
-        self._metrics_exporters = args
+    def __init__(self, *args: List[OutputExporter]):
+        self._output_exporters = args
 
     def __enter__(self):
-        for metrics_exporter in self._metrics_exporters:
-            metrics_exporter.__enter__()
+        for output_exporter in self._output_exporters:
+            output_exporter.__enter__()
 
         return self
 
     def __exit__(self, exception_type, exception, traceback):
-        for metrics_exporter in self._metrics_exporters:
-            metrics_exporter.__exit__(exception_type, exception, traceback)
+        for output_exporter in self._output_exporters:
+            output_exporter.__exit__(exception_type, exception, traceback)
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
-        for metrics_exporter in self._metrics_exporters:
-            metrics_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values)
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
+        for output_exporter in self._output_exporters:
+            output_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values, loss)
 
     def __iter__(self):
-        return iter(self._metrics_exporters)
+        return iter(self._output_exporters)
 
 
-class TensorboardBinaryClassificationExporter(MetricsExporter):
-    """ Exports to tensorboard, works for binary classification only.
+class TensorboardBinaryClassificationExporter(OutputExporter):
+    """ Exporter for tensorboard, works for binary classification only.
 
         Currently outputs to tensorboard:
          - Mathews Correlation Coefficient (MCC)
          - Accuracy
          - ROC area under the curve
 
-        Outputs are done per epoch.
+        Outputs are computed for each epoch.
     """
 
     def __init__(self, directory_path: str):
-        self._directory_path = directory_path
+        super().__init__(directory_path)
         self._writer = SummaryWriter(log_dir=directory_path)
 
     def __enter__(self):
@@ -85,11 +94,11 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
         self._writer.__exit__(exception_type, exception, traceback)
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments, too-many-locals
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         "write to tensorboard"
 
-        loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
-        self._writer.add_scalar(f"{pass_name} cross entropy loss", loss, epoch_number)
+        ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
+        self._writer.add_scalar(f"{pass_name} cross entropy loss", ce_loss, epoch_number)
 
         probabilities = []
         fp, fn, tp, tn = 0, 0, 0, 0
@@ -130,52 +139,14 @@ class TensorboardBinaryClassificationExporter(MetricsExporter):
             roc_auc = roc_auc_score(target_values, probabilities)
             self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
         "for regression, target data is needed and output data must be a list of two-dimensional values"
 
         return output_data_shape == 2 and target_data_shape == 1
 
 
-class OutputExporter(MetricsExporter):
-    """ A metrics exporter that writes CSV output tables, containing every single data point.
-
-        Included are:
-            - entry names
-            - output values
-            - target values
-
-        The user can load these output tables in excel.
-
-        Outputs are done per epoch.
-    """
-
-    def __init__(self, directory_path: str):
-        self._directory_path = directory_path
-
-    def get_filename(self, pass_name, epoch_number):
-        "returns the filename for the table"
-        return os.path.join(self._directory_path, f"output-{pass_name}-epoch-{epoch_number}.csv.xz")
-
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
-        "write the output to the table"
-
-        with lzma.open(self.get_filename(pass_name, epoch_number), 'wt', newline='\n') as f:
-            w = csv.writer(f, delimiter=',')
-
-            w.writerow(["entry", "output", "target"])
-
-            for entry_index, entry_name in enumerate(entry_names):
-                output_value = output_values[entry_index]
-                target_value = target_values[entry_index]
-
-                _log.debug(f"writerow [{entry_name}, {output_value}, {target_value}]") # pylint: disable=logging-fstring-interpolation
-
-                w.writerow([entry_name, str(output_value), str(target_value)])
-
-
-class ScatterPlotExporter(MetricsExporter):
-    """ A metrics exporter that ocasionally makes scatter plots, containing every single data point.
+class ScatterPlotExporter(OutputExporter):
+    """ An output exporter that can make scatter plots, containing every single data point.
 
         On the X-axis: targets values
         On the Y-axis: output values
@@ -186,9 +157,8 @@ class ScatterPlotExporter(MetricsExporter):
                 directory_path: where to store the plots
                 epoch_interval: how often to make a plot, 5 means: every 5 epochs
         """
-
+        super().__init__(directory_path)
         self._epoch_interval = epoch_interval
-        self._directory_path = directory_path
 
     def __enter__(self):
         self._plot_data = {}
@@ -217,7 +187,6 @@ class ScatterPlotExporter(MetricsExporter):
 
         return random.choice(["yellow", "cyan", "magenta"])
 
-
     @staticmethod
     def _plot(epoch_number: int, data: Dict[str, Tuple[List[float], List[float]]], png_path: str):
 
@@ -234,7 +203,7 @@ class ScatterPlotExporter(MetricsExporter):
         pyplot.close()
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any]):
+                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         "make the plot, if the epoch matches with the interval"
 
         if epoch_number % self._epoch_interval == 0:
@@ -247,36 +216,55 @@ class ScatterPlotExporter(MetricsExporter):
             path = self.get_filename(epoch_number)
             self._plot(epoch_number, self._plot_data[epoch_number], path)
 
-    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int]) -> bool:
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
         "for regression, target data is needed and output data must be a list of one-dimensional values"
 
         return output_data_shape == 1 and target_data_shape == 1
 
 
-class ConciseOutputExporter(MetricsExporter):
-    # tbd: if either we want to uniform it with MetricsExporter interface, or if we want to delete the other exporters
-    """ A metrics exporter that writes a CSV output table, containing every single data point.
+class HDF5OutputExporter(OutputExporter):
+    """ An output exporter that saves every single data point in an hdf5 file.
+        It is the most general output exporter implemented, and the information
+        contained in the hdf5 file generated allows the user to compute any kind
+        of metrics, for both classification and regression.
 
-        Included are:
+        Results saved are:
             - phase (train/valid/test)
             - epoch
-            - entry names
-            - output values
-            - target values
+            - entry name
+            - output value/s
+            - target value
             - loss per epoch
 
-        The user can then load the csv table into a Pandas df, and plotting metrics
+        The user can then read the content of the hdf5 file into a Pandas dataframe.
     """
 
-    def __init__(
-        self,
-        directory_path: str):
+    def __init__(self, directory_path: str):
 
-        self._directory_path = directory_path
-        d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
-        self.df = pd.DataFrame(data=d)
+        self.phase = None
+        super().__init__(directory_path)
 
-    def epoch_process( # pylint: disable=too-many-arguments
+    def __enter__(self):
+
+        self.d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
+        self.df = pd.DataFrame(data=self.d)
+
+        return self
+
+    def __exit__(self, exception_type, exception, traceback):
+
+        if self.phase == 'validation':
+            self.phase = 'training'
+
+        self.df.to_hdf(
+            os.path.join(self._directory_path, 'output_exporter.hdf5'),
+            key=self.phase,
+            mode='a')
+
+        # reset df
+        self.df = pd.DataFrame(data=self.d)
+
+    def process( # pylint: disable=too-many-arguments
         self,
         pass_name: str,
         epoch_number: int, 
@@ -285,6 +273,7 @@ class ConciseOutputExporter(MetricsExporter):
         target_values: List[Any],
         loss: float):
 
+        self.phase = pass_name
         pass_name = [pass_name] * len(output_values)
         loss = [loss] * len(output_values)
         epoch_number = [epoch_number] * len(output_values)
@@ -293,10 +282,3 @@ class ConciseOutputExporter(MetricsExporter):
         df_epoch = pd.DataFrame(data=d_epoch)
 
         self.df = pd.concat([self.df, df_epoch])
-
-    def save_all_metrics(self):
-
-        self.df.to_hdf(
-            os.path.join(self._directory_path, 'metrics.hdf5'),
-            key='metrics',
-            mode='w')
