@@ -73,62 +73,72 @@ Now the GraphDataset objects can be defined:
 
 ```python
 from deeprankcore.dataset import GraphDataset
-from deeprankcore.domain.features import nodefeats as Nfeat
-from deeprankcore.domain.features import edgefeats as Efeat
 
-node_features = [Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-edge_features = [Efeat.DISTANCE]
+node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
+edge_features = ["distance"]
+target = "binary"
 
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = targets.BINARY
+    target = target
 )
 dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = targets.BINARY
+    target = target
+
 )
 dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = targets.BINARY
+    target = target
 )
 ```
 ## Training
 
-Training can be performed using one of the already existing GNNs, for example GINet:
+Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
 
 ```python
 from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
-from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
-
-metrics_output_directory = "./metrics"
-metrics_exporters = [OutputExporter(metrics_output_directory)]
 
 trainer = Trainer(
     GINet,
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64,
-    metrics_exporters = metrics_exporters
+    batch_size = 64
 )
+```
 
+By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
+
+Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
+
+```python
+import torch
+
+trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
+
+```
+
+Then the Trainer can be trained and tested, and the model can be saved:
+
+```python
 trainer.train(nepoch = 50, validate = True)
 trainer.test()
 trainer.save_model(filename = "<output_model_path.pth.tar>")
-```
 
+```
 
 ### Custom GNN
 
-It is also possible to define new network architecture and to specify the optimizer (`torch.optim.Adam` by default) to be used during the training.
+It is also possible to define new network architectures:
 
 ```python
 import torch 
@@ -169,11 +179,9 @@ trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64,
-    metrics_exporters = metrics_exporters
+    batch_size = 64
 )
 
-trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-04)
 trainer.train(nepoch=50)
 ```
 
