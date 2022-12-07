@@ -204,7 +204,7 @@ class QueryCollection:
             _log.error(e)
             _log.warning(f'Query {query.get_query_id()}\'s graph was not saved in the hdf5 file; check the query\'s files')
 
-    def process(
+    def process( # pylint: disable=too-many-arguments
         self, 
         prefix: Optional[str] = None,
         feature_modules: List[ModuleType] = None,
