@@ -31,10 +31,10 @@ def add_features( # pylint: disable=unused-argument
 
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
         node.features[Nfeat.PROPERTYX] = residue.amino_acid.propertyX
+        node.features[Nfeat.POLARITY] = residue.amino_acid.polarity.onehot
         node.features[Nfeat.RESSIZE] = residue.amino_acid.size
         node.features[Nfeat.RESMASS] = residue.amino_acid.mass
         node.features[Nfeat.RESPI] = residue.amino_acid.pI
-        node.features[Nfeat.POLARITY] = residue.amino_acid.polarity.onehot
         node.features[Nfeat.HBDONORS] = residue.amino_acid.hydrogen_bond_donors
         node.features[Nfeat.HBACCEPTORS] = residue.amino_acid.hydrogen_bond_acceptors
 
@@ -45,18 +45,18 @@ def add_features( # pylint: disable=unused-argument
             if residue == single_amino_acid_variant.residue:
                 node.features[Nfeat.VARIANTRES] = variant.onehot
                 node.features[Nfeat.DIFFX] = variant.propertyX - wildtype.propertyX
+                node.features[Nfeat.DIFFPOLARITY] = variant.polarity.onehot - wildtype.polarity.onehot
                 node.features[Nfeat.DIFFSIZE] = variant.size - wildtype.size
                 node.features[Nfeat.DIFFMASS] = variant.mass - wildtype.mass
                 node.features[Nfeat.DIFFPI] = variant.pI - wildtype.pI
-                node.features[Nfeat.DIFFPOLARITY] = variant.polarity.onehot - wildtype.polarity.onehot
                 node.features[Nfeat.DIFFHBDONORS] = variant.hydrogen_bond_donors - wildtype.hydrogen_bond_donors
                 node.features[Nfeat.DIFFHBACCEPTORS] = variant.hydrogen_bond_acceptors - wildtype.hydrogen_bond_acceptors
             else:
                 node.features[Nfeat.VARIANTRES] = residue.amino_acid.onehot
                 node.features[Nfeat.DIFFX] = 0
+                node.features[Nfeat.DIFFPOLARITY] = np.zeros(residue.amino_acid.polarity.onehot.shape)
                 node.features[Nfeat.DIFFSIZE] = 0
                 node.features[Nfeat.DIFFMASS] = 0
                 node.features[Nfeat.DIFFPI] = 0
-                node.features[Nfeat.DIFFPOLARITY] = np.zeros(residue.amino_acid.polarity.onehot.shape)
                 node.features[Nfeat.DIFFHBDONORS] = 0
                 node.features[Nfeat.DIFFHBACCEPTORS] = 0
