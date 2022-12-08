@@ -5,7 +5,7 @@ from enum import Enum
 class Polarity(Enum):
     "a value to express a residue's polarity"
 
-    APOLAR = 0
+    NONPOLAR = 0
     POLAR = 1
     NEGATIVE_CHARGE = 2
     POSITIVE_CHARGE = 3
@@ -41,7 +41,7 @@ class AminoAcid:
             three_letter_code (str): three-letter code of the amino acid (as in PDB)
             one_letter_code (str): one-letter of the amino acid (as in fasta)
             propertyX (float): unknown property of the amino acid
-            polarity (deeprank polarity enum): the polarity of the amino acid (polar, apolar, positive, negative)
+            polarity (deeprank polarity enum): the polarity of the amino acid
             size (int): the number of non-hydrogen atoms in the side chain
             mass (float): average residue mass (i.e. mass of amino acid - H20) in Daltons
             pI (float): isolectric point; pH at which the molecule has no net electric charge

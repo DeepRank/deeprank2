@@ -1,12 +1,20 @@
 from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 
-# Mass and pI confirmed from 3 independent sources for canonical amino acids. Discrepancies of <0.1 for either are ignored.
-# Two instances (K and T) have a larger discrepancy for pI in 1/3 sources; majority rule is implemented (and outlier is indicated in inline comment)
-# Sources:
+# Sources for Polarity (# few differences between sources are commented inline):
+#   1) https://www.britannica.com/science/amino-acid/Standard-amino-acids
+#   2) https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf
+#   3) https://en.wikipedia.org/wiki/Amino_acid
+#   3) https://nld.promega.com/resources/tools/amino-acid-chart-amino-acid-structure/
+#   5) https://ib.bioninja.com.au/standard-level/topic-2-molecular-biology/24-proteins/amino-acids.html
+#   6) print book: "Biology", by Campbell & Reece, 6th ed, ISBN: 0-201-75054-6 
+
+# Sources for mass and pI:
 #   1) https://www.sigmaaldrich.com/NL/en/technical-documents/technical-article/protein-biology/protein-structural-analysis/amino-acid-reference-chart
 #   2) https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf
 #   3) https://www.nectagen.com/reference-data/ingredients/amino-acids
 # Sources for selenocysteine and pyrrolysine sources are indicated in inline comments.
+# Discrepancies of <0.1 for either property are ignored.
+# Two instances (K and T) have a larger discrepancy for pI in 1/3 sources; majority rule is implemented (and outlier is indicated in inline comment)
 
 
 alanine = AminoAcid(
@@ -14,7 +22,7 @@ alanine = AminoAcid(
     "ALA",
     "A",
     propertyX = -0.37,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR,
     size = 1,
     mass = 71.1,
     pI = 6.00,
@@ -27,7 +35,7 @@ cysteine = AminoAcid(
     "CYS",
     "C",
     propertyX = -0.64,
-    polarity = Polarity.POLAR,
+    polarity = Polarity.POLAR, # source 3: "special case", source 5: nonpolar
     size = 2,
     mass = 103.2,
     pI = 5.07,
@@ -40,7 +48,7 @@ selenocysteine = AminoAcid(
     "SEC",
     "U",
     propertyX = 0.0,
-    polarity = Polarity.POLAR,
+    polarity = Polarity.POLAR, # source 3: "special case"
     size = 2,
     mass = 150.0, # from source 3
     pI = 5.47, # from source 3
@@ -79,7 +87,7 @@ phenylalanine = AminoAcid(
     "PHE",
     "F",
     propertyX = -0.37,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR,
     size = 7,
     mass = 147.2,
     pI = 5.48,
@@ -92,7 +100,7 @@ glycine = AminoAcid(
     "GLY",
     "G",
     propertyX = -0.37,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR, # source 3: "special case"
     size = 0,
     mass = 57.1,
     pI = 5.97,
@@ -105,7 +113,7 @@ histidine = AminoAcid(
     "HIS",
     "H",
     propertyX = -0.29,
-    polarity = Polarity.POLAR,
+    polarity = Polarity.POSITIVE_CHARGE,
     size = 6,
     mass = 137.1,
     pI = 7.59,
@@ -118,7 +126,7 @@ isoleucine = AminoAcid(
     "ILE",
     "I",
     propertyX = -0.37,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR,
     size = 4,
     mass = 113.2,
     pI = 6.02,
@@ -144,7 +152,7 @@ pyrrolysine = AminoAcid(
     "PYL",
     "O",
     propertyX = 0.0,
-    polarity = Polarity.POLAR,
+    polarity = Polarity.POLAR, # based on having both H-bond donors and acceptors 
     size = 13,
     mass = 255.32, # from source 3
     pI = 7.394, # rough estimate from https://rstudio-pubs-static.s3.amazonaws.com/846259_7a9236df54e6410a972621590ecdcfcb.html
@@ -157,7 +165,7 @@ leucine = AminoAcid(
     "LEU",
     "L",
     propertyX = -0.37,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR,
     size = 4,
     mass = 113.2,
     pI = 5.98,
@@ -170,7 +178,7 @@ methionine = AminoAcid(
     "MET",
     "M",
     propertyX = -0.37,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR,
     size = 4,
     mass = 131.2,
     pI = 5.74,
@@ -196,7 +204,7 @@ proline = AminoAcid(
     "PRO",
     "P",
     propertyX = 0.0,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR,
     size = 3,
     mass = 97.1,
     pI = 6.30,
@@ -261,7 +269,7 @@ valine = AminoAcid(
     "VAL",
     "V",
     propertyX = -0.37,
-    polarity = Polarity.APOLAR,
+    polarity = Polarity.NONPOLAR,
     size = 3,
     mass = 99.1,
     pI = 5.96,
@@ -274,7 +282,7 @@ tryptophan = AminoAcid(
     "TRP",
     "W",
     propertyX = -0.79,
-    polarity = Polarity.POLAR,
+    polarity = Polarity.NONPOLAR, # source 4: polar
     size = 10,
     mass = 186.2,
     pI = 5.89,
@@ -287,7 +295,7 @@ tyrosine = AminoAcid(
     "TYR",
     "Y",
     propertyX = -0.80,
-    polarity = Polarity.POLAR,
+    polarity = Polarity.POLAR, # source 3: nonpolar
     size = 8,
     mass = 163.2,
     pI = 5.66,
