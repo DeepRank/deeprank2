@@ -113,6 +113,14 @@ class AminoAcid:
         return self._size
 
     @property
+    def mass(self) -> float:
+        return self._mass
+
+    @property
+    def pI(self) -> float:
+        return self._pI
+
+    @property
     def index(self) -> int:
         return self._index
 
