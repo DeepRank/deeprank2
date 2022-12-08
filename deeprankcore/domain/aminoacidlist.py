@@ -16,6 +16,10 @@ from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 # Discrepancies of <0.1 for either property are ignored.
 # Two instances (K and T) have a larger discrepancy for pI in 1/3 sources; majority rule is implemented (and outlier is indicated in inline comment)
 
+# Sources for hydrogen bond donors and acceptors:
+#   1) https://foldit.fandom.com/wiki/Sidechain_Bonding_Gallery
+#   2) https://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/charge/
+
 
 alanine = AminoAcid(
     "Alanine",
@@ -35,7 +39,8 @@ cysteine = AminoAcid(
     "CYS",
     "C",
     propertyX = -0.64,
-    polarity = Polarity.POLAR, # source 3: "special case", source 5: nonpolar
+    polarity = Polarity.POLAR, # source 3: "special case"; source 5: nonpolar
+    # polarity of C is generally considered ambiguous: https://chemistry.stackexchange.com/questions/143142/why-is-the-amino-acid-cysteine-classified-as-polar
     size = 2,
     mass = 103.2,
     pI = 5.07,
@@ -50,10 +55,10 @@ selenocysteine = AminoAcid(
     propertyX = 0.0,
     polarity = Polarity.POLAR, # source 3: "special case"
     size = 2,
-    mass = 150.0, # from source 3
-    pI = 5.47, # from source 3
-    hydrogen_bond_donors = 1,
-    hydrogen_bond_acceptors = 2,
+    mass = 150.0, # only from source 3
+    pI = 5.47, # only from source 3
+    hydrogen_bond_donors = 1, # unconfirmed
+    hydrogen_bond_acceptors = 2, # unconfirmed
     index = cysteine.index)
 
 aspartate = AminoAcid(
@@ -117,8 +122,10 @@ histidine = AminoAcid(
     size = 6,
     mass = 137.1,
     pI = 7.59,
-    hydrogen_bond_donors = 2,
-    hydrogen_bond_acceptors = 2,
+    hydrogen_bond_donors = 1,
+    hydrogen_bond_acceptors = 1,
+    # both position 7 and 10 can serve as either donor or acceptor (depending on tautomer), but any single His will have exactly one donor and one acceptor
+    # (see https://foldit.fandom.com/wiki/Histidine)
     index = 6)
 
 isoleucine = AminoAcid(
@@ -156,8 +163,8 @@ pyrrolysine = AminoAcid(
     size = 13,
     mass = 255.32, # from source 3
     pI = 7.394, # rough estimate from https://rstudio-pubs-static.s3.amazonaws.com/846259_7a9236df54e6410a972621590ecdcfcb.html
-    hydrogen_bond_donors = 1,
-    hydrogen_bond_acceptors = 4,
+    hydrogen_bond_donors = 1, # unconfirmed
+    hydrogen_bond_acceptors = 4, # unconfirmed
     index = lysine.index)
 
 leucine = AminoAcid(
