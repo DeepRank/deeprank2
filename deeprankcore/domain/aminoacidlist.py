@@ -137,7 +137,7 @@ lysine = AminoAcid(
     pI = 9.74, # 9.60 in source 3
     hydrogen_bond_donors = 3,
     hydrogen_bond_acceptors = 0,
-    index = 9)
+    index = 8)
 
 pyrrolysine = AminoAcid(
     "Pyrrolysine",
@@ -163,7 +163,7 @@ leucine = AminoAcid(
     pI = 5.98,
     hydrogen_bond_donors = 0,
     hydrogen_bond_acceptors = 0,
-    index = 8)
+    index = 9)
 
 methionine = AminoAcid(
     "Methionine",
@@ -189,7 +189,7 @@ asparagine = AminoAcid(
     pI = 5.41,
     hydrogen_bond_donors = 2,
     hydrogen_bond_acceptors = 2,
-    index = 18)
+    index = 11)
 
 proline = AminoAcid(
     "Proline",
@@ -202,7 +202,7 @@ proline = AminoAcid(
     pI = 6.30,
     hydrogen_bond_donors = 0,
     hydrogen_bond_acceptors = 0,
-    index = 11)
+    index = 12)
 
 glutamine = AminoAcid(
     "Glutamine",
@@ -215,7 +215,7 @@ glutamine = AminoAcid(
     pI = 5.65,
     hydrogen_bond_donors = 2,
     hydrogen_bond_acceptors = 2,
-    index = 19)
+    index = 13)
 
 arginine = AminoAcid(
     "Arginine",
@@ -228,8 +228,7 @@ arginine = AminoAcid(
     pI = 10.76,
     hydrogen_bond_donors = 5,
     hydrogen_bond_acceptors = 0,
-    index = 17)
-
+    index = 14)
 
 serine = AminoAcid(
     "Serine",
@@ -242,7 +241,7 @@ serine = AminoAcid(
     pI = 5.68,
     hydrogen_bond_donors = 1,
     hydrogen_bond_acceptors = 2,
-    index = 12)
+    index = 15)
 
 threonine = AminoAcid(
     "Threonine",
@@ -255,7 +254,7 @@ threonine = AminoAcid(
     pI = 5.60, # 6.16 in source 2
     hydrogen_bond_donors = 1,
     hydrogen_bond_acceptors = 2,
-    index = 13)
+    index = 16)
 
 valine = AminoAcid(
     "Valine",
@@ -268,7 +267,7 @@ valine = AminoAcid(
     pI = 5.96,
     hydrogen_bond_donors = 0,
     hydrogen_bond_acceptors = 0,
-    index = 16)
+    index = 17)
 
 tryptophan = AminoAcid(
     "Tryptophan",
@@ -281,7 +280,7 @@ tryptophan = AminoAcid(
     pI = 5.89,
     hydrogen_bond_donors = 1,
     hydrogen_bond_acceptors = 0,
-    index = 14)
+    index = 18)
 
 tyrosine = AminoAcid(
     "Tyrosine",
@@ -294,7 +293,7 @@ tyrosine = AminoAcid(
     pI = 5.66,
     hydrogen_bond_donors = 1,
     hydrogen_bond_acceptors = 1,
-    index = 15)
+    index = 19)
 
 
 amino_acids = [
