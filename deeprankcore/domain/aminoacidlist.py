@@ -220,6 +220,7 @@ arginine = AminoAcid(
     count_hydrogen_bond_donors=5,
     count_hydrogen_bond_acceptors=0,
     index=17)
+
 asparagine = AminoAcid(
     "Asparagine",
     "ASN",
@@ -262,4 +263,6 @@ amino_acids = [
     threonine,
     tryptophan,
     tyrosine,
-    valine]
+    valine,
+    selenocysteine,
+    pyrrolysine]
