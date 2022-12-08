@@ -8,7 +8,7 @@ POSITION = "_position" # list[3xfloat]; former FEATURENAME_POSITION
 
 ## residue core features
 RESTYPE = "res_type" # AminoAcid object; former FEATURENAME_AMINOACID
-RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
+PROPERTYX = "property_X" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
 RESSIZE = "res_size" # int; former FEATURENAME_SIZE
 POLARITY = "polarity" #  Polarity object; former FEATURENAME_POLARITY
 HBDONORS = "hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORS

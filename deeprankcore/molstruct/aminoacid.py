@@ -26,7 +26,7 @@ class AminoAcid:
         name: str,
         three_letter_code: str,
         one_letter_code: str,
-        charge: float,
+        propertyX: float,
         polarity: Polarity,
         size: int,
         count_hydrogen_bond_donors: int,
@@ -38,10 +38,10 @@ class AminoAcid:
             name(str): unique name for the amino acid
             three_letter_code(str): code of the amino acid, as in PDB
             one_letter_code(str): letter of the amino acid, as in fasta
-            charge(float, optional): the charge property of the amino acid
-            polarity(deeprank polarity enum, optional): the polarity property of the amino acid
-            size(int, optional): the number of heavy atoms in the side chain
-            index(int, optional): the rank of the amino acid, used for computing one-hot encoding
+            propertyX(float): unknown property of the amino acid
+            polarity(deeprank polarity enum): the polarity property of the amino acid
+            size(int): the number of non-hydrogen atoms in the side chain
+            index(int): the rank of the amino acid, used for computing one-hot encoding
         """
 
         self._name = name
@@ -50,7 +50,7 @@ class AminoAcid:
 
         # these settings apply to the side chain
         self._size = size
-        self._charge = charge
+        self._propertyX = propertyX
         self._polarity = polarity
         self._count_hydrogen_bond_donors = count_hydrogen_bond_donors
         self._count_hydrogen_bond_acceptors = count_hydrogen_bond_acceptors
@@ -91,8 +91,8 @@ class AminoAcid:
         return self._count_hydrogen_bond_acceptors
 
     @property
-    def charge(self) -> float:
-        return self._charge
+    def propertyX(self) -> float:
+        return self._propertyX
 
     @property
     def polarity(self) -> Polarity:
