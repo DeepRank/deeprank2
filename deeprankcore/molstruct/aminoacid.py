@@ -1,6 +1,5 @@
 import numpy as np
 from enum import Enum
-from deeprankcore.domain.aminoacidlist import amino_acids
 
 
 class Polarity(Enum):
@@ -76,7 +75,9 @@ class AminoAcid:
             raise ValueError(
                 "amino acid {self._name} index is not set, thus no onehot can be computed"
             )
-        a = np.zeros(len(amino_acids))
+        # 20 canonical amino acids
+        # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
+        a = np.zeros(20)
         a[self._index] = 1.0
 
         return a

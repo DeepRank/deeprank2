@@ -23,6 +23,17 @@ cysteine = AminoAcid(
     count_hydrogen_bond_acceptors=0,
     index=1)
 
+selenocysteine = AminoAcid(
+    "Selenocysteine",
+    "SEC",
+    "U",
+    charge=0.0,
+    polarity=Polarity.POLAR,
+    size=2,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=2,
+    index=cysteine.index)
+
 aspartate = AminoAcid(
     "Aspartate",
     "ASP",
@@ -111,6 +122,17 @@ lysine = AminoAcid(
     count_hydrogen_bond_acceptors=0,
     index=9)
 
+pyrrolysine = AminoAcid(
+    "Pyrrolysine",
+    "PYL",
+    "O",
+    charge=0.0,
+    polarity=Polarity.POLAR,
+    size=13,
+    count_hydrogen_bond_donors=1,
+    count_hydrogen_bond_acceptors=4,
+    index=lysine.index)
+
 methionine = AminoAcid(
     "Methionine",
     "MET",
@@ -187,28 +209,6 @@ valine = AminoAcid(
     count_hydrogen_bond_donors=0,
     count_hydrogen_bond_acceptors=0,
     index=16)
-
-selenocysteine = AminoAcid(
-    "Selenocysteine",
-    "SEC",
-    "U",
-    charge=0.0,
-    polarity=Polarity.POLAR,
-    size=2,
-    count_hydrogen_bond_donors=1,
-    count_hydrogen_bond_acceptors=2,
-    index=cysteine.index)
-
-pyrrolysine = AminoAcid(
-    "Pyrrolysine",
-    "PYL",
-    "O",
-    charge=0.0,
-    polarity=Polarity.POLAR,
-    size=13,
-    count_hydrogen_bond_donors=1,
-    count_hydrogen_bond_acceptors=4,
-    index=lysine.index)
 
 arginine = AminoAcid(
     "Arginine",
