@@ -44,7 +44,7 @@ def add_features( # pylint: disable=unused-argument
 
             if residue == single_amino_acid_variant.residue:
                 node.features[Nfeat.VARIANTRES] = variant.onehot
-                node.features[Nfeat.DIFFCHARGE] = variant.propertyX - wildtype.propertyX
+                node.features[Nfeat.DIFFX] = variant.propertyX - wildtype.propertyX
                 node.features[Nfeat.DIFFSIZE] = variant.size - wildtype.size
                 node.features[Nfeat.DIFFMASS] = variant.mass - wildtype.mass
                 node.features[Nfeat.DIFFPI] = variant.pI - wildtype.pI
@@ -53,7 +53,7 @@ def add_features( # pylint: disable=unused-argument
                 node.features[Nfeat.DIFFHBACCEPTORS] = variant.hydrogen_bond_acceptors - wildtype.hydrogen_bond_acceptors
             else:
                 node.features[Nfeat.VARIANTRES] = residue.amino_acid.onehot
-                node.features[Nfeat.DIFFCHARGE] = 0
+                node.features[Nfeat.DIFFX] = 0
                 node.features[Nfeat.DIFFSIZE] = 0
                 node.features[Nfeat.DIFFMASS] = 0
                 node.features[Nfeat.DIFFPI] = 0

@@ -18,7 +18,7 @@ HBACCEPTORS = "hb_acceptors"# int; former FEATURENAME_HYDROGENBONDACCEPTORS
 
 ## variant residue features
 VARIANTRES = "variant_res" # AminoAcid object; former FEATURENAME_VARIANTAMINOACID
-DIFFCHARGE = "diff_charge" # float
+DIFFX = "diff_property_X" # float
 DIFFSIZE = "diff_size" # int; former FEATURENAME_SIZEDIFFERENCE
 DIFFMASS = "diff_mass"
 DIFFPI = "diff_pI"
