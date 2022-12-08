@@ -8,6 +8,9 @@ from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 #   5) https://ib.bioninja.com.au/standard-level/topic-2-molecular-biology/24-proteins/amino-acids.html
 #   6) print book: "Biology", by Campbell & Reece, 6th ed, ISBN: 0-201-75054-6 
 
+# Source for size:
+#   https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf 
+
 # Sources for mass and pI:
 #   1) https://www.sigmaaldrich.com/NL/en/technical-documents/technical-article/protein-biology/protein-structural-analysis/amino-acid-reference-chart
 #   2) https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf
@@ -41,7 +44,7 @@ cysteine = AminoAcid(
     propertyX = -0.64,
     polarity = Polarity.POLAR, # source 3: "special case"; source 5: nonpolar
     # polarity of C is generally considered ambiguous: https://chemistry.stackexchange.com/questions/143142/why-is-the-amino-acid-cysteine-classified-as-polar
-    size = 2,
+    size = 2, # source: https://en.wikipedia.org/wiki/Pyrrolysine
     mass = 103.2,
     pI = 5.07,
     hydrogen_bond_donors = 0,
@@ -160,7 +163,7 @@ pyrrolysine = AminoAcid(
     "O",
     propertyX = 0.0,
     polarity = Polarity.POLAR, # based on having both H-bond donors and acceptors 
-    size = 13,
+    size = 13, # source: https://en.wikipedia.org/wiki/Pyrrolysine
     mass = 255.32, # from source 3
     pI = 7.394, # rough estimate from https://rstudio-pubs-static.s3.amazonaws.com/846259_7a9236df54e6410a972621590ecdcfcb.html
     hydrogen_bond_donors = 1, # unconfirmed
