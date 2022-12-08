@@ -29,19 +29,21 @@ class AminoAcid:
         propertyX: float,
         polarity: Polarity,
         size: int,
-        count_hydrogen_bond_donors: int,
-        count_hydrogen_bond_acceptors: int,
+        hydrogen_bond_donors: int,
+        hydrogen_bond_acceptors: int,
         index: int,
     ):
         """
         Args:
-            name(str): unique name for the amino acid
-            three_letter_code(str): code of the amino acid, as in PDB
-            one_letter_code(str): letter of the amino acid, as in fasta
-            propertyX(float): unknown property of the amino acid
-            polarity(deeprank polarity enum): the polarity property of the amino acid
-            size(int): the number of non-hydrogen atoms in the side chain
-            index(int): the rank of the amino acid, used for computing one-hot encoding
+            name (str): full name of the amino acid
+            three_letter_code (str): three-letter code of the amino acid (as in PDB)
+            one_letter_code (str): one-letter of the amino acid (as in fasta)
+            propertyX (float): unknown property of the amino acid
+            polarity (deeprank polarity enum): the polarity of the amino acid (polar, apolar, positive, negative)
+            size (int): the number of non-hydrogen atoms in the side chain
+            hydrogen_bond_donors (int): number of hydrogen bond donors
+            hydrogen_bond_acceptors (int): number of hydrogen bond acceptors
+            index (int): the rank of the amino acid, used for computing one-hot encoding
         """
 
         self._name = name
@@ -52,8 +54,8 @@ class AminoAcid:
         self._size = size
         self._propertyX = propertyX
         self._polarity = polarity
-        self._count_hydrogen_bond_donors = count_hydrogen_bond_donors
-        self._count_hydrogen_bond_acceptors = count_hydrogen_bond_acceptors
+        self._hydrogen_bond_donors = hydrogen_bond_donors
+        self._hydrogen_bond_acceptors = hydrogen_bond_acceptors
 
         self._index = index
 
@@ -83,12 +85,12 @@ class AminoAcid:
         return a
 
     @property
-    def count_hydrogen_bond_donors(self) -> int:
-        return self._count_hydrogen_bond_donors
+    def hydrogen_bond_donors(self) -> int:
+        return self._hydrogen_bond_donors
 
     @property
-    def count_hydrogen_bond_acceptors(self) -> int:
-        return self._count_hydrogen_bond_acceptors
+    def hydrogen_bond_acceptors(self) -> int:
+        return self._hydrogen_bond_acceptors
 
     @property
     def propertyX(self) -> float:
