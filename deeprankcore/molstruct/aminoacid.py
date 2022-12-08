@@ -29,6 +29,8 @@ class AminoAcid:
         propertyX: float,
         polarity: Polarity,
         size: int,
+        mass: float,
+        pI: float, 
         hydrogen_bond_donors: int,
         hydrogen_bond_acceptors: int,
         index: int,
@@ -41,22 +43,28 @@ class AminoAcid:
             propertyX (float): unknown property of the amino acid
             polarity (deeprank polarity enum): the polarity of the amino acid (polar, apolar, positive, negative)
             size (int): the number of non-hydrogen atoms in the side chain
+            mass (float): average residue mass (i.e. mass of amino acid - H20) in Daltons
+            pI (float): isolectric point; pH at which the molecule has no net electric charge
             hydrogen_bond_donors (int): number of hydrogen bond donors
             hydrogen_bond_acceptors (int): number of hydrogen bond acceptors
             index (int): the rank of the amino acid, used for computing one-hot encoding
         """
 
+        # amino acid nomenclature
         self._name = name
         self._three_letter_code = three_letter_code
         self._one_letter_code = one_letter_code
 
-        # these settings apply to the side chain
-        self._size = size
+        # side chain properties
         self._propertyX = propertyX
         self._polarity = polarity
+        self._size = size
+        self._mass = mass
+        self._pI = pI
         self._hydrogen_bond_donors = hydrogen_bond_donors
         self._hydrogen_bond_acceptors = hydrogen_bond_acceptors
 
+        # one hot encoding
         self._index = index
 
     @property
