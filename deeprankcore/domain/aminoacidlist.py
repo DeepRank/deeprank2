@@ -10,8 +10,9 @@ from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 #   3) https://en.wikipedia.org/wiki/Amino_acid
 #   3) https://nld.promega.com/resources/tools/amino-acid-chart-amino-acid-structure/
 #   5) https://ib.bioninja.com.au/standard-level/topic-2-molecular-biology/24-proteins/amino-acids.html
-#   6) print book: "Biology", by Campbell & Reece, 6th ed, ISBN: 0-201-75054-6 
-# Few discrepancies between sources are commented inline, and majority rule is implemented.
+#   6) print book: "Biology", by Campbell & Reece, 6th ed, ISBN: 0-201-75054-6
+# Sources 1, 2, and 6 sources agree on every amino acid and are used below.
+# The other sources have some minor discrepancies compared to this and are commented inline.
 
 # Source for size:
 #   https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf 
@@ -344,5 +345,6 @@ amino_acids = [
     tryptophan,
     tyrosine,
     valine,
-    selenocysteine,
-    pyrrolysine]
+    # selenocysteine,
+    # pyrrolysine,
+    ]
