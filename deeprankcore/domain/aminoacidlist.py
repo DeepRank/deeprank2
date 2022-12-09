@@ -1,6 +1,8 @@
 from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 
-# Charge is calculated from summing all atoms in the residue (from ./deeprankcore/domain/forcefield/protein-allhdg5-5_new.top).
+# Charge is calculated from summing all atoms in the residue (from ./deeprankcore/domain/forcefield/protein-allhdg5-5_new.top). 
+# This results in the expected charge of 0 for all POLAR and NONPOLAR residues, +1 for POSITIVE residues and -1 for NEGATIVE residues.
+# Note that Ser, Thr, and Tyr lead to a charge of ~1e-16. A rounding error is assumed in these cases and they are set to 0.
 
 # Sources for Polarity:
 #   1) https://www.britannica.com/science/amino-acid/Standard-amino-acids
