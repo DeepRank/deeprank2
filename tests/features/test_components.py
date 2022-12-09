@@ -1,7 +1,7 @@
 import numpy as np
 from pdb2sql import pdb2sql
 from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.domain.aminoacidlist import serine
+from deeprankcore.domain.aminoacidlist import serine, glycine
 from deeprankcore.utils.graph import build_atomic_graph, build_residue_graph
 from deeprankcore.utils.buildgraph import get_structure, get_surrounding_residues
 from deeprankcore.molstruct.structure import Chain
@@ -14,7 +14,6 @@ def _get_residue(chain: Chain, number: int) -> Residue:
     for residue in chain.residues:
         if residue.number == number:
             return residue
-
     raise ValueError(f"Not found: {number}")
 
 
@@ -29,9 +28,9 @@ def test_atom_features(): # copied first part, up to add_features, from test_sas
         pdb._close() # pylint: disable=protected-access
 
     residue = _get_residue(structure.chains[0], 108)
-    residues = get_surrounding_residues(structure, residue, 10.0)
+    surr_residues = get_surrounding_residues(structure, residue, 10.0)
     atoms = set([])
-    for residue in residues:
+    for residue in surr_residues:
         for atom in residue.atoms:
             atoms.add(atom)
     atoms = list(atoms)
@@ -54,16 +53,30 @@ def test_aminoacid_features():
         pdb._close() # pylint: disable=protected-access
 
     residue = structure.chains[0].residues[25]
+    surr_residues = get_surrounding_residues(structure, residue, 10.0)
     variant = SingleResidueVariant(residue, serine)  # GLY -> SER
+    assert len(surr_residues) > 0
 
-    residues = get_surrounding_residues(structure, residue, 10.0)
-    assert len(residues) > 0
-
-    graph = build_residue_graph(residues, "101m-25", 4.5)
-
+    graph = build_residue_graph(surr_residues, "101m-25", 4.5)
     add_features(pdb_path, graph, variant)
-
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
-            assert node.features[Nfeat.DIFFSIZE] > 0
-            assert node.features[Nfeat.DIFFHBDONORS] > 0
+            assert sum(node.features[Nfeat.RESTYPE]) == 1
+            assert node.features[Nfeat.RESTYPE][glycine.index] == 1
+            assert node.features[Nfeat.RESCHARGE] == glycine.charge
+            assert (node.features[Nfeat.POLARITY] == glycine.polarity.onehot).all
+            assert node.features[Nfeat.RESSIZE] == glycine.size
+            assert node.features[Nfeat.RESMASS] == glycine.mass
+            assert node.features[Nfeat.RESPI] == glycine.pI
+            assert node.features[Nfeat.HBDONORS] == glycine.hydrogen_bond_donors
+            assert node.features[Nfeat.HBACCEPTORS] == glycine.hydrogen_bond_acceptors
+
+            assert sum(node.features[Nfeat.VARIANTRES]) == 1
+            assert node.features[Nfeat.VARIANTRES][serine.index] == 1
+            assert node.features[Nfeat.DIFFCHARGE] == serine.charge - glycine.charge
+            assert (node.features[Nfeat.DIFFPOLARITY] == serine.polarity.onehot - glycine.polarity.onehot).all
+            assert node.features[Nfeat.DIFFSIZE] == serine.size - glycine.size
+            assert node.features[Nfeat.DIFFMASS] == serine.mass - glycine.mass
+            assert node.features[Nfeat.DIFFPI] == serine.pI - glycine.pI
+            assert node.features[Nfeat.DIFFHBDONORS] == serine.hydrogen_bond_donors - glycine.hydrogen_bond_donors
+            assert node.features[Nfeat.DIFFHBACCEPTORS] == serine.hydrogen_bond_acceptors - glycine.hydrogen_bond_acceptors
