@@ -1,5 +1,3 @@
-from time import time
-
 from typing import Callable, Union, List
 import logging
 import numpy as np
