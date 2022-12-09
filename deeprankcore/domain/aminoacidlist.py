@@ -1,5 +1,7 @@
 from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 
+# All info below sourced from above websites in December 2022 and summarized in deeprankcore/domain/aminoacid_summary.xlsx
+
 # Charge is calculated from summing all atoms in the residue (from ./deeprankcore/domain/forcefield/protein-allhdg5-5_new.top). 
 # This results in the expected charge of 0 for all POLAR and NONPOLAR residues, +1 for POSITIVE residues and -1 for NEGATIVE residues.
 # Note that SER, THR, and TYR lead to a charge of ~1e-16. A rounding error is assumed in these cases and they are set to 0.
@@ -29,10 +31,8 @@ from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 #   2) https://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/charge/
 
 # For selenocysteine and pyrrolysine only few sources detailing some of their properties could be found.
-# Whatever sources were found (or lack thereof) are indicated in inline comments, 
-# but the reliability is much lower than for the canonical amino acids.
-
-# All info was sourced from above websites in December 2022.
+# Whatever sources were found (or lack thereof) are indicated in inline comments, but the reliability is much lower than for the canonical amino acids.
+# Also, the rest of the package is not expecting these, so they removed from amino_acids at the bottom of this file.
 
 alanine = AminoAcid(
     "Alanine",
@@ -324,6 +324,7 @@ tyrosine = AminoAcid(
     index = 19)
 
 
+# Including selenocysteine and pyrrolysine in the future will require some work to be done on the package.
 amino_acids = [
     alanine,
     arginine,
