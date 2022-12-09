@@ -30,7 +30,7 @@ def add_features( # pylint: disable=unused-argument
             raise TypeError(f"Unexpected node type: {type(node.id)}") 
 
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
-        node.features[Nfeat.PROPERTYX] = residue.amino_acid.propertyX
+        node.features[Nfeat.RESCHARGE] = residue.amino_acid.charge
         node.features[Nfeat.POLARITY] = residue.amino_acid.polarity.onehot
         node.features[Nfeat.RESSIZE] = residue.amino_acid.size
         node.features[Nfeat.RESMASS] = residue.amino_acid.mass
@@ -44,7 +44,7 @@ def add_features( # pylint: disable=unused-argument
 
             if residue == single_amino_acid_variant.residue:
                 node.features[Nfeat.VARIANTRES] = variant.onehot
-                node.features[Nfeat.DIFFX] = variant.propertyX - wildtype.propertyX
+                node.features[Nfeat.DIFFCHARGE] = variant.charge - wildtype.charge
                 node.features[Nfeat.DIFFPOLARITY] = variant.polarity.onehot - wildtype.polarity.onehot
                 node.features[Nfeat.DIFFSIZE] = variant.size - wildtype.size
                 node.features[Nfeat.DIFFMASS] = variant.mass - wildtype.mass
@@ -53,7 +53,7 @@ def add_features( # pylint: disable=unused-argument
                 node.features[Nfeat.DIFFHBACCEPTORS] = variant.hydrogen_bond_acceptors - wildtype.hydrogen_bond_acceptors
             else:
                 node.features[Nfeat.VARIANTRES] = residue.amino_acid.onehot
-                node.features[Nfeat.DIFFX] = 0
+                node.features[Nfeat.DIFFCHARGE] = 0
                 node.features[Nfeat.DIFFPOLARITY] = np.zeros(residue.amino_acid.polarity.onehot.shape)
                 node.features[Nfeat.DIFFSIZE] = 0
                 node.features[Nfeat.DIFFMASS] = 0

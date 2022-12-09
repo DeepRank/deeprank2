@@ -63,7 +63,7 @@ def test_aminoacid_features():
         if node.id == variant.residue:  # GLY -> SER
             assert sum(node.features[Nfeat.RESTYPE]) == 1
             assert node.features[Nfeat.RESTYPE][glycine.index] == 1
-            assert node.features[Nfeat.PROPERTYX] == glycine.propertyX
+            assert node.features[Nfeat.RESCHARGE] == glycine.charge
             assert (node.features[Nfeat.POLARITY] == glycine.polarity.onehot).all
             assert node.features[Nfeat.RESSIZE] == glycine.size
             assert node.features[Nfeat.RESMASS] == glycine.mass
@@ -73,7 +73,7 @@ def test_aminoacid_features():
 
             assert sum(node.features[Nfeat.VARIANTRES]) == 1
             assert node.features[Nfeat.VARIANTRES][serine.index] == 1
-            assert node.features[Nfeat.DIFFX] == serine.propertyX - glycine.propertyX
+            assert node.features[Nfeat.DIFFCHARGE] == serine.charge - glycine.charge
             assert (node.features[Nfeat.DIFFPOLARITY] == serine.polarity.onehot - glycine.polarity.onehot).all
             assert node.features[Nfeat.DIFFSIZE] == serine.size - glycine.size
             assert node.features[Nfeat.DIFFMASS] == serine.mass - glycine.mass

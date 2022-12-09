@@ -26,7 +26,7 @@ class AminoAcid:
         name: str,
         three_letter_code: str,
         one_letter_code: str,
-        propertyX: float,
+        charge: int,
         polarity: Polarity,
         size: int,
         mass: float,
@@ -40,7 +40,7 @@ class AminoAcid:
             name (str): full name of the amino acid
             three_letter_code (str): three-letter code of the amino acid (as in PDB)
             one_letter_code (str): one-letter of the amino acid (as in fasta)
-            propertyX (float): unknown property of the amino acid
+            charge (int): charge of the amino acid
             polarity (deeprank polarity enum): the polarity of the amino acid
             size (int): the number of non-hydrogen atoms in the side chain
             mass (float): average residue mass (i.e. mass of amino acid - H20) in Daltons
@@ -56,7 +56,7 @@ class AminoAcid:
         self._one_letter_code = one_letter_code
 
         # side chain properties
-        self._propertyX = propertyX
+        self._charge = charge
         self._polarity = polarity
         self._size = size
         self._mass = mass
@@ -101,8 +101,8 @@ class AminoAcid:
         return self._hydrogen_bond_acceptors
 
     @property
-    def propertyX(self) -> float:
-        return self._propertyX
+    def charge(self) -> float:
+        return self._charge
 
     @property
     def polarity(self) -> Polarity:
