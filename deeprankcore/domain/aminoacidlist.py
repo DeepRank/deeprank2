@@ -31,6 +31,7 @@ from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
 # Whatever sources were found (or lack thereof) are indicated in inline comments, 
 # but the reliability is much lower than for the canonical amino acids.
 
+# All info was sourced from above websites in December 2022.
 
 alanine = AminoAcid(
     "Alanine",
