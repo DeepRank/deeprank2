@@ -80,28 +80,7 @@ class AminoAcid:
         return self._one_letter_code
 
     @property
-    def onehot(self) -> np.ndarray:
-        if self._index is None:
-            raise ValueError(
-                "amino acid {self._name} index is not set, thus no onehot can be computed"
-            )
-        # 20 canonical amino acids
-        # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
-        a = np.zeros(20)
-        a[self._index] = 1.0
-
-        return a
-
-    @property
-    def hydrogen_bond_donors(self) -> int:
-        return self._hydrogen_bond_donors
-
-    @property
-    def hydrogen_bond_acceptors(self) -> int:
-        return self._hydrogen_bond_acceptors
-
-    @property
-    def charge(self) -> float:
+    def charge(self) -> int:
         return self._charge
 
     @property
@@ -119,6 +98,27 @@ class AminoAcid:
     @property
     def pI(self) -> float:
         return self._pI
+
+    @property
+    def hydrogen_bond_donors(self) -> int:
+        return self._hydrogen_bond_donors
+
+    @property
+    def hydrogen_bond_acceptors(self) -> int:
+        return self._hydrogen_bond_acceptors
+
+    @property
+    def onehot(self) -> np.ndarray:
+        if self._index is None:
+            raise ValueError(
+                "amino acid {self._name} index is not set, thus no onehot can be computed"
+            )
+        # 20 canonical amino acids
+        # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
+        a = np.zeros(20)
+        a[self._index] = 1.0
+
+        return a
 
     @property
     def index(self) -> int:
