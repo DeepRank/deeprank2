@@ -53,7 +53,7 @@ def test_aminoacid_features():
         pdb._close() # pylint: disable=protected-access
 
     residue = structure.chains[0].residues[25]
-    surr_residues = get_surrounding_residues(structure, residue, 10.0)
+    surr_residues = list(get_surrounding_residues(structure, residue, 10.0))
     variant = SingleResidueVariant(residue, serine)  # GLY -> SER
     assert len(surr_residues) > 0
 

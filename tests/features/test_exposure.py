@@ -21,6 +21,7 @@ def test_add_features():
     ):
         residues.add(residue1)
         residues.add(residue2)
+    residues = list(residues)
 
     graph = build_residue_graph(residues, "1ATN-1w", 8.5)
 
