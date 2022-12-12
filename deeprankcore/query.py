@@ -362,7 +362,7 @@ class SingleResidueVariantResidueQuery(Query):
         variant = SingleResidueVariant(variant_residue, self._variant_amino_acid)
 
         # select which residues will be the graph
-        residues = get_surrounding_residues(structure, residue, self._radius) # pylint: disable=undefined-loop-variable
+        residues = list(get_surrounding_residues(structure, residue, self._radius)) # pylint: disable=undefined-loop-variable
 
         # build the graph
         graph = build_residue_graph(
