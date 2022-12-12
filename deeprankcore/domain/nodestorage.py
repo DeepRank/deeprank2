@@ -8,9 +8,11 @@ POSITION = "_position" # list[3xfloat]; former FEATURENAME_POSITION
 
 ## residue core features
 RESTYPE = "res_type" # AminoAcid object; former FEATURENAME_AMINOACID
-RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
-RESSIZE = "res_size" # int; former FEATURENAME_SIZE
+RESCHARGE = "charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
 POLARITY = "polarity" #  Polarity object; former FEATURENAME_POLARITY
+RESSIZE = "res_size" # int; former FEATURENAME_SIZE
+RESMASS = "res_mass"
+RESPI = "res_pI"
 HBDONORS = "hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORS
 HBACCEPTORS = "hb_acceptors"# int; former FEATURENAME_HYDROGENBONDACCEPTORS
 
@@ -18,6 +20,8 @@ HBACCEPTORS = "hb_acceptors"# int; former FEATURENAME_HYDROGENBONDACCEPTORS
 VARIANTRES = "variant_res" # AminoAcid object; former FEATURENAME_VARIANTAMINOACID
 DIFFCHARGE = "diff_charge" # float
 DIFFSIZE = "diff_size" # int; former FEATURENAME_SIZEDIFFERENCE
+DIFFMASS = "diff_mass"
+DIFFPI = "diff_pI"
 DIFFPOLARITY = "diff_polarity" # [type?]; former FEATURENAME_POLARITYDIFFERENCE
 DIFFHBDONORS = "diff_hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORSDIFFERENCE
 DIFFHBACCEPTORS = "diff_hb_acceptors" # int; former FEATURENAME_HYDROGENBONDACCEPTORSDIFFERENCE

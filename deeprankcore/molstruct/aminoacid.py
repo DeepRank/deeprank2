@@ -5,7 +5,7 @@ from enum import Enum
 class Polarity(Enum):
     "a value to express a residue's polarity"
 
-    APOLAR = 0
+    NONPOLAR = 0
     POLAR = 1
     NEGATIVE_CHARGE = 2
     POSITIVE_CHARGE = 3
@@ -26,35 +26,45 @@ class AminoAcid:
         name: str,
         three_letter_code: str,
         one_letter_code: str,
-        charge: float,
+        charge: int,
         polarity: Polarity,
         size: int,
-        count_hydrogen_bond_donors: int,
-        count_hydrogen_bond_acceptors: int,
+        mass: float,
+        pI: float, 
+        hydrogen_bond_donors: int,
+        hydrogen_bond_acceptors: int,
         index: int,
     ):
         """
         Args:
-            name(str): unique name for the amino acid
-            three_letter_code(str): code of the amino acid, as in PDB
-            one_letter_code(str): letter of the amino acid, as in fasta
-            charge(float, optional): the charge property of the amino acid
-            polarity(deeprank polarity enum, optional): the polarity property of the amino acid
-            size(int, optional): the number of heavy atoms in the side chain
-            index(int, optional): the rank of the amino acid, used for computing one-hot encoding
+            name (str): full name of the amino acid
+            three_letter_code (str): three-letter code of the amino acid (as in PDB)
+            one_letter_code (str): one-letter of the amino acid (as in fasta)
+            charge (int): charge of the amino acid
+            polarity (deeprank polarity enum): the polarity of the amino acid
+            size (int): the number of non-hydrogen atoms in the side chain
+            mass (float): average residue mass (i.e. mass of amino acid - H20) in Daltons
+            pI (float): isolectric point; pH at which the molecule has no net electric charge
+            hydrogen_bond_donors (int): number of hydrogen bond donors
+            hydrogen_bond_acceptors (int): number of hydrogen bond acceptors
+            index (int): the rank of the amino acid, used for computing one-hot encoding
         """
 
+        # amino acid nomenclature
         self._name = name
         self._three_letter_code = three_letter_code
         self._one_letter_code = one_letter_code
 
-        # these settings apply to the side chain
-        self._size = size
+        # side chain properties
         self._charge = charge
         self._polarity = polarity
-        self._count_hydrogen_bond_donors = count_hydrogen_bond_donors
-        self._count_hydrogen_bond_acceptors = count_hydrogen_bond_acceptors
+        self._size = size
+        self._mass = mass
+        self._pI = pI
+        self._hydrogen_bond_donors = hydrogen_bond_donors
+        self._hydrogen_bond_acceptors = hydrogen_bond_acceptors
 
+        # one hot encoding
         self._index = index
 
     @property
@@ -70,28 +80,7 @@ class AminoAcid:
         return self._one_letter_code
 
     @property
-    def onehot(self) -> np.ndarray:
-        if self._index is None:
-            raise ValueError(
-                "amino acid {self._name} index is not set, thus no onehot can be computed"
-            )
-
-        # assumed that there are only 20 different amino acids
-        a = np.zeros(20)
-        a[self._index] = 1.0
-
-        return a
-
-    @property
-    def count_hydrogen_bond_donors(self) -> int:
-        return self._count_hydrogen_bond_donors
-
-    @property
-    def count_hydrogen_bond_acceptors(self) -> int:
-        return self._count_hydrogen_bond_acceptors
-
-    @property
-    def charge(self) -> float:
+    def charge(self) -> int:
         return self._charge
 
     @property
@@ -101,6 +90,35 @@ class AminoAcid:
     @property
     def size(self) -> int:
         return self._size
+
+    @property
+    def mass(self) -> float:
+        return self._mass
+
+    @property
+    def pI(self) -> float:
+        return self._pI
+
+    @property
+    def hydrogen_bond_donors(self) -> int:
+        return self._hydrogen_bond_donors
+
+    @property
+    def hydrogen_bond_acceptors(self) -> int:
+        return self._hydrogen_bond_acceptors
+
+    @property
+    def onehot(self) -> np.ndarray:
+        if self._index is None:
+            raise ValueError(
+                "amino acid {self._name} index is not set, thus no onehot can be computed"
+            )
+        # 20 canonical amino acids
+        # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
+        a = np.zeros(20)
+        a[self._index] = 1.0
+
+        return a
 
     @property
     def index(self) -> int:
