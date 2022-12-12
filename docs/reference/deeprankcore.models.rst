@@ -44,10 +44,10 @@ deeprankcore.models.grid module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.models.metrics module
+deeprankcore.utils.exporters module
 ----------------------------------
 
-.. automodule:: deeprankcore.models.metrics
+.. automodule:: deeprankcore.utils.exporters
    :members:
    :undoc-members:
    :show-inheritance:

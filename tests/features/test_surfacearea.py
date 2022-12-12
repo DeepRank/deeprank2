@@ -61,6 +61,7 @@ def test_bsa_residue():
     ):
         residues.add(residue1)
         residues.add(residue2)
+    residues = list(residues)
 
     graph = build_residue_graph(residues, "1ATN-1w", 8.5)
 
@@ -110,7 +111,7 @@ def test_sasa_residue():
     residue = _get_residue(structure.chains[0], 108)
     variant = SingleResidueVariant(residue, alanine)
 
-    residues = get_surrounding_residues(structure, residue, 10.0)
+    residues = list(get_surrounding_residues(structure, residue, 10.0))
     assert len(residues) > 0
 
     graph = build_residue_graph(residues, "101M-108-res", 4.5)

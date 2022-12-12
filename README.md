@@ -58,7 +58,8 @@ Before installing deeprankcore you need to install:
  * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
     * **How to build it without sudo privileges on a Linux machine**. After having run `make` in the reduce/ root directory, go to reduce/reduce_src/Makefile and modify `/usr/local/` to a folder in your home directory, such as `/home/user_name/apps`. Note that such a folder needs to be added to the PATH in the `.bashrc` file. Then run `make install` from reduce/. 
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
- * [pytorch](https://pytorch.org/): `conda install pytorch=1.12.1 -c pytorch`. Note that by default the CPU version of pytorch will be installed, but you can also customize that installation following the instructions on pytorch website.
+ * [pytorch](https://pytorch.org/get-started/locally/): `conda install pytorch torchvision torchaudio cpuonly -c pytorch` or `conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia`, for taking advantage of GPUs.
+ * [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
  * Only if you have a MacOS with M1 chip, additional steps are needed:
     * `conda install pytables`
     * See [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution to install PyQt5 or run `conda install pyqt`
@@ -215,26 +216,27 @@ from deeprankcore.dataset import GraphDataset
 
 node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
 edge_features = ["distance"]
+target = "binary"
 
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = "<train_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = "binary"
+    target = target
 )
 dataset_val = GraphDataset(
     hdf5_path = "<val_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = "binary"
+    target = target
 
 )
 dataset_test = GraphDataset(
     hdf5_path = "<test_hdf5_path.hdf5>",
     node_features = node_features,
     edge_features = edge_features,
-    target = "binary"
+    target = target
 )
 ```
 
@@ -245,21 +247,18 @@ Let's define a Trainer instance, using for example of the already existing GNNs,
 ```python
 from deeprankcore.trainer import Trainer
 from deeprankcore.ginet import GINet
-from deeprankcore.utils.metrics import OutputExporter, ScatterPlotExporter
-
-metrics_output_directory = "./metrics"
-metrics_exporters = [OutputExporter(metrics_output_directory)]
 
 trainer = Trainer(
     GINet,
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64,
-    metrics_exporters = metrics_exporters
+    batch_size = 64
 )
 
 ```
+
+By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
 
 Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
 
@@ -278,7 +277,6 @@ trainer.test()
 trainer.save_model(filename = "<output_model_path.pth.tar>")
 
 ```
-
 
 #### Custom GNN
 
@@ -321,8 +319,7 @@ trainer = Trainer(
     dataset_train,
     dataset_val,
     dataset_test,
-    batch_size = 64,
-    metrics_exporters = metrics_exporters
+    batch_size = 64
 )
 
 trainer.train(nepoch=50)
