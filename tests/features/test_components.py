@@ -56,7 +56,7 @@ def test_aminoacid_features():
     residue = structure.chains[0].residues[25]
     variant = SingleResidueVariant(residue, serine)  # GLY -> SER
 
-    residues = get_surrounding_residues(structure, residue, 10.0)
+    residues = list(get_surrounding_residues(structure, residue, 10.0))
     assert len(residues) > 0
 
     graph = build_residue_graph(residues, "101m-25", 4.5)
