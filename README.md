@@ -338,11 +338,11 @@ After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can 
 
 ### Branching
 
-When creating a new branch, please follow the following convention: `<issue_number>_<description>_<author_name>`.
+When creating a new branch, please use the following convention: `<issue_number>_<description>_<author_name>`.
 
 ### Pull Requests
 
-When creating a Pull Request, please follow the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and other based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
+When creating a pull request, please use the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
 
 ### Software release
 
