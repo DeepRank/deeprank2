@@ -47,6 +47,8 @@ DeeprankCore documentation can be found here : https://deeprankcore.rtfd.io/.
       - [Custom GNN](#custom-gnn)
   - [h5x support](#h5x-support)
   - [For the developers](#for-the-developers)
+    - [Branching](#branching)
+    - [Pull Requests](#pull-requests)
     - [Software release](#software-release)
 
 ## Installation
@@ -334,6 +336,15 @@ After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can 
 
 ## For the developers
 
+### Branching
+
+When creating a new branch, please follow the following convention: `<issue_number>_<description>_<author_name>`.
+
+### Pull Requests
+
+When creating a Pull Request, please follow the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and other based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
+
 ### Software release
 
 Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings. 
+
