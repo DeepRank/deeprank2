@@ -1,8 +1,7 @@
 import unittest
-from deeprankcore.dataset import GraphDataset, save_hdf5_keys
-from deeprankcore.trainer import _divide_dataset
 from torch_geometric.data.data import Data
 import h5py
+from deeprankcore.dataset import GraphDataset, save_hdf5_keys
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 
@@ -91,45 +90,6 @@ class TestDataSet(unittest.TestCase):
         assert len(new_ids) == n
         for new_id in new_ids:
             assert new_id in original_ids
-
-    def test_trainsize(self):
-        hdf5 = "tests/data/hdf5/train.hdf5"
-        hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
-        n_val = int ( 0.25 * len(hdf5_file) )
-        n_train = len(hdf5_file) - n_val
-        test_cases = [None, 0.25, n_val]
-        
-        for t in test_cases:
-            dataset_train, dataset_val =_divide_dataset(
-                dataset = GraphDataset(hdf5_path=hdf5),
-                val_size=t,
-            )
-
-            assert len(dataset_train) == n_train
-            assert len(dataset_val) == n_val
-
-        hdf5_file.close()
-        
-    def test_invalid_trainsize(self):
-
-        hdf5 = "tests/data/hdf5/train.hdf5"
-        hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
-        n = len(hdf5_file)
-        test_cases = [
-            1.0, n,     # cannot be 100% validation data
-            -0.5, -1,   # no negative values 
-            1.1, n + 1, # cannot use more than all data as input
-            ]
-        
-        for t in test_cases:
-            print(t)
-            with self.assertRaises(ValueError):
-                _divide_dataset(
-                    dataset = GraphDataset(hdf5_path=hdf5),
-                    val_size=t,
-                )
-        
-        hdf5_file.close()
 
     def test_subset(self):
         hdf5 = h5py.File("tests/data/hdf5/train.hdf5", 'r')  # contains 44 datapoints

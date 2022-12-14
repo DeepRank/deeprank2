@@ -163,7 +163,7 @@ class Trainer():
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     self.dataset_train, self.dataset_val = _divide_dataset(
-                        self.dataset_train, val_size=self.val_size)
+                        self.dataset_train, splitsize=self.val_size)
             else:
                 raise ValueError(
                     "Invalid node clustering method. \n\t"
