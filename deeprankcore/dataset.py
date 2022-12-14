@@ -9,7 +9,7 @@ from ast import literal_eval
 import torch
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
-from typing import Callable, List, Union
+from typing import Callable, List, Union, Optional
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 
@@ -51,7 +51,7 @@ def save_hdf5_keys(
 
 
 class GraphDataset(Dataset):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__( # pylint: disable=too-many-arguments, too-many-locals
         self,
         hdf5_path: Union[str,list],
         subset: List[str] = None,
@@ -60,12 +60,13 @@ class GraphDataset(Dataset):
         node_features: Union[List[str], str] = "all",
         edge_features: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
-        classes: List = None,
+        classes: Union[List[str], List[int], List[float]] = None,
         tqdm: bool = True,
         root: str = "./",
         transform: Callable = None,
         pre_transform: Callable = None,
         edge_features_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
+        target_transform: Optional[bool] = False,
         target_filter: dict = None,
     ):
         """Class from which the hdf5 datasets are loaded.
@@ -119,6 +120,11 @@ class GraphDataset(Dataset):
             edge_features_transform (function, optional): transformation applied to the edge features.
                 Defaults to lambdax:np.tanh(-x/2+2)+1.
 
+            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
+                This puts the target value between 0 and 1, and can result in 
+                a more uniform target distribution and speed up the optimization.
+                Defaults to False.
+
             target_filter (dictionary, optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target.
                 Defaults to None.
@@ -138,6 +144,7 @@ class GraphDataset(Dataset):
 
         self._transform = transform
         self.edge_features_transform = edge_features_transform
+        self.target_transform = target_transform
         self.target_filter = target_filter
 
         self._check_hdf5_files()
@@ -234,12 +241,13 @@ class GraphDataset(Dataset):
                 y = None
             else:
                 if targets.VALUES in grp and self.target in grp[targets.VALUES]:
-                    try:
-                        y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
-                    except Exception as e:
-                        _log.error(e)
-                        _log.info('If your target variable contains categorical classes, \
-                        please convert them into class indices before defining the GraphDataset instance.')
+                    y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
+
+                    if self.task == targets.REGRESS and self.target_transform is True:
+                        y = torch.sigmoid(torch.log(y))
+                    elif self.task is not targets.REGRESS and self.target_transform is True:
+                        raise ValueError(f"Task is set to {self.task}. Please set it to regress to transform the target with a sigmoid.")
+
                 else:
                     possible_targets = grp[targets.VALUES].keys()
                     raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
@@ -325,6 +333,7 @@ class GraphDataset(Dataset):
         if self.task == targets.CLASSIF:
             if classes is None:
                 self.classes = [0, 1]
+                _log.info(f'Target classes set up to: {self.classes}')
             else:
                 self.classes = classes
 

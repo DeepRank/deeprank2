@@ -35,7 +35,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     edge_features,
     task,
     target,
-    transform_sigmoid,
+    target_transform,
     output_exporters,
     clustering_method,
     use_cuda = False
@@ -45,18 +45,20 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         hdf5_path=train_hdf5_path,
         node_features=node_features,
         edge_features=edge_features,
-        task = task,
         target=target,
-        clustering_method=clustering_method)
+        task = task,
+        clustering_method=clustering_method,
+        target_transform = target_transform)
 
     if val_hdf5_path is not None:
         dataset_val = GraphDataset(
             hdf5_path=val_hdf5_path,
             node_features=node_features,
             edge_features=edge_features,
-            task = task,
             target=target,
-            clustering_method=clustering_method)
+            task = task,
+            clustering_method=clustering_method,
+            target_transform = target_transform)
     else:
         dataset_val = None
 
@@ -67,7 +69,8 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             edge_features=edge_features,
             target=target,
             task=task,
-            clustering_method=clustering_method)
+            clustering_method=clustering_method,
+            target_transform = target_transform)
     else:
         dataset_test = None
 
@@ -77,7 +80,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val,
         dataset_test,
         batch_size=64,
-        transform_sigmoid=transform_sigmoid,
         output_exporters=output_exporters,
     )
 

@@ -105,6 +105,31 @@ class TestDataSet(unittest.TestCase):
         assert n == len(dataset)
 
         hdf5.close()
+
+    def test_target_transform(self):
+
+        dataset = GraphDataset(
+            hdf5_path = "tests/data/hdf5/train.hdf5",
+            target = "BA", # continuous values
+            task = 'regress',
+            target_transform = True
+        )
+
+        for i in range(len(dataset)):
+            assert(0 <= dataset.get(i).y <= 1)
+
+    def test_invalid_target_transform(self):
+
+        dataset = GraphDataset(
+            hdf5_path = "tests/data/hdf5/train.hdf5",
+            target = "BA", # continuous values
+            task = 'classif',
+            target_transform = True # only for regression
+        )
+
+        with self.assertRaises(ValueError):
+            dataset.get(0)
+
         
 
 if __name__ == "__main__":
