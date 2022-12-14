@@ -61,7 +61,9 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
         graph.write_to_hdf5(hdf5_path)
 
         # export grid to hdf5
-        grid_settings = GridSettings(20, 20.0)
+        grid_settings = GridSettings(np.array((20, 21, 21)), np.array((20.0, 21.0, 21.0)))
+        assert np.all(grid_settings.resolutions == np.array((1.0, 1.0, 1.0)))
+
         graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
 
         # check the contents of the hdf5 file
