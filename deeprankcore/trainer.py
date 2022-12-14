@@ -27,6 +27,7 @@ class Trainer():
                 dataset_val: GraphDataset = None,
                 dataset_test: GraphDataset = None,
                 val_size: Union[float,int] = None,
+                test_size: Union[float,int] = 0,
                 class_weights: bool = False,
                 pretrained_model: str = None,
                 batch_size: int = 32,
@@ -51,11 +52,15 @@ class Trainer():
 
             dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
 
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
-                to use for validation.
-                - Should be set to 0 if no validation set is needed.
-                - Should be not set (None) if dataset_val is not None.
-                Defaults to None, and it is set to 0.25 in _divide_dataset function if no dataset_val is provided.
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+                Only used if dataset_val is not specified. 
+                Can be set to 0 if no validation set is needed.
+                Defaults to to 0.25 (in _divide_dataset function).
+
+            test_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for test dataset. 
+                Only used if dataset_test is not specified. 
+                Can be set to 0 if no test set is needed.
+                Defaults to to 0 (i.e., no test data).
 
             class_weights (bool): assign class weights based on the dataset content. 
                 Defaults to False.
@@ -81,13 +86,18 @@ class Trainer():
             self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
 
         self.neuralnet = neuralnet
-        self.dataset_train = dataset_train
-        self.dataset_val = dataset_val
-        self.dataset_test = dataset_test
+
+        if dataset_test is None and test_size > 0:
+            self.dataset_train, self.dataset_test = _divide_dataset(self.dataset_train, test_size)
+        else:
+            self.dataset_train = dataset_train
+            self.dataset_test = dataset_test
 
         if (val_size is not None) and (dataset_val is not None):
             warnings.warn("Validation and testing datasets were provided to Trainer; split_dataset parameter is ignored.")
             _log.info("Validation and testing datasets were provided to Trainer; split_dataset parameter is ignored.")
+            self.val_size = None
+        self.dataset_val = dataset_val
 
         if pretrained_model is None:
             if self.dataset_train is None:
@@ -101,12 +111,9 @@ class Trainer():
             self.classes_to_idx = self.dataset_train.classes_to_idx
             self.optimizer = None
             self.batch_size = batch_size
-            self.val_size = val_size
             self.class_weights = class_weights
-
             self.shuffle = shuffle
             self.transform_sigmoid = transform_sigmoid
-
             self.subset = self.dataset_train.subset
             self.node_features = self.dataset_train.node_features
             self.edge_features = self.dataset_train.edge_features
