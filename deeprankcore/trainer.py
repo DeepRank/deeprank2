@@ -87,15 +87,21 @@ class Trainer():
 
         self.neuralnet = neuralnet
 
-        if dataset_test is None and test_size > 0:
-            self.dataset_train, self.dataset_test = _divide_dataset(self.dataset_train, test_size)
+        if test_size > 0:
+            if dataset_test is None:
+                self.test_size = test_size
+                self.dataset_train, self.dataset_test = _divide_dataset(self.dataset_train, self.test_size)
+            else:
+                warnings.warn("Test dataset was provided to Trainer; test_size parameter is ignored.")
+                _log.info("Test dataset was provided to Trainer; test_size parameter is ignored.")
+                self.test_size = 0
         else:
             self.dataset_train = dataset_train
             self.dataset_test = dataset_test
 
         if (val_size is not None) and (dataset_val is not None):
-            warnings.warn("Validation and testing datasets were provided to Trainer; split_dataset parameter is ignored.")
-            _log.info("Validation and testing datasets were provided to Trainer; split_dataset parameter is ignored.")
+            warnings.warn("Validation dataset was provided to Trainer; val_size parameter is ignored.")
+            _log.info("Validation dataset was provided to Trainer; val_size parameter is ignored.")
             self.val_size = None
         self.dataset_val = dataset_val
 
