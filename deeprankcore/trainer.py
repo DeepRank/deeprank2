@@ -86,10 +86,11 @@ class Trainer():
             self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
 
         self.neuralnet = neuralnet
+        self.val_size = val_size
+        self.test_size = test_size
 
         if test_size > 0:
             if dataset_test is None:
-                self.test_size = test_size
                 self.dataset_train, self.dataset_test = _divide_dataset(self.dataset_train, self.test_size)
             else:
                 warnings.warn("Test dataset was provided to Trainer; test_size parameter is ignored.")
@@ -660,6 +661,7 @@ class Trainer():
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
+        self.test_size = state["test_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.subset = state["subset"]
@@ -693,6 +695,7 @@ class Trainer():
             "class_weights": self.class_weights,
             "batch_size": self.batch_size,
             "val_size": self.val_size,
+            "test_size": self.test_size,
             "lr": self.lr,
             "weight_decay": self.weight_decay,
             "subset": self.subset,
