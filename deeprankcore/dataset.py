@@ -60,7 +60,7 @@ class GraphDataset(Dataset):
         node_features: Union[List[str], str] = "all",
         edge_features: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
-        classes: List = None,
+        classes: Union[List[str], List[int], List[float]] = None,
         tqdm: bool = True,
         root: str = "./",
         transform: Callable = None,
@@ -325,6 +325,7 @@ class GraphDataset(Dataset):
         if self.task == targets.CLASSIF:
             if classes is None:
                 self.classes = [0, 1]
+                _log.info(f'Target classes set up to: {self.classes}')
             else:
                 self.classes = classes
 
