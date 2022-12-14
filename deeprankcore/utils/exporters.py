@@ -282,3 +282,4 @@ class HDF5OutputExporter(OutputExporter):
         df_epoch = pd.DataFrame(data=d_epoch)
 
         self.df = pd.concat([self.df, df_epoch])
+        self.df.reset_index(drop=True, inplace=True)
