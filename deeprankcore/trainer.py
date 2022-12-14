@@ -86,13 +86,14 @@ class Trainer():
         self.dataset_test = dataset_test
 
         if (val_size is not None) and (dataset_val is not None):
-            raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
+            warnings.warn("Validation and testing datasets were provided to Trainer; split_dataset parameter is ignored.")
+            _log.info("Validation and testing datasets were provided to Trainer; split_dataset parameter is ignored.")
 
         if pretrained_model is None:
             if self.dataset_train is None:
-                raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
+                raise ValueError("No training data specified. Training data is required if there is no pretrained model.")
             if self.neuralnet is None:
-                raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
+                raise ValueError("No neural network specified. Specifying a model framework is required if there is no pretrained model.")
 
             self.target = self.dataset_train.target
             self.task = self.dataset_train.task
@@ -100,7 +101,7 @@ class Trainer():
             self.classes_to_idx = self.dataset_train.classes_to_idx
             self.optimizer = None
             self.batch_size = batch_size
-            self.val_size = val_size            # if None, will be set to 0.25 in _divide_dataset function
+            self.val_size = val_size
             self.class_weights = class_weights
 
             self.shuffle = shuffle
