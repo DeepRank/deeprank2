@@ -111,7 +111,8 @@ trainer = Trainer(
     GINet,
     dataset_train,
     dataset_val,
-    dataset_test
+    dataset_test,
+    batch_size = 64
 )
 ```
 
@@ -177,7 +178,8 @@ trainer = Trainer(
     CustomNet,
     dataset_train,
     dataset_val,
-    dataset_test
+    dataset_test,
+    batch_size = 64
 )
 
 trainer.train(nepoch=50)
