@@ -60,7 +60,7 @@ class GraphDataset(Dataset):
         node_features: Union[List[str], str] = "all",
         edge_features: Union[List[str], str] = "all",
         clustering_method: str = "mcl",
-        classes: List = None,
+        classes: Union[List[str], List[int], List[float]] = None,
         tqdm: bool = True,
         root: str = "./",
         transform: Callable = None,
