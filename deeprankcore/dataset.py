@@ -120,10 +120,9 @@ class GraphDataset(Dataset):
             edge_features_transform (function, optional): transformation applied to the edge features.
                 Defaults to lambdax:np.tanh(-x/2+2)+1.
 
-            target_transform (bool, optional): Bool to decide whether or not to apply a sigmoid transformation to the
-                target (for regression only). If True, first a log and then a sigmoid transformations
-                are applied to the target. This can result in a more uniform target distribution,
-                can speed up the optimization and puts target value between 0 and 1.
+            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
+                This puts the target value between 0 and 1, and can result in 
+                a more uniform target distribution and speed up the optimization.
                 Defaults to False.
 
             target_filter (dictionary, optional): Dictionary of type [target: cond] to filter the molecules.
