@@ -10,6 +10,8 @@ from deeprankcore.domain import (
 
 _log = logging.getLogger(__name__)
 
+# in case savinbg the pd df into feather works (on Snellius, my home, the script read_hdf5_to_pandas.py),
+# remember to add here a function and add pyarrow to the package's dependencies
 
 def hdf5_to_pandas(
     hdf5_path: Union[str,List],
