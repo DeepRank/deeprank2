@@ -4,7 +4,7 @@ This module holds the classes that are used when working with a 3D grid.
 
 
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union
 import numpy as np
 import h5py
 import itertools
@@ -221,14 +221,25 @@ class Grid:
         self,
         position: np.ndarray,
         feature_name: str,
-        feature_value: np.ndarray,
+        feature_value: Union[np.ndarray, float],
         method: MapMethod,
     ):
-        "Maps point feature data at a given position to the grid, using the given method."
+        """
+        Maps point feature data at a given position to the grid, using the given method.
+        The feature_value should either be a single number or a one-dimensional array
+        """
 
-        for index, value in enumerate(feature_value):
+        # determine whether we're dealing with a single number of multiple numbers:
+        index_names_values = []
+        if isinstance(feature_value, float):
+            index_names_values = [(feature_name, feature_value)]
+        else:
+            for index, value in enumerate(feature_value):
+                index_name = f"{feature_name}_{index:03d}"
+                index_names_values.append((index_name, value))
 
-            index_name = f"{feature_name}_{index:03d}"
+        # map the data to the grid
+        for index_name, value in index_names_values:
 
             if method == MapMethod.GAUSSIAN:
                 grid_data = self._get_mapped_feature_gaussian(position, value)

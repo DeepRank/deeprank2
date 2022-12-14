@@ -38,10 +38,13 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
     # add features to the nodes and edge
     node_feature_name = "node_features"
     edge_feature_name = "edge_features"
+    node_feature_singlevalue_name = "singlevalue_features"
 
     node0.features[node_feature_name] = np.array([0.1])
     node1.features[node_feature_name] = np.array([1.0])
     edge01.features[edge_feature_name] = np.array([2.0])
+    node0.features[node_feature_singlevalue_name] = 1.0
+    node1.features[node_feature_singlevalue_name] = 0.0
 
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
