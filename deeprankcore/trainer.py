@@ -698,7 +698,7 @@ class Trainer():
         torch.save(state, filename)
 
 
-def _divide_dataset(dataset: GraphDataset, val_size: Union[float, int] = None):
+def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
@@ -711,36 +711,34 @@ def _divide_dataset(dataset: GraphDataset, val_size: Union[float, int] = None):
         GraphDataset: [description]
     """
 
-    if val_size is None:
-        val_size = 0.25
+    if splitsize is None:
+        splitsize = 0.25
     full_size = len(dataset)
 
     # find number of datapoints to include in training dataset
-    if isinstance (val_size, float):
-        n_val = int(val_size * full_size)
-    elif isinstance (val_size, int):
-        n_val = val_size
+    if isinstance (splitsize, float):
+        n_split = int(splitsize * full_size)
+    elif isinstance (splitsize, int):
+        n_split = splitsize
     else:
-        raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
+        raise TypeError (f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
     
     # raise exception if no training data or negative validation size
-    if n_val >= full_size or n_val < 0:
-        raise ValueError ("invalid val_size. \n\t" +
-            f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
+    if n_split >= full_size or n_split < 0:
+        raise ValueError ("invalid splitsize. \n\t" +
+            f"splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)")
 
-    if val_size == 0:
-        dataset_train = dataset
-        dataset_val = None
+    if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint
+        dataset_main = dataset
+        dataset_split = None
     else:
-        index = np.arange(full_size)
-        np.random.shuffle(index)
+        indices = np.arange(full_size)
+        np.random.shuffle(indices)
 
-        index_train, index_val = index[n_val:], index[:n_val]
+        dataset_main = copy.deepcopy(dataset)
+        dataset_main.index_complexes = [dataset.index_complexes[i] for i in indices[n_split:]]
 
-        dataset_train = copy.deepcopy(dataset)
-        dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
+        dataset_split = copy.deepcopy(dataset)
+        dataset_split.index_complexes = [dataset.index_complexes[i] for i in indices[:n_split]]
 
-        dataset_val = copy.deepcopy(dataset)
-        dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
-
-    return dataset_train, dataset_val
+    return dataset_main, dataset_split
