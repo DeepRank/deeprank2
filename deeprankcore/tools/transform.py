@@ -99,17 +99,40 @@ def hdf5_to_pandas(
 
             features = node_features + edge_features + target_features
             df_dict = {}
+            mol_0 = list(f.keys())[0]
+
             for feat in features:
+
                 df_dict['id'] = []
-                df_dict[feat] = []
+
+                if feat in node_features:
+                    feat_type = 'node_features'
+                elif feat in edge_features:
+                    feat_type = 'edge_features'
+                else:
+                    feat_type = 'target_values'
+
+                dim = f[mol_0][feat_type][feat][()].ndim
+                # create columns for ndarrays with axis 1 of dimension 2
+                if dim == 2:
+                    for i in range(f[mol_0][feat_type][feat][:].shape[1]):
+                        df_dict[feat + '_' + str(i)] = []
+                else:
+                    df_dict[feat] = []
+
                 for mol in f.keys():
-                    if feat in node_features:
-                        df_dict[feat].append(f[mol]['node_features'][feat][:])
-                    elif feat in edge_features:
-                        df_dict[feat].append(f[mol]['edge_features'][feat][:])
+        
+                    if dim == 0:
+                        df_dict[feat].append(f[mol][feat_type][feat][()])
+                    elif dim == 1:
+                        df_dict[feat].append(f[mol][feat_type][feat][:])
                     else:
-                        df_dict[feat].append(f[mol]['target_values'][feat][()])
+                        for i in range(f[mol_0][feat_type][feat][:].shape[1]):
+                            df_dict[feat + '_' + str(i)].append(f[mol][feat_type][feat][:][:,i])
+
                     df_dict['id'].append(mol)
+
             df = pd.DataFrame(data=df_dict)
             df_final = pd.concat([df_final, df])
+
     return df_final
