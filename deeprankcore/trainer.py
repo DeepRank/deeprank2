@@ -31,7 +31,6 @@ class Trainer():
                 pretrained_model: str = None,
                 batch_size: int = 32,
                 shuffle: bool = True,
-                transform_sigmoid: Optional[bool] = False,
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
         """Class from which the network is trained, evaluated and tested
@@ -65,9 +64,6 @@ class Trainer():
             batch_size (int, optional): defaults to 32.
 
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
-
-            transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
-                This can speed up the optimization and puts the value between 0 and 1.
 
             output_exporters: the output exporters to use for saving/exploring/plotting predictions/targets/losses
                 over the epochs. Defaults to HDF5OutputExporter, which saves all the results in an hdf5 file stored
@@ -104,7 +100,6 @@ class Trainer():
             self.class_weights = class_weights
 
             self.shuffle = shuffle
-            self.transform_sigmoid = transform_sigmoid
 
             self.subset = self.dataset_train.subset
             self.node_features = self.dataset_train.node_features
@@ -596,13 +591,7 @@ class Trainer():
             ).to(self.device)
 
         elif self.task == targets.REGRESS:
-            if self.transform_sigmoid is True:
-
-                # Sigmoid(x) = 1 / (1 + exp(-x))
-                pred = torch.sigmoid(pred.reshape(-1))
-
-            else:
-                pred = pred.reshape(-1)
+            pred = pred.reshape(-1)
 
         if target is not None:
             target = target.to(self.device)
@@ -654,7 +643,6 @@ class Trainer():
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
         self.clustering_method = state["clustering_method"]
-        self.transform_sigmoid = state["transform_sigmoid"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
@@ -683,8 +671,7 @@ class Trainer():
             "weight_decay": self.weight_decay,
             "subset": self.subset,
             "shuffle": self.shuffle,
-            "clustering_method": self.clustering_method,
-            "transform_sigmoid": self.transform_sigmoid,
+            "clustering_method": self.clustering_method
         }
 
         torch.save(state, filename)
