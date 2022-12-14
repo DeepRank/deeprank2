@@ -20,7 +20,7 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-    def __init__( # pylint: disable=too-many-arguments, too-many-branches, too-many-statements
+    def __init__( # pylint: disable=too-many-arguments, too-many-branches
                 self,
                 neuralnet = None,
                 dataset_train: GraphDataset = None,
