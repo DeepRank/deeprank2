@@ -592,7 +592,7 @@ class Trainer():
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
-                [self.classes_to_idx[int(x)] if ~isinstance(x, str) else self.classes_to_idx[x] for x in target]
+                [self.classes_to_idx[x] if isinstance(x, str) else self.classes_to_idx[int(x)] for x in target]
             ).to(self.device)
 
         elif self.task == targets.REGRESS:
