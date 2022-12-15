@@ -59,7 +59,7 @@ class GraphDataset(Dataset):
         task: str = None,
         node_features: Union[List[str], str] = "all",
         edge_features: Union[List[str], str] = "all",
-        clustering_method: str = "mcl",
+        clustering_method: str = None,
         classes: Union[List[str], List[int], List[float]] = None,
         tqdm: bool = True,
         root: str = "./",
@@ -107,7 +107,7 @@ class GraphDataset(Dataset):
                 The latter tensor is saved into the hdf5 file as a Dataset called "depth_1". Both "depth_0" and "depth_1"
                 Datasets belong to the "cluster" Group. They are saved in the hdf5 file to make them available to networks
                 that make use of clustering methods.
-                Defaults to "mcl".
+                Defaults to None.
 
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
