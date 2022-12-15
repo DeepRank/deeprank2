@@ -20,18 +20,18 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__( # pylint: disable=too-many-arguments, too-many-branches
                 self,
                 neuralnet = None,
                 dataset_train: GraphDataset = None,
                 dataset_val: GraphDataset = None,
                 dataset_test: GraphDataset = None,
                 val_size: Union[float,int] = None,
+                test_size: Union[float,int] = 0,
                 class_weights: bool = False,
                 pretrained_model: str = None,
                 batch_size: int = 32,
                 shuffle: bool = True,
-                transform_sigmoid: Optional[bool] = False,
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
         """Class from which the network is trained, evaluated and tested
@@ -51,11 +51,15 @@ class Trainer():
 
             dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
 
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int)
-                to use for validation.
-                - Should be set to 0 if no validation set is needed.
-                - Should be not set (None) if dataset_val is not None.
-                Defaults to None, and it is set to 0.25 in _divide_dataset function if no dataset_val is provided.
+            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+                Only used if dataset_val is not specified. 
+                Can be set to 0 if no validation set is needed.
+                Defaults to to 0.25 (in _divide_dataset function).
+
+            test_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for test dataset. 
+                Only used if dataset_test is not specified. 
+                Can be set to 0 if no test set is needed.
+                Defaults to to 0 (i.e., no test data).
 
             class_weights (bool): assign class weights based on the dataset content. 
                 Defaults to False.
@@ -65,9 +69,6 @@ class Trainer():
             batch_size (int, optional): defaults to 32.
 
             shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
-
-            transform_sigmoid: whether or not to apply a sigmoid transformation to the output (for regression only). 
-                This can speed up the optimization and puts the value between 0 and 1.
 
             output_exporters: the output exporters to use for saving/exploring/plotting predictions/targets/losses
                 over the epochs. Defaults to HDF5OutputExporter, which saves all the results in an hdf5 file stored
@@ -81,18 +82,31 @@ class Trainer():
             self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
 
         self.neuralnet = neuralnet
-        self.dataset_train = dataset_train
-        self.dataset_val = dataset_val
-        self.dataset_test = dataset_test
+        self.val_size = val_size
+        self.test_size = test_size
+
+        if test_size > 0:
+            if dataset_test is None:
+                self.dataset_train, self.dataset_test = _divide_dataset(self.dataset_train, self.test_size)
+            else:
+                warnings.warn("Test dataset was provided to Trainer; test_size parameter is ignored.")
+                _log.info("Test dataset was provided to Trainer; test_size parameter is ignored.")
+                self.test_size = 0
+        else:
+            self.dataset_train = dataset_train
+            self.dataset_test = dataset_test
 
         if (val_size is not None) and (dataset_val is not None):
-            raise ValueError("Because a validation dataset has been assigned to dataset_val, val_size should not be used.")
+            warnings.warn("Validation dataset was provided to Trainer; val_size parameter is ignored.")
+            _log.info("Validation dataset was provided to Trainer; val_size parameter is ignored.")
+            self.val_size = None
+        self.dataset_val = dataset_val
 
         if pretrained_model is None:
             if self.dataset_train is None:
-                raise ValueError("No pretrained model uploaded. You need to upload a training dataset.")
+                raise ValueError("No training data specified. Training data is required if there is no pretrained model.")
             if self.neuralnet is None:
-                raise ValueError("No pretrained model uploaded. You need to upload a neural network class to be trained.")
+                raise ValueError("No neural network specified. Specifying a model framework is required if there is no pretrained model.")
 
             self.target = self.dataset_train.target
             self.task = self.dataset_train.task
@@ -100,12 +114,8 @@ class Trainer():
             self.classes_to_idx = self.dataset_train.classes_to_idx
             self.optimizer = None
             self.batch_size = batch_size
-            self.val_size = val_size            # if None, will be set to 0.25 in _divide_dataset function
             self.class_weights = class_weights
-
             self.shuffle = shuffle
-            self.transform_sigmoid = transform_sigmoid
-
             self.subset = self.dataset_train.subset
             self.node_features = self.dataset_train.node_features
             self.edge_features = self.dataset_train.edge_features
@@ -155,7 +165,7 @@ class Trainer():
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     self.dataset_train, self.dataset_val = _divide_dataset(
-                        self.dataset_train, val_size=self.val_size)
+                        self.dataset_train, splitsize=self.val_size)
             else:
                 raise ValueError(
                     "Invalid node clustering method. \n\t"
@@ -596,13 +606,7 @@ class Trainer():
             ).to(self.device)
 
         elif self.task == targets.REGRESS:
-            if self.transform_sigmoid is True:
-
-                # Sigmoid(x) = 1 / (1 + exp(-x))
-                pred = torch.sigmoid(pred.reshape(-1))
-
-            else:
-                pred = pred.reshape(-1)
+            pred = pred.reshape(-1)
 
         if target is not None:
             target = target.to(self.device)
@@ -646,6 +650,7 @@ class Trainer():
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
+        self.test_size = state["test_size"]
         self.lr = state["lr"]
         self.weight_decay = state["weight_decay"]
         self.subset = state["subset"]
@@ -654,7 +659,6 @@ class Trainer():
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
         self.clustering_method = state["clustering_method"]
-        self.transform_sigmoid = state["transform_sigmoid"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
@@ -679,18 +683,18 @@ class Trainer():
             "class_weights": self.class_weights,
             "batch_size": self.batch_size,
             "val_size": self.val_size,
+            "test_size": self.test_size,
             "lr": self.lr,
             "weight_decay": self.weight_decay,
             "subset": self.subset,
             "shuffle": self.shuffle,
-            "clustering_method": self.clustering_method,
-            "transform_sigmoid": self.transform_sigmoid,
+            "clustering_method": self.clustering_method
         }
 
         torch.save(state, filename)
 
 
-def _divide_dataset(dataset: GraphDataset, val_size: Union[float, int] = None):
+def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
     """Divides the dataset into a training set and an evaluation set
 
     Args:
@@ -703,36 +707,34 @@ def _divide_dataset(dataset: GraphDataset, val_size: Union[float, int] = None):
         GraphDataset: [description]
     """
 
-    if val_size is None:
-        val_size = 0.25
+    if splitsize is None:
+        splitsize = 0.25
     full_size = len(dataset)
 
     # find number of datapoints to include in training dataset
-    if isinstance (val_size, float):
-        n_val = int(val_size * full_size)
-    elif isinstance (val_size, int):
-        n_val = val_size
+    if isinstance (splitsize, float):
+        n_split = int(splitsize * full_size)
+    elif isinstance (splitsize, int):
+        n_split = splitsize
     else:
-        raise TypeError (f"type(val_size) must be float, int or None ({type(val_size)} detected.)")
+        raise TypeError (f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
     
     # raise exception if no training data or negative validation size
-    if n_val >= full_size or n_val < 0:
-        raise ValueError ("invalid val_size. \n\t" +
-            f"val_size must be a float between 0 and 1 OR an int smaller than the size of the dataset used ({full_size})")
+    if n_split >= full_size or n_split < 0:
+        raise ValueError ("invalid splitsize. \n\t" +
+            f"splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)")
 
-    if val_size == 0:
-        dataset_train = dataset
-        dataset_val = None
+    if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint
+        dataset_main = dataset
+        dataset_split = None
     else:
-        index = np.arange(full_size)
-        np.random.shuffle(index)
+        indices = np.arange(full_size)
+        np.random.shuffle(indices)
 
-        index_train, index_val = index[n_val:], index[:n_val]
+        dataset_main = copy.deepcopy(dataset)
+        dataset_main.index_complexes = [dataset.index_complexes[i] for i in indices[n_split:]]
 
-        dataset_train = copy.deepcopy(dataset)
-        dataset_train.index_complexes = [dataset.index_complexes[i] for i in index_train]
+        dataset_split = copy.deepcopy(dataset)
+        dataset_split.index_complexes = [dataset.index_complexes[i] for i in indices[:n_split]]
 
-        dataset_val = copy.deepcopy(dataset)
-        dataset_val.index_complexes = [dataset.index_complexes[i] for i in index_val]
-
-    return dataset_train, dataset_val
+    return dataset_main, dataset_split
