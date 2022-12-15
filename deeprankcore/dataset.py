@@ -98,9 +98,16 @@ class GraphDataset(Dataset):
                 or some defined edge features (provide a list, example: ["dist", "coulomb"]).
                 The complete list can be found in deeprankcore/domain/features.py
 
-            clustering_method (str, optional): perform node clustering ('mcl', Markov Clustering,
-                or 'louvain' algorithm). Note that this parameter can be None only if the neural
-                network doesn't expects clusters (e.g. naive_gnn). Defaults to "mcl".
+            clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
+                or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
+                In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates
+                a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved
+                in the hdf5 file as a Dataset called "depth_0". Then, all cluster members beloging to the same community are
+                pooled into a single node, and the resulting tensor is used to find communities among the pooled clusters.
+                The latter tensor is saved into the hdf5 file as a Dataset called "depth_1". Both "depth_0" and "depth_1"
+                Datasets belong to the "cluster" Group. They are saved in the hdf5 file to make them available to networks
+                that make use of clustering methods.
+                Defaults to "mcl".
 
             classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
 
