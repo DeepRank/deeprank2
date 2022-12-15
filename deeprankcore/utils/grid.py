@@ -4,7 +4,7 @@ This module holds the classes that are used when working with a 3D grid.
 
 
 from enum import Enum
-from typing import Dict, Union
+from typing import Dict, Union, List
 import numpy as np
 import h5py
 import itertools
@@ -33,20 +33,23 @@ class GridSettings:
      - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
-    def __init__(self, points_counts: np.array, sizes: np.array):
+    def __init__(self, points_counts: List[int], sizes: List[float]):
+        assert len(points_counts) == 3
+        assert len(sizes) == 3
+
         self._points_counts = points_counts
         self._sizes = sizes
 
     @property
-    def resolutions(self) -> float:
-        return self._sizes / self._points_counts
+    def resolutions(self) -> List[float]:
+        return [self._sizes[i] / self._points_counts[i] for i in range(3)]
 
     @property
-    def sizes(self) -> float:
-        return self._sizes
+    def sizes(self) -> List[float]:
+        return self._sizes.tolist()
 
     @property
-    def points_counts(self) -> int:
+    def points_counts(self) -> List[int]:
         return self._points_counts
 
 
