@@ -32,9 +32,8 @@ class TestDataSet(unittest.TestCase):
 
         assert len(dataset) == 4
 
-        feature_data, target_data = dataset[0]
-        assert feature_data[Efeat.VANDERWAALS].shape == (20, 20, 20)
-        assert isinstance(target_data[targets.IRMSD], float)
+        assert dataset[0].x.shape == (2, 20, 20, 20)  # 2 features with grid box dimensions
+        assert dataset[0].y.shape == (1,)
 
     def test_dataset_filter(self):
         GraphDataset(

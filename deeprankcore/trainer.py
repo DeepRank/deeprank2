@@ -10,11 +10,12 @@ import torch
 from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
-from torch_geometric.loader import DataLoader
+from torch_geometric.data import DataLoader
+
 from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
 from deeprankcore.domain import targetstorage as targets
-from deeprankcore.dataset import GraphDataset
+from deeprankcore.dataset import GraphDataset, GridDataset
 
 _log = logging.getLogger(__name__)
 
@@ -23,9 +24,9 @@ class Trainer():
     def __init__( # pylint: disable=too-many-arguments, too-many-branches
                 self,
                 neuralnet = None,
-                dataset_train: GraphDataset = None,
-                dataset_val: GraphDataset = None,
-                dataset_test: GraphDataset = None,
+                dataset_train: Union[GraphDataset, GridDataset] = None,
+                dataset_val: Union[GraphDataset, GridDataset] = None,
+                dataset_test: Union[GraphDataset, GridDataset] = None,
                 val_size: Union[float,int] = None,
                 test_size: Union[float,int] = 0,
                 class_weights: bool = False,
@@ -42,14 +43,14 @@ class Trainer():
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
 
-            dataset_train (GraphDataset object, optional): training set used during training.
+            dataset_train (deeprank dataset object, optional): training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
 
-            dataset_val (GraphDataset object, optional): evaluation set used during training.
+            dataset_val (deeprank dataset object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
 
-            dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
+            dataset_test (deeprank dataset object, optional): independent evaluation set. Defaults to None.
 
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
                 Only used if dataset_val is not specified. 
@@ -111,15 +112,12 @@ class Trainer():
             self.target = self.dataset_train.target
             self.task = self.dataset_train.task
             self.classes = self.dataset_train.classes
-            self.classes_to_idx = self.dataset_train.classes_to_idx
+            self.classes_to_index = self.dataset_train.classes_to_index
             self.optimizer = None
             self.batch_size = batch_size
             self.class_weights = class_weights
             self.shuffle = shuffle
             self.subset = self.dataset_train.subset
-            self.node_features = self.dataset_train.node_features
-            self.edge_features = self.dataset_train.edge_features
-            self.clustering_method = self.dataset_train.clustering_method
             self.epoch_saved_model = None
 
             if self.target is None:
@@ -148,7 +146,6 @@ class Trainer():
 
 
     def _load_model(self):
-        
         """
         Loads model
 
@@ -156,8 +153,8 @@ class Trainer():
             ValueError: Invalid node clustering method.
         """
 
-        if self.clustering_method is not None:
-            if self.clustering_method in ('mcl', 'louvain'):
+        if isinstance(self.dataset_train, GraphDataset) and self.dataset_train.clustering_method is not None:
+            if self.dataset_train.clustering_method in ('mcl', 'louvain'):
                 _log.info("Loading clusters")
                 self._precluster(self.dataset_train)
                 if self.dataset_val is not None:
@@ -203,22 +200,38 @@ class Trainer():
         self.set_loss()
 
     def _check_dataset_equivalence(self):
-        for other in [self.dataset_val, self.dataset_test]:
-            if other is not None:
-                if (other.target == self.target # pylint: disable = too-many-boolean-expressions
-                    and other.node_features == self.node_features
-                    and other.edge_features == self.edge_features
-                    and other.clustering_method == self.clustering_method
-                    and other.task == self.task
-                    and other.classes == self.classes
-                    ):
-                    pass
-                else:
-                    raise ValueError(
-                        f"""Training dataset is not equivalent to {other}.\n
-                        Check datasets passed to Trainer class and ensure that the same (non-default) \n
-                        target, node_features, edge_features, clustering_method, task, and classes are used."""
+        for other_dataset in [self.dataset_val, self.dataset_test]:
+            if other_dataset is not None:
+
+                if isinstance(self.dataset_train, GraphDataset) and isinstance(other_dataset, GraphDataset):
+
+                    if (other_dataset.target != self.dataset_train.target  # pylint: disable = too-many-boolean-expressions
+                        or other_dataset.node_features != self.dataset_train.node_features
+                        or other_dataset.edge_features != self.dataset_train.edge_features
+                        or other_dataset.clustering_method != self.dataset_train.clustering_method
+                        or other_dataset.task != self.dataset_train.task
+                        or other_dataset.classes != self.dataset_train.classes):
+
+                        raise ValueError(
+                            f"""Training dataset is not equivalent to {other_dataset}.\n
+                            Check datasets passed to Trainer class and ensure that the same (non-default)\n
+                            target, node_features, edge_features, clustering_method, task, and classes are used."""
                         )
+
+                elif isinstance(self.dataset_train, GridDataset) and isinstance(other_dataset, GridDataset):
+
+                    if (other_dataset.target == self.dataset_train.target  # pylint: disable = too-many-boolean-expressions
+                        or other_dataset.features == self.dataset_train.features
+                        or other_dataset.task == self.dataset_train.task
+                        or other_dataset.classes == self.dataset_train.classes):
+
+                        raise ValueError(
+                            f"""Training dataset is not equivalent to {other_dataset}.\n
+                            Check datasets passed to Trainer class and ensure that the same (non-default)\n
+                            target, features, task, and classes are used."""
+                        )
+                else:
+                    raise ValueError("Datasets are not the same type. Make sure to use only graph or only grid datasets")
 
     def _load_pretrained_model(self):
         """
@@ -276,7 +289,7 @@ class Trainer():
 
             f5.close()
 
-    def _put_model_to_device(self, dataset: GraphDataset):
+    def _put_model_to_device(self, dataset: Union[GraphDataset, GridDataset]):
         """
         Puts the model on the available device
 
@@ -294,7 +307,13 @@ class Trainer():
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
-        self.num_edge_features = len(self.edge_features)
+        # regression mode
+        if self.task == targets.REGRESS:
+            self.output_shape = 1
+
+        # classification mode
+        elif self.task == targets.CLASSIF:
+            self.output_shape = len(self.classes)
 
         # the target values are optional
         if dataset.get(0).y is not None:
@@ -302,23 +321,21 @@ class Trainer():
         else:
             target_shape = None
 
-        # regression mode
-        if self.task == targets.REGRESS:
-            self.output_shape = 1
+        if isinstance(dataset, GraphDataset):
+
+            self.num_edge_features = len(self.edge_features)
+
             self.model = self.neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
                 self.num_edge_features
             ).to(self.device)
 
-        # classification mode
-        elif self.task == targets.CLASSIF:
-            self.output_shape = len(self.classes)
-            self.model = self.neuralnet(
-                dataset.get(0).num_features,
-                self.output_shape,
-                self.num_edge_features
-            ).to(self.device)
+        elif isinstance(dataset, GridDataset):
+            self.model = self.neuralnet(dataset.get(0).x.shape).to(self.device)
+
+        else:
+            raise TypeError(type(dataset))
 
         # check for compatibility
         for output_exporter in self._output_exporters:
@@ -480,7 +497,7 @@ class Trainer():
         outputs = []
         entry_names = []
         t0 = time()
-        for _, data_batch in enumerate(self.train_loader):
+        for data_batch in self.train_loader:
             data_batch = data_batch.to(self.device)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
@@ -548,12 +565,12 @@ class Trainer():
         for _, data_batch in enumerate(loader):
             data_batch = data_batch.to(self.device)
             pred = self.model(data_batch)
-            pred, data_batch.y = self._format_output(pred, data_batch.y)
+            pred, y = self._format_output(pred, data_batch.y)
 
             # Check if a target value was provided (i.e. benchmarck scenario)
-            if data_batch.y is not None:
-                target_vals += data_batch.y.tolist()
-                loss_ = loss_func(pred, data_batch.y)
+            if y is not None:
+                target_vals += y.tolist()
+                loss_ = loss_func(pred, y)
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
 
@@ -645,8 +662,6 @@ class Trainer():
 
         state = torch.load(self.pretrained_model, map_location=torch.device(self.device))
 
-        self.node_features = state["node_features"]
-        self.edge_features = state["edge_features"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
@@ -675,8 +690,6 @@ class Trainer():
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
-            "node_features": self.node_features,
-            "edge_features": self.edge_features,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,

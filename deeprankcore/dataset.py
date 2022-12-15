@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 import h5py
 from typing import Dict, Callable, List, Union, Optional, Tuple
+from collections.abc import Mapping
 
 from tqdm import tqdm
 from ast import literal_eval
@@ -181,12 +182,12 @@ class GraphDataset(Dataset):
         data = self.load_one_graph(fname, mol)
         return data
 
-    def load_one_graph(self, fname, mol): # noqa
+    def load_one_graph(self, fname, entry_name): # noqa
         """Loads one graph
 
         Args:
             fname (str): hdf5 file name
-            mol (str): name of the molecule
+            entry_name (str): name of the entry
 
         Returns:
             Data object or None: torch_geometric Data object containing the node features,
@@ -195,7 +196,7 @@ class GraphDataset(Dataset):
         """
 
         with h5py.File(fname, 'r') as f5:
-            grp = f5[mol]
+            grp = f5[entry_name]
 
             # node features
             node_data = ()
@@ -252,7 +253,7 @@ class GraphDataset(Dataset):
 
                 else:
                     possible_targets = grp[targets.VALUES].keys()
-                    raise ValueError(f"Target {self.target} missing in entry {mol} in file {fname}, possible targets are {possible_targets}." +
+                    raise ValueError(f"Target {self.target} missing in entry {entry_name} in file {fname}, possible targets are {possible_targets}." +
                                      "\n Use the query class to add more target values to input data.")
 
             # positions
@@ -288,8 +289,8 @@ class GraphDataset(Dataset):
         data.cluster0 = cluster0
         data.cluster1 = cluster1
 
-        # mol name
-        data.mol = mol
+        # entry name
+        data.entry_name = entry_name
 
         # apply transformation
         if self._transform is not None:
@@ -339,12 +340,12 @@ class GraphDataset(Dataset):
             else:
                 self.classes = classes
 
-            self.classes_to_idx = {
-                i: idx for idx, i in enumerate(self.classes)
+            self.classes_to_index = {
+                class_: index for index, class_ in enumerate(self.classes)
             }
         else:
             self.classes = None
-            self.classes_to_idx = None
+            self.classes_to_index = None
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -693,7 +694,7 @@ class GridDataset(Dataset):
         """
         return len(self.index_entries)
 
-    def get(self, index: int) -> Tuple[Dict[str, np.array], Dict[str, np.array]]:
+    def get(self, index: int) -> Data:
         """Gets one entry from its unique index.
 
         Args:
@@ -703,27 +704,29 @@ class GridDataset(Dataset):
         """
 
         file_path, entry_name = self.index_entries[index]
-        return GridDataset.load_one_entry(file_path, entry_name)
+        return self.load_one_entry(file_path, entry_name)
 
-    @staticmethod
-    def load_one_entry(hdf5_path: str, entry_name: str) -> Tuple[Dict[str, np.array], Dict[str, np.array]]:
+    def load_one_entry(self, hdf5_path: str, entry_name: str) -> Data:
         "Load the features and targets of a single entry."
 
-        feature_data = {}
-        target_data = {}
+        feature_data = []
+        target_value = None
 
         with h5py.File(hdf5_path, 'r') as hdf5_file:
             entry_group = hdf5_file[entry_name]
 
             mapped_features_group = entry_group[gridstorage.MAPPED_FEATURES]
-            for feature_name, feature_group in mapped_features_group.items():
-                feature_data[feature_name] = feature_group[gridstorage.FEATURE_VALUE][:]
+            for feature_name in self.features:
+                feature_data.append(mapped_features_group[feature_name][gridstorage.FEATURE_VALUE][:])
 
-            targets_group = entry_group[targets.VALUES]
-            for target_name, target_dataset in targets_group.items():
-                target_data[target_name] = target_dataset[()]
+            target_value = [entry_group[targets.VALUES][self.target][()]]
 
-        return (feature_data, target_data)
+        data = Data(x=torch.tensor(feature_data, dtype=torch.float).to(self.device),
+                    y=torch.tensor(target_value, dtype=torch.float).to(self.device))
+
+        data.entry_name = entry_name
+
+        return data
 
     def _filter_targets(self, entry_group: h5py.Group) -> bool:
         """Filters the entry according to a dictionary.
