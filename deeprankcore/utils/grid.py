@@ -4,7 +4,7 @@ This module holds the classes that are used when working with a 3D grid.
 
 
 from enum import Enum
-from typing import Dict, Union
+from typing import Dict, Union, List
 import numpy as np
 import h5py
 import itertools
@@ -27,26 +27,30 @@ class GridSettings:
     """Objects of this class hold the settings to build a grid.
     The grid is basically a multi-divided 3D cube with
     the following properties:
-     - points_count: the number of points on one edge of the cube
-     - size: the length in Å of one edge of the cube
-     - resolution: the size in Å of one edge subdivision. Also the distance between two points on the edge.
+
+     - sizes: x, y, z sizes of the box in Å
+     - points_counts: the number of points on the x, y, z edges of the cube
+     - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
-    def __init__(self, points_count: int, size: float):
-        self._points_count = points_count
-        self._size = size
+    def __init__(self, points_counts: List[int], sizes: List[float]):
+        assert len(points_counts) == 3
+        assert len(sizes) == 3
+
+        self._points_counts = points_counts
+        self._sizes = sizes
 
     @property
-    def resolution(self) -> float:
-        return self._size / self._points_count
+    def resolutions(self) -> List[float]:
+        return [self._sizes[i] / self._points_counts[i] for i in range(3)]
 
     @property
-    def size(self) -> float:
-        return self._size
+    def sizes(self) -> List[float]:
+        return self._sizes.tolist()
 
     @property
-    def points_count(self) -> int:
-        return self._points_count
+    def points_counts(self) -> List[int]:
+        return self._points_counts
 
 
 class Grid:
@@ -69,19 +73,21 @@ class Grid:
     def _set_mesh(self, settings: GridSettings, center: np.array):
         "builds the grid points"
 
-        half_size = settings.size / 2
+        half_size_x = settings.sizes[0] / 2
+        half_size_y = settings.sizes[1] / 2
+        half_size_z = settings.sizes[2] / 2
 
-        min_x = center[0] - half_size
-        max_x = center[0] + half_size
-        self._xs = np.linspace(min_x, max_x, num=settings.points_count)
+        min_x = center[0] - half_size_x
+        max_x = center[0] + half_size_x
+        self._xs = np.linspace(min_x, max_x, num=settings.points_counts[0])
 
-        min_y = center[1] - half_size
-        max_y = center[1] + half_size
-        self._ys = np.linspace(min_y, max_y, num=settings.points_count)
+        min_y = center[1] - half_size_y
+        max_y = center[1] + half_size_y
+        self._ys = np.linspace(min_y, max_y, num=settings.points_counts[1])
 
-        min_z = center[2] - half_size
-        max_z = center[2] + half_size
-        self._zs = np.linspace(min_z, max_z, num=settings.points_count)
+        min_z = center[2] - half_size_z
+        max_z = center[2] + half_size_z
+        self._zs = np.linspace(min_z, max_z, num=settings.points_counts[2])
 
         self._ygrid, self._xgrid, self._zgrid = np.meshgrid(
             self._ys, self._xs, self._zs
