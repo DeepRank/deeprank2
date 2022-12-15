@@ -97,6 +97,6 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 assert "value" in mapped_group[feature_name]
                 data = mapped_group[feature_name]["value"][()]
                 assert len(np.nonzero(data)) > 0, f"{feature_name}: all zero"
-                assert np.all(data.shape == grid_settings.sizes)
+                assert np.all(data.shape == grid_settings.points_counts)
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
