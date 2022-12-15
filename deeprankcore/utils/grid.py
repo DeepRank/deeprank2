@@ -47,7 +47,7 @@ class GridSettings:
 
     @property
     def sizes(self) -> List[float]:
-        return self._sizes.tolist()
+        return self._sizes
 
     @property
     def points_counts(self) -> List[int]:
@@ -272,7 +272,7 @@ class Grid:
             grid_group = hdf5_file.require_group(self.id)
 
             # store grid points
-            points_group = grid_group.create_group("grid_points")
+            points_group = grid_group.require_group("grid_points")
             points_group.create_dataset("x", data=self.xs)
             points_group.create_dataset("y", data=self.ys)
             points_group.create_dataset("z", data=self.zs)
@@ -284,7 +284,7 @@ class Grid:
 
                 feature_group = features_group.require_group(feature_name)
                 feature_group.create_dataset(
-                    gridstorage.VALUE,
+                    gridstorage.FEATURE_VALUE,
                     data=feature_data,
                     compression="lzf",
                     chunks=True,

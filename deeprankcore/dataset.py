@@ -552,7 +552,6 @@ class GridDataset(Dataset):
         self.subset = subset
         self.target = target
         self.features = features
-        self.clustering_method = clustering_method
         self.tqdm = tqdm
 
         self._transform = transform
@@ -704,8 +703,9 @@ class GridDataset(Dataset):
         """
 
         file_path, entry_name = self.index_entries[index]
-        return self.load_one_entry(file_path, entry_name)
+        return GridDataset.load_one_entry(file_path, entry_name)
 
+    @staticmethod
     def load_one_entry(hdf5_path: str, entry_name: str) -> Tuple[Dict[str, np.array], Dict[str, np.array]]:
         "Load the features and targets of a single entry."
 
@@ -719,7 +719,7 @@ class GridDataset(Dataset):
             for feature_name, feature_group in mapped_features_group.items():
                 feature_data[feature_name] = feature_group[gridstorage.FEATURE_VALUE][:]
 
-            targets_group = entry_group[gridstorage.TARGETS]
+            targets_group = entry_group[targets.VALUES]
             for target_name, target_dataset in targets_group.items():
                 target_data[target_name] = target_dataset[()]
 
@@ -744,8 +744,8 @@ class GridDataset(Dataset):
 
         for target_name, target_condition in self.target_filter.items():
 
-            if target_name in entry_group[gridstorage.TARGETS]:
-                target_value = entry_group[gridstorage.TARGETS][target_name]
+            if target_name in entry_group[targets.VALUES]:
+                target_value = entry_group[targets.VALUES][target_name]
 
                 # If we have a given target_condition, see if it's met.
                 if isinstance(target_condition, str):
@@ -764,5 +764,5 @@ class GridDataset(Dataset):
                 _log.warning(f"   :Filter {target_name} not found for entry {entry_group}\n" +
                              "   :Filter options are:\n" +
                              "\n".join(["   :  "+ target_name
-                                        for target_name in entry_group[gridstorage.TARGETS].keys()]))
+                                        for target_name in entry_group[targets.VALUES].keys()]))
         return True
