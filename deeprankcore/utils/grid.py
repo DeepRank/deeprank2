@@ -10,6 +10,7 @@ import h5py
 import itertools
 from scipy.signal import bspline
 
+from deeprankcore.domain import gridstorage
 
 
 class MapMethod(Enum):
@@ -278,12 +279,12 @@ class Grid:
             points_group.create_dataset("center", data=self.center)
 
             # store grid features
-            features_group = grid_group.require_group("mapped_features")
+            features_group = grid_group.require_group(gridstorage.MAPPED_FEATURES)
             for feature_name, feature_data in self.features.items():
 
                 feature_group = features_group.require_group(feature_name)
                 feature_group.create_dataset(
-                    "value",
+                    gridstorage.VALUE,
                     data=feature_data,
                     compression="lzf",
                     chunks=True,
