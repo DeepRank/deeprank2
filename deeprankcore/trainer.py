@@ -1,5 +1,5 @@
 from time import time
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 import logging
 import warnings
 from tqdm import tqdm
@@ -98,8 +98,17 @@ class Trainer():
             self.dataset_test = dataset_test
 
         self.clustering_method = None
-        if isinstance(self.dataset_train, GraphDataset):
-            self.clustering_method = self.dataset_train.clustering_method
+        self.node_features = None
+        self.edge_features = None
+        self.features = None
+        for dataset in [self.dataset_train, self.dataset_test]:
+            if isinstance(dataset, GraphDataset):
+                self.clustering_method = dataset.clustering_method
+                self.node_features = dataset.node_features
+                self.edge_features = dataset.edge_features
+
+            elif isinstance(dataset, GridDataset):
+                self.features = dataset.features
 
         if (val_size is not None) and (dataset_val is not None):
             warnings.warn("Validation dataset was provided to Trainer; val_size parameter is ignored.")
@@ -207,8 +216,9 @@ class Trainer():
         self.set_loss()
 
     def _check_dataset_equivalence(self):
+
         if self.dataset_train is None:
-            return
+            return  # then we use only a test dataset
 
         for other_dataset_name, other_dataset in [("validation", self.dataset_val),
                                                   ("testing", self.dataset_test)]:
@@ -242,7 +252,8 @@ class Trainer():
                             target, features, task, and classes are used."""
                         )
                 else:
-                    raise ValueError(f"Training and {other_dataset_name} datasets are not the same type. Make sure to use only graph or only grid datasets")
+                    raise ValueError(f"Training and {other_dataset_name} datasets are not the same type.\n"
+                                     "Make sure to use only graph or only grid datasets")
 
     def _load_pretrained_model(self):
         """
@@ -266,7 +277,7 @@ class Trainer():
         Args:
             dataset (GraphDataset object)
         """
-        for fname, mol in tqdm(dataset.index_complexes):
+        for fname, mol in tqdm(dataset.index_entries):
             data = dataset.load_one_graph(fname, mol)
 
             if data is None:
@@ -334,18 +345,21 @@ class Trainer():
 
         if isinstance(dataset, GraphDataset):
 
+            num_node_features = dataset.get(0).num_features
             num_edge_features = len(dataset.edge_features)
 
             self.model = self.neuralnet(
-                dataset.get(0).num_features,
+                num_node_features,
                 self.output_shape,
                 num_edge_features
             ).to(self.device)
 
         elif isinstance(dataset, GridDataset):
-            batch_size, num_features, box_width, box_height, box_depth = dataset.get(0).x.shape
+            _, num_features, box_width, box_height, box_depth = dataset.get(0).x.shape
 
-            self.model = self.neuralnet(num_features, (box_width, box_height, box_depth)).to(self.device)
+            self.model = self.neuralnet(num_features,
+                                        (box_width, box_height, box_depth)
+            ).to(self.device)
         else:
             raise TypeError(type(dataset))
 
@@ -392,7 +406,7 @@ class Trainer():
         """
         Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification).
         """
-        
+
         if self.task == targets.REGRESS:
             self.loss = MSELoss()
 
@@ -564,7 +578,7 @@ class Trainer():
         Returns:
             running loss
         """
-        
+
         # Sets the module in evaluation mode
         self.model.eval()
         loss_func = self.loss
@@ -658,7 +672,7 @@ class Trainer():
                 )
             elif self.test_loader is None:
                 raise ValueError("No test dataset provided.")
-                
+
             # Run test
             self._eval(self.test_loader, 0, "testing")
 
@@ -685,10 +699,13 @@ class Trainer():
         self.task = state["task"]
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
-        self.clustering_method = state["clustering_method"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
+        self.clustering_method = state["clustering_method"]
+        self.node_features = state["node_features"]
+        self.edge_features = state["edge_features"]
+        self.features = state["features"]
 
 
     def save_model(self, filename='model.pth.tar'):
@@ -713,23 +730,24 @@ class Trainer():
             "weight_decay": self.weight_decay,
             "subset": self.subset,
             "shuffle": self.shuffle,
-            "clustering_method": self.clustering_method
+            "clustering_method": self.clustering_method,
+            "node_features": self.node_features,
+            "edge_features": self.edge_features,
+            "features": self.features
         }
 
         torch.save(state, filename)
 
 
-def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
+def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[float, int] = None) -> Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
+
     """Divides the dataset into a training set and an evaluation set
 
     Args:
-        dataset (GraphDataset): input dataset to be split into training and validation data
-        
+        dataset: input dataset to be split into training and validation data
+
         val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to 0.25.
-
-    Returns:
-        GraphDataset: [description]
     """
 
     if splitsize is None:
@@ -743,7 +761,7 @@ def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
         n_split = splitsize
     else:
         raise TypeError (f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
-    
+
     # raise exception if no training data or negative validation size
     if n_split >= full_size or n_split < 0:
         raise ValueError ("invalid splitsize. \n\t" +
@@ -757,9 +775,9 @@ def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
         np.random.shuffle(indices)
 
         dataset_main = copy.deepcopy(dataset)
-        dataset_main.index_complexes = [dataset.index_complexes[i] for i in indices[n_split:]]
+        dataset_main.index_entries = [dataset.index_entries[i] for i in indices[n_split:]]
 
         dataset_split = copy.deepcopy(dataset)
-        dataset_split.index_complexes = [dataset.index_complexes[i] for i in indices[:n_split]]
+        dataset_split.index_entries = [dataset.index_entries[i] for i in indices[:n_split]]
 
     return dataset_main, dataset_split

@@ -157,7 +157,7 @@ class GraphDataset(Dataset):
         # create the indexing system
         # alows to associate each mol to an index
         # and get fname and mol name from the index
-        self._create_index_molecules()
+        self._create_index_entries()
 
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -167,7 +167,7 @@ class GraphDataset(Dataset):
         Returns:
             int: number of complexes in the dataset
         """
-        return len(self.index_complexes)
+        return len(self.index_entries)
 
     def get(self, index): # pylint: disable=arguments-renamed
         """Gets one item from its unique index.
@@ -178,7 +178,7 @@ class GraphDataset(Dataset):
             dict: {'mol':[fname,mol],'feature':feature,'target':target}
         """
 
-        fname, mol = self.index_complexes[index]
+        fname, mol = self.index_entries[index]
         data = self.load_one_graph(fname, mol)
         return data
 
@@ -401,7 +401,7 @@ class GraphDataset(Dataset):
                     \nProbably, the feature wasn't generated during the preprocessing step. \
                     {miss_node_error}{miss_edge_error}")
 
-    def _create_index_molecules(self):
+    def _create_index_entries(self):
         """Creates the indexing of each molecule in the dataset.
 
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
@@ -409,7 +409,7 @@ class GraphDataset(Dataset):
         """
         _log.debug(f"Processing data set with hdf5 files: {self.hdf5_path}")
 
-        self.index_complexes = []
+        self.index_entries = []
 
         desc = f"   {self.hdf5_path}{' dataset':25s}"
         if self.tqdm:
@@ -431,7 +431,7 @@ class GraphDataset(Dataset):
 
                 for k in mol_names:
                     if self._filter(fh5[k]):
-                        self.index_complexes += [(fdata, k)]
+                        self.index_entries += [(fdata, k)]
                 fh5.close()
             except Exception:
                 _log.exception(f"on {fdata}")
