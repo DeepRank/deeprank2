@@ -4,7 +4,7 @@ import logging
 import warnings
 import numpy as np
 import h5py
-from typing import Callable, List, Union, Optional, Tuple
+from typing import Callable, List, Union, Optional
 
 from tqdm import tqdm
 from ast import literal_eval
@@ -747,7 +747,9 @@ class GridDataset(Dataset):
 
         for target_name, target_condition in self.target_filter.items():
 
-            if target_name in entry_group[targets.VALUES]:
+            present_target_names = list(entry_group[targets.VALUES].keys())
+
+            if target_name in present_target_names:
 
                 # If we have a given target_condition, see if it's met.
                 if isinstance(target_condition, str):
@@ -763,8 +765,6 @@ class GridDataset(Dataset):
                     raise ValueError("Conditions not supported", target_condition)
 
             else:
-                _log.warning(f"   :Filter {target_name} not found for entry {entry_group}\n" +
-                             "   :Filter options are:\n" +
-                             "\n".join([f"   :  {target_value}"
-                                        for target_value in entry_group[targets.VALUES].keys()]))
+                _log.warning(f"   :Filter {target_name} not found for entry {entry_group}\n"
+                             f"   :Filter options are: {present_target_names}")
         return True
