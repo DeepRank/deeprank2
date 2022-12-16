@@ -207,7 +207,11 @@ class Trainer():
         self.set_loss()
 
     def _check_dataset_equivalence(self):
-        for other_dataset in [self.dataset_val, self.dataset_test]:
+        if self.dataset_train is None:
+            return
+
+        for other_dataset_name, other_dataset in [("validation", self.dataset_val),
+                                                  ("testing", self.dataset_test)]:
             if other_dataset is not None:
 
                 if isinstance(self.dataset_train, GraphDataset) and isinstance(other_dataset, GraphDataset):
@@ -238,7 +242,7 @@ class Trainer():
                             target, features, task, and classes are used."""
                         )
                 else:
-                    raise ValueError("Datasets are not the same type. Make sure to use only graph or only grid datasets")
+                    raise ValueError(f"Training and {other_dataset_name} datasets are not the same type. Make sure to use only graph or only grid datasets")
 
     def _load_pretrained_model(self):
         """
@@ -330,12 +334,12 @@ class Trainer():
 
         if isinstance(dataset, GraphDataset):
 
-            self.num_edge_features = len(self.edge_features)
+            num_edge_features = len(dataset.edge_features)
 
             self.model = self.neuralnet(
                 dataset.get(0).num_features,
                 self.output_shape,
-                self.num_edge_features
+                num_edge_features
             ).to(self.device)
 
         elif isinstance(dataset, GridDataset):
