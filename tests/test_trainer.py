@@ -9,10 +9,10 @@ import torch
 import h5py
 from deeprankcore.trainer import Trainer, _divide_dataset
 from deeprankcore.dataset import GraphDataset, GridDataset
-from deeprankcore.neuralnets.ginet import GINet
-from deeprankcore.neuralnets.foutnet import FoutNet
-from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
-from deeprankcore.neuralnets.sgat import SGAT
+from deeprankcore.neuralnets.gnn.ginet import GINet
+from deeprankcore.neuralnets.gnn.foutnet import FoutNet
+from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprankcore.neuralnets.gnn.sgat import SGAT
 from deeprankcore.neuralnets.cnn.model3d import CnnRegression, CnnClassification
 from deeprankcore.utils.exporters import (
     HDF5OutputExporter,

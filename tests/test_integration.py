@@ -7,7 +7,7 @@ from tests._utils import PATH_TEST
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
 from deeprankcore.dataset import GraphDataset
 from deeprankcore.trainer import Trainer
-from deeprankcore.neuralnets.ginet import GINet
+from deeprankcore.neuralnets.gnn.ginet import GINet
 from deeprankcore.utils.exporters import HDF5OutputExporter
 from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
