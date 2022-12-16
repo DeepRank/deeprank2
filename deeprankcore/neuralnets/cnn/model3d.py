@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import torch
-import torch.nn as nn
+import torch.nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
@@ -23,20 +23,20 @@ from torch.autograd import Variable
 # ----------------------------------------------------------------------
 
 
-class CnnRegression(nn.Module):
+class CnnRegression(torch.nn.Module):
 
     def __init__(self, num_features: int, box_shape: Tuple[int]):
-        super(CnnRegression, self).__init__()
+        super().__init__()
 
-        self.convlayer_000 = nn.Conv3d(num_features, 4, kernel_size=2)
-        self.convlayer_001 = nn.MaxPool3d((2, 2, 2))
-        self.convlayer_002 = nn.Conv3d(4, 5, kernel_size=2)
-        self.convlayer_003 = nn.MaxPool3d((2, 2, 2))
+        self.convlayer_000 = torch.nn.Conv3d(num_features, 4, kernel_size=2)
+        self.convlayer_001 = torch.nn.MaxPool3d((2, 2, 2))
+        self.convlayer_002 = torch.nn.Conv3d(4, 5, kernel_size=2)
+        self.convlayer_003 = torch.nn.MaxPool3d((2, 2, 2))
 
         size = self._get_conv_output(num_features, box_shape)
 
-        self.fclayer_000 = nn.Linear(size, 84)
-        self.fclayer_001 = nn.Linear(84, 1)
+        self.fclayer_000 = torch.nn.Linear(size, 84)
+        self.fclayer_001 = torch.nn.Linear(84, 1)
 
     def _get_conv_output(self, num_features: int, shape: Tuple[int]):
         num_data_points = 2
@@ -76,20 +76,20 @@ class CnnRegression(nn.Module):
 # fc   layer   1: fc   | input  84  output  1  post None
 # ----------------------------------------------------------------------
 
-class CnnClassification(nn.Module):
+class CnnClassification(torch.nn.Module):
 
     def __init__(self, num_features, box_shape):
-        super(CnnClassification, self).__init__()
+        super().__init__()
 
-        self.convlayer_000 = nn.Conv3d(num_features, 4, kernel_size=2)
-        self.convlayer_001 = nn.MaxPool3d((2, 2, 2))
-        self.convlayer_002 = nn.Conv3d(4, 5, kernel_size=2)
-        self.convlayer_003 = nn.MaxPool3d((2, 2, 2))
+        self.convlayer_000 = torch.nn.Conv3d(num_features, 4, kernel_size=2)
+        self.convlayer_001 = torch.nn.MaxPool3d((2, 2, 2))
+        self.convlayer_002 = torch.nn.Conv3d(4, 5, kernel_size=2)
+        self.convlayer_003 = torch.nn.MaxPool3d((2, 2, 2))
 
         size = self._get_conv_output(num_features, box_shape)
 
-        self.fclayer_000 = nn.Linear(size, 84)
-        self.fclayer_001 = nn.Linear(84, 2)
+        self.fclayer_000 = torch.nn.Linear(size, 84)
+        self.fclayer_001 = torch.nn.Linear(84, 2)
 
     def _get_conv_output(self, num_features, shape):
         inp = Variable(torch.rand(1, num_features, *shape))

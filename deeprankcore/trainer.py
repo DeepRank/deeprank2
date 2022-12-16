@@ -227,11 +227,11 @@ class Trainer():
                 if isinstance(self.dataset_train, GraphDataset) and isinstance(other_dataset, GraphDataset):
 
                     if (other_dataset.target != self.dataset_train.target  # pylint: disable = too-many-boolean-expressions
-                        or other_dataset.node_features != self.dataset_train.node_features
-                        or other_dataset.edge_features != self.dataset_train.edge_features
-                        or other_dataset.clustering_method != self.dataset_train.clustering_method
-                        or other_dataset.task != self.dataset_train.task
-                        or other_dataset.classes != self.dataset_train.classes):
+                            or other_dataset.node_features != self.dataset_train.node_features
+                            or other_dataset.edge_features != self.dataset_train.edge_features
+                            or other_dataset.clustering_method != self.dataset_train.clustering_method
+                            or other_dataset.task != self.dataset_train.task
+                            or other_dataset.classes != self.dataset_train.classes):
 
                         raise ValueError(
                             f"""Training dataset is not equivalent to {other_dataset}.\n
@@ -242,9 +242,9 @@ class Trainer():
                 elif isinstance(self.dataset_train, GridDataset) and isinstance(other_dataset, GridDataset):
 
                     if (other_dataset.target == self.dataset_train.target  # pylint: disable = too-many-boolean-expressions
-                        or other_dataset.features == self.dataset_train.features
-                        or other_dataset.task == self.dataset_train.task
-                        or other_dataset.classes == self.dataset_train.classes):
+                            or other_dataset.features == self.dataset_train.features
+                            or other_dataset.task == self.dataset_train.task
+                            or other_dataset.classes == self.dataset_train.classes):
 
                         raise ValueError(
                             f"""Training dataset is not equivalent to {other_dataset}.\n
@@ -739,7 +739,8 @@ class Trainer():
         torch.save(state, filename)
 
 
-def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[float, int] = None) -> Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
+def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[float, int] = None) -> \
+        Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
 
     """Divides the dataset into a training set and an evaluation set
 

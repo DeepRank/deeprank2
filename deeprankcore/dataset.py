@@ -4,8 +4,7 @@ import logging
 import warnings
 import numpy as np
 import h5py
-from typing import Dict, Callable, List, Union, Optional, Tuple
-from collections.abc import Mapping
+from typing import Callable, List, Union, Optional, Tuple
 
 from tqdm import tqdm
 from ast import literal_eval
@@ -479,7 +478,7 @@ class GraphDataset(Dataset):
 
 
 class GridDataset(Dataset):
-    def __init__( # pylint: disable=too-many-arguments, too-many-locals
+    def __init__( # pylint: disable=too-many-arguments
         self,
         hdf5_path: Union[str,list],
         subset: List[str] = None,
@@ -589,7 +588,7 @@ class GridDataset(Dataset):
                 remove_file.append(hdf5_path)
 
         for hdf5_path in remove_file:
-            self.hdf5_paths.remove(name)
+            self.hdf5_paths.remove(hdf5_path)
 
     def _check_task_and_classes(self, task, classes):
 
@@ -694,16 +693,16 @@ class GridDataset(Dataset):
         """
         return len(self.index_entries)
 
-    def get(self, index: int) -> Data:
+    def get(self, idx: int) -> Data:
         """Gets one entry from its unique index.
 
         Args:
-            index: index of the entry, ranging from 0 to len(dataset)
+            idx: index of the entry, ranging from 0 to len(dataset)
         Returns:
             the grid feature data by name and the target data by name
         """
 
-        file_path, entry_name = self.index_entries[index]
+        file_path, entry_name = self.index_entries[idx]
         return self.load_one_entry(file_path, entry_name)
 
     def load_one_entry(self, hdf5_path: str, entry_name: str) -> Data:
@@ -749,7 +748,6 @@ class GridDataset(Dataset):
         for target_name, target_condition in self.target_filter.items():
 
             if target_name in entry_group[targets.VALUES]:
-                target_value = entry_group[targets.VALUES][target_name]
 
                 # If we have a given target_condition, see if it's met.
                 if isinstance(target_condition, str):
@@ -767,6 +765,6 @@ class GridDataset(Dataset):
             else:
                 _log.warning(f"   :Filter {target_name} not found for entry {entry_group}\n" +
                              "   :Filter options are:\n" +
-                             "\n".join(["   :  "+ target_name
-                                        for target_name in entry_group[targets.VALUES].keys()]))
+                             "\n".join([f"   :  {target_value}"
+                                        for target_value in entry_group[targets.VALUES].keys()]))
         return True
