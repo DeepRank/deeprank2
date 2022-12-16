@@ -286,6 +286,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
+                clustering_method="mcl"
             )
 
             trainer = Trainer(
@@ -307,6 +308,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
+                clustering_method="mcl"
             )
 
             trainer = Trainer(
@@ -327,6 +329,7 @@ class TestTrainer(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
+            clustering_method="mcl"
         )
 
         trainer = Trainer(
@@ -378,7 +381,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer.weight_decay == weight_decay
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, validate=True)
+            trainer.train(nepoch=3)
             trainer.save_model("test.pth.tar")
 
             trainer_pretrained = Trainer(
@@ -455,13 +458,15 @@ class TestTrainer(unittest.TestCase):
             dataset_train = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
+                edge_features=[Efeat.DISTANCE, Efeat.COVALENT],
+                clustering_method="mcl"
             )
             
             dataset_test = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                edge_features=[Efeat.DISTANCE]
+                edge_features=[Efeat.DISTANCE],
+                clustering_method="mcl"
             )
 
             trainer = Trainer(

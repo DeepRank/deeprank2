@@ -260,7 +260,6 @@ class Trainer():
             clust_grp = grp.require_group("clustering")
 
             if self.clustering_method.lower() in clust_grp:
-                #_log.info(f"Deleting previous data for mol {mol} method {method}")
                 del clust_grp[self.clustering_method.lower()]
 
             method_grp = clust_grp.create_group(self.clustering_method.lower())
