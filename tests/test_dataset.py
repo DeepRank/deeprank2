@@ -23,7 +23,7 @@ class TestDataSet(unittest.TestCase):
         assert len(dataset) == 4
         assert dataset[0] is not None
 
-    def test_grid_dataset(self):
+    def test_grid_dataset_regression(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
             features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
@@ -32,8 +32,20 @@ class TestDataSet(unittest.TestCase):
 
         assert len(dataset) == 4
 
-        assert dataset[0].x.shape == (2, 20, 20, 20)  # 2 features with grid box dimensions
-        assert dataset[0].y.shape == (1,)
+        assert dataset[0].x.shape == (1, 2, 20, 20, 20)  # 1 entry, 2 features with grid box dimensions
+        assert dataset[0].y.shape == (1,)  # 1 entry with rmsd value
+
+    def test_grid_dataset_classification(self):
+        dataset = GridDataset(
+            hdf5_path=self.hdf5_path,
+            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            target=targets.BINARY
+        )
+
+        assert len(dataset) == 4
+
+        assert dataset[0].x.shape == (1, 2, 20, 20, 20)  # 1 entry, 2 features with grid box dimensions
+        assert dataset[0].y.shape == (1,)  # 1 entry with class value
 
     def test_dataset_filter(self):
         GraphDataset(

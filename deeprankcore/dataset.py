@@ -290,7 +290,7 @@ class GraphDataset(Dataset):
         data.cluster1 = cluster1
 
         # entry name
-        data.entry_name = entry_name
+        data.entry_names = [entry_name]
 
         # apply transformation
         if self._transform is not None:
@@ -719,12 +719,13 @@ class GridDataset(Dataset):
             for feature_name in self.features:
                 feature_data.append(mapped_features_group[feature_name][gridstorage.FEATURE_VALUE][:])
 
-            target_value = [entry_group[targets.VALUES][self.target][()]]
+            target_value = entry_group[targets.VALUES][self.target][()]
 
-        data = Data(x=torch.tensor(feature_data, dtype=torch.float).to(self.device),
-                    y=torch.tensor(target_value, dtype=torch.float).to(self.device))
+        # Wrap up the data in this object, for the collate_fn to handle it properly:
+        data = Data(x=torch.tensor([feature_data], dtype=torch.float).to(self.device),
+                    y=torch.tensor([target_value], dtype=torch.float).to(self.device))
 
-        data.entry_name = entry_name
+        data.entry_names = [entry_name]
 
         return data
 

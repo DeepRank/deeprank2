@@ -13,7 +13,7 @@ from deeprankcore.neuralnets.ginet import GINet
 from deeprankcore.neuralnets.foutnet import FoutNet
 from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
 from deeprankcore.neuralnets.sgat import SGAT
-from deeprankcore.neuralnets.cnn.model3d import cnn_reg, cnn_class
+from deeprankcore.neuralnets.cnn.model3d import CnnRegression, CnnClassification
 from deeprankcore.utils.exporters import (
     HDF5OutputExporter,
     TensorboardBinaryClassificationExporter,
@@ -121,14 +121,25 @@ class TestTrainer(unittest.TestCase):
     def tearDownClass(class_):
         shutil.rmtree(class_.work_directory)
 
-    def test_grid(self):
+    def test_grid_regression(self):
         dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
                               subset=None,
                               target=targets.IRMSD,
                               task=targets.REGRESS,
                               features=[Efeat.VANDERWAALS])
 
-        trainer = Trainer(cnn_reg, dataset, batch_size=2)
+        trainer = Trainer(CnnRegression, dataset, batch_size=2)
+
+        trainer.train(nepoch=1)
+
+    def test_grid_classification(self):
+        dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                              subset=None,
+                              target=targets.BINARY,
+                              task=targets.CLASSIF,
+                              features=[Efeat.VANDERWAALS])
+
+        trainer = Trainer(CnnClassification, dataset, batch_size=2)
 
         trainer.train(nepoch=1)
 

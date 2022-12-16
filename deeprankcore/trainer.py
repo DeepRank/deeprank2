@@ -97,6 +97,10 @@ class Trainer():
             self.dataset_train = dataset_train
             self.dataset_test = dataset_test
 
+        self.clustering_method = None
+        if isinstance(self.dataset_train, GraphDataset):
+            self.clustering_method = self.dataset_train.clustering_method
+
         if (val_size is not None) and (dataset_val is not None):
             warnings.warn("Validation dataset was provided to Trainer; val_size parameter is ignored.")
             _log.info("Validation dataset was provided to Trainer; val_size parameter is ignored.")
@@ -153,19 +157,23 @@ class Trainer():
             ValueError: Invalid node clustering method.
         """
 
-        if isinstance(self.dataset_train, GraphDataset) and self.dataset_train.clustering_method is not None:
-            if self.dataset_train.clustering_method in ('mcl', 'louvain'):
+        if self.clustering_method is not None:
+            if self.clustering_method in ('mcl', 'louvain'):
                 _log.info("Loading clusters")
                 self._precluster(self.dataset_train)
+
                 if self.dataset_val is not None:
                     self._precluster(self.dataset_val)
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     self.dataset_train, self.dataset_val = _divide_dataset(
                         self.dataset_train, splitsize=self.val_size)
+
+                if self.dataset_test is not None:
+                    self._precluster(self.dataset_test)
             else:
                 raise ValueError(
-                    "Invalid node clustering method. \n\t"
+                    f"Invalid node clustering method: {self.clustering_method}\n\t"
                     "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # dataloader
@@ -185,8 +193,7 @@ class Trainer():
         # independent validation dataset
         if self.dataset_test is not None:
             _log.info("Loading independent testing dataset...")
-            if self.clustering_method in ('mcl', 'louvain'):
-                self._precluster(self.dataset_test)
+
             self.test_loader = DataLoader(
                 self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
             )
@@ -332,8 +339,9 @@ class Trainer():
             ).to(self.device)
 
         elif isinstance(dataset, GridDataset):
-            self.model = self.neuralnet(dataset.get(0).x.shape).to(self.device)
+            batch_size, num_features, box_width, box_height, box_depth = dataset.get(0).x.shape
 
+            self.model = self.neuralnet(num_features, (box_width, box_height, box_depth)).to(self.device)
         else:
             raise TypeError(type(dataset))
 
@@ -519,8 +527,8 @@ class Trainer():
                 pred = pred.detach().reshape(-1)
             outputs += pred.tolist()
 
-            # Get the data
-            entry_names += data_batch['mol']
+            # Get the name
+            entry_names += data_batch.entry_names
 
         dt = time() - t0
         if count_predictions > 0:
@@ -582,8 +590,8 @@ class Trainer():
                 pred = pred.detach().reshape(-1)
             outputs += pred.tolist()
 
-            # get the data
-            entry_names += data_batch['mol']
+            # get the name
+            entry_names += data_batch.entry_names
 
         dt = time() - t0
         if count_predictions > 0:
@@ -619,7 +627,7 @@ class Trainer():
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
-                [self.classes_to_idx[x] if isinstance(x, str) else self.classes_to_idx[int(x)] for x in target]
+                [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
             ).to(self.device)
 
         elif self.task == targets.REGRESS:
