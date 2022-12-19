@@ -20,7 +20,7 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-    def __init__( # pylint: disable=too-many-arguments, too-many-branches
+    def __init__( # pylint: disable=too-many-arguments
                 self,
                 neuralnet = None,
                 dataset_train: Union[GraphDataset, GridDataset] = None,
@@ -125,7 +125,7 @@ class Trainer():
         else:
             self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
 
-    def _init_datasets(self,
+    def _init_datasets(self,  # pylint: disable=too-many-arguments
                        train_dataset: Union[GraphDataset, GridDataset],
                        validation_dataset: Optional[Union[GraphDataset, GridDataset]],
                        test_dataset: Optional[Union[GraphDataset, GridDataset]],
