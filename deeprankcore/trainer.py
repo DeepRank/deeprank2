@@ -1,7 +1,6 @@
 from time import time
 from typing import List, Optional, Union, Tuple
 import logging
-import warnings
 from tqdm import tqdm
 import h5py
 import copy
@@ -27,10 +26,10 @@ class Trainer():
                 dataset_train: Union[GraphDataset, GridDataset] = None,
                 dataset_val: Union[GraphDataset, GridDataset] = None,
                 dataset_test: Union[GraphDataset, GridDataset] = None,
-                val_size: Union[float,int] = None,
-                test_size: Union[float,int] = 0,
+                val_size: Union[float, int] = None,
+                test_size: Union[float, int] = None,
                 class_weights: bool = False,
-                pretrained_model: str = None,
+                pretrained_model: Optional[str] = None,
                 batch_size: int = 32,
                 shuffle: bool = True,
                 output_exporters: Optional[List[OutputExporter]] = None,
@@ -44,7 +43,7 @@ class Trainer():
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
 
             dataset_train (deeprank dataset object, optional): training set used during training.
-                Can't be None if pretrained_model is also None. Defaults to None.
+                Can't be None if pretrained_model_path is also None. Defaults to None.
 
             dataset_val (deeprank dataset object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
@@ -65,7 +64,7 @@ class Trainer():
             class_weights (bool): assign class weights based on the dataset content. 
                 Defaults to False.
 
-            pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+            pretrained_model_path (str, optional): path to pre-trained model. Defaults to None.
 
             batch_size (int, optional): defaults to 32.
 
@@ -76,45 +75,12 @@ class Trainer():
                 in ./output directory.
         """
 
-        if output_exporters is not None:
-            self._output_exporters = OutputExporterCollection(
-                *output_exporters)
-        else:
-            self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
+        self._init_output_exporters(output_exporters)
 
         self.neuralnet = neuralnet
-        self.val_size = val_size
-        self.test_size = test_size
 
-        if test_size > 0:
-            if dataset_test is None:
-                self.dataset_train, self.dataset_test = _divide_dataset(self.dataset_train, self.test_size)
-            else:
-                warnings.warn("Test dataset was provided to Trainer; test_size parameter is ignored.")
-                _log.info("Test dataset was provided to Trainer; test_size parameter is ignored.")
-                self.test_size = 0
-        else:
-            self.dataset_train = dataset_train
-            self.dataset_test = dataset_test
-
-        self.clustering_method = None
-        self.node_features = None
-        self.edge_features = None
-        self.features = None
-        for dataset in [self.dataset_train, self.dataset_test]:
-            if isinstance(dataset, GraphDataset):
-                self.clustering_method = dataset.clustering_method
-                self.node_features = dataset.node_features
-                self.edge_features = dataset.edge_features
-
-            elif isinstance(dataset, GridDataset):
-                self.features = dataset.features
-
-        if (val_size is not None) and (dataset_val is not None):
-            warnings.warn("Validation dataset was provided to Trainer; val_size parameter is ignored.")
-            _log.info("Validation dataset was provided to Trainer; val_size parameter is ignored.")
-            self.val_size = None
-        self.dataset_val = dataset_val
+        self._init_datasets(dataset_train, dataset_val, dataset_test,
+                            val_size, test_size)
 
         if pretrained_model is None:
             if self.dataset_train is None:
@@ -122,8 +88,6 @@ class Trainer():
             if self.neuralnet is None:
                 raise ValueError("No neural network specified. Specifying a model framework is required if there is no pretrained model.")
 
-            self.target = self.dataset_train.target
-            self.task = self.dataset_train.task
             self.classes = self.dataset_train.classes
             self.classes_to_index = self.dataset_train.classes_to_index
             self.optimizer = None
@@ -136,17 +100,12 @@ class Trainer():
             if self.target is None:
                 raise ValueError("No target set. You need to choose a target (set in GraphDataset) for training.")
 
-            self._check_dataset_equivalence()
             self._load_model()
-
         else:
-            self.pretrained_model = pretrained_model
-            self._load_params()
-
             if self.dataset_train is not None:
-                warnings.warn("Pretrained model loaded: dataset_train will be ignored.")
+                _log.warning("Pretrained model loaded: dataset_train will be ignored.")
             if self.dataset_val is not None:
-                warnings.warn("Pretrained model loaded: dataset_val will be ignored.")
+                _log.warning("Pretrained model loaded: dataset_val will be ignored.")
             if self.neuralnet is None:
                 raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
             if self.dataset_test is None:
@@ -154,9 +113,70 @@ class Trainer():
             if self.target is None:
                 raise ValueError("No target set. Make sure the pretrained model explicitly defines the target to train against.")
 
-            self._check_dataset_equivalence()
+            self.pretrained_model_path = pretrained_model
+
+            self._load_params()
             self._load_pretrained_model()
 
+    def _init_output_exporters(self, output_exporters: Optional[List[OutputExporter]]):
+
+        if output_exporters is not None:
+            self._output_exporters = OutputExporterCollection(*output_exporters)
+        else:
+            self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
+
+    def _init_datasets(self,
+                       train_dataset: Union[GraphDataset, GridDataset],
+                       validation_dataset: Optional[Union[GraphDataset, GridDataset]],
+                       test_dataset: Optional[Union[GraphDataset, GridDataset]],
+                       validation_size: Optional[Union[int, float]],
+                       test_size: Optional[Union[int, float]]):
+
+        self._check_dataset_equivalence(train_dataset, validation_dataset, test_dataset)
+
+        self.dataset_train = train_dataset
+        self.dataset_test = test_dataset
+        self.dataset_val = validation_dataset
+        self.val_size = validation_size
+        self.test_size = test_size
+
+        # Divide datasets where necessary.
+        if test_size is not None:
+            if test_dataset is None:
+                self.dataset_train, self.dataset_test = _divide_dataset(train_dataset, test_size)
+            else:
+                _log.warning("Test dataset was provided to Trainer; test_size parameter is ignored.")
+
+        if validation_size is not None:
+            if validation_dataset is None:
+                self.dataset_train, self.dataset_val = _divide_dataset(train_dataset, validation_size)
+            else:
+                _log.warning("Validation dataset was provided to Trainer; val_size parameter is ignored.")
+
+        # Copy settings from the dataset that we will use.
+        if self.dataset_train is not None:
+            self._init_from_dataset(self.dataset_train)
+        else:
+            self._init_from_dataset(self.dataset_test)
+
+    def _init_from_dataset(self, dataset: Union[GraphDataset, GridDataset]):
+
+        if isinstance(dataset, GraphDataset):
+            self.clustering_method = dataset.clustering_method
+            self.node_features = dataset.node_features
+            self.edge_features = dataset.edge_features
+            self.features = None
+
+        elif isinstance(dataset, GridDataset):
+            self.clustering_method = None
+            self.node_features = None
+            self.edge_features = None
+            self.features = dataset.features
+        else:
+            TypeError(type(dataset))
+
+        self.target = dataset.target
+        self.task = dataset.task
 
     def _load_model(self):
         """
@@ -215,23 +235,31 @@ class Trainer():
         self.configure_optimizers()
         self.set_loss()
 
-    def _check_dataset_equivalence(self):
+    def _check_dataset_equivalence(self, train_dataset, validation_dataset, test_dataset):
 
-        if self.dataset_train is None:
-            return  # then we use only a test dataset
+        if train_dataset is None:
+            # only check the test dataset
+            if test_dataset is None:
+                raise ValueError("Please provide at least a train or test dataset")
 
-        for other_dataset_name, other_dataset in [("validation", self.dataset_val),
-                                                  ("testing", self.dataset_test)]:
+            if not isinstance(test_dataset, GraphDataset) and not isinstance(test_dataset, GridDataset):
+                raise TypeError(f"""test dataset is not the right type {type(test_dataset)}
+                                Make sure it's either GraphDataset or GridDataset""")
+            return
+
+        # Compare the datasets to each other
+        for other_dataset_name, other_dataset in [("validation", validation_dataset),
+                                                  ("testing", test_dataset)]:
             if other_dataset is not None:
 
-                if isinstance(self.dataset_train, GraphDataset) and isinstance(other_dataset, GraphDataset):
+                if isinstance(train_dataset, GraphDataset) and isinstance(other_dataset, GraphDataset):
 
-                    if (other_dataset.target != self.dataset_train.target  # pylint: disable = too-many-boolean-expressions
-                            or other_dataset.node_features != self.dataset_train.node_features
-                            or other_dataset.edge_features != self.dataset_train.edge_features
-                            or other_dataset.clustering_method != self.dataset_train.clustering_method
-                            or other_dataset.task != self.dataset_train.task
-                            or other_dataset.classes != self.dataset_train.classes):
+                    if (other_dataset.target != train_dataset.target  # pylint: disable = too-many-boolean-expressions
+                            or other_dataset.node_features != train_dataset.node_features
+                            or other_dataset.edge_features != train_dataset.edge_features
+                            or other_dataset.clustering_method != train_dataset.clustering_method
+                            or other_dataset.task != train_dataset.task
+                            or other_dataset.classes != train_dataset.classes):
 
                         raise ValueError(
                             f"""Training dataset is not equivalent to {other_dataset}.\n
@@ -239,12 +267,12 @@ class Trainer():
                             target, node_features, edge_features, clustering_method, task, and classes are used."""
                         )
 
-                elif isinstance(self.dataset_train, GridDataset) and isinstance(other_dataset, GridDataset):
+                elif isinstance(train_dataset, GridDataset) and isinstance(other_dataset, GridDataset):
 
-                    if (other_dataset.target == self.dataset_train.target  # pylint: disable = too-many-boolean-expressions
-                            or other_dataset.features == self.dataset_train.features
-                            or other_dataset.task == self.dataset_train.task
-                            or other_dataset.classes == self.dataset_train.classes):
+                    if (other_dataset.target == train_dataset.target
+                            or other_dataset.features == train_dataset.features
+                            or other_dataset.task == train_dataset.task
+                            or other_dataset.classes == train_dataset.classes):
 
                         raise ValueError(
                             f"""Training dataset is not equivalent to {other_dataset}.\n
@@ -252,7 +280,7 @@ class Trainer():
                             target, features, task, and classes are used."""
                         )
                 else:
-                    raise ValueError(f"Training and {other_dataset_name} datasets are not the same type.\n"
+                    raise TypeError(f"Training and {other_dataset_name} datasets are not the same type.\n"
                                      "Make sure to use only graph or only grid datasets")
 
     def _load_pretrained_model(self):
@@ -686,7 +714,8 @@ class Trainer():
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
-        state = torch.load(self.pretrained_model, map_location=torch.device(self.device))
+        state = torch.load(self.pretrained_model_path,
+                           map_location=torch.device(self.device))
 
         self.target = state["target"]
         self.batch_size = state["batch_size"]
