@@ -1,14 +1,14 @@
 import h5py
 import pandas as pd
 import logging
-from typing import List, Union
+
+from typing import List, Union, Tuple
 from deeprankcore.domain import (
     edgestorage as Efeat,
     nodestorage as Nfeat,
     targetstorage as targets)
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 _log = logging.getLogger(__name__)
@@ -137,10 +137,13 @@ def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
     return df_final
 
 
-def plot_hist(
+def save_hist(
     df: pd.DataFrame,
     features: Union[str,List],
-) -> go.Figure():
+    fname: str,
+    bins: Union[int,List,str] = 10,
+    figsize: Tuple = (15, 15)
+):
     """
     Args
     ----------
@@ -148,9 +151,16 @@ def plot_hist(
 
     features (str or list): features to be plotted. 
 
-    Returns
-    ----------
-    fig (pd.DataFrame): go.Figure() object containing the distributions of the chosen features.   
+    fname (str): str or path-like or binary file-like object.
+
+    bins (int or sequence or str): if bins is an integer, it defines the number of equal-width bins in the range.
+        If bins is a sequence, it defines the bin edges, including the left edge of the first bin and the right edge
+        of the last bin; in this case, bins may be unequally spaced. All but the last (righthand-most) bin is half-open.
+        If bins is a string, it is one of the binning strategies supported by numpy.histogram_bin_edges:
+        'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
+        Defaults to 10.
+    
+    figsize (tuple): saved figure sizes, defaults to (15, 15).
     """
     if not isinstance(features, list):
         features = [features]
@@ -164,31 +174,26 @@ def plot_hist(
         else round(df[feat].values.std(), 1) \
         for feat in features]
 
-    fig = make_subplots(
-        rows=len(features),
-        cols=1,
-        subplot_titles=[
-            f'{features[idx]} (mean {means[idx]}, std {devs[idx]})' \
-            for idx in range(len(features))
-        ])
+    if len(features) > 1:
 
-    for row, feat in enumerate(features):
+        fig, axs = plt.subplots(len(features), figsize=figsize)
 
-        if isinstance(df[feat].values[0], np.ndarray):
-            fig.add_trace(
-                go.Histogram(x=np.concatenate(df[feat].values)),
-                row=row+1, col=1)
-        else:
-            fig.add_trace(
-                go.Histogram(x=df[feat].values),
-                row=row+1, col=1)
+        for row, feat in enumerate(features):
 
-    fig.update_layout(
-        barmode='stack',
-        title='Chosen features',
-        showlegend = False,
-        xaxis_title='Value',
-        yaxis_title='Count')
-    fig.update_traces(opacity=0.75)
+            if isinstance(df[feat].values[0], np.ndarray):
+                axs[row].hist(np.concatenate(df[feat].values), bins=bins)
+            else:
+                axs[row].hist(df[feat].values, bins=bins)
+            axs[row].set(xlabel=f'{feat} (mean {means[row]}, std {devs[row]})', ylabel='Count')
+        fig.tight_layout()
 
-    return fig
+    else:
+
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(111)
+        ax.hist(df[features[0]].values, bins=bins)
+        ax.set(xlabel=f'{features[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
+
+    fig.tight_layout()
+    fig.savefig(fname)
+    plt.close(fig)
