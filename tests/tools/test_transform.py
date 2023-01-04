@@ -1,5 +1,5 @@
 import h5py
-from deeprankcore.tools.transform import hdf5_to_pandas, plot_distr
+from deeprankcore.tools.transform import hdf5_to_pandas, plot_hist
 import plotly
 
 def test_hdf5_to_pandas():
@@ -25,11 +25,11 @@ def test_hdf5_to_pandas():
 
     assert df.shape[0] == len(keys[2:])
     
-def test_plot_distr():
+def test_plot_hist():
 
     hdf5_path = "tests/data/hdf5/test.hdf5"
     df = hdf5_to_pandas(
         hdf5_path)
-    fig = plot_distr(df, ['charge', 'binary'])
+    fig = plot_hist(df, ['charge', 'binary'])
 
     assert isinstance(fig, plotly.graph_objs._figure.Figure)
