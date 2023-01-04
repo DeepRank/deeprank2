@@ -137,7 +137,7 @@ def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
     return df_final
 
 
-def plot_distr(
+def plot_hist(
     df: pd.DataFrame,
     features: Union[str,List],
 ) -> go.Figure():
@@ -155,11 +155,14 @@ def plot_distr(
     if not isinstance(features, list):
         features = [features]
 
-    means = [round(df[feat].apply(lambda x: x.mean() if isinstance(x, np.ndarray) else x).mean(), 1) for feat in features]
+    means = [
+        round(np.concatenate(df[feat].values).mean(), 1) if isinstance(df[feat].values[0], np.ndarray) \
+            else round(df[feat].values.mean(), 1) \
+                for feat in features]
     devs = [
-        round(df[feat].apply(lambda x: x.std() if isinstance(x, np.ndarray) else x).mean(), 1)
-        if isinstance(df[feat].loc[0], np.ndarray)
-        else round(df[feat].std(), 1) for feat in features]
+        round(np.concatenate(df[feat].values).std(), 1) if isinstance(df[feat].values[0], np.ndarray) \
+            else round(df[feat].values.std(), 1) \
+                for feat in features]
 
     fig = make_subplots(
         rows=len(features),
@@ -169,16 +172,15 @@ def plot_distr(
             for idx in range(len(features))
         ])
 
-    for row, feature in enumerate(features):
-        if isinstance(df[feature].loc[0], np.ndarray):
-            for idx in range(df.shape[0]):
-                fig.add_trace(
-                    go.Histogram(x=df[feature][idx]),
-                    row=row+1,
-                    col=1)
+    for row, feat in enumerate(features):
+
+        if isinstance(df[feat].values[0], np.ndarray):
+            fig.add_trace(
+                go.Histogram(x=np.concatenate(df[feat].values)),
+                row=row+1, col=1)
         else:
             fig.add_trace(
-                go.Histogram(x=df[feature]),
+                go.Histogram(x=df[feat].values),
                 row=row+1, col=1)
 
     fig.update_layout(
