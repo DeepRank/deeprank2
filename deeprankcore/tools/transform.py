@@ -157,12 +157,12 @@ def plot_hist(
 
     means = [
         round(np.concatenate(df[feat].values).mean(), 1) if isinstance(df[feat].values[0], np.ndarray) \
-            else round(df[feat].values.mean(), 1) \
-                for feat in features]
+        else round(df[feat].values.mean(), 1) \
+        for feat in features]
     devs = [
         round(np.concatenate(df[feat].values).std(), 1) if isinstance(df[feat].values[0], np.ndarray) \
-            else round(df[feat].values.std(), 1) \
-                for feat in features]
+        else round(df[feat].values.std(), 1) \
+        for feat in features]
 
     fig = make_subplots(
         rows=len(features),
