@@ -13,6 +13,7 @@ from os.path import basename
 import h5py
 import pkgutil
 from deeprankcore.utils.graph import Graph
+from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.utils.buildgraph import (
     get_residue_contact_pairs,
