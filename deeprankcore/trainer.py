@@ -794,7 +794,7 @@ def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[
 
     # raise exception if no training data or negative validation size
     if n_split >= full_size or n_split < 0:
-        raise ValueError ("invalid splitsize. \n\t" +
+        raise ValueError (f"invalid splitsize: {n_split}\n\t" +
             f"splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)")
 
     if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint
