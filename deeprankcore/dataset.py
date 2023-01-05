@@ -284,8 +284,6 @@ class GraphDataset(Dataset):
                         _log.warning(f"no clustering/{self.clustering_method} detected")
                 else:
                     _log.warning("no clustering group found")
-            else:
-                _log.warning("no cluster method set")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
