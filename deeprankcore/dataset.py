@@ -625,7 +625,7 @@ class GridDataset(DatasetParent):
 
                 else:  # no numbers, it's a one-dimensional feature name
 
-                    if self.features == "all" or isinstance(self.features, list) and feature_name in self.features):
+                    if self.features == "all" or isinstance(self.features, list) and feature_name in self.features:
 
                         hdf5_matching_feature_names.append(feature_name)
 
