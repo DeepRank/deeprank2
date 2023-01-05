@@ -240,6 +240,10 @@ class Grid:
         index_names_values = []
         if isinstance(feature_value, float):
             index_names_values = [(feature_name, feature_value)]
+
+        elif isinstance(feature_value, int):
+            index_names_values = [(feature_name, float(feature_value))]
+
         else:
             for index, value in enumerate(feature_value):
                 index_name = f"{feature_name}_{index:03d}"

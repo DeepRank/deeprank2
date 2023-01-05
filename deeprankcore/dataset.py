@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import logging
 import warnings
 import numpy as np
@@ -505,6 +506,10 @@ class GraphDataset(DatasetInterface):
                     {miss_node_error}{miss_edge_error}")
 
 
+# Grid features are stored per dimension
+GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
+
+
 class GridDataset(DatasetInterface):
     def __init__( # pylint: disable=too-many-arguments
         self,
@@ -584,30 +589,52 @@ class GridDataset(DatasetInterface):
 
         hdf5_path = self.hdf5_paths[0]
 
+        # read available features
         with h5py.File(hdf5_path, "r") as hdf5_file:
             entry_name = list(hdf5_file.keys())[0]
 
-            # read available node features
-            self.available_features = list(hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys())
-            self.available_features = [feature_name for feature_name in self.available_features if feature_name[0] != '_']  # ignore metafeatures
+            hdf5_all_feature_names = hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys()
 
-        # check node features
+            hdf5_matching_feature_names = []  # feature names that match with the requested list of names
+            unpartial_feature_names = []  # feature names without their dimension number suffix
+
+            for feature_name in hdf5_all_feature_names:
+
+                if feature_name.startswith("_"):
+                    continue  # ignore metafeatures
+
+                partial_feature_match = GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name)
+                if partial_feature_match is not None:  # there's a dimension number in the feature name
+
+                    unpartial_feature_name = partial_feature_match.group(1)
+
+                    hdf5_matching_feature_names.append(feature_name)
+                    unpartial_feature_names.append(unpartial_feature_name)
+
+                else:  # it's a one-dimensional feature name
+
+                    unpartial_feature_names.append(feature_name)
+
+        # check for the requested features
         missing_features = []
         if self.features == "all":
-            self.features = self.available_features
+            self.features = sorted(hdf5_all_feature_names)
         else:
             for feature_name in self.features:
-                if feature_name not in self.available_features:
+                if feature_name not in unpartial_feature_names:
                     _log.info(f"The feature {feature_name} was not found in the file {hdf5_path}.")
                     missing_features.append(feature_name)
+
+            self.features = sorted(hdf5_matching_feature_names)
 
         # raise error if any features are missing
         if len(missing_features) > 0:
             raise ValueError(
                 f"Not all features could be found in the file {hdf5_path} under entry {entry_name}.\
+                    \nMissing features are: {missing_features} \
                     \nCheck feature_modules passed to the preprocess function. \
                     \nProbably, the feature wasn't generated during the preprocessing step. \
-                    Available features: {self.available_features}")
+                    Available features: {hdf5_all_feature_names}")
 
     def get(self, idx: int) -> Data:
         """Gets one entry from its unique index.

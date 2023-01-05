@@ -252,33 +252,38 @@ class Trainer():
                                                   ("testing", test_dataset)]:
             if other_dataset is not None:
 
+                if other_dataset.target != train_dataset.target:
+                    raise ValueError(f"training dataset has target {train_dataset.target} while "
+                                     f"{other_dataset_name} dataset has target {other_dataset.target}")
+
+                elif other_dataset.task != other_dataset.task:
+                    raise ValueError(f"training dataset has task {train_dataset.task} while "
+                                     f"{other_dataset_name} dataset has task {other_dataset.task}")
+
+                elif other_dataset.classes != other_dataset.classes:
+                    raise ValueError(f"training dataset has classes {train_dataset.classes} while "
+                                     f"{other_dataset_name} dataset has classes {other_dataset.classes}")
+
                 if isinstance(train_dataset, GraphDataset) and isinstance(other_dataset, GraphDataset):
 
-                    if (other_dataset.target != train_dataset.target  # pylint: disable = too-many-boolean-expressions
-                            or other_dataset.node_features != train_dataset.node_features
-                            or other_dataset.edge_features != train_dataset.edge_features
-                            or other_dataset.clustering_method != train_dataset.clustering_method
-                            or other_dataset.task != train_dataset.task
-                            or other_dataset.classes != train_dataset.classes):
+                    if other_dataset.node_features != train_dataset.node_features:
+                        raise ValueError(f"training dataset has node_features {train_dataset.node_features} while "
+                                         f"{other_dataset_name} dataset has node_features {other_dataset.node_features}")
 
-                        raise ValueError(
-                            f"""Training dataset is not equivalent to {other_dataset}.\n
-                            Check datasets passed to Trainer class and ensure that the same (non-default)\n
-                            target, node_features, edge_features, clustering_method, task, and classes are used."""
-                        )
+                    elif other_dataset.edge_features != train_dataset.edge_features:
+                        raise ValueError(f"training dataset has edge_features {train_dataset.edge_features} while "
+                                         f"{other_dataset_name} dataset has edge_features {other_dataset.edge_features}")
+
+                    elif other_dataset.clustering_method != other_dataset.clustering_method:
+                        raise ValueError(f"training dataset has clustering method {train_dataset.clustering_method} while "
+                                         f"{other_dataset_name} dataset has clustering method {other_dataset.clustering_method}")
 
                 elif isinstance(train_dataset, GridDataset) and isinstance(other_dataset, GridDataset):
 
-                    if (other_dataset.target == train_dataset.target
-                            or other_dataset.features == train_dataset.features
-                            or other_dataset.task == train_dataset.task
-                            or other_dataset.classes == train_dataset.classes):
+                    if other_dataset.features != train_dataset.features:
+                        raise ValueError(f"training dataset has features {train_dataset.features} while "
+                                         f"{other_dataset_name} dataset has features {other_dataset.features}")
 
-                        raise ValueError(
-                            f"""Training dataset is not equivalent to {other_dataset}.\n
-                            Check datasets passed to Trainer class and ensure that the same (non-default)\n
-                            target, features, task, and classes are used."""
-                        )
                 else:
                     raise TypeError(f"Training and {other_dataset_name} datasets are not the same type.\n"
                                      "Make sure to use only graph or only grid datasets")
