@@ -4,7 +4,7 @@ import logging
 import warnings
 import numpy as np
 import h5py
-from typing import Callable, List, Union, Optional
+from typing import Callable, List, Union, Optional, Dict
 
 from tqdm import tqdm
 from ast import literal_eval
@@ -39,7 +39,6 @@ def save_hdf5_keys(
         (external links, see h5py ExternalLink class) to the original hdf5 file.
         If True, the new file contains a copy of the objects specified in data_ids
         (see h5py HardLink class).
-        
     """
     if not all(isinstance(d, str) for d in src_ids):
         raise TypeError("data_ids should be a list containing strings.")
@@ -52,24 +51,203 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-class GraphDataset(Dataset):
+class DatasetInterface(Dataset):
+
+    def __init__(self,
+                 hdf5_paths: Union[str, List[str]],
+                 subset: Union[List[str], None],
+                 target: Union[str, None],
+                 task: Union[str, None],
+                 classes: Union[List[str], List[int], List[float], None],
+                 use_tqdm: bool,
+                 root_directory_path: str,
+                 transform: Union[Callable, None],
+                 pre_transform: Union[Callable, None],
+                 target_filter: Union[Dict[str, str], None]
+    ):
+
+        super().__init__(root_directory_path, transform, pre_transform)
+
+        if type(hdf5_paths) == str:
+            self.hdf5_paths = [hdf5_paths]
+
+        elif type(hdf5_paths) == list:
+            self.hdf5_paths = hdf5_paths
+
+        else:
+            raise TypeError(f"Unexpected type: {type(hdf5_paths)}")
+
+        self.use_tqdm = use_tqdm
+
+        self.target = target
+        self.subset = subset
+
+        self.target_filter = target_filter
+
+        self._check_hdf5_files()
+        self._check_task_and_classes(task, classes)
+
+        # create the indexing system
+        # alows to associate each mol to an index
+        # and get fname and mol name from the index
+        self._create_index_entries()
+
+        # get the device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    def _check_hdf5_files(self):
+        """Checks if the data contained in the hdf5 file is valid."""
+        _log.info("\nChecking dataset Integrity...")
+        to_be_removed = []
+        for hdf5_path in self.hdf5_paths:
+            try:
+                with h5py.File(hdf5_path, "r") as f5:
+                    entry_names = list(f5.keys())
+                    if len(entry_names) == 0:
+                        _log.info(f"    -> {hdf5_path} is empty ")
+                        to_be_removed.append(hdf5_path)
+            except Exception as e:
+                _log.error(e)
+                _log.info(f"    -> {hdf5_path} is corrupted ")
+                to_be_removed.append(hdf5_path)
+
+        for hdf5_path in to_be_removed:
+            self.hdf5_paths.remove(hdf5_path)
+
+    def _check_task_and_classes(self, task: str, classes: Optional[str] = None):
+
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+            self.task = targets.REGRESS
+
+        elif self.target in [targets.BINARY, targets.CAPRI]:
+            self.task = targets.CLASSIF
+
+        else:
+            self.task = task
+
+        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
+            raise ValueError(
+                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
+
+        if task != self.task and task is not None:
+            warnings.warn(f"Target {self.target} expects {self.task}, but was set to task {task} by user.\n" +
+                f"User set task is ignored and {self.task} will be used.")
+
+        if self.task == targets.CLASSIF:
+            if classes is None:
+                self.classes = [0, 1]
+                _log.info(f'Target classes set up to: {self.classes}')
+            else:
+                self.classes = classes
+
+            self.classes_to_index = {
+                class_: index for index, class_ in enumerate(self.classes)
+            }
+        else:
+            self.classes = None
+            self.classes_to_index = None
+
+    def _create_index_entries(self):
+        """Creates the indexing of each molecule in the dataset.
+
+        Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
+        This allows to refer to one entry with its index in the list
+        """
+        _log.debug(f"Processing data set with hdf5 files: {self.hdf5_paths}")
+
+        self.index_entries = []
+
+        desc = f"   {self.hdf5_paths}{' dataset':25s}"
+        if self.use_tqdm:
+            hdf5_path_iterator = tqdm(self.hdf5_paths, desc=desc, file=sys.stdout)
+        else:
+            _log.info(f"   {self.hdf5_paths} dataset\n")
+            hdf5_path_iterator = self.hdf5_paths
+        sys.stdout.flush()
+
+        for hdf5_path in hdf5_path_iterator:
+            if self.use_tqdm:
+                hdf5_path_iterator.set_postfix(entry_name=os.path.basename(hdf5_path))
+            try:
+                with h5py.File(hdf5_path, "r") as hdf5_file:
+                    if self.subset is None:
+                        entry_names = list(hdf5_file.keys())
+                    else:
+                        entry_names = [entry_name for entry_name in self.subset if entry_name in list(hdf5_file.keys())]
+
+                    for entry_name in entry_names:
+                        if self._filter_targets(hdf5_file[entry_name]):
+                            self.index_entries += [(hdf5_path, entry_name)]
+            except Exception:
+                _log.exception(f"on {hdf5_path}")
+
+    def _filter_targets(self, entry_group: h5py.Group) -> bool:
+        """Filters the entry according to a dictionary.
+
+        The filter is based on the attribute self.target_filter
+        that must be either of the form: { target_name : target_condition } or None
+
+        Args:
+            entry_group: the entry group in the hdf5 file
+        Returns:
+            True if we keep the entry False otherwise
+        Raises:
+            ValueError: If an unsuported condition is provided
+        """
+
+        if self.target_filter is None:
+            return True
+
+        for target_name, target_condition in self.target_filter.items():
+
+            present_target_names = list(entry_group[targets.VALUES].keys())
+
+            if target_name in present_target_names:
+
+                # If we have a given target_condition, see if it's met.
+                if isinstance(target_condition, str):
+
+                    operation = target_condition
+                    for operator_string in [">", "<", "==", "<=", ">=", "!="]:
+                        operation = operation.replace(operator_string, "target_value" + operator_string)
+
+                    if not literal_eval(operation):
+                        return False
+
+                elif target_condition is not None:
+                    raise ValueError("Conditions not supported", target_condition)
+
+            else:
+                _log.warning(f"   :Filter {target_name} not found for entry {entry_group}\n"
+                             f"   :Filter options are: {present_target_names}")
+        return True
+
+    def len(self) -> int:
+        """Gets the length of the dataset
+        Returns:
+            int: number of complexes in the dataset
+        """
+        return len(self.index_entries)
+
+
+class GraphDataset(DatasetInterface):
     def __init__( # pylint: disable=too-many-arguments, too-many-locals
         self,
-        hdf5_path: Union[str,list],
-        subset: List[str] = None,
-        target: str = None,
-        task: str = None,
-        node_features: Union[List[str], str] = "all",
-        edge_features: Union[List[str], str] = "all",
-        clustering_method: str = "mcl",
-        classes: Union[List[str], List[int], List[float]] = None,
-        tqdm: bool = True,
-        root: str = "./",
-        transform: Callable = None,
-        pre_transform: Callable = None,
-        edge_features_transform: Callable = lambda x: np.tanh(-x / 2 + 2) + 1,
+        hdf5_paths: Union[str, List[str]],
+        subset: Optional[List[str]] = None,
+        target: Optional[str] = None,
+        task: Optional[str] = None,
+        node_features: Optional[Union[List[str], str]] = "all",
+        edge_features: Optional[Union[List[str], str]] = "all",
+        clustering_method: Optional[str] = "mcl",
+        classes: Optional[Union[List[str], List[int], List[float]]] = None,
+        tqdm: Optional[bool] = True,
+        root: Optional[str] = "./",
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
+        edge_features_transform: Optional[Callable] = lambda x: np.tanh(-x / 2 + 2) + 1,
         target_transform: Optional[bool] = False,
-        target_filter: dict = None,
+        target_filter: Optional[Dict[str, str]] = None,
     ):
         """Class from which the hdf5 datasets are loaded.
 
@@ -131,42 +309,17 @@ class GraphDataset(Dataset):
                 Note that the you can filter on a different target than the one selected as the dataset target.
                 Defaults to None.
         """
-        super().__init__(root, transform, pre_transform)
+        super().__init__(hdf5_paths, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
 
-        if isinstance(hdf5_path, list):
-            self.hdf5_path = hdf5_path
-        else:
-            self.hdf5_path = [hdf5_path]
-        self.subset = subset
-        self.target = target
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
-        self.tqdm = tqdm
 
         self._transform = transform
         self.edge_features_transform = edge_features_transform
         self.target_transform = target_transform
-        self.target_filter = target_filter
 
-        self._check_hdf5_files()
-        self._check_task_and_classes(task,classes)
         self._check_features()
-
-        # create the indexing system
-        # alows to associate each mol to an index
-        # and get fname and mol name from the index
-        self._create_index_entries()
-
-        # get the device
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    def len(self):
-        """Gets the length of the dataset
-        Returns:
-            int: number of complexes in the dataset
-        """
-        return len(self.index_entries)
 
     def get(self, index): # pylint: disable=arguments-renamed
         """Gets one item from its unique index.
@@ -297,64 +450,15 @@ class GraphDataset(Dataset):
 
         return data
 
-    def _check_hdf5_files(self):
-        """Checks if the data contained in the hdf5 file is valid."""
-        _log.info("\nChecking dataset Integrity...")
-        remove_file = []
-        for fname in self.hdf5_path:
-            try:
-                f = h5py.File(fname, "r")
-                mol_names = list(f.keys())
-                if len(mol_names) == 0:
-                    _log.info(f"    -> {fname} is empty ")
-                    remove_file.append(fname)
-                f.close()
-            except Exception as e:
-                _log.error(e)
-                _log.info(f"    -> {fname} is corrupted ")
-                remove_file.append(fname)
-
-        for name in remove_file:
-            self.hdf5_path.remove(name)
-
-    def _check_task_and_classes(self, task, classes):
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
-            self.task = targets.REGRESS
-        elif self.target in [targets.BINARY, targets.CAPRI]:
-            self.task = targets.CLASSIF
-        else:
-            self.task = task
-        
-        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
-            raise ValueError(
-                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
-        if task != self.task and task is not None:
-            warnings.warn(f"Target {self.target} expects {self.task}, but was set to task {task} by user.\n" +
-                f"User set task is ignored and {self.task} will be used.")
-
-        if self.task == targets.CLASSIF:
-            if classes is None:
-                self.classes = [0, 1]
-                _log.info(f'Target classes set up to: {self.classes}')
-            else:
-                self.classes = classes
-
-            self.classes_to_index = {
-                class_: index for index, class_ in enumerate(self.classes)
-            }
-        else:
-            self.classes = None
-            self.classes_to_index = None
-
     def _check_features(self):
         """Checks if the required features exist"""
-        f = h5py.File(self.hdf5_path[0], "r")
+        f = h5py.File(self.hdf5_paths[0], "r")
         mol_key = list(f.keys())[0]
-        
+
         # read available node features
         self.available_node_features = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
         self.available_node_features = [key for key in self.available_node_features if key[0] != '_']  # ignore metafeatures
-        
+
         # read available edge features
         self.available_edge_features = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
         self.available_edge_features = [key for key in self.available_edge_features if key[0] != '_']  # ignore metafeatures
@@ -368,7 +472,7 @@ class GraphDataset(Dataset):
         else:
             for feat in self.node_features:
                 if feat not in self.available_node_features:
-                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")
                     missing_node_features.append(feat)
 
         # check edge features
@@ -378,7 +482,7 @@ class GraphDataset(Dataset):
         elif self.edge_features is not None:
             for feat in self.edge_features:
                 if feat not in self.available_edge_features:
-                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_path[0]}.")
+                    _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")
                     missing_edge_features.append(feat)
 
         # raise error if any features are missing
@@ -395,103 +499,27 @@ class GraphDataset(Dataset):
                 miss_edge_error = f"\nMissing edge features: {missing_edge_features} \
                                     \nAvailable edge features: {self.available_edge_features}"
             raise ValueError(
-                f"Not all features could be found in the file {self.hdf5_path[0]}.\
+                f"Not all features could be found in the file {self.hdf5_paths[0]}.\
                     \nCheck feature_modules passed to the preprocess function. \
                     \nProbably, the feature wasn't generated during the preprocessing step. \
                     {miss_node_error}{miss_edge_error}")
 
-    def _create_index_entries(self):
-        """Creates the indexing of each molecule in the dataset.
 
-        Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
-        This allows to refer to one complex with its index in the list
-        """
-        _log.debug(f"Processing data set with hdf5 files: {self.hdf5_path}")
-
-        self.index_entries = []
-
-        desc = f"   {self.hdf5_path}{' dataset':25s}"
-        if self.tqdm:
-            data_tqdm = tqdm(self.hdf5_path, desc=desc, file=sys.stdout)
-        else:
-            _log.info(f"   {self.hdf5_path} dataset\n")
-            data_tqdm = self.hdf5_path
-        sys.stdout.flush()
-
-        for fdata in data_tqdm:
-            if self.tqdm:
-                data_tqdm.set_postfix(mol=os.path.basename(fdata))
-            try:
-                fh5 = h5py.File(fdata, "r")
-                if self.subset is None:
-                    mol_names = list(fh5.keys())
-                else:
-                    mol_names = [i for i in self.subset if i in list(fh5.keys())]
-
-                for k in mol_names:
-                    if self._filter(fh5[k]):
-                        self.index_entries += [(fdata, k)]
-                fh5.close()
-            except Exception:
-                _log.exception(f"on {fdata}")
-
-    def _filter(self, molgrp):
-        """Filters the molecule according to a dictionary.
-
-        The filter is based on the attribute self.target_filter
-        that must be either of the form: { 'name' : cond } or None
-
-        Args:
-            molgrp (str): group name of the molecule in the hdf5 file
-        Returns:
-            bool: True if we keep the complex False otherwise
-        Raises:
-            ValueError: If an unsuported condition is provided
-        """
-        if self.target_filter is None:
-            return True
-
-        for cond_name, cond_vals in self.target_filter.items():
-
-            try:
-                molgrp[targets.VALUES][cond_name][()]
-            except KeyError:
-                _log.info(f"   :Filter {cond_name} not found for mol {molgrp}")
-                _log.info("   :Filter options are")
-                for k in molgrp[targets.VALUES].keys():
-                    _log.info("   : ", k) # pylint: disable=logging-too-many-args
-
-            # if we have a string it's more complicated
-            if isinstance(cond_vals, str):
-
-                ops = [">", "<", "=="]
-                new_cond_vals = cond_vals
-                for o in ops:
-                    new_cond_vals = new_cond_vals.replace(o, "val" + o)
-
-                if not literal_eval(new_cond_vals):
-                    return False
-            else:
-                raise ValueError("Conditions not supported", cond_vals)
-
-        return True
-
-
-class GridDataset(Dataset):
+class GridDataset(DatasetInterface):
     def __init__( # pylint: disable=too-many-arguments
         self,
-        hdf5_path: Union[str,list],
-        subset: List[str] = None,
-        target: str = None,
-        task: str = None,
-        features: Union[List[str], str] = "all",
-        classes: Union[List[str], List[int], List[float]] = None,
-        tqdm: bool = True,
-        root: str = "./",
-        transform: Callable = None,
-        pre_transform: Callable = None,
+        hdf5_paths: Union[str, list],
+        subset: Optional[List[str]] = None,
+        target: Optional[str] = None,
+        task: Optional[str] = None,
+        features: Optional[Union[List[str], str]] = "all",
+        classes: Optional[Union[List[str], List[int], List[float]]] = None,
+        tqdm: Optional[bool] = True,
+        root: Optional[str] = "./",
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
         target_transform: Optional[bool] = False,
-        target_filter: dict = None,
+        target_filter: Optional[Dict[str, str]] = None,
     ):
         """Class from which the hdf5 datasets are loaded.
 
@@ -542,85 +570,14 @@ class GridDataset(Dataset):
                 Note that the you can filter on a different target than the one selected as the dataset target.
                 Defaults to None.
         """
-        super().__init__(root, transform, pre_transform)
+        super().__init__(hdf5_paths, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
 
-        if isinstance(hdf5_path, list):
-            self.hdf5_paths = hdf5_path
-        else:
-            self.hdf5_paths = [hdf5_path]
-
-        self.subset = subset
-        self.target = target
         self.features = features
-        self.tqdm = tqdm
 
         self._transform = transform
         self.target_transform = target_transform
-        self.target_filter = target_filter
 
-        self._check_hdf5_files()
-        self._check_task_and_classes(task,classes)
         self._check_features()
-
-        # create the indexing system
-        # alows to associate each entry to an index
-        # and get the file name and entry name from the index
-        self._create_index_entries()
-
-        # get the device
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    def _check_hdf5_files(self):
-        """Checks if the data contained in the hdf5 file is valid."""
-        _log.info("\nChecking dataset Integrity...")
-        remove_file = []
-        for hdf5_path in self.hdf5_paths:
-            try:
-                f = h5py.File(hdf5_path, "r")
-                entry_names = list(f.keys())
-                if len(entry_names) == 0:
-                    _log.info(f"    -> {hdf5_path} is empty ")
-                    remove_file.append(hdf5_path)
-                f.close()
-            except Exception as e:
-                _log.error(e)
-                _log.info(f"    -> {hdf5_path} is corrupted ")
-                remove_file.append(hdf5_path)
-
-        for hdf5_path in remove_file:
-            self.hdf5_paths.remove(hdf5_path)
-
-    def _check_task_and_classes(self, task, classes):
-
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
-            self.task = targets.REGRESS
-
-        elif self.target in [targets.BINARY, targets.CAPRI]:
-            self.task = targets.CLASSIF
-        else:
-            self.task = task
-
-        if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
-            raise ValueError(
-                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
-
-        if task != self.task and task is not None:
-            warnings.warn(f"Target {self.target} expects {self.task}, but was set to task {task} by user.\n" +
-                f"User set task is ignored and {self.task} will be used.")
-
-        if self.task == targets.CLASSIF:
-            if classes is None:
-                self.classes = [0, 1]
-                _log.info(f'Target classes set up to: {self.classes}')
-            else:
-                self.classes = classes
-
-            self.classes_to_index = {
-                class_: index for index, class_ in enumerate(self.classes)
-            }
-        else:
-            self.classes = None
-            self.classes_to_index = None
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -651,47 +608,6 @@ class GridDataset(Dataset):
                     \nCheck feature_modules passed to the preprocess function. \
                     \nProbably, the feature wasn't generated during the preprocessing step. \
                     Available features: {self.available_features}")
-
-    def _create_index_entries(self):
-        """Creates the indexing of each molecule in the dataset.
-
-        Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
-        This allows to refer to one entry with its index in the list
-        """
-        _log.debug(f"Processing data set with hdf5 files: {self.hdf5_paths}")
-
-        self.index_entries = []
-
-        desc = f"   {self.hdf5_paths}{' dataset':25s}"
-        if self.tqdm:
-            data_tqdm = tqdm(self.hdf5_paths, desc=desc, file=sys.stdout)
-        else:
-            _log.info(f"   {self.hdf5_paths} dataset\n")
-            data_tqdm = self.hdf5_paths
-        sys.stdout.flush()
-
-        for hdf5_path in data_tqdm:
-            if self.tqdm:
-                data_tqdm.set_postfix(entry_name=os.path.basename(hdf5_path))
-            try:
-                with h5py.File(hdf5_path, "r") as hdf5_file:
-                    if self.subset is None:
-                        entry_names = list(hdf5_file.keys())
-                    else:
-                        entry_names = [entry_name for entry_name in self.subset if entry_name in list(hdf5_file.keys())]
-
-                    for entry_name in entry_names:
-                        if self._filter_targets(hdf5_file[entry_name]):
-                            self.index_entries += [(hdf5_path, entry_name)]
-            except Exception:
-                _log.exception(f"on {hdf5_path}")
-
-    def len(self):
-        """Gets the length of the dataset
-        Returns:
-            int: number of entries in the dataset
-        """
-        return len(self.index_entries)
 
     def get(self, idx: int) -> Data:
         """Gets one entry from its unique index.
@@ -727,44 +643,3 @@ class GridDataset(Dataset):
         data.entry_names = [entry_name]
 
         return data
-
-    def _filter_targets(self, entry_group: h5py.Group) -> bool:
-        """Filters the entry according to a dictionary.
-
-        The filter is based on the attribute self.target_filter
-        that must be either of the form: { target_name : target_condition } or None
-
-        Args:
-            entry_group: the entry group in the hdf5 file
-        Returns:
-            True if we keep the entry False otherwise
-        Raises:
-            ValueError: If an unsuported condition is provided
-        """
-
-        if self.target_filter is None:
-            return True
-
-        for target_name, target_condition in self.target_filter.items():
-
-            present_target_names = list(entry_group[targets.VALUES].keys())
-
-            if target_name in present_target_names:
-
-                # If we have a given target_condition, see if it's met.
-                if isinstance(target_condition, str):
-
-                    operation = target_condition
-                    for operator_string in [">", "<", "==", "<=", ">=", "!="]:
-                        operation = operation.replace(operator_string, "target_value" + operator_string)
-
-                    if not literal_eval(operation):
-                        return False
-
-                elif target_condition is not None:
-                    raise ValueError("Conditions not supported", target_condition)
-
-            else:
-                _log.warning(f"   :Filter {target_name} not found for entry {entry_group}\n"
-                             f"   :Filter options are: {present_target_names}")
-        return True
