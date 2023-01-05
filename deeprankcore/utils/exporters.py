@@ -254,6 +254,9 @@ class HDF5OutputExporter(OutputExporter):
     def __exit__(self, exception_type, exception, traceback):
 
         if self.phase is not None:
+            if self.phase == "validation":
+                self.phase = "training"
+
             self.df.to_hdf(
                 os.path.join(self._directory_path, 'output_exporter.hdf5'),
                 key=self.phase,
