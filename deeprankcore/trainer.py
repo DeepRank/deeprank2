@@ -42,14 +42,14 @@ class Trainer():
                 in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
 
-            dataset_train (deeprank dataset object, optional): training set used during training.
+            dataset_train (deeprank-core dataset object, optional): training set used during training.
                 Can't be None if pretrained_model_path is also None. Defaults to None.
 
-            dataset_val (deeprank dataset object, optional): evaluation set used during training.
+            dataset_val (deeprank-core dataset object, optional): evaluation set used during training.
                 Defaults to None. If None, training set will be split randomly into training set and
                 validation set during training, using val_size parameter
 
-            dataset_test (deeprank dataset object, optional): independent evaluation set. Defaults to None.
+            dataset_test (deeprank-core dataset object, optional): independent evaluation set. Defaults to None.
 
             val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
                 Only used if dataset_val is not specified. 
@@ -98,7 +98,7 @@ class Trainer():
             self.epoch_saved_model = None
 
             if self.target is None:
-                raise ValueError("No target set. You need to choose a target (set in GraphDataset) for training.")
+                raise ValueError("No target set. You need to choose a target (set in the dataset) for training.")
 
             self._load_model()
         else:
@@ -126,30 +126,30 @@ class Trainer():
             self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
 
     def _init_datasets(self,  # pylint: disable=too-many-arguments
-                       train_dataset: Union[GraphDataset, GridDataset],
-                       validation_dataset: Optional[Union[GraphDataset, GridDataset]],
-                       test_dataset: Optional[Union[GraphDataset, GridDataset]],
-                       validation_size: Optional[Union[int, float]],
+                       dataset_train: Union[GraphDataset, GridDataset],
+                       dataset_val: Optional[Union[GraphDataset, GridDataset]],
+                       dataset_test: Optional[Union[GraphDataset, GridDataset]],
+                       val_size: Optional[Union[int, float]],
                        test_size: Optional[Union[int, float]]):
 
-        self._check_dataset_equivalence(train_dataset, validation_dataset, test_dataset)
+        self._check_dataset_equivalence(dataset_train, dataset_val, dataset_test)
 
-        self.dataset_train = train_dataset
-        self.dataset_test = test_dataset
-        self.dataset_val = validation_dataset
-        self.val_size = validation_size
+        self.dataset_train = dataset_train
+        self.dataset_test = dataset_test
+        self.dataset_val = dataset_val
+        self.val_size = val_size
         self.test_size = test_size
 
         # Divide datasets where necessary.
         if test_size is not None:
-            if test_dataset is None:
-                self.dataset_train, self.dataset_test = _divide_dataset(train_dataset, test_size)
+            if dataset_test is None:
+                self.dataset_train, self.dataset_test = _divide_dataset(dataset_train, test_size)
             else:
                 _log.warning("Test dataset was provided to Trainer; test_size parameter is ignored.")
 
-        if validation_size is not None:
-            if validation_dataset is None:
-                self.dataset_train, self.dataset_val = _divide_dataset(train_dataset, validation_size)
+        if val_size is not None:
+            if dataset_val is None:
+                self.dataset_train, self.dataset_val = _divide_dataset(dataset_train, val_size)
             else:
                 _log.warning("Validation dataset was provided to Trainer; val_size parameter is ignored.")
 
@@ -235,57 +235,57 @@ class Trainer():
         self.configure_optimizers()
         self.set_loss()
 
-    def _check_dataset_equivalence(self, train_dataset, validation_dataset, test_dataset):
+    def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
 
-        if train_dataset is None:
+        if dataset_train is None:
             # only check the test dataset
-            if test_dataset is None:
+            if dataset_test is None:
                 raise ValueError("Please provide at least a train or test dataset")
 
-            if not isinstance(test_dataset, GraphDataset) and not isinstance(test_dataset, GridDataset):
-                raise TypeError(f"""test dataset is not the right type {type(test_dataset)}
+            if not isinstance(dataset_test, GraphDataset) and not isinstance(dataset_test, GridDataset):
+                raise TypeError(f"""test dataset is not the right type {type(dataset_test)}
                                 Make sure it's either GraphDataset or GridDataset""")
             return
 
         # Compare the datasets to each other
-        for other_dataset_name, other_dataset in [("validation", validation_dataset),
-                                                  ("testing", test_dataset)]:
-            if other_dataset is not None:
+        for dataset_other_name, dataset_other in [("validation", dataset_val),
+                                                  ("testing", dataset_test)]:
+            if dataset_other is not None:
 
-                if other_dataset.target != train_dataset.target:
-                    raise ValueError(f"training dataset has target {train_dataset.target} while "
-                                     f"{other_dataset_name} dataset has target {other_dataset.target}")
+                if dataset_other.target != dataset_train.target:
+                    raise ValueError(f"training dataset has target {dataset_train.target} while "
+                                     f"{dataset_other_name} dataset has target {dataset_other.target}")
 
-                elif other_dataset.task != other_dataset.task:
-                    raise ValueError(f"training dataset has task {train_dataset.task} while "
-                                     f"{other_dataset_name} dataset has task {other_dataset.task}")
+                elif dataset_other.task != dataset_other.task:
+                    raise ValueError(f"training dataset has task {dataset_train.task} while "
+                                     f"{dataset_other_name} dataset has task {dataset_other.task}")
 
-                elif other_dataset.classes != other_dataset.classes:
-                    raise ValueError(f"training dataset has classes {train_dataset.classes} while "
-                                     f"{other_dataset_name} dataset has classes {other_dataset.classes}")
+                elif dataset_other.classes != dataset_other.classes:
+                    raise ValueError(f"training dataset has classes {dataset_train.classes} while "
+                                     f"{dataset_other_name} dataset has classes {dataset_other.classes}")
 
-                if isinstance(train_dataset, GraphDataset) and isinstance(other_dataset, GraphDataset):
+                if isinstance(dataset_train, GraphDataset) and isinstance(dataset_other, GraphDataset):
 
-                    if other_dataset.node_features != train_dataset.node_features:
-                        raise ValueError(f"training dataset has node_features {train_dataset.node_features} while "
-                                         f"{other_dataset_name} dataset has node_features {other_dataset.node_features}")
+                    if dataset_other.node_features != dataset_train.node_features:
+                        raise ValueError(f"training dataset has node_features {dataset_train.node_features} while "
+                                         f"{dataset_other_name} dataset has node_features {dataset_other.node_features}")
 
-                    elif other_dataset.edge_features != train_dataset.edge_features:
-                        raise ValueError(f"training dataset has edge_features {train_dataset.edge_features} while "
-                                         f"{other_dataset_name} dataset has edge_features {other_dataset.edge_features}")
+                    elif dataset_other.edge_features != dataset_train.edge_features:
+                        raise ValueError(f"training dataset has edge_features {dataset_train.edge_features} while "
+                                         f"{dataset_other_name} dataset has edge_features {dataset_other.edge_features}")
 
-                    elif other_dataset.clustering_method != other_dataset.clustering_method:
-                        raise ValueError(f"training dataset has clustering method {train_dataset.clustering_method} while "
-                                         f"{other_dataset_name} dataset has clustering method {other_dataset.clustering_method}")
+                    elif dataset_other.clustering_method != dataset_other.clustering_method:
+                        raise ValueError(f"training dataset has clustering method {dataset_train.clustering_method} while "
+                                         f"{dataset_other_name} dataset has clustering method {dataset_other.clustering_method}")
 
-                elif isinstance(train_dataset, GridDataset) and isinstance(other_dataset, GridDataset):
+                elif isinstance(dataset_train, GridDataset) and isinstance(dataset_other, GridDataset):
 
-                    if other_dataset.features != train_dataset.features:
-                        raise ValueError(f"training dataset has features {train_dataset.features} while "
-                                         f"{other_dataset_name} dataset has features {other_dataset.features}")
+                    if dataset_other.features != dataset_train.features:
+                        raise ValueError(f"training dataset has features {dataset_train.features} while "
+                                         f"{dataset_other_name} dataset has features {dataset_other.features}")
 
                 else:
-                    raise TypeError(f"Training and {other_dataset_name} datasets are not the same type.\n"
+                    raise TypeError(f"Training and {dataset_other_name} datasets are not the same type.\n"
                                      "Make sure to use only graph or only grid datasets")
 
     def _load_pretrained_model(self):
@@ -779,7 +779,7 @@ def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[
     """Divides the dataset into a training set and an evaluation set
 
     Args:
-        dataset: input dataset to be split into training and validation data
+        dataset (deeprank-core dataset object): input dataset to be split into training and validation data
 
         val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to 0.25.
