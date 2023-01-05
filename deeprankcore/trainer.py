@@ -621,7 +621,7 @@ class Trainer():
         sum_of_losses = 0
         count_predictions = 0
         t0 = time()
-        for _, data_batch in enumerate(loader):
+        for data_batch in loader:
             data_batch = data_batch.to(self.device)
             pred = self.model(data_batch)
             pred, y = self._format_output(pred, data_batch.y)
