@@ -156,10 +156,10 @@ class TestTrainer(unittest.TestCase):
             )
 
         with pytest.raises(TypeError):
-            trainer = Trainer(CnnClassification,
-                              dataset_train=dataset_train,
-                              dataset_val=dataset_valid,
-                              batch_size=2)
+            Trainer(CnnClassification,
+                    dataset_train=dataset_train,
+                    dataset_val=dataset_valid,
+                    batch_size=2)
 
     def test_ginet_sigmoid(self):
         _model_base_test(

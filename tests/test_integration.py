@@ -14,7 +14,7 @@ from deeprankcore.utils.exporters import HDF5OutputExporter
 from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
-import tempfile
+
 
 def test_integration_cnn(): # pylint: disable=too-many-locals
     """
