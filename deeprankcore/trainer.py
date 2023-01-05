@@ -173,7 +173,7 @@ class Trainer():
             self.edge_features = None
             self.features = dataset.features
         else:
-            TypeError(type(dataset))
+            raise TypeError(type(dataset))
 
         self.target = dataset.target
         self.task = dataset.task
