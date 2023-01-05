@@ -52,7 +52,7 @@ def save_hdf5_keys(
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
 
 
-class DatasetInterface(Dataset):
+class DatasetParent(Dataset):
 
     def __init__(self,
                  hdf5_paths: Union[str, List[str]],
@@ -231,7 +231,7 @@ class DatasetInterface(Dataset):
         return len(self.index_entries)
 
 
-class GraphDataset(DatasetInterface):
+class GraphDataset(DatasetParent):
     def __init__( # pylint: disable=too-many-arguments, too-many-locals
         self,
         hdf5_paths: Union[str, List[str]],
@@ -512,7 +512,7 @@ class GraphDataset(DatasetInterface):
 GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
-class GridDataset(DatasetInterface):
+class GridDataset(DatasetParent):
     def __init__( # pylint: disable=too-many-arguments
         self,
         hdf5_paths: Union[str, list],
