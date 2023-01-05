@@ -12,7 +12,6 @@ import importlib
 from os.path import basename
 import h5py
 import pkgutil
-from deeprankcore.utils.grid import MapMethod, Grid, GridSettings
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.utils.buildgraph import (
@@ -183,7 +182,7 @@ class QueryCollection:
     def __iter__(self) -> Iterator[Query]:
         return iter(self._queries)
 
-    def _process_one_query(
+    def _process_one_query(  # pylint: disable=too-many-arguments
         self,
         prefix: str,
         feature_names: List[str],
@@ -212,7 +211,7 @@ class QueryCollection:
             _log.error(e)
             _log.warning(f'Query {query.get_query_id()}\'s graph was not saved in the hdf5 file; check the query\'s files')
 
-    def process( # pylint: disable=too-many-arguments
+    def process( # pylint: disable=too-many-arguments, too-many-locals
         self, 
         prefix: Optional[str] = None,
         feature_modules: List[ModuleType] = None,

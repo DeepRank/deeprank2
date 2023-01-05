@@ -54,7 +54,7 @@ def save_hdf5_keys(
 
 class DatasetParent(Dataset):
 
-    def __init__(self,
+    def __init__(self, # pylint: disable=too-many-arguments
                  hdf5_paths: Union[str, List[str]],
                  subset: Union[List[str], None],
                  target: Union[str, None],
@@ -69,10 +69,10 @@ class DatasetParent(Dataset):
 
         super().__init__(root_directory_path, transform, pre_transform)
 
-        if type(hdf5_paths) == str:
+        if isinstance(hdf5_paths, str):
             self.hdf5_paths = [hdf5_paths]
 
-        elif type(hdf5_paths) == list:
+        elif isinstance(hdf5_paths, list):
             self.hdf5_paths = hdf5_paths
 
         else:
@@ -617,7 +617,7 @@ class GridDataset(DatasetParent):
 
                     unpartial_feature_name = partial_feature_match.group(1)
 
-                    if self.features == "all" or any([name == unpartial_feature_name for name in self.features]):
+                    if self.features == "all" or isinstance(self.features, list) and unpartial_feature_name in self.features:
 
                         hdf5_matching_feature_names.append(feature_name)
 
@@ -625,7 +625,7 @@ class GridDataset(DatasetParent):
 
                 else:  # no numbers, it's a one-dimensional feature name
 
-                    if self.features == "all" or any([name == feature_name for name in self.features]):
+                    if self.features == "all" or isinstance(self.features, list) and feature_name in self.features):
 
                         hdf5_matching_feature_names.append(feature_name)
 

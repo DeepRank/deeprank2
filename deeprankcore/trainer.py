@@ -256,11 +256,11 @@ class Trainer():
                     raise ValueError(f"training dataset has target {dataset_train.target} while "
                                      f"{dataset_other_name} dataset has target {dataset_other.target}")
 
-                elif dataset_other.task != dataset_other.task:
+                if dataset_other.task != dataset_other.task:
                     raise ValueError(f"training dataset has task {dataset_train.task} while "
                                      f"{dataset_other_name} dataset has task {dataset_other.task}")
 
-                elif dataset_other.classes != dataset_other.classes:
+                if dataset_other.classes != dataset_other.classes:
                     raise ValueError(f"training dataset has classes {dataset_train.classes} while "
                                      f"{dataset_other_name} dataset has classes {dataset_other.classes}")
 
@@ -270,11 +270,11 @@ class Trainer():
                         raise ValueError(f"training dataset has node_features {dataset_train.node_features} while "
                                          f"{dataset_other_name} dataset has node_features {dataset_other.node_features}")
 
-                    elif dataset_other.edge_features != dataset_train.edge_features:
+                    if dataset_other.edge_features != dataset_train.edge_features:
                         raise ValueError(f"training dataset has edge_features {dataset_train.edge_features} while "
                                          f"{dataset_other_name} dataset has edge_features {dataset_other.edge_features}")
 
-                    elif dataset_other.clustering_method != dataset_other.clustering_method:
+                    if dataset_other.clustering_method != dataset_other.clustering_method:
                         raise ValueError(f"training dataset has clustering method {dataset_train.clustering_method} while "
                                          f"{dataset_other_name} dataset has clustering method {dataset_other.clustering_method}")
 
