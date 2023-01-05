@@ -143,6 +143,24 @@ class TestTrainer(unittest.TestCase):
 
         trainer.train(nepoch=1)
 
+    def test_grid_graph_incompatible(self):
+        dataset_train = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                                    subset=None,
+                                    target=targets.BINARY,
+                                    task=targets.CLASSIF,
+                                    features=[Efeat.VANDERWAALS])
+
+        dataset_valid = GraphDataset(
+                hdf5_path="tests/data/hdf5/valid.hdf5",
+                target=targets.BINARY,
+            )
+
+        with pytest.raises(TypeError):
+            trainer = Trainer(CnnClassification,
+                              dataset_train=dataset_train,
+                              dataset_val=dataset_valid,
+                              batch_size=2)
+
     def test_ginet_sigmoid(self):
         _model_base_test(
             GINet,
