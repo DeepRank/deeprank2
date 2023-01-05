@@ -506,7 +506,9 @@ class GraphDataset(DatasetInterface):
                     {miss_node_error}{miss_edge_error}")
 
 
-# Grid features are stored per dimension
+# Grid features are stored per dimension and named accordingly.
+# Example: position_001, position_002, position_003 (for x,y,z)
+# Use this regular expression to take the feature name apart
 GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
@@ -608,10 +610,17 @@ class GridDataset(DatasetInterface):
 
                     unpartial_feature_name = partial_feature_match.group(1)
 
-                    hdf5_matching_feature_names.append(feature_name)
+                    if self.features == "all" or any([name == unpartial_feature_name for name in self.features]):
+
+                        hdf5_matching_feature_names.append(feature_name)
+
                     unpartial_feature_names.append(unpartial_feature_name)
 
-                else:  # it's a one-dimensional feature name
+                else:  # no numbers, it's a one-dimensional feature name
+
+                    if self.features == "all" or any([name == feature_name for name in self.features]):
+
+                        hdf5_matching_feature_names.append(feature_name)
 
                     unpartial_feature_names.append(feature_name)
 
