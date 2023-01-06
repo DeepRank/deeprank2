@@ -30,7 +30,7 @@ _log = logging.getLogger(__name__)
 
 
 class Query():
-    """
+    '''
     Represents one entity of interest, like a single residue variant or a protein-protein interface.
     Query objects are used to generate graphs from structures.
     objects of this class should be created before any model is loaded
@@ -47,7 +47,7 @@ class Query():
        - fnat
        - dockq
     Other target names are also allowed, but require additional settings to the Trainer object.
-    """
+    '''
 
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
         """
@@ -55,7 +55,6 @@ class Query():
             model_id: the id of the model to load, usually a pdb accession code
             targets: target values associated with this query
             pssm_paths: the paths of the pssm files, per protein(chain) id
-        """
 
         self._model_id = model_id
 
