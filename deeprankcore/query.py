@@ -128,7 +128,7 @@ class QueryCollection:
         Adds new query to the collection of all generated queries.
 
         Args:
-            query (:class: Query): must be a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
+            query (:class:`Query`): must be a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
             verbose: bool for logging query ids added, defaults to False.
         """
         query_id = query.get_query_id()
