@@ -1,18 +1,6 @@
 deeprankcore package
 ====================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   deeprankcore.domain
-   deeprankcore.feature
-   deeprankcore.h5x
-   deeprankcore.models
-   deeprankcore.tools
-
 Submodules
 ----------
 
@@ -32,7 +20,15 @@ deeprankcore.GraphGenMP module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.trainer module
+deeprankcore.tools.metrics module
+---------------------------
+
+.. automodule:: deeprankcore.tools.metrics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deeprankcore.Trainer module
 -----------------------------
 
 .. automodule:: deeprankcore.trainer
@@ -40,13 +36,6 @@ deeprankcore.trainer module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.alignmentnet module
---------------------------------
-
-.. automodule:: deeprankcore.alignmentnet
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 deeprankcore.community\_pooling module
 --------------------------------------
@@ -59,7 +48,7 @@ deeprankcore.community\_pooling module
 deeprankcore.foutnet module
 ---------------------------
 
-.. automodule:: deeprankcore.foutnet
+.. automodule:: deeprankcore.neuralnets.foutnet
    :members:
    :undoc-members:
    :show-inheritance:
@@ -67,7 +56,7 @@ deeprankcore.foutnet module
 deeprankcore.ginet module
 -------------------------
 
-.. automodule:: deeprankcore.ginet
+.. automodule:: deeprankcore.neuralnets.ginet
    :members:
    :undoc-members:
    :show-inheritance:
@@ -88,26 +77,30 @@ deeprankcore.naive\_gnn module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.query module
+deeprankcore.preprocess module
 ------------------------------
 
-.. automodule:: deeprankcore.query
+.. automodule:: deeprankcore.preprocess
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.sgat module
+deeprankcore.sGAT module
 ------------------------
 
-.. automodule:: deeprankcore.sgat
+.. automodule:: deeprankcore.sGAT
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+Subpackages
+-----------
 
-.. automodule:: deeprankcore
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 4
+
+   deeprankcore.domain
+   deeprankcore.feature
+   deeprankcore.h5x
+   deeprankcore.models
+   deeprankcore.tools
