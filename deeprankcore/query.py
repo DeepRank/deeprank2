@@ -30,31 +30,17 @@ _log = logging.getLogger(__name__)
 
 
 class Query():
-    '''
-    Represents one entity of interest, like a single residue variant or a protein-protein interface.
-    Query objects are used to generate graphs from structures.
-    objects of this class should be created before any model is loaded
-    Query objects can have target values associated with them, these will be stored with the resulting graph.
-    The compute_targets function under deeprankcore.tools.target is a nice way to get started. It will output a directory that can serve
-    as input for the targets argument.
-    Currently, the Trainer class under deeprankcore.trainer can work with target values, that have one of the following names:
-      for classification:
-       - bin_class (scalar value is expected to be either 0 or 1)
-       - capri_classes (scalar integer values are expected)
-      for regression (expects one scalar per graph per target):
-       - irmsd
-       - lrmsd
-       - fnat
-       - dockq
-    Other target names are also allowed, but require additional settings to the Trainer object.
-    '''
 
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
         """
+        Class that represents one entity of interest, like a single residue variant or a protein-protein interface.
+        Query objects are used to generate graphs from structures, and they should be created before any model is loaded. They can have target values associated with them, these will be stored with the resulting graph.
+        
         Args:
             model_id: the id of the model to load, usually a pdb accession code
             targets: target values associated with this query
             pssm_paths: the paths of the pssm files, per protein(chain) id
+        """
 
         self._model_id = model_id
 
