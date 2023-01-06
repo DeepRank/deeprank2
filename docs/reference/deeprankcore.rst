@@ -4,7 +4,15 @@ deeprankcore package
 Submodules
 ----------
 
-deeprankcore.dataset module
+deeprankcore.query
+---------------------------
+
+.. automodule:: deeprankcore.query
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deeprankcore.dataset
 ---------------------------
 
 .. automodule:: deeprankcore.dataset
@@ -12,83 +20,10 @@ deeprankcore.dataset module
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.GraphGenMP module
-------------------------------
-
-.. automodule:: deeprankcore.GraphGenMP
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.tools.metrics module
+deeprankcore.trainer
 ---------------------------
-
-.. automodule:: deeprankcore.tools.metrics
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.Trainer module
------------------------------
 
 .. automodule:: deeprankcore.trainer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-deeprankcore.community\_pooling module
---------------------------------------
-
-.. automodule:: deeprankcore.community_pooling
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.foutnet module
----------------------------
-
-.. automodule:: deeprankcore.neuralnets.foutnet
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.ginet module
--------------------------
-
-.. automodule:: deeprankcore.neuralnets.ginet
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.ginet\_nocluster module
-------------------------------------
-
-.. automodule:: deeprankcore.ginet_nocluster
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.naive\_gnn module
-------------------------------
-
-.. automodule:: deeprankcore.naive_gnn
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.preprocess module
-------------------------------
-
-.. automodule:: deeprankcore.preprocess
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.sGAT module
-------------------------
-
-.. automodule:: deeprankcore.sGAT
    :members:
    :undoc-members:
    :show-inheritance:
@@ -99,8 +34,6 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   deeprankcore.domain
-   deeprankcore.feature
-   deeprankcore.h5x
-   deeprankcore.models
+   deeprankcore.features
    deeprankcore.tools
+   deeprankcore.neuralnets

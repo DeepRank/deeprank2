@@ -4,50 +4,42 @@ deeprankcore.feature package
 Submodules
 ----------
 
-deeprankcore.feature.amino\_acid module
+deeprankcore.feature.components
 ---------------------------------------
 
-.. automodule:: deeprankcore.feature.amino_acid
+.. automodule:: deeprankcore.feature.components
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.feature.atomic\_contact module
+deeprankcore.feature.conservation
 -------------------------------------------
 
-.. automodule:: deeprankcore.feature.atomic_contact
+.. automodule:: deeprankcore.feature.conservation
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.feature.biopython module
+deeprankcore.feature.contact
 -------------------------------------
 
-.. automodule:: deeprankcore.feature.biopython
+.. automodule:: deeprankcore.feature.contact
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.feature.bsa module
+deeprankcore.feature.exposure
 -------------------------------
 
-.. automodule:: deeprankcore.feature.bsa
+.. automodule:: deeprankcore.feature.exposure
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.feature.pssm module
+deeprankcore.feature.surfacearea
 --------------------------------
 
-.. automodule:: deeprankcore.feature.pssm
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deeprankcore.feature.sasa module
---------------------------------
-
-.. automodule:: deeprankcore.feature.sasa
+.. automodule:: deeprankcore.feature.surfacearea
    :members:
    :undoc-members:
    :show-inheritance:
