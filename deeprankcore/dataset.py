@@ -55,7 +55,7 @@ def save_hdf5_keys(
 class DatasetParent(Dataset):
 
     def __init__(self, # pylint: disable=too-many-arguments
-                 hdf5_paths: Union[str, List[str]],
+                 hdf5_path: Union[str, List[str]],
                  subset: Union[List[str], None],
                  target: Union[str, None],
                  task: Union[str, None],
@@ -69,14 +69,14 @@ class DatasetParent(Dataset):
 
         super().__init__(root_directory_path, transform, pre_transform)
 
-        if isinstance(hdf5_paths, str):
-            self.hdf5_paths = [hdf5_paths]
+        if isinstance(hdf5_path, str):
+            self.hdf5_paths = [hdf5_path]
 
-        elif isinstance(hdf5_paths, list):
-            self.hdf5_paths = hdf5_paths
+        elif isinstance(hdf5_path, list):
+            self.hdf5_paths = hdf5_path
 
         else:
-            raise TypeError(f"Unexpected type: {type(hdf5_paths)}")
+            raise TypeError(f"hdf5_path: unexpected type: {type(hdf5_path)}")
 
         self.use_tqdm = use_tqdm
 
@@ -234,7 +234,7 @@ class DatasetParent(Dataset):
 class GraphDataset(DatasetParent):
     def __init__( # pylint: disable=too-many-arguments, too-many-locals
         self,
-        hdf5_paths: Union[str, List[str]],
+        hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]] = None,
         target: Optional[str] = None,
         task: Optional[str] = None,
@@ -317,7 +317,7 @@ class GraphDataset(DatasetParent):
                 Note that the you can filter on a different target than the one selected as the dataset target.
                 Defaults to None.
         """
-        super().__init__(hdf5_paths, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
 
         self.node_features = node_features
         self.edge_features = edge_features
@@ -522,7 +522,7 @@ GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 class GridDataset(DatasetParent):
     def __init__( # pylint: disable=too-many-arguments
         self,
-        hdf5_paths: Union[str, list],
+        hdf5_path: Union[str, list],
         subset: Optional[List[str]] = None,
         target: Optional[str] = None,
         task: Optional[str] = None,
@@ -584,7 +584,7 @@ class GridDataset(DatasetParent):
                 Note that the you can filter on a different target than the one selected as the dataset target.
                 Defaults to None.
         """
-        super().__init__(hdf5_paths, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
 
         self.features = features
 

@@ -13,7 +13,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_graph_dataset(self):
         dataset = GraphDataset(
-            hdf5_paths=self.hdf5_path,
+            hdf5_path=self.hdf5_path,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
@@ -25,7 +25,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_grid_dataset_regression(self):
         dataset = GridDataset(
-            hdf5_paths=self.hdf5_path,
+            hdf5_path=self.hdf5_path,
             features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
             target=targets.IRMSD
         )
@@ -40,7 +40,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_grid_dataset_classification(self):
         dataset = GridDataset(
-            hdf5_paths=self.hdf5_path,
+            hdf5_path=self.hdf5_path,
             features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
             target=targets.BINARY
         )
@@ -55,7 +55,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_dataset_filter(self):
         GraphDataset(
-            hdf5_paths=self.hdf5_path,
+            hdf5_path=self.hdf5_path,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
@@ -70,7 +70,7 @@ class TestDataSet(unittest.TestCase):
             return data
 
         dataset = GraphDataset(
-            hdf5_paths=self.hdf5_path,
+            hdf5_path=self.hdf5_path,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
@@ -83,7 +83,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_multi_file_dataset(self):
         dataset = GraphDataset(
-            hdf5_paths=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
+            hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
             target=targets.BINARY
@@ -131,7 +131,7 @@ class TestDataSet(unittest.TestCase):
         subset = hdf5_keys[:n]
 
         dataset = GraphDataset(
-            hdf5_paths="tests/data/hdf5/train.hdf5",
+            hdf5_path="tests/data/hdf5/train.hdf5",
             subset=subset,
         )
 
@@ -142,7 +142,7 @@ class TestDataSet(unittest.TestCase):
     def test_target_transform(self):
 
         dataset = GraphDataset(
-            hdf5_paths = "tests/data/hdf5/train.hdf5",
+            hdf5_path = "tests/data/hdf5/train.hdf5",
             target = "BA", # continuous values
             task = 'regress',
             target_transform = True
@@ -154,7 +154,7 @@ class TestDataSet(unittest.TestCase):
     def test_invalid_target_transform(self):
 
         dataset = GraphDataset(
-            hdf5_paths = "tests/data/hdf5/train.hdf5",
+            hdf5_path = "tests/data/hdf5/train.hdf5",
             target = "BA", # continuous values
             task = 'classif',
             target_transform = True # only for regression

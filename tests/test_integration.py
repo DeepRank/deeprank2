@@ -69,19 +69,19 @@ def test_integration_cnn(): # pylint: disable=too-many-locals
         features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM, Efeat.DISTANCE]
 
         dataset_train = GridDataset(
-            hdf5_paths = hdf5_paths,
+            hdf5_path = hdf5_paths,
             features = features,
             target = targets.BINARY
         )
 
         dataset_val = GridDataset(
-            hdf5_paths = hdf5_paths,
+            hdf5_path = hdf5_paths,
             features = features,
             target = targets.BINARY
         )
 
         dataset_test = GridDataset(
-            hdf5_paths = hdf5_paths,
+            hdf5_path = hdf5_paths,
             features = features,
             target = targets.BINARY
         )
@@ -159,7 +159,7 @@ def test_integration_gnn(): # pylint: disable=too-many-locals
 
 
         dataset_train = GraphDataset(
-            hdf5_paths = hdf5_paths,
+            hdf5_path = hdf5_paths,
             node_features = node_features,
             edge_features = edge_features,
             target = targets.BINARY,
@@ -167,7 +167,7 @@ def test_integration_gnn(): # pylint: disable=too-many-locals
         )
 
         dataset_val = GraphDataset(
-            hdf5_paths = hdf5_paths,
+            hdf5_path = hdf5_paths,
             node_features = node_features,
             edge_features = edge_features,
             target = targets.BINARY,
@@ -175,7 +175,7 @@ def test_integration_gnn(): # pylint: disable=too-many-locals
         )
 
         dataset_test = GraphDataset(
-            hdf5_paths = hdf5_paths,
+            hdf5_path = hdf5_paths,
             node_features = node_features,
             edge_features = edge_features,
             target = targets.BINARY,
