@@ -30,7 +30,8 @@ _log = logging.getLogger(__name__)
 
 
 class Query():
-    """Represents one entity of interest, like a single residue variant or a protein-protein interface.
+    """
+    Represents one entity of interest, like a single residue variant or a protein-protein interface.
     Query objects are used to generate graphs from structures.
     objects of this class should be created before any model is loaded
     Query objects can have target values associated with them, these will be stored with the resulting graph.
