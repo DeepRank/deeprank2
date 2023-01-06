@@ -27,13 +27,3 @@ deeprankcore.trainer
    :members:
    :undoc-members:
    :show-inheritance:
-
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   deeprankcore.features
-   deeprankcore.tools
-   deeprankcore.neuralnets
