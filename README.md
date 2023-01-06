@@ -39,8 +39,8 @@ DeeprankCore documentation can be found here : https://deeprankcore.rtfd.io/.
     - [Deeprank-Core Package](#deeprank-core-package)
   - [Documentation](#documentation)
   - [Quick start](#quick-start)
-    - [Data generation](#data-generation)
-    - [Dataset(s)](#datasets)
+    - [Graphs generation](#graphs-generation)
+    - [Dataset](#dataset)
     - [Training](#training)
       - [Custom GNN](#custom-gnn)
   - [h5x support](#h5x-support)
@@ -83,7 +83,7 @@ More extensive and detailed documentation can be found [here](https://deeprankco
 
 ## Quick start
 
-### Data generation
+### Graphs generation
 
 The process of generating graphs takes as input `.pdb` files representing protein-protein structural complexes and the correspondent Position-Specific Scoring Matrices (PSSMs) in the form of `.pssm` files. Query objects describe how the graphs should be built.
 
@@ -138,7 +138,7 @@ output_paths = queries.process("<output_folder>/<prefix_for_outputs>")
 The user is free to implement his/her own query class. Each implementation requires the `build` method to be present.
 
 
-### Dataset(s)
+### Dataset
 
 Data can be split in sets implementing custom splits according to the specific application. Utility splitting functions are currently under development.
 
