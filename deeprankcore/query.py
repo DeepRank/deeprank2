@@ -37,8 +37,8 @@ class Query():
         Query objects are used to generate graphs from structures, and they should be created before any model is loaded. They can have target values associated with them, these will be stored with the resulting graph.
 
         Args:
-            model_id: the id of the model to load, usually a pdb accession code
-            targets: target values associated with the query
+            model_id(str): the id of the model to load, usually a pdb accession code
+            targets(): target values associated with the query
             pssm_paths: the paths of the pssm files, per protein (chain) id
         """
 
@@ -128,7 +128,7 @@ class QueryCollection:
         Adds new query to the collection of all generated queries.
 
         Args:
-            query (:class:Query): must be a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
+            query (:class:`~Query`): must be a Query object, either ProteinProteinInterfaceResidueQuery or SingleResidueVariantAtomicQuery.
             verbose: bool for logging query ids added, defaults to False.
         """
         query_id = query.get_query_id()
