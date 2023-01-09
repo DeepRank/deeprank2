@@ -37,17 +37,26 @@ class Trainer():
         """Class from which the network is trained, evaluated and tested.
 
         Args:
-            neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.). It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task). More specifically, in classification task cases, softmax shouldn't be used as the last activation function. Defaults to None.
+            neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+                It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
+                in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
+                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+                Defaults to None.
 
-            dataset_train (:class:`GraphDataset`, optional): Training set used during training. Can't be None if pretrained_model is also None. Defaults to None.
+            dataset_train (:class:`GraphDataset`, optional): Training set used during training.
+                Can't be None if pretrained_model is also None. Defaults to None.
 
-            dataset_val (:class:`GraphDataset`, optional): Evaluation set used during training. If None, training set will be split randomly into training set and validation set during training, using val_size parameter. Defaults to None.
+            dataset_val (:class:`GraphDataset`, optional): Evaluation set used during training.
+                If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
+                Defaults to None.
 
             dataset_test (:class:`GraphDataset`, optional): Independent evaluation set. Defaults to None.
 
-            val_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation. Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to to 0.25 (in _divide_dataset function).
+            val_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+                Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to to 0.25 (in _divide_dataset function).
 
-            test_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset. Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to 0 (i.e., no test data).
+            test_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
+                Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to 0 (i.e., no test data).
 
             class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
 
@@ -57,7 +66,8 @@ class Trainer():
 
             shuffle (bool, optional): whether to shuffle the dataloaders data. Defaults to True.
 
-            output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory. Defaults to None.
+            output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the epochs.
+                If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory. Defaults to None.
         """
 
         if output_exporters is not None:
@@ -318,11 +328,13 @@ class Trainer():
         Configure optimizer and its main parameters.
 
         Args:
-            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`. Defaults to None.
+            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
+                Defaults to None.
 
             lr (float, optional): Learning rate. Defaults to 0.001.
 
-            weight_decay (float, optional): Weight decay (L2 penalty). Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
+            weight_decay (float, optional): Weight decay (L2 penalty).
+                Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
         """
 
         self.lr = lr
