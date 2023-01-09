@@ -39,7 +39,7 @@ class Trainer():
         Args:
             neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.). It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task). More specifically, in classification task cases, softmax shouldn't be used as the last activation function. Defaults to None.
 
-            dataset_train (:class:`deeprankcore.dataset.GraphDataset`, optional): Training set used during training. Can't be None if pretrained_model is also None. Defaults to None.
+            dataset_train (:class:`GraphDataset`, optional): Training set used during training. Can't be None if pretrained_model is also None. Defaults to None.
 
             dataset_val (:class:`GraphDataset`, optional): Evaluation set used during training. If None, training set will be split randomly into training set and validation set during training, using val_size parameter. Defaults to None.
 
@@ -318,7 +318,7 @@ class Trainer():
         Configure optimizer and its main parameters.
 
         Args:
-            optimizer (:class:torch.optim, optional): PyTorch optimizer object. If none, defaults to Adam. Defaults to None.
+            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to Adam. Defaults to None.
 
             lr (float, optional): Learning rate. Defaults to 0.001.
 
@@ -376,7 +376,7 @@ class Trainer():
         model_path: Optional[str] = None,
     ):
         """
-        Performs the model's training.
+        Performs the training of the model.
 
         Args:
             nepoch (int, optional): Number of epochs for training the model. Defaults to 1.
@@ -592,7 +592,7 @@ class Trainer():
 
     def test(self):
         """
-        Performs the model's testing.
+        Performs the testing of the model.
         """
 
         with self._output_exporters:
