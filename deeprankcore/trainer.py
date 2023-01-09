@@ -34,12 +34,12 @@ class Trainer():
                 shuffle: bool = True,
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
-        """Class from which the network is trained, evaluated and tested
+        """Class from which the network is trained, evaluated and tested.
 
         Args:
             neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.). It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task). More specifically, in classification task cases, softmax shouldn't be used as the last activation function. Defaults to None.
 
-            dataset_train (:class:`GraphDataset`, optional): Training set used during training. Can't be None if pretrained_model is also None. Defaults to None.
+            dataset_train (:class:`deeprankcore.dataset.GraphDataset`, optional): Training set used during training. Can't be None if pretrained_model is also None. Defaults to None.
 
             dataset_val (:class:`GraphDataset`, optional): Evaluation set used during training. If None, training set will be split randomly into training set and validation set during training, using val_size parameter. Defaults to None.
 
