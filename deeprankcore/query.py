@@ -325,7 +325,8 @@ class SingleResidueVariantResidueQuery(Query):
 
         Args:
             feature_modules(List[ModuleType]): Each must implement the :py:func:`add_features` function.
-            include_hydrogens(bool): Whether to include hydrogens in the :class:`Graph`, defaults to False.
+
+            include_hydrogens(bool, optional): Whether to include hydrogens in the :class:`Graph`, defaults to False.
         
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
@@ -565,10 +566,17 @@ class ProteinProteinInterfaceAtomicQuery(Query):
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
-    def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the .PDB structure.
+    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+        """
+        Builds the graph from the .PDB structure.
+
         Args:
-            feature_modules (list of modules): each must implement the :py:func:`add_features` function.
+            feature_modules(List[ModuleType]): Each must implement the :py:func:`add_features` function.
+
+            include_hydrogens(bool, optional): Whether to include hydrogens in the :class:`Graph`, defaults to False.
+
+        Returns:
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
 
         # load .PDB structure
@@ -606,7 +614,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
 
 class ProteinProteinInterfaceResidueQuery(Query):
-    "a query that builds residue-based graphs, using the residues at a protein-protein interface"
+    "A query that builds residue-based graphs, using the residues at a protein-protein interface."
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -619,12 +627,12 @@ class ProteinProteinInterfaceResidueQuery(Query):
     ):
         """
         Args:
-            pdb_path(str): the path to the .PDB file
-            chain_id1(str): the .PDB chain identifier of the first protein of interest
-            chain_id2(str): the .PDB chain identifier of the second protein of interest
-            pssm_paths(dict(str,str), optional): the paths to the .PSSM files, per chain identifier
-            distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
-            targets(dict, optional): named target values associated with this query
+            pdb_path(str): The path to the .PDB file.
+            chain_id1(str): The .PDB chain identifier of the first protein of interest.
+            chain_id2(str): The .PDB chain identifier of the second protein of interest.
+            pssm_paths(dict(str,str), optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
+            distance_cutoff(float, optional): Max distance in Ångström between two interacting residues of the two proteins, defaults to 10.
+            targets(dict, optional): Named target values associated with this query, defaults to None.
         """
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
@@ -654,10 +662,17 @@ class ProteinProteinInterfaceResidueQuery(Query):
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
-    def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the .PDB structure.
+    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+        """
+        Builds the graph from the .PDB structure.
+
         Args:
-            feature_modules (list of modules): each must implement the :py:func:`add_features` function.
+            feature_modules(List[ModuleType]): Each must implement the :py:func:`add_features` function.
+
+            include_hydrogens(bool, optional): Whether to include hydrogens in the :class:`Graph`, defaults to False.
+
+        Returns:
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
 
         # load .PDB structure
