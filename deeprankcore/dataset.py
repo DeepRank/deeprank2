@@ -43,7 +43,10 @@ class GraphDataset(Dataset):
 
             subset (list, optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
 
-            target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well. Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
+            target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target
+            given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
+            Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into numerical
+            class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored. Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'. Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
