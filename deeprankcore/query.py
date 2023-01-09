@@ -371,7 +371,6 @@ class SingleResidueVariantResidueQuery(Query):
 
 
 class SingleResidueVariantAtomicQuery(Query):
-    "Creates an atomic graph for a single residue variant in a .PDB file."
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -387,6 +386,8 @@ class SingleResidueVariantAtomicQuery(Query):
         targets: Optional[Dict[str, float]] = None,
     ):
         """
+        Creates an atomic graph for a single residue variant in a .PDB file.
+
         Args:
             pdb_path(str): The path to the .PDB file.
             chain_id(str): The .PDB chain identifier of the variant residue
@@ -517,7 +518,6 @@ class SingleResidueVariantAtomicQuery(Query):
 
 
 class ProteinProteinInterfaceAtomicQuery(Query):
-    "A query that builds atom-based graphs, using the residues at a protein-protein interface."
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -529,6 +529,8 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         targets: Optional[Dict[str, float]] = None,
     ):
         """
+        A query that builds atom-based graphs, using the residues at a protein-protein interface.
+
         Args:
             pdb_path(str): The path to the .PDB file.
             chain_id1(str): The .PDB chain identifier of the first protein of interest.
@@ -614,7 +616,6 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
 
 class ProteinProteinInterfaceResidueQuery(Query):
-    "A query that builds residue-based graphs, using the residues at a protein-protein interface."
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -626,6 +627,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
         targets: Optional[Dict[str, float]] = None,
     ):
         """
+        A query that builds residue-based graphs, using the residues at a protein-protein interface.
+
         Args:
             pdb_path(str): The path to the .PDB file.
             chain_id1(str): The .PDB chain identifier of the first protein of interest.
