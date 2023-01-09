@@ -116,7 +116,7 @@ class GraphDataset(Dataset):
             index (int): Index of the complex.
 
         Returns:
-            Dict: {'mol': [fname,mol],'feature': feature,'target': target}
+            dict: {'mol': [fname,mol],'feature': feature,'target': target}
         """
 
         fname, mol = self.index_complexes[index]
@@ -127,7 +127,7 @@ class GraphDataset(Dataset):
         """Loads one graph.
 
         Args:
-            fname (str): .hdf5 file name
+            fname (str): .HDF5 file name.
             mol (str): Name of the molecule.
 
         Returns:
