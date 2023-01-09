@@ -282,10 +282,10 @@ class SingleResidueVariantResidueQuery(Query):
             insertion_code(str): The insertion code of the variant residue, set to None if not applicable.
             wildtype_amino_acid(:class:`AminoAcid`): The wildtype amino acid.
             variant_amino_acid(:class:`AminoAcid`): The variant amino acid.
-            pssm_paths(Dict(str,str), optional): The paths to the pssm files, per chain identifier.
-            radius(float, optional): In Ångström, determines how many residues will be included in the graph.
-            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
-            targets(Dict(str,float), optional): Named target values associated with this query.
+            pssm_paths(Dict(str,str), optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
+            radius(float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0.
+            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph. Defaults to 4.5.
+            targets(Dict(str,float), optional): Named target values associated with this query. Defaults to None.
         """
 
         self._pdb_path = pdb_path
@@ -324,7 +324,8 @@ class SingleResidueVariantResidueQuery(Query):
         Builds the graph from the .PDB structure.
 
         Args:
-            feature_modules(List[ModuleType]): each must implement the add_features function.
+            feature_modules(List[ModuleType]): Each must implement the add_features function.
+            include_hydrogens(bool): Whether to include hydrogens in the :class:`Graph`, defaults to False.
         
         Returns:
             graph(:class:`Graph`): The resulting :class:`Graph` object with all the features and targets. 
@@ -369,7 +370,7 @@ class SingleResidueVariantResidueQuery(Query):
 
 
 class SingleResidueVariantAtomicQuery(Query):
-    "creates an atomic graph for a single residue variant in a .PDB file"
+    "Creates an atomic graph for a single residue variant in a .PDB file"
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -386,16 +387,16 @@ class SingleResidueVariantAtomicQuery(Query):
     ):
         """
         Args:
-            pdb_path(str): the path to the .PDB file
-            chain_id(str): the .PDB chain identifier of the variant residue
-            residue_number(int): the number of the variant residue
-            insertion_code(str): the insertion code of the variant residue, set to None if not applicable
-            wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
-            variant_amino_acid(deeprank amino acid object): the variant amino acid
-            pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
-            radius(float): in Ångström, determines how many residues will be included in the graph
-            distance_cutoff(float): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph
-            targets(dict(str,float)): named target values associated with this query
+            pdb_path(str): The path to the .PDB file.
+            chain_id(str): The .PDB chain identifier of the variant residue
+            residue_number(int): The number of the variant residue.
+            insertion_code(str): The insertion code of the variant residue, set to None if not applicable.
+            wildtype_amino_acid(deeprank amino acid object): The wildtype amino acid.
+            variant_amino_acid(deeprank amino acid object): The variant amino acid.
+            pssm_paths(dict(str,str), optional): The paths to the .PSSM files, per chain identifier.
+            radius(float, optional): In Ångström, determines how many residues will be included in the graph.
+            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
+            targets(dict(str,float), optional): Named target values associated with this query.
         """
 
         self._pdb_path = pdb_path
@@ -524,7 +525,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             pdb_path(str): the path to the .PDB file
             chain_id1(str): the .PDB chain identifier of the first protein of interest
             chain_id2(str): the .PDB chain identifier of the second protein of interest
-            pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+            pssm_paths(dict(str,str), optional): the paths to the .PSSM files, per chain identifier
             distance_cutoff(float): max distance in Ångström between two interacting atoms of the two proteins
             targets(dict, optional): named target values associated with this query
         """
@@ -613,7 +614,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             pdb_path(str): the path to the .PDB file
             chain_id1(str): the .PDB chain identifier of the first protein of interest
             chain_id2(str): the .PDB chain identifier of the second protein of interest
-            pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
+            pssm_paths(dict(str,str), optional): the paths to the .PSSM files, per chain identifier
             distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
             targets(dict, optional): named target values associated with this query
         """
