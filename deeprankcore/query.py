@@ -37,8 +37,8 @@ class Query():
         :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded. They can have target values associated with them, which will be stored with the resulting graph.
 
         Args:
-            model_id(str): the id of the model to load, usually a pdb accession code.
-            targets(Dict[str, Union[float, int]], optional): target values associated with the query, defaults to None.
+            model_id(str): The ID of the model to load, usually a .PDB accession code.
+            targets(Dict[str, Union[float, int]], optional): Target values associated with the query, defaults to None.
         """
 
         self._model_id = model_id
@@ -49,7 +49,7 @@ class Query():
             self._targets = targets
 
     def _set_graph_targets(self, graph: Graph):
-        "simply copies target data from query to graph"
+        "Simply copies target data from query to graph"
 
         for target_name, target_data in self._targets.items():
             graph.targets[target_name] = target_data
@@ -58,7 +58,7 @@ class Query():
         self, pdb_path: str, pssm_paths: Optional[Dict[str, str]],
         include_hydrogens: bool
     ):
-        "A helper function, to build the structure from pdb and pssm files."
+        "A helper function, to build the structure from .PDB and .PSSM files."
 
         # make a copy of the pdb, with hydrogens
         pdb_name = os.path.basename(pdb_path)
@@ -70,7 +70,7 @@ class Query():
         if include_hydrogens:
             add_hydrogens(pdb_path, hydrogen_pdb_path)
 
-            # read the pdb copy
+            # read the .PDB copy
             try:
                 pdb = pdb2sql.pdb2sql(hydrogen_pdb_path)
             finally:
@@ -96,6 +96,7 @@ class Query():
 
     @property
     def model_id(self) -> str:
+        "The ID of the model, usually a .PDB accession code."
         return self._model_id
 
     @model_id.setter
@@ -104,6 +105,7 @@ class Query():
 
     @property
     def targets(self) -> Dict[str, float]:
+        "The target values associated with the query."
         return self._targets
 
     def __repr__(self) -> str:
@@ -127,8 +129,8 @@ class QueryCollection:
         Adds a new query to the collection.
 
         Args:
-            query(:class:`Query`): must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or :class:`SingleResidueVariantAtomicQuery`.
-            verbose(bool, optional): for logging query ids added, defaults to False.
+            query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or :class:`SingleResidueVariantAtomicQuery`.
+            verbose(bool, optional): For logging query IDs added, defaults to False.
         """
         query_id = query.get_query_id()
 
@@ -141,7 +143,7 @@ class QueryCollection:
             self.ids_count[query_id] += 1
             new_id = query.model_id + "_" + str(self.ids_count[query_id])
             query.model_id = new_id
-            _log.warning(f'Query with id {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+            _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
@@ -149,13 +151,14 @@ class QueryCollection:
         """ Exports the colection of all queries to a dictionary file.
 
             Args:
-                dataset_path(str): the path where to save the list of queries.
+                dataset_path(str): The path where to save the list of queries.
         """
         with open(dataset_path, "wb") as pkl_file:
             pickle.dump(self, pkl_file)    
             
     @property
     def queries(self) -> List[Query]:
+        "The list of queries added to the collection."
         return self._queries
 
     def __contains__(self, query: Query) -> bool:
@@ -198,19 +201,18 @@ class QueryCollection:
 
         """
         Args:
-            prefix(str, optional): prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
+            prefix(str, optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
 
-            feature_modules(List[ModuleType], optional): list of features' modules used to generate features.
-            Each feature's module must implement the add_features function, and features' modules can be found (or should be placed in case of a custom made feature) in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate the features. 
+            feature_modules(List[ModuleType], optional): List of features' modules used to generate features. Each feature's module must implement the add_features function, and features' modules can be found (or should be placed in case of a custom made feature) in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate the features. 
             
-            cpu_count(int, optional): how many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
+            cpu_count(int, optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
 
-            combine_output(bool, optional): for combining the hdf5 files generated by the processes, defaults to True.
+            combine_output(bool, optional): For combining the hdf5 files generated by the processes, defaults to True.
 
-            verbose(bool, optional): for logging query ids processed, defaults to False.
+            verbose(bool, optional): For logging query IDs processed, defaults to False.
         
         Returns:
-            output_paths(List(str)): the list of paths of the generated .hdf5 files.
+            output_paths(List(str)): The list of paths of the generated .hdf5 files.
         """
 
         if cpu_count is None:
@@ -271,19 +273,19 @@ class SingleResidueVariantResidueQuery(Query):
         targets: Optional[Dict[str, float]] = None,
     ):
         """
-        "Creates a residue graph from a single residue variant in a .pdb file."
+        Creates a residue graph from a single residue variant in a .PDB file.
 
         Args:
-            pdb_path(str): the path to the pdb file.
-            chain_id(str): the pdb chain identifier of the variant residue.
-            residue_number(int): the number of the variant residue.
-            insertion_code(str): the insertion code of the variant residue, set to None if not applicable.
-            wildtype_amino_acid(:class:`AminoAcid`): the wildtype amino acid.
-            variant_amino_acid(:class:`AminoAcid`): the variant amino acid.
-            pssm_paths(Dict(str,str), optional): the paths to the pssm files, per chain identifier.
-            radius(float, optional): in Ångström, determines how many residues will be included in the graph.
-            distance_cutoff(float, optional): max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
-            targets(Dict(str,float), optional): named target values associated with this query.
+            pdb_path(str): The path to the .PDB file.
+            chain_id(str): The .PDB chain identifier of the variant residue.
+            residue_number(int): The number of the variant residue.
+            insertion_code(str): The insertion code of the variant residue, set to None if not applicable.
+            wildtype_amino_acid(:class:`AminoAcid`): The wildtype amino acid.
+            variant_amino_acid(:class:`AminoAcid`): The variant amino acid.
+            pssm_paths(Dict(str,str), optional): The paths to the pssm files, per chain identifier.
+            radius(float, optional): In Ångström, determines how many residues will be included in the graph.
+            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
+            targets(Dict(str,float), optional): Named target values associated with this query.
         """
 
         self._pdb_path = pdb_path
@@ -313,13 +315,13 @@ class SingleResidueVariantResidueQuery(Query):
         return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        "Returns the complete query id."
+        "Returns the complete query ID."
 
         return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
         """
-        Builds the graph from the pdb structure.
+        Builds the graph from the .PDB structure.
 
         Args:
             feature_modules(List[ModuleType]): each must implement the add_features function.
@@ -328,7 +330,7 @@ class SingleResidueVariantResidueQuery(Query):
             graph(:class:`Graph`): The resulting :class:`Graph` object with all the features and targets. 
         """
 
-        # load pdb structure
+        # load .PDB structure
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # find the variant residue
@@ -367,7 +369,7 @@ class SingleResidueVariantResidueQuery(Query):
 
 
 class SingleResidueVariantAtomicQuery(Query):
-    "creates an atomic graph for a single residue variant in a pdb file"
+    "creates an atomic graph for a single residue variant in a .PDB file"
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -384,8 +386,8 @@ class SingleResidueVariantAtomicQuery(Query):
     ):
         """
         Args:
-            pdb_path(str): the path to the pdb file
-            chain_id(str): the pdb chain identifier of the variant residue
+            pdb_path(str): the path to the .PDB file
+            chain_id(str): the .PDB chain identifier of the variant residue
             residue_number(int): the number of the variant residue
             insertion_code(str): the insertion code of the variant residue, set to None if not applicable
             wildtype_amino_acid(deeprank amino acid object): the wildtype amino acid
@@ -455,12 +457,12 @@ class SingleResidueVariantAtomicQuery(Query):
         return str(atom)
 
     def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the pdb structure.
+        """Builds the graph from the .PDB structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
         """
 
-        # load pdb structure
+        # load .PDB structure
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # find the variant residue
@@ -519,9 +521,9 @@ class ProteinProteinInterfaceAtomicQuery(Query):
     ):
         """
         Args:
-            pdb_path(str): the path to the pdb file
-            chain_id1(str): the pdb chain identifier of the first protein of interest
-            chain_id2(str): the pdb chain identifier of the second protein of interest
+            pdb_path(str): the path to the .PDB file
+            chain_id1(str): the .PDB chain identifier of the first protein of interest
+            chain_id2(str): the .PDB chain identifier of the second protein of interest
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
             distance_cutoff(float): max distance in Ångström between two interacting atoms of the two proteins
             targets(dict, optional): named target values associated with this query
@@ -555,12 +557,12 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
     def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the pdb structure.
+        """Builds the graph from the .PDB structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
         """
 
-        # load pdb structure
+        # load .PDB structure
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # get the contact residues
@@ -608,9 +610,9 @@ class ProteinProteinInterfaceResidueQuery(Query):
     ):
         """
         Args:
-            pdb_path(str): the path to the pdb file
-            chain_id1(str): the pdb chain identifier of the first protein of interest
-            chain_id2(str): the pdb chain identifier of the second protein of interest
+            pdb_path(str): the path to the .PDB file
+            chain_id1(str): the .PDB chain identifier of the first protein of interest
+            chain_id2(str): the .PDB chain identifier of the second protein of interest
             pssm_paths(dict(str,str), optional): the paths to the pssm files, per chain identifier
             distance_cutoff(float): max distance in Ångström between two interacting residues of the two proteins
             targets(dict, optional): named target values associated with this query
@@ -644,12 +646,12 @@ class ProteinProteinInterfaceResidueQuery(Query):
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
 
     def build(self, feature_modules: List, include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the pdb structure.
+        """Builds the graph from the .PDB structure.
         Args:
             feature_modules (list of modules): each must implement the add_features function.
         """
 
-        # load pdb structure
+        # load .PDB structure
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
         # get the contact residues
