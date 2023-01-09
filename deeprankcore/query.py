@@ -13,6 +13,7 @@ from os.path import basename
 import h5py
 import pkgutil
 from deeprankcore.utils.graph import Graph
+from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.utils.buildgraph import (
     get_residue_contact_pairs,
@@ -138,6 +139,7 @@ class QueryCollection:
     """
 
     def __init__(self):
+
         self._queries = []
         self.cpu_count = None
         self.ids_count = {}
@@ -181,11 +183,13 @@ class QueryCollection:
     def __iter__(self) -> Iterator[Query]:
         return iter(self._queries)
 
-    def _process_one_query(
+    def _process_one_query(  # pylint: disable=too-many-arguments
         self,
         prefix: str,
         feature_names: List[str],
         verbose: bool,
+        grid_settings: Union[GridSettings, None],
+        grid_map_method: Union[MapMethod, None],
         query: Query):
 
         if verbose:
@@ -200,17 +204,23 @@ class QueryCollection:
         try:
             graph = query.build(feature_modules)
             graph.write_to_hdf5(output_path)
+
+            if grid_settings is not None and grid_map_method is not None:
+                graph.write_as_grid_to_hdf5(output_path, grid_settings, grid_map_method)
+
         except ValueError as e:
             _log.error(e)
             _log.warning(f'Query {query.get_query_id()}\'s graph was not saved in the hdf5 file; check the query\'s files')
 
-    def process( # pylint: disable=too-many-arguments
+    def process( # pylint: disable=too-many-arguments, too-many-locals
         self, 
         prefix: Optional[str] = None,
         feature_modules: List[ModuleType] = None,
         cpu_count: Optional[int] = None,
-        combine_output: bool = True,
-        verbose: bool = False
+        combine_output: Optional[bool] = True,
+        verbose: Optional[bool] = False,
+        grid_settings: Optional[GridSettings] = None,
+        grid_map_method: Optional[MapMethod] = None
         ) -> List[str]:
 
         """
@@ -231,6 +241,8 @@ class QueryCollection:
                 By default, the hdf5 files generated are combined into one, and then deleted.
 
             verbose: bool for logging query ids processed, defaults to False.
+
+            grid_settings and grid_map_method: if valid, then the grid data will be stored as well.
         """
 
         if cpu_count is None:
@@ -254,9 +266,10 @@ class QueryCollection:
         else:
             feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
 
-        _log.info('Creating pool function to process the queries...')
+        _log.info(f'Creating pool function to process {len(self.queries)} queries...')
         pool_function = partial(self._process_one_query, prefix,
-                                feature_names, verbose)
+                                feature_names, verbose,
+                                grid_settings, grid_map_method)
 
         with Pool(self.cpu_count) as pool:
             _log.info('Starting pooling...\n')

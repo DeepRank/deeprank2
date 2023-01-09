@@ -1,7 +1,7 @@
 import unittest
 from torch_geometric.data.data import Data
 import h5py
-from deeprankcore.dataset import GraphDataset, save_hdf5_keys
+from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 
@@ -11,14 +11,47 @@ class TestDataSet(unittest.TestCase):
     def setUp(self):
         self.hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5"
 
-    def test_dataset(self):
-        GraphDataset(
+    def test_graph_dataset(self):
+        dataset = GraphDataset(
             hdf5_path=self.hdf5_path,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
             subset=None,
         )
+
+        assert len(dataset) == 4
+        assert dataset[0] is not None
+
+    def test_grid_dataset_regression(self):
+        dataset = GridDataset(
+            hdf5_path=self.hdf5_path,
+            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            target=targets.IRMSD
+        )
+
+        assert len(dataset) == 4
+
+        # 1 entry, 2 features with grid box dimensions
+        assert dataset[0].x.shape == (1, 2, 20, 20, 20), f"got features shape {dataset[0].x.shape}"
+
+        # 1 entry with rmsd value
+        assert dataset[0].y.shape == (1,)
+
+    def test_grid_dataset_classification(self):
+        dataset = GridDataset(
+            hdf5_path=self.hdf5_path,
+            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            target=targets.BINARY
+        )
+
+        assert len(dataset) == 4
+
+        # 1 entry, 2 features with grid box dimensions
+        assert dataset[0].x.shape == (1, 2, 20, 20, 20), f"got features shape {dataset[0].x.shape}"
+
+        # 1 entry with class value
+        assert dataset[0].y.shape == (1,)
 
     def test_dataset_filter(self):
         GraphDataset(
