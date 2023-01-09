@@ -318,7 +318,7 @@ class Trainer():
         Configure optimizer and its main parameters.
 
         Args:
-            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to Adam. Defaults to None.
+            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`. Defaults to None.
 
             lr (float, optional): Learning rate. Defaults to 0.001.
 
@@ -612,9 +612,6 @@ class Trainer():
     def _load_params(self):
         """
         Loads the parameters of a pretrained model
-
-        Returns:
-            [type]: [description]
         """
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
