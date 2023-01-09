@@ -208,7 +208,8 @@ class QueryCollection:
 
             feature_modules(List[ModuleType], optional): List of features' modules used to generate features. Each feature's module must
                 implement the :py:func:`add_features` function, and features' modules can be found (or should be placed in case of a custom made feature)
-                in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate the features. 
+                in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate
+                the features. 
             
             cpu_count(int, optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
 

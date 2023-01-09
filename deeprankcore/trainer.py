@@ -66,8 +66,9 @@ class Trainer():
 
             shuffle (bool, optional): whether to shuffle the dataloaders data. Defaults to True.
 
-            output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the epochs.
-                If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory. Defaults to None.
+            output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
+                epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+                Defaults to None.
         """
 
         if output_exporters is not None:

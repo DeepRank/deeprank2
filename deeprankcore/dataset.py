@@ -45,8 +45,8 @@ class GraphDataset(Dataset):
 
             target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target
                 given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
-                Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into numerical
-                class indices before defining the :class:`GraphDataset` instance. Defaults to None.
+                Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into
+                numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
                 ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored.
@@ -84,7 +84,8 @@ class GraphDataset(Dataset):
             edge_features_transform (function, optional): Transformation applied to the edge features. Defaults to lambda x: np.tanh(-x/2+2)+1.
 
             target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
-                This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization. Defaults to False.
+                This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
+                Defaults to False.
 
             target_filter (dictionary, optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
