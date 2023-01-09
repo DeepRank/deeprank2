@@ -48,13 +48,26 @@ class GraphDataset(Dataset):
                 Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into numerical
                 class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
-            task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored. Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'. Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+            task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
+                ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored.
+                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
-            node_features (str or list, optional): Consider all pre-computed node features ("all") or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.features`. 
+            node_features (str or list, optional): Consider all pre-computed node features ("all") or some defined node features
+                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.features`. 
 
-            edge_features (list, optional): Consider all pre-computed edge features ("all") or some defined edge features (provide a list, example: ["dist", "coulomb"]). The complete list can be found in `deeprankcore.domain.features`.
+            edge_features (list, optional): Consider all pre-computed edge features ("all") or some defined edge features
+                (provide a list, example: ["dist", "coulomb"]). The complete list can be found in `deeprankcore.domain.features`.
 
-            clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/), or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method). In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved in the .HDF5 file as a :class:`Dataset` called "depth_0". Then, all cluster members beloging to the same community are pooled into a single node, and the resulting tensor is used to find communities among the pooled clusters. The latter tensor is saved into the .HDF5 file as a :class:`Dataset` called "depth_1". Both "depth_0" and "depth_1" :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to make them available to networks that make use of clustering methods. Defaults to None.
+            clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
+                or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
+                In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates
+                a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved in
+                the .HDF5 file as a :class:`Dataset` called "depth_0". Then, all cluster members beloging to the same community are
+                pooled into a single node, and the resulting tensor is used to find communities among the pooled clusters.
+                The latter tensor is saved into the .HDF5 file as a :class:`Dataset` called "depth_1". Both "depth_0" and "depth_1"
+                :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to make them available to networks
+                that make use of clustering methods. Defaults to None.
 
             classes (list, optional): Define the dataset target classes in classification mode. Defaults to [0, 1].
 
@@ -62,15 +75,19 @@ class GraphDataset(Dataset):
 
             root (str, optional): Root directory where the dataset should be saved, defaults to "./".
 
-            transform (callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before every access. Defaults to None.
+            transform (callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a
+                transformed version. The data object will be transformed before every access. Defaults to None.
 
-            pre_transform (callable, optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
+            pre_transform (callable, optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns
+                a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
 
             edge_features_transform (function, optional): Transformation applied to the edge features. Defaults to lambda x: np.tanh(-x/2+2)+1.
 
-            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only). This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization. Defaults to False.
+            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
+                This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization. Defaults to False.
 
-            target_filter (dictionary, optional): Dictionary of type [target: cond] to filter the molecules. Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
+            target_filter (dictionary, optional): Dictionary of type [target: cond] to filter the molecules.
+                Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
         """
         super().__init__(root, transform, pre_transform)
 
@@ -134,7 +151,8 @@ class GraphDataset(Dataset):
             mol (str): Name of the molecule.
 
         Returns:
-            Union[:class:`torch_geometric.data.Data`, None]: Torch Geometric Data object containing the node features, the internal and external edge features, the target and the xyz coordinates. Returns None if features cannot be loaded.
+            Union[:class:`torch_geometric.data.Data`, None]: Torch Geometric Data object containing the node features,
+                the internal and external edge features, the target and the xyz coordinates. Returns None if features cannot be loaded.
         """
 
         with h5py.File(fname, 'r') as f5:
@@ -436,7 +454,9 @@ def save_hdf5_keys(
 
         f_dest_path(str): The path to the new .HDF5 file.
 
-        hardcopy(bool, optional): If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`) to the original .HDF5 file. If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`). Default = False.
+        hardcopy(bool, optional): If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`)
+            to the original .HDF5 file. If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`).
+            Default = False.
     """
     if not all(isinstance(d, str) for d in src_ids):
         raise TypeError("data_ids should be a list containing strings.")
