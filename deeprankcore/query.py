@@ -34,7 +34,8 @@ class Query():
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
         """
         Represents one entity of interest, like a single residue variant or a protein-protein interface.
-        :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded. They can have target values associated with them, which will be stored with the resulting graph.
+            :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
+            They can have target values associated with them, which will be stored with the resulting graph.
 
         Args:
             model_id(str): The ID of the model to load, usually a .PDB accession code.
@@ -129,7 +130,9 @@ class QueryCollection:
         Adds a new query to the collection.
 
         Args:
-            query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or :class:`SingleResidueVariantAtomicQuery`.
+            query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
+                :class:`SingleResidueVariantAtomicQuery`.
+
             verbose(bool, optional): For logging query IDs added, defaults to False.
         """
         query_id = query.get_query_id()
@@ -203,7 +206,9 @@ class QueryCollection:
         Args:
             prefix(str, optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
 
-            feature_modules(List[ModuleType], optional): List of features' modules used to generate features. Each feature's module must implement the :py:func:`add_features` function, and features' modules can be found (or should be placed in case of a custom made feature) in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate the features. 
+            feature_modules(List[ModuleType], optional): List of features' modules used to generate features. Each feature's module must
+                implement the :py:func:`add_features` function, and features' modules can be found (or should be placed in case of a custom made feature)
+                in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate the features. 
             
             cpu_count(int, optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
 
@@ -284,7 +289,8 @@ class SingleResidueVariantResidueQuery(Query):
             variant_amino_acid(:class:`AminoAcid`): The variant amino acid.
             pssm_paths(Dict(str,str), optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
             radius(float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0.
-            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph. Defaults to 4.5.
+            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
+                Defaults to 4.5.
             targets(Dict(str,float), optional): Named target values associated with this query. Defaults to None.
         """
 
@@ -397,7 +403,8 @@ class SingleResidueVariantAtomicQuery(Query):
             variant_amino_acid(deeprank amino acid object): The variant amino acid.
             pssm_paths(dict(str,str), optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
             radius(float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0. 
-            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph. Defaults to 4.5.
+            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
+                Defaults to 4.5.
             targets(dict(str,float), optional): Named target values associated with this query. Defaults to None.
         """
 
@@ -536,7 +543,8 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             chain_id1(str): The .PDB chain identifier of the first protein of interest.
             chain_id2(str): The .PDB chain identifier of the second protein of interest.
             pssm_paths(dict(str,str), optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
-            distance_cutoff(float, optional): Max distance in Ångström between two interacting atoms of the two proteins, defaults to 5.5.
+            distance_cutoff(float, optional): Max distance in Ångström between two interacting atoms of the two proteins,
+                defaults to 5.5.
             targets(dict, optional): Named target values associated with this query, defaults to None.
         """
 
@@ -634,7 +642,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
             chain_id1(str): The .PDB chain identifier of the first protein of interest.
             chain_id2(str): The .PDB chain identifier of the second protein of interest.
             pssm_paths(dict(str,str), optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
-            distance_cutoff(float, optional): Max distance in Ångström between two interacting residues of the two proteins, defaults to 10.
+            distance_cutoff(float, optional): Max distance in Ångström between two interacting residues of the two proteins,
+                defaults to 10.
             targets(dict, optional): Named target values associated with this query, defaults to None.
         """
 
