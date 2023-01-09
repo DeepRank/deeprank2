@@ -16,39 +16,6 @@ from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
 
 _log = logging.getLogger(__name__)
 
-def save_hdf5_keys(
-    f_src_path: str,
-    src_ids: List[str],
-    f_dest_path: str,
-    hardcopy = False
-    ):
-    """Save references to keys in data_ids in a new hdf5 file.
-    Parameters
-    ----------
-    f_src_path : str
-        The path to the hdf5 file containing the keys.
-    src_ids : List[str]
-        Keys to be saved in the new hdf5 file.
-        It should be a list containing at least one key.
-    f_dest_path : str
-        The path to the new hdf5 file.
-    hardcopy : bool, default = False
-        If False, the new file contains only references.
-        (external links, see h5py ExternalLink class) to the original hdf5 file.
-        If True, the new file contains a copy of the objects specified in data_ids
-        (see h5py HardLink class).
-        
-    """
-    if not all(isinstance(d, str) for d in src_ids):
-        raise TypeError("data_ids should be a list containing strings.")
-
-    with h5py.File(f_dest_path,'w') as f_dest, h5py.File(f_src_path,'r') as f_src:
-        for key in src_ids:
-            if hardcopy:
-                f_src.copy(f_src[key],f_dest)
-            else:
-                f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
-
 
 class GraphDataset(Dataset):
     def __init__( # pylint: disable=too-many-arguments, too-many-locals
@@ -69,72 +36,38 @@ class GraphDataset(Dataset):
         target_transform: Optional[bool] = False,
         target_filter: dict = None,
     ):
-        """Class from which the hdf5 datasets are loaded.
+        """Class from which the .HDF5 datasets are loaded.
 
         Args:
-            hdf5_path (str or list): Path to hdf5 file(s). For multiple hdf5 files, 
-                insert the paths in a list. Defaults to None.
+            hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
 
-            subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
+            subset (list, optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
 
-            target (str, optional): default options: irmsd, lrmsd, fnat, bin, capri_class or dockq. 
-                It can also be a custom-defined target given to the Query class as input (see: deeprankcore.query); 
-                in this case, the task parameter needs to be explicitly specified as well.
-                Only numerical target variables are supported, not categorical. If the latter is your case, please convert 
-                the categorical classes into numerical class indices before defining the GraphDataset instance.
-                Defaults to None.
+            target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well. Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
-            task (str, optional): 'regress' for regression or 'classif' for classification.
-                Required if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise
-                this setting is ignored.
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+            task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored. Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'. Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
-            node_features (str or list, optional): consider all pre-computed node features ("all")
-                or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
-                The complete list can be found in deeprankcore/domain/features.py
+            node_features (str or list, optional): Consider all pre-computed node features ("all") or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.features`. 
 
-            edge_features (list, optional): consider all pre-computed edge features ("all")
-                or some defined edge features (provide a list, example: ["dist", "coulomb"]).
-                The complete list can be found in deeprankcore/domain/features.py
+            edge_features (list, optional): Consider all pre-computed edge features ("all") or some defined edge features (provide a list, example: ["dist", "coulomb"]). The complete list can be found in `deeprankcore.domain.features`.
 
-            clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
-                or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
-                In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates
-                a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved
-                in the hdf5 file as a Dataset called "depth_0". Then, all cluster members beloging to the same community are
-                pooled into a single node, and the resulting tensor is used to find communities among the pooled clusters.
-                The latter tensor is saved into the hdf5 file as a Dataset called "depth_1". Both "depth_0" and "depth_1"
-                Datasets belong to the "cluster" Group. They are saved in the hdf5 file to make them available to networks
-                that make use of clustering methods.
-                Defaults to None.
+            clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/), or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method). In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved in the .HDF5 file as a :class:`Dataset` called "depth_0". Then, all cluster members beloging to the same community are pooled into a single node, and the resulting tensor is used to find communities among the pooled clusters. The latter tensor is saved into the .HDF5 file as a :class:`Dataset` called "depth_1". Both "depth_0" and "depth_1" :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to make them available to networks that make use of clustering methods. Defaults to None.
 
-            classes (list, optional): define the dataset target classes in classification mode. Defaults to [0, 1].
+            classes (list, optional): Define the dataset target classes in classification mode. Defaults to [0, 1].
 
             tqdm (bool, optional): Show progress bar. Defaults to True.
 
-            root (str, optional): Root directory where the dataset should be
-                saved. Defaults to "./"
+            root (str, optional): Root directory where the dataset should be saved, defaults to "./".
 
-            transform (callable, optional): A function/transform that takes in
-                a torch_geometric.data.Data object and returns a transformed version.
-                The data object will be transformed before every access. Defaults to None.
+            transform (callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before every access. Defaults to None.
 
-            pre_transform (callable, optional):  A function/transform that takes in
-                a torch_geometric.data.Data object and returns a transformed version.
-                The data object will be transformed before being saved to disk. Defaults to None.
+            pre_transform (callable, optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
 
-            edge_features_transform (function, optional): transformation applied to the edge features.
-                Defaults to lambdax:np.tanh(-x/2+2)+1.
+            edge_features_transform (function, optional): Transformation applied to the edge features. Defaults to lambda x: np.tanh(-x/2+2)+1.
 
-            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
-                This puts the target value between 0 and 1, and can result in 
-                a more uniform target distribution and speed up the optimization.
-                Defaults to False.
+            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only). This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization. Defaults to False.
 
-            target_filter (dictionary, optional): Dictionary of type [target: cond] to filter the molecules.
-                Note that the you can filter on a different target than the one selected as the dataset target.
-                Defaults to None.
+            target_filter (dictionary, optional): Dictionary of type [target: cond] to filter the molecules. Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
         """
         super().__init__(root, transform, pre_transform)
 
@@ -167,19 +100,23 @@ class GraphDataset(Dataset):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def len(self):
-        """Gets the length of the dataset
+        """
+        Gets the length of the dataset.
+
         Returns:
-            int: number of complexes in the dataset
+            int: Number of complexes in the dataset.
         """
         return len(self.index_complexes)
 
     def get(self, index): # pylint: disable=arguments-renamed
-        """Gets one item from its unique index.
+        """
+        Gets one item from its unique index.
 
         Args:
-            index (int): index of the complex
+            index (int): Index of the complex.
+
         Returns:
-            dict: {'mol':[fname,mol],'feature':feature,'target':target}
+            Dict: {'mol': [fname,mol],'feature': feature,'target': target}
         """
 
         fname, mol = self.index_complexes[index]
@@ -187,16 +124,14 @@ class GraphDataset(Dataset):
         return data
 
     def load_one_graph(self, fname, mol): # noqa
-        """Loads one graph
+        """Loads one graph.
 
         Args:
-            fname (str): hdf5 file name
-            mol (str): name of the molecule
+            fname (str): .hdf5 file name
+            mol (str): Name of the molecule.
 
         Returns:
-            Data object or None: torch_geometric Data object containing the node features,
-            the internal and external edge features, the target and the xyz coordinates.
-            Return None if features cannot be loaded.
+            Union[:class:`torch_geometric.data.Data`, None]: Torch Geometric Data object containing the node features, the internal and external edge features, the target and the xyz coordinates. Returns None if features cannot be loaded.
         """
 
         with h5py.File(fname, 'r') as f5:
@@ -303,7 +238,7 @@ class GraphDataset(Dataset):
         return data
 
     def _check_hdf5_files(self):
-        """Checks if the data contained in the hdf5 file is valid."""
+        """Checks if the data contained in the .HDF5 file is valid."""
         _log.info("\nChecking dataset Integrity...")
         remove_file = []
         for fname in self.hdf5_path:
@@ -411,7 +346,7 @@ class GraphDataset(Dataset):
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
         This allows to refer to one complex with its index in the list
         """
-        _log.debug(f"Processing data set with hdf5 files: {self.hdf5_path}")
+        _log.debug(f"Processing data set with .HDF5 files: {self.hdf5_path}")
 
         self.index_complexes = []
 
@@ -447,7 +382,7 @@ class GraphDataset(Dataset):
         that must be either of the form: { 'name' : cond } or None
 
         Args:
-            molgrp (str): group name of the molecule in the hdf5 file
+            molgrp (str): group name of the molecule in the .HDF5 file
         Returns:
             bool: True if we keep the complex False otherwise
         Raises:
@@ -480,3 +415,32 @@ class GraphDataset(Dataset):
                 raise ValueError("Conditions not supported", cond_vals)
 
         return True
+
+
+def save_hdf5_keys(
+    f_src_path: str,
+    src_ids: List[str],
+    f_dest_path: str,
+    hardcopy = False
+    ):
+    """
+    Save references to keys in src_ids in a new .HDF5 file.
+
+    Args:
+        f_src_path (str): The path to the .HDF5 file containing the keys.
+
+        src_ids(List[str]): Keys to be saved in the new .HDF5 file. It should be a list containing at least one key.
+
+        f_dest_path(str): The path to the new .HDF5 file.
+
+        hardcopy(bool, optional): If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`) to the original .HDF5 file. If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`). Default = False.
+    """
+    if not all(isinstance(d, str) for d in src_ids):
+        raise TypeError("data_ids should be a list containing strings.")
+
+    with h5py.File(f_dest_path,'w') as f_dest, h5py.File(f_src_path,'r') as f_src:
+        for key in src_ids:
+            if hardcopy:
+                f_src.copy(f_src[key],f_dest)
+            else:
+                f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
