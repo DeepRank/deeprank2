@@ -212,7 +212,7 @@ class QueryCollection:
             verbose(bool, optional): For logging query IDs processed, defaults to False.
         
         Returns:
-            output_paths(List(str)): The list of paths of the generated .hdf5 files.
+            List(str): The list of paths of the generated .hdf5 files.
         """
 
         if cpu_count is None:
@@ -328,7 +328,7 @@ class SingleResidueVariantResidueQuery(Query):
             include_hydrogens(bool): Whether to include hydrogens in the :class:`Graph`, defaults to False.
         
         Returns:
-            graph(:class:`Graph`): The resulting :class:`Graph` object with all the features and targets. 
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
 
         # load .PDB structure
@@ -393,10 +393,10 @@ class SingleResidueVariantAtomicQuery(Query):
             insertion_code(str): The insertion code of the variant residue, set to None if not applicable.
             wildtype_amino_acid(deeprank amino acid object): The wildtype amino acid.
             variant_amino_acid(deeprank amino acid object): The variant amino acid.
-            pssm_paths(dict(str,str), optional): The paths to the .PSSM files, per chain identifier.
-            radius(float, optional): In Ångström, determines how many residues will be included in the graph.
-            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
-            targets(dict(str,float), optional): Named target values associated with this query.
+            pssm_paths(dict(str,str), optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
+            radius(float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0. 
+            distance_cutoff(float, optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph. Defaults to 4.5.
+            targets(dict(str,float), optional): Named target values associated with this query. Defaults to None.
         """
 
         self._pdb_path = pdb_path
