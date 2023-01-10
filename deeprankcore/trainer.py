@@ -397,24 +397,29 @@ class Trainer():
 
     def train(
         self,
-        nepoch: Optional[int] = 1,
-        patience: int = None,
-        validate: Optional[bool] = False,
-        save_model: Optional[str] = 'last',
+        nepoch: int = 1,
+        patience: Optional[int] = None,
+        validate: bool = False,
+        save_model: str = 'best',
         model_path: Optional[str] = None,
     ):
         """
         Trains the model
 
         Args:
-            nepoch (int, optional): number of epochs. Defaults to 1.
-
-            validate (bool, optional): perform validation. 
-                If True, there must be a validation set. 
-                Defaults to False.
-
-            save_model (str: 'last' or 'best;, optional): save the model. 
-                Defaults to 'last'
+            nepoch (int): Maximum number of epochs to run. 
+                        Default: 1.
+            patience (int): Early stopping patience.
+                        Training ends if the model has run for this number of epochs without improving the validation loss.
+                        Set to None to disable early stopping.
+                        Default: None.
+            validate (bool): Perform validation on independent data set.
+                        If True, a validation set must be provided. 
+                        Default: False.
+            save_model (str: 'best' or 'last'): Choose whether to save the best model (in terms of validation loss) or the last model.
+                        Default: 'best'
+            model_path (str, optional): Name under which the model is saved.
+                        Defaults to a descriptive name of the model settings.
         """
 
         train_losses = []
