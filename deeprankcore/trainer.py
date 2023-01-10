@@ -464,10 +464,11 @@ class Trainer():
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
                 
-                early_stopping(loss_)
-                if early_stopping.early_stop:
-                    _log.info(f"Early stopping at epoch # {epoch}")
-                    break
+                if patience:
+                    early_stopping(loss_)
+                    if early_stopping.early_stop:
+                        _log.info(f"Early stopping at epoch # {epoch}")
+                        break
 
             # Save the last model
             if save_model == 'last':
