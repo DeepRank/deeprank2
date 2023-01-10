@@ -451,14 +451,14 @@ class Trainer():
                         if min(valid_losses) == loss_:
                             self.save_model(model_path)
                             self.epoch_saved_model = epoch
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
                 else:
                     # if no validation set, save the best performing model on the training set
                     if save_model == 'best':
                         if min(train_losses) == loss_: # noqa
                             _log.warning(
-                                """The training set is used both for learning and model selection.
-                                            This may lead to training set data overfitting.
-                                            We advice you to use an external validation set.""")
+                                "Training data is used both for learning and model selection, which will to overfitting." +
+                                "\n\tIt is preferable to use an independent training and validation data sets.")
 
                             self.save_model(model_path)
                             self.epoch_saved_model = epoch
