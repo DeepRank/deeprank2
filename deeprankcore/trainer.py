@@ -463,7 +463,7 @@ class Trainer():
         nepoch: int = 1,
         patience: Optional[int] = None,
         validate: bool = False,
-        save_best_model: bool = True,
+        save_best_model: Optional[bool] = True,
         output_prefix: Optional[str] = None,
     ):
         """
@@ -476,11 +476,12 @@ class Trainer():
                         Training ends if the model has run for this number of epochs without improving the validation loss.
                         Set to None to disable early stopping.
                         Default: None.
-            validate (bool): Perform validation on independent data set.
-                        If True, a validation set must be provided.
+            validate (bool): Perform validation on independent data set (requires a validation data set).
                         Default: False.
-            save_best_model (bool): Set True to save the best model (in terms of validation loss) or False to save the last model.
-                        Default: True.
+            save_best_model (bool, optional): 
+                        True (default): save the best model (in terms of validation loss).
+                        False: save the last model tried.
+                        None: do not save at all.
             output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
                         Default: 'model'.
         """
@@ -540,7 +541,7 @@ class Trainer():
                         break
 
             # Save the last model
-            if not save_best_model:
+            if save_best_model is False:
                 self.save_model(output_file)
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
