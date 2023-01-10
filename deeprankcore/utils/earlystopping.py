@@ -7,7 +7,7 @@ class EarlyStopping:
     def __init__(
         self,
         patience: int = 10,
-        verbose: bool = False,
+        verbose: bool = True,
         delta: float = 0,
         path: str = 'checkpoint.pt',
         trace_func: function = print,
@@ -17,10 +17,10 @@ class EarlyStopping:
             patience (int): How long to wait after last time validation loss improved.
                             Default: 10
             verbose (bool): If True, prints a message for each validation loss improvement. 
-                            Default: False
+                            Default: True
             delta (float): Minimum change in the monitored quantity to qualify as an improvement.
                             Default: 0
-            path (str): Path for the checkpoint saving.
+            path (str): Path for the checkpoint saving. Ignored if no model is passed.
                             Default: 'checkpoint.pt'
             trace_func (function): Trace print function.
                             Default: print            
@@ -54,11 +54,12 @@ class EarlyStopping:
 
     def save_checkpoint(self, val_loss, model):
         '''Saves model when validation loss decrease.'''
-        if model:
-            if self.verbose:
-                self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-            torch.save(model.state_dict(), self.path)
-            self.val_loss_min = val_loss
+        if self.verbose:
+            self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).')
+            if model:
+                self.trace_func('\tSaving model...')
+                torch.save(model.state_dict(), self.path)
+                self.val_loss_min = val_loss
 
 
 
