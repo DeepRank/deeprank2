@@ -13,6 +13,7 @@ import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
+from deeprankcore.utils.earlystopping import EarlyStopping
 from deeprankcore.domain import targetstorage as targets
 from deeprankcore.dataset import GraphDataset
 
@@ -397,6 +398,7 @@ class Trainer():
     def train(
         self,
         nepoch: Optional[int] = 1,
+        patience: int = None,
         validate: Optional[bool] = False,
         save_model: Optional[str] = 'last',
         model_path: Optional[str] = None,
@@ -417,6 +419,7 @@ class Trainer():
 
         train_losses = []
         valid_losses = []
+        early_stopping = EarlyStopping(patience=patience, verbose=True, trace_func=_log.info)
 
         if model_path is None:
             model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
@@ -460,6 +463,11 @@ class Trainer():
                             self.save_model(model_path)
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
+                
+                early_stopping(loss_)
+                if early_stopping.early_stop:
+                    _log.info(f"Early stopping at epoch # {epoch}")
+                    break
 
             # Save the last model
             if save_model == 'last':
