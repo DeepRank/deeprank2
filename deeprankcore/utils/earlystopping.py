@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 import torch
 
@@ -7,8 +8,9 @@ class EarlyStopping:
     def __init__(
         self,
         patience: int = 10,
+        delta: Optional[float] = None,
+        max_gap: Optional[float] = None,
         verbose: bool = True,
-        delta: float = 0,
         path: str = 'checkpoint.pt',
         trace_func: function = print,
     ):
@@ -16,10 +18,12 @@ class EarlyStopping:
         Args:
             patience (int): How long to wait after last time validation loss improved.
                             Default: 10
+            delta (float, optional): Minimum change in the monitored quantity to qualify as an improvement.
+                            Default: None
+            max_gap (float, optional): Maximum difference between between training and validation loss.
+                            Default: None
             verbose (bool): If True, prints a message for each validation loss improvement. 
                             Default: True
-            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
-                            Default: 0
             path (str): Path for the checkpoint saving. Ignored if no model is passed.
                             Default: 'checkpoint.pt'
             trace_func (function): Trace print function.
@@ -27,16 +31,21 @@ class EarlyStopping:
         """
 
         self.patience = patience
+        if delta is None:
+            self.delta = 0
+        else:
+            self.delta = delta
+        self.max_gap = max_gap
         self.verbose = verbose
-        self.counter = 0
-        self.best_score = None
-        self.early_stop = False
-        self.val_loss_min = np.Inf
-        self.delta = delta
         self.path = path
         self.trace_func = trace_func
 
-    def __call__(self, val_loss, model=None):
+        self.early_stop = False
+        self.counter = 0
+        self.best_score = None
+        self.val_loss_min = np.Inf
+
+    def __call__(self, val_loss, train_loss=None, model=None):
         """Set `model=None` if model is saved elsewhere"""
         score = -val_loss
         if self.best_score is None:
@@ -47,6 +56,15 @@ class EarlyStopping:
             self.trace_func(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
+        elif self.max_gap:
+            if train_loss is None:
+                raise ValueError("cannot compute gap because no train_loss is provided to EarlyStopping")
+            gap = val_loss - train_loss
+            if gap > self.max_gap:
+                self.trace_func(f'EarlyStopping activated because difference between validation and training loss exceeds max_gap of {self.max_gap}')
+                self.early_stop = True
+
+
         else:
             self.best_score = score
             self.save_checkpoint(val_loss, model)
