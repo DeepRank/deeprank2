@@ -417,9 +417,9 @@ class Trainer():
                         If True, a validation set must be provided. 
                         Default: False.
             save_best_model (bool): Set True to save the best model (in terms of validation loss) or False to save the last model.
-                        Default: True
-            output_prefix (str, optional): Name under which the model is saved.
-                        Defaults to a descriptive name of the model settings.
+                        Default: True.
+            output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
+                        Default: 'model'.
         """
 
         train_losses = []
