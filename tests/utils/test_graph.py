@@ -8,7 +8,7 @@ from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.utils.graph import Graph, Edge, Node
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.molstruct.pair import ResidueContact
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, gridstorage)
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals
@@ -38,10 +38,13 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
     # add features to the nodes and edge
     node_feature_name = "node_features"
     edge_feature_name = "edge_features"
+    node_feature_singlevalue_name = "singlevalue_features"
 
     node0.features[node_feature_name] = np.array([0.1])
     node1.features[node_feature_name] = np.array([1.0])
     edge01.features[edge_feature_name] = np.array([2.0])
+    node0.features[node_feature_singlevalue_name] = 1.0
+    node1.features[node_feature_singlevalue_name] = 0.0
 
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
@@ -58,7 +61,9 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
         graph.write_to_hdf5(hdf5_path)
 
         # export grid to hdf5
-        grid_settings = GridSettings(20, 20.0)
+        grid_settings = GridSettings(np.array((20, 21, 21)), np.array((20.0, 21.0, 21.0)))
+        assert np.all(grid_settings.resolutions == np.array((1.0, 1.0, 1.0)))
+
         graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
 
         # check the contents of the hdf5 file
@@ -80,8 +85,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             assert len(np.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
 
             # check for grid-mapped values
-            assert "mapped_features" in entry_group
-            mapped_group = entry_group["mapped_features"]
+            assert gridstorage.MAPPED_FEATURES in entry_group
+            mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
 
             for feature_name in (node_feature_name, edge_feature_name):
                 feature_name = f"{feature_name}_000"
@@ -92,5 +97,6 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 assert "value" in mapped_group[feature_name]
                 data = mapped_group[feature_name]["value"][()]
                 assert len(np.nonzero(data)) > 0, f"{feature_name}: all zero"
+                assert np.all(data.shape == grid_settings.points_counts)
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test

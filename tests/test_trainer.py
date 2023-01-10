@@ -8,11 +8,12 @@ import warnings
 import torch
 import h5py
 from deeprankcore.trainer import Trainer, _divide_dataset
-from deeprankcore.dataset import GraphDataset
-from deeprankcore.neuralnets.ginet import GINet
-from deeprankcore.neuralnets.foutnet import FoutNet
-from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
-from deeprankcore.neuralnets.sgat import SGAT
+from deeprankcore.dataset import GraphDataset, GridDataset
+from deeprankcore.neuralnets.gnn.ginet import GINet
+from deeprankcore.neuralnets.gnn.foutnet import FoutNet
+from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprankcore.neuralnets.gnn.sgat import SGAT
+from deeprankcore.neuralnets.cnn.model3d import CnnRegression, CnnClassification
 from deeprankcore.utils.exporters import (
     HDF5OutputExporter,
     TensorboardBinaryClassificationExporter,
@@ -35,7 +36,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     edge_features,
     task,
     target,
-    transform_sigmoid,
+    target_transform,
     output_exporters,
     clustering_method,
     use_cuda = False
@@ -45,18 +46,20 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         hdf5_path=train_hdf5_path,
         node_features=node_features,
         edge_features=edge_features,
-        task = task,
         target=target,
-        clustering_method=clustering_method)
+        task = task,
+        clustering_method=clustering_method,
+        target_transform = target_transform)
 
     if val_hdf5_path is not None:
         dataset_val = GraphDataset(
             hdf5_path=val_hdf5_path,
             node_features=node_features,
             edge_features=edge_features,
-            task = task,
             target=target,
-            clustering_method=clustering_method)
+            task = task,
+            clustering_method=clustering_method,
+            target_transform = target_transform)
     else:
         dataset_val = None
 
@@ -67,7 +70,8 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             edge_features=edge_features,
             target=target,
             task=task,
-            clustering_method=clustering_method)
+            clustering_method=clustering_method,
+            target_transform = target_transform)
     else:
         dataset_test = None
 
@@ -77,7 +81,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val,
         dataset_test,
         batch_size=64,
-        transform_sigmoid=transform_sigmoid,
         output_exporters=output_exporters,
     )
 
@@ -117,6 +120,46 @@ class TestTrainer(unittest.TestCase):
     @classmethod
     def tearDownClass(class_):
         shutil.rmtree(class_.work_directory)
+
+    def test_grid_regression(self):
+        dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                              subset=None,
+                              target=targets.IRMSD,
+                              task=targets.REGRESS,
+                              features=[Efeat.VANDERWAALS])
+
+        trainer = Trainer(CnnRegression, dataset, batch_size=2)
+
+        trainer.train(nepoch=1)
+
+    def test_grid_classification(self):
+        dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                              subset=None,
+                              target=targets.BINARY,
+                              task=targets.CLASSIF,
+                              features=[Efeat.VANDERWAALS])
+
+        trainer = Trainer(CnnClassification, dataset, batch_size=2)
+
+        trainer.train(nepoch=1)
+
+    def test_grid_graph_incompatible(self):
+        dataset_train = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                                    subset=None,
+                                    target=targets.BINARY,
+                                    task=targets.CLASSIF,
+                                    features=[Efeat.VANDERWAALS])
+
+        dataset_valid = GraphDataset(
+                hdf5_path="tests/data/hdf5/valid.hdf5",
+                target=targets.BINARY,
+            )
+
+        with pytest.raises(TypeError):
+            Trainer(CnnClassification,
+                    dataset_train=dataset_train,
+                    dataset_val=dataset_valid,
+                    batch_size=2)
 
     def test_ginet_sigmoid(self):
         _model_base_test(
@@ -284,6 +327,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
+                clustering_method="mcl"
             )
 
             trainer = Trainer(
@@ -305,6 +349,7 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
+                clustering_method="mcl"
             )
 
             trainer = Trainer(
@@ -325,6 +370,7 @@ class TestTrainer(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
+            clustering_method="mcl"
         )
 
         trainer = Trainer(
@@ -376,7 +422,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer.weight_decay == weight_decay
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, validate=True)
+            trainer.train(nepoch=3)
             trainer.save_model("test.pth.tar")
 
             trainer_pretrained = Trainer(
@@ -453,13 +499,15 @@ class TestTrainer(unittest.TestCase):
             dataset_train = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
+                edge_features=[Efeat.DISTANCE, Efeat.COVALENT],
+                clustering_method="mcl"
             )
             
             dataset_test = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
-                edge_features=[Efeat.DISTANCE]
+                edge_features=[Efeat.DISTANCE],
+                clustering_method="mcl"
             )
 
             trainer = Trainer(

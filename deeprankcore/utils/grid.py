@@ -4,12 +4,13 @@ This module holds the classes that are used when working with a 3D grid.
 
 
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union, List
 import numpy as np
 import h5py
 import itertools
 from scipy.signal import bspline
 
+from deeprankcore.domain import gridstorage
 
 
 class MapMethod(Enum):
@@ -27,26 +28,30 @@ class GridSettings:
     """Objects of this class hold the settings to build a grid.
     The grid is basically a multi-divided 3D cube with
     the following properties:
-     - points_count: the number of points on one edge of the cube
-     - size: the length in Å of one edge of the cube
-     - resolution: the size in Å of one edge subdivision. Also the distance between two points on the edge.
+
+     - sizes: x, y, z sizes of the box in Å
+     - points_counts: the number of points on the x, y, z edges of the cube
+     - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
-    def __init__(self, points_count: int, size: float):
-        self._points_count = points_count
-        self._size = size
+    def __init__(self, points_counts: List[int], sizes: List[float]):
+        assert len(points_counts) == 3
+        assert len(sizes) == 3
+
+        self._points_counts = points_counts
+        self._sizes = sizes
 
     @property
-    def resolution(self) -> float:
-        return self._size / self._points_count
+    def resolutions(self) -> List[float]:
+        return [self._sizes[i] / self._points_counts[i] for i in range(3)]
 
     @property
-    def size(self) -> float:
-        return self._size
+    def sizes(self) -> List[float]:
+        return self._sizes
 
     @property
-    def points_count(self) -> int:
-        return self._points_count
+    def points_counts(self) -> List[int]:
+        return self._points_counts
 
 
 class Grid:
@@ -69,19 +74,21 @@ class Grid:
     def _set_mesh(self, settings: GridSettings, center: np.array):
         "builds the grid points"
 
-        half_size = settings.size / 2
+        half_size_x = settings.sizes[0] / 2
+        half_size_y = settings.sizes[1] / 2
+        half_size_z = settings.sizes[2] / 2
 
-        min_x = center[0] - half_size
-        max_x = center[0] + half_size
-        self._xs = np.linspace(min_x, max_x, num=settings.points_count)
+        min_x = center[0] - half_size_x
+        max_x = center[0] + half_size_x
+        self._xs = np.linspace(min_x, max_x, num=settings.points_counts[0])
 
-        min_y = center[1] - half_size
-        max_y = center[1] + half_size
-        self._ys = np.linspace(min_y, max_y, num=settings.points_count)
+        min_y = center[1] - half_size_y
+        max_y = center[1] + half_size_y
+        self._ys = np.linspace(min_y, max_y, num=settings.points_counts[1])
 
-        min_z = center[2] - half_size
-        max_z = center[2] + half_size
-        self._zs = np.linspace(min_z, max_z, num=settings.points_count)
+        min_z = center[2] - half_size_z
+        max_z = center[2] + half_size_z
+        self._zs = np.linspace(min_z, max_z, num=settings.points_counts[2])
 
         self._ygrid, self._xgrid, self._zgrid = np.meshgrid(
             self._ys, self._xs, self._zs
@@ -221,14 +228,29 @@ class Grid:
         self,
         position: np.ndarray,
         feature_name: str,
-        feature_value: np.ndarray,
+        feature_value: Union[np.ndarray, float],
         method: MapMethod,
     ):
-        "Maps point feature data at a given position to the grid, using the given method."
+        """
+        Maps point feature data at a given position to the grid, using the given method.
+        The feature_value should either be a single number or a one-dimensional array
+        """
 
-        for index, value in enumerate(feature_value):
+        # determine whether we're dealing with a single number of multiple numbers:
+        index_names_values = []
+        if isinstance(feature_value, float):
+            index_names_values = [(feature_name, feature_value)]
 
-            index_name = f"{feature_name}_{index:03d}"
+        elif isinstance(feature_value, int):
+            index_names_values = [(feature_name, float(feature_value))]
+
+        else:
+            for index, value in enumerate(feature_value):
+                index_name = f"{feature_name}_{index:03d}"
+                index_names_values.append((index_name, value))
+
+        # map the data to the grid
+        for index_name, value in index_names_values:
 
             if method == MapMethod.GAUSSIAN:
                 grid_data = self._get_mapped_feature_gaussian(position, value)
@@ -254,19 +276,19 @@ class Grid:
             grid_group = hdf5_file.require_group(self.id)
 
             # store grid points
-            points_group = grid_group.create_group("grid_points")
+            points_group = grid_group.require_group("grid_points")
             points_group.create_dataset("x", data=self.xs)
             points_group.create_dataset("y", data=self.ys)
             points_group.create_dataset("z", data=self.zs)
             points_group.create_dataset("center", data=self.center)
 
             # store grid features
-            features_group = grid_group.require_group("mapped_features")
+            features_group = grid_group.require_group(gridstorage.MAPPED_FEATURES)
             for feature_name, feature_data in self.features.items():
 
                 feature_group = features_group.require_group(feature_name)
                 feature_group.create_dataset(
-                    "value",
+                    gridstorage.FEATURE_VALUE,
                     data=feature_data,
                     compression="lzf",
                     chunks=True,

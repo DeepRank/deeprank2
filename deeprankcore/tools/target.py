@@ -83,7 +83,16 @@ def add_target(graph_path, target_name, target_list, sep=" "):
 
 def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
 
-    """Compute targets (lrmsd, irmsd, fnat, dockq, bin_class, capri_class) and outputs them as a dictionary
+    """
+    Compute targets and outputs them as a dictionary.
+    For classification: 
+       - bin_class (scalar value is expected to be either 0 or 1)
+       - capri_classes (scalar integer values are expected)
+    For regression:
+       - irmsd
+       - lrmsd
+       - fnat
+       - dockq
 
     Args:
         pdb_path (path): path to the scored pdb structure
