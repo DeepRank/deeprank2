@@ -472,7 +472,7 @@ class TestTrainer(unittest.TestCase):
             assert len(os.listdir(self.work_directory)) > 0
 
         else:
-            warnings.warn("CUDA NOT AVAILABLE. test_cuda skipped")
+            warnings.warn("CUDA not available. test_cuda skipped")
             _log.debug("cuda is not available, test_cuda skipped")
 
     def test_dataset_equivalence_no_pretrained(self):
