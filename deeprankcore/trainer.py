@@ -535,7 +535,7 @@ class Trainer():
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
                 
                 if patience:
-                    early_stopping(loss_)
+                    early_stopping(loss_, min(train_losses))
                     if early_stopping.early_stop:
                         _log.info(f"Early stopping at epoch # {epoch}")
                         break
