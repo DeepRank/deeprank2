@@ -116,7 +116,8 @@ class Query:
 
 class QueryCollection:
     """
-    Represents the collection of data queries. Queries can be saved as a dictionary to easily navigate through their data.
+    Represents the collection of data queries.
+        Queries can be saved as a dictionary to easily navigate through their data.
     
     """
 

@@ -222,7 +222,9 @@ class GraphDataset(DatasetParent):
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
     ):
-        """Class from which the .HDF5 datasets are loaded into graphs.
+        """
+        Class from which the .HDF5 datasets are loaded into graphs.
+
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
 
@@ -494,7 +496,9 @@ class GridDataset(DatasetParent):
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
     ):
-        """Class from which the .HDF5 datasets are loaded into grids.
+        """
+        Class from which the .HDF5 datasets are loaded into grids.
+        
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
 
