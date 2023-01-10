@@ -407,14 +407,14 @@ class Trainer():
         Trains the model
 
         Args:
-            nepoch (int): Maximum number of epochs to run. 
+            nepoch (int): Maximum number of epochs to run.
                         Default: 1.
             patience (int): Early stopping patience.
                         Training ends if the model has run for this number of epochs without improving the validation loss.
                         Set to None to disable early stopping.
                         Default: None.
             validate (bool): Perform validation on independent data set.
-                        If True, a validation set must be provided. 
+                        If True, a validation set must be provided.
                         Default: False.
             save_best_model (bool): Set True to save the best model (in terms of validation loss) or False to save the last model.
                         Default: True.
@@ -424,7 +424,7 @@ class Trainer():
 
         train_losses = []
         valid_losses = []
-        early_stopping = EarlyStopping(patience=patience, verbose=True, trace_func=_log.info)
+        early_stopping = EarlyStopping(patience=patience, trace_func=_log.info)
 
         if output_prefix is None:
             output_prefix = 'model'
