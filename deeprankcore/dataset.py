@@ -21,7 +21,6 @@ _log = logging.getLogger(__name__)
 
 
 class DatasetParent(Dataset):
-
     def __init__(self, # pylint: disable=too-many-arguments
                  hdf5_path: Union[str, List[str]],
                  subset: Union[List[str], None],
@@ -34,6 +33,10 @@ class DatasetParent(Dataset):
                  pre_transform: Union[Callable, None],
                  target_filter: Union[Dict[str, str], None]
     ):
+        """
+        Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
+            More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
+        """
 
         super().__init__(root_directory_path, transform, pre_transform)
 
@@ -195,7 +198,7 @@ class DatasetParent(Dataset):
 
     def len(self) -> int:
         """
-        Gets the length of the dataset.
+        Gets the length of the dataset, either :class:`GridDataset` or :class:`GraphDataset` object.
 
         Returns:
             int: Number of complexes in the dataset.
@@ -498,7 +501,7 @@ class GridDataset(DatasetParent):
     ):
         """
         Class from which the .HDF5 datasets are loaded into grids.
-        
+
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
 
