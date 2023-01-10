@@ -229,7 +229,7 @@ class GridDataset(DeeprankDataset):
         target_filter: Optional[Dict[str, str]] = None,
     ):
         """
-        Class from which the .HDF5 datasets are loaded into grids.
+        Class to load the .HDF5 files data into grids.
 
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
@@ -343,8 +343,7 @@ class GridDataset(DeeprankDataset):
             idx(int): Index of the item, ranging from 0 to len(dataset).
 
         Returns:
-            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, 
-                entry_names.
+            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
         """
 
         file_path, entry_name = self.index_entries[idx]
@@ -358,8 +357,7 @@ class GridDataset(DeeprankDataset):
             entry_name (str): Name of the entry.
             
         Returns:
-            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, 
-                entry_names.
+            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
         """
 
         feature_data = []
@@ -403,7 +401,7 @@ class GraphDataset(DeeprankDataset):
         target_filter: Optional[Dict[str, str]] = None,
     ):
         """
-        Class from which the .HDF5 datasets are loaded into graphs.
+        Class to load the .HDF5 files data into graphs.
 
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
@@ -477,8 +475,7 @@ class GraphDataset(DeeprankDataset):
             idx(int): Index of the item, ranging from 0 to len(dataset).
 
         Returns:
-            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, 
-                edge_index, edge_attr, pos, entry_names.
+            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
 
         fname, mol = self.index_entries[idx]
@@ -492,8 +489,7 @@ class GraphDataset(DeeprankDataset):
             entry_name (str): Name of the entry.
             
         Returns:
-            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, 
-                edge_index, edge_attr, pos, entry_names.
+            :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
 
         with h5py.File(fname, 'r') as f5:
