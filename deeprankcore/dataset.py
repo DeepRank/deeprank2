@@ -20,7 +20,7 @@ from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
 _log = logging.getLogger(__name__)
 
 
-class DatasetParent(Dataset):
+class DeeprankDataset(Dataset):
     def __init__(self, # pylint: disable=too-many-arguments
                  hdf5_path: Union[str, List[str]],
                  subset: Union[List[str], None],
@@ -206,7 +206,7 @@ class DatasetParent(Dataset):
         return len(self.index_entries)
 
 
-class GraphDataset(DatasetParent):
+class GraphDataset(DeeprankDataset):
     def __init__( # pylint: disable=too-many-arguments, too-many-locals
         self,
         hdf5_path: Union[str, List[str]],
@@ -483,7 +483,7 @@ class GraphDataset(DatasetParent):
 GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
-class GridDataset(DatasetParent):
+class GridDataset(DeeprankDataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
         hdf5_path: Union[str, list],
