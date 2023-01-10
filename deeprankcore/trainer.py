@@ -400,8 +400,8 @@ class Trainer():
         nepoch: int = 1,
         patience: Optional[int] = None,
         validate: bool = False,
-        save_model: str = 'best',
-        model_path: Optional[str] = None,
+        save_best_model: bool = True,
+        output_prefix: Optional[str] = None,
     ):
         """
         Trains the model
@@ -416,9 +416,9 @@ class Trainer():
             validate (bool): Perform validation on independent data set.
                         If True, a validation set must be provided. 
                         Default: False.
-            save_model (str: 'best' or 'last'): Choose whether to save the best model (in terms of validation loss) or the last model.
-                        Default: 'best'
-            model_path (str, optional): Name under which the model is saved.
+            save_best_model (bool): Set True to save the best model (in terms of validation loss) or False to save the last model.
+                        Default: True
+            output_prefix (str, optional): Name under which the model is saved.
                         Defaults to a descriptive name of the model settings.
         """
 
@@ -426,8 +426,9 @@ class Trainer():
         valid_losses = []
         early_stopping = EarlyStopping(patience=patience, verbose=True, trace_func=_log.info)
 
-        if model_path is None:
-            model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
+        if output_prefix is None:
+            output_prefix = 'model'
+        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._output_exporters:
             # Number of epochs
@@ -452,20 +453,20 @@ class Trainer():
                 if validate:
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
                     valid_losses.append(loss_)
-                    if save_model == 'best':
+                    if save_best_model:
                         if min(valid_losses) == loss_:
-                            self.save_model(model_path)
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
                 else:
                     # if no validation set, save the best performing model on the training set
-                    if save_model == 'best':
+                    if save_best_model:
                         if min(train_losses) == loss_: # noqa
                             _log.warning(
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
 
-                            self.save_model(model_path)
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
                 
@@ -476,8 +477,8 @@ class Trainer():
                         break
 
             # Save the last model
-            if save_model == 'last':
-                self.save_model(model_path)
+            if not save_best_model:
+                self.save_model(output_file)
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
 
