@@ -1,20 +1,20 @@
-from typing import Optional
+from typing import Optional, Callable
 import numpy as np
 import torch
 
 
 class EarlyStopping:
-    """Early stops the training if validation loss doesn't improve after a given patience."""
-    def __init__(
+    def __init__( # pylint: disable=too-many-arguments
         self,
         patience: int = 10,
         delta: Optional[float] = None,
         max_gap: Optional[float] = None,
         verbose: bool = True,
         path: str = 'checkpoint.pt',
-        trace_func: function = print,
+        trace_func: Callable = print,
     ):
-        """
+        """Terminate training if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
+
         Args:
             patience (int): How long to wait after last time validation loss improved.
                             Default: 10
@@ -26,7 +26,7 @@ class EarlyStopping:
                             Default: True
             path (str): Path for the checkpoint saving. Ignored if no model is passed.
                             Default: 'checkpoint.pt'
-            trace_func (function): Trace print function.
+            trace_func (function): Function used for recording EarlyStopping status.
                             Default: print            
         """
 

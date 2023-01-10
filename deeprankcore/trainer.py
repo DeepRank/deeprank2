@@ -458,7 +458,7 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-    def train(
+    def train( # pylint: disable=too-many-arguments
         self,
         nepoch: int = 1,
         earlystop_patience: Optional[int] = None,
@@ -482,14 +482,18 @@ class Trainer():
             save_best_model (bool, optional): 
                         True (default): save the best model (in terms of validation loss).
                         False: save the last model tried.
-                        None: do not save at all.
+                        None: do not save.
             output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
                         Default: 'model'.
         """
 
         train_losses = []
         valid_losses = []
-        early_stopping = EarlyStopping(patience=earlystop_patience, trace_func=_log.info)
+        
+        if earlystop_patience or earlystop_maxgap:
+            early_stopping = EarlyStopping(patience=earlystop_patience, trace_func=_log.info)
+        else: 
+            early_stopping = None
 
         if output_prefix is None:
             output_prefix = 'model'
@@ -522,30 +526,30 @@ class Trainer():
                         if min(valid_losses) == loss_:
                             self.save_model(output_file)
                             self.epoch_saved_model = epoch
-                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
                 else:
                     # if no validation set, save the best performing model on the training set
                     if save_best_model:
-                        if min(train_losses) == loss_: # noqa
-                            _log.warning(
+                        if min(train_losses) == loss_:
+                            _log.warning( # pylint: disable=logging-not-lazy
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
-
                             self.save_model(output_file)
                             self.epoch_saved_model = epoch
-                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
                 
-                if earlystop_patience or earlystop_maxgap:
+                # check early stopping criteria
+                if early_stopping:
                     early_stopping(loss_, min(train_losses))
                     if early_stopping.early_stop:
-                        _log.info(f"Early stopping at epoch # {epoch}")
+                        _log.info(f"Early stopping at epoch # {epoch}.")
                         break
 
             # Save the last model
             if save_best_model is False:
                 self.save_model(output_file)
                 self.epoch_saved_model = epoch
-                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
+                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
