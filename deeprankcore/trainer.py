@@ -461,7 +461,8 @@ class Trainer():
     def train(
         self,
         nepoch: int = 1,
-        patience: Optional[int] = None,
+        earlystop_patience: Optional[int] = None,
+        earlystop_maxgap: Optional[float] = None,
         validate: bool = False,
         save_best_model: Optional[bool] = True,
         output_prefix: Optional[str] = None,
@@ -472,10 +473,10 @@ class Trainer():
         Args:
             nepoch (int): Maximum number of epochs to run.
                         Default: 1.
-            patience (int): Early stopping patience.
-                        Training ends if the model has run for this number of epochs without improving the validation loss.
-                        Set to None to disable early stopping.
+            earlystop_patience (int, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
                         Default: None.
+            earlystop_maxgap (float, optional): Training ends if the difference between validation and training loss exceeds this value.
+                        Default: None. 
             validate (bool): Perform validation on independent data set (requires a validation data set).
                         Default: False.
             save_best_model (bool, optional): 
@@ -488,7 +489,7 @@ class Trainer():
 
         train_losses = []
         valid_losses = []
-        early_stopping = EarlyStopping(patience=patience, trace_func=_log.info)
+        early_stopping = EarlyStopping(patience=earlystop_patience, trace_func=_log.info)
 
         if output_prefix is None:
             output_prefix = 'model'
@@ -534,7 +535,7 @@ class Trainer():
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
                 
-                if patience:
+                if earlystop_patience or earlystop_maxgap:
                     early_stopping(loss_, min(train_losses))
                     if early_stopping.early_stop:
                         _log.info(f"Early stopping at epoch # {epoch}")
