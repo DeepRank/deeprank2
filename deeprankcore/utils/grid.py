@@ -34,12 +34,18 @@ class GridSettings:
      - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
-    def __init__(self, points_counts: List[int], sizes: List[float]):
+    def __init__(self, center: List[float], points_counts: List[int], sizes: List[float]):
+        assert len(center) == 3
         assert len(points_counts) == 3
         assert len(sizes) == 3
 
+        self._center = center
         self._points_counts = points_counts
         self._sizes = sizes
+
+    @property
+    def center(self) -> List[float]:
+        return self._center
 
     @property
     def resolutions(self) -> List[float]:
@@ -61,33 +67,32 @@ class Grid:
     - feature values on each point
     """
 
-    def __init__(self, id_: str, settings: GridSettings, center: np.array):
+    def __init__(self, id_: str, settings: GridSettings):
         self.id = id_
 
         self._settings = settings
-        self._center = center
 
-        self._set_mesh(settings, center)
+        self._set_mesh(settings)
 
         self._features = {}
 
-    def _set_mesh(self, settings: GridSettings, center: np.array):
+    def _set_mesh(self, settings: GridSettings):
         "builds the grid points"
 
         half_size_x = settings.sizes[0] / 2
         half_size_y = settings.sizes[1] / 2
         half_size_z = settings.sizes[2] / 2
 
-        min_x = center[0] - half_size_x
-        max_x = center[0] + half_size_x
+        min_x = settings.center[0] - half_size_x
+        max_x = min_x + (settings.points_counts[0] - 1.0) * settings.resolutions[0]
         self._xs = np.linspace(min_x, max_x, num=settings.points_counts[0])
 
-        min_y = center[1] - half_size_y
-        max_y = center[1] + half_size_y
+        min_y = settings.center[1] - half_size_y
+        max_y = min_y + (settings.points_counts[1] - 1.0) * settings.resolutions[1]
         self._ys = np.linspace(min_y, max_y, num=settings.points_counts[1])
 
-        min_z = center[2] - half_size_z
-        max_z = center[2] + half_size_z
+        min_z = settings.center[2] - half_size_z
+        max_z = min_z + (settings.points_counts[2] - 1.0) * settings.resolutions[2]
         self._zs = np.linspace(min_z, max_z, num=settings.points_counts[2])
 
         self._ygrid, self._xgrid, self._zgrid = np.meshgrid(
@@ -120,7 +125,7 @@ class Grid:
 
     @property
     def center(self) -> np.array:
-        return self._center
+        return self._settings.center
 
     @property
     def features(self) -> Dict[str, np.array]:
