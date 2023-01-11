@@ -491,7 +491,7 @@ class Trainer():
         valid_losses = []
         
         if earlystop_patience or earlystop_maxgap:
-            early_stopping = EarlyStopping(patience=earlystop_patience, max_gap=earlystop_maxgap, trace_func=_log.info)
+            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, trace_func=_log.info)
         else: 
             early_stopping = None
 
