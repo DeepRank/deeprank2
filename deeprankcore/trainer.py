@@ -480,7 +480,7 @@ class Trainer():
             validate (bool): Perform validation on independent data set (requires a validation data set).
                         Default: False.
             save_best_model (bool, optional): 
-                        True (default): save the best model (in terms of validation loss).
+                        If True, the best model (in terms of validation loss) is saved.
                         False: save the last model tried.
                         None: do not save.
             output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
