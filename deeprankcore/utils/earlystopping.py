@@ -13,7 +13,8 @@ class EarlyStopping:
         path: str = 'checkpoint.pt',
         trace_func: Callable = print,
     ):
-        """Terminate training if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
+        """
+        Terminate training if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
 
         Args:
             patience (int): How long to wait after last time validation loss improved.
