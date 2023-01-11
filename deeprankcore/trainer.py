@@ -32,6 +32,7 @@ class Trainer():
                 pretrained_model: Optional[str] = None,
                 batch_size: int = 32,
                 shuffle: bool = True,
+                cuda: bool = False, 
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
         """Class from which the network is trained, evaluated and tested.
@@ -66,6 +67,8 @@ class Trainer():
 
             shuffle (bool, optional): whether to shuffle the dataloaders data. Defaults to True.
 
+            cuda (bool, optional): whether to use CUDA.
+
             output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
                 epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
@@ -77,6 +80,28 @@ class Trainer():
 
         self._init_datasets(dataset_train, dataset_val, dataset_test,
                             val_size, test_size)
+
+        # get the device
+        self.cuda = cuda
+        if self.cuda and torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        elif self.cuda and not torch.cuda.is_available():
+            _log.error(
+                f' --> CUDA not deteceted: Make sure that CUDA is installed '
+                f'and that you are running on GPUs.\n'
+                f' --> To turn CUDA of set cuda=False in Trainer.\n'
+                f' --> Aborting the experiment \n\n')
+            raise ValueError(
+                f' --> CUDA not deteceted: Make sure that CUDA is installed '
+                f'and that you are running on GPUs.\n'
+                f' --> To turn CUDA of set cuda=False in Trainer.\n'
+                f' --> Aborting the experiment \n\n')
+        else:
+            self.device = torch.device("cpu")
+
+        _log.info("Device set to %s.", self.device)
+        if self.device.type == 'cuda':
+            _log.info("CUDA device name is %s.", torch.cuda.get_device_name(0))
 
         if pretrained_model is None:
             if self.dataset_train is None:
@@ -203,13 +228,19 @@ class Trainer():
 
         # dataloader
         self.train_loader = DataLoader(
-            self.dataset_train, batch_size=self.batch_size, shuffle=self.shuffle
+            self.dataset_train,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
+            pin_memory=self.cuda
         )
         _log.info("Training set loaded\n")
 
         if self.dataset_val is not None:
             self.valid_loader = DataLoader(
-                self.dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
+                self.dataset_val,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                pin_memory=self.cuda
             )
             _log.info("Validation set loaded\n")
         else:
@@ -220,7 +251,10 @@ class Trainer():
             _log.info("Loading independent testing dataset...")
 
             self.test_loader = DataLoader(
-                self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                self.dataset_test,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                pin_memory=self.cuda
             )
             _log.info("Testing set loaded\n")
         else:
@@ -291,7 +325,9 @@ class Trainer():
 
         if self.clustering_method is not None: 
             self._precluster(self.dataset_test)
-        self.test_loader = DataLoader(self.dataset_test)
+        self.test_loader = DataLoader(
+            self.dataset_test,
+            pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
         self._put_model_to_device(self.dataset_test)
         self.set_loss()
@@ -349,13 +385,6 @@ class Trainer():
         Raises:
             ValueError: Incorrect output shape
         """
-        # get the device
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
-
-        _log.info("Device set to %s.", self.device)
-        if self.device.type == 'cuda':
-            _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
         # regression mode
         if self.task == targets.REGRESS:
@@ -556,8 +585,8 @@ class Trainer():
             count_predictions += pred.shape[0]
 
             # convert mean back to sum
-            sum_of_losses += loss_.detach().item() * pred.shape[0]
-            target_vals += data_batch.y.tolist()
+            sum_of_losses += loss_.detach().item() * pred.detach().shape[0]
+            target_vals += data_batch.y.detach().tolist()
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
@@ -690,7 +719,10 @@ class Trainer():
                 if self.clustering_method in ('mcl', 'louvain'):
                     self._precluster(self.dataset_test)
                 self.test_loader = DataLoader(
-                    self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
+                    self.dataset_test,
+                    batch_size=self.batch_size,
+                    shuffle=self.shuffle,
+                    pin_memory=self.cuda
                 )
             elif self.test_loader is None:
                 raise ValueError("No test dataset provided.")
@@ -702,8 +734,6 @@ class Trainer():
         """
         Loads the parameters of a pretrained model
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
 
         state = torch.load(self.pretrained_model_path,
                            map_location=torch.device(self.device))
@@ -726,6 +756,7 @@ class Trainer():
         self.node_features = state["node_features"]
         self.edge_features = state["edge_features"]
         self.features = state["features"]
+        self.cuda = state["cuda"]
 
 
     def save_model(self, filename='model.pth.tar'):
@@ -753,7 +784,8 @@ class Trainer():
             "clustering_method": self.clustering_method,
             "node_features": self.node_features,
             "edge_features": self.edge_features,
-            "features": self.features
+            "features": self.features,
+            "cuda": self.cuda
         }
 
         torch.save(state, filename)
