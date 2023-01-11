@@ -122,6 +122,27 @@ class Trainer():
                 raise ValueError("No target set. You need to choose a target (set in the dataset) for training.")
 
             self._load_model()
+
+            # clustering the datasets
+            if self.clustering_method is not None:
+                if self.clustering_method in ('mcl', 'louvain'):
+                    _log.info("Loading clusters")
+                    self._precluster(self.dataset_train)
+
+                    if self.dataset_val is not None:
+                        self._precluster(self.dataset_val)
+                    else:
+                        _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
+                        self.dataset_train, self.dataset_val = _divide_dataset(
+                            self.dataset_train, splitsize=self.val_size)
+
+                    if self.dataset_test is not None:
+                        self._precluster(self.dataset_test)
+                else:
+                    raise ValueError(
+                        f"Invalid node clustering method: {self.clustering_method}\n\t"
+                        "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
+
         else:
             if self.dataset_train is not None:
                 _log.warning("Pretrained model loaded: dataset_train will be ignored.")
@@ -206,60 +227,6 @@ class Trainer():
         Raises:
             ValueError: Invalid node clustering method.
         """
-
-        if self.clustering_method is not None:
-            if self.clustering_method in ('mcl', 'louvain'):
-                _log.info("Loading clusters")
-                self._precluster(self.dataset_train)
-
-                if self.dataset_val is not None:
-                    self._precluster(self.dataset_val)
-                else:
-                    _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
-                    self.dataset_train, self.dataset_val = _divide_dataset(
-                        self.dataset_train, splitsize=self.val_size)
-
-                if self.dataset_test is not None:
-                    self._precluster(self.dataset_test)
-            else:
-                raise ValueError(
-                    f"Invalid node clustering method: {self.clustering_method}\n\t"
-                    "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
-
-        # dataloader
-        self.train_loader = DataLoader(
-            self.dataset_train,
-            batch_size=self.batch_size,
-            shuffle=self.shuffle,
-            pin_memory=self.cuda
-        )
-        _log.info("Training set loaded\n")
-
-        if self.dataset_val is not None:
-            self.valid_loader = DataLoader(
-                self.dataset_val,
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
-                pin_memory=self.cuda
-            )
-            _log.info("Validation set loaded\n")
-        else:
-            self.valid_loader = None
-
-        # independent validation dataset
-        if self.dataset_test is not None:
-            _log.info("Loading independent testing dataset...")
-
-            self.test_loader = DataLoader(
-                self.dataset_test,
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
-                pin_memory=self.cuda
-            )
-            _log.info("Testing set loaded\n")
-        else:
-            _log.info("No independent testing set loaded")
-            self.test_loader = None
 
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
@@ -504,6 +471,25 @@ class Trainer():
             save_model (str, optional): Whether to save the model. Can be either 'best' or 'last' Defaults to 'last'.
         """
 
+        self.train_loader = DataLoader(
+            self.dataset_train,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
+            pin_memory=self.cuda
+        )
+        _log.info("Training set loaded\n")
+
+        if self.dataset_val is not None:
+            self.valid_loader = DataLoader(
+                self.dataset_val,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                pin_memory=self.cuda
+            )
+            _log.info("Validation set loaded\n")
+        else:
+            self.valid_loader = None
+
         train_losses = []
         valid_losses = []
 
@@ -712,21 +698,30 @@ class Trainer():
         """
         Performs the testing of the model.
         """
+        if self.dataset_test is not None:
+            _log.info("Loading independent testing dataset...")
+
+            self.test_loader = DataLoader(
+                self.dataset_test,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                pin_memory=self.cuda
+            )
+            _log.info("Testing set loaded\n")
+        else:
+            _log.error("No test dataset provided.")
+            raise ValueError("No test dataset provided.")
 
         with self._output_exporters:
-            # Loads the test dataset if provided
-            if self.dataset_test is not None:
-                if self.clustering_method in ('mcl', 'louvain'):
-                    self._precluster(self.dataset_test)
-                self.test_loader = DataLoader(
-                    self.dataset_test,
-                    batch_size=self.batch_size,
-                    shuffle=self.shuffle,
-                    pin_memory=self.cuda
-                )
-            elif self.test_loader is None:
-                raise ValueError("No test dataset provided.")
-
+            if self.clustering_method in ('mcl', 'louvain'):
+                self._precluster(self.dataset_test)
+            self.test_loader = DataLoader(
+                self.dataset_test,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                pin_memory=self.cuda
+            )
+            
             # Run test
             self._eval(self.test_loader, 0, "testing")
 
