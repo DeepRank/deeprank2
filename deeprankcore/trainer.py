@@ -394,7 +394,6 @@ class Trainer():
                                  is not compatible with output shape {self.output_shape}\n
                                  and target shape {target_shape}""")
 
-
     def configure_optimizers(self, optimizer = None, lr: float = 0.001, weight_decay: float = 1e-05):
 
         """
@@ -452,11 +451,11 @@ class Trainer():
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
-
     def train(
         self,
         nepoch: Optional[int] = 1,
         validate: Optional[bool] = False,
+        num_workers: int = 0,
         save_model: Optional[str] = 'last',
         model_path: Optional[str] = None,
     ):
@@ -468,6 +467,9 @@ class Trainer():
 
             validate (bool, optional): Whether to perform validation. If True, there must be a validation set. Defaults to False.
 
+            num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
+                Defaults to 0.
+
             save_model (str, optional): Whether to save the model. Can be either 'best' or 'last' Defaults to 'last'.
         """
 
@@ -475,6 +477,7 @@ class Trainer():
             self.dataset_train,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
+            num_workers=num_workers,
             pin_memory=self.cuda
         )
         _log.info("Training set loaded\n")
@@ -484,6 +487,7 @@ class Trainer():
                 self.dataset_val,
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
+                num_workers=num_workers,
                 pin_memory=self.cuda
             )
             _log.info("Validation set loaded\n")
@@ -693,10 +697,16 @@ class Trainer():
 
         return pred, target
 
-
-    def test(self):
+    def test(
+        self,
+        num_workers: int = 0):
         """
         Performs the testing of the model.
+
+        Args:
+            num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
+                Defaults to 0.
+
         """
         if self.dataset_test is not None:
             _log.info("Loading independent testing dataset...")
@@ -705,6 +715,7 @@ class Trainer():
                 self.dataset_test,
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
+                num_workers=num_workers,
                 pin_memory=self.cuda
             )
             _log.info("Testing set loaded\n")
@@ -721,7 +732,7 @@ class Trainer():
                 shuffle=self.shuffle,
                 pin_memory=self.cuda
             )
-            
+
             # Run test
             self._eval(self.test_loader, 0, "testing")
 
@@ -752,7 +763,6 @@ class Trainer():
         self.edge_features = state["edge_features"]
         self.features = state["features"]
         self.cuda = state["cuda"]
-
 
     def save_model(self, filename='model.pth.tar'):
         """
