@@ -481,7 +481,7 @@ class Trainer():
                         Default: False.
             save_best_model (bool, optional): 
                         If True, the best model (in terms of validation loss) is saved.
-                        False: save the last model tried.
+                        If False, the last model tried is saved.
                         None: do not save.
             output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
                         Default: 'model'.
