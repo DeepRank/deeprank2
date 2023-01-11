@@ -378,6 +378,7 @@ class TestTrainer(unittest.TestCase):
             dataset_train = dataset,
             batch_size = 1
         )
+        trainer.train()
 
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
@@ -395,6 +396,7 @@ class TestTrainer(unittest.TestCase):
             val_size = 0,
             batch_size = 1
         )
+        trainer.train()
 
         assert len(trainer.train_loader) == len(dataset)
         assert trainer.valid_loader is None
