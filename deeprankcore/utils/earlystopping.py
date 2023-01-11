@@ -8,7 +8,7 @@ class EarlyStopping:
         self,
         patience: int = 10,
         delta: Optional[float] = None,
-        max_gap: Optional[float] = None,
+        maxgap: Optional[float] = None,
         verbose: bool = True,
         path: str = 'checkpoint.pt',
         trace_func: Callable = print,
@@ -18,14 +18,19 @@ class EarlyStopping:
         Args:
             patience (int): How long to wait after last time validation loss improved.
                             Default: 10
+            
             delta (float, optional): Minimum change in the monitored quantity to qualify as an improvement.
                             Default: None
-            max_gap (float, optional): Maximum difference between between training and validation loss.
+            
+            maxgap (float, optional): Maximum difference between between training and validation loss.
                             Default: None
+            
             verbose (bool): If True, prints a message for each validation loss improvement. 
                             Default: True
+            
             path (str): Path for the checkpoint saving. Ignored if no model is passed.
                             Default: 'checkpoint.pt'
+            
             trace_func (function): Function used for recording EarlyStopping status.
                             Default: print            
         """
@@ -35,7 +40,7 @@ class EarlyStopping:
             self.delta = 0
         else:
             self.delta = delta
-        self.max_gap = max_gap
+        self.maxgap = maxgap
         self.verbose = verbose
         self.path = path
         self.trace_func = trace_func
@@ -45,39 +50,57 @@ class EarlyStopping:
         self.best_score = None
         self.val_loss_min = np.Inf
 
-    def __call__(self, val_loss, train_loss=None, model=None):
-        """Set `model=None` if model is saved elsewhere"""
+    def __call__(self, epoch, val_loss, train_loss=None, model=None):
+        # Set model=None if model is saved elsewhere
         score = -val_loss
+        
+        # initialize
         if self.best_score is None:
             self.best_score = score
-            self.save_checkpoint(val_loss, model)
+            self._save_checkpoint(model)
+        
+        # check patience
         elif score < self.best_score + self.delta:
             self.counter += 1
-            self.trace_func(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.verbose:
+                if self.delta:
+                    extra_trace = f'more than {self.delta} '
+                else:
+                    extra_trace = ''
+                self.trace_func(f'Validation loss did not decrease {extra_trace}({self.val_loss_min:.6f} --> {val_loss:.6f}). '+
+                                f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
+                self.trace_func(f'EarlyStopping activated at epoch # {epoch} because patience of {self.patience} has been reached.')
                 self.early_stop = True
-        elif self.max_gap:
-            if train_loss is None:
-                raise ValueError("cannot compute gap because no train_loss is provided to EarlyStopping")
-            gap = val_loss - train_loss
-            if gap > self.max_gap:
-                self.trace_func(f'EarlyStopping activated because difference between validation and training loss exceeds max_gap of {self.max_gap}')
-                self.early_stop = True
-
-
         else:
-            self.best_score = score
-            self.save_checkpoint(val_loss, model)
-            self.counter = 0
-
-    def save_checkpoint(self, val_loss, model):
-        '''Saves model when validation loss decrease.'''
-        if self.verbose:
-            self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).')
-            if model:
-                self.trace_func('\tSaving model...')
-                torch.save(model.state_dict(), self.path)
+            if self.verbose:
+                self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).')
                 self.val_loss_min = val_loss
+            self.best_score = score
+            self.counter = 0
+        
+        # check maxgap
+        if self.maxgap:
+            if train_loss is None:
+                raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping")
+            gap = val_loss - train_loss
+            if gap > self.maxgap:
+                if self.verbose:
+                    self.trace_func(f'EarlyStopping activated at epoch # {epoch} due to overfitting. ' +
+                                    f'The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})')
+                self.early_stop = True        
+        
+        if self.counter == 0 and not self.early_stop:
+            self._save_checkpoint(model)
+
+
+    def _save_checkpoint(self, model):
+        '''Saves model when validation loss decrease.'''
+        if model:
+            if self.verbose:
+                self.trace_func('\tSaving model...')
+            torch.save(model.state_dict(), self.path)
+                
 
 
 

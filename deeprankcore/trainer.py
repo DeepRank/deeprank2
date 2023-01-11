@@ -491,7 +491,7 @@ class Trainer():
         valid_losses = []
         
         if earlystop_patience or earlystop_maxgap:
-            early_stopping = EarlyStopping(patience=earlystop_patience, trace_func=_log.info)
+            early_stopping = EarlyStopping(patience=earlystop_patience, max_gap=earlystop_maxgap, trace_func=_log.info)
         else: 
             early_stopping = None
 
@@ -540,9 +540,8 @@ class Trainer():
                 
                 # check early stopping criteria
                 if early_stopping:
-                    early_stopping(loss_, min(train_losses))
+                    early_stopping(epoch, loss_, min(train_losses))
                     if early_stopping.early_stop:
-                        _log.info(f"Early stopping at epoch # {epoch}.")
                         break
 
             # Save the last model
