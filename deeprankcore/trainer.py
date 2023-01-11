@@ -425,6 +425,7 @@ class Trainer():
             except Exception as e:
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+                raise e
 
     def set_loss(self):
 
