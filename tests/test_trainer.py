@@ -451,6 +451,40 @@ class TestTrainer(unittest.TestCase):
         assert trainer.lr == 0.001
         assert trainer.weight_decay == 1e-05
 
+    def test_loss_function(self):
+
+        dataset = GraphDataset(
+            hdf5_path="tests/data/hdf5/test.hdf5",
+            target=targets.BINARY,
+        )
+
+        trainer = Trainer(
+            neuralnet = NaiveNetwork,
+            dataset_train = dataset,
+        )
+
+        # loss = torch.nn.BCELoss
+        loss_function = torch.nn.NLLLoss
+        # loss = torch.nn.CrossEntropyLoss
+        trainer.set_loss_function(loss_function = loss_function)
+
+        assert isinstance(trainer.loss_function, loss_function)
+
+        with warnings.catch_warnings(record=UserWarning):
+            trainer.train(nepoch=3, save_best_model=None)
+            trainer.save_model(model_path)
+
+            trainer_pretrained = Trainer(
+                neuralnet = NaiveNetwork,
+                dataset_test=dataset,
+                pretrained_model=model_path)
+
+        assert isinstance(trainer_pretrained.loss_function, loss_function)
+        
+
+
+
+
     def test_cuda(self):    # test_ginet, but with cuda
         if torch.cuda.is_available():
 
