@@ -45,7 +45,7 @@ _amino_acids_by_code = {
 _elements_by_name = {element.name: element for element in AtomicElement}
 
 
-def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-many-arguments
+def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-many-arguments, too-many-locals
                                 x: float, y: float, z: float,
                                 atom_name: str,
                                 altloc: str, occupancy: float,
@@ -55,47 +55,47 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
                                 residue_name: str,
                                 insertion_code: str):
 
-        # Make sure not to take the same atom twice.
-        if altloc is not None and altloc != "" and altloc != "A":
-            return
+    # Make sure not to take the same atom twice.
+    if altloc is not None and altloc != "" and altloc != "A":
+        return
 
-        # We use None to indicate that the residue has no insertion code.
-        if insertion_code == "":
-            insertion_code = None
+    # We use None to indicate that the residue has no insertion code.
+    if insertion_code == "":
+        insertion_code = None
 
-        # The amino acid is only valid when we deal with protein residues.
-        if residue_name in _amino_acids_by_code:
-            amino_acid = _amino_acids_by_code[residue_name]
-        else:
-            amino_acid = None
+    # The amino acid is only valid when we deal with protein residues.
+    if residue_name in _amino_acids_by_code:
+        amino_acid = _amino_acids_by_code[residue_name]
+    else:
+        amino_acid = None
 
-        # Turn the x,y,z into a vector:
-        atom_position = np.array([x, y, z])
+    # Turn the x,y,z into a vector:
+    atom_position = np.array([x, y, z])
 
-        # Init chain.
-        if not structure.has_chain(chain_id):
+    # Init chain.
+    if not structure.has_chain(chain_id):
 
-            chain = Chain(structure, chain_id)
-            structure.add_chain(chain)
-        else:
-            chain = structure.get_chain(chain_id)
+        chain = Chain(structure, chain_id)
+        structure.add_chain(chain)
+    else:
+        chain = structure.get_chain(chain_id)
 
-        # Init residue.
-        if not chain.has_residue(residue_number, insertion_code):
+    # Init residue.
+    if not chain.has_residue(residue_number, insertion_code):
 
-            residue = Residue(chain, residue_number, amino_acid, insertion_code)
-            chain.add_residue(residue)
-        else:
-            residue = chain.get_residue(residue_number, insertion_code)
+        residue = Residue(chain, residue_number, amino_acid, insertion_code)
+        chain.add_residue(residue)
+    else:
+        residue = chain.get_residue(residue_number, insertion_code)
 
-        # Init atom.
-        atom = Atom(
-            residue, atom_name, _elements_by_name[element_name], atom_position, occupancy
-        )
-        _add_atom_to_residue(atom, residue)
+    # Init atom.
+    atom = Atom(
+        residue, atom_name, _elements_by_name[element_name], atom_position, occupancy
+    )
+    _add_atom_to_residue(atom, residue)
 
 
-def get_structure(pdb, id_): # pylint: disable=too-many-locals
+def get_structure(pdb, id_):
     """Builds a structure from rows in a pdb file
     Args:
         pdb (pdb2sql object): the pdb structure that we're investigating
@@ -140,7 +140,7 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
     return structure
 
 
-def get_contact_atoms(
+def get_contact_atoms( # pylint: disable=too-many-locals
     pdb_path: str,
     chain_id1: str,
     chain_id2: str,
@@ -156,7 +156,7 @@ def get_contact_atoms(
         rows = interface.get("x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
                              rowID=atom_indexes[chain_id1] + atom_indexes[chain_id2])
     finally:
-        interface._close()
+        interface._close()  # pylint: disable=protected-access
 
     pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
 

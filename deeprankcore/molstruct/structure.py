@@ -104,7 +104,6 @@ class Chain:
 
         return atoms
 
-    @property
     def __eq__(self, other) -> bool:
         return (
             isinstance(self, type(other))

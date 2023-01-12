@@ -4,15 +4,13 @@ This module holds the classes that are used when working with a 3D grid.
 
 
 from enum import Enum
-from typing import Dict, Union, List, Optional
+from typing import Dict, Union, List
 import numpy as np
 import h5py
 import itertools
 from scipy.signal import bspline
 
 from deeprankcore.domain import gridstorage
-from deeprankcore.molstruct.atom import AtomicElement
-from deeprankcore.molstruct.structure import PDBStructure
 
 
 class MapMethod(Enum):
