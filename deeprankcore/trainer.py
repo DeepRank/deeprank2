@@ -427,13 +427,13 @@ class Trainer():
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise e
 
-    def set_loss(self, loss = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
+    def set_loss_function(self, loss_function = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
 
         """
         Set the loss function.
         
         Args:
-            loss: Make sure to use a loss function that is appropriate for
+            loss_function: Make sure to use a loss function that is appropriate for
                 your task (classification or regression). All loss functions
                 from torch.nn.modules.loss are listed as belonging to either
                 category (or to neither) and an exception is raised if an invalid
@@ -448,12 +448,12 @@ class Trainer():
         default_regression_loss = nn.MSELoss
         default_classification_loss = nn.CrossEntropyLoss
 
-        default_loss_info = (f'No loss function provided, the default loss function for {self.task} tasks is used: {loss}')
-        custom_loss_warning = ( f'The provided loss function ({loss}) is not part of the default list.\n\t' +
+        default_loss_info = (f'No loss function provided, the default loss function for {self.task} tasks is used: {loss_function}')
+        custom_loss_warning = ( f'The provided loss function ({loss_function}) is not part of the default list.\n\t' +
                                 f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
-        invalid_loss_error = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
+        invalid_loss_error = (f'The provided loss function ({loss_function}) is not appropriate for {self.task} tasks.\n\t' + 
                                'If you want to use this loss function anyway, set override_invalid to True.')
-        override_warning = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
+        override_warning = (f'The provided loss function ({loss_function}) is not appropriate for {self.task} tasks.\n\t' + 
                             'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
                             'This will likely cause other errors or exceptions down the line.')
 
@@ -474,24 +474,24 @@ class Trainer():
                 raise ValueError(invalid_loss_error)
 
         # check for custom/invalid loss functions
-        if loss in other_losses:
+        if loss_function in other_losses:
             _invalid_loss()
-        elif loss not in (regression_losses + classification_losses):
+        elif loss_function not in (regression_losses + classification_losses):
             custom_loss = True
         else:
             custom_loss = False
 
         # set regression loss
         if self.task == targets.REGRESS:
-            if loss is None:
-                loss = default_regression_loss
+            if loss_function is None:
+                loss_function = default_regression_loss
                 _log.info(default_loss_info)
             else:
                 if custom_loss:
                     _log.warning(custom_loss_warning)
-                elif loss not in regression_losses:
+                elif loss_function not in regression_losses:
                     _invalid_loss()
-            self.loss = loss()
+            self.loss_function = loss_function()
 
         elif self.task == targets.CLASSIF:
             # Assign weights to each class
@@ -512,24 +512,24 @@ class Trainer():
                 self.weights = None
 
             # Set classification loss
-            if loss is None:
-                loss = default_classification_loss
+            if loss_function is None:
+                loss_function = default_classification_loss
                 _log.info(default_loss_info)
             else:
                 if custom_loss:
                     _log.warning(custom_loss_warning)
-                elif loss not in regression_losses:
+                elif loss_function not in classification_losses:
                     _invalid_loss()
                 
             try:
-                self.loss = loss(weight=self.weights)  # Check whether loss allows for weighted classes
+                self.loss_function = loss_function(weight=self.weights)  # Check whether loss allows for weighted classes
             except AttributeError as e:
                 if self.class_weights:
-                    weight_error = (f"Loss function {loss} does not allow for weighted classes.\n\t" +
+                    weight_error = (f"Loss function {loss_function} does not allow for weighted classes.\n\t" +
                                     "Please use a different loss function or set class_weights to False.\n")
                     _log.error(weight_error)
                     raise ValueError(weight_error) from e
-                self.loss = loss()
+                self.loss_function = loss_function()
                     
 
 
@@ -649,7 +649,7 @@ class Trainer():
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
-            loss_ = self.loss(pred, data_batch.y)
+            loss_ = self.loss_function(pred, data_batch.y)
             loss_.backward()
             self.optimizer.step()
             count_predictions += pred.shape[0]
@@ -702,7 +702,7 @@ class Trainer():
 
         # Sets the module in evaluation mode
         self.model.eval()
-        loss_func = self.loss
+        loss_func = self.loss_function
         target_vals = []
         outputs = []
         entry_names = []
@@ -820,6 +820,7 @@ class Trainer():
         self.shuffle = state["shuffle"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
+        self.loss_function = state["loss_function"]
         self.model_load_state_dict = state["model_state"]
         self.clustering_method = state["clustering_method"]
         self.node_features = state["node_features"]
@@ -838,6 +839,7 @@ class Trainer():
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
+            "loss_function": self.loss_function,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,
