@@ -20,7 +20,7 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__( # pylint: disable=too-many-arguments # noqa: MC0001
                 self,
                 neuralnet = None,
                 dataset_train: Union[GraphDataset, GridDataset] = None,
@@ -94,26 +94,34 @@ class Trainer():
                 _log.info("CUDA detected. Setting number of GPUs to 1.")
         elif self.cuda and not torch.cuda.is_available():
             _log.error(
-                f' --> CUDA not detected: Make sure that CUDA is installed '
-                f'and that you are running on GPUs.\n'
-                f' --> To turn CUDA off set cuda=False in Trainer.\n'
-                f' --> Aborting the experiment \n\n')
+                """
+                --> CUDA not detected: Make sure that CUDA is installed
+                    and that you are running on GPUs.\n
+                --> To turn CUDA off set cuda=False in Trainer.\n
+                --> Aborting the experiment \n\n'
+                """)
             raise ValueError(
-                f' --> CUDA not detected: Make sure that CUDA is installed '
-                f'and that you are running on GPUs.\n'
-                f' --> To turn CUDA off set cuda=False in Trainer.\n'
-                f' --> Aborting the experiment \n\n')
+                """
+                --> CUDA not detected: Make sure that CUDA is installed
+                    and that you are running on GPUs.\n
+                --> To turn CUDA off set cuda=False in Trainer.\n
+                --> Aborting the experiment \n\n'
+                """)
         else:
             self.device = torch.device("cpu")
             if self.ngpu > 0:
                 _log.error(
-                    f' --> CUDA not detected.'
-                    f'Set cuda=True in Trainer to turn CUDA on.\n'
-                    f' --> Aborting the experiment \n\n')
+                    """
+                    --> CUDA not detected.
+                        Set cuda=True in Trainer to turn CUDA on.\n
+                    --> Aborting the experiment \n\n
+                    """)
                 raise ValueError(
-                    f' --> CUDA not detected.'
-                    f'Set cuda=True in Trainer to turn CUDA on.\n'
-                    f' --> Aborting the experiment \n\n')
+                    """
+                    --> CUDA not detected.
+                        Set cuda=True in Trainer to turn CUDA on.\n
+                    --> Aborting the experiment \n\n
+                    """)
 
         _log.info("Device set to %s.", self.device)
         if self.device.type == 'cuda':
@@ -406,7 +414,7 @@ class Trainer():
 
         # multi-gpu
         if self.ngpu > 1:
-            ids = [i for i in range(self.ngpu)]
+            ids = list(range(self.ngpu))
             self.model = nn.DataParallel(self.model, device_ids=ids).to(self.device)
 
         # check for compatibility
@@ -473,7 +481,7 @@ class Trainer():
             self.loss = nn.CrossEntropyLoss(
                 weight=self.weights, reduction="mean")
 
-    def train(
+    def train( # pylint: disable=too-many-arguments
         self,
         nepoch: Optional[int] = 1,
         validate: Optional[bool] = False,
