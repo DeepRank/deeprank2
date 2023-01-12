@@ -593,7 +593,7 @@ class GraphDataset(DeeprankDataset):
         data.cluster1 = cluster1
 
         # entry name:
-        if len(entry_name) > MAX_ENTRY_NAME_LENGTH
+        if len(entry_name) > MAX_ENTRY_NAME_LENGTH:
             raise ValueError(f"entry name '{entry_name}' is too long (max {MAX_ENTRY_NAME_LENGTH})")
 
         data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
