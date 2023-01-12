@@ -10,7 +10,7 @@ def base_earlystopper(patience=10, delta=None, maxgap=None):
 
     for ep, loss in enumerate(dummy_val_losses):
         # check early stopping criteria
-        print (ep, loss, dummy_train_losses[ep])
+        print (f'Epoch #{ep}', end=': ')
         early_stopping(ep, loss, dummy_train_losses[ep])
         if early_stopping.early_stop:
             break

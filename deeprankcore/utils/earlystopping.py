@@ -75,9 +75,11 @@ class EarlyStopping:
         # check maxgap
         if self.maxgap:
             if train_loss is None:
-                raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping")
+                raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping.")
             gap = val_loss - train_loss
             if gap > self.maxgap:
+                self.trace_func(f'EarlyStopping activated at epoch # {epoch} due to overfitting. ' +
+                                f'The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})')
                 self.early_stop = True
                 
 
