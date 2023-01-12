@@ -565,6 +565,32 @@ class TestTrainer(unittest.TestCase):
         
         hdf5_file.close()
 
+    def test_invalid_cuda_ngpus(self):
+        dataset_train = GraphDataset(
+            hdf5_path="tests/data/hdf5/test.hdf5"
+        )
+        
+        dataset_val = GraphDataset(
+            hdf5_path="tests/data/hdf5/test.hdf5"
+        )
+
+        if not torch.cuda.is_available():
+            with pytest.raises(ValueError):
+                Trainer(
+                    neuralnet = GINet,
+                    dataset_train = dataset_train,
+                    dataset_val = dataset_val,
+                    cuda = True
+                )
+
+        with pytest.raises(ValueError):
+            Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_train,
+                dataset_val = dataset_val,
+                ngpu = 2
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
