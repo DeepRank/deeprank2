@@ -1,16 +1,12 @@
-from tempfile import mkstemp
-import os
 from typing import List
 
 import h5py
 import numpy as np
-from pdb2sql import interface
 
 from deeprankcore.query import ProteinProteinInterfaceAtomicQuery
 import deeprankcore.features.contact
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 from deeprankcore.molstruct.atom import AtomicElement
-from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.domain.nodestorage import POSITION as POSITION_FEATURE
 
 
