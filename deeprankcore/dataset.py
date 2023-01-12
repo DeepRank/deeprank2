@@ -379,6 +379,9 @@ class GridDataset(DeeprankDataset):
         data = Data(x=torch.tensor([feature_data], dtype=torch.float).to(self.device),
                     y=torch.tensor([target_value], dtype=torch.float).to(self.device))
 
+        if len(entry_name) > MAX_ENTRY_NAME_LENGTH:
+            raise ValueError(f"entry name '{entry_name}' is too long (max {MAX_ENTRY_NAME_LENGTH})")
+
         data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
 
         return data
@@ -589,7 +592,10 @@ class GraphDataset(DeeprankDataset):
         data.cluster0 = cluster0
         data.cluster1 = cluster1
 
-        # entry name
+        # entry name:
+        if len(entry_name) > MAX_ENTRY_NAME_LENGTH
+            raise ValueError(f"entry name '{entry_name}' is too long (max {MAX_ENTRY_NAME_LENGTH})")
+
         data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
 
         # apply transformation
