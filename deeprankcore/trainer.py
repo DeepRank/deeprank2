@@ -443,8 +443,8 @@ class Trainer():
         regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
         binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, nn.CrossEntropyLoss, ]
         multi_classification_losses = [nn.NLLLoss, nn.PoissonNLLLoss, nn.GaussianNLLLoss, 
-                                nn.KLDivLoss, nn.MultiLabelMarginLoss, ]
-        other_losses = [nn.HingeEmbeddingLoss, nn.MultiLabelSoftMarginLoss, nn.CosineEmbeddingLoss, 
+                                nn.KLDivLoss, nn.MultiLabelMarginLoss, nn.MultiLabelSoftMarginLoss, ]
+        other_losses = [nn.HingeEmbeddingLoss, nn.CosineEmbeddingLoss, 
                         nn.MarginRankingLoss, nn.TripletMarginLoss, nn.CTCLoss]
         classification_losses = multi_classification_losses + binary_classification_losses
 
@@ -476,20 +476,27 @@ class Trainer():
 
         elif self.task == targets.CLASSIF:
             # Assign weights to each class
-            self.weights = None
             if self.class_weights:
-                targets_all = []
-                for batch in self.train_loader:
-                    targets_all.append(batch.y)
+                if issubclass(loss, nn.modules.loss._WeightedLoss):
+                    targets_all = []
+                    for batch in self.train_loader:
+                        targets_all.append(batch.y)
 
-                targets_all = torch.cat(targets_all).squeeze().tolist()
-                self.weights = torch.tensor(
-                    [targets_all.count(i) for i in self.classes], dtype=torch.float32
-                )
-                _log.info(f"class occurences: {self.weights}")
-                self.weights = 1.0 / self.weights
-                self.weights = self.weights / self.weights.sum()
-                _log.info(f"class weights: {self.weights}")
+                    targets_all = torch.cat(targets_all).squeeze().tolist()
+                    self.weights = torch.tensor(
+                        [targets_all.count(i) for i in self.classes], dtype=torch.float32
+                    )
+                    _log.info(f"class occurences: {self.weights}")
+                    self.weights = 1.0 / self.weights
+                    self.weights = self.weights / self.weights.sum()
+                    _log.info(f"class weights: {self.weights}")
+                else:
+                    weight_error = (f"Loss function {loss} does not allow for weighted classes." +
+                                    f"Please use a different loss function or set class_weights to False.")
+                    _log.error(weight_error)
+                    raise ValueError(weight_error)
+            else:
+                self.weights = None
 
             # Note that non-linear activation is automatically applied in CrossEntropyLoss
             self.loss = nn.CrossEntropyLoss(
