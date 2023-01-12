@@ -1,12 +1,11 @@
 from typing import Optional, Callable
-import numpy as np
 
 
 class EarlyStopping:
     def __init__( # pylint: disable=too-many-arguments
         self,
         patience: int = 10,
-        delta: Optional[float] = None,
+        delta: float = 0,
         maxgap: Optional[float] = None,
         verbose: bool = True,
         trace_func: Callable = print,
@@ -18,7 +17,7 @@ class EarlyStopping:
             patience (int): How long to wait after last time validation loss improved.
                 Default: 10
             
-            delta (float, optional): Minimum change in the monitored quantity to qualify as an improvement.
+            delta (float): Minimum change required to reset the early stopping counter.
                 Default: None
             
             maxgap (float, optional): Maximum difference between between training and validation loss.
@@ -32,10 +31,7 @@ class EarlyStopping:
         """
 
         self.patience = patience
-        if delta is None:
-            self.delta = 0
-        else:
-            self.delta = delta
+        self.delta = delta
         self.maxgap = maxgap
         self.verbose = verbose
         self.trace_func = trace_func
@@ -43,7 +39,7 @@ class EarlyStopping:
         self.early_stop = False
         self.counter = 0
         self.best_score = None
-        self.val_loss_min = np.Inf
+        self.val_loss_min = None
 
     def __call__(self, epoch, val_loss, train_loss=None):
         score = -val_loss
@@ -51,6 +47,7 @@ class EarlyStopping:
         # initialize
         if self.best_score is None:
             self.best_score = score
+            self.val_loss_min = val_loss
         
         # check patience
         elif score < self.best_score + self.delta:
@@ -68,9 +65,12 @@ class EarlyStopping:
         else:
             if self.verbose:
                 self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).')
-                self.val_loss_min = val_loss
             self.best_score = score
             self.counter = 0
+        
+        if score >= self.best_score:
+            self.best_score = score
+            self.val_loss_min = val_loss
         
         # check maxgap
         if self.maxgap and epoch > 0:
