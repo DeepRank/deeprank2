@@ -53,7 +53,7 @@ def test_integration_cnn(): # pylint: disable=too-many-locals
             queries.add(query)
 
         hdf5_paths = queries.process(prefix = prefix,
-                                     grid_settings=GridSettings([20, 20, 20], [20.0, 20.0, 20.0]),
+                                     grid_settings=GridSettings([100.0, 50.0, 50.0], [20, 20, 20], [20.0, 20.0, 20.0]),
                                      grid_map_method=MapMethod.GAUSSIAN)
         assert len(hdf5_paths) > 0
 

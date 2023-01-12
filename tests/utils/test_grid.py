@@ -11,6 +11,7 @@ import deeprankcore.features.contact
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 from deeprankcore.molstruct.atom import AtomicElement
 from deeprankcore.utils.buildgraph import get_structure
+from deeprankcore.domain.nodestorage import POSITION as POSITION_FEATURE
 
 
 def _inflate(index: np.array, value: np.array, shape: List[int]):
@@ -57,21 +58,16 @@ def test_grid_orientation():
 
     graph = query.build([deeprankcore.features.contact])
 
-    # Get atomic positions.
-    pdb = interface(pdb_path)
-    try:
-        contact_atoms_by_chain = pdb.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2)
-        contact_atom_indices = []
-        for atom_indices in contact_atoms_by_chain.values():
-            contact_atom_indices.extend(atom_indices)
-
-        center = np.mean(pdb.get("x,y,z", rowID=list(set(contact_atom_indices))), axis=0)
-
-        chain1_carbon_positions = pdb.get("x,y,z", rowID=contact_atoms_by_chain[chain_id1], element="C")
-    finally:
-        pdb._close()
+    # Get atomic positions from the graph
+    positions = np.array([node.features[POSITION_FEATURE] for node in graph.nodes])
+    center = np.mean(positions, axis=0)
 
     assert np.all(np.abs(target_center - center) < error_margin), f"\n{center} != \n{target_center}"
+
+    chain1_carbon_positions = [node.id.position  # the node id is actually the atom
+                               for node in graph.nodes
+                               if node.id.residue.chain.id == chain_id1 and
+                                    node.id.element == AtomicElement.C]
 
     # Make a grid from the graph.
     map_method = MapMethod.GAUSSIAN

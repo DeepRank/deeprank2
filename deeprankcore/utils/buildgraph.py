@@ -1,3 +1,4 @@
+import os
 import logging
 from typing import List
 import numpy as np
@@ -36,6 +37,64 @@ def _add_atom_to_residue(atom, residue):
     residue.add_atom(atom)
 
 
+_amino_acids_by_code = {
+    amino_acid.three_letter_code: amino_acid for amino_acid in amino_acids
+}
+
+
+_elements_by_name = {element.name: element for element in AtomicElement}
+
+
+def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-many-arguments
+                                x: float, y: float, z: float,
+                                atom_name: str,
+                                altloc: str, occupancy: float,
+                                element_name: str,
+                                chain_id: str,
+                                residue_number: int,
+                                residue_name: str,
+                                insertion_code: str):
+
+        # Make sure not to take the same atom twice.
+        if altloc is not None and altloc != "" and altloc != "A":
+            return
+
+        # We use None to indicate that the residue has no insertion code.
+        if insertion_code == "":
+            insertion_code = None
+
+        # The amino acid is only valid when we deal with protein residues.
+        if residue_name in _amino_acids_by_code:
+            amino_acid = _amino_acids_by_code[residue_name]
+        else:
+            amino_acid = None
+
+        # Turn the x,y,z into a vector:
+        atom_position = np.array([x, y, z])
+
+        # Init chain.
+        if not structure.has_chain(chain_id):
+
+            chain = Chain(structure, chain_id)
+            structure.add_chain(chain)
+        else:
+            chain = structure.get_chain(chain_id)
+
+        # Init residue.
+        if not chain.has_residue(residue_number, insertion_code):
+
+            residue = Residue(chain, residue_number, amino_acid, insertion_code)
+            chain.add_residue(residue)
+        else:
+            residue = chain.get_residue(residue_number, insertion_code)
+
+        # Init atom.
+        atom = Atom(
+            residue, atom_name, _elements_by_name[element_name], atom_position, occupancy
+        )
+        _add_atom_to_residue(atom, residue)
+
+
 def get_structure(pdb, id_): # pylint: disable=too-many-locals
     """Builds a structure from rows in a pdb file
     Args:
@@ -44,16 +103,8 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
     Returns (PDBStructure): the structure object, giving access to chains, residues, atoms
     """
 
-    amino_acids_by_code = {
-        amino_acid.three_letter_code: amino_acid for amino_acid in amino_acids
-    }
-    elements_by_name = {element.name: element for element in AtomicElement}
-
     # We need these intermediary dicts to keep track of which residues and
     # chains have already been created.
-    chains = {}
-    residues = {}
-
     structure = PDBStructure(id_)
 
     # Iterate over the atom output from pdb2sql
@@ -69,57 +120,74 @@ def get_structure(pdb, id_): # pylint: disable=too-many-locals
             atom_name,
             altloc,
             occupancy,
-            element,
+            element_name,
             chain_id,
             residue_number,
             residue_name,
             insertion_code,
         ) = row
 
-        # Make sure not to take the same atom twice.
-        if altloc is not None and altloc != "" and altloc != "A":
-            continue
-
-        # We use None to indicate that the residue has no insertion code.
-        if insertion_code == "":
-            insertion_code = None
-
-        # The amino acid is only valid when we deal with protein residues.
-        if residue_name in amino_acids_by_code:
-            amino_acid = amino_acids_by_code[residue_name]
-        else:
-            amino_acid = None
-
-        # Turn the x,y,z into a vector:
-        atom_position = np.array([x, y, z])
-
-        # Init chain.
-        if chain_id not in chains:
-
-            chain = Chain(structure, chain_id)
-            chains[chain_id] = chain
-            structure.add_chain(chain)
-        else:
-            chain = chains[chain_id]
-
-        # Init residue.
-        residue_id = (chain_id, residue_number, insertion_code)
-        if residue_id not in residues:
-
-            residue = Residue(chain, residue_number, amino_acid, insertion_code)
-            residues[residue_id] = residue
-            chain.add_residue(residue)
-        else:
-            residue = residues[residue_id]
-
-        # Init atom.
-        atom = Atom(
-            residue, atom_name, elements_by_name[element], atom_position, occupancy
-        )
-        _add_atom_to_residue(atom, residue)
+        _add_atom_data_to_structure(structure,
+                                    x, y, z,
+                                    atom_name,
+                                    altloc, occupancy,
+                                    element_name,
+                                    chain_id,
+                                    residue_number,
+                                    residue_name,
+                                    insertion_code)
 
     return structure
 
+
+def get_contact_atoms(
+    pdb_path: str,
+    chain_id1: str,
+    chain_id2: str,
+    distance_cutoff: float
+) -> List[Atom]:
+    """
+    Gets the contact atoms from pdb2sql and wraps them in python objects
+    """
+
+    interface = get_interface(pdb_path)
+    try:
+        atom_indexes = interface.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2)
+        rows = interface.get("x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
+                             rowID=atom_indexes[chain_id1] + atom_indexes[chain_id2])
+    finally:
+        interface._close()
+
+    pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
+
+    structure = PDBStructure(f"contact_atoms_{pdb_name}")
+
+    for row in rows:
+        (
+            x,
+            y,
+            z,
+            atom_name,
+            element_name,
+            altloc,
+            occupancy,
+            chain_id,
+            residue_number,
+            residue_name,
+            insertion_code
+        ) = row
+
+        _add_atom_data_to_structure(structure,
+                                    x, y, z,
+                                    atom_name,
+                                    altloc, occupancy,
+                                    element_name,
+                                    chain_id,
+                                    residue_number,
+                                    residue_name,
+                                    insertion_code)
+
+    return structure.get_atoms()
 
 def get_residue_contact_pairs( # pylint: disable=too-many-locals
     pdb_path: str,
