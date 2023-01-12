@@ -436,9 +436,9 @@ class Trainer():
         custom_loss_warning = ( f'Selected loss function ({loss}) is not part of default list.\n\t' +
                                 f'Please ensure that this loss function is appropriate for {self.task} tasks.')
         invalid_loss_error = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
-                               'If you want to use this loss function anyway, set `override_invalid` option of set_loss method to True.')
+                               'If you want to use this loss function anyway, set override_invalid option of set_loss method to True.')
         override_warning = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
-                            'You have set `override_invalid` to True, so the training will run with this loss function nonetheless')
+                            'You have set override_invalid to True, so the training will run with this loss function nonetheless.')
 
         regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
         binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, nn.CrossEntropyLoss, ]
@@ -477,24 +477,18 @@ class Trainer():
         elif self.task == targets.CLASSIF:
             # Assign weights to each class
             if self.class_weights:
-                if issubclass(loss, nn.modules.loss._WeightedLoss):
-                    targets_all = []
-                    for batch in self.train_loader:
-                        targets_all.append(batch.y)
+                targets_all = []
+                for batch in self.train_loader:
+                    targets_all.append(batch.y)
 
-                    targets_all = torch.cat(targets_all).squeeze().tolist()
-                    self.weights = torch.tensor(
-                        [targets_all.count(i) for i in self.classes], dtype=torch.float32
-                    )
-                    _log.info(f"class occurences: {self.weights}")
-                    self.weights = 1.0 / self.weights
-                    self.weights = self.weights / self.weights.sum()
-                    _log.info(f"class weights: {self.weights}")
-                else:
-                    weight_error = (f"Loss function {loss} does not allow for weighted classes." +
-                                    f"Please use a different loss function or set class_weights to False.")
-                    _log.error(weight_error)
-                    raise ValueError(weight_error)
+                targets_all = torch.cat(targets_all).squeeze().tolist()
+                self.weights = torch.tensor(
+                    [targets_all.count(i) for i in self.classes], dtype=torch.float32
+                )
+                _log.info(f"class occurences: {self.weights}")
+                self.weights = 1.0 / self.weights
+                self.weights = self.weights / self.weights.sum()
+                _log.info(f"class weights: {self.weights}")
             else:
                 self.weights = None
 
@@ -507,9 +501,15 @@ class Trainer():
                 elif loss not in regression_losses:
                     _invalid_loss()
                 
-                if issubclass(loss, nn.modules.loss._WeightedLoss):
+                # apply weighted or unweighted loss function
+                try:
                     self.loss = loss(weight=self.weights)
-                else:
+                except AttributeError:
+                    if self.class_weights:
+                        weight_error = (f"Loss function {loss} does not allow for weighted classes." +
+                                        f"Please use a different loss function or set class_weights to False.")
+                        _log.error(weight_error)
+                        raise ValueError(weight_error)
                     self.loss = loss()
                     
 
