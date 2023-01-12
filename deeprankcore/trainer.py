@@ -427,22 +427,35 @@ class Trainer():
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise e
 
-    def set_loss(self, loss = None, override_invalid = False): #pylint: disable=too-many-locals # noqa: MC0001
+    def set_loss(self, loss = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
 
         """
-        Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
+        Set the loss function.
+        
+        Args:
+            loss: Make sure to use a loss function that is appropriate for
+                your task (classification or regression). All loss functions
+                from torch.nn.modules.loss are listed as belonging to either
+                category (or to neither) and an exception is raised if an invalid
+                loss function is chosen for the set task.
+                Default for regression: MSELoss
+                Default for classification: CrossEntropyLoss
+            override_invalid (bool): If True, loss functions that are considered
+                invalid for the task do no longer automaticallt raise an exception.
+                Defaults to False.
         """
 
         default_regression_loss = nn.MSELoss
         default_classification_loss = nn.CrossEntropyLoss
 
         default_loss_info = (f'No loss function provided, the default loss function for {self.task} tasks is used: {loss}')
-        custom_loss_warning = ( f'Selected loss function ({loss}) is not part of default list.\n\t' +
-                                f'Please ensure that this loss function is appropriate for {self.task} tasks.')
+        custom_loss_warning = ( f'The provided loss function ({loss}) is not part of the default list.\n\t' +
+                                f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
         invalid_loss_error = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
-                               'If you want to use this loss function anyway, set override_invalid option of set_loss method to True.')
+                               'If you want to use this loss function anyway, set override_invalid to True.')
         override_warning = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
-                            'You have set override_invalid to True, so the training will run with this loss function nonetheless.')
+                            'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
+                            'This will likely cause other errors or exceptions down the line.')
 
         regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
         binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, nn.CrossEntropyLoss, ]
