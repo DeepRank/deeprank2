@@ -212,6 +212,9 @@ class DeeprankDataset(Dataset):
 GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
+MAX_ENTRY_NAME_LENGTH = 100
+
+
 class GridDataset(DeeprankDataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
@@ -376,7 +379,7 @@ class GridDataset(DeeprankDataset):
         data = Data(x=torch.tensor([feature_data], dtype=torch.float).to(self.device),
                     y=torch.tensor([target_value], dtype=torch.float).to(self.device))
 
-        data.entry_names = [entry_name]
+        data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
 
         return data
 
@@ -587,7 +590,7 @@ class GraphDataset(DeeprankDataset):
         data.cluster1 = cluster1
 
         # entry name
-        data.entry_names = [entry_name]
+        data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
 
         # apply transformation
         if self._transform is not None:
