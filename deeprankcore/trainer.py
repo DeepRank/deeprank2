@@ -437,6 +437,8 @@ class Trainer():
                                 f'Please ensure that this loss function is appropriate for {self.task} tasks.')
         invalid_loss_error = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
                                'If you want to use this loss function anyway, set `override_invalid` option of set_loss method to True.')
+        override_warning = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
+                            'You have set `override_invalid` to True, so the training will run with this loss function nonetheless')
 
         regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
         binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, nn.CrossEntropyLoss, ]
@@ -446,9 +448,17 @@ class Trainer():
                         nn.MarginRankingLoss, nn.TripletMarginLoss, nn.CTCLoss]
         classification_losses = multi_classification_losses + binary_classification_losses
 
-        if loss in other_losses and not override_invalid:
-            _log.error(invalid_loss_error)
-            raise ValueError(invalid_loss_error)
+
+        def _invalid_loss():
+            if override_invalid:
+                _log.warning(override_warning)
+            else:
+                _log.error(invalid_loss_error)
+                raise ValueError(invalid_loss_error)
+
+
+        if loss in other_losses:
+            _invalid_loss()
         elif loss not in (regression_losses + classification_losses):
             custom_loss = True
         else:
@@ -459,9 +469,8 @@ class Trainer():
                 self.loss = nn.MSELoss()
             elif custom_loss:
                 _log.warning(custom_loss_warning)
-            elif loss not in regression_losses and not override_invalid:
-                _log.error(invalid_loss_error)
-                raise ValueError(invalid_loss_error)
+            elif loss not in regression_losses:
+                _invalid_loss()
             else:
                 self.loss = loss
 
