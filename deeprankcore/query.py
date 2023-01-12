@@ -615,6 +615,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
                     with open(pssm_path, "rt", encoding="utf-8") as f:
                         chain.pssm = parse_pssm(f, chain)
 
+        # add the features
         for feature_module in feature_modules:
             feature_module.add_features(self._pdb_path, graph)
 
