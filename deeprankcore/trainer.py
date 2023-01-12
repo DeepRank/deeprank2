@@ -428,7 +428,7 @@ class Trainer():
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise e
 
-    def set_loss(self):
+    def set_loss(self, loss = None, override_invalid = False):
 
         """
         Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
@@ -446,6 +446,14 @@ class Trainer():
         other_losses = [nn.HingeEmbeddingLoss, nn.MultiLabelSoftMarginLoss, nn.CosineEmbeddingLoss, 
                         nn.MarginRankingLoss, nn.TripletMarginLoss, nn.CTCLoss]
         classification_losses = multi_classification_losses + binary_classification_losses
+
+        if loss in other_losses and not override_invalid:
+            _log.error(invalid_loss_error)
+            raise ValueError(invalid_loss_error)
+        elif loss not in (regression_losses + classification_losses):
+            custom_loss = True
+        else:
+            custom_loss = False
 
         if self.task == targets.REGRESS:
             self.loss = MSELoss()
