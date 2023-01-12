@@ -86,7 +86,7 @@ def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[f
     """
     Compute targets and outputs them as a dictionary.
     For classification: 
-       - bin_class (scalar value is expected to be either 0 or 1)
+       - binary (scalar value is expected to be either 0 or 1)
        - capri_classes (scalar integer values are expected)
     For regression:
        - irmsd
@@ -98,7 +98,7 @@ def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[f
         pdb_path (path): path to the scored pdb structure
         reference_pdb_path (path): path to the reference structure required to compute the different target
 
-    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, bin_class, capri_class
+    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class
     """
 
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
