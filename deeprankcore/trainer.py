@@ -472,7 +472,7 @@ class Trainer():
                     _log.warning(custom_loss_warning)
                 elif loss not in regression_losses:
                     _invalid_loss()
-                self.loss = loss
+                self.loss = loss()
 
         elif self.task == targets.CLASSIF:
             # Assign weights to each class
@@ -499,8 +499,19 @@ class Trainer():
                 self.weights = None
 
             # Note that non-linear activation is automatically applied in CrossEntropyLoss
-            self.loss = nn.CrossEntropyLoss(
-                weight=self.weights, reduction="mean")
+            if loss is None:
+                self.loss = nn.CrossEntropyLoss(weight=self.weights)
+            else:
+                if custom_loss:
+                    _log.warning(custom_loss_warning)
+                elif loss not in regression_losses:
+                    _invalid_loss()
+                
+                if issubclass(loss, nn.modules.loss._WeightedLoss):
+                    self.loss = loss(weight=self.weights)
+                else:
+                    self.loss = loss()
+                    
 
 
     def train( # pylint: disable=too-many-arguments
