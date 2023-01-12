@@ -8,7 +8,7 @@ from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.utils.graph import Graph, Edge, Node
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.molstruct.pair import ResidueContact
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat)
+from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, gridstorage)
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals
@@ -85,8 +85,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             assert len(np.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
 
             # check for grid-mapped values
-            assert "mapped_features" in entry_group
-            mapped_group = entry_group["mapped_features"]
+            assert gridstorage.MAPPED_FEATURES in entry_group
+            mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
 
             for feature_name in (node_feature_name, edge_feature_name):
                 feature_name = f"{feature_name}_000"

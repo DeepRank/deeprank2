@@ -1,7 +1,6 @@
 from time import time
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 import logging
-import warnings
 from tqdm import tqdm
 import h5py
 import copy
@@ -11,96 +10,74 @@ from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
+
 from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
+from deeprankcore.utils.earlystopping import EarlyStopping
 from deeprankcore.domain import targetstorage as targets
-from deeprankcore.dataset import GraphDataset
+from deeprankcore.dataset import GraphDataset, GridDataset
 
 _log = logging.getLogger(__name__)
 
 
 class Trainer():
-    def __init__( # pylint: disable=too-many-arguments, too-many-branches
+    def __init__( # pylint: disable=too-many-arguments
                 self,
                 neuralnet = None,
-                dataset_train: GraphDataset = None,
-                dataset_val: GraphDataset = None,
-                dataset_test: GraphDataset = None,
-                val_size: Union[float,int] = None,
-                test_size: Union[float,int] = 0,
+                dataset_train: Union[GraphDataset, GridDataset] = None,
+                dataset_val: Union[GraphDataset, GridDataset] = None,
+                dataset_test: Union[GraphDataset, GridDataset] = None,
+                val_size: Union[float, int] = None,
+                test_size: Union[float, int] = None,
                 class_weights: bool = False,
-                pretrained_model: str = None,
+                pretrained_model: Optional[str] = None,
                 batch_size: int = 32,
                 shuffle: bool = True,
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
-        """Class from which the network is trained, evaluated and tested
+        """Class from which the network is trained, evaluated and tested.
 
         Args:
-            neuralnet (function, required): neural network class (ex. GINet, Foutnet etc.).
-                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+            neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+                It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
+                in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+                Defaults to None.
 
-            dataset_train (GraphDataset object, optional): training set used during training.
+            dataset_train (:class:`GraphDataset`, optional): Training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
 
-            dataset_val (GraphDataset object, optional): evaluation set used during training.
-                Defaults to None. If None, training set will be split randomly into training set and
-                validation set during training, using val_size parameter
+            dataset_val (:class:`GraphDataset`, optional): Evaluation set used during training.
+                If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
+                Defaults to None.
 
-            dataset_test (GraphDataset object, optional): independent evaluation set. Defaults to None.
+            dataset_test (:class:`GraphDataset`, optional): Independent evaluation set. Defaults to None.
 
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-                Only used if dataset_val is not specified. 
-                Can be set to 0 if no validation set is needed.
-                Defaults to to 0.25 (in _divide_dataset function).
+            val_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+                Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to to 0.25 (in _divide_dataset function).
 
-            test_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for test dataset. 
-                Only used if dataset_test is not specified. 
-                Can be set to 0 if no test set is needed.
-                Defaults to to 0 (i.e., no test data).
+            test_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
+                Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to 0 (i.e., no test data).
 
-            class_weights (bool): assign class weights based on the dataset content. 
-                Defaults to False.
+            class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
 
-            pretrained_model (str, optional): path to pre-trained model. Defaults to None.
+            pretrained_model (str, optional): Path to pre-trained model. Defaults to None.
 
-            batch_size (int, optional): defaults to 32.
+            batch_size (int, optional): Sets the size of the batch. Defaults to 32.
 
-            shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
+            shuffle (bool, optional): whether to shuffle the dataloaders data. Defaults to True.
 
-            output_exporters: the output exporters to use for saving/exploring/plotting predictions/targets/losses
-                over the epochs. Defaults to HDF5OutputExporter, which saves all the results in an hdf5 file stored
-                in ./output directory.
+            output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
+                epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+                Defaults to None.
         """
 
-        if output_exporters is not None:
-            self._output_exporters = OutputExporterCollection(
-                *output_exporters)
-        else:
-            self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
+        self._init_output_exporters(output_exporters)
 
         self.neuralnet = neuralnet
-        self.val_size = val_size
-        self.test_size = test_size
 
-        if test_size > 0:
-            if dataset_test is None:
-                self.dataset_train, self.dataset_test = _divide_dataset(self.dataset_train, self.test_size)
-            else:
-                warnings.warn("Test dataset was provided to Trainer; test_size parameter is ignored.")
-                _log.info("Test dataset was provided to Trainer; test_size parameter is ignored.")
-                self.test_size = 0
-        else:
-            self.dataset_train = dataset_train
-            self.dataset_test = dataset_test
-
-        if (val_size is not None) and (dataset_val is not None):
-            warnings.warn("Validation dataset was provided to Trainer; val_size parameter is ignored.")
-            _log.info("Validation dataset was provided to Trainer; val_size parameter is ignored.")
-            self.val_size = None
-        self.dataset_val = dataset_val
+        self._init_datasets(dataset_train, dataset_val, dataset_test,
+                            val_size, test_size)
 
         if pretrained_model is None:
             if self.dataset_train is None:
@@ -108,34 +85,24 @@ class Trainer():
             if self.neuralnet is None:
                 raise ValueError("No neural network specified. Specifying a model framework is required if there is no pretrained model.")
 
-            self.target = self.dataset_train.target
-            self.task = self.dataset_train.task
             self.classes = self.dataset_train.classes
-            self.classes_to_idx = self.dataset_train.classes_to_idx
+            self.classes_to_index = self.dataset_train.classes_to_index
             self.optimizer = None
             self.batch_size = batch_size
             self.class_weights = class_weights
             self.shuffle = shuffle
             self.subset = self.dataset_train.subset
-            self.node_features = self.dataset_train.node_features
-            self.edge_features = self.dataset_train.edge_features
-            self.clustering_method = self.dataset_train.clustering_method
             self.epoch_saved_model = None
 
             if self.target is None:
-                raise ValueError("No target set. You need to choose a target (set in GraphDataset) for training.")
+                raise ValueError("No target set. You need to choose a target (set in the dataset) for training.")
 
-            self._check_dataset_equivalence()
             self._load_model()
-
         else:
-            self.pretrained_model = pretrained_model
-            self._load_params()
-
             if self.dataset_train is not None:
-                warnings.warn("Pretrained model loaded: dataset_train will be ignored.")
+                _log.warning("Pretrained model loaded: dataset_train will be ignored.")
             if self.dataset_val is not None:
-                warnings.warn("Pretrained model loaded: dataset_val will be ignored.")
+                _log.warning("Pretrained model loaded: dataset_val will be ignored.")
             if self.neuralnet is None:
                 raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
             if self.dataset_test is None:
@@ -143,12 +110,72 @@ class Trainer():
             if self.target is None:
                 raise ValueError("No target set. Make sure the pretrained model explicitly defines the target to train against.")
 
-            self._check_dataset_equivalence()
+            self.pretrained_model_path = pretrained_model
+
+            self._load_params()
             self._load_pretrained_model()
 
+    def _init_output_exporters(self, output_exporters: Optional[List[OutputExporter]]):
+
+        if output_exporters is not None:
+            self._output_exporters = OutputExporterCollection(*output_exporters)
+        else:
+            self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
+
+    def _init_datasets(self,  # pylint: disable=too-many-arguments
+                       dataset_train: Union[GraphDataset, GridDataset],
+                       dataset_val: Optional[Union[GraphDataset, GridDataset]],
+                       dataset_test: Optional[Union[GraphDataset, GridDataset]],
+                       val_size: Optional[Union[int, float]],
+                       test_size: Optional[Union[int, float]]):
+
+        self._check_dataset_equivalence(dataset_train, dataset_val, dataset_test)
+
+        self.dataset_train = dataset_train
+        self.dataset_test = dataset_test
+        self.dataset_val = dataset_val
+        self.val_size = val_size
+        self.test_size = test_size
+
+        # Divide datasets where necessary.
+        if test_size is not None:
+            if dataset_test is None:
+                self.dataset_train, self.dataset_test = _divide_dataset(dataset_train, test_size)
+            else:
+                _log.warning("Test dataset was provided to Trainer; test_size parameter is ignored.")
+
+        if val_size is not None:
+            if dataset_val is None:
+                self.dataset_train, self.dataset_val = _divide_dataset(dataset_train, val_size)
+            else:
+                _log.warning("Validation dataset was provided to Trainer; val_size parameter is ignored.")
+
+        # Copy settings from the dataset that we will use.
+        if self.dataset_train is not None:
+            self._init_from_dataset(self.dataset_train)
+        else:
+            self._init_from_dataset(self.dataset_test)
+
+    def _init_from_dataset(self, dataset: Union[GraphDataset, GridDataset]):
+
+        if isinstance(dataset, GraphDataset):
+            self.clustering_method = dataset.clustering_method
+            self.node_features = dataset.node_features
+            self.edge_features = dataset.edge_features
+            self.features = None
+
+        elif isinstance(dataset, GridDataset):
+            self.clustering_method = None
+            self.node_features = None
+            self.edge_features = None
+            self.features = dataset.features
+        else:
+            raise TypeError(type(dataset))
+
+        self.target = dataset.target
+        self.task = dataset.task
 
     def _load_model(self):
-        
         """
         Loads model
 
@@ -160,15 +187,19 @@ class Trainer():
             if self.clustering_method in ('mcl', 'louvain'):
                 _log.info("Loading clusters")
                 self._precluster(self.dataset_train)
+
                 if self.dataset_val is not None:
                     self._precluster(self.dataset_val)
                 else:
                     _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
                     self.dataset_train, self.dataset_val = _divide_dataset(
                         self.dataset_train, splitsize=self.val_size)
+
+                if self.dataset_test is not None:
+                    self._precluster(self.dataset_test)
             else:
                 raise ValueError(
-                    "Invalid node clustering method. \n\t"
+                    f"Invalid node clustering method: {self.clustering_method}\n\t"
                     "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         # dataloader
@@ -188,8 +219,7 @@ class Trainer():
         # independent validation dataset
         if self.dataset_test is not None:
             _log.info("Loading independent testing dataset...")
-            if self.clustering_method in ('mcl', 'louvain'):
-                self._precluster(self.dataset_test)
+
             self.test_loader = DataLoader(
                 self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
             )
@@ -202,23 +232,58 @@ class Trainer():
         self.configure_optimizers()
         self.set_loss()
 
-    def _check_dataset_equivalence(self):
-        for other in [self.dataset_val, self.dataset_test]:
-            if other is not None:
-                if (other.target == self.target # pylint: disable = too-many-boolean-expressions
-                    and other.node_features == self.node_features
-                    and other.edge_features == self.edge_features
-                    and other.clustering_method == self.clustering_method
-                    and other.task == self.task
-                    and other.classes == self.classes
-                    ):
-                    pass
+    def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
+
+        if dataset_train is None:
+            # only check the test dataset
+            if dataset_test is None:
+                raise ValueError("Please provide at least a train or test dataset")
+
+            if not isinstance(dataset_test, GraphDataset) and not isinstance(dataset_test, GridDataset):
+                raise TypeError(f"""test dataset is not the right type {type(dataset_test)}
+                                Make sure it's either GraphDataset or GridDataset""")
+            return
+
+        # Compare the datasets to each other
+        for dataset_other_name, dataset_other in [("validation", dataset_val),
+                                                  ("testing", dataset_test)]:
+            if dataset_other is not None:
+
+                if dataset_other.target != dataset_train.target:
+                    raise ValueError(f"training dataset has target {dataset_train.target} while "
+                                     f"{dataset_other_name} dataset has target {dataset_other.target}")
+
+                if dataset_other.task != dataset_other.task:
+                    raise ValueError(f"training dataset has task {dataset_train.task} while "
+                                     f"{dataset_other_name} dataset has task {dataset_other.task}")
+
+                if dataset_other.classes != dataset_other.classes:
+                    raise ValueError(f"training dataset has classes {dataset_train.classes} while "
+                                     f"{dataset_other_name} dataset has classes {dataset_other.classes}")
+
+                if isinstance(dataset_train, GraphDataset) and isinstance(dataset_other, GraphDataset):
+
+                    if dataset_other.node_features != dataset_train.node_features:
+                        raise ValueError(f"training dataset has node_features {dataset_train.node_features} while "
+                                         f"{dataset_other_name} dataset has node_features {dataset_other.node_features}")
+
+                    if dataset_other.edge_features != dataset_train.edge_features:
+                        raise ValueError(f"training dataset has edge_features {dataset_train.edge_features} while "
+                                         f"{dataset_other_name} dataset has edge_features {dataset_other.edge_features}")
+
+                    if dataset_other.clustering_method != dataset_other.clustering_method:
+                        raise ValueError(f"training dataset has clustering method {dataset_train.clustering_method} while "
+                                         f"{dataset_other_name} dataset has clustering method {dataset_other.clustering_method}")
+
+                elif isinstance(dataset_train, GridDataset) and isinstance(dataset_other, GridDataset):
+
+                    if dataset_other.features != dataset_train.features:
+                        raise ValueError(f"training dataset has features {dataset_train.features} while "
+                                         f"{dataset_other_name} dataset has features {dataset_other.features}")
+
                 else:
-                    raise ValueError(
-                        f"""Training dataset is not equivalent to {other}.\n
-                        Check datasets passed to Trainer class and ensure that the same (non-default) \n
-                        target, node_features, edge_features, clustering_method, task, and classes are used."""
-                        )
+                    raise TypeError(f"Training and {dataset_other_name} datasets are not the same type.\n"
+                                     "Make sure to use only graph or only grid datasets")
 
     def _load_pretrained_model(self):
         """
@@ -242,7 +307,7 @@ class Trainer():
         Args:
             dataset (GraphDataset object)
         """
-        for fname, mol in tqdm(dataset.index_complexes):
+        for fname, mol in tqdm(dataset.index_entries):
             data = dataset.load_one_graph(fname, mol)
 
             if data is None:
@@ -275,7 +340,7 @@ class Trainer():
 
             f5.close()
 
-    def _put_model_to_device(self, dataset: GraphDataset):
+    def _put_model_to_device(self, dataset: Union[GraphDataset, GridDataset]):
         """
         Puts the model on the available device
 
@@ -293,7 +358,13 @@ class Trainer():
         if self.device.type == 'cuda':
             _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
-        self.num_edge_features = len(self.edge_features)
+        # regression mode
+        if self.task == targets.REGRESS:
+            self.output_shape = 1
+
+        # classification mode
+        elif self.task == targets.CLASSIF:
+            self.output_shape = len(self.classes)
 
         # the target values are optional
         if dataset.get(0).y is not None:
@@ -301,23 +372,25 @@ class Trainer():
         else:
             target_shape = None
 
-        # regression mode
-        if self.task == targets.REGRESS:
-            self.output_shape = 1
+        if isinstance(dataset, GraphDataset):
+
+            num_node_features = dataset.get(0).num_features
+            num_edge_features = len(dataset.edge_features)
+
             self.model = self.neuralnet(
-                dataset.get(0).num_features,
+                num_node_features,
                 self.output_shape,
-                self.num_edge_features
+                num_edge_features
             ).to(self.device)
 
-        # classification mode
-        elif self.task == targets.CLASSIF:
-            self.output_shape = len(self.classes)
-            self.model = self.neuralnet(
-                dataset.get(0).num_features,
-                self.output_shape,
-                self.num_edge_features
+        elif isinstance(dataset, GridDataset):
+            _, num_features, box_width, box_height, box_depth = dataset.get(0).x.shape
+
+            self.model = self.neuralnet(num_features,
+                                        (box_width, box_height, box_depth)
             ).to(self.device)
+        else:
+            raise TypeError(type(dataset))
 
         # check for compatibility
         for output_exporter in self._output_exporters:
@@ -333,16 +406,13 @@ class Trainer():
         Configure optimizer and its main parameters.
 
         Args:
-            optimizer (optional): PyTorch optimizer object (from torch.optim)
-                Defaults to Adam.
+            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
+                Defaults to None.
 
-            lr (float, optional): Learning rate.
-                Defaults to 0.01.
+            lr (float, optional): Learning rate. Defaults to 0.001.
 
-            weight_decay (float, optional): Weight decay (L2 penalty). 
-                Weight decay is fundamental for GNNs, otherwise, parameters can become 
-                too big and the gradient may explode. 
-                Defaults to 1e-05.
+            weight_decay (float, optional): Weight decay (L2 penalty).
+                Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
         """
 
         self.lr = lr
@@ -356,13 +426,14 @@ class Trainer():
             except Exception as e:
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+                raise e
 
     def set_loss(self):
 
         """
-        Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification).
+        Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
         """
-        
+
         if self.task == targets.REGRESS:
             self.loss = MSELoss()
 
@@ -388,32 +459,47 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-    def train(
+    def train( # pylint: disable=too-many-arguments
         self,
-        nepoch: Optional[int] = 1,
-        validate: Optional[bool] = False,
-        save_model: Optional[str] = 'last',
-        model_path: Optional[str] = None,
+        nepoch: int = 1,
+        earlystop_patience: Optional[int] = None,
+        earlystop_maxgap: Optional[float] = None,
+        validate: bool = False,
+        save_best_model: Optional[bool] = True,
+        output_prefix: Optional[str] = None,
     ):
         """
-        Trains the model
+        Performs the training of the model.
 
         Args:
-            nepoch (int, optional): number of epochs. Defaults to 1.
-
-            validate (bool, optional): perform validation. 
-                If True, there must be a validation set. 
-                Defaults to False.
-
-            save_model (str: 'last' or 'best;, optional): save the model. 
-                Defaults to 'last'
+            nepoch (int): Maximum number of epochs to run.
+                        Default: 1.
+            earlystop_patience (int, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
+                        Default: None.
+            earlystop_maxgap (float, optional): Training ends if the difference between validation and training loss exceeds this value.
+                        Default: None. 
+            validate (bool): Perform validation on independent data set (requires a validation data set).
+                        Default: False.
+            save_best_model (bool, optional): 
+                        If True, the best model (in terms of validation loss) is saved.
+                        If False, the last model tried is saved.
+                        If None, no model is saved.
+                        Defaults to True.
+            output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
+                        Default: 'model'.
         """
 
         train_losses = []
         valid_losses = []
+        
+        if earlystop_patience or earlystop_maxgap:
+            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, trace_func=_log.info)
+        else: 
+            early_stopping = None
 
-        if model_path is None:
-            model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
+        if output_prefix is None:
+            output_prefix = 'model'
+        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._output_exporters:
             # Number of epochs
@@ -438,28 +524,33 @@ class Trainer():
                 if validate:
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
                     valid_losses.append(loss_)
-                    if save_model == 'best':
+                    if save_best_model:
                         if min(valid_losses) == loss_:
-                            self.save_model(model_path)
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
                 else:
                     # if no validation set, save the best performing model on the training set
-                    if save_model == 'best':
-                        if min(train_losses) == loss_: # noqa
-                            _log.warning(
-                                """The training set is used both for learning and model selection.
-                                            This may lead to training set data overfitting.
-                                            We advice you to use an external validation set.""")
-
-                            self.save_model(model_path)
+                    if save_best_model:
+                        if min(train_losses) == loss_:
+                            _log.warning( # pylint: disable=logging-not-lazy
+                                "Training data is used both for learning and model selection, which will to overfitting." +
+                                "\n\tIt is preferable to use an independent training and validation data sets.")
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
-                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
+                
+                # check early stopping criteria
+                if early_stopping:
+                    early_stopping(epoch, loss_, min(train_losses))
+                    if early_stopping.early_stop:
+                        break
 
             # Save the last model
-            if save_model == 'last':
-                self.save_model(model_path)
+            if save_best_model is False:
+                self.save_model(output_file)
                 self.epoch_saved_model = epoch
-                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
+                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
@@ -479,7 +570,7 @@ class Trainer():
         outputs = []
         entry_names = []
         t0 = time()
-        for _, data_batch in enumerate(self.train_loader):
+        for data_batch in self.train_loader:
             data_batch = data_batch.to(self.device)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
@@ -501,8 +592,8 @@ class Trainer():
                 pred = pred.detach().reshape(-1)
             outputs += pred.tolist()
 
-            # Get the data
-            entry_names += data_batch['mol']
+            # Get the name
+            entry_names += data_batch.entry_names
 
         dt = time() - t0
         if count_predictions > 0:
@@ -534,7 +625,7 @@ class Trainer():
         Returns:
             running loss
         """
-        
+
         # Sets the module in evaluation mode
         self.model.eval()
         loss_func = self.loss
@@ -544,15 +635,15 @@ class Trainer():
         sum_of_losses = 0
         count_predictions = 0
         t0 = time()
-        for _, data_batch in enumerate(loader):
+        for data_batch in loader:
             data_batch = data_batch.to(self.device)
             pred = self.model(data_batch)
-            pred, data_batch.y = self._format_output(pred, data_batch.y)
+            pred, y = self._format_output(pred, data_batch.y)
 
             # Check if a target value was provided (i.e. benchmarck scenario)
-            if data_batch.y is not None:
-                target_vals += data_batch.y.tolist()
-                loss_ = loss_func(pred, data_batch.y)
+            if y is not None:
+                target_vals += y.tolist()
+                loss_ = loss_func(pred, y)
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
 
@@ -564,8 +655,8 @@ class Trainer():
                 pred = pred.detach().reshape(-1)
             outputs += pred.tolist()
 
-            # get the data
-            entry_names += data_batch['mol']
+            # get the name
+            entry_names += data_batch.entry_names
 
         dt = time() - t0
         if count_predictions > 0:
@@ -601,7 +692,7 @@ class Trainer():
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
-                [self.classes_to_idx[x] if isinstance(x, str) else self.classes_to_idx[int(x)] for x in target]
+                [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
             ).to(self.device)
 
         elif self.task == targets.REGRESS:
@@ -615,7 +706,7 @@ class Trainer():
 
     def test(self):
         """
-        Tests the model
+        Performs the testing of the model.
         """
 
         with self._output_exporters:
@@ -628,24 +719,20 @@ class Trainer():
                 )
             elif self.test_loader is None:
                 raise ValueError("No test dataset provided.")
-                
+
             # Run test
             self._eval(self.test_loader, 0, "testing")
 
     def _load_params(self):
         """
         Loads the parameters of a pretrained model
-
-        Returns:
-            [type]: [description]
         """
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
-        state = torch.load(self.pretrained_model, map_location=torch.device(self.device))
+        state = torch.load(self.pretrained_model_path,
+                           map_location=torch.device(self.device))
 
-        self.node_features = state["node_features"]
-        self.edge_features = state["edge_features"]
         self.target = state["target"]
         self.batch_size = state["batch_size"]
         self.val_size = state["val_size"]
@@ -657,25 +744,26 @@ class Trainer():
         self.task = state["task"]
         self.classes = state["classes"]
         self.shuffle = state["shuffle"]
-        self.clustering_method = state["clustering_method"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.model_load_state_dict = state["model_state"]
+        self.clustering_method = state["clustering_method"]
+        self.node_features = state["node_features"]
+        self.edge_features = state["edge_features"]
+        self.features = state["features"]
 
 
     def save_model(self, filename='model.pth.tar'):
         """
-        Saves the model to a file
+        Saves the model to a file.
 
         Args:
-            filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
+            filename (str, optional): Name of the file. Defaults to 'model.pth.tar'.
         """
         state = {
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
-            "node_features": self.node_features,
-            "edge_features": self.edge_features,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,
@@ -687,23 +775,25 @@ class Trainer():
             "weight_decay": self.weight_decay,
             "subset": self.subset,
             "shuffle": self.shuffle,
-            "clustering_method": self.clustering_method
+            "clustering_method": self.clustering_method,
+            "node_features": self.node_features,
+            "edge_features": self.edge_features,
+            "features": self.features
         }
 
         torch.save(state, filename)
 
 
-def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
+def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[float, int] = None) -> \
+        Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
+
     """Divides the dataset into a training set and an evaluation set
 
     Args:
-        dataset (GraphDataset): input dataset to be split into training and validation data
-        
+        dataset (deeprank-core dataset object): input dataset to be split into training and validation data
+
         val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to 0.25.
-
-    Returns:
-        GraphDataset: [description]
     """
 
     if splitsize is None:
@@ -717,10 +807,10 @@ def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
         n_split = splitsize
     else:
         raise TypeError (f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
-    
+
     # raise exception if no training data or negative validation size
     if n_split >= full_size or n_split < 0:
-        raise ValueError ("invalid splitsize. \n\t" +
+        raise ValueError (f"invalid splitsize: {n_split}\n\t" +
             f"splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)")
 
     if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint
@@ -731,9 +821,9 @@ def _divide_dataset(dataset: GraphDataset, splitsize: Union[float, int] = None):
         np.random.shuffle(indices)
 
         dataset_main = copy.deepcopy(dataset)
-        dataset_main.index_complexes = [dataset.index_complexes[i] for i in indices[n_split:]]
+        dataset_main.index_entries = [dataset.index_entries[i] for i in indices[n_split:]]
 
         dataset_split = copy.deepcopy(dataset)
-        dataset_split.index_complexes = [dataset.index_complexes[i] for i in indices[:n_split]]
+        dataset_split.index_entries = [dataset.index_entries[i] for i in indices[:n_split]]
 
     return dataset_main, dataset_split

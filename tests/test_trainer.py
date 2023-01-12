@@ -8,11 +8,12 @@ import warnings
 import torch
 import h5py
 from deeprankcore.trainer import Trainer, _divide_dataset
-from deeprankcore.dataset import GraphDataset
-from deeprankcore.neuralnets.ginet import GINet
-from deeprankcore.neuralnets.foutnet import FoutNet
-from deeprankcore.neuralnets.naive_gnn import NaiveNetwork
-from deeprankcore.neuralnets.sgat import SGAT
+from deeprankcore.dataset import GraphDataset, GridDataset
+from deeprankcore.neuralnets.gnn.ginet import GINet
+from deeprankcore.neuralnets.gnn.foutnet import FoutNet
+from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprankcore.neuralnets.gnn.sgat import SGAT
+from deeprankcore.neuralnets.cnn.model3d import CnnRegression, CnnClassification
 from deeprankcore.utils.exporters import (
     HDF5OutputExporter,
     TensorboardBinaryClassificationExporter,
@@ -25,6 +26,7 @@ from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
 _log = logging.getLogger(__name__)
 
 default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+model_path = './tests/test.pth.tar'
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     model_class,
@@ -101,15 +103,15 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
     with warnings.catch_warnings(record=UserWarning):
-        trainer.train(nepoch=3, validate=True)
-        trainer.save_model("test.pth.tar")
+        trainer.train(nepoch=3, validate=True, save_best_model=None)
+        trainer.save_model(model_path)
 
         Trainer(
             model_class,
             dataset_train,
             dataset_val,
             dataset_test,
-            pretrained_model="test.pth.tar")
+            pretrained_model=model_path)
 
 class TestTrainer(unittest.TestCase):
     @classmethod
@@ -119,6 +121,46 @@ class TestTrainer(unittest.TestCase):
     @classmethod
     def tearDownClass(class_):
         shutil.rmtree(class_.work_directory)
+
+    def test_grid_regression(self):
+        dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                              subset=None,
+                              target=targets.IRMSD,
+                              task=targets.REGRESS,
+                              features=[Efeat.VANDERWAALS])
+
+        trainer = Trainer(CnnRegression, dataset, batch_size=2)
+
+        trainer.train(nepoch=1, save_best_model=None)
+
+    def test_grid_classification(self):
+        dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                              subset=None,
+                              target=targets.BINARY,
+                              task=targets.CLASSIF,
+                              features=[Efeat.VANDERWAALS])
+
+        trainer = Trainer(CnnClassification, dataset, batch_size=2)
+
+        trainer.train(nepoch=1, save_best_model=None)
+
+    def test_grid_graph_incompatible(self):
+        dataset_train = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+                                    subset=None,
+                                    target=targets.BINARY,
+                                    task=targets.CLASSIF,
+                                    features=[Efeat.VANDERWAALS])
+
+        dataset_valid = GraphDataset(
+                hdf5_path="tests/data/hdf5/valid.hdf5",
+                target=targets.BINARY,
+            )
+
+        with pytest.raises(TypeError):
+            Trainer(CnnClassification,
+                    dataset_train=dataset_train,
+                    dataset_val=dataset_valid,
+                    batch_size=2)
 
     def test_ginet_sigmoid(self):
         _model_base_test(
@@ -295,13 +337,13 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True)
-                trainer.save_model("test.pth.tar")
+                trainer.train(nepoch=3, validate=True, save_best_model=None)
+                trainer.save_model(model_path)
 
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset,
-                    pretrained_model="test.pth.tar")
+                    pretrained_model=model_path)
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
@@ -317,12 +359,12 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True)
-                trainer.save_model("test.pth.tar")
+                trainer.train(nepoch=3, validate=True, save_best_model=None)
+                trainer.save_model(model_path)
 
                 Trainer(
                     dataset_test = dataset,
-                    pretrained_model="test.pth.tar")
+                    pretrained_model=model_path)
 
     def test_no_valid_provided(self):
 
@@ -381,13 +423,13 @@ class TestTrainer(unittest.TestCase):
         assert trainer.weight_decay == weight_decay
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3)
-            trainer.save_model("test.pth.tar")
+            trainer.train(nepoch=3, save_best_model=None)
+            trainer.save_model(model_path)
 
             trainer_pretrained = Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_test=dataset,
-                pretrained_model="test.pth.tar")
+                pretrained_model=model_path)
 
         assert isinstance(trainer_pretrained.optimizer, optimizer)
         assert trainer_pretrained.lr == lr
@@ -430,7 +472,7 @@ class TestTrainer(unittest.TestCase):
             assert len(os.listdir(self.work_directory)) > 0
 
         else:
-            warnings.warn("CUDA NOT AVAILABLE. test_cuda skipped")
+            warnings.warn("CUDA not available. test_cuda skipped")
             _log.debug("cuda is not available, test_cuda skipped")
 
     def test_dataset_equivalence_no_pretrained(self):
@@ -475,14 +517,14 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True)
-                trainer.save_model("test.pth.tar")
+                trainer.train(nepoch=3, validate=True, save_best_model=None)
+                trainer.save_model(model_path)
 
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset_train,
                     dataset_test = dataset_test,
-                    pretrained_model="test.pth.tar")
+                    pretrained_model=model_path)
 
     def test_trainsize(self):
         hdf5 = "tests/data/hdf5/train.hdf5"

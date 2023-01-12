@@ -253,13 +253,14 @@ class HDF5OutputExporter(OutputExporter):
 
     def __exit__(self, exception_type, exception, traceback):
 
-        if self.phase == 'validation':
-            self.phase = 'training'
+        if self.phase is not None:
+            if self.phase == "validation":
+                self.phase = "training"
 
-        self.df.to_hdf(
-            os.path.join(self._directory_path, 'output_exporter.hdf5'),
-            key=self.phase,
-            mode='a')
+            self.df.to_hdf(
+                os.path.join(self._directory_path, 'output_exporter.hdf5'),
+                key=self.phase,
+                mode='a')
 
         # reset df
         self.df = pd.DataFrame(data=self.d)
