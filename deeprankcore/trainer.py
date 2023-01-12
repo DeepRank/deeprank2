@@ -7,7 +7,6 @@ import copy
 import numpy as np
 import torch
 from torch import nn
-from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 
@@ -456,7 +455,15 @@ class Trainer():
             custom_loss = False
 
         if self.task == targets.REGRESS:
-            self.loss = MSELoss()
+            if loss is None:
+                self.loss = nn.MSELoss()
+            elif custom_loss:
+                _log.warning(custom_loss_warning)
+            elif loss not in regression_losses and not override_invalid:
+                _log.error(invalid_loss_error)
+                raise ValueError(invalid_loss_error)
+            else:
+                self.loss = loss
 
         elif self.task == targets.CLASSIF:
             # Assign weights to each class
