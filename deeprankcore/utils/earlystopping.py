@@ -18,7 +18,7 @@ class EarlyStopping:
                 Default: 10
             
             delta (float): Minimum change required to reset the early stopping counter.
-                Default: None
+                Default: 0
             
             maxgap (float, optional): Maximum difference between between training and validation loss.
                 Default: None
