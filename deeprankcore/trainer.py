@@ -522,7 +522,7 @@ class Trainer():
                 
             try:
                 self.loss_function = loss_function(weight=self.weights)  # Check whether loss allows for weighted classes
-            except AttributeError as e:
+            except TypeError as e:
                 if self.class_weights:
                     weight_error = (f"Loss function {loss_function} does not allow for weighted classes.\n\t" +
                                     "Please use a different loss function or set class_weights to False.\n")
