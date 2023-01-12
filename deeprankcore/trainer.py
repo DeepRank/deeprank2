@@ -434,6 +434,19 @@ class Trainer():
         Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
         """
 
+        custom_loss_warning = ( f'Selected loss function ({loss}) is not part of default list.\n\t' +
+                                f'Please ensure that this loss function is appropriate for {self.task} tasks.')
+        invalid_loss_error = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
+                               'If you want to use this loss function anyway, set `override_invalid` option of set_loss method to True.')
+
+        regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
+        binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, nn.CrossEntropyLoss, ]
+        multi_classification_losses = [nn.NLLLoss, nn.PoissonNLLLoss, nn.GaussianNLLLoss, 
+                                nn.KLDivLoss, nn.MultiLabelMarginLoss, ]
+        other_losses = [nn.HingeEmbeddingLoss, nn.MultiLabelSoftMarginLoss, nn.CosineEmbeddingLoss, 
+                        nn.MarginRankingLoss, nn.TripletMarginLoss, nn.CTCLoss]
+        classification_losses = multi_classification_losses + binary_classification_losses
+
         if self.task == targets.REGRESS:
             self.loss = MSELoss()
 
