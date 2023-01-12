@@ -32,13 +32,14 @@ class Trainer():
                 pretrained_model: Optional[str] = None,
                 batch_size: int = 32,
                 shuffle: bool = True,
-                cuda: bool = False, 
+                cuda: bool = False,
+                ngpu: int = 0,
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
         """Class from which the network is trained, evaluated and tested.
 
         Args:
-            neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+            neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
                 It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
                 in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
@@ -65,9 +66,11 @@ class Trainer():
 
             batch_size (int, optional): Sets the size of the batch. Defaults to 32.
 
-            shuffle (bool, optional): whether to shuffle the dataloaders data. Defaults to True.
+            shuffle (bool, optional): Whether to shuffle the dataloaders data. Defaults to True.
 
-            cuda (bool, optional): whether to use CUDA.
+            cuda (bool, optional): Whether to use CUDA. Defaults to False.
+
+            ngpu (int, optional): Number of GPU to be used. Defaults to 0.
 
             output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
                 epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
@@ -81,27 +84,41 @@ class Trainer():
         self._init_datasets(dataset_train, dataset_val, dataset_test,
                             val_size, test_size)
 
-        # get the device
         self.cuda = cuda
+        self.ngpu = ngpu
+
         if self.cuda and torch.cuda.is_available():
             self.device = torch.device("cuda")
+            if self.ngpu == 0:
+                self.ngpu = 1
+                _log.info("CUDA detected. Setting number of GPUs to 1.")
         elif self.cuda and not torch.cuda.is_available():
             _log.error(
-                f' --> CUDA not deteceted: Make sure that CUDA is installed '
+                f' --> CUDA not detected: Make sure that CUDA is installed '
                 f'and that you are running on GPUs.\n'
-                f' --> To turn CUDA of set cuda=False in Trainer.\n'
+                f' --> To turn CUDA off set cuda=False in Trainer.\n'
                 f' --> Aborting the experiment \n\n')
             raise ValueError(
-                f' --> CUDA not deteceted: Make sure that CUDA is installed '
+                f' --> CUDA not detected: Make sure that CUDA is installed '
                 f'and that you are running on GPUs.\n'
-                f' --> To turn CUDA of set cuda=False in Trainer.\n'
+                f' --> To turn CUDA off set cuda=False in Trainer.\n'
                 f' --> Aborting the experiment \n\n')
         else:
             self.device = torch.device("cpu")
+            if self.ngpu > 0:
+                _log.error(
+                    f' --> CUDA not detected.'
+                    f'Set cuda=True in Trainer to turn CUDA on.\n'
+                    f' --> Aborting the experiment \n\n')
+                raise ValueError(
+                    f' --> CUDA not detected.'
+                    f'Set cuda=True in Trainer to turn CUDA on.\n'
+                    f' --> Aborting the experiment \n\n')
 
         _log.info("Device set to %s.", self.device)
         if self.device.type == 'cuda':
-            _log.info("CUDA device name is %s.", torch.cuda.get_device_name(0))
+            _log.info(f"CUDA device name is {torch.cuda.get_device_name(0)}.")
+            _log.info(f"Number of GPUs set to {self.ngpu}.")
 
         if pretrained_model is None:
             if self.dataset_train is None:
@@ -386,6 +403,11 @@ class Trainer():
             ).to(self.device)
         else:
             raise TypeError(type(dataset))
+
+        # multi-gpu
+        if self.ngpu > 1:
+            ids = [i for i in range(self.ngpu)]
+            self.model = nn.DataParallel(self.model, device_ids=ids).to(self.device)
 
         # check for compatibility
         for output_exporter in self._output_exporters:
@@ -763,6 +785,7 @@ class Trainer():
         self.edge_features = state["edge_features"]
         self.features = state["features"]
         self.cuda = state["cuda"]
+        self.ngpu = state["ngpu"]
 
     def save_model(self, filename='model.pth.tar'):
         """
@@ -790,7 +813,8 @@ class Trainer():
             "node_features": self.node_features,
             "edge_features": self.edge_features,
             "features": self.features,
-            "cuda": self.cuda
+            "cuda": self.cuda,
+            "ngpu": self.ngpu
         }
 
         torch.save(state, filename)
