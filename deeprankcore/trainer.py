@@ -13,6 +13,7 @@ from torch_geometric.loader import DataLoader
 
 from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
+from deeprankcore.utils.earlystopping import EarlyStopping
 from deeprankcore.domain import targetstorage as targets
 from deeprankcore.dataset import GraphDataset, GridDataset
 
@@ -458,29 +459,47 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-    def train(
+    def train( # pylint: disable=too-many-arguments
         self,
-        nepoch: Optional[int] = 1,
-        validate: Optional[bool] = False,
-        save_model: Optional[str] = 'last',
-        model_path: Optional[str] = None,
+        nepoch: int = 1,
+        earlystop_patience: Optional[int] = None,
+        earlystop_maxgap: Optional[float] = None,
+        validate: bool = False,
+        save_best_model: Optional[bool] = True,
+        output_prefix: Optional[str] = None,
     ):
         """
         Performs the training of the model.
 
         Args:
-            nepoch (int, optional): Number of epochs for training the model. Defaults to 1.
-
-            validate (bool, optional): Whether to perform validation. If True, there must be a validation set. Defaults to False.
-
-            save_model (str, optional): Whether to save the model. Can be either 'best' or 'last' Defaults to 'last'.
+            nepoch (int): Maximum number of epochs to run.
+                        Default: 1.
+            earlystop_patience (int, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
+                        Default: None.
+            earlystop_maxgap (float, optional): Training ends if the difference between validation and training loss exceeds this value.
+                        Default: None. 
+            validate (bool): Perform validation on independent data set (requires a validation data set).
+                        Default: False.
+            save_best_model (bool, optional): 
+                        If True, the best model (in terms of validation loss) is saved.
+                        If False, the last model tried is saved.
+                        If None, no model is saved.
+                        Defaults to True.
+            output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
+                        Default: 'model'.
         """
 
         train_losses = []
         valid_losses = []
+        
+        if earlystop_patience or earlystop_maxgap:
+            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, trace_func=_log.info)
+        else: 
+            early_stopping = None
 
-        if model_path is None:
-            model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
+        if output_prefix is None:
+            output_prefix = 'model'
+        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._output_exporters:
             # Number of epochs
@@ -505,28 +524,33 @@ class Trainer():
                 if validate:
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
                     valid_losses.append(loss_)
-                    if save_model == 'best':
+                    if save_best_model:
                         if min(valid_losses) == loss_:
-                            self.save_model(model_path)
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
                 else:
                     # if no validation set, save the best performing model on the training set
-                    if save_model == 'best':
-                        if min(train_losses) == loss_: # noqa
-                            _log.warning(
-                                """The training set is used both for learning and model selection.
-                                            This may lead to training set data overfitting.
-                                            We advice you to use an external validation set.""")
-
-                            self.save_model(model_path)
+                    if save_best_model:
+                        if min(train_losses) == loss_:
+                            _log.warning( # pylint: disable=logging-not-lazy
+                                "Training data is used both for learning and model selection, which will to overfitting." +
+                                "\n\tIt is preferable to use an independent training and validation data sets.")
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
-                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
+                
+                # check early stopping criteria
+                if early_stopping:
+                    early_stopping(epoch, loss_, min(train_losses))
+                    if early_stopping.early_stop:
+                        break
 
             # Save the last model
-            if save_model == 'last':
-                self.save_model(model_path)
+            if save_best_model is False:
+                self.save_model(output_file)
                 self.epoch_saved_model = epoch
-                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
+                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
