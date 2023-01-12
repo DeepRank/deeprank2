@@ -229,7 +229,7 @@ class Trainer():
 
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
-        self.set_loss()
+        self.set_loss_function()
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
 
@@ -294,7 +294,6 @@ class Trainer():
         self.test_loader = DataLoader(self.dataset_test)
         _log.info("Testing set loaded\n")
         self._put_model_to_device(self.dataset_test)
-        self.set_loss()
 
         # load the model and the optimizer state
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
@@ -531,7 +530,6 @@ class Trainer():
                     raise ValueError(weight_error) from e
                 self.loss_function = loss_function()
                     
-
 
     def train( # pylint: disable=too-many-arguments
         self,
