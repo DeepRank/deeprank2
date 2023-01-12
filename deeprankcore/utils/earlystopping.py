@@ -73,7 +73,7 @@ class EarlyStopping:
             self.counter = 0
         
         # check maxgap
-        if self.maxgap:
+        if self.maxgap and epoch > 0:
             if train_loss is None:
                 raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping.")
             gap = val_loss - train_loss
