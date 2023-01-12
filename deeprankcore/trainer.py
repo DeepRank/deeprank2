@@ -433,6 +433,10 @@ class Trainer():
         Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
         """
 
+        default_regression_loss = nn.MSELoss
+        default_classification_loss = nn.CrossEntropyLoss
+
+        default_loss_info = (f'No loss function provided, the default loss function for {self.task} tasks is used: {loss}')
         custom_loss_warning = ( f'Selected loss function ({loss}) is not part of default list.\n\t' +
                                 f'Please ensure that this loss function is appropriate for {self.task} tasks.')
         invalid_loss_error = (f'The provided loss function ({loss}) is not appropriate for {self.task} tasks.\n\t' + 
@@ -456,7 +460,7 @@ class Trainer():
                 _log.error(invalid_loss_error)
                 raise ValueError(invalid_loss_error)
 
-
+        # check for custom/invalid loss functions
         if loss in other_losses:
             _invalid_loss()
         elif loss not in (regression_losses + classification_losses):
@@ -464,15 +468,17 @@ class Trainer():
         else:
             custom_loss = False
 
+        # set regression loss
         if self.task == targets.REGRESS:
             if loss is None:
-                self.loss = nn.MSELoss()
+                loss = default_regression_loss
+                _log.info(default_loss_info)
             else:
                 if custom_loss:
                     _log.warning(custom_loss_warning)
                 elif loss not in regression_losses:
                     _invalid_loss()
-                self.loss = loss()
+            self.loss = loss()
 
         elif self.task == targets.CLASSIF:
             # Assign weights to each class
@@ -492,25 +498,25 @@ class Trainer():
             else:
                 self.weights = None
 
-            # Note that non-linear activation is automatically applied in CrossEntropyLoss
+            # Set classification loss
             if loss is None:
-                self.loss = nn.CrossEntropyLoss(weight=self.weights)
+                loss = default_classification_loss
+                _log.info(default_loss_info)
             else:
                 if custom_loss:
                     _log.warning(custom_loss_warning)
                 elif loss not in regression_losses:
                     _invalid_loss()
                 
-                # apply weighted or unweighted loss function
-                try:
-                    self.loss = loss(weight=self.weights)
-                except AttributeError:
-                    if self.class_weights:
-                        weight_error = (f"Loss function {loss} does not allow for weighted classes." +
-                                        f"Please use a different loss function or set class_weights to False.")
-                        _log.error(weight_error)
-                        raise ValueError(weight_error)
-                    self.loss = loss()
+            try:
+                self.loss = loss(weight=self.weights)  # Check whether loss allows for weighted classes
+            except AttributeError:
+                if self.class_weights:
+                    weight_error = (f"Loss function {loss} does not allow for weighted classes." +
+                                    f"Please use a different loss function or set class_weights to False.")
+                    _log.error(weight_error)
+                    raise ValueError(weight_error)
+                self.loss = loss()
                     
 
 
