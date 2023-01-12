@@ -4,13 +4,15 @@ This module holds the classes that are used when working with a 3D grid.
 
 
 from enum import Enum
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Optional
 import numpy as np
 import h5py
 import itertools
 from scipy.signal import bspline
 
 from deeprankcore.domain import gridstorage
+from deeprankcore.molstruct.atom import AtomicElement
+from deeprankcore.molstruct.structure import PDBStructure
 
 
 class MapMethod(Enum):
@@ -34,7 +36,12 @@ class GridSettings:
      - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
-    def __init__(self, center: List[float], points_counts: List[int], sizes: List[float]):
+    def __init__(
+        self,
+        center: List[float],
+        points_counts: List[int],
+        sizes: List[float]
+    ):
         assert len(center) == 3
         assert len(points_counts) == 3
         assert len(sizes) == 3
@@ -228,6 +235,32 @@ class Grid:
             neighbour_data[point] = weight * value
 
         return neighbour_data
+
+    def _get_atomic_density_koes(self, center: np.ndarray, vanderwaals_radius: float) -> np.ndarray:
+        """
+        Function to map individual atomic density on the grid.
+        The formula is equation (1) of the Koes paper
+        Protein-Ligand Scoring with Convolutional NN Arxiv:1612.02751v1
+
+        Returns:
+            the mapped density
+        """
+
+        distances = np.sqrt(np.square(self.xgrid - center[0]) +
+                            np.square(self.ygrid - center[1]) +
+                            np.square(self.zgrid - center[2]))
+
+        density_data = np.zeros(distances.shape)
+
+        indices_close = distances < vanderwaals_radius
+        indices_far = (distances >= vanderwaals_radius) & (distances < 1.5 * vanderwaals_radius)
+
+        density_data[indices_close] = np.exp(-2.0 * np.square(distances[indices_close]) /  np.square(vanderwaals_radius))
+        density_data[indices_far] = 4.0 / np.square(np.e) / np.square(vanderwaals_radius) * np.square(distances[indices_far]) - \
+                                    12.0 / np.square(np.e) / vanderwaals_radius * distances[indices_far] + \
+                                    9.0 / np.square(np.e)
+
+        return density_data
 
     def map_feature(
         self,

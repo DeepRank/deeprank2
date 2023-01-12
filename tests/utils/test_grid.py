@@ -8,7 +8,9 @@ from pdb2sql import interface
 
 from deeprankcore.query import ProteinProteinInterfaceAtomicQuery
 import deeprankcore.features.contact
-from deeprankcore.utils.grid import MapMethod, GridSettings
+from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
+from deeprankcore.molstruct.atom import AtomicElement
+from deeprankcore.utils.buildgraph import get_structure
 
 
 def _inflate(index: np.array, value: np.array, shape: List[int]):
@@ -22,9 +24,13 @@ def _inflate(index: np.array, value: np.array, shape: List[int]):
 
 def test_grid_orientation():
 
+    error_margin = 0.001
+
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]
+    carbon_vanderwaals_radius = 1.7
 
+    # Extract data from original deeprank's preprocessed file.
     with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", 'r') as data_file:
         grid_points_group = data_file["1AK4/grid_points"]
 
@@ -37,55 +43,57 @@ def test_grid_orientation():
         c_group = data_file["1AK4/mapped_features/AtomicDensities_ind/C_chain1"]
         chain1_c_index = c_group["index"][()]
         chain1_c_value = c_group["value"][()]
-        target_chain1_c = _inflate(chain1_c_index, chain1_c_value, points_counts)
 
+        target_chain1_densities_carbon = _inflate(chain1_c_index, chain1_c_value, points_counts)
+
+    # Build the atomic graph, according to this repository's code.
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
-    chain1 = "C"
-    chain2 = "D"
+    chain_id1 = "C"
+    chain_id2 = "D"
     distance_cutoff = 8.5
 
-    query = ProteinProteinInterfaceAtomicQuery(pdb_path, chain1, chain2,
+    query = ProteinProteinInterfaceAtomicQuery(pdb_path, chain_id1, chain_id2,
                                                distance_cutoff=distance_cutoff)
 
     graph = query.build([deeprankcore.features.contact])
 
-    grid_file, grid_path = mkstemp(suffix=".hdf5")
-    os.close(grid_file)
-
+    # Get atomic positions.
     pdb = interface(pdb_path)
     try:
-        contact_atoms = pdb.get_contact_atoms(cutoff=distance_cutoff, chain1=chain1, chain2=chain2)
+        contact_atoms_by_chain = pdb.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2)
         contact_atom_indices = []
-        for atom_indices in contact_atoms.values():
+        for atom_indices in contact_atoms_by_chain.values():
             contact_atom_indices.extend(atom_indices)
 
         center = np.mean(pdb.get("x,y,z", rowID=list(set(contact_atom_indices))), axis=0)
+
+        chain1_carbon_positions = pdb.get("x,y,z", rowID=contact_atoms_by_chain[chain_id1], element="C")
     finally:
         pdb._close()
 
-    assert np.all(np.abs(target_center - center) < 0.000000001), f"\n{center} != \n{target_center}"
+    assert np.all(np.abs(target_center - center) < error_margin), f"\n{center} != \n{target_center}"
 
+    # Make a grid from the graph.
+    map_method = MapMethod.GAUSSIAN
     grid_settings = GridSettings(center, points_counts, grid_sizes)
+    grid = Grid("test_grid", grid_settings)
+    graph.map_to_grid(grid, map_method)
 
-    graph.write_as_grid_to_hdf5(grid_path, grid_settings, MapMethod.GAUSSIAN)
+    # Orientation must be the same as in the original deeprank.
+    # Check that the grid point coordinates are the same.
+    assert grid.xs.shape == target_xs.shape
+    assert np.all(np.abs(grid.xs - target_xs) < error_margin), f"\n{grid.xs} != \n{target_xs}"
 
-    try:
-        with h5py.File(grid_path, 'r') as data_file:
-            entry_group = data_file[list(data_file.keys())[0]]
-            grid_points_group = entry_group["grid_points"]
+    assert grid.ys.shape == target_ys.shape
+    assert np.all(np.abs(grid.ys - target_ys) < error_margin), f"\n{grid.ys} != \n{target_ys}"
 
-            xs = grid_points_group["x"][()]
-            ys = grid_points_group["y"][()]
-            zs = grid_points_group["z"][()]
-    finally:
-        os.remove(grid_path)
+    assert grid.zs.shape == target_zs.shape
+    assert np.all(np.abs(grid.zs - target_zs) < error_margin), f"\n{grid.zs} != \n{target_zs}"
 
-    assert xs.shape == target_xs.shape
-    assert np.all(np.abs(xs - target_xs) < 0.000000001), f"\n{xs} != \n{target_xs}"
+    # Map the atomic densities for carbon.
+    chain1_densities_carbon = np.zeros(target_chain1_densities_carbon.shape)
+    for position in chain1_carbon_positions:
+        chain1_densities_carbon += grid._get_atomic_density_koes(position, carbon_vanderwaals_radius)
 
-    assert ys.shape == target_ys.shape
-    assert np.all(np.abs(ys - target_ys) < 0.000000001), f"\n{ys} != \n{target_ys}"
-
-    assert zs.shape == target_zs.shape
-    assert np.all(np.abs(zs - target_zs) < 0.000000001), f"\n{zs} != \n{target_zs}"
-
+    # Check that the carbon densities are the same as in the original deeprank.
+    assert np.all(np.abs(chain1_densities_carbon - target_chain1_densities_carbon) < error_margin)

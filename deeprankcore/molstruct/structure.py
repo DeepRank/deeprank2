@@ -87,6 +87,15 @@ class Chain:
     def residues(self):
         return self._residues
 
+    def get_atoms(self):
+        "shortcut to list all atoms in this chain"
+        atoms = []
+        for residue in self._residues:
+            atoms.extend(residue.atoms)
+
+        return atoms
+
+    @property
     def __eq__(self, other) -> bool:
         return (
             isinstance(self, type(other))
