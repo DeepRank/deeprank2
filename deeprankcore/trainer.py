@@ -427,7 +427,7 @@ class Trainer():
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise e
 
-    def set_loss(self, loss = None, override_invalid = False):
+    def set_loss(self, loss = None, override_invalid = False): #pylint: disable=too-many-locals # noqa: MC0001
 
         """
         Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
@@ -510,12 +510,12 @@ class Trainer():
                 
             try:
                 self.loss = loss(weight=self.weights)  # Check whether loss allows for weighted classes
-            except AttributeError:
+            except AttributeError as e:
                 if self.class_weights:
-                    weight_error = (f"Loss function {loss} does not allow for weighted classes." +
-                                    f"Please use a different loss function or set class_weights to False.")
+                    weight_error = (f"Loss function {loss} does not allow for weighted classes.\n\t" +
+                                    "Please use a different loss function or set class_weights to False.\n")
                     _log.error(weight_error)
-                    raise ValueError(weight_error)
+                    raise ValueError(weight_error) from e
                 self.loss = loss()
                     
 
