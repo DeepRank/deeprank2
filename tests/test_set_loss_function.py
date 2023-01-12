@@ -27,9 +27,9 @@ _log = logging.getLogger(__name__)
 model_path = './tests/test.pth.tar'
 hdf5_path = 'tests/data/hdf5/test.hdf5'
 
-def base_test(trainer: Trainer, loss_function = None):
+def base_test(trainer: Trainer, loss_function = None, override = False):
 
-    trainer.set_loss_function(loss_function = loss_function)
+    trainer.set_loss_function(loss_function = loss_function, override_invalid=override)
 
     # check correct passing to/picking up from pretrained model 
     with warnings.catch_warnings(record=UserWarning):
@@ -54,7 +54,19 @@ class TestTrainer(unittest.TestCase):
         shutil.rmtree(class_.work_directory)
 
     # classification tasks
-    def test_classif_unweighted(self):
+    def test_classif_default(self):
+        dataset = GraphDataset(hdf5_path, 
+            target=targets.BINARY)
+        trainer = Trainer(
+            neuralnet = NaiveNetwork,
+            dataset_train = dataset,
+        )
+
+        trainer_pretrained = base_test(trainer)
+        assert isinstance(trainer.loss_function, nn.CrossEntropyLoss)
+        assert isinstance(trainer_pretrained.loss_function, nn.CrossEntropyLoss)
+
+    def test_classif_from_list(self):
         dataset = GraphDataset(hdf5_path,
             target=targets.BINARY)
         trainer = Trainer(
@@ -89,7 +101,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer_pretrained.class_weights
 
     def test_classif_invalid_weighted(self):
-        assert False
+        raise AssertionError('Both functional classification losses allow for weighted loss.')
     
     def test_classif_invalid_lossfunction(self):
         dataset = GraphDataset(hdf5_path, 
@@ -104,24 +116,34 @@ class TestTrainer(unittest.TestCase):
             base_test(trainer, loss_function)
 
     def test_classif_invalid_lossfunction_override(self):
-        assert False
-
-    def test_classif_default(self):
         dataset = GraphDataset(hdf5_path, 
             target=targets.BINARY)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
         )
+        loss_function = nn.MSELoss
 
-        trainer_pretrained = base_test(trainer)
-        assert isinstance(trainer.loss_function, nn.CrossEntropyLoss)
-        assert isinstance(trainer_pretrained.loss_function, nn.CrossEntropyLoss)
+        with pytest.raises(RuntimeError):
+            base_test(trainer, loss_function, override = True)
+
 
 
     # regression tasks
+        
+    def test_regress_default(self):
+        dataset = GraphDataset(hdf5_path,
+            target=targets.BA)
+        trainer = Trainer(
+            neuralnet = NaiveNetwork,
+            dataset_train = dataset,
+        )
 
-    def test_regress(self):
+        trainer_pretrained = base_test(trainer)
+        assert isinstance(trainer.loss_function, nn.MSELoss)
+        assert isinstance(trainer_pretrained.loss_function, nn.MSELoss)
+
+    def test_regress_from_list(self):
         dataset = GraphDataset(hdf5_path, 
             target=targets.BA)
         trainer = Trainer(
@@ -148,16 +170,12 @@ class TestTrainer(unittest.TestCase):
             base_test(trainer, loss_function)
 
     def test_regress_invalid_lossfunction_override(self):
-        assert False
-
-    def test_regress_default(self):
-        dataset = GraphDataset(hdf5_path,
+        dataset = GraphDataset(hdf5_path, 
             target=targets.BA)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
         )
+        loss_function = nn.CrossEntropyLoss
 
-        trainer_pretrained = base_test(trainer)
-        assert isinstance(trainer.loss_function, nn.MSELoss)
-        assert isinstance(trainer_pretrained.loss_function, nn.MSELoss)
+        base_test(trainer, loss_function, override=True)
