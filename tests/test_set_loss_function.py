@@ -53,7 +53,7 @@ class TestTrainer(unittest.TestCase):
     def tearDownClass(class_):
         shutil.rmtree(class_.work_directory)
 
-    # classification tasks
+    # Classification tasks
     def test_classif_default(self):
         dataset = GraphDataset(hdf5_path, 
             target=targets.BINARY)
@@ -127,10 +127,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(RuntimeError):
             base_test(trainer, loss_function, override = True)
 
-
-
-    # regression tasks
-        
+    # Regression tasks
     def test_regress_default(self):
         dataset = GraphDataset(hdf5_path,
             target=targets.BA)
