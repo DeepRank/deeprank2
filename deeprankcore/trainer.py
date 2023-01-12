@@ -484,7 +484,7 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-    def train( # pylint: disable=too-many-arguments
+    def train( # pylint: disable=too-many-arguments, too-many-branches
         self,
         nepoch: int = 1,
         earlystop_patience: Optional[int] = None,
