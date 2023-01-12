@@ -467,11 +467,11 @@ class Trainer():
         if self.task == targets.REGRESS:
             if loss is None:
                 self.loss = nn.MSELoss()
-            elif custom_loss:
-                _log.warning(custom_loss_warning)
-            elif loss not in regression_losses:
-                _invalid_loss()
             else:
+                if custom_loss:
+                    _log.warning(custom_loss_warning)
+                elif loss not in regression_losses:
+                    _invalid_loss()
                 self.loss = loss
 
         elif self.task == targets.CLASSIF:
