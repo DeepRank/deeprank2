@@ -9,10 +9,11 @@ import torch
 from torch import nn
 from torch.nn import MSELoss
 import torch.nn.functional as F
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
+from deeprankcore.utils.earlystopping import EarlyStopping
 from deeprankcore.domain import targetstorage as targets
 from deeprankcore.dataset import GraphDataset, GridDataset
 
@@ -34,45 +35,41 @@ class Trainer():
                 shuffle: bool = True,
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
-        """Class from which the network is trained, evaluated and tested
+        """Class from which the network is trained, evaluated and tested.
 
         Args:
-            neuralnet (function, required): neural network class (ex. GINet, Foutnet etc.).
-                It should subclass torch.nn.Module, and it shouldn't be specific to regression or classification
-                in terms of output shape (Trainer class takes care of formatting the output shape according to the task).
+            neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+                It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
+                in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+                Defaults to None.
 
-            dataset_train (deeprank-core dataset object, optional): training set used during training.
-                Can't be None if pretrained_model_path is also None. Defaults to None.
+            dataset_train (:class:`GraphDataset`, optional): Training set used during training.
+                Can't be None if pretrained_model is also None. Defaults to None.
 
-            dataset_val (deeprank-core dataset object, optional): evaluation set used during training.
-                Defaults to None. If None, training set will be split randomly into training set and
-                validation set during training, using val_size parameter
+            dataset_val (:class:`GraphDataset`, optional): Evaluation set used during training.
+                If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
+                Defaults to None.
 
-            dataset_test (deeprank-core dataset object, optional): independent evaluation set. Defaults to None.
+            dataset_test (:class:`GraphDataset`, optional): Independent evaluation set. Defaults to None.
 
-            val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
-                Only used if dataset_val is not specified. 
-                Can be set to 0 if no validation set is needed.
-                Defaults to to 0.25 (in _divide_dataset function).
+            val_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+                Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to to 0.25 (in _divide_dataset function).
 
-            test_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for test dataset. 
-                Only used if dataset_test is not specified. 
-                Can be set to 0 if no test set is needed.
-                Defaults to to 0 (i.e., no test data).
+            test_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
+                Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to 0 (i.e., no test data).
 
-            class_weights (bool): assign class weights based on the dataset content. 
-                Defaults to False.
+            class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
 
-            pretrained_model_path (str, optional): path to pre-trained model. Defaults to None.
+            pretrained_model (str, optional): Path to pre-trained model. Defaults to None.
 
-            batch_size (int, optional): defaults to 32.
+            batch_size (int, optional): Sets the size of the batch. Defaults to 32.
 
-            shuffle (bool, optional): shuffle the dataloaders data. Defaults to True.
+            shuffle (bool, optional): whether to shuffle the dataloaders data. Defaults to True.
 
-            output_exporters: the output exporters to use for saving/exploring/plotting predictions/targets/losses
-                over the epochs. Defaults to HDF5OutputExporter, which saves all the results in an hdf5 file stored
-                in ./output directory.
+            output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
+                epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+                Defaults to None.
         """
 
         self._init_output_exporters(output_exporters)
@@ -409,16 +406,13 @@ class Trainer():
         Configure optimizer and its main parameters.
 
         Args:
-            optimizer (optional): PyTorch optimizer object (from torch.optim)
-                Defaults to Adam.
+            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
+                Defaults to None.
 
-            lr (float, optional): Learning rate.
-                Defaults to 0.01.
+            lr (float, optional): Learning rate. Defaults to 0.001.
 
-            weight_decay (float, optional): Weight decay (L2 penalty). 
-                Weight decay is fundamental for GNNs, otherwise, parameters can become 
-                too big and the gradient may explode. 
-                Defaults to 1e-05.
+            weight_decay (float, optional): Weight decay (L2 penalty).
+                Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
         """
 
         self.lr = lr
@@ -432,11 +426,12 @@ class Trainer():
             except Exception as e:
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
+                raise e
 
     def set_loss(self):
 
         """
-        Sets the loss function (MSE loss for regression/ CrossEntropy loss for classification).
+        Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
         """
 
         if self.task == targets.REGRESS:
@@ -464,32 +459,47 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-    def train(
+    def train( # pylint: disable=too-many-arguments
         self,
-        nepoch: Optional[int] = 1,
-        validate: Optional[bool] = False,
-        save_model: Optional[str] = 'last',
-        model_path: Optional[str] = None,
+        nepoch: int = 1,
+        earlystop_patience: Optional[int] = None,
+        earlystop_maxgap: Optional[float] = None,
+        validate: bool = False,
+        save_best_model: Optional[bool] = True,
+        output_prefix: Optional[str] = None,
     ):
         """
-        Trains the model
+        Performs the training of the model.
 
         Args:
-            nepoch (int, optional): number of epochs. Defaults to 1.
-
-            validate (bool, optional): perform validation. 
-                If True, there must be a validation set. 
-                Defaults to False.
-
-            save_model (str: 'last' or 'best;, optional): save the model. 
-                Defaults to 'last'
+            nepoch (int): Maximum number of epochs to run.
+                        Default: 1.
+            earlystop_patience (int, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
+                        Default: None.
+            earlystop_maxgap (float, optional): Training ends if the difference between validation and training loss exceeds this value.
+                        Default: None. 
+            validate (bool): Perform validation on independent data set (requires a validation data set).
+                        Default: False.
+            save_best_model (bool, optional): 
+                        If True, the best model (in terms of validation loss) is saved.
+                        If False, the last model tried is saved.
+                        If None, no model is saved.
+                        Defaults to True.
+            output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
+                        Default: 'model'.
         """
 
         train_losses = []
         valid_losses = []
+        
+        if earlystop_patience or earlystop_maxgap:
+            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, trace_func=_log.info)
+        else: 
+            early_stopping = None
 
-        if model_path is None:
-            model_path = f't{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
+        if output_prefix is None:
+            output_prefix = 'model'
+        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._output_exporters:
             # Number of epochs
@@ -514,28 +524,33 @@ class Trainer():
                 if validate:
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
                     valid_losses.append(loss_)
-                    if save_model == 'best':
+                    if save_best_model:
                         if min(valid_losses) == loss_:
-                            self.save_model(model_path)
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
                 else:
                     # if no validation set, save the best performing model on the training set
-                    if save_model == 'best':
-                        if min(train_losses) == loss_: # noqa
-                            _log.warning(
-                                """The training set is used both for learning and model selection.
-                                            This may lead to training set data overfitting.
-                                            We advice you to use an external validation set.""")
-
-                            self.save_model(model_path)
+                    if save_best_model:
+                        if min(train_losses) == loss_:
+                            _log.warning( # pylint: disable=logging-not-lazy
+                                "Training data is used both for learning and model selection, which will to overfitting." +
+                                "\n\tIt is preferable to use an independent training and validation data sets.")
+                            self.save_model(output_file)
                             self.epoch_saved_model = epoch
-                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}')
+                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
+                
+                # check early stopping criteria
+                if early_stopping:
+                    early_stopping(epoch, loss_, min(train_losses))
+                    if early_stopping.early_stop:
+                        break
 
             # Save the last model
-            if save_model == 'last':
-                self.save_model(model_path)
+            if save_best_model is False:
+                self.save_model(output_file)
                 self.epoch_saved_model = epoch
-                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}')
+                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
@@ -691,7 +706,7 @@ class Trainer():
 
     def test(self):
         """
-        Tests the model
+        Performs the testing of the model.
         """
 
         with self._output_exporters:
@@ -711,9 +726,6 @@ class Trainer():
     def _load_params(self):
         """
         Loads the parameters of a pretrained model
-
-        Returns:
-            [type]: [description]
         """
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
@@ -743,10 +755,10 @@ class Trainer():
 
     def save_model(self, filename='model.pth.tar'):
         """
-        Saves the model to a file
+        Saves the model to a file.
 
         Args:
-            filename (str, optional): name of the file. Defaults to 'model.pth.tar'.
+            filename (str, optional): Name of the file. Defaults to 'model.pth.tar'.
         """
         state = {
             "model_state": self.model.state_dict(),

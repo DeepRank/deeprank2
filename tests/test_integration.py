@@ -15,6 +15,7 @@ from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 
+model_path = './tests/test.pth.tar'
 
 def test_integration_cnn(): # pylint: disable=too-many-locals
     """
@@ -98,10 +99,10 @@ def test_integration_cnn(): # pylint: disable=too-many-locals
         )
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, validate=True) 
-            trainer.save_model("test.pth.tar")
+            trainer.train(nepoch=3, validate=True, save_best_model=None)
+            trainer.save_model(model_path)
 
-            Trainer(CnnClassification, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
+            Trainer(CnnClassification, dataset_train, dataset_val, dataset_test, pretrained_model=model_path)
 
         assert len(os.listdir(output_directory)) > 0
     finally:
@@ -194,10 +195,10 @@ def test_integration_gnn(): # pylint: disable=too-many-locals
         )
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, validate=True) 
-            trainer.save_model("test.pth.tar")
+            trainer.train(nepoch=3, validate=True, save_best_model=None) 
+            trainer.save_model(model_path)
 
-            Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model="test.pth.tar")
+            Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model=model_path)
 
         assert len(os.listdir(output_directory)) > 0
 
