@@ -538,6 +538,7 @@ class Trainer():
             _log.info("Validation set loaded\n")
         else:
             self.valid_loader = None
+            _log.info("No validation set provided\n")
 
         train_losses = []
         valid_losses = []
