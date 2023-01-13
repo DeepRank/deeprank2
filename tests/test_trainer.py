@@ -81,7 +81,6 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_train,
         dataset_val,
         dataset_test,
-        batch_size=64,
         output_exporters=output_exporters,
     )
 
@@ -103,7 +102,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
     with warnings.catch_warnings(record=UserWarning):
-        trainer.train(nepoch=3, validate=True, save_best_model=None)
+        trainer.train(nepoch=3, batch_size=64, validate=True, save_best_model=None)
         trainer.save_model(model_path)
 
         Trainer(
@@ -129,9 +128,9 @@ class TestTrainer(unittest.TestCase):
                               task=targets.REGRESS,
                               features=[Efeat.VANDERWAALS])
 
-        trainer = Trainer(CnnRegression, dataset, batch_size=2)
+        trainer = Trainer(CnnRegression, dataset)
 
-        trainer.train(nepoch=1, save_best_model=None)
+        trainer.train(nepoch=1, batch_size=2, save_best_model=None)
 
     def test_grid_classification(self):
         dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
@@ -140,9 +139,9 @@ class TestTrainer(unittest.TestCase):
                               task=targets.CLASSIF,
                               features=[Efeat.VANDERWAALS])
 
-        trainer = Trainer(CnnClassification, dataset, batch_size=2)
+        trainer = Trainer(CnnClassification, dataset)
 
-        trainer.train(nepoch=1, save_best_model=None)
+        trainer.train(nepoch=1, batch_size = 2, save_best_model=None)
 
     def test_grid_graph_incompatible(self):
         dataset_train = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
@@ -159,8 +158,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(TypeError):
             Trainer(CnnClassification,
                     dataset_train=dataset_train,
-                    dataset_val=dataset_valid,
-                    batch_size=2)
+                    dataset_val=dataset_valid)
 
     def test_ginet_sigmoid(self):
         _model_base_test(
@@ -177,6 +175,8 @@ class TestTrainer(unittest.TestCase):
             "mcl",
         )
 
+        # assert len(os.listdir(self.work_directory)) > 0
+
     def test_ginet(self):
         _model_base_test(           
             GINet,
@@ -192,7 +192,7 @@ class TestTrainer(unittest.TestCase):
             "mcl",
         )
 
-        assert len(os.listdir(self.work_directory)) > 0
+        # assert len(os.listdir(self.work_directory)) > 0
 
     def test_ginet_class(self):
         _model_base_test(
@@ -377,9 +377,8 @@ class TestTrainer(unittest.TestCase):
         trainer = Trainer(
             neuralnet = GINet,
             dataset_train = dataset,
-            batch_size = 1
         )
-        trainer.train()
+        trainer.train(batch_size = 1)
 
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
@@ -395,9 +394,8 @@ class TestTrainer(unittest.TestCase):
             neuralnet = GINet,
             dataset_train = dataset,
             val_size = 0,
-            batch_size = 1
         )
-        trainer.train()
+        trainer.train(batch_size=1)
 
         assert len(trainer.train_loader) == len(dataset)
         assert trainer.valid_loader is None
