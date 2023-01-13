@@ -175,7 +175,7 @@ class TestTrainer(unittest.TestCase):
             "mcl",
         )
 
-        # assert len(os.listdir(self.work_directory)) > 0
+        assert len(os.listdir(self.work_directory)) > 0
 
     def test_ginet(self):
         _model_base_test(           
