@@ -138,9 +138,9 @@ def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
 
 def save_hist(
     df: pd.DataFrame,
-    features: Union[str,List],
+    features: Union[str,List[str]],
     fname: str,
-    bins: Union[int,List,str] = 10,
+    bins: Union[int,List[float],str] = 10,
     figsize: Tuple = (15, 15)
 ):
     """
