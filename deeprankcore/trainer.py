@@ -31,8 +31,6 @@ class Trainer():
                 test_size: Union[float, int] = None,
                 class_weights: bool = False,
                 pretrained_model: Optional[str] = None,
-                batch_size: int = 32,
-                shuffle: bool = True,
                 cuda: bool = False,
                 ngpu: int = 0,
                 output_exporters: Optional[List[OutputExporter]] = None,
@@ -65,10 +63,6 @@ class Trainer():
 
             pretrained_model (str, optional): Path to pre-trained model. Defaults to None.
 
-            batch_size (int, optional): Sets the size of the batch. Defaults to 32.
-
-            shuffle (bool, optional): Whether to shuffle the dataloaders data. Defaults to True.
-
             cuda (bool, optional): Whether to use CUDA. Defaults to False.
 
             ngpu (int, optional): Number of GPU to be used. Defaults to 0.
@@ -77,6 +71,9 @@ class Trainer():
                 epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
         """
+        self.batch_size_train = None
+        self.batch_size_test = None
+        self.shuffle = None
 
         self._init_output_exporters(output_exporters)
 
@@ -138,9 +135,7 @@ class Trainer():
             self.classes = self.dataset_train.classes
             self.classes_to_index = self.dataset_train.classes_to_index
             self.optimizer = None
-            self.batch_size = batch_size
             self.class_weights = class_weights
-            self.shuffle = shuffle
             self.subset = self.dataset_train.subset
             self.epoch_saved_model = None
 
@@ -316,8 +311,6 @@ class Trainer():
         Loads pretrained model
         """
 
-        if self.clustering_method is not None: 
-            self._precluster(self.dataset_test)
         self.test_loader = DataLoader(
             self.dataset_test,
             pin_memory=self.cuda)
@@ -487,6 +480,8 @@ class Trainer():
     def train( # pylint: disable=too-many-arguments, too-many-branches
         self,
         nepoch: int = 1,
+        batch_size: int = 32,
+        shuffle: bool = True,
         earlystop_patience: Optional[int] = None,
         earlystop_maxgap: Optional[float] = None,
         validate: bool = False,
@@ -500,6 +495,10 @@ class Trainer():
         Args:
             nepoch (int): Maximum number of epochs to run.
                         Default: 1.
+            batch_size (int, optional): Sets the size of the batch.
+                        Default: 32.
+            shuffle (bool, optional): Whether to shuffle the training dataloaders data (train set and validation set).
+                        Default: True.
             earlystop_patience (int, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
                         Default: None.
             earlystop_maxgap (float, optional): Training ends if the difference between validation and training loss exceeds this value.
@@ -516,10 +515,12 @@ class Trainer():
             output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
                         Default: 'model'.
         """
+        self.batch_size_train = batch_size
+        self.shuffle = shuffle
 
         self.train_loader = DataLoader(
             self.dataset_train,
-            batch_size=self.batch_size,
+            batch_size=self.batch_size_train,
             shuffle=self.shuffle,
             num_workers=num_workers,
             pin_memory=self.cuda
@@ -529,7 +530,7 @@ class Trainer():
         if self.dataset_val is not None:
             self.valid_loader = DataLoader(
                 self.dataset_val,
-                batch_size=self.batch_size,
+                batch_size=self.batch_size_train,
                 shuffle=self.shuffle,
                 num_workers=num_workers,
                 pin_memory=self.cuda
@@ -548,7 +549,7 @@ class Trainer():
 
         if output_prefix is None:
             output_prefix = 'model'
-        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
+        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size_train)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._output_exporters:
             # Number of epochs
@@ -754,22 +755,26 @@ class Trainer():
 
     def test(
         self,
+        batch_size: int = 32,
         num_workers: int = 0):
         """
         Performs the testing of the model.
 
         Args:
+            batch_size (int, optional): Sets the size of the batch.
+                        Default: 32.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
-                Defaults to 0.
+                        Default: 0.
 
         """
+        self.batch_size_test = batch_size
+
         if self.dataset_test is not None:
             _log.info("Loading independent testing dataset...")
 
             self.test_loader = DataLoader(
                 self.dataset_test,
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
+                batch_size=self.batch_size_test,
                 num_workers=num_workers,
                 pin_memory=self.cuda
             )
@@ -779,14 +784,6 @@ class Trainer():
             raise ValueError("No test dataset provided.")
 
         with self._output_exporters:
-            if self.clustering_method in ('mcl', 'louvain'):
-                self._precluster(self.dataset_test)
-            self.test_loader = DataLoader(
-                self.dataset_test,
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
-                pin_memory=self.cuda
-            )
 
             # Run test
             self._eval(self.test_loader, 0, "testing")
@@ -800,7 +797,8 @@ class Trainer():
                            map_location=torch.device(self.device))
 
         self.target = state["target"]
-        self.batch_size = state["batch_size"]
+        self.batch_size_train = state["batch_size_train"]
+        self.batch_size_test = state["batch_size_test"]
         self.val_size = state["val_size"]
         self.test_size = state["test_size"]
         self.lr = state["lr"]
@@ -835,7 +833,8 @@ class Trainer():
             "task": self.task,
             "classes": self.classes,
             "class_weights": self.class_weights,
-            "batch_size": self.batch_size,
+            "batch_size_train": self.batch_size_train,
+            "batch_size_test": self.batch_size_test,
             "val_size": self.val_size,
             "test_size": self.test_size,
             "lr": self.lr,
