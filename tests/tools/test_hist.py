@@ -2,7 +2,7 @@ from tempfile import mkdtemp
 from shutil import rmtree
 import os
 import h5py
-from deeprankcore.tools.transform import hdf5_to_pandas, save_hist
+from deeprankcore.tools.hist import hdf5_to_pandas, save_hist
 
 def test_hdf5_to_pandas():
 
