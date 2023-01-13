@@ -22,28 +22,27 @@ def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
     target_features: Union[List[str], str] = "all"
 ) -> pd.DataFrame:
     """
-    Args
-    ----------
-    hdf5_path (str or list): Path to hdf5 file(s). For multiple hdf5 files, 
-        insert the paths in a list.
+    Args:
+        hdf5_path (str or list): Path to hdf5 file(s). For multiple hdf5 files, 
+            insert the paths in a list.
 
-    subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
+        subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
 
-    node_features (str or list, optional): consider all pre-computed node features ("all")
-        or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
-        The complete list can be found in deeprankcore/domain/nodestorage.py
+        node_features (str or list, optional): consider all pre-computed node features ("all")
+            or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
+            The complete list can be found in deeprankcore/domain/nodestorage.py
 
-    edge_features (list, optional): consider all pre-computed edge features ("all")
-        or some defined edge features (provide a list, example: ["dist", "coulomb"]).
-        The complete list can be found in deeprankcore/domain/edgestorage.py
+        edge_features (list, optional): consider all pre-computed edge features ("all")
+            or some defined edge features (provide a list, example: ["dist", "coulomb"]).
+            The complete list can be found in deeprankcore/domain/edgestorage.py
 
-    target_features (list, optional): consider all pre-computed target features ("all")
-        or some defined target features (provide a list, example: ["binary", "capri_class"]).
-        The complete list (only of the pre-defined ones) can be found in deeprankcore/domain/targetstorage.py
-    Returns
-    ----------
-    df_final (pd.DataFrame): Pandas DataFrame containing the selected features as columns per all data points in
-    hdf5_path files.   
+        target_features (list, optional): consider all pre-computed target features ("all")
+            or some defined target features (provide a list, example: ["binary", "capri_class"]).
+            The complete list (only of the pre-defined ones) can be found in deeprankcore/domain/targetstorage.py
+    
+    Returns:
+        df_final (pd.DataFrame): Pandas DataFrame containing the selected features as columns per all data points in
+            hdf5_path files.   
     """
     if not isinstance(hdf5_path, list):
         hdf5_path = [hdf5_path]
