@@ -243,10 +243,7 @@ class Trainer():
 
     def _load_model(self):
         """
-        Loads model
-
-        Raises:
-            ValueError: Invalid node clustering method.
+        Loads the neural network model.
         """
 
         self._put_model_to_device(self.dataset_train)
