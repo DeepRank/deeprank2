@@ -477,7 +477,7 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-    def train( # pylint: disable=too-many-arguments, too-many-branches
+    def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals
         self,
         nepoch: int = 1,
         batch_size: int = 32,
