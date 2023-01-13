@@ -121,7 +121,7 @@ class Trainer():
                     --> Aborting the experiment \n\n
                     """)
 
-        _log.info("Device set to %s.", self.device)
+        _log.info(f"Device set to {self.device}.")
         if self.device.type == 'cuda':
             _log.info(f"CUDA device name is {torch.cuda.get_device_name(0)}.")
             _log.info(f"Number of GPUs set to {self.ngpu}.")
