@@ -10,6 +10,9 @@ from deeprankcore.dataset import GraphDataset
 from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
 from deeprankcore.domain import targetstorage as targets
 
+_log = logging.getLogger(__name__)
+
+
 regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
 
 binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, ]
@@ -22,7 +25,7 @@ other_losses = [nn.HingeEmbeddingLoss, nn.CosineEmbeddingLoss,
 
 classification_losses = multi_classification_losses + binary_classification_losses
 
-_log = logging.getLogger(__name__)
+
 
 model_path = './tests/test.pth.tar'
 hdf5_path = 'tests/data/hdf5/test.hdf5'
@@ -66,7 +69,7 @@ class TestTrainer(unittest.TestCase):
         assert isinstance(trainer.loss_function, nn.CrossEntropyLoss)
         assert isinstance(trainer_pretrained.loss_function, nn.CrossEntropyLoss)
 
-    def test_classif_from_list(self):
+    def test_classif_all(self):
         dataset = GraphDataset(hdf5_path,
             target=targets.BINARY)
         trainer = Trainer(
@@ -140,7 +143,7 @@ class TestTrainer(unittest.TestCase):
         assert isinstance(trainer.loss_function, nn.MSELoss)
         assert isinstance(trainer_pretrained.loss_function, nn.MSELoss)
 
-    def test_regress_from_list(self):
+    def test_regress_all(self):
         dataset = GraphDataset(hdf5_path, 
             target=targets.BA)
         trainer = Trainer(
