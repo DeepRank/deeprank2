@@ -25,3 +25,4 @@ other_losses = (nn.HingeEmbeddingLoss,
                 nn.CTCLoss)
                 
 classification_losses = multi_classification_losses + binary_classification_losses
+classification_tested = [nn.CrossEntropyLoss, nn.NLLLoss, nn.BCELoss, nn.BCEWithLogitsLoss]

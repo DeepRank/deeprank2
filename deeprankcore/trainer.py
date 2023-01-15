@@ -807,14 +807,17 @@ class Trainer():
             ).to(self.device)
             
             if isinstance(self.lossfunction, (nn.BCELoss, nn.BCEWithLogitsLoss)):
-                # requires passing activation function
-                # using softmax gives new error for some reason
-                # pred = torch.nn.functional.softmax(pred)[:,1]
-                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
-                                'Implementation of an activation function to Trainer._format_output is required.')
-            if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, (nn.CrossEntropyLoss, nn.NLLLoss)):
+                # pred must be in (0,1) range and target must be float with same shape as pred
+                pred = F.softmax(pred)
+                target = torch.tensor(
+                    [[0,1] if x == [1] else [1,0] for x in target]
+                ).float().to(self.device)
+                # raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
+                #                 'Implementation of an activation function to Trainer._format_output is required.')
+            
+            if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
                 raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' + 
-                                'Only CrossEntropyLoss and NLLLoss are supported for classification tasks.\n\t' +
+                                f'Supported loss functions for classification: {losses.classification_tested}.\n\t' +
                                 'Implementation of other loss functions requires adaptation of Trainer._format_output.')
 
         elif self.task == targets.REGRESS:
