@@ -765,9 +765,9 @@ class Trainer():
                 raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
                                 'Implementation of an activation function to Trainer._format_output is required.')
             if isinstance(self.loss_function, losses.classification_losses) and not isinstance(self.loss_function, (nn.CrossEntropyLoss, nn.NLLLoss)):
-                raise ValueError(f'{self.loss_function} is not supported.\n\t' + 
-                                'Currently, only CrossEntropyLoss and NLLLoss are supported for classification tasks.')
-            
+                raise ValueError(f'{self.loss_function} is currently not supported.\n\t' + 
+                                'Only CrossEntropyLoss and NLLLoss are supported for classification tasks.\n\t' +
+                                'Implementation of other loss functions requires adaptation of Trainer._format_output.')
 
         elif self.task == targets.REGRESS:
             pred = pred.reshape(-1)
