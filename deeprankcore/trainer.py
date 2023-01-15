@@ -13,7 +13,7 @@ from torch_geometric.loader import DataLoader
 from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
 from deeprankcore.utils.earlystopping import EarlyStopping
-from deeprankcore.domain import targetstorage as targets
+from deeprankcore.domain import targetstorage as targets, losstypes as losses
 from deeprankcore.dataset import GraphDataset, GridDataset
 
 _log = logging.getLogger(__name__)
@@ -456,15 +456,6 @@ class Trainer():
                             'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
                             'This will likely cause other errors or exceptions down the line.')
 
-        regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
-        binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, nn.CrossEntropyLoss, ]
-        multi_classification_losses = [nn.NLLLoss, nn.PoissonNLLLoss, nn.GaussianNLLLoss, 
-                                nn.KLDivLoss, nn.MultiLabelMarginLoss, nn.MultiLabelSoftMarginLoss, ]
-        other_losses = [nn.HingeEmbeddingLoss, nn.CosineEmbeddingLoss, 
-                        nn.MarginRankingLoss, nn.TripletMarginLoss, nn.CTCLoss]
-        classification_losses = multi_classification_losses + binary_classification_losses
-
-
         def _invalid_loss():
             if override_invalid:
                 _log.warning(override_warning)
@@ -473,9 +464,9 @@ class Trainer():
                 raise ValueError(invalid_loss_error)
 
         # check for custom/invalid loss functions
-        if loss_function in other_losses:
+        if loss_function in losses.other_losses:
             _invalid_loss()
-        elif loss_function not in (regression_losses + classification_losses):
+        elif loss_function not in (losses.regression_losses + losses.classification_losses):
             custom_loss = True
         else:
             custom_loss = False
@@ -488,7 +479,7 @@ class Trainer():
             else:
                 if custom_loss:
                     _log.warning(custom_loss_warning)
-                elif loss_function not in regression_losses:
+                elif loss_function not in losses.regression_losses:
                     _invalid_loss()
             self.loss_function = loss_function()
 
@@ -517,7 +508,7 @@ class Trainer():
             else:
                 if custom_loss:
                     _log.warning(custom_loss_warning)
-                elif loss_function not in classification_losses:
+                elif loss_function not in losses.classification_losses:
                     _invalid_loss()
                 
             try:

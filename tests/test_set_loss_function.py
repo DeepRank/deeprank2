@@ -8,22 +8,10 @@ from torch import nn
 from deeprankcore.trainer import Trainer
 from deeprankcore.dataset import GraphDataset
 from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
-from deeprankcore.domain import targetstorage as targets
+from deeprankcore.domain import targetstorage as targets, losstypes as losses
 
 _log = logging.getLogger(__name__)
 
-
-regression_losses = [nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss, nn.HuberLoss, ]
-
-binary_classification_losses = [nn.SoftMarginLoss, nn.BCELoss, nn.BCEWithLogitsLoss, ]
-
-multi_classification_losses = [nn.NLLLoss, nn.PoissonNLLLoss, nn.GaussianNLLLoss, nn.CrossEntropyLoss, 
-                        nn.KLDivLoss, nn.MultiLabelMarginLoss, nn.MultiLabelSoftMarginLoss, ]
-
-other_losses = [nn.HingeEmbeddingLoss, nn.CosineEmbeddingLoss, 
-                nn.MarginRankingLoss, nn.TripletMarginLoss, nn.CTCLoss]
-
-classification_losses = multi_classification_losses + binary_classification_losses
 
 
 
@@ -78,8 +66,8 @@ class TestTrainer(unittest.TestCase):
         )
 
         # only NLLLoss and CrossEntropyLoss are working!
-        classification_losses = [nn.NLLLoss, nn.CrossEntropyLoss]
-        for f in classification_losses:
+        # for f in [nn.BCELoss]:
+        for f in losses.classification_losses:
             loss_function = f
 
             trainer_pretrained = base_test(trainer, loss_function)
@@ -150,7 +138,7 @@ class TestTrainer(unittest.TestCase):
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
         )
-        for f in regression_losses:
+        for f in losses.regression_losses:
             loss_function = f
 
             trainer_pretrained = base_test(trainer, loss_function)
