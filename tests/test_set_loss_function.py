@@ -16,9 +16,9 @@ _log = logging.getLogger(__name__)
 model_path = './tests/test.pth.tar'
 hdf5_path = 'tests/data/hdf5/test.hdf5'
 
-def base_test(trainer: Trainer, loss_function = None, override = False):
+def base_test(trainer: Trainer, lossfunction = None, override = False):
 
-    trainer.set_loss_function(loss_function = loss_function, override_invalid=override)
+    trainer.set_lossfunction(lossfunction = lossfunction, override_invalid=override)
 
     # check correct passing to/picking up from pretrained model 
     with warnings.catch_warnings(record=UserWarning):
@@ -52,8 +52,8 @@ class TestTrainer(unittest.TestCase):
         )
 
         trainer_pretrained = base_test(trainer)
-        assert isinstance(trainer.loss_function, nn.CrossEntropyLoss)
-        assert isinstance(trainer_pretrained.loss_function, nn.CrossEntropyLoss)
+        assert isinstance(trainer.lossfunction, nn.CrossEntropyLoss)
+        assert isinstance(trainer_pretrained.lossfunction, nn.CrossEntropyLoss)
 
 
     def test_classif_all(self):
@@ -65,11 +65,11 @@ class TestTrainer(unittest.TestCase):
         )
 
         # only NLLLoss and CrossEntropyLoss are currently working
-        # for loss_function in losses.classification_losses:
-        for loss_function in [nn.CrossEntropyLoss, nn.NLLLoss]:
-            trainer_pretrained = base_test(trainer, loss_function)
-            assert isinstance(trainer.loss_function, loss_function)
-            assert isinstance(trainer_pretrained.loss_function, loss_function)
+        # for lossfunction in losses.classification_losses:
+        for lossfunction in [nn.CrossEntropyLoss, nn.NLLLoss]:
+            trainer_pretrained = base_test(trainer, lossfunction)
+            assert isinstance(trainer.lossfunction, lossfunction)
+            assert isinstance(trainer_pretrained.lossfunction, lossfunction)
         
 
     def test_classif_weighted(self):
@@ -80,11 +80,11 @@ class TestTrainer(unittest.TestCase):
             dataset_train = dataset,
             class_weights = True
         )
-        loss_function = nn.NLLLoss
+        lossfunction = nn.NLLLoss
 
-        trainer_pretrained = base_test(trainer, loss_function)
-        assert isinstance(trainer.loss_function, loss_function)
-        assert isinstance(trainer_pretrained.loss_function, loss_function)
+        trainer_pretrained = base_test(trainer, lossfunction)
+        assert isinstance(trainer.lossfunction, lossfunction)
+        assert isinstance(trainer_pretrained.lossfunction, lossfunction)
         assert trainer_pretrained.class_weights
 
 
@@ -97,10 +97,10 @@ class TestTrainer(unittest.TestCase):
     #         class_weights = True
     #     )
     #     # use a loss function that does not allow for weighted loss, e.g. MultiLabelMarginLoss
-    #     loss_function = nn.MultiLabelMarginLoss
+    #     lossfunction = nn.MultiLabelMarginLoss
 
     #     with pytest.raises(ValueError):
-    #         base_test(trainer, loss_function)
+    #         base_test(trainer, lossfunction)
 
 
     def test_classif_invalid_lossfunction(self):
@@ -110,10 +110,10 @@ class TestTrainer(unittest.TestCase):
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
         )
-        loss_function = nn.MSELoss
+        lossfunction = nn.MSELoss
 
         with pytest.raises(ValueError):
-            base_test(trainer, loss_function)
+            base_test(trainer, lossfunction)
 
 
     def test_classif_invalid_lossfunction_override(self):
@@ -123,10 +123,10 @@ class TestTrainer(unittest.TestCase):
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
         )
-        loss_function = nn.MSELoss
+        lossfunction = nn.MSELoss
 
         with pytest.raises(RuntimeError):
-            base_test(trainer, loss_function, override = True)
+            base_test(trainer, lossfunction, override = True)
 
 
     # Regression tasks
@@ -139,8 +139,8 @@ class TestTrainer(unittest.TestCase):
         )
 
         trainer_pretrained = base_test(trainer)
-        assert isinstance(trainer.loss_function, nn.MSELoss)
-        assert isinstance(trainer_pretrained.loss_function, nn.MSELoss)
+        assert isinstance(trainer.lossfunction, nn.MSELoss)
+        assert isinstance(trainer_pretrained.lossfunction, nn.MSELoss)
 
 
     def test_regress_all(self):
@@ -151,11 +151,11 @@ class TestTrainer(unittest.TestCase):
             dataset_train = dataset,
         )
         for f in losses.regression_losses:
-            loss_function = f
+            lossfunction = f
 
-            trainer_pretrained = base_test(trainer, loss_function)
-            assert isinstance(trainer.loss_function, loss_function)
-            assert isinstance(trainer_pretrained.loss_function, loss_function)
+            trainer_pretrained = base_test(trainer, lossfunction)
+            assert isinstance(trainer.lossfunction, lossfunction)
+            assert isinstance(trainer_pretrained.lossfunction, lossfunction)
 
 
     def test_regress_invalid_lossfunction(self):
@@ -165,10 +165,10 @@ class TestTrainer(unittest.TestCase):
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
         )
-        loss_function = nn.CrossEntropyLoss
+        lossfunction = nn.CrossEntropyLoss
 
         with pytest.raises(ValueError):
-            base_test(trainer, loss_function)
+            base_test(trainer, lossfunction)
 
 
     def test_regress_invalid_lossfunction_override(self):
@@ -178,6 +178,6 @@ class TestTrainer(unittest.TestCase):
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
         )
-        loss_function = nn.CrossEntropyLoss
+        lossfunction = nn.CrossEntropyLoss
 
-        base_test(trainer, loss_function, override=True)
+        base_test(trainer, lossfunction, override=True)
