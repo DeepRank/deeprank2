@@ -764,7 +764,7 @@ class Trainer():
                 # pred = torch.nn.functional.softmax(pred)[:,1]
                 raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
                                 'Implementation of an activation function to Trainer._format_output is required.')
-            elif isinstance(self.loss_function, losses.classification_losses) and not isinstance(self.loss_function, (nn.CrossEntropyLoss, nn.NLLLoss)):
+            if isinstance(self.loss_function, losses.classification_losses) and not isinstance(self.loss_function, (nn.CrossEntropyLoss, nn.NLLLoss)):
                 raise ValueError(f'{self.loss_function} is not supported.\n\t' + 
                                 'Currently, only CrossEntropyLoss and NLLLoss are supported for classification tasks.')
             

@@ -25,6 +25,3 @@ other_losses = (nn.HingeEmbeddingLoss,
                 nn.CTCLoss)
                 
 classification_losses = multi_classification_losses + binary_classification_losses
-
-
-
