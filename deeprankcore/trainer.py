@@ -766,6 +766,12 @@ class Trainer():
             target = torch.tensor(
                 [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
             ).to(self.device)
+        if isinstance(self.loss_function, (nn.BCELoss, nn.BCEWithLogitsLoss)):
+            # requires passing activation function
+            # using softmax gives new error for some reason
+            # pred = torch.nn.functional.softmax(pred)[:,1]
+            raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
+                            'Implementation of an activation function to Trainer._format_output is required')
 
         elif self.task == targets.REGRESS:
             pred = pred.reshape(-1)
