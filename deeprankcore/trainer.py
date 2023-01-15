@@ -811,8 +811,7 @@ class Trainer():
                 target = torch.tensor(
                     [[0,1] if x == [1] else [1,0] for x in target]
                 ).float().to(self.device)
-                # raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
-                #                 'Implementation of an activation function to Trainer._format_output is required.')
+                # raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t')
             
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
                 raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' + 
