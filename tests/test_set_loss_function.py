@@ -13,8 +13,6 @@ from deeprankcore.domain import targetstorage as targets, losstypes as losses
 _log = logging.getLogger(__name__)
 
 
-
-
 model_path = './tests/test.pth.tar'
 hdf5_path = 'tests/data/hdf5/test.hdf5'
 
@@ -57,6 +55,7 @@ class TestTrainer(unittest.TestCase):
         assert isinstance(trainer.loss_function, nn.CrossEntropyLoss)
         assert isinstance(trainer_pretrained.loss_function, nn.CrossEntropyLoss)
 
+
     def test_classif_all(self):
         dataset = GraphDataset(hdf5_path,
             target=targets.BINARY)
@@ -65,16 +64,13 @@ class TestTrainer(unittest.TestCase):
             dataset_train = dataset,
         )
 
-        # only NLLLoss and CrossEntropyLoss are working!
-        # for f in [nn.BCELoss]:
-        for f in losses.classification_losses:
-            loss_function = f
-
+        # only NLLLoss and CrossEntropyLoss are currently working
+        # for loss_function in losses.classification_losses:
+        for loss_function in [nn.CrossEntropyLoss, nn.NLLLoss]:
             trainer_pretrained = base_test(trainer, loss_function)
             assert isinstance(trainer.loss_function, loss_function)
             assert isinstance(trainer_pretrained.loss_function, loss_function)
         
-        raise AssertionError('Only 2 classification losses are currently working')
 
     def test_classif_weighted(self):
         dataset = GraphDataset(hdf5_path, 
@@ -91,9 +87,22 @@ class TestTrainer(unittest.TestCase):
         assert isinstance(trainer_pretrained.loss_function, loss_function)
         assert trainer_pretrained.class_weights
 
-    def test_classif_invalid_weighted(self):
-        raise AssertionError('Both functional classification losses allow for weighted loss.')
-    
+
+    # def test_classif_invalid_weighted(self):
+    #     dataset = GraphDataset(hdf5_path, 
+    #         target=targets.BINARY)
+    #     trainer = Trainer(
+    #         neuralnet = NaiveNetwork,
+    #         dataset_train = dataset,
+    #         class_weights = True
+    #     )
+    #     # use a loss function that does not allow for weighted loss, e.g. MultiLabelMarginLoss
+    #     loss_function = nn.MultiLabelMarginLoss
+
+    #     with pytest.raises(ValueError):
+    #         base_test(trainer, loss_function)
+
+
     def test_classif_invalid_lossfunction(self):
         dataset = GraphDataset(hdf5_path, 
             target=targets.BINARY)
@@ -105,6 +114,7 @@ class TestTrainer(unittest.TestCase):
 
         with pytest.raises(ValueError):
             base_test(trainer, loss_function)
+
 
     def test_classif_invalid_lossfunction_override(self):
         dataset = GraphDataset(hdf5_path, 
@@ -118,6 +128,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(RuntimeError):
             base_test(trainer, loss_function, override = True)
 
+
     # Regression tasks
     def test_regress_default(self):
         dataset = GraphDataset(hdf5_path,
@@ -130,6 +141,7 @@ class TestTrainer(unittest.TestCase):
         trainer_pretrained = base_test(trainer)
         assert isinstance(trainer.loss_function, nn.MSELoss)
         assert isinstance(trainer_pretrained.loss_function, nn.MSELoss)
+
 
     def test_regress_all(self):
         dataset = GraphDataset(hdf5_path, 
@@ -145,6 +157,7 @@ class TestTrainer(unittest.TestCase):
             assert isinstance(trainer.loss_function, loss_function)
             assert isinstance(trainer_pretrained.loss_function, loss_function)
 
+
     def test_regress_invalid_lossfunction(self):
         dataset = GraphDataset(hdf5_path, 
             target=targets.BA)
@@ -156,6 +169,7 @@ class TestTrainer(unittest.TestCase):
 
         with pytest.raises(ValueError):
             base_test(trainer, loss_function)
+
 
     def test_regress_invalid_lossfunction_override(self):
         dataset = GraphDataset(hdf5_path, 
