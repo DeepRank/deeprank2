@@ -465,16 +465,15 @@ class Trainer():
         default_loss_info = (f'No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}')
         custom_loss_warning = ( f'The provided loss function ({lossfunction}) is not part of the default list.\n\t' +
                                 f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
-        invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
-                               'If you want to use this loss function anyway, set override_invalid to True.')
-        override_warning = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
-                            'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
-                            'This will likely cause other errors or exceptions down the line.')
 
         def _invalid_loss():
             if override_invalid:
-                _log.warning(override_warning)
+                _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                            'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
+                            'This will likely cause other errors or exceptions down the line.')
             else:
+                invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                                    'If you want to use this loss function anyway, set override_invalid to True.')
                 _log.error(invalid_loss_error)
                 raise ValueError(invalid_loss_error)
 
