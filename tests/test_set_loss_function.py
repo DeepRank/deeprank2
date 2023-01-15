@@ -18,7 +18,8 @@ hdf5_path = 'tests/data/hdf5/test.hdf5'
 
 def base_test(trainer: Trainer, lossfunction = None, override = False):
 
-    trainer.set_lossfunction(lossfunction = lossfunction, override_invalid=override)
+    if lossfunction:
+        trainer.set_lossfunction(lossfunction = lossfunction, override_invalid=override)
 
     # check correct passing to/picking up from pretrained model 
     with warnings.catch_warnings(record=UserWarning):
