@@ -247,7 +247,7 @@ class GridDataset(DeeprankDataset):
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
             features (Union[List[str], str], optional): Consider all pre-computed features ("all") or some defined node features
-                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.features`. 
+                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.gridstorage`. 
 
             classes (Union[List[str], List[int], List[float]], optional): Define the dataset target classes in classification mode. Defaults to [0, 1].
 
@@ -419,10 +419,10 @@ class GraphDataset(DeeprankDataset):
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
 
             node_features (Union[List[str], str, optional): Consider all pre-computed node features ("all") or some defined node features
-                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.features`. 
+                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.nodestorage`.
 
             edge_features (Union[List[str], str, optional): Consider all pre-computed edge features ("all") or some defined edge features
-                (provide a list, example: ["dist", "coulomb"]). The complete list can be found in `deeprankcore.domain.features`.
+                (provide a list, example: ["dist", "coulomb"]). The complete list can be found in `deeprankcore.domain.edgestorage`.
 
             clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
                 or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
@@ -577,8 +577,6 @@ class GraphDataset(DeeprankDataset):
                         _log.warning(f"no clustering/{self.clustering_method} detected")
                 else:
                     _log.warning("no clustering group found")
-            else:
-                _log.warning("no cluster method set")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
