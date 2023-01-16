@@ -55,6 +55,25 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
                                 residue_name: str,
                                 insertion_code: str):
 
+    """
+    This is a subroutine, to be used in other methods for converting pdb2sql atomic data into a
+    deeprank structure object. It should be called for one atom.
+
+    Args:
+        structure: where this atom should be added to
+        x: x-coordinate of atom
+        y: y-coordinate of atom
+        z: z-coordinate of atom
+        atom_name: name of atom: 'CA', 'C', 'N', 'O', 'CB', etc.
+        altloc: pdb alternative location id for this atom (can be empty): 'A', 'B', 'C', etc.
+        occupancy: pdb occupancy of this atom, ranging from 0.0 to 1.0. Should be used with altloc.
+        element_name: pdb element symbol of this atom: 'C', 'O', 'H', 'N', 'S'
+        chain_id: pdb chain identifier: 'A', 'B', 'C', etc.
+        residue_number: pdb residue number, a positive integer
+        residue_name: pdb residue name: "ALA", "CYS", "ASP", etc.
+        insertion_code: pdb residue insertion code (can be empty) : '', 'A', 'B', 'C', etc.
+    """
+
     # Make sure not to take the same atom twice.
     if altloc is not None and altloc != "" and altloc != "A":
         return
