@@ -643,7 +643,7 @@ class Trainer():
                     # if no validation set, save the best performing model on the training set
                     if save_best_model:
                         if min(train_losses) == loss_:
-                            _log.warning( # pylint: disable=logging-not-lazy
+                            _log.warning(
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
                             self.save_model(output_file)
