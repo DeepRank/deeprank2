@@ -21,7 +21,7 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer():
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__( # pylint: disable=too-many-arguments # noqa: MC0001
                 self,
                 neuralnet = None,
                 dataset_train: Union[GraphDataset, GridDataset] = None,
@@ -31,14 +31,14 @@ class Trainer():
                 test_size: Union[float, int] = None,
                 class_weights: bool = False,
                 pretrained_model: Optional[str] = None,
-                batch_size: int = 32,
-                shuffle: bool = True,
+                cuda: bool = False,
+                ngpu: int = 0,
                 output_exporters: Optional[List[OutputExporter]] = None,
             ):
         """Class from which the network is trained, evaluated and tested.
 
         Args:
-            neuralnet (function, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+            neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
                 It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
                 in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
@@ -63,14 +63,17 @@ class Trainer():
 
             pretrained_model (str, optional): Path to pre-trained model. Defaults to None.
 
-            batch_size (int, optional): Sets the size of the batch. Defaults to 32.
+            cuda (bool, optional): Whether to use CUDA. Defaults to False.
 
-            shuffle (bool, optional): whether to shuffle the dataloaders data. Defaults to True.
+            ngpu (int, optional): Number of GPU to be used. Defaults to 0.
 
             output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
                 epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
         """
+        self.batch_size_train = None
+        self.batch_size_test = None
+        self.shuffle = None
 
         self._init_output_exporters(output_exporters)
 
@@ -78,6 +81,50 @@ class Trainer():
 
         self._init_datasets(dataset_train, dataset_val, dataset_test,
                             val_size, test_size)
+
+        self.cuda = cuda
+        self.ngpu = ngpu
+
+        if self.cuda and torch.cuda.is_available():
+            self.device = torch.device("cuda")
+            if self.ngpu == 0:
+                self.ngpu = 1
+                _log.info("CUDA detected. Setting number of GPUs to 1.")
+        elif self.cuda and not torch.cuda.is_available():
+            _log.error(
+                """
+                --> CUDA not detected: Make sure that CUDA is installed
+                    and that you are running on GPUs.\n
+                --> To turn CUDA off set cuda=False in Trainer.\n
+                --> Aborting the experiment \n\n'
+                """)
+            raise ValueError(
+                """
+                --> CUDA not detected: Make sure that CUDA is installed
+                    and that you are running on GPUs.\n
+                --> To turn CUDA off set cuda=False in Trainer.\n
+                --> Aborting the experiment \n\n'
+                """)
+        else:
+            self.device = torch.device("cpu")
+            if self.ngpu > 0:
+                _log.error(
+                    """
+                    --> CUDA not detected.
+                        Set cuda=True in Trainer to turn CUDA on.\n
+                    --> Aborting the experiment \n\n
+                    """)
+                raise ValueError(
+                    """
+                    --> CUDA not detected.
+                        Set cuda=True in Trainer to turn CUDA on.\n
+                    --> Aborting the experiment \n\n
+                    """)
+
+        _log.info(f"Device set to {self.device}.")
+        if self.device.type == 'cuda':
+            _log.info(f"CUDA device name is {torch.cuda.get_device_name(0)}.")
+            _log.info(f"Number of GPUs set to {self.ngpu}.")
 
         if pretrained_model is None:
             if self.dataset_train is None:
@@ -88,9 +135,7 @@ class Trainer():
             self.classes = self.dataset_train.classes
             self.classes_to_index = self.dataset_train.classes_to_index
             self.optimizer = None
-            self.batch_size = batch_size
             self.class_weights = class_weights
-            self.shuffle = shuffle
             self.subset = self.dataset_train.subset
             self.epoch_saved_model = None
 
@@ -98,6 +143,27 @@ class Trainer():
                 raise ValueError("No target set. You need to choose a target (set in the dataset) for training.")
 
             self._load_model()
+
+            # clustering the datasets
+            if self.clustering_method is not None:
+                if self.clustering_method in ('mcl', 'louvain'):
+                    _log.info("Loading clusters")
+                    self._precluster(self.dataset_train)
+
+                    if self.dataset_val is not None:
+                        self._precluster(self.dataset_val)
+                    else:
+                        _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
+                        self.dataset_train, self.dataset_val = _divide_dataset(
+                            self.dataset_train, splitsize=self.val_size)
+
+                    if self.dataset_test is not None:
+                        self._precluster(self.dataset_test)
+                else:
+                    raise ValueError(
+                        f"Invalid node clustering method: {self.clustering_method}\n\t"
+                        "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
+
         else:
             if self.dataset_train is not None:
                 _log.warning("Pretrained model loaded: dataset_train will be ignored.")
@@ -177,56 +243,8 @@ class Trainer():
 
     def _load_model(self):
         """
-        Loads model
-
-        Raises:
-            ValueError: Invalid node clustering method.
+        Loads the neural network model.
         """
-
-        if self.clustering_method is not None:
-            if self.clustering_method in ('mcl', 'louvain'):
-                _log.info("Loading clusters")
-                self._precluster(self.dataset_train)
-
-                if self.dataset_val is not None:
-                    self._precluster(self.dataset_val)
-                else:
-                    _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
-                    self.dataset_train, self.dataset_val = _divide_dataset(
-                        self.dataset_train, splitsize=self.val_size)
-
-                if self.dataset_test is not None:
-                    self._precluster(self.dataset_test)
-            else:
-                raise ValueError(
-                    f"Invalid node clustering method: {self.clustering_method}\n\t"
-                    "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
-
-        # dataloader
-        self.train_loader = DataLoader(
-            self.dataset_train, batch_size=self.batch_size, shuffle=self.shuffle
-        )
-        _log.info("Training set loaded\n")
-
-        if self.dataset_val is not None:
-            self.valid_loader = DataLoader(
-                self.dataset_val, batch_size=self.batch_size, shuffle=self.shuffle
-            )
-            _log.info("Validation set loaded\n")
-        else:
-            self.valid_loader = None
-
-        # independent validation dataset
-        if self.dataset_test is not None:
-            _log.info("Loading independent testing dataset...")
-
-            self.test_loader = DataLoader(
-                self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
-            )
-            _log.info("Testing set loaded\n")
-        else:
-            _log.info("No independent testing set loaded")
-            self.test_loader = None
 
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
@@ -290,9 +308,9 @@ class Trainer():
         Loads pretrained model
         """
 
-        if self.clustering_method is not None: 
-            self._precluster(self.dataset_test)
-        self.test_loader = DataLoader(self.dataset_test)
+        self.test_loader = DataLoader(
+            self.dataset_test,
+            pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
         self._put_model_to_device(self.dataset_test)
         self.set_loss()
@@ -350,13 +368,6 @@ class Trainer():
         Raises:
             ValueError: Incorrect output shape
         """
-        # get the device
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
-
-        _log.info("Device set to %s.", self.device)
-        if self.device.type == 'cuda':
-            _log.info("cuda device name is %s", torch.cuda.get_device_name(0))
 
         # regression mode
         if self.task == targets.REGRESS:
@@ -392,13 +403,17 @@ class Trainer():
         else:
             raise TypeError(type(dataset))
 
+        # multi-gpu
+        if self.ngpu > 1:
+            ids = list(range(self.ngpu))
+            self.model = nn.DataParallel(self.model, device_ids=ids).to(self.device)
+
         # check for compatibility
         for output_exporter in self._output_exporters:
             if not output_exporter.is_compatible_with(self.output_shape, target_shape):
                 raise ValueError(f"""output exporter of type {type(output_exporter)}\n
                                  is not compatible with output shape {self.output_shape}\n
                                  and target shape {target_shape}""")
-
 
     def configure_optimizers(self, optimizer = None, lr: float = 0.001, weight_decay: float = 1e-05):
 
@@ -459,12 +474,15 @@ class Trainer():
                 weight=self.weights, reduction="mean")
 
 
-    def train( # pylint: disable=too-many-arguments
+    def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals
         self,
         nepoch: int = 1,
+        batch_size: int = 32,
+        shuffle: bool = True,
         earlystop_patience: Optional[int] = None,
         earlystop_maxgap: Optional[float] = None,
         validate: bool = False,
+        num_workers: int = 0,
         save_best_model: Optional[bool] = True,
         output_prefix: Optional[str] = None,
     ):
@@ -474,12 +492,18 @@ class Trainer():
         Args:
             nepoch (int): Maximum number of epochs to run.
                         Default: 1.
+            batch_size (int, optional): Sets the size of the batch.
+                        Default: 32.
+            shuffle (bool, optional): Whether to shuffle the training dataloaders data (train set and validation set).
+                        Default: True.
             earlystop_patience (int, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
                         Default: None.
             earlystop_maxgap (float, optional): Training ends if the difference between validation and training loss exceeds this value.
                         Default: None. 
             validate (bool): Perform validation on independent data set (requires a validation data set).
                         Default: False.
+            num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
+                        Default: 0.
             save_best_model (bool, optional): 
                         If True, the best model (in terms of validation loss) is saved.
                         If False, the last model tried is saved.
@@ -488,6 +512,30 @@ class Trainer():
             output_prefix (str, optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
                         Default: 'model'.
         """
+        self.batch_size_train = batch_size
+        self.shuffle = shuffle
+
+        self.train_loader = DataLoader(
+            self.dataset_train,
+            batch_size=self.batch_size_train,
+            shuffle=self.shuffle,
+            num_workers=num_workers,
+            pin_memory=self.cuda
+        )
+        _log.info("Training set loaded\n")
+
+        if self.dataset_val is not None:
+            self.valid_loader = DataLoader(
+                self.dataset_val,
+                batch_size=self.batch_size_train,
+                shuffle=self.shuffle,
+                num_workers=num_workers,
+                pin_memory=self.cuda
+            )
+            _log.info("Validation set loaded\n")
+        else:
+            self.valid_loader = None
+            _log.info("No validation set provided\n")
 
         train_losses = []
         valid_losses = []
@@ -499,7 +547,7 @@ class Trainer():
 
         if output_prefix is None:
             output_prefix = 'model'
-        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
+        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size_train)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
 
         with self._output_exporters:
             # Number of epochs
@@ -581,8 +629,8 @@ class Trainer():
             count_predictions += pred.shape[0]
 
             # convert mean back to sum
-            sum_of_losses += loss_.detach().item() * pred.shape[0]
-            target_vals += data_batch.y.tolist()
+            sum_of_losses += loss_.detach().item() * pred.detach().shape[0]
+            target_vals += data_batch.y.detach().tolist()
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
@@ -703,22 +751,37 @@ class Trainer():
 
         return pred, target
 
-
-    def test(self):
+    def test(
+        self,
+        batch_size: int = 32,
+        num_workers: int = 0):
         """
         Performs the testing of the model.
+
+        Args:
+            batch_size (int, optional): Sets the size of the batch.
+                        Default: 32.
+            num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
+                        Default: 0.
+
         """
+        self.batch_size_test = batch_size
+
+        if self.dataset_test is not None:
+            _log.info("Loading independent testing dataset...")
+
+            self.test_loader = DataLoader(
+                self.dataset_test,
+                batch_size=self.batch_size_test,
+                num_workers=num_workers,
+                pin_memory=self.cuda
+            )
+            _log.info("Testing set loaded\n")
+        else:
+            _log.error("No test dataset provided.")
+            raise ValueError("No test dataset provided.")
 
         with self._output_exporters:
-            # Loads the test dataset if provided
-            if self.dataset_test is not None:
-                if self.clustering_method in ('mcl', 'louvain'):
-                    self._precluster(self.dataset_test)
-                self.test_loader = DataLoader(
-                    self.dataset_test, batch_size=self.batch_size, shuffle=self.shuffle
-                )
-            elif self.test_loader is None:
-                raise ValueError("No test dataset provided.")
 
             # Run test
             self._eval(self.test_loader, 0, "testing")
@@ -727,14 +790,13 @@ class Trainer():
         """
         Loads the parameters of a pretrained model
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
 
         state = torch.load(self.pretrained_model_path,
                            map_location=torch.device(self.device))
 
         self.target = state["target"]
-        self.batch_size = state["batch_size"]
+        self.batch_size_train = state["batch_size_train"]
+        self.batch_size_test = state["batch_size_test"]
         self.val_size = state["val_size"]
         self.test_size = state["test_size"]
         self.lr = state["lr"]
@@ -751,7 +813,8 @@ class Trainer():
         self.node_features = state["node_features"]
         self.edge_features = state["edge_features"]
         self.features = state["features"]
-
+        self.cuda = state["cuda"]
+        self.ngpu = state["ngpu"]
 
     def save_model(self, filename='model.pth.tar'):
         """
@@ -768,7 +831,8 @@ class Trainer():
             "task": self.task,
             "classes": self.classes,
             "class_weights": self.class_weights,
-            "batch_size": self.batch_size,
+            "batch_size_train": self.batch_size_train,
+            "batch_size_test": self.batch_size_test,
             "val_size": self.val_size,
             "test_size": self.test_size,
             "lr": self.lr,
@@ -778,7 +842,9 @@ class Trainer():
             "clustering_method": self.clustering_method,
             "node_features": self.node_features,
             "edge_features": self.edge_features,
-            "features": self.features
+            "features": self.features,
+            "cuda": self.cuda,
+            "ngpu": self.ngpu
         }
 
         torch.save(state, filename)

@@ -161,8 +161,7 @@ trainer = Trainer(
     GINet,
     dataset_train,
     dataset_val,
-    dataset_test,
-    batch_size = 64
+    dataset_test
 )
 ```
 
@@ -180,7 +179,7 @@ trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-0
 Then the Trainer can be trained and tested, and the model can be saved:
 
 ```python
-trainer.train(nepoch = 50, validate = True)
+trainer.train(nepoch = 50, batch_size = 64, validate = True)
 trainer.test()
 trainer.save_model(filename = "<output_model_path.pth.tar>")
 
@@ -228,11 +227,10 @@ trainer = Trainer(
     CustomNet,
     dataset_train,
     dataset_val,
-    dataset_test,
-    batch_size = 64
+    dataset_test
 )
 
-trainer.train(nepoch=50)
+trainer.train(nepoch=50, batch_size = 64)
 ```
 
 ## h5x support
