@@ -154,7 +154,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
-            target = targets.BINARY, # --> classificcation
+            target = targets.BINARY, # --> classification
             target_transform = True # only for regression
         )
 
