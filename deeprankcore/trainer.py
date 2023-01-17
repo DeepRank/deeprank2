@@ -497,25 +497,8 @@ class Trainer():
                     _invalid_loss()
             self.lossfunction = lossfunction()
 
+        # Set classification loss
         elif self.task == targets.CLASSIF:
-            # Assign weights to each class
-            if self.class_weights:
-                targets_all = []
-                for batch in self.train_loader:
-                    targets_all.append(batch.y)
-
-                targets_all = torch.cat(targets_all).squeeze().tolist()
-                self.weights = torch.tensor(
-                    [targets_all.count(i) for i in self.classes], dtype=torch.float32
-                )
-                _log.info(f"class occurences: {self.weights}")
-                self.weights = 1.0 / self.weights
-                self.weights = self.weights / self.weights.sum()
-                _log.info(f"class weights: {self.weights}")
-            else:
-                self.weights = None
-
-            # Set classification loss
             if lossfunction is None:
                 lossfunction = default_classification_loss
                 _log.info(default_loss_info)
@@ -524,17 +507,10 @@ class Trainer():
                     _log.warning(custom_loss_warning)
                 elif lossfunction not in losses.classification_losses:
                     _invalid_loss()
-                
-            try:
-                self.lossfunction = lossfunction(weight=self.weights)  # Check whether loss allows for weighted classes
-            except TypeError as e:
-                if self.class_weights:
-                    weight_error = (f"Loss function {lossfunction} does not allow for weighted classes.\n\t" +
-                                    "Please use a different loss function or set class_weights to False.\n")
-                    _log.error(weight_error)
-                    raise ValueError(weight_error) from e
+            if not self.class_weights:
                 self.lossfunction = lossfunction()
-                    
+            else:
+                self.lossfunction = lossfunction # weights will be set in the train() method
 
     def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals
         self,
@@ -598,6 +574,31 @@ class Trainer():
         else:
             self.valid_loader = None
             _log.info("No validation set provided\n")
+
+        # Assign weights to each class
+        if self.task == targets.CLASSIF and self.class_weights:
+            targets_all = []
+            for batch in self.train_loader:
+                targets_all.append(batch.y)
+
+            targets_all = torch.cat(targets_all).squeeze().tolist()
+            self.weights = torch.tensor(
+                [targets_all.count(i) for i in self.classes], dtype=torch.float32
+            )
+            _log.info(f"class occurences: {self.weights}")
+            self.weights = 1.0 / self.weights
+            self.weights = self.weights / self.weights.sum()
+            _log.info(f"class weights: {self.weights}")
+
+            try:
+                self.lossfunction = self.lossfunction(weight=self.weights)  # Check whether loss allows for weighted classes
+            except TypeError as e:
+                weight_error = (f"Loss function {self.lossfunction} does not allow for weighted classes.\n\t" +
+                                "Please use a different loss function or set class_weights to False.\n")
+                _log.error(weight_error)
+                raise ValueError(weight_error) from e
+        else:
+            self.weights = None
 
         train_losses = []
         valid_losses = []
