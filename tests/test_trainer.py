@@ -1,6 +1,7 @@
 import tempfile
 import shutil
 import os
+import glob
 import unittest
 import pytest
 import logging
@@ -161,6 +162,13 @@ class TestTrainer(unittest.TestCase):
                     dataset_val=dataset_valid)
 
     def test_ginet_sigmoid(self):
+        try:
+            f = glob.glob(self.work_directory + '/*')[0]
+            os.remove(f)
+        except IndexError:
+            pass
+        assert len(os.listdir(self.work_directory)) == 0
+
         _model_base_test(
             GINet,
             "tests/data/hdf5/1ATN_ppi.hdf5",
@@ -178,6 +186,13 @@ class TestTrainer(unittest.TestCase):
         assert len(os.listdir(self.work_directory)) > 0
 
     def test_ginet(self):
+        try:
+            f = glob.glob(self.work_directory + '/*')[0]
+            os.remove(f)
+        except IndexError:
+            pass
+        assert len(os.listdir(self.work_directory)) == 0
+        
         _model_base_test(           
             GINet,
             "tests/data/hdf5/1ATN_ppi.hdf5",
@@ -195,6 +210,13 @@ class TestTrainer(unittest.TestCase):
         assert len(os.listdir(self.work_directory)) > 0
 
     def test_ginet_class(self):
+        try:
+            f = glob.glob(self.work_directory + '/*')[0]
+            os.remove(f)
+        except IndexError:
+            pass
+        assert len(os.listdir(self.work_directory)) == 0
+
         _model_base_test(
             GINet,
             "tests/data/hdf5/variants.hdf5",
@@ -454,6 +476,13 @@ class TestTrainer(unittest.TestCase):
 
     def test_cuda(self):    # test_ginet, but with cuda
         if torch.cuda.is_available():
+
+            try:
+                f = glob.glob(self.work_directory + '/*')[0]
+                os.remove(f)
+            except IndexError:
+                pass
+            assert len(os.listdir(self.work_directory)) == 0
 
             _model_base_test(           
                 GINet,
