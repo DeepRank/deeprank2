@@ -807,12 +807,13 @@ class Trainer():
             )
             
             if isinstance(self.lossfunction, (nn.BCELoss, nn.BCEWithLogitsLoss)):
-                # pred must be in (0,1) range and target must be float with same shape as pred
-                pred = F.softmax(pred)
-                target = torch.tensor(
-                    [[0,1] if x == [1] else [1,0] for x in target]
-                ).float()
-                # raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t')
+                # # pred must be in (0,1) range and target must be float with same shape as pred
+                # pred = F.softmax(pred)
+                # target = torch.tensor(
+                #     [[0,1] if x == [1] else [1,0] for x in target]
+                # ).float()
+                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
+                                'For further details see: https://github.com/DeepRank/deeprank-core/issues/318')
             
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
                 raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' + 
