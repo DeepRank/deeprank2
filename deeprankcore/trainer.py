@@ -512,7 +512,7 @@ class Trainer():
             else:
                 self.lossfunction = lossfunction # weights will be set in the train() method
 
-    def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals
+    def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals # noqa: MC0001
         self,
         nepoch: int = 1,
         batch_size: int = 32,
