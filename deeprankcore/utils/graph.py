@@ -217,8 +217,7 @@ class Graph:
         self, hdf5_path: str, settings: GridSettings, method: MapMethod
     ) -> str:
 
-        center = np.mean([node.position for node in self._nodes], axis=0)
-        grid = Grid(self.id, settings, center)
+        grid = Grid(self.id, settings)
 
         self.map_to_grid(grid, method)
         grid.to_hdf5(hdf5_path)

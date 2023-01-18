@@ -17,6 +17,7 @@ from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.utils.buildgraph import (
     get_residue_contact_pairs,
+    get_contact_atoms,
     get_surrounding_residues,
     get_structure,
     add_hydrogens,
@@ -378,7 +379,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         if variant_residue is None:
             raise ValueError(
-                "Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
+                f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
             )
 
         # define the variant
@@ -529,7 +530,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         if variant_residue is None:
             raise ValueError(
-                "Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
+                f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
             )
 
         # define the variant
@@ -629,34 +630,55 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
 
-        # load .PDB structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
 
-        # get the contact residues
-        interface_pairs = get_residue_contact_pairs(
-            self._pdb_path,
-            structure,
-            self._chain_id1,
-            self._chain_id2,
-            self._distance_cutoff,
-        )
-        if len(interface_pairs) == 0:
-            raise ValueError("no interface residues found")
+        # get the contact atoms
+        if include_hydrogens:
 
-        atoms_selected = set([])
-        for residue1, residue2 in interface_pairs:
-            for atom in residue1.atoms + residue2.atoms:
-                atoms_selected.add(atom)
-        atoms_selected = list(atoms_selected)
+            pdb_name = os.path.basename(self._pdb_path)
+            hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
+                prefix="hydrogenated-", suffix=pdb_name
+            )
+            os.close(hydrogen_pdb_file)
+
+            add_hydrogens(self._pdb_path, hydrogen_pdb_path)
+
+            try:
+                contact_atoms = get_contact_atoms(hydrogen_pdb_path,
+                                                  self._chain_id1, self._chain_id2,
+                                                  self._distance_cutoff)
+            finally:
+                os.remove(hydrogen_pdb_path)
+        else:
+            contact_atoms =  get_contact_atoms(self._pdb_path,
+                                               self._chain_id1, self._chain_id2,
+                                               self._distance_cutoff)
+
+        if len(contact_atoms) == 0:
+            raise ValueError("no contact atoms found")
 
         # build the graph
         graph = build_atomic_graph(
-            atoms_selected, self.get_query_id(), self._distance_cutoff
+            contact_atoms, self.get_query_id(), self._distance_cutoff
         )
 
         # add data to the graph
         self._set_graph_targets(graph)
 
+        # read the pssm
+        structure = contact_atoms[0].residue.chain.model
+        if self._pssm_paths is not None:
+            for chain_id in [self._chain_id1, self._chain_id2]:
+
+                if chain_id in self._pssm_paths:
+
+                    chain = structure.get_chain(chain_id)
+
+                    pssm_path = self._pssm_paths[chain_id]
+
+                    with open(pssm_path, "rt", encoding="utf-8") as f:
+                        chain.pssm = parse_pssm(f, chain)
+
+        # add the features
         for feature_module in feature_modules:
             feature_module.add_features(self._pdb_path, graph)
 
