@@ -229,7 +229,7 @@ class Grid:
 
         return neighbour_data
 
-    def _get_atomic_density_koes(self, position, vanderwaals_radius: float) -> np.ndarray:
+    def _get_atomic_density_koes(self, position: np.ndarray, vanderwaals_radius: float) -> np.ndarray:
         """
         Function to map individual atomic density on the grid.
         The formula is equation (1) of the Koes paper
