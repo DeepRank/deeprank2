@@ -34,14 +34,7 @@ def base_test(trainer: Trainer, lossfunction = None, override = False):
         return trainer_pretrained
 
 
-class TestTrainer(unittest.TestCase):
-    @classmethod
-    def setUpClass(class_):
-        class_.work_directory = tempfile.mkdtemp()
-
-    @classmethod
-    def tearDownClass(class_):
-        shutil.rmtree(class_.work_directory)
+class TestLosses(unittest.TestCase):
 
     # Classification tasks
     def test_classif_default(self):
