@@ -388,12 +388,13 @@ class TestTrainer(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
+            clustering_method = "mcl"
         )
 
         trainer = Trainer(
             neuralnet = GINet,
             dataset_train = dataset,
-            val_size = 0,
+            val_size = 0
         )
         trainer.train(batch_size=1)
 

@@ -31,7 +31,8 @@ class DeeprankDataset(Dataset):
                  root_directory_path: str,
                  transform: Union[Callable, None],
                  pre_transform: Union[Callable, None],
-                 target_filter: Union[Dict[str, str], None]
+                 target_filter: Union[Dict[str, str], None],
+                 check_integrity: bool
     ):
         """
         Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
@@ -55,17 +56,16 @@ class DeeprankDataset(Dataset):
         self.subset = subset
 
         self.target_filter = target_filter
+        
+        if check_integrity:
+            self._check_hdf5_files()
 
-        self._check_hdf5_files()
         self._check_task_and_classes(task, classes)
 
         # create the indexing system
         # alows to associate each mol to an index
         # and get fname and mol name from the index
         self._create_index_entries()
-
-        # get the device
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def _check_hdf5_files(self):
         """Checks if the data contained in the .HDF5 file is valid."""
@@ -212,6 +212,9 @@ class DeeprankDataset(Dataset):
 GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
+MAX_ENTRY_NAME_LENGTH = 100
+
+
 class GridDataset(DeeprankDataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
@@ -227,6 +230,7 @@ class GridDataset(DeeprankDataset):
         pre_transform: Optional[Callable] = None,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
+        check_integrity: bool = True
     ):
         """
         Class to load the .HDF5 files data into grids.
@@ -267,8 +271,11 @@ class GridDataset(DeeprankDataset):
                 
             target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
+
+            check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
+                Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
 
         self.features = features
 
@@ -373,10 +380,13 @@ class GridDataset(DeeprankDataset):
             target_value = entry_group[targets.VALUES][self.target][()]
 
         # Wrap up the data in this object, for the collate_fn to handle it properly:
-        data = Data(x=torch.tensor([feature_data], dtype=torch.float).to(self.device),
-                    y=torch.tensor([target_value], dtype=torch.float).to(self.device))
+        data = Data(x=torch.tensor([feature_data], dtype=torch.float),
+                    y=torch.tensor([target_value], dtype=torch.float))
 
-        data.entry_names = [entry_name]
+        if len(entry_name) > MAX_ENTRY_NAME_LENGTH:
+            raise ValueError(f"entry name '{entry_name}' is too long (max {MAX_ENTRY_NAME_LENGTH})")
+
+        data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
 
         return data
 
@@ -390,7 +400,7 @@ class GraphDataset(DeeprankDataset):
         task: Optional[str] = None,
         node_features: Optional[Union[List[str], str]] = "all",
         edge_features: Optional[Union[List[str], str]] = "all",
-        clustering_method: Optional[str] = "mcl",
+        clustering_method: Optional[str] = None,
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
@@ -399,6 +409,7 @@ class GraphDataset(DeeprankDataset):
         edge_features_transform: Optional[Callable] = lambda x: np.tanh(-x / 2 + 2) + 1,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
+        check_integrity: bool = True
     ):
         """
         Class to load the .HDF5 files data into graphs.
@@ -454,8 +465,11 @@ class GraphDataset(DeeprankDataset):
 
             target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
+
+            check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
+                Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
 
         self.node_features = node_features
         self.edge_features = edge_features
@@ -503,7 +517,7 @@ class GraphDataset(DeeprankDataset):
                     if vals.ndim == 1:
                         vals = vals.reshape(-1, 1)
                     node_data += (vals,)
-            x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
+            x = torch.tensor(np.hstack(node_data), dtype=torch.float)
 
             # edge index,
             # we have to have all the edges i.e : (i,j) and (j,i)
@@ -514,7 +528,6 @@ class GraphDataset(DeeprankDataset):
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
             else:
                 edge_index = torch.empty((2, 0), dtype=torch.long)
-            edge_index = edge_index.to(self.device)
 
             # edge feature
             # we have to have all the edges i.e : (i,j) and (j,i)
@@ -534,14 +547,13 @@ class GraphDataset(DeeprankDataset):
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
-            edge_attr = edge_attr.to(self.device)
 
             # target
             if self.target is None:
                 y = None
             else:
                 if targets.VALUES in grp and self.target in grp[targets.VALUES]:
-                    y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
+                    y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous()
 
                     if self.task == targets.REGRESS and self.target_transform is True:
                         y = torch.sigmoid(torch.log(y))
@@ -554,7 +566,7 @@ class GraphDataset(DeeprankDataset):
                                      "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous()
 
             # cluster
             cluster0 = None
@@ -568,15 +580,13 @@ class GraphDataset(DeeprankDataset):
                             ):
 
                             cluster0 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long)
                             cluster1 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long)
                         else:
                             _log.warning("no clusters detected")
                     else:
                         _log.warning(f"no clustering/{self.clustering_method} detected")
-                else:
-                    _log.warning("no clustering group found")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
@@ -584,8 +594,11 @@ class GraphDataset(DeeprankDataset):
         data.cluster0 = cluster0
         data.cluster1 = cluster1
 
-        # entry name
-        data.entry_names = [entry_name]
+        # entry name:
+        if len(entry_name) > MAX_ENTRY_NAME_LENGTH:
+            raise ValueError(f"entry name '{entry_name}' is too long (max {MAX_ENTRY_NAME_LENGTH})")
+
+        data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
 
         # apply transformation
         if self._transform is not None:

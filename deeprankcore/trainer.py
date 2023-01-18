@@ -682,7 +682,8 @@ class Trainer():
         entry_names = []
         t0 = time()
         for data_batch in self.train_loader:
-            data_batch = data_batch.to(self.device)
+            if self.cuda:
+                data_batch = data_batch.to(self.device, non_blocking=True)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
@@ -693,7 +694,7 @@ class Trainer():
 
             # convert mean back to sum
             sum_of_losses += loss_.detach().item() * pred.detach().shape[0]
-            target_vals += data_batch.y.detach().tolist()
+            target_vals += data_batch.y.detach().cpu().numpy().tolist()
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
@@ -701,7 +702,7 @@ class Trainer():
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
-            outputs += pred.tolist()
+            outputs += pred.cpu().numpy().tolist()
 
             # Get the name
             entry_names += data_batch.entry_names
@@ -747,7 +748,8 @@ class Trainer():
         count_predictions = 0
         t0 = time()
         for data_batch in loader:
-            data_batch = data_batch.to(self.device)
+            if self.cuda:
+                data_batch = data_batch.to(self.device, non_blocking=True)
             pred = self.model(data_batch)
             pred, y = self._format_output(pred, data_batch.y)
 
@@ -805,7 +807,6 @@ class Trainer():
             target = torch.tensor(
                 [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
             )
-            
             if isinstance(self.lossfunction, (nn.BCELoss, nn.BCEWithLogitsLoss)):
                 # # pred must be in (0,1) range and target must be float with same shape as pred
                 # pred = F.softmax(pred)
@@ -868,8 +869,7 @@ class Trainer():
         Loads the parameters of a pretrained model
         """
 
-        state = torch.load(self.pretrained_model_path,
-                           map_location=torch.device(self.device))
+        state = torch.load(self.pretrained_model_path)
 
         self.target = state["target"]
         self.batch_size_train = state["batch_size_train"]

@@ -34,12 +34,23 @@ class GridSettings:
      - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
-    def __init__(self, points_counts: List[int], sizes: List[float]):
+    def __init__(
+        self,
+        center: List[float],
+        points_counts: List[int],
+        sizes: List[float]
+    ):
+        assert len(center) == 3
         assert len(points_counts) == 3
         assert len(sizes) == 3
 
+        self._center = center
         self._points_counts = points_counts
         self._sizes = sizes
+
+    @property
+    def center(self) -> List[float]:
+        return self._center
 
     @property
     def resolutions(self) -> List[float]:
@@ -61,33 +72,32 @@ class Grid:
     - feature values on each point
     """
 
-    def __init__(self, id_: str, settings: GridSettings, center: np.array):
+    def __init__(self, id_: str, settings: GridSettings):
         self.id = id_
 
         self._settings = settings
-        self._center = center
 
-        self._set_mesh(settings, center)
+        self._set_mesh(settings)
 
         self._features = {}
 
-    def _set_mesh(self, settings: GridSettings, center: np.array):
+    def _set_mesh(self, settings: GridSettings):
         "builds the grid points"
 
         half_size_x = settings.sizes[0] / 2
         half_size_y = settings.sizes[1] / 2
         half_size_z = settings.sizes[2] / 2
 
-        min_x = center[0] - half_size_x
-        max_x = center[0] + half_size_x
+        min_x = settings.center[0] - half_size_x
+        max_x = min_x + (settings.points_counts[0] - 1.0) * settings.resolutions[0]
         self._xs = np.linspace(min_x, max_x, num=settings.points_counts[0])
 
-        min_y = center[1] - half_size_y
-        max_y = center[1] + half_size_y
+        min_y = settings.center[1] - half_size_y
+        max_y = min_y + (settings.points_counts[1] - 1.0) * settings.resolutions[1]
         self._ys = np.linspace(min_y, max_y, num=settings.points_counts[1])
 
-        min_z = center[2] - half_size_z
-        max_z = center[2] + half_size_z
+        min_z = settings.center[2] - half_size_z
+        max_z = min_z + (settings.points_counts[2] - 1.0) * settings.resolutions[2]
         self._zs = np.linspace(min_z, max_z, num=settings.points_counts[2])
 
         self._ygrid, self._xgrid, self._zgrid = np.meshgrid(
@@ -120,7 +130,7 @@ class Grid:
 
     @property
     def center(self) -> np.array:
-        return self._center
+        return self._settings.center
 
     @property
     def features(self) -> Dict[str, np.array]:
@@ -223,6 +233,32 @@ class Grid:
             neighbour_data[point] = weight * value
 
         return neighbour_data
+
+    def _get_atomic_density_koes(self, center: np.ndarray, vanderwaals_radius: float) -> np.ndarray:
+        """
+        Function to map individual atomic density on the grid.
+        The formula is equation (1) of the Koes paper
+        Protein-Ligand Scoring with Convolutional NN Arxiv:1612.02751v1
+
+        Returns:
+            the mapped density
+        """
+
+        distances = np.sqrt(np.square(self.xgrid - center[0]) +
+                            np.square(self.ygrid - center[1]) +
+                            np.square(self.zgrid - center[2]))
+
+        density_data = np.zeros(distances.shape)
+
+        indices_close = distances < vanderwaals_radius
+        indices_far = (distances >= vanderwaals_radius) & (distances < 1.5 * vanderwaals_radius)
+
+        density_data[indices_close] = np.exp(-2.0 * np.square(distances[indices_close]) /  np.square(vanderwaals_radius))
+        density_data[indices_far] = 4.0 / np.square(np.e) / np.square(vanderwaals_radius) * np.square(distances[indices_far]) - \
+                                    12.0 / np.square(np.e) / vanderwaals_radius * distances[indices_far] + \
+                                    9.0 / np.square(np.e)
+
+        return density_data
 
     def map_feature(
         self,
