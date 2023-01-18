@@ -7,14 +7,13 @@ import copy
 import numpy as np
 import torch
 from torch import nn
-from torch.nn import MSELoss
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 
 from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
 from deeprankcore.utils.community_pooling import community_detection, community_pooling
 from deeprankcore.utils.earlystopping import EarlyStopping
-from deeprankcore.domain import targetstorage as targets
+from deeprankcore.domain import targetstorage as targets, losstypes as losses
 from deeprankcore.dataset import GraphDataset, GridDataset
 
 _log = logging.getLogger(__name__)
@@ -248,7 +247,7 @@ class Trainer():
 
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
-        self.set_loss()
+        self.set_lossfunction()
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
 
@@ -313,7 +312,6 @@ class Trainer():
             pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
         self._put_model_to_device(self.dataset_test)
-        self.set_loss()
 
         # load the model and the optimizer state
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
@@ -443,38 +441,78 @@ class Trainer():
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise e
 
-    def set_loss(self):
+    def set_lossfunction(self, lossfunction = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
 
         """
-        Sets the loss function: MSE loss for regression and CrossEntropy loss for classification.
+        Set the loss function.
+        
+        Args:
+            lossfunction: Make sure to use a loss function that is appropriate for
+                your task (classification or regression). All loss functions
+                from torch.nn.modules.loss are listed as belonging to either
+                category (or to neither) and an exception is raised if an invalid
+                loss function is chosen for the set task.
+                Default for regression: MSELoss
+                Default for classification: CrossEntropyLoss
+            override_invalid (bool): If True, loss functions that are considered
+                invalid for the task do no longer automaticallt raise an exception.
+                Defaults to False.
         """
 
+        default_regression_loss = nn.MSELoss
+        default_classification_loss = nn.CrossEntropyLoss
+
+        default_loss_info = (f'No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}')
+        custom_loss_warning = ( f'The provided loss function ({lossfunction}) is not part of the default list.\n\t' +
+                                f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
+
+        def _invalid_loss():
+            if override_invalid:
+                _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                            'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
+                            'This will likely cause other errors or exceptions down the line.')
+            else:
+                invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                                    'If you want to use this loss function anyway, set override_invalid to True.')
+                _log.error(invalid_loss_error)
+                raise ValueError(invalid_loss_error)
+
+        # check for custom/invalid loss functions
+        if lossfunction in losses.other_losses:
+            _invalid_loss()
+        elif lossfunction not in (losses.regression_losses + losses.classification_losses):
+            custom_loss = True
+        else:
+            custom_loss = False
+
+        # set regression loss
         if self.task == targets.REGRESS:
-            self.loss = MSELoss()
+            if lossfunction is None:
+                lossfunction = default_regression_loss
+                _log.info(default_loss_info)
+            else:
+                if custom_loss:
+                    _log.warning(custom_loss_warning)
+                elif lossfunction not in losses.regression_losses:
+                    _invalid_loss()
+            self.lossfunction = lossfunction()
 
+        # Set classification loss
         elif self.task == targets.CLASSIF:
-            # Assign weights to each class
-            self.weights = None
-            if self.class_weights:
-                targets_all = []
-                for batch in self.train_loader:
-                    targets_all.append(batch.y)
+            if lossfunction is None:
+                lossfunction = default_classification_loss
+                _log.info(default_loss_info)
+            else:
+                if custom_loss:
+                    _log.warning(custom_loss_warning)
+                elif lossfunction not in losses.classification_losses:
+                    _invalid_loss()
+            if not self.class_weights:
+                self.lossfunction = lossfunction()
+            else:
+                self.lossfunction = lossfunction # weights will be set in the train() method
 
-                targets_all = torch.cat(targets_all).squeeze().tolist()
-                self.weights = torch.tensor(
-                    [targets_all.count(i) for i in self.classes], dtype=torch.float32
-                )
-                _log.info(f"class occurences: {self.weights}")
-                self.weights = 1.0 / self.weights
-                self.weights = self.weights / self.weights.sum()
-                _log.info(f"class weights: {self.weights}")
-
-            # Note that non-linear activation is automatically applied in CrossEntropyLoss
-            self.loss = nn.CrossEntropyLoss(
-                weight=self.weights, reduction="mean")
-
-
-    def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals
+    def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals # noqa: MC0001
         self,
         nepoch: int = 1,
         batch_size: int = 32,
@@ -537,6 +575,31 @@ class Trainer():
             self.valid_loader = None
             _log.info("No validation set provided\n")
 
+        # Assign weights to each class
+        if self.task == targets.CLASSIF and self.class_weights:
+            targets_all = []
+            for batch in self.train_loader:
+                targets_all.append(batch.y)
+
+            targets_all = torch.cat(targets_all).squeeze().tolist()
+            self.weights = torch.tensor(
+                [targets_all.count(i) for i in self.classes], dtype=torch.float32
+            )
+            _log.info(f"class occurences: {self.weights}")
+            self.weights = 1.0 / self.weights
+            self.weights = self.weights / self.weights.sum()
+            _log.info(f"class weights: {self.weights}")
+
+            try:
+                self.lossfunction = self.lossfunction(weight=self.weights)  # Check whether loss allows for weighted classes
+            except TypeError as e:
+                weight_error = (f"Loss function {self.lossfunction} does not allow for weighted classes.\n\t" +
+                                "Please use a different loss function or set class_weights to False.\n")
+                _log.error(weight_error)
+                raise ValueError(weight_error) from e
+        else:
+            self.weights = None
+
         train_losses = []
         valid_losses = []
         
@@ -581,7 +644,7 @@ class Trainer():
                     # if no validation set, save the best performing model on the training set
                     if save_best_model:
                         if min(train_losses) == loss_:
-                            _log.warning( # pylint: disable=logging-not-lazy
+                            _log.warning(
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
                             self.save_model(output_file)
@@ -624,7 +687,7 @@ class Trainer():
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
-            loss_ = self.loss(pred, data_batch.y)
+            loss_ = self.lossfunction(pred, data_batch.y)
             loss_.backward()
             self.optimizer.step()
             count_predictions += pred.shape[0]
@@ -677,7 +740,7 @@ class Trainer():
 
         # Sets the module in evaluation mode
         self.model.eval()
-        loss_func = self.loss
+        loss_func = self.lossfunction
         target_vals = []
         outputs = []
         entry_names = []
@@ -744,6 +807,19 @@ class Trainer():
             target = torch.tensor(
                 [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
             )
+            if isinstance(self.lossfunction, (nn.BCELoss, nn.BCEWithLogitsLoss)):
+                # # pred must be in (0,1) range and target must be float with same shape as pred
+                # pred = F.softmax(pred)
+                # target = torch.tensor(
+                #     [[0,1] if x == [1] else [1,0] for x in target]
+                # ).float()
+                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
+                                'For further details see: https://github.com/DeepRank/deeprank-core/issues/318')
+            
+            if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
+                raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' + 
+                                f'Supported loss functions for classification: {losses.classification_tested}.\n\t' +
+                                'Implementation of other loss functions requires adaptation of Trainer._format_output.')
 
         elif self.task == targets.REGRESS:
             pred = pred.reshape(-1)
@@ -809,6 +885,7 @@ class Trainer():
         self.shuffle = state["shuffle"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
+        self.lossfunction = state["lossfunction"]
         self.model_load_state_dict = state["model_state"]
         self.clustering_method = state["clustering_method"]
         self.node_features = state["node_features"]
@@ -828,6 +905,7 @@ class Trainer():
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
+            "lossfunction": self.lossfunction,
             "target": self.target,
             "task": self.task,
             "classes": self.classes,

@@ -88,7 +88,7 @@ class DeeprankDataset(Dataset):
 
     def _check_task_and_classes(self, task: str, classes: Optional[str] = None):
 
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ, targets.BA]: 
             self.task = targets.REGRESS
 
         elif self.target in [targets.BINARY, targets.CAPRI]:
@@ -240,15 +240,15 @@ class GridDataset(DeeprankDataset):
 
             subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
 
-            target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target
+            target (str, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be a custom-defined target
                 given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
-                ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored.
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
+                Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
 
             features (Union[List[str], str], optional): Consider all pre-computed features ("all") or some defined node features
                 (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.gridstorage`. 
@@ -419,15 +419,15 @@ class GraphDataset(DeeprankDataset):
 
             subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
 
-            target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target
+            target (str, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be a custom-defined target
                 given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
-                ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored.
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
+                Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
 
             node_features (Union[List[str], str, optional): Consider all pre-computed node features ("all") or some defined node features
                 (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.nodestorage`.

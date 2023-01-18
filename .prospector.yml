@@ -45,5 +45,6 @@ pydocstyle:
 
 pylint:
   disable: [
-    logging-fstring-interpolation
+    logging-fstring-interpolation,
+    logging-not-lazy,
   ]

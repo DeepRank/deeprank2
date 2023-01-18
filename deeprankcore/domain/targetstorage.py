@@ -12,6 +12,7 @@ IRMSD = 'irmsd'
 LRMSD = 'lrmsd'
 FNAT = 'fnat'
 DOCKQ = 'dockq'
+BA = 'BA'
 
 ## task names
 REGRESS = 'regress'
