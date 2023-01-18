@@ -163,11 +163,6 @@ class TestTrainer(unittest.TestCase):
                     dataset_val=dataset_valid)
 
     def test_ginet_sigmoid(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
-            os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
@@ -186,13 +181,11 @@ class TestTrainer(unittest.TestCase):
         )
 
         assert len(os.listdir(self.work_directory)) > 0
+        f = glob.glob(self.work_directory + '/*')[0]
+        os.remove(f)
+
 
     def test_ginet(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
-            os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
         
         _model_base_test(
@@ -211,13 +204,10 @@ class TestTrainer(unittest.TestCase):
         )
 
         assert len(os.listdir(self.work_directory)) > 0
+        f = glob.glob(self.work_directory + '/*')[0]
+        os.remove(f)
 
     def test_ginet_class(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
-            os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
@@ -236,6 +226,8 @@ class TestTrainer(unittest.TestCase):
         )
 
         assert len(os.listdir(self.work_directory)) > 0
+        f = glob.glob(self.work_directory + '/*')[0]
+        os.remove(f)
 
     def test_fout(self):
         _model_base_test(
@@ -486,11 +478,6 @@ class TestTrainer(unittest.TestCase):
     def test_cuda(self):    # test_ginet, but with cuda
         if torch.cuda.is_available():
 
-            try:
-                f = glob.glob(self.work_directory + '/*')[0]
-                os.remove(f)
-            except IndexError:
-                pass
             assert len(os.listdir(self.work_directory)) == 0
 
             _model_base_test(
@@ -510,6 +497,8 @@ class TestTrainer(unittest.TestCase):
             )
 
             assert len(os.listdir(self.work_directory)) > 0
+            f = glob.glob(self.work_directory + '/*')[0]
+            os.remove(f)
 
         else:
             warnings.warn("CUDA not available. test_cuda skipped")
