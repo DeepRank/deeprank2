@@ -27,9 +27,9 @@ from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
 _log = logging.getLogger(__name__)
 
 default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-model_path = './tests/test.pth.tar'
 
 def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
+    save_path,
     model_class,
     train_hdf5_path,
     val_hdf5_path,
@@ -104,19 +104,20 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
 
     with warnings.catch_warnings(record=UserWarning):
         trainer.train(nepoch=3, batch_size=64, validate=True, save_best_model=None)
-        trainer.save_model(model_path)
+        trainer.save_model(save_path)
 
         Trainer(
             model_class,
             dataset_train,
             dataset_val,
             dataset_test,
-            pretrained_model=model_path)
+            pretrained_model=save_path)
 
 class TestTrainer(unittest.TestCase):
     @classmethod
     def setUpClass(class_):
         class_.work_directory = tempfile.mkdtemp()
+        class_.save_path = class_.work_directory + 'test.tar'
 
     @classmethod
     def tearDownClass(class_):
@@ -170,6 +171,7 @@ class TestTrainer(unittest.TestCase):
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
+            self.save_path,
             GINet,
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
@@ -193,7 +195,8 @@ class TestTrainer(unittest.TestCase):
             pass
         assert len(os.listdir(self.work_directory)) == 0
         
-        _model_base_test(           
+        _model_base_test(
+            self.save_path,
             GINet,
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
@@ -218,6 +221,7 @@ class TestTrainer(unittest.TestCase):
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
+            self.save_path,
             GINet,
             "tests/data/hdf5/variants.hdf5",
             "tests/data/hdf5/variants.hdf5",
@@ -235,6 +239,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_fout(self):
         _model_base_test(
+            self.save_path,
             FoutNet,
             "tests/data/hdf5/test.hdf5",
             "tests/data/hdf5/test.hdf5",
@@ -250,6 +255,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_sgat(self):
         _model_base_test(
+            self.save_path,
             SGAT,
             "tests/data/hdf5/1ATN_ppi.hdf5",
             "tests/data/hdf5/1ATN_ppi.hdf5",
@@ -265,6 +271,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_naive(self):
         _model_base_test(
+            self.save_path,
             NaiveNetwork,
             "tests/data/hdf5/test.hdf5",
             "tests/data/hdf5/test.hdf5",
@@ -281,6 +288,7 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
             _model_base_test(
+                self.save_path,
                 SGAT,
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
@@ -297,6 +305,7 @@ class TestTrainer(unittest.TestCase):
     def test_incompatible_classification(self):
         with pytest.raises(ValueError):
             _model_base_test(
+                self.save_path,
                 GINet,
                 "tests/data/hdf5/variants.hdf5",
                 "tests/data/hdf5/variants.hdf5",
@@ -360,12 +369,12 @@ class TestTrainer(unittest.TestCase):
 
             with warnings.catch_warnings(record=UserWarning):
                 trainer.train(nepoch=3, validate=True, save_best_model=None)
-                trainer.save_model(model_path)
+                trainer.save_model(self.save_path)
 
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset,
-                    pretrained_model=model_path)
+                    pretrained_model=self.save_path)
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
@@ -382,11 +391,11 @@ class TestTrainer(unittest.TestCase):
 
             with warnings.catch_warnings(record=UserWarning):
                 trainer.train(nepoch=3, validate=True, save_best_model=None)
-                trainer.save_model(model_path)
+                trainer.save_model(self.save_path)
 
                 Trainer(
                     dataset_test = dataset,
-                    pretrained_model=model_path)
+                    pretrained_model=self.save_path)
 
     def test_no_valid_provided(self):
 
@@ -400,7 +409,7 @@ class TestTrainer(unittest.TestCase):
             neuralnet = GINet,
             dataset_train = dataset,
         )
-        trainer.train(batch_size = 1)
+        trainer.train(batch_size = 1, save_best_model=None)
 
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
@@ -418,7 +427,7 @@ class TestTrainer(unittest.TestCase):
             dataset_train = dataset,
             val_size = 0
         )
-        trainer.train(batch_size=1)
+        trainer.train(batch_size=1, save_best_model=None)
 
         assert len(trainer.train_loader) == len(dataset)
         assert trainer.valid_loader is None
@@ -447,12 +456,12 @@ class TestTrainer(unittest.TestCase):
 
         with warnings.catch_warnings(record=UserWarning):
             trainer.train(nepoch=3, save_best_model=None)
-            trainer.save_model(model_path)
+            trainer.save_model(self.save_path)
 
             trainer_pretrained = Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_test=dataset,
-                pretrained_model=model_path)
+                pretrained_model=self.save_path)
 
         assert isinstance(trainer_pretrained.optimizer, optimizer)
         assert trainer_pretrained.lr == lr
@@ -484,7 +493,8 @@ class TestTrainer(unittest.TestCase):
                 pass
             assert len(os.listdir(self.work_directory)) == 0
 
-            _model_base_test(           
+            _model_base_test(
+                self.save_path,
                 GINet,
                 "tests/data/hdf5/1ATN_ppi.hdf5",
                 "tests/data/hdf5/1ATN_ppi.hdf5",
@@ -548,13 +558,13 @@ class TestTrainer(unittest.TestCase):
 
             with warnings.catch_warnings(record=UserWarning):
                 trainer.train(nepoch=3, validate=True, save_best_model=None)
-                trainer.save_model(model_path)
+                trainer.save_model(self.save_path)
 
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset_train,
                     dataset_test = dataset_test,
-                    pretrained_model=model_path)
+                    pretrained_model=self.save_path)
 
     def test_trainsize(self):
         hdf5 = "tests/data/hdf5/train.hdf5"
