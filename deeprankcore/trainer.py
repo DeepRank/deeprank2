@@ -743,7 +743,7 @@ class Trainer():
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
                 [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
-            ).to(self.device)
+            )
 
         elif self.task == targets.REGRESS:
             pred = pred.reshape(-1)
