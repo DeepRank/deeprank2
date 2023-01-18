@@ -1,5 +1,3 @@
-import tempfile
-import shutil
 import unittest
 import pytest
 import logging
