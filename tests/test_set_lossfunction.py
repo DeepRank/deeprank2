@@ -1,14 +1,11 @@
 import unittest
 import pytest
-import logging
 import warnings
 from torch import nn
 from deeprankcore.trainer import Trainer
 from deeprankcore.dataset import GraphDataset
 from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
 from deeprankcore.domain import targetstorage as targets, losstypes as losses
-
-_log = logging.getLogger(__name__)
 
 
 model_path = './tests/test.pth.tar'
