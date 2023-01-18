@@ -804,14 +804,14 @@ class Trainer():
             # of class indices with type long and the output should have raw, unnormalized values
             target = torch.tensor(
                 [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
-            ).to(self.device)
+            )
             
             if isinstance(self.lossfunction, (nn.BCELoss, nn.BCEWithLogitsLoss)):
                 # pred must be in (0,1) range and target must be float with same shape as pred
                 pred = F.softmax(pred)
                 target = torch.tensor(
                     [[0,1] if x == [1] else [1,0] for x in target]
-                ).float().to(self.device)
+                ).float()
                 # raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t')
             
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
