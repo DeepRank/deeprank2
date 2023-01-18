@@ -3,8 +3,9 @@ from typing import List
 import h5py
 import numpy as np
 
-from deeprankcore.query import ProteinProteinInterfaceAtomicQuery
+from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
 import deeprankcore.features.contact
+import deeprankcore.features.surfacearea
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 from deeprankcore.molstruct.atom import AtomicElement
 from deeprankcore.domain.nodestorage import POSITION as POSITION_FEATURE
@@ -19,7 +20,37 @@ def _inflate(index: np.array, value: np.array, shape: List[int]):
     return data.reshape(shape)
 
 
-def test_grid_orientation():
+def test_residue_grid_orientation():
+
+    error_margin = 0.001
+
+    points_counts = [10, 10, 10]
+    grid_sizes = [30.0, 30.0, 30.0]
+
+    # Extract data from original deeprank's preprocessed file.
+    with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", 'r') as data_file:
+        target_center = data_file["1AK4/grid_points/center"][()]
+
+    # Build the atomic graph, according to this repository's code.
+    pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
+    chain_id1 = "C"
+    chain_id2 = "D"
+    distance_cutoff = 8.5
+
+    query = ProteinProteinInterfaceResidueQuery(pdb_path, chain_id1, chain_id2,
+                                                distance_cutoff=distance_cutoff)
+
+    graph = query.build([deeprankcore.features.surfacearea])
+
+    # Make a grid from the graph.
+    map_method = MapMethod.GAUSSIAN
+    grid_settings = GridSettings(points_counts, grid_sizes)
+    grid = Grid("test_grid", graph.center, grid_settings)
+    graph.map_to_grid(grid, map_method)
+
+    assert np.all(np.abs(target_center - grid.center) < error_margin), f"\n{grid.center} != \n{target_center}"
+
+def test_atomic_grid_orientation():
 
     error_margin = 0.001
 
@@ -56,9 +87,6 @@ def test_grid_orientation():
 
     # Get atomic positions from the graph
     positions = np.array([node.features[POSITION_FEATURE] for node in graph.nodes])
-    center = np.mean(positions, axis=0)
-
-    assert np.all(np.abs(target_center - center) < error_margin), f"\n{center} != \n{target_center}"
 
     chain1_carbon_positions = [node.id.position  # the node id is actually the atom
                                for node in graph.nodes
@@ -67,9 +95,11 @@ def test_grid_orientation():
 
     # Make a grid from the graph.
     map_method = MapMethod.GAUSSIAN
-    grid_settings = GridSettings(center, points_counts, grid_sizes)
-    grid = Grid("test_grid", grid_settings)
+    grid_settings = GridSettings(points_counts, grid_sizes)
+    grid = Grid("test_grid", graph.center, grid_settings)
     graph.map_to_grid(grid, map_method)
+
+    assert np.all(np.abs(target_center - grid.center) < error_margin), f"\n{grid.center} != \n{target_center}"
 
     # Orientation must be the same as in the original deeprank.
     # Check that the grid point coordinates are the same.

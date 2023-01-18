@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import h5py
 from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.residue import Residue, get_residue_center
 from deeprankcore.molstruct.pair import Contact, AtomicContact, ResidueContact
 from deeprankcore.utils.grid import MapMethod, Grid, GridSettings
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, 
@@ -98,6 +98,9 @@ class Graph:
 
         # targets are optional and may be set later
         self.targets = {}
+
+        # the center only needs to be set when this graph should be mapped to a grid.
+        self.center = np.array((0.0, 0.0, 0.0))
 
     def add_node(self, node: Node):
         self._nodes[node.id] = node
@@ -217,7 +220,7 @@ class Graph:
         self, hdf5_path: str, settings: GridSettings, method: MapMethod
     ) -> str:
 
-        grid = Grid(self.id, settings)
+        grid = Grid(self.id, self.center, settings)
 
         self.map_to_grid(grid, method)
         grid.to_hdf5(hdf5_path)
@@ -307,12 +310,8 @@ def build_residue_graph( # pylint: disable=too-many-locals
             node2 = Node(residue2)
             edge = Edge(contact)
 
-            node1.features[Nfeat.POSITION] = np.mean(
-                [atom.position for atom in residue1.atoms], axis=0
-            )
-            node2.features[Nfeat.POSITION] = np.mean(
-                [atom.position for atom in residue2.atoms], axis=0
-            )
+            node1.features[Nfeat.POSITION] = get_residue_center(residue1)
+            node2.features[Nfeat.POSITION] = get_residue_center(residue2)
 
             # The same residue will be added  multiple times as a node,
             # but the Graph class fixes this.
