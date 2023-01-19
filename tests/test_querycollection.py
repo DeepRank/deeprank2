@@ -5,7 +5,7 @@ import h5py
 from deeprankcore.features import surfacearea
 from deeprankcore.query import SingleResidueVariantResidueQuery, QueryCollection, Query
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
-from tests._utils import PATH_TEST
+from . import PATH_TEST
 
 
 def querycollection_tester(n_queries = 10, feature_modules = None, cpu_count = 1, combine_output = True):

@@ -3,7 +3,7 @@ from shutil import rmtree
 import warnings
 import os
 import h5py
-from tests._utils import PATH_TEST
+from . import PATH_TEST
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
 from deeprankcore.dataset import GraphDataset, GridDataset
 from deeprankcore.trainer import Trainer
