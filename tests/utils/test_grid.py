@@ -86,8 +86,6 @@ def test_atomic_grid_orientation():
     graph = query.build([deeprankcore.features.contact])
 
     # Get atomic positions from the graph
-    positions = np.array([node.features[POSITION_FEATURE] for node in graph.nodes])
-
     chain1_carbon_positions = [node.id.position  # the node id is actually the atom
                                for node in graph.nodes
                                if node.id.residue.chain.id == chain_id1 and

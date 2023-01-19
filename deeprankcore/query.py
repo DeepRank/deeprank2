@@ -18,7 +18,6 @@ from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.molstruct.residue import get_residue_center
 from deeprankcore.utils.buildgraph import (
-    get_residue_contact_pairs,
     get_contact_atoms,
     get_surrounding_residues,
     get_structure,
