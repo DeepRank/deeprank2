@@ -8,7 +8,6 @@ import deeprankcore.features.contact
 import deeprankcore.features.surfacearea
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 from deeprankcore.molstruct.atom import AtomicElement
-from deeprankcore.domain.nodestorage import POSITION as POSITION_FEATURE
 
 
 def _inflate(index: np.array, value: np.array, shape: List[int]):
