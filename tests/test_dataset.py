@@ -163,7 +163,36 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             dataset.get(0)
 
-        
+    def test_hdf5_to_pandas(self):
 
+        hdf5_path = "tests/data/hdf5/test.hdf5"
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            node_features='charge',
+            edge_features=['distance', 'same_chain'],
+            target='binary'
+        )
+        df = dataset.hdf5_to_pandas()
+        cols = list(df.columns)
+        cols.sort()
+        
+        assert df.shape[0] == len(dataset)
+        assert df.shape[1] == 5
+        assert cols == ['binary', 'charge', 'distance', 'id', 'same_chain']
+        
+        with h5py.File(hdf5_path, 'r') as f:
+            keys = list(f.keys())
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            node_features='charge',
+            edge_features=['distance', 'same_chain'],
+            target='binary',
+            subset=keys[2:]
+        )
+        df = dataset.hdf5_to_pandas()
+
+        assert df.shape[0] == len(keys[2:])
+
+        
 if __name__ == "__main__":
     unittest.main()
