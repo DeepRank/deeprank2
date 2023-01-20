@@ -509,7 +509,7 @@ class TestTrainer(unittest.TestCase):
 
         else:
             warnings.warn("CUDA is not available; test_cuda was skipped")
-            _log.warn("CUDA is not available; test_cuda was skipped")
+            _log.info("CUDA is not available; test_cuda was skipped")
 
     def test_dataset_equivalence_no_pretrained(self):
         with pytest.raises(ValueError):
@@ -630,7 +630,7 @@ class TestTrainer(unittest.TestCase):
         
         else:
             warnings.warn('CUDA is available; test_invalid_no_cuda_available was skipped')
-            _log.warn('CUDA is available; test_invalid_no_cuda_available was skipped')
+            _log.info('CUDA is available; test_invalid_no_cuda_available was skipped')
 
 
 
