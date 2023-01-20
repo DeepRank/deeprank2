@@ -20,7 +20,7 @@ dist/*
 *.lzone
 *.ref_pairs
 
-# hdf5
+# hdf5 and tar
 *.hdf5
 *.tar
 
