@@ -171,11 +171,9 @@ class TestTrainer(unittest.TestCase):
             )
 
     def test_ginet_sigmoid(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
+        files = glob.glob(self.work_directory + '/*')
+        for f in files:
             os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
@@ -195,11 +193,9 @@ class TestTrainer(unittest.TestCase):
         assert len(os.listdir(self.work_directory)) > 0
 
     def test_ginet(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
+        files = glob.glob(self.work_directory + '/*')
+        for f in files:
             os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
         
         _model_base_test(
@@ -219,11 +215,9 @@ class TestTrainer(unittest.TestCase):
         assert len(os.listdir(self.work_directory)) > 0
 
     def test_ginet_class(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
+        files = glob.glob(self.work_directory + '/*')
+        for f in files:
             os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
@@ -244,11 +238,9 @@ class TestTrainer(unittest.TestCase):
         assert len(os.listdir(self.work_directory)) > 0
 
     def test_fout(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
+        files = glob.glob(self.work_directory + '/*')
+        for f in files:
             os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
@@ -262,17 +254,15 @@ class TestTrainer(unittest.TestCase):
             targets.CLASSIF,
             targets.BINARY,
             False,
-            None,
+            [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
         assert len(os.listdir(self.work_directory)) > 0
 
     def test_sgat(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
+        files = glob.glob(self.work_directory + '/*')
+        for f in files:
             os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
@@ -286,17 +276,15 @@ class TestTrainer(unittest.TestCase):
             targets.REGRESS,
             targets.IRMSD,
             False,
-            None,
+            [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
         assert len(os.listdir(self.work_directory)) > 0
 
     def test_naive(self):
-        try:
-            f = glob.glob(self.work_directory + '/*')[0]
+        files = glob.glob(self.work_directory + '/*')
+        for f in files:
             os.remove(f)
-        except IndexError:
-            pass
         assert len(os.listdir(self.work_directory)) == 0
 
         _model_base_test(
@@ -313,7 +301,7 @@ class TestTrainer(unittest.TestCase):
             [HDF5OutputExporter(self.work_directory)],
             "mcl",
         )
-        assert len(os.listdir(self.work_directory)) >0
+        assert len(os.listdir(self.work_directory)) > 0
 
     def test_incompatible_regression(self):
         with pytest.raises(ValueError):
@@ -497,11 +485,9 @@ class TestTrainer(unittest.TestCase):
 
     def test_cuda(self):    # test_ginet, but with cuda
         if torch.cuda.is_available():
-            try:
-                f = glob.glob(self.work_directory + '/*')[0]
+            files = glob.glob(self.work_directory + '/*')
+            for f in files:
                 os.remove(f)
-            except IndexError:
-                pass
             assert len(os.listdir(self.work_directory)) == 0
 
             _model_base_test(
