@@ -124,43 +124,51 @@ class TestTrainer(unittest.TestCase):
         shutil.rmtree(class_.work_directory)
 
     def test_grid_regression(self):
-        dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
-                              subset=None,
-                              target=targets.IRMSD,
-                              task=targets.REGRESS,
-                              features=[Efeat.VANDERWAALS])
-
-        trainer = Trainer(CnnRegression, dataset)
-
+        dataset = GridDataset(
+            hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+            subset=None,
+            target=targets.IRMSD,
+            task=targets.REGRESS,
+            features=[Efeat.VANDERWAALS]
+        )
+        trainer = Trainer(
+            CnnRegression,
+            dataset
+        )
         trainer.train(nepoch=1, batch_size=2, save_best_model=None)
 
     def test_grid_classification(self):
-        dataset = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
-                              subset=None,
-                              target=targets.BINARY,
-                              task=targets.CLASSIF,
-                              features=[Efeat.VANDERWAALS])
-
-        trainer = Trainer(CnnClassification, dataset)
-
+        dataset = GridDataset(
+            hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+            subset=None,
+            target=targets.BINARY,
+            task=targets.CLASSIF,
+            features=[Efeat.VANDERWAALS])
+        trainer = Trainer(
+            CnnClassification,
+            dataset
+        )
         trainer.train(nepoch=1, batch_size = 2, save_best_model=None)
 
     def test_grid_graph_incompatible(self):
-        dataset_train = GridDataset(hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
-                                    subset=None,
-                                    target=targets.BINARY,
-                                    task=targets.CLASSIF,
-                                    features=[Efeat.VANDERWAALS])
-
+        dataset_train = GridDataset(
+            hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+            subset=None,
+            target=targets.BINARY,
+            task=targets.CLASSIF,
+            features=[Efeat.VANDERWAALS]
+        )
         dataset_valid = GraphDataset(
-                hdf5_path="tests/data/hdf5/valid.hdf5",
-                target=targets.BINARY,
-            )
+            hdf5_path="tests/data/hdf5/valid.hdf5",
+            target=targets.BINARY,
+        )
 
         with pytest.raises(TypeError):
-            Trainer(CnnClassification,
-                    dataset_train=dataset_train,
-                    dataset_val=dataset_valid)
+            Trainer(
+                CnnClassification,
+                dataset_train=dataset_train,
+                dataset_val=dataset_valid
+            )
 
     def test_ginet_sigmoid(self):
         try:
@@ -343,12 +351,10 @@ class TestTrainer(unittest.TestCase):
 
     def test_incompatible_no_pretrained_no_train(self):
         with pytest.raises(ValueError):
-
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
             )
-
             Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_test = dataset,
@@ -359,7 +365,6 @@ class TestTrainer(unittest.TestCase):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
             )
-
             Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_train = dataset,
@@ -371,7 +376,6 @@ class TestTrainer(unittest.TestCase):
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
             )
-
             Trainer(
                 dataset_train = dataset,
             )
@@ -383,7 +387,6 @@ class TestTrainer(unittest.TestCase):
                 target=targets.BINARY,
                 clustering_method="mcl"
             )
-
             trainer = Trainer(
                 neuralnet = GINet,
                 dataset_train = dataset,
@@ -392,11 +395,11 @@ class TestTrainer(unittest.TestCase):
             with warnings.catch_warnings(record=UserWarning):
                 trainer.train(nepoch=3, validate=True, save_best_model=None)
                 trainer.save_model(self.save_path)
-
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset,
-                    pretrained_model=self.save_path)
+                    pretrained_model=self.save_path
+                )
 
     def test_incompatible_pretrained_no_Net(self):
         with pytest.raises(ValueError):
@@ -405,7 +408,6 @@ class TestTrainer(unittest.TestCase):
                 target=targets.BINARY,
                 clustering_method="mcl"
             )
-
             trainer = Trainer(
                 neuralnet = GINet,
                 dataset_train = dataset,
@@ -414,53 +416,45 @@ class TestTrainer(unittest.TestCase):
             with warnings.catch_warnings(record=UserWarning):
                 trainer.train(nepoch=3, validate=True, save_best_model=None)
                 trainer.save_model(self.save_path)
-
                 Trainer(
                     dataset_test = dataset,
-                    pretrained_model=self.save_path)
+                    pretrained_model=self.save_path
+                )
 
     def test_no_valid_provided(self):
-
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             clustering_method="mcl"
         )
-
         trainer = Trainer(
             neuralnet = GINet,
             dataset_train = dataset,
         )
         trainer.train(batch_size = 1, save_best_model=None)
-
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
 
     def test_no_valid_full_train(self):
-
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
             clustering_method = "mcl"
         )
-
         trainer = Trainer(
             neuralnet = GINet,
             dataset_train = dataset,
             val_size = 0
         )
         trainer.train(batch_size=1, save_best_model=None)
-
         assert len(trainer.train_loader) == len(dataset)
         assert trainer.valid_loader is None
 
     def test_optim(self):
-
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
         )
-
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -469,7 +463,6 @@ class TestTrainer(unittest.TestCase):
         optimizer = torch.optim.Adamax
         lr = 0.1
         weight_decay = 1e-04
-
         trainer.configure_optimizers(optimizer, lr, weight_decay)
 
         assert isinstance(trainer.optimizer, optimizer)
@@ -479,7 +472,6 @@ class TestTrainer(unittest.TestCase):
         with warnings.catch_warnings(record=UserWarning):
             trainer.train(nepoch=3, save_best_model=None)
             trainer.save_model(self.save_path)
-
             trainer_pretrained = Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_test=dataset,
@@ -490,12 +482,10 @@ class TestTrainer(unittest.TestCase):
         assert trainer_pretrained.weight_decay == weight_decay
 
     def test_default_optim(self):
-
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
         )
-
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -542,13 +532,11 @@ class TestTrainer(unittest.TestCase):
                 target=targets.BINARY,
                 edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
             )
-            
             dataset_val = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 edge_features=[Efeat.DISTANCE]
             )
-
             Trainer(
                 neuralnet = GINet,
                 dataset_train = dataset_train,
@@ -563,14 +551,12 @@ class TestTrainer(unittest.TestCase):
                 edge_features=[Efeat.DISTANCE, Efeat.COVALENT],
                 clustering_method="mcl"
             )
-            
             dataset_test = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
                 target=targets.BINARY,
                 edge_features=[Efeat.DISTANCE],
                 clustering_method="mcl"
             )
-
             trainer = Trainer(
                 neuralnet = GINet,
                 dataset_train = dataset_train,
@@ -579,12 +565,12 @@ class TestTrainer(unittest.TestCase):
             with warnings.catch_warnings(record=UserWarning):
                 trainer.train(nepoch=3, validate=True, save_best_model=None)
                 trainer.save_model(self.save_path)
-
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset_train,
                     dataset_test = dataset_test,
-                    pretrained_model=self.save_path)
+                    pretrained_model=self.save_path
+                )
 
     def test_trainsize(self):
         hdf5 = "tests/data/hdf5/train.hdf5"
@@ -598,7 +584,6 @@ class TestTrainer(unittest.TestCase):
                 dataset = GraphDataset(hdf5_path=hdf5),
                 splitsize=t,
             )
-
             assert len(dataset_train) == n_train
             assert len(dataset_val) == n_val
 
