@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 import h5py
 from typing import Callable, List, Union, Optional, Dict
-
+import pandas as pd
 from tqdm import tqdm
 from ast import literal_eval
 import torch
@@ -205,6 +205,50 @@ class DeeprankDataset(Dataset):
         """
         return len(self.index_entries)
 
+    def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
+        self
+    ) -> pd.DataFrame:
+        """
+        Returns:
+            :class:`pd.DataFrame`: Pandas DataFrame containing the selected features as columns per all data points in
+                hdf5_path files.   
+        """
+
+        df_final = pd.DataFrame()
+
+        for fname in self.hdf5_paths:
+            with h5py.File(fname, 'r') as f:
+
+                entry_name = list(f.keys())[0]
+                
+                if self.subset is not None:
+                    entry_names = [entry for entry, _ in f.items() if entry in self.subset]
+                else:
+                    entry_names = [entry for entry, _ in f.items()]
+
+                df_dict = {}
+                df_dict['id'] = entry_names
+
+                for feat_type in self.features_dict:
+                    for feat in self.features_dict[feat_type]:
+                        if f[entry_name][feat_type][feat][()].ndim == 2:
+                            for i in range(f[entry_name][feat_type][feat][:].shape[1]):
+                                df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
+                        else:
+                            df_dict[feat] = [
+                                f[entry_name][feat_type][feat][:]
+                                if f[entry_name][feat_type][feat][()].ndim == 1
+                                else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
+
+
+                df = pd.DataFrame(data=df_dict)
+
+            df_final = pd.concat([df_final, df])
+
+        df_final.reset_index(drop=True, inplace=True)
+
+        return df_final
+
 
 # Grid features are stored per dimension and named accordingly.
 # Example: position_001, position_002, position_003 (for x,y,z)
@@ -277,6 +321,14 @@ class GridDataset(DeeprankDataset):
 
         self._check_features()
 
+        self.features_dict = {}
+        self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
+        if self.target is not None:
+            if isinstance(self.target, str):
+                self.features_dict[targets.VALUES] = [self.target]
+            else:
+                self.features_dict[targets.VALUES] = self.target
+
     def _check_features(self):
         """Checks if the required features exist"""
 
@@ -320,6 +372,8 @@ class GridDataset(DeeprankDataset):
         if self.features == "all":
             self.features = sorted(hdf5_all_feature_names)
         else:
+            if not isinstance(self.features, list):
+                self.features = [self.features]
             for feature_name in self.features:
                 if feature_name not in unpartial_feature_names:
                     _log.info(f"The feature {feature_name} was not found in the file {hdf5_path}.")
@@ -467,6 +521,15 @@ class GraphDataset(DeeprankDataset):
 
         self._check_features()
 
+        self.features_dict = {}
+        self.features_dict[Nfeat.NODE] = self.node_features
+        self.features_dict[Efeat.EDGE] = self.edge_features
+        if self.target is not None:
+            if isinstance(self.target, str):
+                self.features_dict[targets.VALUES] = [self.target]
+            else:
+                self.features_dict[targets.VALUES] = self.target
+
     def get(self, idx: int) -> Data:
         """
         Gets one graph item from its unique index.
@@ -575,8 +638,6 @@ class GraphDataset(DeeprankDataset):
                             _log.warning("no clusters detected")
                     else:
                         _log.warning(f"no clustering/{self.clustering_method} detected")
-                else:
-                    _log.warning("no clustering group found")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
@@ -613,6 +674,8 @@ class GraphDataset(DeeprankDataset):
         if self.node_features == "all":
             self.node_features = self.available_node_features
         else:
+            if not isinstance(self.node_features, list):
+                self.node_features = [self.node_features]
             for feat in self.node_features:
                 if feat not in self.available_node_features:
                     _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")
@@ -622,7 +685,9 @@ class GraphDataset(DeeprankDataset):
         missing_edge_features = []
         if self.edge_features == "all":
             self.edge_features = self.available_edge_features
-        elif self.edge_features is not None:
+        else:
+            if not isinstance(self.edge_features, list):
+                self.edge_features = [self.edge_features]
             for feat in self.edge_features:
                 if feat not in self.available_edge_features:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")
