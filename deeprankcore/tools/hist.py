@@ -190,7 +190,10 @@ def save_hist(
 
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111)
-        ax.hist(df[features[0]].values, bins=bins)
+        if isinstance(df[features[0]].values[0], np.ndarray):
+            ax.hist(np.concatenate(df[features[0]].values), bins=bins)
+        else:
+            ax.hist(df[features[0]].values, bins=bins)
         ax.set(xlabel=f'{features[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
 
     fig.tight_layout()
