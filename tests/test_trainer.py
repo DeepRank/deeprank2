@@ -532,8 +532,8 @@ class TestTrainer(unittest.TestCase):
             assert len(os.listdir(self.work_directory)) > 0
 
         else:
-            warnings.warn("CUDA is not available. test_cuda skipped")
-            _log.debug("CUDA is not available, test_cuda skipped")
+            warnings.warn("CUDA is not available; test_cuda was skipped")
+            _log.warn("CUDA is not available; test_cuda was skipped")
 
     def test_dataset_equivalence_no_pretrained(self):
         with pytest.raises(ValueError):
@@ -627,20 +627,10 @@ class TestTrainer(unittest.TestCase):
     def test_invalid_cuda_ngpus(self):
         dataset_train = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5"
-        )
-        
+        )            
         dataset_val = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5"
         )
-
-        if not torch.cuda.is_available():
-            with pytest.raises(ValueError):
-                Trainer(
-                    neuralnet = GINet,
-                    dataset_train = dataset_train,
-                    dataset_val = dataset_val,
-                    cuda = True
-                )
 
         with pytest.raises(ValueError):
             Trainer(
@@ -649,6 +639,29 @@ class TestTrainer(unittest.TestCase):
                 dataset_val = dataset_val,
                 ngpu = 2
             )
+
+    def test_invalid_no_cuda_available(self):
+        if not torch.cuda.is_available():
+            dataset_train = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5"
+            )            
+            dataset_val = GraphDataset(
+                hdf5_path="tests/data/hdf5/test.hdf5"
+            )
+
+            with pytest.raises(ValueError):
+                Trainer(
+                    neuralnet = GINet,
+                    dataset_train = dataset_train,
+                    dataset_val = dataset_val,
+                    cuda = True
+                )
+        
+        else:
+            warnings.warn('CUDA is available; test_invalid_no_cuda_available was skipped')
+            _log.warn('CUDA is available; test_invalid_no_cuda_available was skipped')
+
+
 
 
 if __name__ == "__main__":
