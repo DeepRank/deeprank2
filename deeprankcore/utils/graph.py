@@ -220,7 +220,7 @@ class Graph:
         self, hdf5_path: str, settings: GridSettings, method: MapMethod
     ) -> str:
 
-        grid = Grid(self.id, self.center, settings)
+        grid = Grid(self.id, self.center.tolist(), settings)
 
         self.map_to_grid(grid, method)
         grid.to_hdf5(hdf5_path)

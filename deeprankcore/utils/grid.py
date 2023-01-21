@@ -65,14 +65,14 @@ class Grid:
     - feature values on each point
     """
 
-    def __init__(self, id_: str, center: np.ndarray, settings: GridSettings):
+    def __init__(self, id_: str, center: List[float], settings: GridSettings):
         self.id = id_
 
-        self._center = center
+        self._center = np.array(center)
 
         self._settings = settings
 
-        self._set_mesh(center, settings)
+        self._set_mesh(self._center, settings)
 
         self._features = {}
 
