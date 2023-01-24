@@ -181,24 +181,25 @@ class QueryCollection:
         grid_map_method: Union[MapMethod, None],
         query: Query):
 
-        if verbose:
-            _log.info(f'\nProcess query with process ID {os.getpid()}.')
-
-        # because only one process may access an hdf5 file at the time:
-        output_path = f"{prefix}-{os.getpid()}.hdf5"
-
-        feature_modules = [
-            importlib.import_module('deeprankcore.features.' + name) for name in feature_names]
-
         try:
+
+            if verbose:
+                _log.info(f'\nProcess query with process ID {os.getpid()}.')
+
+            # because only one process may access an hdf5 file at the time:
+            output_path = f"{prefix}-{os.getpid()}.hdf5"
+
+            feature_modules = [
+                importlib.import_module('deeprankcore.features.' + name) for name in feature_names]
+
             graph = query.build(feature_modules)
             graph.write_to_hdf5(output_path)
 
             if grid_settings is not None and grid_map_method is not None:
                 graph.write_as_grid_to_hdf5(output_path, grid_settings, grid_map_method)
 
-        except ValueError as e:
-            _log.error(e)
+        except Exception as e:
+            _log.error(f'Exception raised: {type(e).__name__, e.args}')
             _log.warning(f'Query {query.get_query_id()}\'s graph was not saved in the .HDF5 file; check the query\'s files')
 
     def process( # pylint: disable=too-many-arguments, too-many-locals
