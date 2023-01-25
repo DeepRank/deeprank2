@@ -89,3 +89,25 @@ class Residue:
     @property
     def position(self) -> np.array:
         return np.mean([atom.position for atom in self._atoms], axis=0)
+
+
+def get_residue_center(residue: Residue) -> np.ndarray:
+    """
+    Chooses a center position for a residue, based on the atoms it has:
+    1. find beta carbon, if present
+    2. find alpha carbon, if present
+    3. else take the mean of the atom positions
+    """
+
+    betas = [atom for atom in residue.atoms if atom.name == "CB"]
+    if len(betas) > 0:
+        return betas[0].position
+
+    alphas = [atom for atom in residue.atoms if atom.name == "CA"]
+    if len(alphas) > 0:
+        return alphas[0].position
+
+    if len(residue.atoms) == 0:
+        raise ValueError(f"cannot get the center position from {residue}, because it has no atoms")
+
+    return np.mean([atom.position for atom in residue.atoms], axis=0)

@@ -12,11 +12,14 @@ import importlib
 from os.path import basename
 import h5py
 import pkgutil
+import numpy as np
 from deeprankcore.utils.graph import Graph
 from deeprankcore.utils.grid import GridSettings, MapMethod
 from deeprankcore.molstruct.aminoacid import AminoAcid
+from deeprankcore.molstruct.residue import get_residue_center
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.structure import PDBStructure
 from deeprankcore.utils.buildgraph import (
-    get_residue_contact_pairs,
     get_contact_atoms,
     get_surrounding_residues,
     get_structure,
@@ -359,7 +362,7 @@ class SingleResidueVariantResidueQuery(Query):
             feature_modules(List[ModuleType]): Each must implement the :py:func:`add_features` function.
 
             include_hydrogens(bool, optional): Whether to include hydrogens in the :class:`Graph`, defaults to False.
-        
+
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
@@ -399,6 +402,7 @@ class SingleResidueVariantResidueQuery(Query):
         for feature_module in feature_modules:
             feature_module.add_features(self._pdb_path, graph, variant)
 
+        graph.center = get_residue_center(variant_residue)
         return graph
 
 
@@ -510,7 +514,7 @@ class SingleResidueVariantAtomicQuery(Query):
             feature_modules(List[ModuleType]): Each must implement the :py:func:`add_features` function.
 
             include_hydrogens(bool, optional): Whether to include hydrogens in the :class:`Graph`, defaults to False.
-        
+
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
@@ -557,7 +561,58 @@ class SingleResidueVariantAtomicQuery(Query):
         for feature_module in feature_modules:
             feature_module.add_features(self._pdb_path, graph, variant)
 
+        graph.center = get_residue_center(variant_residue)
         return graph
+
+
+def _load_ppi_atoms(pdb_path: str,
+                    chain_id1: str, chain_id2: str,
+                    distance_cutoff: float,
+                    include_hydrogens: bool) -> List[Atom]:
+
+    # get the contact atoms
+    if include_hydrogens:
+
+        pdb_name = os.path.basename(pdb_path)
+        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
+            prefix="hydrogenated-", suffix=pdb_name
+        )
+        os.close(hydrogen_pdb_file)
+
+        add_hydrogens(pdb_path, hydrogen_pdb_path)
+
+        try:
+            contact_atoms = get_contact_atoms(hydrogen_pdb_path,
+                                              chain_id1, chain_id2,
+                                              distance_cutoff)
+        finally:
+            os.remove(hydrogen_pdb_path)
+    else:
+        contact_atoms = get_contact_atoms(pdb_path,
+                                          chain_id1, chain_id2,
+                                          distance_cutoff)
+
+    if len(contact_atoms) == 0:
+        raise ValueError("no contact atoms found")
+
+    return contact_atoms
+
+
+def _load_ppi_pssms(pssm_paths: Union[Dict[str, str], None],
+                    chain_id1: str, chain_id2: str,
+                    structure: PDBStructure):
+
+    if pssm_paths is not None:
+        for chain_id in [chain_id1, chain_id2]:
+            if chain_id in pssm_paths:
+
+                chain = structure.get_chain(chain_id)
+
+                pssm_path = pssm_paths[chain_id]
+
+                with open(pssm_path, "rt", encoding="utf-8") as f:
+                    chain.pssm = parse_pssm(f, chain)
+
 
 
 class ProteinProteinInterfaceAtomicQuery(Query):
@@ -630,31 +685,10 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
 
-
-        # get the contact atoms
-        if include_hydrogens:
-
-            pdb_name = os.path.basename(self._pdb_path)
-            hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
-                prefix="hydrogenated-", suffix=pdb_name
-            )
-            os.close(hydrogen_pdb_file)
-
-            add_hydrogens(self._pdb_path, hydrogen_pdb_path)
-
-            try:
-                contact_atoms = get_contact_atoms(hydrogen_pdb_path,
-                                                  self._chain_id1, self._chain_id2,
-                                                  self._distance_cutoff)
-            finally:
-                os.remove(hydrogen_pdb_path)
-        else:
-            contact_atoms =  get_contact_atoms(self._pdb_path,
-                                               self._chain_id1, self._chain_id2,
-                                               self._distance_cutoff)
-
-        if len(contact_atoms) == 0:
-            raise ValueError("no contact atoms found")
+        contact_atoms = _load_ppi_atoms(self._pdb_path,
+                                        self._chain_id1, self._chain_id2,
+                                        self._distance_cutoff,
+                                        include_hydrogens)
 
         # build the graph
         graph = build_atomic_graph(
@@ -666,22 +700,16 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         # read the pssm
         structure = contact_atoms[0].residue.chain.model
-        if self._pssm_paths is not None:
-            for chain_id in [self._chain_id1, self._chain_id2]:
 
-                if chain_id in self._pssm_paths:
-
-                    chain = structure.get_chain(chain_id)
-
-                    pssm_path = self._pssm_paths[chain_id]
-
-                    with open(pssm_path, "rt", encoding="utf-8") as f:
-                        chain.pssm = parse_pssm(f, chain)
+        _load_ppi_pssms(self._pssm_paths,
+                        self._chain_id1, self._chain_id2,
+                        structure)
 
         # add the features
         for feature_module in feature_modules:
             feature_module.add_features(self._pdb_path, graph)
 
+        graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
         return graph
 
 
@@ -754,25 +782,16 @@ class ProteinProteinInterfaceResidueQuery(Query):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
         """
 
-        # load .PDB structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
+        contact_atoms = _load_ppi_atoms(self._pdb_path,
+                                        self._chain_id1, self._chain_id2,
+                                        self._distance_cutoff,
+                                        include_hydrogens)
 
-        # get the contact residues
-        interface_pairs = get_residue_contact_pairs(
-            self._pdb_path,
-            structure,
-            self._chain_id1,
-            self._chain_id2,
-            self._distance_cutoff,
-        )
-
-        if len(interface_pairs) == 0:
-            raise ValueError("no interface residues found")
-
+        atom_positions = []
         residues_selected = set([])
-        for residue1, residue2 in interface_pairs:
-            residues_selected.add(residue1)
-            residues_selected.add(residue2)
+        for atom in contact_atoms:
+            atom_positions.append(atom.position)
+            residues_selected.add(atom.residue)
         residues_selected = list(residues_selected)
 
         # build the graph
@@ -783,7 +802,16 @@ class ProteinProteinInterfaceResidueQuery(Query):
         # add data to the graph
         self._set_graph_targets(graph)
 
+        # read the pssm
+        structure = contact_atoms[0].residue.chain.model
+
+        _load_ppi_pssms(self._pssm_paths,
+                        self._chain_id1, self._chain_id2,
+                        structure)
+
+        # add the features
         for feature_module in feature_modules:
             feature_module.add_features(self._pdb_path, graph)
 
+        graph.center = np.mean(atom_positions, axis=0)
         return graph

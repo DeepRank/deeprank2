@@ -61,7 +61,7 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
         graph.write_to_hdf5(hdf5_path)
 
         # export grid to hdf5
-        grid_settings = GridSettings(np.array((0, 0, 0)), np.array((20, 21, 21)), np.array((20.0, 21.0, 21.0)))
+        grid_settings = GridSettings([20, 21, 21], [20.0, 21.0, 21.0])
         assert np.all(grid_settings.resolutions == np.array((1.0, 1.0, 1.0)))
 
         graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
@@ -97,6 +97,6 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 assert "value" in mapped_group[feature_name]
                 data = mapped_group[feature_name]["value"][()]
                 assert len(np.nonzero(data)) > 0, f"{feature_name}: all zero"
-                assert np.all(data.shape == grid_settings.points_counts)
+                assert np.all(data.shape == tuple(grid_settings.points_counts))
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
