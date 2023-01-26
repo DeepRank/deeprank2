@@ -8,6 +8,9 @@ from deeprankcore.molstruct.atom import Atom
 from deeprankcore.domain import nodestorage as Nfeat
 
 
+def count_neighbours(residue):
+    pass
+
 
 def add_features(
     pdb_path: str, 
