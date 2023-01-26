@@ -33,6 +33,13 @@ HSE = "hse" # list[3xfloat]; former FEATURENAME_HALFSPHEREEXPOSURE
 SASA = "sasa" # float; former FEATURENAME_SASA
 RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
 
+## residue contact density
+RCDTOTAL = 'rcd_total' # int
+RCDAPOLAR = 'rcd_apolar' # int
+RCDPOLAR = 'rcd_polar' # int
+RCDNEG = 'rcd_negative' # int
+RCDPOS = 'rcd_positive' # int
+
 ## conservation features
 PSSM = "pssm" # list[20xint]; former FEATURENAME_PSSM
 INFOCONTENT = "info_content" # float; former FEATURENAME_INFORMATIONCONTENT
