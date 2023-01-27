@@ -1,5 +1,6 @@
 import logging
 import freesasa
+from pdb2sql import pdb2sql
 import numpy as np
 from typing import List
 from deeprankcore.utils.graph import Node, Graph
@@ -46,9 +47,9 @@ def add_sasa_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extens
         node.features[Nfeat.SASA] = area
 
 
-def add_bsa(graph: Graph):
+def add_bsa(graph: Graph, pdb_path: str):
 
-    sasa_complete_structure = freesasa.Structure() # pylint: disable=c-extension-no-member
+    sasa_complete_structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member
     sasa_chain_structures = {}
 
     for node in graph.nodes:
@@ -58,32 +59,26 @@ def add_bsa(graph: Graph):
             if chain_id not in sasa_chain_structures:
                 sasa_chain_structures[chain_id] = freesasa.Structure() # pylint: disable=c-extension-no-member
 
-            for atom in residue.atoms:
-                sasa_chain_structures[chain_id].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
-                                                        atom.residue.number, atom.residue.chain.id,
-                                                        atom.position[0], atom.position[1], atom.position[2])
-                sasa_complete_structure.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
-                                                atom.residue.number, atom.residue.chain.id,
-                                                atom.position[0], atom.position[1], atom.position[2]) 
-
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
             chain_id = residue.chain.id
             if chain_id not in sasa_chain_structures:
                 sasa_chain_structures[chain_id] = freesasa.Structure() # pylint: disable=c-extension-no-member
-
-            sasa_chain_structures[chain_id].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
-                                                    atom.residue.number, atom.residue.chain.id,
-                                                    atom.position[0], atom.position[1], atom.position[2])
-            sasa_complete_structure.addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
-                                            atom.residue.number, atom.residue.chain.id,
-                                            atom.position[0], atom.position[1], atom.position[2])
-
-            area_key = "atom"
-            selection = (f"atom, (name {atom.name}) and (resi {atom.residue.number_string}) and (chain {atom.residue.chain.id})")
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}")
+
+    # add chain-specific atoms to SASA
+    pdb = pdb2sql(pdb_path)
+    try:
+        for chain_id in sasa_chain_structures:
+            for x, y, z, atom_name, residue_name, residue_number in pdb.get("x,y,z,name,resName,resSeq",
+                                                                            chainID=chain_id):
+                sasa_chain_structures[chain_id].addAtom(atom_name,
+                                                        residue_name, residue_number, chain_id,
+                                                        x,y,z)
+    finally:
+        pdb._close()
 
     sasa_complete_result = freesasa.calc(sasa_complete_structure) # pylint: disable=c-extension-no-member
     sasa_chain_results = {chain_id: freesasa.calc(structure) # pylint: disable=c-extension-no-member
@@ -116,7 +111,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
     BSA: the area of the protein, that only gets exposed in monomeric state"""
 
     # BSA
-    add_bsa(graph)
+    add_bsa(graph, pdb_path)
 
     # SASA
     structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member
