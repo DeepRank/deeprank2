@@ -292,7 +292,7 @@ class Grid:
             # elif method == MapMethod.BSP_LINE:
             #     grid_data = self._get_mapped_feature_bsp_line(position, value)
 
-            elif method == MapMethod.NEAREST_NEIGHBOUR:
+            elif method == MapMethod.NEAREST_NEIGHBOURS:
                 grid_data = self._get_mapped_feature_nearest_neighbour(position, value)
 
             # set to grid
