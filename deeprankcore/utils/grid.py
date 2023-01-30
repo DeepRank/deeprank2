@@ -3,6 +3,7 @@ This module holds the classes that are used when working with a 3D grid.
 """
 
 
+import logging
 from enum import Enum
 from typing import Dict, Union, List
 import numpy as np
@@ -11,6 +12,9 @@ import itertools
 from scipy.signal import bspline
 
 from deeprankcore.domain import gridstorage
+
+
+_log = logging.getLogger(__name__)
 
 
 class MapMethod(Enum):
@@ -183,9 +187,9 @@ class Grid:
 
         fx, fy, fz = position
         bsp_data = (
-            bspline((self.xgrid - fx) / self.resolution, order)
-            * bspline((self.ygrid - fy) / self.resolution, order)
-            * bspline((self.zgrid - fz) / self.resolution, order)
+            bspline((self.xgrid - fx) / self._settings.resolutions[0], order)
+            * bspline((self.ygrid - fy) / self._settings.resolutions[1], order)
+            * bspline((self.zgrid - fz) / self._settings.resolutions[2], order)
         )
 
         return value * bsp_data
@@ -289,8 +293,8 @@ class Grid:
             elif method == MapMethod.FAST_GAUSSIAN:
                 grid_data = self._get_mapped_feature_fast_gaussian(position, value)
 
-            # elif method == MapMethod.BSP_LINE:
-            #     grid_data = self._get_mapped_feature_bsp_line(position, value)
+            elif method == MapMethod.BSP_LINE:
+                grid_data = self._get_mapped_feature_bsp_line(position, value)
 
             elif method == MapMethod.NEAREST_NEIGHBOURS:
                 grid_data = self._get_mapped_feature_nearest_neighbour(position, value)

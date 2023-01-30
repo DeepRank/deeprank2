@@ -2,13 +2,18 @@ from typing import List
 
 import h5py
 import numpy as np
+import logging
 
 from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
 import deeprankcore.features.contact
-import deeprankcore.features.surfacearea
+import deeprankcore.features.conservation
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 from deeprankcore.molstruct.atom import AtomicElement
-from deeprankcore.domain.nodestorage import BSA as BSA_FEATURE
+from deeprankcore.domain.nodestorage import PSSM as PSSM_FEATURE, POSITION as POSITION_FEATURE
+from deeprankcore.domain.aminoacidlist import alanine
+
+
+_log = logging.getLogger(__name__)
 
 
 def _inflate(index: np.array, value: np.array, shape: List[int]):
@@ -37,28 +42,36 @@ def test_residue_grid_orientation():
 
         target_center = grid_points_group["center"][()]
 
-        bsa_chain1_group = data_file["1AK4/mapped_features/Feature_ind/bsa_chain1"]
-        chain1_bsa_index = bsa_chain1_group["index"][()]
-        chain1_bsa_value = bsa_chain1_group["value"][()]
-        target_chain1_bsa = _inflate(chain1_bsa_index, chain1_bsa_value, points_counts)
+        pssm_chain1_group = data_file["1AK4/mapped_features/Feature_ind/PSSM_ALA_chain1"]
+        chain1_pssm_index = pssm_chain1_group["index"][()]
+        chain1_pssm_value = pssm_chain1_group["value"][()]
+        target_chain1_pssm = _inflate(chain1_pssm_index, chain1_pssm_value, points_counts)
 
-        bsa_chain2_group = data_file["1AK4/mapped_features/Feature_ind/bsa_chain2"]
-        chain2_bsa_index = bsa_chain2_group["index"][()]
-        chain2_bsa_value = bsa_chain2_group["value"][()]
-        target_chain2_bsa = _inflate(chain2_bsa_index, chain2_bsa_value, points_counts)
+        pssm_chain2_group = data_file["1AK4/mapped_features/Feature_ind/PSSM_ALA_chain2"]
+        chain2_pssm_index = pssm_chain2_group["index"][()]
+        chain2_pssm_value = pssm_chain2_group["value"][()]
+        target_chain2_pssm = _inflate(chain2_pssm_index, chain2_pssm_value, points_counts)
 
-    target_bsa = target_chain1_bsa + target_chain2_bsa
+    target_pssm = target_chain1_pssm + target_chain2_pssm
 
     # Build the atomic graph, according to this repository's code.
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
     chain_id1 = "C"
     chain_id2 = "D"
-    distance_cutoff = 8.5
+    distance_cutoff = 5.5
 
     query = ProteinProteinInterfaceResidueQuery(pdb_path, chain_id1, chain_id2,
-                                                distance_cutoff=distance_cutoff)
+                                                distance_cutoff=distance_cutoff,
+                                                pssm_paths={"C": "tests/data/pssm/1AK4/1AK4.C.pssm",
+                                                            "D": "tests/data/pssm/1AK4/1AK4.D.pssm"})
 
-    graph = query.build([deeprankcore.features.surfacearea])
+    graph = query.build([deeprankcore.features.conservation])
+
+    for node in graph.nodes:
+        position = node.features[POSITION_FEATURE]
+        pssm = node.features[PSSM_FEATURE]
+        residue = node.id
+        _log.debug(f"Chain {residue.chain.id} {residue.amino_acid}{residue.number} at {position} has pssm ala {pssm[0]}")
 
     # Make a grid from the graph.
     map_method = MapMethod.FAST_GAUSSIAN
@@ -79,13 +92,14 @@ def test_residue_grid_orientation():
     assert grid.zs.shape == target_zs.shape
     assert np.all(np.abs(grid.zs - target_zs) < error_margin), f"\n{grid.zs} != \n{target_zs}"
 
-    # Get the bsa from the grid
-    bsa = grid.features[BSA_FEATURE]
+    # Get the pssm from the grid
+    alanine_index = deeprankcore.features.conservation.profile_amino_acid_order.index(alanine)
+    pssm = grid.features[f"{PSSM_FEATURE}_{alanine_index:03}"]
 
-    assert bsa.shape == target_bsa.shape, f"{bsa.shape} != {target_bsa.shape}"
+    assert pssm.shape == target_pssm.shape, f"{pssm.shape} != {target_pssm.shape}"
 
-    for i in range(bsa.shape[0]):
-        assert np.all(np.abs(bsa[i] - target_bsa[i]) < error_margin), f"{i}:\n{bsa[i]} !=\n{target_bsa[i]}"
+    for i in range(0, pssm.shape[0]):
+        assert np.all(np.abs(pssm[i] - target_pssm[i]) < error_margin), f"{i}:\n{pssm[i]} !=\n{target_pssm[i]}"
 
 
 def test_atomic_grid_orientation():
