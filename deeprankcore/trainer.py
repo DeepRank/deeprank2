@@ -705,7 +705,7 @@ class Trainer():
             outputs += pred.cpu().numpy().tolist()
 
             # Get the name
-            entry_names += data_batch.entry_names
+            entry_names += data_batch.entry_names.cpu()
 
         dt = time() - t0
         if count_predictions > 0:
@@ -755,7 +755,7 @@ class Trainer():
 
             # Check if a target value was provided (i.e. benchmarck scenario)
             if y is not None:
-                target_vals += y.tolist()
+                target_vals += y.cpu().numpy().tolist()
                 loss_ = loss_func(pred, y)
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
@@ -766,10 +766,10 @@ class Trainer():
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
-            outputs += pred.tolist()
+            outputs += pred.cpu().numpy().tolist()
 
             # get the name
-            entry_names += data_batch.entry_names
+            entry_names += data_batch.entry_names.cpu()
 
         dt = time() - t0
         if count_predictions > 0:
