@@ -27,5 +27,6 @@ def add_features(
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}")
     
+    sql = pdb2sql.interface(pdb_path)    
     
-
+    all_contact_pairs = sql.get_contact_residues(cutoff=distance, allchains=True, return_contact_pairs=True)
