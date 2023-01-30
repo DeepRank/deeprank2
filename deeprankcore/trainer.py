@@ -772,7 +772,7 @@ class Trainer():
             entry_names += data_batch.entry_names.cpu()
 
         dt = time() - t0
-        if count_predictions > 0:\
+        if count_predictions > 0:
             eval_loss = sum_of_losses / count_predictions
         else:
             eval_loss = 0.0
