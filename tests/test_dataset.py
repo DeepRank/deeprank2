@@ -1,6 +1,7 @@
 import unittest
 from torch_geometric.data.data import Data
 import h5py
+from torch_geometric.loader import DataLoader
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
@@ -22,6 +23,25 @@ class TestDataSet(unittest.TestCase):
 
         assert len(dataset) == 4
         assert dataset[0] is not None
+
+    def test_dataset_collates_entry_names(self):
+
+        for dataset_name, dataset in [("GraphDataset", GraphDataset(self.hdf5_path,
+                                                                    node_features=node_feats,
+                                                                    edge_features=[Efeat.DISTANCE],
+                                                                    target=targets.IRMSD)),
+                                      ("GridDataset", GridDataset(self.hdf5_path,
+                                                                  features=[Efeat.VANDERWAALS],
+                                                                  target=targets.IRMSD))]:
+
+            entry_names = []
+            for batch_data in DataLoader(dataset, batch_size=2, shuffle=True):
+                entry_names += batch_data.entry_names
+
+            assert set(entry_names) == set(['residue-ppi-1ATN_1w:A-B',
+                                            'residue-ppi-1ATN_2w:A-B',
+                                            'residue-ppi-1ATN_3w:A-B',
+                                            'residue-ppi-1ATN_4w:A-B']), f"entry names of {dataset_name} were not collated correctly"
 
     def test_grid_dataset_regression(self):
         dataset = GridDataset(
