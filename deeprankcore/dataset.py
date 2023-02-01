@@ -590,7 +590,7 @@ class GraphDataset(DeeprankDataset):
 
         data.entry_names = entry_name
 
-        # apply transformationa
+        # apply transformation
         if self._transform is not None:
             data = self._transform(data)
 
