@@ -705,7 +705,7 @@ class Trainer():
             outputs += pred.cpu().numpy().tolist()
 
             # Get the name
-            entry_names += data_batch.entry_names.cpu()
+            entry_names += data_batch.entry_names
 
         dt = time() - t0
         if count_predictions > 0:
@@ -769,7 +769,7 @@ class Trainer():
             outputs += pred.cpu().numpy().tolist()
 
             # get the name
-            entry_names += data_batch.entry_names.cpu()
+            entry_names += data_batch.entry_names
 
         dt = time() - t0
         if count_predictions > 0:
