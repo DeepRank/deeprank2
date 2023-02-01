@@ -43,7 +43,7 @@ The following is a brief description of the features already implemented in the 
 ### `deeprankcore.features.exposure`
 
 - `res_depth`: Average distance to surface for all atoms in a residue. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. Computed using `Bio.PDB.ResidueDepth`, in Angstrom. Float value. 
-- `hse`: Half Sphere exposure (HSE) measures how buried amino acid residues are in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. Array of float values of length 3.
+- `hse`: Half Sphere exposure (HSE) measures how buried amino acid residues are in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. It is calculated using biopython, so for more details see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) biopython module. Array of float values of length 3.
   
 ### `deeprankcore.features.surfacearea`
 
