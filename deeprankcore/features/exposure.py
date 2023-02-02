@@ -16,13 +16,13 @@ import signal
 _log = logging.getLogger(__name__)
 
 
-def handle_sigint(sig, frame):
+def handle_sigint(sig, frame): # pylint: disable=unused-argument
     print('SIGINT received, terminating.')
     sys.exit()
 
 
-def handle_timeout(sig, frame):
-    raise TimeoutError(f'Bio.PDB.ResidueDepth.get_surface timed out')
+def handle_timeout(sig, frame): # pylint: disable=unused-argument
+    raise TimeoutError('Timed out!')
 
 
 def space_if_none(value):
@@ -47,8 +47,8 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         signal.alarm(20)
         surface = get_surface(bio_model)
         signal.alarm(0)
-    except TimeoutError:
-        raise
+    except TimeoutError as e:
+        raise TimeoutError('Bio.PDB.ResidueDepth.get_surface timed out.') from e
     else:
         hse = HSExposureCA(bio_model)
 
