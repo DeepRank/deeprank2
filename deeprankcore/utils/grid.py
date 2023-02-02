@@ -157,10 +157,8 @@ class Grid:
         """
 
         if feature_name not in self._features:
-            _log.debug(f"set {np.sum(data)} to {feature_name}")
             self._features[feature_name] = data
         else:
-            _log.debug(f"add {np.sum(data)} to {np.sum(self._features[feature_name])}")
             self._features[feature_name] += data
 
     def _get_mapped_feature_gaussian(

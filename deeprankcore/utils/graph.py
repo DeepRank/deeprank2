@@ -154,8 +154,6 @@ class Graph:
             position = points[point_index]
             value = values[point_index]
 
-            _log.debug(f"map {feature_name} at {position} = {value}")
-
             grid.map_feature(position, feature_name, value, method)
 
     def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Optional[Augmentation] = None):
