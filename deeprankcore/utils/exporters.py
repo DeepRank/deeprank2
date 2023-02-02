@@ -262,9 +262,6 @@ class HDF5OutputExporter(OutputExporter):
                 key=self.phase,
                 mode='a')
 
-        # reset df
-        self.df = pd.DataFrame(data=self.d)
-
     def process( # pylint: disable=too-many-arguments
         self,
         pass_name: str,
