@@ -2,7 +2,7 @@
 This module holds the classes that are used when working with a 3D grid.
 """
 
-
+import logging
 from enum import Enum
 from typing import Dict, Union, List
 import numpy as np
@@ -11,6 +11,9 @@ import itertools
 from scipy.signal import bspline
 
 from deeprankcore.domain import gridstorage
+
+
+_log = logging.getLogger(__name__)
 
 
 class MapMethod(Enum):
@@ -22,6 +25,22 @@ class MapMethod(Enum):
     FAST_GAUSSIAN = 2
     BSP_LINE = 3
     NEAREST_NEIGHBOURS = 4
+
+
+class Augmentation:
+    "a rotation around an axis, to be applied to a feature before mapping it to a grid"
+
+    def __init__(self, axis: np.ndarray, angle: float):
+        self._axis = axis
+        self._angle = angle
+
+    @property
+    def axis(self) -> np.ndarray:
+        return self._axis
+
+    @property
+    def angle(self) -> float:
+        return self._angle
 
 
 class GridSettings:
@@ -138,8 +157,10 @@ class Grid:
         """
 
         if feature_name not in self._features:
+            _log.debug(f"set {np.sum(data)} to {feature_name}")
             self._features[feature_name] = data
         else:
+            _log.debug(f"add {np.sum(data)} to {np.sum(self._features[feature_name])}")
             self._features[feature_name] += data
 
     def _get_mapped_feature_gaussian(
