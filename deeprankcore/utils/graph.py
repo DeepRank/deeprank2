@@ -137,7 +137,7 @@ class Graph:
 
         return False
 
-    def _map_point_features(self, grid: Grid, method: MapMethod,
+    def _map_point_features(self, grid: Grid, method: MapMethod,  # pylint: disable=too-many-arguments
                             feature_name: str, points: List[np.ndarray],
                             values: List[Union[float, np.ndarray]],
                             augmentation: Optional[Augmentation] = None):
