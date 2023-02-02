@@ -21,7 +21,7 @@ def handle_sigint(sig, frame): # pylint: disable=unused-argument
     sys.exit()
 
 
-def handle_timeout(sig, frame): # pylint: disable=unused-argument
+def handle_timeout(sig, frame):
     raise TimeoutError('Timed out!')
 
 
