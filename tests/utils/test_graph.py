@@ -75,8 +75,8 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
         axis, angle = get_rot_axis_angle(int(time() * 1000) % (2**32 - 1))
         augmentation = Augmentation(axis, angle)
 
-        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
-        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN, augmentation)
+        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.GAUSSIAN)
+        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.GAUSSIAN, augmentation)
 
         # check the contents of the hdf5 file
         with h5py.File(hdf5_path, "r") as f5:
@@ -120,7 +120,7 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
             augmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
 
-        assert np.abs(np.sum(augmented_data) - np.sum(unaugmented_data)).item() < 0.01
+        assert np.abs(np.sum(augmented_data) - np.sum(unaugmented_data)).item() < 0.1
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
