@@ -462,10 +462,6 @@ class Trainer():
         default_regression_loss = nn.MSELoss
         default_classification_loss = nn.CrossEntropyLoss
 
-        default_loss_info = (f'No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}')
-        custom_loss_warning = ( f'The provided loss function ({lossfunction}) is not part of the default list.\n\t' +
-                                f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
-
         def _invalid_loss():
             if override_invalid:
                 _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
@@ -489,9 +485,11 @@ class Trainer():
         if self.task == targets.REGRESS:
             if lossfunction is None:
                 lossfunction = default_regression_loss
-                _log.info(default_loss_info)
+                _log.info(f'No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}')
             else:
                 if custom_loss:
+                    custom_loss_warning = ( f'The provided loss function ({lossfunction}) is not part of the default list.\n\t' +
+                                            f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
                     _log.warning(custom_loss_warning)
                 elif lossfunction not in losses.regression_losses:
                     _invalid_loss()
@@ -501,9 +499,11 @@ class Trainer():
         elif self.task == targets.CLASSIF:
             if lossfunction is None:
                 lossfunction = default_classification_loss
-                _log.info(default_loss_info)
+                _log.info(f'No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}')
             else:
                 if custom_loss:
+                    custom_loss_warning = ( f'The provided loss function ({lossfunction}) is not part of the default list.\n\t' +
+                                            f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
                     _log.warning(custom_loss_warning)
                 elif lossfunction not in losses.classification_losses:
                     _invalid_loss()
@@ -755,7 +755,7 @@ class Trainer():
 
             # Check if a target value was provided (i.e. benchmarck scenario)
             if y is not None:
-                target_vals += y.tolist()
+                target_vals += y.cpu().numpy().tolist()
                 loss_ = loss_func(pred, y)
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
@@ -766,7 +766,7 @@ class Trainer():
                 pred = F.softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
-            outputs += pred.tolist()
+            outputs += pred.cpu().numpy().tolist()
 
             # get the name
             entry_names += data_batch.entry_names
