@@ -290,7 +290,7 @@ class GridDataset(DeeprankDataset):
         with h5py.File(hdf5_path, "r") as hdf5_file:
             entry_name = list(hdf5_file.keys())[0]
 
-            hdf5_all_feature_names = hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys()
+            hdf5_all_feature_names = list(hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys())
 
             hdf5_matching_feature_names = []  # feature names that match with the requested list of names
             unpartial_feature_names = []  # feature names without their dimension number suffix

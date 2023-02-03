@@ -24,7 +24,7 @@ from deeprankcore.query import (
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 from deeprankcore.features import components, conservation, contact, surfacearea
-from deeprankcore.dataset import GraphDataset
+from deeprankcore.dataset import GraphDataset, GridDataset
 from deeprankcore.utils.grid import GridSettings, MapMethod
 
 
@@ -327,6 +327,8 @@ def test_augmentation():
     augmentation_count = 5
     grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
 
+    expected_entry_count = (augmentation_count + 1) * 2
+
     tmp_dir = mkdtemp()
     try:
         qc.process(f"{tmp_dir}/qc",
@@ -334,11 +336,16 @@ def test_augmentation():
                    grid_map_method=MapMethod.GAUSSIAN,
                    grid_augmentation_count=augmentation_count)
 
-        entry_names = []
-        for path in glob(f"{tmp_dir}/*.hdf5"):
-            with h5py.File(path, 'r') as f5:
-                entry_names += list(f5.keys())
+        hdf5_path = f"{tmp_dir}/qc.hdf5"
+        assert os.path.isfile(hdf5_path)
 
-        assert len(entry_names) == (augmentation_count + 1) * 2, f"only entries {entry_names}"
+        with h5py.File(hdf5_path, 'r') as f5:
+            entry_names = list(f5.keys())
+
+        assert len(entry_names) == expected_entry_count, f"only entries {entry_names}, expected {expected_entry_count} entries"
+
+        dataset = GridDataset(hdf5_path)
+
+        assert len(dataset) == expected_entry_count, f"only {len(dataset)}, expected {expected_entry_count}"
     finally:
         shutil.rmtree(tmp_dir)
