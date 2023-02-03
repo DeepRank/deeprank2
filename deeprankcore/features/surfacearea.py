@@ -1,6 +1,5 @@
 import logging
 import freesasa
-from pdb2sql import pdb2sql
 import numpy as np
 from typing import List
 from deeprankcore.utils.graph import Node, Graph

@@ -3,7 +3,6 @@ import numpy as np
 
 from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
-from deeprankcore.domain.nodestorage import POSITION as POSITION_FEATURE
 
 
 def test_residue_grid_orientation():
