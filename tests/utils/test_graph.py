@@ -4,7 +4,6 @@ import os
 import h5py
 from pdb2sql import pdb2sql
 from pdb2sql.transform import get_rot_axis_angle
-from time import time
 import numpy as np
 from deeprankcore.utils.grid import GridSettings, MapMethod, Augmentation
 from deeprankcore.utils.graph import Graph, Edge, Node
