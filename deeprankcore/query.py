@@ -221,7 +221,7 @@ class QueryCollection:
         combine_output: Optional[bool] = True,
         grid_settings: Optional[GridSettings] = None,
         grid_map_method: Optional[MapMethod] = None,
-        grid_augmentation_count: Optional[int] = 0
+        grid_augmentation_count: int = 0
         ) -> List[str]:
         """
         Args:
