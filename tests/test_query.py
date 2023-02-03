@@ -3,7 +3,6 @@ import shutil
 import numpy as np
 import os
 import h5py
-from glob import glob
 from deeprankcore.domain.aminoacidlist import (
     alanine,
     arginine,
