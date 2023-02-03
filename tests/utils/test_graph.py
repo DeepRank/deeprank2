@@ -3,11 +3,13 @@ import shutil
 import os
 import h5py
 from pdb2sql import pdb2sql
+from pdb2sql.transform import get_rot_axis_angle
 import numpy as np
-from deeprankcore.utils.grid import GridSettings, MapMethod
+from deeprankcore.utils.grid import GridSettings, MapMethod, Augmentation
 from deeprankcore.utils.graph import Graph, Edge, Node
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.molstruct.pair import ResidueContact
+from deeprankcore.molstruct.residue import get_residue_center
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, gridstorage)
 
 
@@ -46,12 +48,17 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
     node0.features[node_feature_singlevalue_name] = 1.0
     node1.features[node_feature_singlevalue_name] = 0.0
 
+    # set node positions, for the grid mapping
+    node0.features[Nfeat.POSITION] = get_residue_center(residue0)
+    node1.features[Nfeat.POSITION] = get_residue_center(residue1)
+
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
     hdf5_path = os.path.join(tmp_dir_path, "101m.hdf5")
     try:
         # init the graph
         graph = Graph(structure.id)
+        graph.center = np.mean([node0.features[Nfeat.POSITION], node1.features[Nfeat.POSITION]], axis=0)
 
         graph.add_node(node0)
         graph.add_node(node1)
@@ -61,10 +68,14 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
         graph.write_to_hdf5(hdf5_path)
 
         # export grid to hdf5
-        grid_settings = GridSettings([20, 21, 21], [20.0, 21.0, 21.0])
+        grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
         assert np.all(grid_settings.resolutions == np.array((1.0, 1.0, 1.0)))
 
-        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.FAST_GAUSSIAN)
+        axis, angle = get_rot_axis_angle(412346587)
+        augmentation = Augmentation(axis, angle)
+
+        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.GAUSSIAN)
+        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.GAUSSIAN, augmentation)
 
         # check the contents of the hdf5 file
         with h5py.File(hdf5_path, "r") as f5:
@@ -98,5 +109,18 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 data = mapped_group[feature_name]["value"][()]
                 assert len(np.nonzero(data)) > 0, f"{feature_name}: all zero"
                 assert np.all(data.shape == tuple(grid_settings.points_counts))
+
+            # check that the feature value is preserved after augmentation
+            unaugmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
+
+        # check that the augmented data is the same, just different orientation
+        with h5py.File(hdf5_path, "r") as f5:
+            entry_group = f5[f"{entry_id}_000"]
+            mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
+            augmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
+
+        assert np.abs(np.sum(augmented_data) - np.sum(unaugmented_data)).item() < 0.1
+
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
+
