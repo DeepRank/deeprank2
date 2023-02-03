@@ -82,10 +82,10 @@ class Chain:
     def add_residue(self, residue):
         self._residues[(residue.number, residue.insertion_code)] = residue
 
-    def has_residue(self, residue_number: int, insertion_code: str) -> bool:
+    def has_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> bool:
         return (residue_number, insertion_code) in self._residues
 
-    def get_residue(self, residue_number: int, insertion_code: str):
+    def get_residue(self, residue_number: int, insertion_code: Optional[str] = None):
         return self._residues[(residue_number, insertion_code)]
 
     @property
@@ -112,7 +112,7 @@ class Chain:
         )
 
     def __hash__(self) -> hash:
-        return hash((self._model, self._id))
+        return hash(self._id)
 
     def __repr__(self) -> str:
         return f"{self._model} {self._id}"

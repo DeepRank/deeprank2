@@ -38,7 +38,7 @@ class Residue:
         )
 
     def __hash__(self) -> hash:
-        return hash((self._chain, self._number, self._insertion_code))
+        return hash((self._number, self._insertion_code))
 
     def get_pssm(self) -> PssmRow:
         """ if the residue's chain has pssm info linked to it,
