@@ -1,5 +1,6 @@
 import logging
 import os
+from time import time
 from typing import Dict, List, Optional, Iterator, Union
 import tempfile
 import pdb2sql
@@ -14,7 +15,7 @@ import h5py
 import pkgutil
 import numpy as np
 from deeprankcore.utils.graph import Graph
-from deeprankcore.utils.grid import GridSettings, MapMethod
+from deeprankcore.utils.grid import GridSettings, MapMethod, Augmentation
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.molstruct.residue import get_residue_center
 from deeprankcore.molstruct.atom import Atom
@@ -182,6 +183,7 @@ class QueryCollection:
         feature_names: List[str],
         grid_settings: Union[GridSettings, None],
         grid_map_method: Union[MapMethod, None],
+        grid_augmentation_count: int,
         query: Query):
 
         try:
@@ -196,7 +198,13 @@ class QueryCollection:
 
             if grid_settings is not None and grid_map_method is not None:
                 graph.write_as_grid_to_hdf5(output_path, grid_settings, grid_map_method)
-            
+
+                for _ in range(grid_augmentation_count):
+                    # repeat with random augmentation
+                    axis, angle = pdb2sql.transform.get_rot_axis_angle(int(time() * 1000) % (2 ** 32 - 1))
+                    augmentation = Augmentation(axis, angle)
+                    graph.write_as_grid_to_hdf5(output_path, grid_settings, grid_map_method, augmentation)
+
             return None
 
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
@@ -212,7 +220,8 @@ class QueryCollection:
         cpu_count: Optional[int] = None,
         combine_output: Optional[bool] = True,
         grid_settings: Optional[GridSettings] = None,
-        grid_map_method: Optional[MapMethod] = None
+        grid_map_method: Optional[MapMethod] = None,
+        grid_augmentation_count: int = 0
         ) -> List[str]:
         """
         Args:
@@ -232,6 +241,8 @@ class QueryCollection:
             
             grid_map_method(:class:`MapMethod`, optional): if valid together with `grid_settings`, the grid data will be stored as well.
                 Defaults to None.
+
+            grid_augmentation_count: number of grid data augmentations, must be zero or a positive number
         
         Returns:
             List(str): The list of paths of the generated .HDF5 files.
@@ -261,7 +272,7 @@ class QueryCollection:
         _log.info(f'Creating pool function to process {len(self.queries)} queries...')
         pool_function = partial(self._process_one_query, prefix,
                                 feature_names,
-                                grid_settings, grid_map_method)
+                                grid_settings, grid_map_method, grid_augmentation_count)
 
         with Pool(self.cpu_count) as pool:
             _log.info('Starting pooling...\n')
