@@ -64,6 +64,8 @@ class DeeprankDataset(Dataset):
         # and get fname and mol name from the index
         self._create_index_entries()
 
+        self.df = None
+
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -246,8 +248,21 @@ class DeeprankDataset(Dataset):
             df_final = pd.concat([df_final, df])
 
         df_final.reset_index(drop=True, inplace=True)
+        self.df = df_final
 
         return df_final
+    
+    def _compute_mean_std(self):
+
+        means = {col: round(np.concatenate(self.df[col].values).mean(), 1) if isinstance(self.df[col].values[0], np.ndarray) \
+            else round(self.df[col].values.mean(), 1) \
+            for col in self.df.columns[1:]}
+        devs = {col: round(np.concatenate(self.df[col].values).std(), 1) if isinstance(self.df[col].values[0], np.ndarray) \
+            else round(self.df[col].values.std(), 1) \
+            for col in self.df.columns[1:]}
+        self.means = means
+        self.devs = devs
+
 
 
 # Grid features are stored per dimension and named accordingly.
@@ -448,6 +463,7 @@ class GraphDataset(DeeprankDataset):
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
+        standardize: bool = False,
         transform: Optional[Callable] = None,
         pre_transform: Optional[Callable] = None,
         edge_features_transform: Optional[Callable] = lambda x: np.tanh(-x / 2 + 2) + 1,
@@ -494,6 +510,9 @@ class GraphDataset(DeeprankDataset):
 
             root (str, optional): Root directory where the dataset should be saved, defaults to "./".
 
+            standardize (bool, optional): Whether to standardize all the features, centering each feature's mean at 0 with a standard deviation
+                of 1. Defaults to False.
+
             transform (Callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a
                 transformed version. The data object will be transformed before every access. Defaults to None.
 
@@ -515,6 +534,7 @@ class GraphDataset(DeeprankDataset):
         self.edge_features = edge_features
         self.clustering_method = clustering_method
 
+        self._standardize = standardize
         self._transform = transform
         self.edge_features_transform = edge_features_transform
         self.target_transform = target_transform
@@ -529,6 +549,10 @@ class GraphDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = [self.target]
             else:
                 self.features_dict[targets.VALUES] = self.target
+        
+        if self._standardize:
+            self.hdf5_to_pandas()
+            self._compute_mean_std()
 
     def get(self, idx: int) -> Data:
         """
@@ -563,8 +587,15 @@ class GraphDataset(DeeprankDataset):
             for feat in self.node_features:
                 if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
-                    if vals.ndim == 1:
+                    if vals.ndim == 1: # features with only one channel
                         vals = vals.reshape(-1, 1)
+                        if self._standardize:
+                            vals = (vals-self.means[feat])/self.devs[feat]
+                    else:
+                        if self._standardize:
+                            reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
+                            reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
+                            vals = (vals - reshaped_mean)/reshaped_dev
                     node_data += (vals,)
             x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
 
@@ -590,6 +621,13 @@ class GraphDataset(DeeprankDataset):
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
+                            if self._standardize:
+                                vals = (vals-self.means[feat])/self.devs[feat]
+                        else:
+                            if self._standardize:
+                                reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
+                                reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
+                                vals = (vals - reshaped_mean)/reshaped_dev
                         edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
