@@ -1,7 +1,9 @@
-from tempfile import mkstemp
+from tempfile import mkstemp, mkdtemp
+import shutil
 import numpy as np
 import os
 import h5py
+from glob import glob
 from deeprankcore.domain.aminoacidlist import (
     alanine,
     arginine,
@@ -16,12 +18,14 @@ from deeprankcore.query import (
     SingleResidueVariantResidueQuery,
     SingleResidueVariantAtomicQuery,
     ProteinProteinInterfaceAtomicQuery,
-    ProteinProteinInterfaceResidueQuery
+    ProteinProteinInterfaceResidueQuery,
+    QueryCollection
 )
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 from deeprankcore.features import components, conservation, contact, surfacearea
 from deeprankcore.dataset import GraphDataset
+from deeprankcore.utils.grid import GridSettings, MapMethod
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
@@ -291,3 +295,50 @@ def test_res_ppi():
     g = query.build([surfacearea, contact])
 
     _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELECTROSTATIC])
+
+
+def test_augmentation():
+    qc = QueryCollection()
+
+    qc.add(SingleResidueVariantResidueQuery(
+        "tests/data/pdb/101M/101M.pdb",
+        "A",
+        25,
+        None,
+        glycine,
+        alanine,
+        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+        targets={targets.BINARY: 0},
+    ))
+
+    qc.add(SingleResidueVariantAtomicQuery(
+        "tests/data/pdb/101M/101M.pdb",
+        "A",
+        27,
+        None,
+        asparagine,
+        phenylalanine,
+        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+        targets={targets.BINARY: 0},
+        radius=5.0,
+        distance_cutoff=5.0,
+    ))
+
+    augmentation_count = 5
+    grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
+
+    tmp_dir = mkdtemp()
+    try:
+        qc.process(f"{tmp_dir}/qc",
+                   grid_settings=grid_settings,
+                   grid_map_method=MapMethod.GAUSSIAN,
+                   grid_augmentation_count=augmentation_count)
+
+        entry_names = []
+        for path in glob(f"{tmp_dir}/*.hdf5"):
+            with h5py.File(path, 'r') as f5:
+                entry_names += list(f5.keys())
+
+        assert len(entry_names) == (augmentation_count + 1) * 2, f"only entries {entry_names}"
+    finally:
+        shutil.rmtree(tmp_dir)
