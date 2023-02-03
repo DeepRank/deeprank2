@@ -1,13 +1,9 @@
-from typing import List
-
 import h5py
 import numpy as np
 
 from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
-from deeprankcore.molstruct.atom import AtomicElement
-from deeprankcore.domain.nodestorage import PSSM as PSSM_FEATURE, POSITION as POSITION_FEATURE
-from deeprankcore.domain.aminoacidlist import alanine
+from deeprankcore.domain.nodestorage import POSITION as POSITION_FEATURE
 
 
 def test_residue_grid_orientation():
@@ -64,7 +60,6 @@ def test_atomic_grid_orientation():
 
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]
-    carbon_vanderwaals_radius = 1.7
 
     # Extract data from original deeprank's preprocessed file.
     with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", 'r') as data_file:
