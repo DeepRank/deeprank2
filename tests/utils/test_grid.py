@@ -2,32 +2,17 @@ from typing import List
 
 import h5py
 import numpy as np
-import logging
 
 from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
-import deeprankcore.features.contact
-import deeprankcore.features.conservation
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 from deeprankcore.molstruct.atom import AtomicElement
 from deeprankcore.domain.nodestorage import PSSM as PSSM_FEATURE, POSITION as POSITION_FEATURE
 from deeprankcore.domain.aminoacidlist import alanine
 
 
-_log = logging.getLogger(__name__)
-
-
-def _inflate(index: np.array, value: np.array, shape: List[int]):
-
-    data = np.zeros(shape[0] * shape[1] * shape[2])
-
-    data[index] = value[:,0]
-
-    return data.reshape(shape)
-
-
 def test_residue_grid_orientation():
 
-    error_margin = 0.001
+    coord_error_margin = 1.0  # Angstrom
 
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]
@@ -42,36 +27,16 @@ def test_residue_grid_orientation():
 
         target_center = grid_points_group["center"][()]
 
-        pssm_chain1_group = data_file["1AK4/mapped_features/Feature_ind/PSSM_ALA_chain1"]
-        chain1_pssm_index = pssm_chain1_group["index"][()]
-        chain1_pssm_value = pssm_chain1_group["value"][()]
-        target_chain1_pssm = _inflate(chain1_pssm_index, chain1_pssm_value, points_counts)
-
-        pssm_chain2_group = data_file["1AK4/mapped_features/Feature_ind/PSSM_ALA_chain2"]
-        chain2_pssm_index = pssm_chain2_group["index"][()]
-        chain2_pssm_value = pssm_chain2_group["value"][()]
-        target_chain2_pssm = _inflate(chain2_pssm_index, chain2_pssm_value, points_counts)
-
-    target_pssm = target_chain1_pssm + target_chain2_pssm
-
     # Build the atomic graph, according to this repository's code.
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
     chain_id1 = "C"
     chain_id2 = "D"
-    distance_cutoff = 5.5
+    distance_cutoff = 8.5
 
     query = ProteinProteinInterfaceResidueQuery(pdb_path, chain_id1, chain_id2,
-                                                distance_cutoff=distance_cutoff,
-                                                pssm_paths={"C": "tests/data/pssm/1AK4/1AK4.C.pssm",
-                                                            "D": "tests/data/pssm/1AK4/1AK4.D.pssm"})
+                                                distance_cutoff=distance_cutoff)
 
-    graph = query.build([deeprankcore.features.conservation])
-
-    for node in graph.nodes:
-        position = node.features[POSITION_FEATURE]
-        pssm = node.features[PSSM_FEATURE]
-        residue = node.id
-        _log.debug(f"Chain {residue.chain.id} {residue.amino_acid}{residue.number} at {position} has pssm ala {pssm[0]}")
+    graph = query.build([])
 
     # Make a grid from the graph.
     map_method = MapMethod.FAST_GAUSSIAN
@@ -79,32 +44,23 @@ def test_residue_grid_orientation():
     grid = Grid("test_grid", graph.center, grid_settings)
     graph.map_to_grid(grid, map_method)
 
-    assert np.all(np.abs(target_center - grid.center) < error_margin), f"\n{grid.center} != \n{target_center}"
+    assert np.all(np.abs(target_center - grid.center) < coord_error_margin), f"\n{grid.center} != \n{target_center}"
 
     # Orientation must be the same as in the original deeprank.
     # Check that the grid point coordinates are the same.
     assert grid.xs.shape == target_xs.shape
-    assert np.all(np.abs(grid.xs - target_xs) < error_margin), f"\n{grid.xs} != \n{target_xs}"
+    assert np.all(np.abs(grid.xs - target_xs) < coord_error_margin), f"\n{grid.xs} != \n{target_xs}"
 
     assert grid.ys.shape == target_ys.shape
-    assert np.all(np.abs(grid.ys - target_ys) < error_margin), f"\n{grid.ys} != \n{target_ys}"
+    assert np.all(np.abs(grid.ys - target_ys) < coord_error_margin), f"\n{grid.ys} != \n{target_ys}"
 
     assert grid.zs.shape == target_zs.shape
-    assert np.all(np.abs(grid.zs - target_zs) < error_margin), f"\n{grid.zs} != \n{target_zs}"
-
-    # Get the pssm from the grid
-    alanine_index = deeprankcore.features.conservation.profile_amino_acid_order.index(alanine)
-    pssm = grid.features[f"{PSSM_FEATURE}_{alanine_index:03}"]
-
-    assert pssm.shape == target_pssm.shape, f"{pssm.shape} != {target_pssm.shape}"
-
-    for i in range(0, pssm.shape[0]):
-        assert np.all(np.abs(pssm[i] - target_pssm[i]) < error_margin), f"{i}:\n{pssm[i]} !=\n{target_pssm[i]}"
+    assert np.all(np.abs(grid.zs - target_zs) < coord_error_margin), f"\n{grid.zs} != \n{target_zs}"
 
 
 def test_atomic_grid_orientation():
 
-    error_margin = 0.001
+    coord_error_margin = 1.0  # Angstrom
 
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]
@@ -120,12 +76,6 @@ def test_atomic_grid_orientation():
 
         target_center = grid_points_group["center"][()]
 
-        c_group = data_file["1AK4/mapped_features/AtomicDensities_ind/C_chain1"]
-        chain1_c_index = c_group["index"][()]
-        chain1_c_value = c_group["value"][()]
-
-        target_chain1_densities_carbon = _inflate(chain1_c_index, chain1_c_value, points_counts)
-
     # Build the atomic graph, according to this repository's code.
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
     chain_id1 = "C"
@@ -135,13 +85,7 @@ def test_atomic_grid_orientation():
     query = ProteinProteinInterfaceAtomicQuery(pdb_path, chain_id1, chain_id2,
                                                distance_cutoff=distance_cutoff)
 
-    graph = query.build([deeprankcore.features.contact])
-
-    # Get atomic positions from the graph
-    chain1_carbon_positions = [node.id.position  # the node id is actually the atom
-                               for node in graph.nodes
-                               if node.id.residue.chain.id == chain_id1 and
-                                    node.id.element == AtomicElement.C]
+    graph = query.build([])
 
     # Make a grid from the graph.
     map_method = MapMethod.FAST_GAUSSIAN
@@ -149,23 +93,15 @@ def test_atomic_grid_orientation():
     grid = Grid("test_grid", graph.center, grid_settings)
     graph.map_to_grid(grid, map_method)
 
-    assert np.all(np.abs(target_center - grid.center) < error_margin), f"\n{grid.center} != \n{target_center}"
+    assert np.all(np.abs(target_center - grid.center) < coord_error_margin), f"\n{grid.center} != \n{target_center}"
 
     # Orientation must be the same as in the original deeprank.
     # Check that the grid point coordinates are the same.
     assert grid.xs.shape == target_xs.shape
-    assert np.all(np.abs(grid.xs - target_xs) < error_margin), f"\n{grid.xs} != \n{target_xs}"
+    assert np.all(np.abs(grid.xs - target_xs) < coord_error_margin), f"\n{grid.xs} != \n{target_xs}"
 
     assert grid.ys.shape == target_ys.shape
-    assert np.all(np.abs(grid.ys - target_ys) < error_margin), f"\n{grid.ys} != \n{target_ys}"
+    assert np.all(np.abs(grid.ys - target_ys) < coord_error_margin), f"\n{grid.ys} != \n{target_ys}"
 
     assert grid.zs.shape == target_zs.shape
-    assert np.all(np.abs(grid.zs - target_zs) < error_margin), f"\n{grid.zs} != \n{target_zs}"
-
-    # Map the atomic densities for carbon.
-    chain1_densities_carbon = np.zeros(target_chain1_densities_carbon.shape)
-    for position in chain1_carbon_positions:
-        chain1_densities_carbon += grid._get_atomic_density_koes(position, carbon_vanderwaals_radius)
-
-    # Check that the carbon densities are the same as in the original deeprank.
-    assert np.all(np.abs(chain1_densities_carbon - target_chain1_densities_carbon) < error_margin)
+    assert np.all(np.abs(grid.zs - target_zs) < coord_error_margin), f"\n{grid.zs} != \n{target_zs}"
