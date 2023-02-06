@@ -22,8 +22,10 @@ def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndar
 
     EPSILON0 = 1.0
     COULOMB_CONSTANT = 332.0636
+    distance_cutoff = 8.5
     charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
-    coulomb_potentials = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
+    prefactors = np.square(1.0 - np.square(distances / distance_cutoff))
+    coulomb_potentials = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances) * prefactors
     return coulomb_potentials
 
 

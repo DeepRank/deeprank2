@@ -3,8 +3,7 @@ from torch import nn
 
 regression_losses = (nn.L1Loss, 
                     nn.SmoothL1Loss, 
-                    nn.MSELoss, 
-                    nn.HuberLoss)
+                    nn.MSELoss)
 
 binary_classification_losses = (nn.SoftMarginLoss, 
                                 nn.BCELoss, 

@@ -9,6 +9,7 @@ import numpy as np
 from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 import deeprankcore.features.contact
+from deeprankcore.utils.parsing import atomic_forcefield
 
 
 _log = logging.getLogger(__name__)
@@ -122,7 +123,7 @@ def _inflate(index: np.ndarray, value: np.ndarray, shape: Tuple[int]):
     return data.reshape(shape)
 
 
-def test_grid_features():
+def test_grid_contact_features():
     "Check that grid mapped features produce output that makes sense"
 
     error_margin = 0.001
@@ -144,6 +145,8 @@ def test_grid_features():
         original_chain2_vanderwaals = _inflate(data_file["1AK4/mapped_features/Feature_ind/vdwaals_chain2/index"][:],
                                                data_file["1AK4/mapped_features/Feature_ind/vdwaals_chain2/value"][:],
                                                (10, 10, 10))
+
+        point_feature_charges = data_file["1AK4/features/charge"][:]
 
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
 
@@ -171,8 +174,36 @@ def test_grid_features():
     finally:
         os.remove(hdf5_path)
 
+    atoms_recognized = set([])
+    for chain_float, x, y, z, charge in point_feature_charges.tolist():
+
+        if chain_float > 0.0:
+            chain_id = 'D'
+        else:
+            chain_id = 'C'
+
+        position = np.array([x, y, z])
+
+        for node in graph.nodes:
+
+            atom = node.id
+
+            if np.all(atom.position == position) and chain_id == atom.residue.chain.id:
+                break
+        else:
+            raise RuntimeError(f"No atom at {position} chain {chain_id}")
+
+        atom_charge = atomic_forcefield.get_charge(atom)
+        assert atom_charge == charge, f"{atom}: {atom_charge} != {charge}"
+        atoms_recognized.add(atom)
+
+    for node in graph.nodes:
+        assert node.id in atoms_recognized, f"unrecognized atom {atom}"
+
+    assert len(graph.nodes) == point_feature_charges.shape[0], f"{len(graph.nodes)} != {point_feature_charges.shape[0]}"
+
     assert np.all(np.abs(original_chain1_electrostatic + original_chain2_electrostatic - electrostatic_data) < error_margin), \
-            f"difference is {np.abs(original_chain1_electrostatic + original_chain2_electrostatic - electrostatic_data)}"
+            f"max difference is {np.max(np.abs(original_chain1_electrostatic + original_chain2_electrostatic - electrostatic_data))}"
     assert np.all(np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data) < error_margin), \
-            f"difference is {np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data)}"
+            f"max difference is {np.max(np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data))}"
 

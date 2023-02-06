@@ -171,7 +171,7 @@ def get_contact_atoms( # pylint: disable=too-many-locals
 
     interface = get_interface(pdb_path)
     try:
-        atom_indexes = interface.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2)
+        atom_indexes = interface.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2, extend_to_residue=True)
         rows = interface.get("x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
                              rowID=atom_indexes[chain_id1] + atom_indexes[chain_id2])
     finally:
