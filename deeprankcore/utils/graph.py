@@ -156,12 +156,18 @@ class Graph:
 
             grid.map_feature(position, feature_name, value, method)
 
-    def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Optional[Augmentation] = None):
+    def map_to_grid(self, grid: Grid, method: MapMethod,
+                    allow_contacts_within_chain: bool = True,
+                    augmentation: Optional[Augmentation] = None):
 
         # order edge features by xyz point
         points = []
         feature_values = {}
         for edge in self._edges.values():
+
+            contact = edge.id
+            if not allow_contacts_within_chain and contact.is_within_chain():
+                continue
 
             points += [edge.position1, edge.position2]
 
@@ -280,7 +286,8 @@ class Graph:
         self, hdf5_path: str,
         settings: GridSettings,
         method: MapMethod,
-        augmentation: Optional[Augmentation] = None
+        allow_contacts_within_chain: bool = True,
+        augmentation: Optional[Augmentation] = None,
     ) -> str:
 
         id_ = self.id

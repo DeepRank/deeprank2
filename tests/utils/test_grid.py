@@ -159,13 +159,12 @@ def test_grid_features():
     os.close(hdf5_file)
 
     try:
-        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, map_method)
+        graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, map_method,
+                                    allow_contacts_within_chain=False)
 
         with h5py.File(hdf5_path, 'r') as data_file:
 
             entry_name = list(data_file.keys())[0]
-
-            _log.debug(f"entry is {entry_name}")
 
             electrostatic_data = data_file[entry_name]["mapped_features/electrostatic/value"][:]
             vanderwaals_data = data_file[entry_name]["mapped_features/vanderwaals/value"][:]
@@ -173,7 +172,7 @@ def test_grid_features():
         os.remove(hdf5_path)
 
     assert np.all(np.abs(original_chain1_electrostatic + original_chain2_electrostatic - electrostatic_data) < error_margin), \
-            f"difference is {np.max(np.abs(original_chain1_electrostatic + original_chain2_electrostatic - electrostatic_data))}"
+            f"difference is {np.abs(original_chain1_electrostatic + original_chain2_electrostatic - electrostatic_data)}"
     assert np.all(np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data) < error_margin), \
-            f"difference is {np.max(np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data))}"
+            f"difference is {np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data)}"
 

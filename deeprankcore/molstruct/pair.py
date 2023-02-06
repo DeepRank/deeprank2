@@ -65,6 +65,9 @@ class ResidueContact(Contact):
     def residue2(self) -> Residue:
         return self.item2
 
+    def is_within_chain(self) -> bool:
+        return self._residue1.chain == self._residue2.chain
+
 
 class AtomicContact(Contact):
     "A contact between two atoms from a structure"
@@ -87,3 +90,7 @@ class AtomicContact(Contact):
     @property
     def atom2(self) -> Atom:
         return self.item2
+
+    def is_within_chain(self) -> bool:
+        return self._atom1.residue.chain == self._atom2.residue.chain
+
