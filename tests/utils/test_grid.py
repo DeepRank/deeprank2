@@ -1,6 +1,6 @@
 from tempfile import mkstemp
 import os
-from typing import Tuple
+from typing import Tuple, List
 import logging
 
 import h5py
@@ -10,6 +10,7 @@ from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProtei
 from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
 import deeprankcore.features.contact
 from deeprankcore.utils.parsing import atomic_forcefield
+from deeprankcore.molstruct.atom import Atom
 
 
 _log = logging.getLogger(__name__)
@@ -123,6 +124,29 @@ def _inflate(index: np.ndarray, value: np.ndarray, shape: Tuple[int]):
     return data.reshape(shape)
 
 
+def _compare_point_features_to_atoms(point_feature_data: np.ndarray, atoms: List[Atom], chain_id0, chain_id1):
+
+    atom_feature_values = {}
+    for chain_float, x, y, z, feature_value in point_feature_data.tolist():
+
+        if chain_float > 0.0:
+            chain_id = chain_id1
+        else:
+            chain_id = chain_id0
+
+        position = np.array([x, y, z])
+
+        for atom in atoms:
+            if np.all(atom.position == position) and chain_id == atom.residue.chain.id:
+                break
+        else:
+            raise RuntimeError(f"No atom at coulomb {position} chain {chain_id}")
+
+
+    for atom in atoms:
+        assert atom in atom_feature_values, f"unrecognized atom {atom} at {atom.position}"
+
+
 def test_grid_contact_features():
     "Check that grid mapped features produce output that makes sense"
 
@@ -147,6 +171,7 @@ def test_grid_contact_features():
                                                (10, 10, 10))
 
         point_feature_charges = data_file["1AK4/features/charge"][:]
+        point_feature_coulomb = data_file["1AK4/features/coulomb"][:]
 
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
 
@@ -174,31 +199,13 @@ def test_grid_contact_features():
     finally:
         os.remove(hdf5_path)
 
-    atoms_recognized = set([])
-    for chain_float, x, y, z, charge in point_feature_charges.tolist():
-
-        if chain_float > 0.0:
-            chain_id = 'D'
-        else:
-            chain_id = 'C'
-
-        position = np.array([x, y, z])
-
-        for node in graph.nodes:
-
-            atom = node.id
-
-            if np.all(atom.position == position) and chain_id == atom.residue.chain.id:
-                break
-        else:
-            raise RuntimeError(f"No atom at {position} chain {chain_id}")
-
-        atom_charge = atomic_forcefield.get_charge(atom)
-        assert atom_charge == charge, f"{atom}: {atom_charge} != {charge}"
-        atoms_recognized.add(atom)
-
-    for node in graph.nodes:
-        assert node.id in atoms_recognized, f"unrecognized atom {atom}"
+    atoms = set([])
+    backbone_names = ["C", "O", "N", "CA"]
+    for edge in graph.edges:
+        if edge.id.item1.name not in backbone_names and edge.id.item2.name not in backbone_names:
+            atoms.add(edge.id.item1)
+            atoms.add(edge.id.item2)
+    _compare_point_features_to_atoms(point_feature_coulomb, list(atoms), "C", "D")
 
     assert len(graph.nodes) == point_feature_charges.shape[0], f"{len(graph.nodes)} != {point_feature_charges.shape[0]}"
 
@@ -206,4 +213,5 @@ def test_grid_contact_features():
             f"max difference is {np.max(np.abs(original_chain1_electrostatic + original_chain2_electrostatic - electrostatic_data))}"
     assert np.all(np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data) < error_margin), \
             f"max difference is {np.max(np.abs(original_chain1_vanderwaals + original_chain2_vanderwaals - vanderwaals_data))}"
+
 
