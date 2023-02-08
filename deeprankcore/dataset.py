@@ -287,6 +287,9 @@ class DeeprankDataset(Dataset):
         
         figsize (tuple): saved figure sizes, defaults to (15, 15).
         """
+        if self.df is None:
+            raise ValueError("Please first read in the data into a pd.DataFrame using `hdf5_to_pandas` method of the class.")
+        
         if not isinstance(features, list):
             features = [features]
 
@@ -325,7 +328,7 @@ class DeeprankDataset(Dataset):
             ax.set(xlabel=f'{features_df[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
 
         else:
-            raise ValueError('Please provide valid features names. They must be present in the current :class:`DeeprankDataset` instance.')
+            raise ValueError("Please provide valid features names. They must be present in the current :class:`DeeprankDataset` instance.")
         
         fig.tight_layout()
         fig.savefig(fname)

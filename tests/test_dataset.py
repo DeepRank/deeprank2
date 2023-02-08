@@ -207,7 +207,13 @@ class TestDataSet(unittest.TestCase):
             target='binary'
         )
 
+        with self.assertRaises(ValueError):
+            dataset.save_hist(['charge', 'binary'], fname = fname)
+
         dataset.hdf5_to_pandas()
+
+        with self.assertRaises(ValueError):
+            dataset.save_hist(['non existing feature'], fname = fname)
 
         dataset.save_hist(['charge', 'binary'], fname = fname)
 
