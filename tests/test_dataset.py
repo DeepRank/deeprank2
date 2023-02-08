@@ -270,22 +270,23 @@ class TestDataSet(unittest.TestCase):
                         arr = np.concatenate(arr)
                         edge_features_dict[feat + f'_{ch}'] = arr
 
-        for feat in node_features_dict:
+        for _, values in node_features_dict.items():
 
-            mean = node_features_dict[feat].mean()
-            dev = node_features_dict[feat].std()
+            mean = values.mean()
+            dev = values.std()
 
             assert -0.3 < mean < 0.3
             # for one hot encoded features, it can happen that mean and std are not exactly 0 and 1
             assert 0.7 < dev < 1.5
 
-        for feat in edge_features_dict:
+        for _, values in edge_features_dict.items():
 
-            mean = edge_features_dict[feat].mean()
-            dev = edge_features_dict[feat].std()
+            mean = values.mean()
+            dev = values.std()
 
             assert -0.1 < mean < 0.1
             assert 0.8 < dev < 1.2
+
         
 if __name__ == "__main__":
     unittest.main()
