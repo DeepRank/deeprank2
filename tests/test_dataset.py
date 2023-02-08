@@ -1,6 +1,9 @@
 import unittest
-from torch_geometric.data.data import Data
+import numpy as np
 import h5py
+from tempfile import mkdtemp
+from shutil import rmtree
+import os
 from torch_geometric.loader import DataLoader
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
@@ -163,7 +166,7 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             dataset.get(0)
 
-    def test_hdf5_to_pandas(self):
+    def test_graph_hdf5_to_pandas(self):
 
         hdf5_path = "tests/data/hdf5/test.hdf5"
         dataset = GraphDataset(
@@ -193,6 +196,96 @@ class TestDataSet(unittest.TestCase):
 
         assert df.shape[0] == len(keys[2:])
 
+    def test_graph_save_hist(self):
+
+        output_directory = mkdtemp()
+        fname = os.path.join(output_directory, "test.png")
+        hdf5_path = "tests/data/hdf5/test.hdf5"
+
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary'
+        )
+
+        dataset.hdf5_to_pandas()
+
+        dataset.save_hist(['charge', 'binary'], fname = fname)
+
+        assert len(os.listdir(output_directory)) > 0
+
+        rmtree(output_directory)
+
+    def test_graph_standardize(self):
+
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary',
+            standardize=True
+        )
+
+        with h5py.File(hdf5_path, 'r') as f5:
+            grp = f5[list(f5.keys())[0]]
+
+            # getting all node features values
+            tensor_idx = 0
+            node_features_dict = {}
+            for feat in dataset.node_features:
+                vals = grp[f"{Nfeat.NODE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    node_features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        node_features_dict[feat + f'_{ch}'] = arr
+
+            # getting all edge features values
+            tensor_idx = 0
+            edge_features_dict = {}
+            for feat in dataset.edge_features:
+                vals = grp[f"{Efeat.EDGE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    edge_features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        edge_features_dict[feat + f'_{ch}'] = arr
+
+        for feat in node_features_dict:
+
+            mean = node_features_dict[feat].mean()
+            dev = node_features_dict[feat].std()
+
+            assert -0.3 < mean < 0.3
+            # for one hot encoded features, it can happen that mean and std are not exactly 0 and 1
+            assert 0.7 < dev < 1.5
+
+        for feat in edge_features_dict:
+
+            mean = edge_features_dict[feat].mean()
+            dev = edge_features_dict[feat].std()
+
+            assert -0.1 < mean < 0.1
+            assert 0.8 < dev < 1.2
         
 if __name__ == "__main__":
     unittest.main()
