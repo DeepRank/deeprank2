@@ -31,7 +31,8 @@ class DeeprankDataset(Dataset):
                  root_directory_path: str,
                  transform: Union[Callable, None],
                  pre_transform: Union[Callable, None],
-                 target_filter: Union[Dict[str, str], None]
+                 target_filter: Union[Dict[str, str], None],
+                 check_integrity: bool
     ):
         """
         Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
@@ -55,8 +56,10 @@ class DeeprankDataset(Dataset):
         self.subset = subset
 
         self.target_filter = target_filter
+        
+        if check_integrity:
+            self._check_hdf5_files()
 
-        self._check_hdf5_files()
         self._check_task_and_classes(task, classes)
 
         # create the indexing system
@@ -90,7 +93,7 @@ class DeeprankDataset(Dataset):
 
     def _check_task_and_classes(self, task: str, classes: Optional[str] = None):
 
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]: 
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ, targets.BA]: 
             self.task = targets.REGRESS
 
         elif self.target in [targets.BINARY, targets.CAPRI]:
@@ -286,6 +289,7 @@ class GridDataset(DeeprankDataset):
         pre_transform: Optional[Callable] = None,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
+        check_integrity: bool = True
     ):
         """
         Class to load the .HDF5 files data into grids.
@@ -295,15 +299,15 @@ class GridDataset(DeeprankDataset):
 
             subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
 
-            target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target
+            target (str, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be a custom-defined target
                 given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
-                ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored.
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
+                Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
 
             features (Union[List[str], str], optional): Consider all pre-computed features ("all") or some defined node features
                 (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.gridstorage`. 
@@ -326,8 +330,11 @@ class GridDataset(DeeprankDataset):
                 
             target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
+
+            check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
+                Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
 
         self.features = features
 
@@ -353,7 +360,7 @@ class GridDataset(DeeprankDataset):
         with h5py.File(hdf5_path, "r") as hdf5_file:
             entry_name = list(hdf5_file.keys())[0]
 
-            hdf5_all_feature_names = hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys()
+            hdf5_all_feature_names = list(hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys())
 
             hdf5_matching_feature_names = []  # feature names that match with the requested list of names
             unpartial_feature_names = []  # feature names without their dimension number suffix
@@ -442,10 +449,10 @@ class GridDataset(DeeprankDataset):
             target_value = entry_group[targets.VALUES][self.target][()]
 
         # Wrap up the data in this object, for the collate_fn to handle it properly:
-        data = Data(x=torch.tensor([feature_data], dtype=torch.float).to(self.device),
-                    y=torch.tensor([target_value], dtype=torch.float).to(self.device))
+        data = Data(x=torch.tensor([feature_data], dtype=torch.float),
+                    y=torch.tensor([target_value], dtype=torch.float))
 
-        data.entry_names = [entry_name]
+        data.entry_names = entry_name
 
         return data
 
@@ -459,7 +466,7 @@ class GraphDataset(DeeprankDataset):
         task: Optional[str] = None,
         node_features: Optional[Union[List[str], str]] = "all",
         edge_features: Optional[Union[List[str], str]] = "all",
-        clustering_method: Optional[str] = "mcl",
+        clustering_method: Optional[str] = None,
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
@@ -469,6 +476,7 @@ class GraphDataset(DeeprankDataset):
         edge_features_transform: Optional[Callable] = lambda x: np.tanh(-x / 2 + 2) + 1,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
+        check_integrity: bool = True
     ):
         """
         Class to load the .HDF5 files data into graphs.
@@ -478,15 +486,15 @@ class GraphDataset(DeeprankDataset):
 
             subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
 
-            target (str, optional): Default options are irmsd, lrmsd, fnat, bin, capri_class or dockq. It can also be a custom-defined target
+            target (str, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be a custom-defined target
                 given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
 
             task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
-                ['irmsd', 'lrmsd', 'fnat', 'bin_class', 'capri_class', or 'dockq'], otherwise this setting is ignored.
-                Automatically set to 'classif' if the target is 'bin_class' or 'capri_classes'.
-                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat' or 'dockq'.
+                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
+                Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
 
             node_features (Union[List[str], str, optional): Consider all pre-computed node features ("all") or some defined node features
                 (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.nodestorage`.
@@ -527,8 +535,11 @@ class GraphDataset(DeeprankDataset):
 
             target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
+
+            check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
+                Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
 
         self.node_features = node_features
         self.edge_features = edge_features
@@ -597,7 +608,7 @@ class GraphDataset(DeeprankDataset):
                             reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
                             vals = (vals - reshaped_mean)/reshaped_dev
                     node_data += (vals,)
-            x = torch.tensor(np.hstack(node_data), dtype=torch.float).to(self.device)
+            x = torch.tensor(np.hstack(node_data), dtype=torch.float)
 
             # edge index,
             # we have to have all the edges i.e : (i,j) and (j,i)
@@ -608,7 +619,6 @@ class GraphDataset(DeeprankDataset):
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
             else:
                 edge_index = torch.empty((2, 0), dtype=torch.long)
-            edge_index = edge_index.to(self.device)
 
             # edge feature
             # we have to have all the edges i.e : (i,j) and (j,i)
@@ -635,14 +645,13 @@ class GraphDataset(DeeprankDataset):
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
-            edge_attr = edge_attr.to(self.device)
 
             # target
             if self.target is None:
                 y = None
             else:
                 if targets.VALUES in grp and self.target in grp[targets.VALUES]:
-                    y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous().to(self.device)
+                    y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous()
 
                     if self.task == targets.REGRESS and self.target_transform is True:
                         y = torch.sigmoid(torch.log(y))
@@ -655,7 +664,7 @@ class GraphDataset(DeeprankDataset):
                                      "\n Use the query class to add more target values to input data.")
 
             # positions
-            pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous().to(self.device)
+            pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous()
 
             # cluster
             cluster0 = None
@@ -669,9 +678,9 @@ class GraphDataset(DeeprankDataset):
                             ):
 
                             cluster0 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long)
                             cluster1 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long).to(self.device)
+                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long)
                         else:
                             _log.warning("no clusters detected")
                     else:
@@ -683,8 +692,7 @@ class GraphDataset(DeeprankDataset):
         data.cluster0 = cluster0
         data.cluster1 = cluster1
 
-        # entry name
-        data.entry_names = [entry_name]
+        data.entry_names = entry_name
 
         # apply transformation
         if self._transform is not None:

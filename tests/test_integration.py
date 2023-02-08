@@ -3,7 +3,7 @@ from shutil import rmtree
 import warnings
 import os
 import h5py
-from tests._utils import PATH_TEST
+from . import PATH_TEST
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
 from deeprankcore.dataset import GraphDataset, GridDataset
 from deeprankcore.trainer import Trainer
@@ -15,7 +15,6 @@ from deeprankcore.tools.target import compute_targets
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 
-model_path = './tests/test.pth.tar'
 
 def test_integration_cnn(): # pylint: disable=too-many-locals
     """
@@ -33,6 +32,7 @@ def test_integration_cnn(): # pylint: disable=too-many-locals
 
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
+    model_path = output_directory + 'test.pth.tar'
 
     prefix = os.path.join(hdf5_directory, "test-queries-process")
 
@@ -124,6 +124,7 @@ def test_integration_gnn(): # pylint: disable=too-many-locals
 
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
+    model_path = output_directory + 'test.pth.tar'
 
     prefix = os.path.join(hdf5_directory, "test-queries-process")
 

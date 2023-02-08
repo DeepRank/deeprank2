@@ -1,11 +1,13 @@
-from typing import Callable, Union, List
+from typing import Callable, Union, List, Optional
+import os
 import logging
 import numpy as np
 import h5py
+import pdb2sql.transform
 from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.residue import Residue, get_residue_center
 from deeprankcore.molstruct.pair import Contact, AtomicContact, ResidueContact
-from deeprankcore.utils.grid import MapMethod, Grid, GridSettings
+from deeprankcore.utils.grid import MapMethod, Grid, GridSettings, Augmentation
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, 
                                 targetstorage as targets)
 from scipy.spatial import distance_matrix
@@ -99,6 +101,9 @@ class Graph:
         # targets are optional and may be set later
         self.targets = {}
 
+        # the center only needs to be set when this graph should be mapped to a grid.
+        self.center = np.array((0.0, 0.0, 0.0))
+
     def add_node(self, node: Node):
         self._nodes[node.id] = node
 
@@ -132,16 +137,54 @@ class Graph:
 
         return False
 
-    def map_to_grid(self, grid: Grid, method: MapMethod):
+    def _map_point_features(self, grid: Grid, method: MapMethod,  # pylint: disable=too-many-arguments
+                            feature_name: str, points: List[np.ndarray],
+                            values: List[Union[float, np.ndarray]],
+                            augmentation: Optional[Augmentation] = None):
 
+        points = np.stack(points, axis=0)
+
+        if augmentation is not None:
+            points = pdb2sql.transform.rot_xyz_around_axis(points,
+                                                           augmentation.axis,
+                                                           augmentation.angle,
+                                                           self.center)
+
+        for point_index in range(points.shape[0]):
+            position = points[point_index]
+            value = values[point_index]
+
+            grid.map_feature(position, feature_name, value, method)
+
+    def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Optional[Augmentation] = None):
+
+        # order edge features by xyz point
+        points = []
+        feature_values = {}
         for edge in self._edges.values():
-            for feature_name, feature_value in edge.features.items():
-                grid.map_feature(edge.position1, feature_name, feature_value, method)
-                grid.map_feature(edge.position2, feature_name, feature_value, method)
 
+            points += [edge.position1, edge.position2]
+
+            for feature_name, feature_value in edge.features.items():
+                feature_values[feature_name] = feature_values.get(feature_name, []) + [feature_value, feature_value]
+
+        # map edge features to grid
+        for feature_name, values in feature_values.items():
+            self._map_point_features(grid, method, feature_name, points, values, augmentation)
+
+        # order node features by xyz point
+        points = []
+        feature_values = {}
         for node in self._nodes.values():
+
+            points.append(node.position)
+
             for feature_name, feature_value in node.features.items():
-                grid.map_feature(node.position, feature_name, feature_value, method)
+                feature_values[feature_name] = feature_values.get(feature_name, []) + [feature_value]
+
+        # map node features to grid
+        for feature_name, values in feature_values.items():
+            self._map_point_features(grid, method, feature_name, points, values, augmentation)
 
     def write_to_hdf5(self, hdf5_path: str): # pylint: disable=too-many-locals
         "Write a featured graph to an hdf5 file, according to deeprank standards."
@@ -213,14 +256,40 @@ class Graph:
             for target_name, target_data in self.targets.items():
                 score_group.create_dataset(target_name, data=target_data)
 
+    @staticmethod
+    def _find_unused_augmentation_name(unaugmented_id: str, hdf5_path: str) -> str:
+
+        prefix = f"{unaugmented_id}_"
+
+        entry_names_taken = []
+        if os.path.isfile(hdf5_path):
+            with h5py.File(hdf5_path, 'r') as hdf5_file:
+                for entry_name in hdf5_file:
+                    if entry_name.startswith(prefix):
+                        entry_names_taken.append(entry_name)
+
+        augmentation_count = 0
+        chosen_name = f"{prefix}{augmentation_count:03}"
+        while chosen_name in entry_names_taken:
+            augmentation_count += 1
+            chosen_name = f"{prefix}{augmentation_count:03}"
+
+        return chosen_name
+
     def write_as_grid_to_hdf5(
-        self, hdf5_path: str, settings: GridSettings, method: MapMethod
+        self, hdf5_path: str,
+        settings: GridSettings,
+        method: MapMethod,
+        augmentation: Optional[Augmentation] = None
     ) -> str:
 
-        center = np.mean([node.position for node in self._nodes], axis=0)
-        grid = Grid(self.id, settings, center)
+        id_ = self.id
+        if augmentation is not None:
+            id_ = self._find_unused_augmentation_name(id_, hdf5_path)
 
-        self.map_to_grid(grid, method)
+        grid = Grid(id_, self.center.tolist(), settings)
+
+        self.map_to_grid(grid, method, augmentation)
         grid.to_hdf5(hdf5_path)
 
         return hdf5_path
@@ -308,12 +377,8 @@ def build_residue_graph( # pylint: disable=too-many-locals
             node2 = Node(residue2)
             edge = Edge(contact)
 
-            node1.features[Nfeat.POSITION] = np.mean(
-                [atom.position for atom in residue1.atoms], axis=0
-            )
-            node2.features[Nfeat.POSITION] = np.mean(
-                [atom.position for atom in residue2.atoms], axis=0
-            )
+            node1.features[Nfeat.POSITION] = get_residue_center(residue1)
+            node2.features[Nfeat.POSITION] = get_residue_center(residue2)
 
             # The same residue will be added  multiple times as a node,
             # but the Graph class fixes this.

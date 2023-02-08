@@ -22,6 +22,9 @@ class PDBStructure:
     def __repr__(self) -> str:
         return self._id
 
+    def has_chain(self, chain_id: str) -> bool:
+        return chain_id in self._chains
+
     def get_chain(self, chain_id: str):
         return self._chains[chain_id]
 
@@ -61,7 +64,7 @@ class Chain:
 
         self._model = model
         self._id = id_
-        self._residues = []
+        self._residues = {}
         self._pssm = None  # pssm is per chain
 
     @property
@@ -77,7 +80,13 @@ class Chain:
         self._pssm = pssm
 
     def add_residue(self, residue):
-        self._residues.append(residue)
+        self._residues[(residue.number, residue.insertion_code)] = residue
+
+    def has_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> bool:
+        return (residue_number, insertion_code) in self._residues
+
+    def get_residue(self, residue_number: int, insertion_code: Optional[str] = None):
+        return self._residues[(residue_number, insertion_code)]
 
     @property
     def id(self) -> str:
@@ -85,7 +94,15 @@ class Chain:
 
     @property
     def residues(self):
-        return self._residues
+        return list(self._residues.values())
+
+    def get_atoms(self):
+        "shortcut to list all atoms in this chain"
+        atoms = []
+        for residue in self._residues.values():
+            atoms.extend(residue.atoms)
+
+        return atoms
 
     def __eq__(self, other) -> bool:
         return (
@@ -95,7 +112,7 @@ class Chain:
         )
 
     def __hash__(self) -> hash:
-        return hash((self._model, self._id))
+        return hash(self._id)
 
     def __repr__(self) -> str:
         return f"{self._model} {self._id}"

@@ -56,7 +56,7 @@ class Atom:
         )
 
     def __hash__(self) -> hash:
-        return hash((self._residue, self._name))
+        return hash((tuple(self._position), self._element, self._name))
 
     def __repr__(self) -> str:
         return f"{self._residue} {self._name}"

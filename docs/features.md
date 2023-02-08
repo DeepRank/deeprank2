@@ -29,7 +29,7 @@ The following is a brief description of the features already implemented in the 
 - `res_size`: The number of heavy atoms in the side chain. Int value.
 - `res_mass`: The average residue mass (i.e. mass of amino acid - H20) in Daltons. Float value.
 - `res_pI`: The isolectric point, which represents the pH at which the molecule has no net electric charge. Float value.
-- `hb_donors`, `hb_acceptors`: Amino acids can have hydrogen donor/acceptor atoms in their side chain. Hydrogen bonds are noncovalent intermolecular interaction formed between a hydrogen atom (partially + charged) bound to a small, highly electronegative atom (O, N, F) and another small, highly electronegative atom with an unshared electron pair. There is a distinction between the electronegative atoms (O, N, F) in a hydrogen bond based on which atom the hydrogen atom is covalently bonded to. From this, hydrogen bond acceptors and donators. Int value representing the number of donor/acceptor atoms, from 0 to 5.
+- `hb_donors`, `hb_acceptors`: Represents the number of donor/acceptor atoms, from 0 to 5. Amino acids can have hydrogen donor/acceptor atoms in their side chain. Hydrogen Bonds (HB) are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair. In hydrogen bonds there is a distinction between the electronegative atoms (O, N, F) based on which one the hydrogen is covalently bonded to. Based on this, hydrogens can be named either acceptors or donators. Int value.
 - `variant_res`: If a variant is present, one hot encodes the type of amino acid variant (20).
 - `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: If a variant is present, they represent the differences between the variant and the wild type amino acid in charge, polarity, size, mass, isoelectric point, donor/acceptor atoms.
   
@@ -43,7 +43,7 @@ The following is a brief description of the features already implemented in the 
 ### `deeprankcore.features.exposure`
 
 - `res_depth`: Average distance to surface for all atoms in a residue. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. Computed using `Bio.PDB.ResidueDepth`, in Angstrom. Float value. 
-- `hse`: Half Sphere exposure (HSE) measures how buried amino acid residues are in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. Array of float values of length 3.
+- `hse`: Half Sphere exposure (HSE) measures how buried amino acid residues are in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. It is calculated using biopython, so for more details see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) biopython module. Array of float values of length 3.
   
 ### `deeprankcore.features.surfacearea`
 
