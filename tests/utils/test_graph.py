@@ -115,7 +115,6 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
 
         # check that the augmented data is the same, just different orientation
         with h5py.File(hdf5_path, "r") as f5:
-
             entry_group = f5[f"{entry_id}_000"]
             mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
             augmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
