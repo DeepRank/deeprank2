@@ -220,7 +220,7 @@ class TestDataSet(unittest.TestCase):
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
         dataset = GraphDataset(
-            hdf5_path = hdf5_path,
+            hdf5_path = "tests/data/hdf5/train.hdf5",
             target='binary',
             standardize=True
         )
@@ -230,7 +230,7 @@ class TestDataSet(unittest.TestCase):
 
             # getting all node features values
             tensor_idx = 0
-            node_features_dict = {}
+            features_dict = {}
             for feat in dataset.node_features:
                 vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                 if vals.ndim == 1: # features with only one channel
@@ -238,7 +238,7 @@ class TestDataSet(unittest.TestCase):
                     for entry_idx in range(len(dataset)):
                         arr.append(dataset.get(entry_idx).x[:, tensor_idx])
                     arr = np.concatenate(arr)
-                    node_features_dict[feat] = arr
+                    features_dict[feat] = arr
                     tensor_idx += 1
                 else:
                     for ch in range(vals.shape[1]):
@@ -247,11 +247,20 @@ class TestDataSet(unittest.TestCase):
                             arr.append(dataset.get(entry_idx).x[:, tensor_idx])
                         tensor_idx += 1
                         arr = np.concatenate(arr)
-                        node_features_dict[feat + f'_{ch}'] = arr
+                        features_dict[feat + f'_{ch}'] = arr
+
+            for _, values in features_dict.items():
+
+                mean = values.mean()
+                dev = values.std()
+
+                assert -0.3 < mean < 0.3
+                # for one hot encoded features, it can happen that mean and std are not exactly 0 and 1
+                assert 0.7 < dev < 1.5
 
             # getting all edge features values
             tensor_idx = 0
-            edge_features_dict = {}
+            features_dict = {}
             for feat in dataset.edge_features:
                 vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                 if vals.ndim == 1: # features with only one channel
@@ -259,7 +268,7 @@ class TestDataSet(unittest.TestCase):
                     for entry_idx in range(len(dataset)):
                         arr.append(dataset.get(entry_idx).x[:, tensor_idx])
                     arr = np.concatenate(arr)
-                    edge_features_dict[feat] = arr
+                    features_dict[feat] = arr
                     tensor_idx += 1
                 else:
                     for ch in range(vals.shape[1]):
@@ -268,25 +277,16 @@ class TestDataSet(unittest.TestCase):
                             arr.append(dataset.get(entry_idx).x[:, tensor_idx])
                         tensor_idx += 1
                         arr = np.concatenate(arr)
-                        edge_features_dict[feat + f'_{ch}'] = arr
+                        features_dict[feat + f'_{ch}'] = arr
 
-        for _, values in node_features_dict.items():
+            for _, values in features_dict.items():
 
-            mean = values.mean()
-            dev = values.std()
+                mean = values.mean()
+                dev = values.std()
 
-            assert -0.3 < mean < 0.3
-            # for one hot encoded features, it can happen that mean and std are not exactly 0 and 1
-            assert 0.7 < dev < 1.5
+                assert -0.1 < mean < 0.1
+                assert 0.8 < dev < 1.2
 
-        for _, values in edge_features_dict.items():
 
-            mean = values.mean()
-            dev = values.std()
-
-            assert -0.1 < mean < 0.1
-            assert 0.8 < dev < 1.2
-
-        
 if __name__ == "__main__":
     unittest.main()
