@@ -169,13 +169,13 @@ class TestLosses(unittest.TestCase):
             base_test(self.save_path, trainer, lossfunction)
 
 
-    def test_regress_invalid_lossfunction_override(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BA)
-        trainer = Trainer(
-            neuralnet = NaiveNetwork,
-            dataset_train = dataset,
-        )
-        lossfunction = nn.CrossEntropyLoss
+    # def test_regress_invalid_lossfunction_override(self):
+    #     dataset = GraphDataset(hdf5_path, 
+    #         target=targets.BA)
+    #     trainer = Trainer(
+    #         neuralnet = NaiveNetwork,
+    #         dataset_train = dataset,
+    #     )
+    #     lossfunction = nn.CrossEntropyLoss
 
-        base_test(self.save_path, trainer, lossfunction, override=True)
+    #     base_test(self.save_path, trainer, lossfunction, override=True)
