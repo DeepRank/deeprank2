@@ -5,14 +5,14 @@ import logging
 import warnings
 import numpy as np
 import h5py
-from typing import Callable, List, Union, Optional, Dict
+from typing import List, Union, Optional, Dict, Tuple
+import matplotlib.pyplot as plt
 import pandas as pd
 from tqdm import tqdm
 from ast import literal_eval
 import torch
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
-
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                  targetstorage as targets, gridstorage)
 
@@ -236,12 +236,21 @@ class DeeprankDataset(Dataset):
                     for feat in self.features_dict[feat_type]:
                         if f[entry_name][feat_type][feat][()].ndim == 2:
                             for i in range(f[entry_name][feat_type][feat][:].shape[1]):
-                                df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
+                                if feat_type == 'edge_features':
+                                    df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
+                                else:
+                                    df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
                         else:
-                            df_dict[feat] = [
-                                f[entry_name][feat_type][feat][:]
-                                if f[entry_name][feat_type][feat][()].ndim == 1
-                                else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
+                            if feat_type == 'edge_features':
+                                df_dict[feat] = [
+                                    f[entry_name][feat_type][feat][:]
+                                    if f[entry_name][feat_type][feat][()].ndim == 1
+                                    else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
+                            else:
+                                df_dict[feat] = [
+                                    f[entry_name][feat_type][feat][:]
+                                    if f[entry_name][feat_type][feat][()].ndim == 1
+                                    else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
 
 
                 df = pd.DataFrame(data=df_dict)
@@ -252,6 +261,75 @@ class DeeprankDataset(Dataset):
         self.df = df_final
 
         return df_final
+
+    def save_hist(
+            self,
+            features: Union[str,List[str]],
+            fname: str,
+            bins: Union[int,List[float],str] = 10,
+            figsize: Tuple = (15, 15)
+    ):
+        """
+        After having generated a pd.DataFrame using hdf5_to_pandas method, histograms of the features can be saved in an image.
+
+        Args
+        ----------
+        features (str or list): features to be plotted (including target features). 
+
+        fname (str): str or path-like or binary file-like object.
+
+        bins (int or sequence or str): if bins is an integer, it defines the number of equal-width bins in the range.
+            If bins is a sequence, it defines the bin edges, including the left edge of the first bin and the right edge
+            of the last bin; in this case, bins may be unequally spaced. All but the last (righthand-most) bin is half-open.
+            If bins is a string, it is one of the binning strategies supported by numpy.histogram_bin_edges:
+            'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
+            Defaults to 10.
+        
+        figsize (tuple): saved figure sizes, defaults to (15, 15).
+        """
+        if not isinstance(features, list):
+            features = [features]
+
+        features_df = [col for feat in features for col in self.df.columns.values.tolist() if feat in col]
+
+        means = [
+            round(np.concatenate(self.df[feat].values).mean(), 1) if isinstance(self.df[feat].values[0], np.ndarray) \
+            else round(self.df[feat].values.mean(), 1) \
+            for feat in features_df]
+        devs = [
+            round(np.concatenate(self.df[feat].values).std(), 1) if isinstance(self.df[feat].values[0], np.ndarray) \
+            else round(self.df[feat].values.std(), 1) \
+            for feat in features_df]
+
+        if len(features_df) > 1:
+
+            fig, axs = plt.subplots(len(features_df), figsize=figsize)
+
+            for row, feat in enumerate(features_df):
+
+                if isinstance(self.df[feat].values[0], np.ndarray):
+                    axs[row].hist(np.concatenate(self.df[feat].values), bins=bins)
+                else:
+                    axs[row].hist(self.df[feat].values, bins=bins)
+                axs[row].set(xlabel=f'{feat} (mean {means[row]}, std {devs[row]})', ylabel='Count')
+            fig.tight_layout()
+
+        elif len(features_df) == 1:
+
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_subplot(111)
+            if isinstance(self.df[features_df[0]].values[0], np.ndarray):
+                ax.hist(np.concatenate(self.df[features_df[0]].values), bins=bins)
+            else:
+                ax.hist(self.df[features_df[0]].values, bins=bins)
+            ax.set(xlabel=f'{features_df[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
+
+        else:
+            raise ValueError('Please provide valid features names. They must be present in the current :class:`DeeprankDataset` instance.')
+        
+        fig.tight_layout()
+        fig.savefig(fname)
+        plt.close(fig)
     
     def _compute_mean_std(self):
 
