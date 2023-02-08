@@ -29,8 +29,6 @@ class DeeprankDataset(Dataset):
                  classes: Union[List[str], List[int], List[float], None],
                  use_tqdm: bool,
                  root_directory_path: str,
-                 transform: Union[Callable, None],
-                 pre_transform: Union[Callable, None],
                  target_filter: Union[Dict[str, str], None],
                  check_integrity: bool
     ):
@@ -39,7 +37,7 @@ class DeeprankDataset(Dataset):
             More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
         """
 
-        super().__init__(root_directory_path, transform, pre_transform)
+        super().__init__(root_directory_path)
 
         if isinstance(hdf5_path, str):
             self.hdf5_paths = [hdf5_path]
@@ -284,8 +282,7 @@ class GridDataset(DeeprankDataset):
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
-        transform: Optional[Callable] = None,
-        pre_transform: Optional[Callable] = None,
+        standardize: bool = False,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
         check_integrity: bool = True
@@ -317,11 +314,8 @@ class GridDataset(DeeprankDataset):
 
             root (str, optional): Root directory where the dataset should be saved, defaults to "./".
 
-            transform (Callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a
-                transformed version. The data object will be transformed before every access. Defaults to None.
-
-            pre_transform (Callable, optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns
-                a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
+            standardize (bool, optional): Whether to standardize all the features, centering each feature's mean at 0 with a standard deviation
+                of 1. Defaults to False.
 
             target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
@@ -333,11 +327,11 @@ class GridDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.features = features
 
-        self._transform = transform
+        self._standardize = standardize
         self.target_transform = target_transform
 
         self._check_features()
@@ -349,6 +343,10 @@ class GridDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = [self.target]
             else:
                 self.features_dict[targets.VALUES] = self.target
+
+        if self._standardize:
+            self.hdf5_to_pandas()
+            self._compute_mean_std()
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -470,9 +468,6 @@ class GraphDataset(DeeprankDataset):
         tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
         standardize: bool = False,
-        transform: Optional[Callable] = None,
-        pre_transform: Optional[Callable] = None,
-        edge_features_transform: Optional[Callable] = lambda x: np.tanh(-x / 2 + 2) + 1,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
         check_integrity: bool = True
@@ -520,14 +515,6 @@ class GraphDataset(DeeprankDataset):
             standardize (bool, optional): Whether to standardize all the features, centering each feature's mean at 0 with a standard deviation
                 of 1. Defaults to False.
 
-            transform (Callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a
-                transformed version. The data object will be transformed before every access. Defaults to None.
-
-            pre_transform (Callable, optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns
-                a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
-
-            edge_features_transform (Callable, optional): Transformation applied to the edge features. Defaults to lambda x: np.tanh(-x/2+2)+1.
-
             target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
@@ -538,15 +525,13 @@ class GraphDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
 
         self._standardize = standardize
-        self._transform = transform
-        self.edge_features_transform = edge_features_transform
         self.target_transform = target_transform
 
         self._check_features()
@@ -640,7 +625,6 @@ class GraphDataset(DeeprankDataset):
                         edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
-                edge_data = self.edge_features_transform(edge_data)
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
@@ -692,10 +676,6 @@ class GraphDataset(DeeprankDataset):
         data.cluster1 = cluster1
 
         data.entry_names = entry_name
-
-        # apply transformation
-        if self._transform is not None:
-            data = self._transform(data)
 
         return data
 

@@ -83,24 +83,6 @@ class TestDataSet(unittest.TestCase):
             target_filter={targets.IRMSD: "<10"},
         )
 
-    def test_transform(self):
-
-        def operator(data: Data):
-            data.x = data.x / 10
-            return data
-
-        dataset = GraphDataset(
-            hdf5_path=self.hdf5_path,
-            node_features=node_feats,
-            edge_features=[Efeat.DISTANCE],
-            target=targets.IRMSD,
-            subset=None,
-            transform=operator
-        )
-
-        assert dataset.len() > 0
-        assert dataset.get(0) is not None
-
     def test_multi_file_dataset(self):
         dataset = GraphDataset(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
