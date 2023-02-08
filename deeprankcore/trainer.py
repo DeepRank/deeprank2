@@ -455,7 +455,7 @@ class Trainer():
                 Default for regression: MSELoss
                 Default for classification: CrossEntropyLoss
             override_invalid (bool): If True, loss functions that are considered
-                invalid for the task do no longer automaticallt raise an exception.
+                invalid for the task do no longer automatically raise an exception.
                 Defaults to False.
         """
 
