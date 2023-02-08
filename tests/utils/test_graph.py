@@ -10,7 +10,9 @@ from deeprankcore.utils.graph import Graph, Edge, Node
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.molstruct.pair import ResidueContact
 from deeprankcore.molstruct.residue import get_residue_center
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, gridstorage)
+from deeprankcore.domain import (edgestorage as Efeat,
+                                 nodestorage as Nfeat, gridstorage,
+                                 targetstorage as targets)
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals
@@ -55,10 +57,13 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
     hdf5_path = os.path.join(tmp_dir_path, "101m.hdf5")
+    target_name = "test_target"
+    target_value = 1.0
     try:
         # init the graph
         graph = Graph(structure.id)
         graph.center = np.mean([node0.features[Nfeat.POSITION], node1.features[Nfeat.POSITION]], axis=0)
+        graph.targets[target_name] = target_value
 
         graph.add_node(node0)
         graph.add_node(node1)
@@ -113,11 +118,14 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             # check that the feature value is preserved after augmentation
             unaugmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
 
-        # check that the augmented data is the same, just different orientation
-        with h5py.File(hdf5_path, "r") as f5:
+            assert entry_group[targets.VALUES][target_name][()] == target_value
+
+            # check that the augmented data is the same, just different orientation
             entry_group = f5[f"{entry_id}_000"]
             mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
             augmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
+
+            assert entry_group[targets.VALUES][target_name][()] == target_value
 
         assert np.abs(np.sum(augmented_data) - np.sum(unaugmented_data)).item() < 0.1
 

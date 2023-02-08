@@ -55,9 +55,9 @@ def test_add_features():
         Efeat.VANDERWAALS
     ]
 
-    # MET 0 N - ASP 27 CB, very far, should have negative vanderwaals energ
+    # MET 0: N - VAL 1 CB, should be within the cutoff distance and have negative vanderwaals energy
     contact = AtomicContact(
-        _get_atom(structure.chains[0], 0, "N"), _get_atom(structure.chains[0], 27, "CB")
+        _get_atom(structure.chains[0], 0, "N"), _get_atom(structure.chains[0], 1, "CB")
     )
     edge_far = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_far), variant)
@@ -66,11 +66,22 @@ def test_add_features():
         Efeat.VANDERWAALS
     ]
 
-    # MET 0 N - PHE 138 CG, intermediate distance, should have more negative
-    # vanderwaals energy than the war interaction
+    # MET 0 N - ASP 27 CB, too far, should have zero vanderwaals energy
+    contact = AtomicContact(
+         _get_atom(structure.chains[0], 0, "N"), _get_atom(structure.chains[0], 27, "CB")
+    )
+    edge_out_of_range = Edge(contact)
+    add_features(pdb_path, _wrap_in_graph(edge_out_of_range), variant)
+    assert not np.isnan(edge_out_of_range.features[Efeat.VANDERWAALS])
+    assert edge_out_of_range.features[Efeat.VANDERWAALS] == 0.0, edge_out_of_range.features[
+        Efeat.VANDERWAALS
+    ]
+
+    # MET 0 N - VAL 1 CA, intermediate distance, should have more negative
+    # vanderwaals energy than the far interaction
     contact = AtomicContact(
         _get_atom(structure.chains[0], 0, "N"),
-        _get_atom(structure.chains[0], 138, "CG"),
+        _get_atom(structure.chains[0], 1, "CA"),
     )
     edge_intermediate = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_intermediate), variant)
@@ -102,10 +113,10 @@ def test_add_features():
         close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
     ), close_attracting_edge.features[Efeat.ELECTROSTATIC]
 
-    # ARG 139 CZ - ASP 20 OD2, far attractive electrostatic energy
+    # ARG 139 CZ - ASP 109 OD2, far attractive electrostatic energy
     contact = AtomicContact(
         _get_atom(structure.chains[0], 139, "CZ"),
-        _get_atom(structure.chains[0], 20, "OD2"),
+        _get_atom(structure.chains[0], 109, "OE2"),
     )
     far_attracting_edge = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(far_attracting_edge), variant)

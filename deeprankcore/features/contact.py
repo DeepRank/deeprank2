@@ -13,21 +13,28 @@ _log = logging.getLogger(__name__)
 
 MAX_COVALENT_DISTANCE = 2.1
 
-def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
+def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray, cutoff_distance: float) -> np.ndarray:
     """ 
         Calculate Coulomb potentials between between all Atoms in atom.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
             However, the potential tends to 0 at large distance.
     """
 
+    clamped_distances = distances
+    clamped_distances[distances == 0.0] = 3.0
+
     EPSILON0 = 1.0
     COULOMB_CONSTANT = 332.0636
     charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
-    coulomb_potentials = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
-    return coulomb_potentials
+    coulomb_potentials = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * clamped_distances)
+
+    cutoff_factors = (1.0 - (clamped_distances / cutoff_distance) ** 2) ** 2
+
+    return coulomb_potentials * cutoff_factors
 
 
-def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
+def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray,
+                                  on_cutoff_distance: float, off_cutoff_distance: float) -> np.ndarray:
     """ 
         Calculate Lennard-Jones potentials between all Atoms in atom.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
@@ -40,7 +47,7 @@ def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> n
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
     intra_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
-    
+
     # calculate inter potentials
     sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms]
     epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms]
@@ -48,7 +55,18 @@ def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> n
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
     inter_potentials = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
-    lennard_jones_potentials = {'intra': intra_potentials, 'inter': inter_potentials}
+    # calculate prefactors
+    squared_distances = distances ** 2
+    squared_off_cutoff_distance = off_cutoff_distance ** 2
+    squared_on_cutoff_distance = on_cutoff_distance ** 2
+    prefactors = (squared_off_cutoff_distance - squared_distances) ** 2 * \
+                 (squared_off_cutoff_distance - squared_distances - 3.0 * (squared_on_cutoff_distance - squared_distances)) / \
+                 (squared_off_cutoff_distance - squared_on_cutoff_distance) ** 3
+    prefactors[distances > off_cutoff_distance] = 0.0
+    prefactors[distances < on_cutoff_distance] = 1.0
+
+    lennard_jones_potentials = {'intra': intra_potentials * prefactors,
+                                'inter': inter_potentials * prefactors}
     return lennard_jones_potentials
 
 
@@ -76,8 +94,8 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         warnings.simplefilter("ignore")
         positions = [atom.position for atom in all_atoms]
         interatomic_distances = distance_matrix(positions, positions)
-        interatomic_electrostatic_potentials = _get_coulomb_potentials(all_atoms, interatomic_distances)
-        interatomic_vanderwaals_potentials = _get_lennard_jones_potentials(all_atoms, interatomic_distances)
+        interatomic_electrostatic_potentials = _get_coulomb_potentials(all_atoms, interatomic_distances, 8.5)
+        interatomic_vanderwaals_potentials = _get_lennard_jones_potentials(all_atoms, interatomic_distances, 6.5, 8.5)
 
     # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
