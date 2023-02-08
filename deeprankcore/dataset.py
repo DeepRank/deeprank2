@@ -267,7 +267,6 @@ class DeeprankDataset(Dataset):
         self.devs = devs
 
 
-
 # Grid features are stored per dimension and named accordingly.
 # Example: position_001, position_002, position_003 (for x,y,z)
 # Use this regular expression to take the feature name apart
