@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sys
 import os
 import re
@@ -541,7 +542,9 @@ class GraphDataset(DeeprankDataset):
         standardize: bool = False,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
-        check_integrity: bool = True
+        check_integrity: bool = True,
+        train: bool = True,
+        dataset_train: GraphDataset = None
     ):
         """
         Class to load the .HDF5 files data into graphs.
@@ -595,6 +598,13 @@ class GraphDataset(DeeprankDataset):
 
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
+            
+            train (bool, optional): Boolean flag to determine if the instance represents the training set. If False, a dataset_train of the same class must be provided as well.
+                The latter will be used to scale the validation/testing set according to its features values. This parameter is considered only if standardize flag is set to True.
+                Defaults to True.
+
+            dataset_train: (class:`GraphDataset`, optional): if train is True, assign here the training set. This parameter is considered only if standardize flag is set to True.
+                Defaults to None.
         """
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
@@ -615,10 +625,33 @@ class GraphDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = [self.target]
             else:
                 self.features_dict[targets.VALUES] = self.target
+
+        if not train and not isinstance(dataset_train, GraphDataset):
+            raise TypeError("Please provide a valid training GraphDataset.")
         
+        if train and dataset_train:
+            _log.warning("dataset_train has been set but train flag was set to True. dataset_train will be ignored since the current dataset will be considered as training set.")
+
         if self._standardize:
-            self.hdf5_to_pandas()
-            self._compute_mean_std()
+            if not train and not isinstance(dataset_train, GraphDataset):
+                raise TypeError("Please provide a valid training GraphDataset.")
+            
+            if train and dataset_train:
+                _log.warning("dataset_train has been set but train flag was set to True. dataset_train will be ignored since the current dataset will be considered as training set.")
+            
+            if train:
+                self.hdf5_to_pandas()
+                self._compute_mean_std()
+            else:
+                if dataset_train.df is None:
+                    dataset_train.hdf5_to_pandas()
+                    dataset_train._compute_mean_std()
+                elif dataset_train.means is None or dataset_train.devs is None:
+                    dataset_train._compute_mean_std()
+                self.means = dataset_train.means
+                self.devs = dataset_train.devs
+        elif not self._standardize and (not train or dataset_train):
+            _log.warning("No scaling method has been set, and train and dataset_train parameters will be ignored.")
 
     def get(self, idx: int) -> Data:
         """
