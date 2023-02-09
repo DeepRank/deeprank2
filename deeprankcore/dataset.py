@@ -236,22 +236,12 @@ class DeeprankDataset(Dataset):
                     for feat in self.features_dict[feat_type]:
                         if f[entry_name][feat_type][feat][()].ndim == 2:
                             for i in range(f[entry_name][feat_type][feat][:].shape[1]):
-                                if feat_type == 'edge_features':
-                                    df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
-                                else:
-                                    df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
+                                df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
                         else:
-                            if feat_type == 'edge_features':
-                                df_dict[feat] = [
-                                    f[entry_name][feat_type][feat][:]
-                                    if f[entry_name][feat_type][feat][()].ndim == 1
-                                    else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
-                            else:
-                                df_dict[feat] = [
-                                    f[entry_name][feat_type][feat][:]
-                                    if f[entry_name][feat_type][feat][()].ndim == 1
-                                    else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
-
+                            df_dict[feat] = [
+                                f[entry_name][feat_type][feat][:]
+                                if f[entry_name][feat_type][feat][()].ndim == 1
+                                else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
 
                 df = pd.DataFrame(data=df_dict)
 
@@ -328,7 +318,7 @@ class DeeprankDataset(Dataset):
             ax.set(xlabel=f'{features_df[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
 
         else:
-            raise ValueError("Please provide valid features names. They must be present in the current :class:`DeeprankDataset` instance.")
+            raise ValueError("Please provide valid features names. They must be present in the current :class:`DeeprankDataset` children instance.")
         
         fig.tight_layout()
         fig.savefig(fname)
