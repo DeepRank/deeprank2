@@ -527,7 +527,7 @@ class GridDataset(DeeprankDataset):
 
 
 class GraphDataset(DeeprankDataset):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__( # pylint: disable=too-many-arguments, too-many-locals
         self,
         hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]] = None,
@@ -599,11 +599,13 @@ class GraphDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
             
-            train (bool, optional): Boolean flag to determine if the instance represents the training set. If False, a dataset_train of the same class must be provided as well.
-                The latter will be used to scale the validation/testing set according to its features values. This parameter is considered only if standardize flag is set to True.
+            train (bool, optional): Boolean flag to determine if the instance represents the training set. If False, a dataset_train of the same class must
+                be provided as well. The latter will be used to scale the validation/testing set according to its features values. This parameter is considered
+                only if standardize flag is set to True.
                 Defaults to True.
 
-            dataset_train: (class:`GraphDataset`, optional): if train is True, assign here the training set. This parameter is considered only if standardize flag is set to True.
+            dataset_train: (class:`GraphDataset`, optional): if train is True, assign here the training set. This parameter is considered only if standardize
+                flag is set to True.
                 Defaults to None.
         """
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
