@@ -349,6 +349,70 @@ class TestDataSet(unittest.TestCase):
                 assert -0.2 < mean < 0.2
                 assert 0.8 < dev < 1.2
 
+    def test_graph_standardization_logic(self):
+
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+
+        # normal logic 
+        dataset_train = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary', 
+            standardize=True
+        )
+
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary',
+            standardize=True,
+            train=False,
+            dataset_train=dataset_train
+        )
+
+        assert dataset_train.means == dataset_test.means
+        assert dataset_train.devs == dataset_test.devs
+
+        # without specifying standardization in training set
+        dataset_train = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary'
+        )
+
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary',
+            standardize=True,
+            train=False,
+            dataset_train=dataset_train
+        )
+
+        assert dataset_train.means == dataset_test.means
+        assert dataset_train.devs == dataset_test.devs
+
+        # raise error if dataset_train is not provided
+        with self.assertRaises(TypeError):
+            GraphDataset(
+                hdf5_path = hdf5_path,
+                target='binary',
+                standardize=True,
+                train=False
+            )
+
+        # raise error if dataset_train is of the wrong type
+        with self.assertRaises(TypeError):
+
+            dataset_train = GridDataset(
+                hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
+                target='binary'
+            )
+
+            GraphDataset(
+                hdf5_path = hdf5_path,
+                target='binary',
+                standardize=True,
+                train=False,
+                dataset_train=dataset_train
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
