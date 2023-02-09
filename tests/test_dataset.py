@@ -175,24 +175,23 @@ class TestDataSet(unittest.TestCase):
             edge_features=['distance', 'same_chain'],
             target='binary'
         )
-        df = dataset.hdf5_to_pandas()
-        cols = list(df.columns)
+        dataset.hdf5_to_pandas()
+        cols = list(dataset.df.columns)
         cols.sort()
         
         # assert dataset and df shapes
-        assert df.shape[0] == len(dataset)
-        assert df.shape[1] == 5
+        assert dataset.df.shape[0] == len(dataset)
+        assert dataset.df.shape[1] == 5
         assert cols == ['binary', 'charge', 'distance', 'id', 'same_chain']
 
         # assert dataset and df values
         with h5py.File(hdf5_path, 'r') as f5:
-            grp = f5[list(f5.keys())[0]]
 
             # getting nodes values with get()
             tensor_idx = 0
             features_dict = {}
             for feat in dataset.node_features:
-                vals = grp[f"{Nfeat.NODE}/{feat}"][()]
+                vals = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/{feat}"][()]
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
@@ -210,13 +209,13 @@ class TestDataSet(unittest.TestCase):
                         features_dict[feat + f'_{ch}'] = arr
 
             for feat, values in features_dict.items():
-                assert np.allclose(values, np.concatenate(df[feat].values))
+                assert np.allclose(values, np.concatenate(dataset.df[feat].values))
 
             # getting edges values with get()
             tensor_idx = 0
             features_dict = {}
             for feat in dataset.edge_features:
-                vals = grp[f"{Efeat.EDGE}/{feat}"][()]
+                vals = f5[list(f5.keys())[0]][f"{Efeat.EDGE}/{feat}"][()]
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
@@ -235,8 +234,8 @@ class TestDataSet(unittest.TestCase):
 
             for feat, values in features_dict.items():
                 # edge_attr contains stacked edges (doubled) so we test on mean and std
-                assert np.float32(round(values.mean(), 2)) == np.float32(round(np.concatenate(df[feat].values).mean(), 2))
-                assert np.float32(round(values.std(), 2)) == np.float32(round(np.concatenate(df[feat].values).std(), 2))
+                assert np.float32(round(values.mean(), 2)) == np.float32(round(np.concatenate(dataset.df[feat].values).mean(), 2))
+                assert np.float32(round(values.std(), 2)) == np.float32(round(np.concatenate(dataset.df[feat].values).std(), 2))
         
         # assert dataset and df shapes in subset case
         with h5py.File(hdf5_path, 'r') as f:
@@ -249,9 +248,9 @@ class TestDataSet(unittest.TestCase):
             target='binary',
             subset=keys[2:]
         )
-        df = dataset.hdf5_to_pandas()
+        dataset.hdf5_to_pandas()
 
-        assert df.shape[0] == len(keys[2:])
+        assert dataset.df.shape[0] == len(keys[2:])
 
     def test_graph_save_hist(self):
 
