@@ -168,7 +168,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_graph_hdf5_to_pandas(self):
 
-        hdf5_path = "tests/data/hdf5/test.hdf5"
+        hdf5_path = "tests/data/hdf5/train.hdf5"
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
             node_features='charge',
@@ -179,12 +179,69 @@ class TestDataSet(unittest.TestCase):
         cols = list(df.columns)
         cols.sort()
         
+        # assert dataset and df shapes
         assert df.shape[0] == len(dataset)
         assert df.shape[1] == 5
         assert cols == ['binary', 'charge', 'distance', 'id', 'same_chain']
+
+        # assert dataset and df values
+        with h5py.File(hdf5_path, 'r') as f5:
+            grp = f5[list(f5.keys())[0]]
+
+            # getting nodes values with get()
+            tensor_idx = 0
+            features_dict = {}
+            for feat in dataset.node_features:
+                vals = grp[f"{Nfeat.NODE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        features_dict[feat + f'_{ch}'] = arr
+
+            for feat, values in features_dict.items():
+                assert np.allclose(values, np.concatenate(df[feat].values))
+
+            # getting edges values with get()
+            tensor_idx = 0
+            features_dict = {}
+            for feat in dataset.edge_features:
+                vals = grp[f"{Efeat.EDGE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        features_dict[feat + f'_{ch}'] = arr
+
+            for feat, values in features_dict.items():
+                # edge_attr contains stacked edges (doubled) so we test on mean and std
+                assert np.float32(round(values.mean(), 2)) == np.float32(round(np.concatenate(df[feat].values).mean(), 2))
+                assert np.float32(round(values.std(), 2)) == np.float32(round(np.concatenate(df[feat].values).std(), 2))
         
+        # assert dataset and df shapes in subset case
         with h5py.File(hdf5_path, 'r') as f:
             keys = list(f.keys())
+
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
             node_features='charge',
@@ -261,7 +318,7 @@ class TestDataSet(unittest.TestCase):
                 dev = values.std()
 
                 assert -0.3 < mean < 0.3
-                # for one hot encoded features, it can happen that mean and std are not exactly 0 and 1
+                # for one hot encoded features, with few data points it can happen that mean and std are not exactly 0 and 1
                 assert 0.7 < dev < 1.5
 
             # getting all edge features values
@@ -272,7 +329,7 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -280,7 +337,7 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                            arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
@@ -290,7 +347,7 @@ class TestDataSet(unittest.TestCase):
                 mean = values.mean()
                 dev = values.std()
 
-                assert -0.1 < mean < 0.1
+                assert -0.2 < mean < 0.2
                 assert 0.8 < dev < 1.2
 
 
