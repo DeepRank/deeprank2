@@ -632,14 +632,16 @@ class GraphDataset(DeeprankDataset):
             raise TypeError("Please provide a valid training GraphDataset.")
         
         if train and dataset_train:
-            _log.warning("dataset_train has been set but train flag was set to True. dataset_train will be ignored since the current dataset will be considered as training set.")
+            _log.warning("""dataset_train has been set but train flag was set to True.
+            dataset_train will be ignored since the current dataset will be considered as training set.""")
 
         if self._standardize:
             if not train and not isinstance(dataset_train, GraphDataset):
                 raise TypeError("Please provide a valid training GraphDataset.")
             
             if train and dataset_train:
-                _log.warning("dataset_train has been set but train flag was set to True. dataset_train will be ignored since the current dataset will be considered as training set.")
+                _log.warning("""dataset_train has been set but train flag was set to True.
+                dataset_train will be ignored since the current dataset will be considered as training set.""")
             
             if train:
                 self.hdf5_to_pandas()
