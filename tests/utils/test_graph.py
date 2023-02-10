@@ -113,13 +113,13 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
                 assert (
                     feature_name in mapped_group
                 ), f"missing mapped feature {feature_name}"
-                assert "value" in mapped_group[feature_name]
-                data = mapped_group[feature_name]["value"][()]
+                assert feature_name in mapped_group
+                data = mapped_group[feature_name][()]
                 assert len(np.nonzero(data)) > 0, f"{feature_name}: all zero"
                 assert np.all(data.shape == tuple(grid_settings.points_counts))
 
             # check that the feature value is preserved after augmentation
-            unaugmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
+            unaugmented_data = mapped_group[node_feature_singlevalue_name][:]
 
             # Check the value
             assert entry_group[Target.VALUES][target_name][()] == target_value
@@ -127,7 +127,7 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
             # check that the augmented data is the same, just different orientation
             entry_group = f5[f"{entry_id}_000"]
             mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
-            augmented_data = mapped_group[node_feature_singlevalue_name]["value"][:]
+            augmented_data = mapped_group[node_feature_singlevalue_name][:]
 
             # Check the value
             assert entry_group[Target.VALUES][target_name][()] == target_value
