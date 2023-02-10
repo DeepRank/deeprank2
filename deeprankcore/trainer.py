@@ -591,7 +591,7 @@ class Trainer():
             _log.info(f"class weights: {self.weights}")
 
             try:
-                self.lossfunction = self.lossfunction(weight=self.weights)  # Check whether loss allows for weighted classes
+                self.lossfunction = self.lossfunction(weight=self.weights.to(self.device))  # Check whether loss allows for weighted classes
             except TypeError as e:
                 weight_error = (f"Loss function {self.lossfunction} does not allow for weighted classes.\n\t" +
                                 "Please use a different loss function or set class_weights to False.\n")
