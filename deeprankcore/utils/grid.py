@@ -336,9 +336,8 @@ class Grid:
             features_group = grid_group.require_group(gridstorage.MAPPED_FEATURES)
             for feature_name, feature_data in self.features.items():
 
-                feature_group = features_group.require_group(feature_name)
-                feature_group.create_dataset(
-                    gridstorage.FEATURE_VALUE,
+                features_group.create_dataset(
+                    feature_name,
                     data=feature_data,
                     compression="lzf",
                     chunks=True,
