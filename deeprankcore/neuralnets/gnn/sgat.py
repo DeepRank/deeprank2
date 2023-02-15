@@ -17,6 +17,7 @@ class SGraphAttentionLayer(torch.nn.Module):
     Ni is the number of neighbor of node i
     \\Sum_j runs over the neighbors of node i
     a_ij is the edge attribute between node i and j
+    
     Args:
         in_channels (int): Size of each input sample.
         out_channels (int): Size of each output sample.
