@@ -1,11 +1,11 @@
-import logging
-import numpy as np
-from typing import List
 import pdb2sql
 from deeprankcore.utils.graph import Node, Graph
 from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.aminoacid import Polarity
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain.aminoacidlist import amino_acids
+
 
 def count_residue_contacts(pdb_path: str, cutoff: float, chain1: str = 'A', chain2: str = 'B') -> dict:
     """Count total number of close contact residues and contacts of specific Polarity.
@@ -77,11 +77,11 @@ def add_features(
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}")
     
-    sql = pdb2sql.interface(pdb_path)    
             
             
 class _ContactDensity:
-    """Internal class that holds contact density information for a given residue."""
+    """Internal class that holds contact density information for a given residue.
+    """
     def __init__(self, residue):
         self.id = residue
         self.densities = {pol: 0 for pol in Polarity}
