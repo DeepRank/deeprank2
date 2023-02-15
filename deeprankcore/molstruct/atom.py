@@ -4,7 +4,7 @@ from deeprankcore.molstruct.residue import Residue
 
 
 class AtomicElement(Enum):
-    "value to represent the type of pdb atoms"
+    """Value to represent the type of pdb atoms."""
 
     C = 1
     O = 2 # noqa: pycodestyle
@@ -21,7 +21,7 @@ class AtomicElement(Enum):
 
 
 class Atom:
-    "represents a pdb atom"
+    "Represents a pdb atom."
 
     def __init__( # pylint: disable=too-many-arguments
         self,
@@ -62,7 +62,7 @@ class Atom:
         return f"{self._residue} {self._name}"
 
     def change_altloc(self, alternative_atom):
-        "replace the atom's location by another atom's location"
+        """Replace the atom's location by another atom's location."""
 
         self._position = alternative_atom.position
         self._occupancy = alternative_atom.occupancy

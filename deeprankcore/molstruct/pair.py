@@ -5,6 +5,7 @@ from deeprankcore.molstruct.atom import Atom
 
 class Pair:
     """A hashable, comparable object for any set of two inputs where order doesn't matter.
+
     Args:
         item1 (object): the pair's first object, must be convertable to string
         item2 (object): the pair's second object, must be convertable to string
@@ -48,7 +49,7 @@ class Contact(Pair, ABC):
 
 
 class ResidueContact(Contact):
-    "A contact between two residues from a structure"
+    """A contact between two residues from a structure."""
 
     def __init__(self, residue1: Residue, residue2: Residue):
 
@@ -67,7 +68,7 @@ class ResidueContact(Contact):
 
 
 class AtomicContact(Contact):
-    "A contact between two atoms from a structure"
+    """A contact between two atoms from a structure."""
 
     def __init__(
         self,

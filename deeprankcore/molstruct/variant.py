@@ -3,7 +3,7 @@ from deeprankcore.molstruct.aminoacid import AminoAcid
 
 
 class SingleResidueVariant:
-    "represents an amino acid replacement"
+    """Represents an amino acid replacement."""
 
     def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
         self._residue = residue
