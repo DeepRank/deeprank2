@@ -28,5 +28,14 @@ def add_features(
             raise TypeError(f"Unexpected node type: {type(node.id)}")
     
     sql = pdb2sql.interface(pdb_path)    
+            
+            
+class _ContactDensity:
+    """Internal class that holds contact density information for a given residue."""
+    def __init__(self, residue):
+        self.id = residue
+        self.densities = {pol: 0 for pol in Polarity}
+        self.densities['total': 0]
+        self.connections = {pol: [] for pol in Polarity}
     
-    all_contact_pairs = sql.get_contact_residues(cutoff=distance, allchains=True, return_contact_pairs=True)
+    
