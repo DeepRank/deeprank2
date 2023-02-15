@@ -90,7 +90,7 @@ class _ContactDensity:
         self.id = residue
         self.res = residue
         self.densities = {pol: 0 for pol in Polarity}
-        self.densities['total': 0]
+        self.densities['total'] = 0
         self.connections = {pol: [] for pol in Polarity}
     
     
