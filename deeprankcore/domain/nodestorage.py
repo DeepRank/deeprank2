@@ -35,10 +35,10 @@ RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
 
 ## residue contact density
 RCDTOTAL = 'rcd_total' # int
-RCDAPOLAR = 'rcd_apolar' # int
+RCDNONPOLAR = 'rcd_nonpolar' # int
 RCDPOLAR = 'rcd_polar' # int
-RCDNEG = 'rcd_negative' # int
-RCDPOS = 'rcd_positive' # int
+RCDNEGATIVE = 'rcd_negative' # int
+RCDPOSITIVE = 'rcd_positive' # int
 
 ## conservation features
 PSSM = "pssm" # list[20xint]; former FEATURENAME_PSSM
