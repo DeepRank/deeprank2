@@ -129,7 +129,7 @@ class TestTrainer(unittest.TestCase):
             subset=None,
             target=targets.IRMSD,
             task=targets.REGRESS,
-            features=[Efeat.VANDERWAALS]
+            features=[Efeat.VDW]
         )
         trainer = Trainer(
             CnnRegression,
@@ -143,7 +143,7 @@ class TestTrainer(unittest.TestCase):
             subset=None,
             target=targets.BINARY,
             task=targets.CLASSIF,
-            features=[Efeat.VANDERWAALS])
+            features=[Efeat.VDW])
         trainer = Trainer(
             CnnClassification,
             dataset
@@ -156,7 +156,7 @@ class TestTrainer(unittest.TestCase):
             subset=None,
             target=targets.BINARY,
             task=targets.CLASSIF,
-            features=[Efeat.VANDERWAALS]
+            features=[Efeat.VDW]
         )
         dataset_valid = GraphDataset(
             hdf5_path="tests/data/hdf5/valid.hdf5",

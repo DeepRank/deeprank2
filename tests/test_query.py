@@ -171,7 +171,7 @@ def test_variant_graph_101M():
         ],
         [
             Efeat.DISTANCE,
-            Efeat.VANDERWAALS,
+            Efeat.VDW,
             Efeat.ELECTROSTATIC,
         ],
     )
@@ -211,7 +211,7 @@ def test_variant_graph_1A0Z():
         ],
         [
             Efeat.DISTANCE,
-            Efeat.VANDERWAALS,
+            Efeat.VDW,
             Efeat.ELECTROSTATIC,
         ],
     )
@@ -249,7 +249,7 @@ def test_variant_graph_9API():
         ],
         [
             Efeat.DISTANCE,
-            Efeat.VANDERWAALS,
+            Efeat.VDW,
             Efeat.ELECTROSTATIC,
         ],
     )

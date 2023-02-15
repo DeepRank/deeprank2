@@ -26,7 +26,7 @@ class TestDataSet(unittest.TestCase):
     def test_grid_dataset_regression(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
-            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            features=[Efeat.VDW, Efeat.ELECTROSTATIC],
             target=targets.IRMSD
         )
 
@@ -41,7 +41,7 @@ class TestDataSet(unittest.TestCase):
     def test_grid_dataset_classification(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
-            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            features=[Efeat.VDW, Efeat.ELECTROSTATIC],
             target=targets.BINARY
         )
 
