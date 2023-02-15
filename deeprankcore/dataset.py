@@ -145,9 +145,9 @@ class DeeprankDataset(Dataset):
                     else:
                         entry_names = [entry_name for entry_name in self.subset if entry_name in list(hdf5_file.keys())]
 
-                    for entry_name in entry_names:
-                        if self._filter_targets(hdf5_file[entry_name]):
-                            self.index_entries += [(hdf5_path, entry_name)]
+                    #using list comprehension to skip _filter_targets method if target_filter is None
+                    self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names if self.target_filter is None or self._filter_targets(hdf5_file[entry_name]) is True]
+                    
             except Exception:
                 _log.exception(f"on {hdf5_path}")
 
