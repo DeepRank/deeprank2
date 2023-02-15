@@ -7,14 +7,14 @@ from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import amino_acids
 
 
-def count_residue_contacts(pdb_path: str, cutoff: float, chain1: str = 'A', chain2: str = 'B') -> dict:
+def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A', chain2: str = 'B'):
     """Count total number of close contact residues and contacts of specific Polarity.
 
     Args:
-        pdb_path (str): path to pdb file to read molecular information from
-        cutoff (float): cutoff distance to be considered a close contact
-        chain1 (str, optional): name of first chain from pdb file to consider. Defaults to 'A'.
-        chain2 (str, optional): name of second chain from pdb file to consider. Defaults to 'B'.
+        pdb_path (str): Path to pdb file to read molecular information from
+        cutoff (float, optional): Cutoff distance (in Angstrom) to be considered a close contact. Defaults to 5.5
+        chain1 (str, optional): Name of first chain from pdb file to consider. Defaults to 'A'.
+        chain2 (str, optional): Name of second chain from pdb file to consider. Defaults to 'B'.
 
     Returns:
         dict: keys are each residue; items are _ContactDensity objects, which containing all contact density information 
