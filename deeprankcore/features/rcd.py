@@ -65,8 +65,9 @@ def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A'
 def add_features(
     pdb_path: str, 
     graph: Graph,
-    distance: float = 5.5,
     *args, **kwargs): # pylint: disable=unused-argument
+    
+    residue_contacts = count_residue_contacts(pdb_path)
     
     for node in graph.nodes:
         if isinstance(node.id, Residue):
@@ -76,14 +77,18 @@ def add_features(
             residue = atom.residue
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}")
+        # example residue will hash as: <1A0Z B 118>
+        # example _ContactDensity.id will is a tuple: <('A', 27, 'GLU')>
     
-            
-            
+    
+
+
 class _ContactDensity:
     """Internal class that holds contact density information for a given residue.
     """
     def __init__(self, residue):
         self.id = residue
+        self.res = residue
         self.densities = {pol: 0 for pol in Polarity}
         self.densities['total': 0]
         self.connections = {pol: [] for pol in Polarity}
