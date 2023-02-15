@@ -14,7 +14,7 @@ _log = logging.getLogger(__name__)
 
 
 class OutputExporter:
-    "The class implements a general exporter to be called when a neural network generates outputs"
+    """The class implements a general exporter to be called when a neural network generates outputs."""
 
     def __init__(self, directory_path: str = None):
         
@@ -47,7 +47,7 @@ class OutputExporter:
 
 
 class OutputExporterCollection:
-    "It allows a series of output exporters to be used at the same time"
+    """It allows a series of output exporters to be used at the same time."""
 
     def __init__(self, *args: List[OutputExporter]):
         self._output_exporters = args
@@ -72,14 +72,13 @@ class OutputExporterCollection:
 
 
 class TensorboardBinaryClassificationExporter(OutputExporter):
-    """ Exporter for tensorboard, works for binary classification only.
+    """Exporter for tensorboard, works for binary classification only.
 
-        Currently outputs to tensorboard:
-         - Mathews Correlation Coefficient (MCC)
-         - Accuracy
-         - ROC area under the curve
-
-        Outputs are computed for each epoch.
+    Currently outputs to tensorboard:
+    - Mathews Correlation Coefficient (MCC)
+    - Accuracy
+    - ROC area under the curve
+    Outputs are computed for each epoch.
     """
 
     def __init__(self, directory_path: str):
@@ -140,22 +139,23 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
             self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
 
     def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
-        "for regression, target data is needed and output data must be a list of two-dimensional values"
+        """For regression, target data is needed and output data must be a list of two-dimensional values."""
 
         return output_data_shape == 2 and target_data_shape == 1
 
 
 class ScatterPlotExporter(OutputExporter):
-    """ An output exporter that can make scatter plots, containing every single data point.
+    """An output exporter that can make scatter plots, containing every single data point.
 
-        On the X-axis: targets values
-        On the Y-axis: output values
+    On the X-axis: targets values
+    On the Y-axis: output values
     """
 
     def __init__(self, directory_path: str, epoch_interval: int = 1):
-        """ Args:
-                directory_path: where to store the plots
-                epoch_interval: how often to make a plot, 5 means: every 5 epochs
+        """ 
+        Args:
+            directory_path: where to store the plots
+            epoch_interval: how often to make a plot, 5 means: every 5 epochs
         """
         super().__init__(directory_path)
         self._epoch_interval = epoch_interval
@@ -168,7 +168,7 @@ class ScatterPlotExporter(OutputExporter):
         self._plot_data.clear()
 
     def get_filename(self, epoch_number):
-        "returns the filename for the table"
+        """Returns the filename for the table."""
         return os.path.join(self._directory_path, f"scatter-{epoch_number}.png")
 
     @staticmethod
@@ -204,7 +204,7 @@ class ScatterPlotExporter(OutputExporter):
 
     def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
                 entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
-        "make the plot, if the epoch matches with the interval"
+        """Make the plot, if the epoch matches with the interval."""
 
         if epoch_number % self._epoch_interval == 0:
 
@@ -217,26 +217,25 @@ class ScatterPlotExporter(OutputExporter):
             self._plot(epoch_number, self._plot_data[epoch_number], path)
 
     def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
-        "for regression, target data is needed and output data must be a list of one-dimensional values"
+        """For regression, target data is needed and output data must be a list of one-dimensional values."""
 
         return output_data_shape == 1 and target_data_shape == 1
 
 
 class HDF5OutputExporter(OutputExporter):
-    """ An output exporter that saves every single data point in an hdf5 file.
-        It is the most general output exporter implemented, and the information
-        contained in the hdf5 file generated allows the user to compute any kind
-        of metrics, for both classification and regression.
+    """An output exporter that saves every single data point in an hdf5 file.
 
-        Results saved are:
-            - phase (train/valid/test)
-            - epoch
-            - entry name
-            - output value/s
-            - target value
-            - loss per epoch
-
-        The user can then read the content of the hdf5 file into a Pandas dataframe.
+    It is the most general output exporter implemented, and the information
+    contained in the hdf5 file generated allows the user to compute any kind
+    of metrics, for both classification and regression.
+    Results saved are:
+    - phase (train/valid/test)
+    - epoch
+    - entry name
+    - output value/s
+    - target value
+    - loss per epoch
+    The user can then read the content of the hdf5 file into a Pandas dataframe.
     """
 
     def __init__(self, directory_path: str):

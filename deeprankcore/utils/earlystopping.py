@@ -11,21 +11,18 @@ class EarlyStopping:
         trace_func: Callable = print,
     ):
         """
-        Terminate training if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
+        Terminate training if validation loss doesn't improve after a given patience
+        or if a maximum gap between validation and training loss is reached.
 
         Args:
             patience (int): How long to wait after last time validation loss improved.
                 Default: 10
-            
             delta (float): Minimum change required to reset the early stopping counter.
                 Default: 0
-            
             maxgap (float, optional): Maximum difference between between training and validation loss.
                 Default: None
-            
             verbose (bool): If True, prints a message for each validation loss improvement. 
                 Default: True
-            
             trace_func (function): Function used for recording EarlyStopping status.
                 Default: print            
         """
