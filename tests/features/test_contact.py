@@ -1,13 +1,14 @@
 from uuid import uuid4
 from pdb2sql import pdb2sql
 import numpy as np
-from deeprankcore.molstruct.structure import Chain
+from scipy.spatial import distance_matrix
+from deeprankcore.molstruct.structure import Chain, PDBStructure
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.utils.graph import Edge, Graph
 from deeprankcore.utils.buildgraph import get_structure
-from deeprankcore.features.contact import add_features
+from deeprankcore.features.contact import add_features, get_bonded_matrix
 from deeprankcore.domain.aminoacidlist import alanine
 from deeprankcore.domain import edgestorage as Efeat
 
@@ -30,6 +31,65 @@ def _wrap_in_graph(edge: Edge):
     g = Graph(uuid4().hex)
     g.add_edge(edge)
     return g
+
+
+def test_within_3bonds_distinction():
+
+    pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
+
+    pdb = pdb2sql(pdb_path)
+    try:
+        structure = get_structure(pdb, "101m")
+    finally:
+        pdb._close() # pylint: disable=protected-access
+
+    chain_C = structure.get_chain('C')
+    chain_D = structure.get_chain('D')
+
+    atoms = structure.get_atoms()
+    positions = np.array([atom.position for atom in atoms])
+
+    count_atoms = len(atoms)
+
+    BONDED = get_bonded_matrix(positions, 2.0, 3)
+
+    assert BONDED.shape == (count_atoms, count_atoms)
+
+    index_C_phe60_CE1 = atoms.index(_get_atom(chain_C, 60, "CE1"))
+    index_C_trp121_CZ2 = atoms.index(_get_atom(chain_C, 121, "CZ2"))
+    index_C_asn102_O = atoms.index(_get_atom(chain_C, 102, "O"))
+    index_D_leu111_CG = atoms.index(_get_atom(chain_D, 111, "CG"))
+    index_D_pro93_CA = atoms.index(_get_atom(chain_D, 93, "CA"))
+    index_D_pro93_CB = atoms.index(_get_atom(chain_D, 93, "CB"))
+    index_D_pro93_CG = atoms.index(_get_atom(chain_D, 93, "CG"))
+    index_D_pro93_CD = atoms.index(_get_atom(chain_D, 93, "CD"))
+    index_D_ala92_CA = atoms.index(_get_atom(chain_D, 92, "CA"))
+    index_D_ala92_CB = atoms.index(_get_atom(chain_D, 92, "CB"))
+    index_D_gly89_N = atoms.index(_get_atom(chain_D, 89, "N"))
+
+    # one bond away
+    assert BONDED[index_D_pro93_CA, index_D_pro93_CB]
+    assert BONDED[index_D_pro93_CB, index_D_pro93_CA]
+
+    # two bonds away
+    assert BONDED[index_D_pro93_CA, index_D_pro93_CG]
+    assert BONDED[index_D_pro93_CG, index_D_pro93_CA]
+
+    # three bonds away
+    assert BONDED[index_D_pro93_CA, index_D_ala92_CA]
+    assert BONDED[index_D_ala92_CA, index_D_pro93_CA]
+
+    # four bonds away
+    assert not BONDED[index_D_pro93_CA, index_D_ala92_CB]
+
+    # in different chain, but hydrogen bonded
+    assert not BONDED[index_D_gly89_N, index_C_asn102_O]
+
+    # close, but not connected
+    assert not BONDED[index_C_trp121_CZ2, index_C_phe60_CE1]
+
+    # far away from each other
+    assert not BONDED[index_D_leu111_CG, index_D_pro93_CA]
 
 
 def test_add_features():
