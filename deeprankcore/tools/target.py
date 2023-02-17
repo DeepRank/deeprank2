@@ -2,7 +2,7 @@ import glob
 import h5py
 import os
 import numpy as np
-from typing import Dict, Union
+from typing import Dict, Union, List
 from pdb2sql import StructureSimilarity
 from deeprankcore.domain import targetstorage as targets
 
