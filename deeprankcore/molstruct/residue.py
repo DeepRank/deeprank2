@@ -6,7 +6,7 @@ from deeprankcore.utils.pssmdata import PssmRow
 
 
 class Residue:
-    """Represents a pdb residue."""
+    "represents a pdb residue"
 
     def __init__(
         self,
@@ -41,8 +41,8 @@ class Residue:
         return hash((self._number, self._insertion_code))
 
     def get_pssm(self) -> PssmRow:
-        """ If the residue's chain has pssm info linked to it,
-            then return the part that belongs to this residue.
+        """ if the residue's chain has pssm info linked to it,
+            then return the part that belongs to this residue
         """
 
         pssm = self._chain.pssm
@@ -69,7 +69,7 @@ class Residue:
 
     @property
     def number_string(self) -> str:
-        """Contains both the number and the insertion code (if any)."""
+        "contains both the number and the insertion code (if any)"
 
         if self._insertion_code is not None:
             return f"{self._number}{self._insertion_code}"
@@ -92,7 +92,8 @@ class Residue:
 
 
 def get_residue_center(residue: Residue) -> np.ndarray:
-    """Chooses a center position for a residue, based on the atoms it has:
+    """
+    Chooses a center position for a residue, based on the atoms it has:
     1. find beta carbon, if present
     2. find alpha carbon, if present
     3. else take the mean of the atom positions
