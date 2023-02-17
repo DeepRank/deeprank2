@@ -30,6 +30,7 @@ class _ContactDensity:
         self.densities = {pol: 0 for pol in Polarity}
         self.densities['total'] = 0
         self.connections = {pol: [] for pol in Polarity}
+        self.connections['all'] = []
 
         # example residue will hash as: <1A0Z B 118>
         # example _ContactDensity.res will is a tuple: ('A', 27, 'GLU')
@@ -41,7 +42,7 @@ def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A'
 
     Args:
         pdb_path (str): Path to pdb file to read molecular information from.
-        cutoff (float, optional): Cutoff distance (in Angstrom) to be considered a close contact. Defaults to 5.5
+        cutoff (float, optional): Cutoff distance (in Ångström) to be considered a close contact. Defaults to 10
         chain1 (str, optional): Name of first chain from pdb file to consider. Defaults to 'A'.
         chain2 (str, optional): Name of second chain from pdb file to consider. Defaults to 'B'.
 
@@ -79,6 +80,7 @@ def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A'
             # populate densities and connections for chain1_res
             residue_contacts[contact1_id].densities['total'] += 1
             residue_contacts[contact1_id].densities[aa2.polarity] += 1
+            residue_contacts[contact1_id].connections['all'].append(chain2_res)
             residue_contacts[contact1_id].connections[aa2.polarity].append(chain2_res)
             
             # add chain2_res to residue_contact dict if it doesn't exist yet
@@ -88,6 +90,7 @@ def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A'
             # populate densities and connections for chain2_res
             residue_contacts[contact2_id].densities['total'] += 1
             residue_contacts[contact2_id].densities[aa1.polarity] += 1
+            residue_contacts[contact2_id].connections['all'].append(chain1_res)
             residue_contacts[contact2_id].connections[aa1.polarity].append(chain1_res)
     
     return residue_contacts
