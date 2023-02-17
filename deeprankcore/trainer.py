@@ -23,11 +23,11 @@ class Trainer():
     def __init__( # pylint: disable=too-many-arguments # noqa: MC0001
                 self,
                 neuralnet = None,
-                dataset_train: Union[GraphDataset, GridDataset,None] = None,
-                dataset_val: Union[GraphDataset, GridDataset,None] = None,
-                dataset_test: Union[GraphDataset, GridDataset,None] = None,
-                val_size: Union[float, int,None] = None,
-                test_size: Union[float, int,None] = None,
+                dataset_train: Union[GraphDataset, GridDataset] = None,
+                dataset_val: Union[GraphDataset, GridDataset] = None,
+                dataset_test: Union[GraphDataset, GridDataset] = None,
+                val_size: Union[float, int] = None,
+                test_size: Union[float, int] = None,
                 class_weights: bool = False,
                 pretrained_model: Optional[str] = None,
                 cuda: bool = False,
@@ -42,20 +42,30 @@ class Trainer():
                 in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
                 Defaults to None.
+
             dataset_train (:class:`GraphDataset`, optional): Training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
+
             dataset_val (:class:`GraphDataset`, optional): Evaluation set used during training.
                 If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
                 Defaults to None.
+
             dataset_test (:class:`GraphDataset`, optional): Independent evaluation set. Defaults to None.
+
             val_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
                 Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to to 0.25 (in _divide_dataset function).
+
             test_size (Union[float,int], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
                 Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to 0 (i.e., no test data).
+
             class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
+
             pretrained_model (str, optional): Path to pre-trained model. Defaults to None.
+
             cuda (bool, optional): Whether to use CUDA. Defaults to False.
+
             ngpu (int, optional): Number of GPU to be used. Defaults to 0.
+
             output_exporters (List[OutputExporter], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
                 epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
@@ -231,7 +241,9 @@ class Trainer():
         self.task = dataset.task
 
     def _load_model(self):
-        """Loads the neural network model."""
+        """
+        Loads the neural network model.
+        """
 
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
@@ -291,7 +303,9 @@ class Trainer():
                                      "Make sure to use only graph or only grid datasets")
 
     def _load_pretrained_model(self):
-        """Loads pretrained model."""
+        """
+        Loads pretrained model
+        """
 
         self.test_loader = DataLoader(
             self.dataset_test,
@@ -304,7 +318,7 @@ class Trainer():
         self.model.load_state_dict(self.model_load_state_dict)
 
     def _precluster(self, dataset: GraphDataset):
-        """Pre-clusters nodes of the graphs.
+        """Pre-clusters nodes of the graphs
 
         Args:
             dataset (GraphDataset object)
@@ -343,13 +357,14 @@ class Trainer():
             f5.close()
 
     def _put_model_to_device(self, dataset: Union[GraphDataset, GridDataset]):
-        """Puts the model on the available device.
+        """
+        Puts the model on the available device
 
         Args:
-            dataset (str): GraphDataset object.
+            dataset (str): GraphDataset object
 
         Raises:
-            ValueError: Incorrect output shape.
+            ValueError: Incorrect output shape
         """
 
         # regression mode
@@ -400,12 +415,15 @@ class Trainer():
 
     def configure_optimizers(self, optimizer = None, lr: float = 0.001, weight_decay: float = 1e-05):
 
-        """Configure optimizer and its main parameters.
+        """
+        Configure optimizer and its main parameters.
 
         Args:
             optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
                 Defaults to None.
+
             lr (float, optional): Learning rate. Defaults to 0.001.
+
             weight_decay (float, optional): Weight decay (L2 penalty).
                 Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
         """
@@ -425,7 +443,8 @@ class Trainer():
 
     def set_lossfunction(self, lossfunction = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
 
-        """Set the loss function.
+        """
+        Set the loss function.
         
         Args:
             lossfunction: Make sure to use a loss function that is appropriate for
@@ -505,7 +524,8 @@ class Trainer():
         save_best_model: Optional[bool] = True,
         output_prefix: Optional[str] = None,
     ):
-        """Performs the training of the model.
+        """
+        Performs the training of the model.
 
         Args:
             nepoch (int): Maximum number of epochs to run.
@@ -644,14 +664,15 @@ class Trainer():
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
-        """Runs a single epoch.
+        """
+        Runs a single epoch
 
         Args:
             epoch_number (int)
-            pass_name (str): 'training', 'validation' or 'testing'.
+            pass_name (str): 'training', 'validation' or 'testing'
 
         Returns:
-            running loss.
+            running loss
         """
 
         sum_of_losses = 0
@@ -705,7 +726,8 @@ class Trainer():
             pass_name: str
         ) -> float:
 
-        """Evaluates the model.
+        """
+        Evaluates the model
 
         Args:
             loader (Dataloader): data to evaluate on
@@ -763,7 +785,8 @@ class Trainer():
 
     @staticmethod
     def _log_epoch_data(stage: str, loss: float, time: float):
-        """Prints the data of each epoch.
+        """
+        Prints the data of each epoch
 
         Args:
             stage (str): train or valid
@@ -774,7 +797,9 @@ class Trainer():
 
     def _format_output(self, pred, target=None):
 
-        """Format the network output depending on the task (classification/regression)."""
+        """
+        Format the network output depending on the task (classification/regression).
+        """
 
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
@@ -808,13 +833,15 @@ class Trainer():
         self,
         batch_size: int = 32,
         num_workers: int = 0):
-        """Performs the testing of the model.
+        """
+        Performs the testing of the model.
 
         Args:
             batch_size (int, optional): Sets the size of the batch.
                         Default: 32.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
                         Default: 0.
+
         """
         self.batch_size_test = batch_size
 
@@ -838,7 +865,9 @@ class Trainer():
             self._eval(self.test_loader, 0, "testing")
 
     def _load_params(self):
-        """Loads the parameters of a pretrained model."""
+        """
+        Loads the parameters of a pretrained model
+        """
 
         state = torch.load(self.pretrained_model_path)
 
@@ -866,7 +895,8 @@ class Trainer():
         self.ngpu = state["ngpu"]
 
     def save_model(self, filename='model.pth.tar'):
-        """Saves the model to a file.
+        """
+        Saves the model to a file.
 
         Args:
             filename (str, optional): Name of the file. Defaults to 'model.pth.tar'.
@@ -899,13 +929,14 @@ class Trainer():
         torch.save(state, filename)
 
 
-def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[float, int,None] = None) -> \
+def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[float, int] = None) -> \
         Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
 
-    """Divides the dataset into a training set and an evaluation set.
+    """Divides the dataset into a training set and an evaluation set
 
     Args:
         dataset (deeprank-core dataset object): input dataset to be split into training and validation data
+
         val_size (float or int, optional): fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to 0.25.
     """

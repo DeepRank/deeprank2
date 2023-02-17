@@ -1,4 +1,6 @@
-"""This module holds the classes that are used when working with a 3D grid."""
+"""
+This module holds the classes that are used when working with a 3D grid.
+"""
 
 import logging
 from enum import Enum
@@ -16,7 +18,6 @@ _log = logging.getLogger(__name__)
 
 class MapMethod(Enum):
     """This holds the value of either one of 4 grid mapping methods.
-
     A mapping method determines how feature point values are divided over the grid points.
     """
 
@@ -27,7 +28,7 @@ class MapMethod(Enum):
 
 
 class Augmentation:
-    """A rotation around an axis, to be applied to a feature before mapping it to a grid"""
+    "A rotation around an axis, to be applied to a feature before mapping it to a grid"
 
     def __init__(self, axis: np.ndarray, angle: float):
         self._axis = axis
@@ -44,12 +45,12 @@ class Augmentation:
 
 class GridSettings:
     """Objects of this class hold the settings to build a grid.
-
     The grid is basically a multi-divided 3D cube with
     the following properties:
-    - sizes: x, y, z sizes of the box in Å
-    - points_counts: the number of points on the x, y, z edges of the cube
-    - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
+
+     - sizes: x, y, z sizes of the box in Å
+     - points_counts: the number of points on the x, y, z edges of the cube
+     - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
     def __init__(
@@ -77,8 +78,7 @@ class GridSettings:
 
 
 class Grid:
-    """
-    An instance of this class holds everything that the grid is made of:
+    """An instance of this class holds everything that the grid is made of:
     - coordinates of points
     - names of features
     - feature values on each point
@@ -96,7 +96,7 @@ class Grid:
         self._features = {}
 
     def _set_mesh(self, center: np.ndarray, settings: GridSettings):
-        """Builds the grid points."""
+        "builds the grid points"
 
         half_size_x = settings.sizes[0] / 2
         half_size_y = settings.sizes[1] / 2
@@ -318,7 +318,7 @@ class Grid:
             self.add_feature_values(index_name, grid_data)
 
     def to_hdf5(self, hdf5_path: str):
-        """Write the grid data to hdf5, according to deeprank standards."""
+        "Write the grid data to hdf5, according to deeprank standards."
 
         with h5py.File(hdf5_path, "a") as hdf5_file:
 
@@ -336,9 +336,8 @@ class Grid:
             features_group = grid_group.require_group(gridstorage.MAPPED_FEATURES)
             for feature_name, feature_data in self.features.items():
 
-                feature_group = features_group.require_group(feature_name)
-                feature_group.create_dataset(
-                    gridstorage.FEATURE_VALUE,
+                features_group.create_dataset(
+                    feature_name,
                     data=feature_data,
                     compression="lzf",
                     chunks=True,

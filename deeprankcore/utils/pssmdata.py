@@ -7,7 +7,7 @@ amino_acids_by_letter = {
 }
 
 class PssmRow:
-    """Holds data for one position-specific scoring matrix row."""
+    "holds data for one position-specific scoring matrix row"
 
     def __init__(self, conservations: Dict[AminoAcid, float], information_content: float):
         self._conservations = conservations
@@ -26,7 +26,7 @@ class PssmRow:
 
 
 class PssmTable:
-    """Holds data for one position-specific scoring table."""
+    "holds data for one position-specific scoring table"
 
     def __init__(self, rows: Optional[List[PssmRow]] = None):
         if rows is None:
@@ -41,6 +41,6 @@ class PssmTable:
         return self._rows[residue]
 
     def update(self, other):
-        """Can be used to merge two non-overlapping scoring tables."""
+        "can be used to merge two non-overlapping scoring tables"
 
         self._rows.update(other._rows) # pylint: disable=protected-access
