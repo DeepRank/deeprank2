@@ -398,12 +398,12 @@ class Trainer():
                                  is not compatible with output shape {self.output_shape}\n
                                  and target shape {target_shape}""")
 
-    def configure_optimizers(self, Optional[optimizer] = None, lr: Optional[float] = 0.001, weight_decay: Optional[float] = 1e-05):
+    def configure_optimizers(self, optimizer = None, lr: Optional[float] = 0.001, weight_decay: Optional[float] = 1e-05):
 
         """Configure optimizer and its main parameters.
 
         Args:
-            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
+            optimizer (:class:`torch.optim`): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
                 Defaults to None.
             lr (float, optional): Learning rate. Defaults to 0.001.
             weight_decay (float, optional): Weight decay (L2 penalty).
