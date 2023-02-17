@@ -103,6 +103,7 @@ def add_features(
     
     residue_contacts = count_residue_contacts(pdb_path)
     
+    uncontacted_residues = 0
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id
@@ -116,9 +117,17 @@ def add_features(
         res_num = str(residue).split()[2] # returns the residue number
         contactdensity_id = chain_name + res_num # reformat id to be 
         
-        node.features[Nfeat.RCDTOTAL] = residue_contacts[contactdensity_id].densities['total']
-        node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.NONPOLAR]
-        node.features[Nfeat.RCDPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.POLAR]
-        node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contactdensity_id].densities[Polarity.NEGATIVE_CHARGE]
-        node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contactdensity_id].densities[Polarity.POSITIVE_CHARGE]
-    
+        try:
+            node.features[Nfeat.RCDTOTAL] = residue_contacts[contactdensity_id].densities['total']
+            node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.NONPOLAR]
+            node.features[Nfeat.RCDPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.POLAR]
+            node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contactdensity_id].densities[Polarity.NEGATIVE_CHARGE]
+            node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contactdensity_id].densities[Polarity.POSITIVE_CHARGE]
+        except KeyError:
+            node.features[Nfeat.RCDTOTAL] = 0
+            node.features[Nfeat.RCDNONPOLAR] = 0
+            node.features[Nfeat.RCDPOLAR] = 0
+            node.features[Nfeat.RCDNEGATIVE] = 0
+            node.features[Nfeat.RCDPOSITIVE] = 0
+
+            uncontacted_residues += 1
