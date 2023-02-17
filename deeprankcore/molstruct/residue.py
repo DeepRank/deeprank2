@@ -17,10 +17,10 @@ class Residue:
     ):
         """
         Args:
-            chain(deeprank chain object): the chain that this residue belongs to
-            number(int): the residue number
-            amino_acid(deeprank amino acid, optional): the residue's amino acid (if it's part of a protein)
-            insertion_code(str, optional): the pdb insertion code, if any
+            chain (:class:`Chain`): The chain that this residue belongs to.
+            number (int): the residue number
+            amino_acid (:class:`AminoAcid`, optional): The residue's amino acid (if it's part of a protein).
+            insertion_code (str, optional): The pdb insertion code, if any.
         """
 
         self._chain = chain
@@ -41,8 +41,9 @@ class Residue:
         return hash((self._number, self._insertion_code))
 
     def get_pssm(self) -> PssmRow:
-        """ If the residue's chain has pssm info linked to it,
-            then return the part that belongs to this residue.
+        """ 
+        If the residue's chain has pssm info linked to it,
+        then return the part that belongs to this residue.
         """
 
         pssm = self._chain.pssm

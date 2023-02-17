@@ -21,7 +21,7 @@ class AtomicElement(Enum):
 
 
 class Atom:
-    "Represents a pdb atom."
+    """Represents a pdb atom."""
 
     def __init__( # pylint: disable=too-many-arguments
         self,
@@ -33,14 +33,14 @@ class Atom:
     ):
         """
         Args:
-            residue(deeprank residue object): the residue that this atom belongs to
-            name(str): pdb atom name
-            element(deeprank atomic element enumeration): the chemical element
-            position(numpy array of length 3): pdb position xyz of this atom
-            occupancy(float): pdb occupancy value
-                            This represents the proportion of structures where the atom is detected at a given position.
-                            Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
-                            Note that only the highest occupancy atom is used by deeprankcore (see tools.pdb._add_atom_to_residue) 
+            residue (:class:`Residue`): The residue that this atom belongs to.
+            name (str): Pdb atom name.
+            element (:class:`AtomicElement`): The chemical element.
+            position (np.array): Pdb position xyz of this atom.
+            occupancy (float): Pdb occupancy value.
+                This represents the proportion of structures where the atom is detected at a given position.
+                Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
+                Note that only the highest occupancy atom is used by deeprankcore (see tools.pdb._add_atom_to_residue) 
         """
         self._residue = residue
         self._name = name
