@@ -50,9 +50,9 @@ def test_add_features():
     )
     edge_close = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_close), variant)
-    assert not np.isnan(edge_close.features[Efeat.VDW])
-    assert edge_close.features[Efeat.VDW] > 0.0, edge_close.features[
-        Efeat.VDW
+    assert not np.isnan(edge_close.features[Efeat.VANDERWAALS])
+    assert edge_close.features[Efeat.VANDERWAALS] > 0.0, edge_close.features[
+        Efeat.VANDERWAALS
     ]
 
     # MET 0 N - ASP 27 CB, very far, should have negative vanderwaals energ
@@ -61,9 +61,9 @@ def test_add_features():
     )
     edge_far = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_far), variant)
-    assert not np.isnan(edge_far.features[Efeat.VDW])
-    assert edge_far.features[Efeat.VDW] < 0.0, edge_far.features[
-        Efeat.VDW
+    assert not np.isnan(edge_far.features[Efeat.VANDERWAALS])
+    assert edge_far.features[Efeat.VANDERWAALS] < 0.0, edge_far.features[
+        Efeat.VANDERWAALS
     ]
 
     # MET 0 N - PHE 138 CG, intermediate distance, should have more negative
@@ -74,11 +74,11 @@ def test_add_features():
     )
     edge_intermediate = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_intermediate), variant)
-    assert not np.isnan(edge_intermediate.features[Efeat.VDW])
+    assert not np.isnan(edge_intermediate.features[Efeat.VANDERWAALS])
     assert (
-        edge_intermediate.features[Efeat.VDW]
-        < edge_far.features[Efeat.VDW]
-    ), f"{edge_intermediate.features[Efeat.VDW]} >= {edge_far.features[Efeat.VDW]}"
+        edge_intermediate.features[Efeat.VANDERWAALS]
+        < edge_far.features[Efeat.VANDERWAALS]
+    ), f"{edge_intermediate.features[Efeat.VANDERWAALS]} >= {edge_far.features[Efeat.VANDERWAALS]}"
 
     # Check the distances
     assert (
@@ -145,7 +145,7 @@ def test_add_features():
         Efeat.ELECTROSTATIC
     ]
 
-    assert not np.isnan(edge.features[Efeat.VDW])
-    assert edge.features[Efeat.VDW] != 0.0, edge.features[
-        Efeat.VDW
+    assert not np.isnan(edge.features[Efeat.VANDERWAALS])
+    assert edge.features[Efeat.VANDERWAALS] != 0.0, edge.features[
+        Efeat.VANDERWAALS
     ]

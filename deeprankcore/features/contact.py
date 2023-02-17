@@ -93,9 +93,9 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_energy[atom1_index, atom2_index]
             if edge.features[Efeat.SAMERES]:
-                edge.features[Efeat.VDW] = interatomic_vanderwaals_energy['intra'][atom1_index, atom2_index]
+                edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy['intra'][atom1_index, atom2_index]
             else:
-                edge.features[Efeat.VDW] = interatomic_vanderwaals_energy['inter'][atom1_index, atom2_index]
+                edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy['inter'][atom1_index, atom2_index]
     
     elif isinstance(contact, ResidueContact):
         for edge in graph.edges:        
@@ -108,4 +108,4 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
             edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = np.sum([[interatomic_electrostatic_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-            edge.features[Efeat.VDW] = np.sum([[interatomic_vanderwaals_energy['inter'][a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
+            edge.features[Efeat.VANDERWAALS] = np.sum([[interatomic_vanderwaals_energy['inter'][a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
