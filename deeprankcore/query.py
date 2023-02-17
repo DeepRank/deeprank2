@@ -208,7 +208,7 @@ class QueryCollection:
     def process( # pylint: disable=too-many-arguments, too-many-locals
         self, 
         prefix: Optional[str] = None,
-        feature_modules: List[ModuleType] = None,
+        feature_modules: Union[ModuleType, List[ModuleType]] = None,
         cpu_count: Optional[int] = None,
         combine_output: Optional[bool] = True,
         verbose: Optional[bool] = False,
@@ -219,9 +219,10 @@ class QueryCollection:
         Args:
             prefix(str, optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
             
-            feature_modules(List[ModuleType], optional): List of features' modules used to generate features. Each feature's module must
-                implement the :py:func:`add_features` function, and features' modules can be found (or should be placed in case of a custom made feature)
-                in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate
+            feature_modules(Union[ModuleType, List[ModuleType]], optional): Features' module or list of features' modules used to generate features. 
+                Each feature's module must implement the :py:func:`add_features` function, and features' modules can be found (or should be placed
+                in case of a custom made feature) in `deeprankcore.features` folder. 
+                Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate
                 the features. 
             
             cpu_count(int, optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
@@ -258,8 +259,11 @@ class QueryCollection:
         
         if feature_modules is None:
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__)]
-        else:
+        elif isinstance(feature_modules, list):
             feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
+        else:
+            feature_names = [basename(feature_modules.__file__)[:-3]]
+
 
         _log.info(f'Creating pool function to process {len(self.queries)} queries...')
         pool_function = partial(self._process_one_query, prefix,
