@@ -28,7 +28,7 @@ def get_preloaded_cluster(cluster, batch):
 
 
 def community_detection_per_batch( # pylint: disable=too-many-locals
-    edge_index, batch, num_nodes: int, edge_attr=None, method= Optional[str] = "mcl"
+    edge_index, batch, num_nodes: int, edge_attr=None, method: Optional[str] = "mcl"
 ):
     """Detects clusters of nodes based on the edge attributes (distances).
 
@@ -90,7 +90,7 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
     return torch.tensor(cluster).to(device)
 
 
-def community_detection(edge_index, num_nodes: int, edge_attr=None, method= Optional[str] = "mcl"): # pylint: disable=too-many-locals
+def community_detection(edge_index, num_nodes: int, edge_attr=None, method: Optional[str] = "mcl"): # pylint: disable=too-many-locals
     """Detects clusters of nodes based on the edge attributes (distances).
 
     Args:
