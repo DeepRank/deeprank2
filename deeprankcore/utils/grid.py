@@ -27,7 +27,7 @@ class MapMethod(Enum):
 
 
 class Augmentation:
-    """A rotation around an axis, to be applied to a feature before mapping it to a grid"""
+    """A rotation around an axis, to be applied to a feature before mapping it to a grid."""
 
     def __init__(self, axis: np.ndarray, angle: float):
         self._axis = axis
@@ -249,13 +249,13 @@ class Grid:
         return neighbour_data
 
     def _get_atomic_density_koes(self, position: np.ndarray, vanderwaals_radius: float) -> np.ndarray:
-        """
-        Function to map individual atomic density on the grid.
+        """Function to map individual atomic density on the grid.
+
         The formula is equation (1) of the Koes paper
         Protein-Ligand Scoring with Convolutional NN Arxiv:1612.02751v1
 
         Returns:
-            the mapped density
+            np.ndarray: The mapped density.
         """
 
         distances = np.sqrt(np.square(self.xgrid - position[0]) +
@@ -281,8 +281,8 @@ class Grid:
         feature_value: Union[np.ndarray, float],
         method: MapMethod,
     ):
-        """
-        Maps point feature data at a given position to the grid, using the given method.
+        """Maps point feature data at a given position to the grid, using the given method.
+        
         The feature_value should either be a single number or a one-dimensional array
         """
 

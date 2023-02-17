@@ -23,7 +23,7 @@ class EarlyStopping:
                 Default: None
             verbose (bool): If True, prints a message for each validation loss improvement. 
                 Default: True
-            trace_func (function): Function used for recording EarlyStopping status.
+            trace_func (Callable): Function used for recording EarlyStopping status.
                 Default: print            
         """
 
