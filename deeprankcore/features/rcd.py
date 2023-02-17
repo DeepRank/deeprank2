@@ -1,5 +1,5 @@
 import pdb2sql
-from deeprankcore.utils.graph import Node, Graph
+from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.aminoacid import Polarity
 from deeprankcore.molstruct.atom import Atom
@@ -36,7 +36,7 @@ class _ContactDensity:
         # _ContactDensity.id is: 'A27'
 
 
-def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A', chain2: str = 'B') -> dict[_ContactDensity]:
+def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A', chain2: str = 'B') -> dict[_ContactDensity]: #pylint: disable=too-many-locals
     """Count total number of close contact residues and contacts of specific Polarity.
 
     Args:
@@ -49,7 +49,7 @@ def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A'
         dict: keys are each residue; items are _ContactDensity objects, which containing all contact density information 
     """
 
-    sql = pdb2sql.interface(pdb_path)    
+    sql = pdb2sql.interface(pdb_path)
     pdb2sql_contacts = sql.get_contact_residues(
         cutoff=cutoff, 
         chain1=chain1, chain2=chain2,
@@ -61,7 +61,7 @@ def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A'
     for chain1_res, chain2_residues in pdb2sql_contacts.items():
         aa1_code = chain1_res[2]
         try:
-            aa1 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa1_code][0]        
+            aa1 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa1_code][0]
         except IndexError:
             continue  # skip keys that are not an amino acid
 
@@ -72,7 +72,7 @@ def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A'
         for chain2_res in chain2_residues:
             aa2_code = chain2_res[2]
             try:
-                aa2 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa2_code][0]        
+                aa2 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa2_code][0]
             except IndexError:
                 continue  # skip keys that are not an amino acid
             
@@ -118,5 +118,4 @@ def add_features(
         node.features[Nfeat.RCDPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.POLAR]
         node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contactdensity_id].densities[Polarity.NEGATIVE_CHARGE]
         node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contactdensity_id].densities[Polarity.POSITIVE_CHARGE]
-                
     
