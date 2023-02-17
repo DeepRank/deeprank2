@@ -67,6 +67,8 @@ class DeeprankDataset(Dataset):
         self._create_index_entries()
 
         self.df = None
+        self.means = None
+        self.devs = None
 
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
