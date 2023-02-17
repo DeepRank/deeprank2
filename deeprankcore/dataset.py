@@ -212,7 +212,8 @@ class DeeprankDataset(Dataset):
     def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
         self
     ) -> pd.DataFrame:
-        """
+        """Loads features data from the HDF5 files into a Pandas DataFrame in the attribute `df` of the class.
+
         Returns:
             :class:`pd.DataFrame`: Pandas DataFrame containing the selected features as columns per all data points in
                 hdf5_path files.   
@@ -256,7 +257,7 @@ class DeeprankDataset(Dataset):
     def save_hist(
             self,
             features: Union[str,List[str]],
-            fname: str,
+            fname: str = 'features_hist.png',
             bins: Union[int,List[float],str] = 10,
             figsize: Tuple = (15, 15)
     ):
@@ -267,7 +268,8 @@ class DeeprankDataset(Dataset):
         ----------
         features (str or list): features to be plotted (including target features). 
 
-        fname (str): str or path-like or binary file-like object.
+        fname (str, optional): Filename of output image. Use a str or path-like or binary file-like object.
+            Defaults to 'features_hist.png'.
 
         bins (int or sequence or str): if bins is an integer, it defines the number of equal-width bins in the range.
             If bins is a sequence, it defines the bin edges, including the left edge of the first bin and the right edge
@@ -279,7 +281,7 @@ class DeeprankDataset(Dataset):
         figsize (tuple): saved figure sizes, defaults to (15, 15).
         """
         if self.df is None:
-            raise ValueError("Please first read in the data into a pd.DataFrame using `hdf5_to_pandas` method of the class.")
+            self.hdf5_to_pandas()
         
         if not isinstance(features, list):
             features = [features]
@@ -644,13 +646,14 @@ class GraphDataset(DeeprankDataset):
                 dataset_train will be ignored since the current dataset will be considered as training set.""")
             
             if train:
-                self.hdf5_to_pandas()
-                self._compute_mean_std()
+                if self.means or self.devs is None:
+                    if self.df is None:
+                        self.hdf5_to_pandas()
+                    self._compute_mean_std()
             else:
-                if dataset_train.df is None:
-                    dataset_train.hdf5_to_pandas()
-                    dataset_train._compute_mean_std()
-                elif dataset_train.means is None or dataset_train.devs is None:
+                if (dataset_train.means or dataset_train.devs) is None:
+                    if dataset_train.df is None:
+                        dataset_train.hdf5_to_pandas()
                     dataset_train._compute_mean_std()
                 self.means = dataset_train.means
                 self.devs = dataset_train.devs
