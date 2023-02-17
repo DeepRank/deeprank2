@@ -80,8 +80,12 @@ def test_querycollection_process_single_feature_module():
     Tests processing for generating a single feature.
     """
 
+    # test with single feature in list
     feature_modules = [surfacearea]
+    _, output_directory, _ = querycollection_tester(feature_modules = feature_modules)
 
+    # test with single feature NOT in list
+    feature_modules = surfacearea
     _, output_directory, _ = querycollection_tester(feature_modules = feature_modules)
 
     rmtree(output_directory)
