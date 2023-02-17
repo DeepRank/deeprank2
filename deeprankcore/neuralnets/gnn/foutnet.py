@@ -18,11 +18,11 @@ class FoutLayer(torch.nn.Module):
     Args:
         in_channels (int): Size of each input sample.
         out_channels (int): Size of each output sample.
-        bias (bool, optional): If set to :obj:`False`, the layer will not learn
+        bias (bool): If set to :obj:`False`, the layer will not learn
             an additive bias. (default: :obj:`True`)
     """
 
-    def __init__(self, in_channels, out_channels, bias=True):
+    def __init__(self, in_channels: int, out_channels: int, bias: bool = True):
 
         super().__init__()
 
