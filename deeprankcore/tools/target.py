@@ -8,22 +8,22 @@ from deeprankcore.domain import targetstorage as targets
 
 
 def add_target(graph_path, target_name, target_list, sep=" "):
-    """Add a target to all the graphs in hdf5 files.
+    """Add a target to all the graphs in hdf5 files
 
     Args:
         graph_path (str, list(str)): either a directory containing all the hdf5 files,
-            or a single hdf5 filename
-            or a list of hdf5 filenames
+                                     or a single hdf5 filename
+                                     or a list of hdf5 filenames
         target_name (str): the name of the new target
         target_list (str): name of the file containing the data
         sep (str, optional): separator in target list. Defaults to ' '.
 
-    Note:
+    Notes:
         The input target list should respect the following format :
-            1ATN_xxx-1 0
-            1ATN_xxx-2 1
-            1ATN_xxx-3 0
-            1ATN_xxx-4 0
+        1ATN_xxx-1 0
+        1ATN_xxx-2 1
+        1ATN_xxx-3 0
+        1ATN_xxx-4 0
     """
 
     target_dict = {}
@@ -83,23 +83,22 @@ def add_target(graph_path, target_name, target_list, sep=" "):
 
 def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
 
-    """Compute targets and outputs them as a dictionary.
-
+    """
+    Compute targets and outputs them as a dictionary.
     For classification: 
-    - binary (scalar value is expected to be either 0 or 1)
-    - capri_classes (scalar integer values are expected)
+       - binary (scalar value is expected to be either 0 or 1)
+       - capri_classes (scalar integer values are expected)
     For regression:
-    - irmsd
-    - lrmsd
-    - fnat
-    - dockq
+       - irmsd
+       - lrmsd
+       - fnat
+       - dockq
 
     Args:
         pdb_path (path): path to the scored pdb structure
         reference_pdb_path (path): path to the reference structure required to compute the different target
 
-    Returns: 
-        A dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.
+    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class
     """
 
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
