@@ -7,16 +7,16 @@ from pdb2sql import StructureSimilarity
 from deeprankcore.domain import targetstorage as targets
 
 
-def add_target(graph_path, target_name, target_list, sep=" "):
+def add_target(graph_path: Union[str, List[str]], target_name: str, target_list: str, sep: str = " "):
     """Add a target to all the graphs in hdf5 files.
 
     Args:
-        graph_path (str, list(str)): either a directory containing all the hdf5 files,
+        graph_path (str, List(str)): Either a directory containing all the hdf5 files,
             or a single hdf5 filename
-            or a list of hdf5 filenames
-        target_name (str): the name of the new target
-        target_list (str): name of the file containing the data
-        sep (str, optional): separator in target list. Defaults to ' '.
+            or a list of hdf5 filenames.
+        target_name (str): The name of the new target.
+        target_list (str): Name of the file containing the data.
+        sep (str): Separator in target list. Defaults to ' '.
 
     Note:
         The input target list should respect the following format :
@@ -95,8 +95,8 @@ def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[f
     - dockq
 
     Args:
-        pdb_path (path): path to the scored pdb structure
-        reference_pdb_path (path): path to the reference structure required to compute the different target
+        pdb_path (str): Path to the scored pdb structure.
+        reference_pdb_path (str): Path to the reference structure required to compute the different target.
 
     Returns: 
         A dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.

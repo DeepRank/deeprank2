@@ -16,25 +16,25 @@ _log = logging.getLogger(__name__)
 
 def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
     hdf5_path: Union[str,List],
-    subset: List[str] = None,
+    subset: Optional[List[str]] = None,
     node_features: Union[List[str], str] = "all",
     edge_features: Union[List[str], str] = "all",
     target_features: Union[List[str], str] = "all"
 ) -> pd.DataFrame:
     """
     Args:
-        hdf5_path (str or list): Path to hdf5 file(s). For multiple hdf5 files, 
+        hdf5_path (Union[str, List]): Path to hdf5 file(s). For multiple hdf5 files, 
             insert the paths in a list.
-        subset (list, optional): list of keys from hdf5 file to include. Defaults to None (meaning include all).
-        node_features (str or list, optional): consider all pre-computed node features ("all")
+        subset (List[str], optional): List of keys from hdf5 file to include. Defaults to None (meaning include all).
+        node_features (Union[List[str], str]): Consider all pre-computed node features ("all").
             or some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
             The complete list can be found in deeprankcore/domain/nodestorage.py
-        edge_features (list, optional): consider all pre-computed edge features ("all")
+        edge_features (Union[List[str], str]): Consider all pre-computed edge features ("all")
             or some defined edge features (provide a list, example: ["dist", "coulomb"]).
-            The complete list can be found in deeprankcore/domain/edgestorage.py
-        target_features (list, optional): consider all pre-computed target features ("all")
+            The complete list can be found in deeprankcore/domain/edgestorage.py.
+        target_features (Union[List[str], str]): Consider all pre-computed target features ("all")
             or some defined target features (provide a list, example: ["binary", "capri_class"]).
-            The complete list (only of the pre-defined ones) can be found in deeprankcore/domain/targetstorage.py
+            The complete list (only of the pre-defined ones) can be found in deeprankcore/domain/targetstorage.py.
     
     Returns:
         df_final (pd.DataFrame): Pandas DataFrame containing the selected features as columns per all data points in
@@ -142,15 +142,15 @@ def save_hist(
     """
     Args:
         df (pd.DataFrame): Pandas DataFrame object generated using hdf5_to_pandas function.
-        features (str or list): features to be plotted. 
+        features (Union[str, List[str]]): Features to be plotted. 
         fname (str): str or path-like or binary file-like object.
-        bins (int or sequence or str): if bins is an integer, it defines the number of equal-width bins in the range.
+        bins (Union[int, List[float], str]): If bins is an integer, it defines the number of equal-width bins in the range.
             If bins is a sequence, it defines the bin edges, including the left edge of the first bin and the right edge
             of the last bin; in this case, bins may be unequally spaced. All but the last (righthand-most) bin is half-open.
             If bins is a string, it is one of the binning strategies supported by numpy.histogram_bin_edges:
             'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
             Defaults to 10.
-        figsize (tuple): saved figure sizes, defaults to (15, 15).
+        figsize (Tuple): Saved figure sizes, defaults to (15, 15).
     """
     if not isinstance(features, list):
         features = [features]
