@@ -9,7 +9,7 @@ from torch_scatter import scatter_max, scatter_mean
 from torch_geometric.nn.pool.pool import pool_edge, pool_batch
 from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.data import Batch, Data
-from typing import List, Optional, Union, Tuple
+from typing import Optional
 
 
 def plot_graph(graph, cluster):

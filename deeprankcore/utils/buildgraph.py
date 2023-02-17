@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Optional, Union, Tuple
+from typing import Union, List
 import numpy as np
 import subprocess
 from scipy.spatial import distance_matrix
