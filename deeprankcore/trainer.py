@@ -56,8 +56,8 @@ class Trainer():
             pretrained_model (Optional[str], optional): Path to pre-trained model. Defaults to None.
             cuda (bool, optional): Whether to use CUDA. Defaults to False.
             ngpu (int, optional): Number of GPU to be used. Defaults to 0.
-            output_exporters (Optional[List[OutputExporter]], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses over the
-                epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+            output_exporters (Optional[List[OutputExporter]], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
+                over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
         """
         self.batch_size_train = None
