@@ -2,7 +2,7 @@ import h5py
 import pandas as pd
 import logging
 
-from typing import List, Union, Tuple, Optional
+from typing import List, Union, Tuple
 from deeprankcore.domain import (
     edgestorage as Efeat,
     nodestorage as Nfeat,
