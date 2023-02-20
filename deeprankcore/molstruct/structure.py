@@ -9,6 +9,7 @@ class PDBStructure:
         """
         Args:
             id_ (str, optional): An unique identifier for this structure, can be the pdb accession code.
+                Defaults to None.
         """
         self._id = id_
         self._chains = {}
@@ -59,7 +60,7 @@ class Chain:
         """
         Args:
             model (:class:`PDBStructure`): The model that this chain is part of.
-            id_ (str, optional): The pdb identifier of this chain.
+            id_ (str): The pdb identifier of this chain.
         """
 
         self._model = model
