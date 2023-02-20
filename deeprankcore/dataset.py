@@ -372,7 +372,7 @@ class GridDataset(DeeprankDataset):
 
             mapped_features_group = entry_group[gridstorage.MAPPED_FEATURES]
             for feature_name in self.features:
-                feature_data.append(mapped_features_group[feature_name][:])
+                feature_data.append(mapped_features_group[feature_name][gridstorage.FEATURE_VALUE][:])
 
             target_value = entry_group[targets.VALUES][self.target][()]
 
