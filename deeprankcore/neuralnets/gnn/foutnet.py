@@ -5,8 +5,7 @@ import torch.nn.functional as F
 from torch_scatter import scatter_mean
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
-from deeprankcore.utils.community_pooling import get_preloaded_cluster, community_pooling
-from typing import Optional
+from deeprankcore.utils.community_pooling import get_preloaded_cluster, community_pooling 
 
 class FoutLayer(torch.nn.Module):
 
@@ -22,7 +21,7 @@ class FoutLayer(torch.nn.Module):
             an additive bias. Defaults to True.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, bias: Optional[bool] = True):
+    def __init__(self, in_channels: int, out_channels: int, bias: bool = True):
 
         super().__init__()
 

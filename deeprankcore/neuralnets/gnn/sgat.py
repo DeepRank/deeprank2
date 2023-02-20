@@ -6,7 +6,6 @@ from torch_scatter import scatter_mean
 from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
 from deeprankcore.utils.community_pooling import get_preloaded_cluster, community_pooling
-from typing import Optional
 
 class SGraphAttentionLayer(torch.nn.Module):
 
@@ -25,7 +24,7 @@ class SGraphAttentionLayer(torch.nn.Module):
             an additive bias. Defaults to True.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, bias: Optional[bool] = True, undirected=True):
+    def __init__(self, in_channels: int, out_channels: int, bias: bool = True, undirected=True):
 
         super().__init__()
 
