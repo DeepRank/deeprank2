@@ -20,7 +20,8 @@ class Residue:
             chain (:class:`Chain`): The chain that this residue belongs to.
             number (int): the residue number
             amino_acid (:class:`AminoAcid`, optional): The residue's amino acid (if it's part of a protein).
-            insertion_code (str, optional): The pdb insertion code, if any.
+                Defaults to None.
+            insertion_code (str, optional): The pdb insertion code, if any. Defaults to None.
         """
 
         self._chain = chain
@@ -93,7 +94,9 @@ class Residue:
 
 
 def get_residue_center(residue: Residue) -> np.ndarray:
-    """Chooses a center position for a residue, based on the atoms it has:
+    """Chooses a center position for a residue. 
+    
+    Based on the atoms it has:
     1. find beta carbon, if present
     2. find alpha carbon, if present
     3. else take the mean of the atom positions
