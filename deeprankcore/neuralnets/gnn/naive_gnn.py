@@ -34,9 +34,9 @@ class NaiveNetwork(Module):
     def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
         """
         Args:
-            input_shape(int): Number of node input features.
-            output_shape(int): Number of output value per graph.
-            input_shape_edge(int): Number of edge input features.
+            input_shape (int): Number of node input features.
+            output_shape (int): Number of output value per graph.
+            input_shape_edge (int): Number of edge input features.
         """
         super().__init__()
         self._external1 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
