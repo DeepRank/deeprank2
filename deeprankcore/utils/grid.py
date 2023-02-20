@@ -252,7 +252,7 @@ class Grid:
         """Function to map individual atomic density on the grid.
 
         The formula is equation (1) of the Koes paper
-        Protein-Ligand Scoring with Convolutional NN Arxiv:1612.02751v1
+        Protein-Ligand Scoring with Convolutional NN Arxiv:1612.02751v1.
 
         Returns:
             np.ndarray: The mapped density.
@@ -283,7 +283,7 @@ class Grid:
     ):
         """Maps point feature data at a given position to the grid, using the given method.
         
-        The feature_value should either be a single number or a one-dimensional array
+        The feature_value should either be a single number or a one-dimensional array.
         """
 
         # determine whether we're dealing with a single number of multiple numbers:

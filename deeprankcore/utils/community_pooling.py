@@ -9,7 +9,6 @@ from torch_scatter import scatter_max, scatter_mean
 from torch_geometric.nn.pool.pool import pool_edge, pool_batch
 from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.data import Batch, Data
-from typing import Optional
 
 
 def plot_graph(graph, cluster):
@@ -28,7 +27,7 @@ def get_preloaded_cluster(cluster, batch):
 
 
 def community_detection_per_batch( # pylint: disable=too-many-locals
-    edge_index, batch, num_nodes: int, edge_attr=None, method: Optional[str] = "mcl"
+    edge_index, batch, num_nodes: int, edge_attr=None, method: str = "mcl"
 ):
     """Detects clusters of nodes based on the edge attributes (distances).
 
@@ -36,7 +35,7 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
         edge_index (Tensor): Edge index.
         num_nodes (int): Number of nodes.
         edge_attr (Tensor, optional): Edge attributes. Defaults to None.
-        method (str, optional): Method. Defaults to 'mcl'.
+        method (str, optional): Method. Defaults to "mcl".
 
     Raises:
         ValueError: Requires a valid clustering method ('mcl' or 'louvain')
@@ -90,14 +89,14 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
     return torch.tensor(cluster).to(device)
 
 
-def community_detection(edge_index, num_nodes: int, edge_attr=None, method: Optional[str] = "mcl"): # pylint: disable=too-many-locals
+def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"): # pylint: disable=too-many-locals
     """Detects clusters of nodes based on the edge attributes (distances).
 
     Args:
         edge_index (Tensor): Edge index.
         num_nodes (int): Number of nodes.
         edge_attr (Tensor, optional): Edge attributes. Defaults to None.
-        method (str, optional): Method. Defaults to 'mcl'.
+        method (str, optional): Method. Defaults to "mcl".
 
     Raises:
         ValueError: Requires a valid clustering method ('mcl' or 'louvain')
