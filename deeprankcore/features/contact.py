@@ -14,7 +14,7 @@ _log = logging.getLogger(__name__)
 MAX_COVALENT_DISTANCE = 2.1
 
 def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
-    """ Calculate Coulomb potentials between between all Atoms in atom.
+    """Calculate Coulomb potentials between between all Atoms in atom.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
     However, the potential tends to 0 at large distance.
