@@ -28,7 +28,7 @@ def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndar
 
 
 def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
-    """ Calculate Lennard-Jones potentials between all Atoms in atom.
+    """Calculate Lennard-Jones potentials between all Atoms in atom.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
     However, the potential tends to 0 at large distance.
