@@ -283,8 +283,7 @@ class QueryCollection:
         if combine_output:
             for output_path in output_paths:
                 with h5py.File(f"{prefix}.hdf5",'a') as f_dest, h5py.File(output_path,'r') as f_src:
-                    for key, value in f_src.items():
-                        _log.debug(f"copy {key} from {output_path} to {prefix}.hdf5")
+                    for _, value in f_src.items():
                         f_src.copy(value, f_dest)
                 os.remove(output_path)
             return glob(f"{prefix}.hdf5")
