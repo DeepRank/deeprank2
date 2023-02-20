@@ -11,12 +11,12 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
     """Add a target to all the graphs in hdf5 files.
 
     Args:
-        graph_path (str, List(str)): Either a directory containing all the hdf5 files,
+        graph_path (Union[str, List(str)]): Either a directory containing all the hdf5 files,
             or a single hdf5 filename
             or a list of hdf5 filenames.
         target_name (str): The name of the new target.
         target_list (str): Name of the file containing the data.
-        sep (str): Separator in target list. Defaults to ' '.
+        sep (str, optional): Separator in target list. Defaults to " ".
 
     Note:
         The input target list should respect the following format :

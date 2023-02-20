@@ -11,7 +11,7 @@ from h5xplorer.menu_plot import (
 
 
 def context_menu(self, treeview, position): # noqa: MC0001
-    """Generate a right-click menu for the items"""
+    """Generate a right-click menu for the items."""
 
     all_item = get_current_item(self, treeview, single=False)
 

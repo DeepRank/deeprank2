@@ -35,7 +35,7 @@ def _get_node_key(value):
 
 
 def hdf5_to_networkx(graph_group: h5py.Group) -> networkx.Graph: # pylint: disable=too-many-locals
-    """Read a hdf5 group into a networkx graph"""
+    """Read a hdf5 group into a networkx graph."""
 
     graph = networkx.Graph()
 
@@ -276,9 +276,9 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
     Args:
         graph (:class:`networkx.Graph`): The graph to be plotted.
         out (str, optional): Defaults to None.
-        offline (bool): Defaults to False.
-        iplot (bool): Defaults to True.
-        disable_plot (bool): Defaults to False.
+        offline (bool, optional): Defaults to False.
+        iplot (bool, optional): Defaults to True.
+        disable_plot (bool, optional): Defaults to False.
     """
 
     if offline:
