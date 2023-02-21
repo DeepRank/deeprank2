@@ -100,33 +100,36 @@ def add_features(
     *args, **kwargs): # pylint: disable=unused-argument
     
     chains = graph.get_all_chains()
-    residue_contacts = count_residue_contacts(pdb_path, chains)
     
-    uncontacted_residues = 0
-    for node in graph.nodes:
-        if isinstance(node.id, Residue):
-            residue = node.id
-        elif isinstance(node.id, Atom):
-            atom = node.id
-            residue = atom.residue
-        else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
-
-        chain_name = str(residue).split()[1] # returns name of the string
-        res_num = str(residue).split()[2] # returns the residue number
-        contactdensity_id = chain_name + res_num # reformat id to be 
+    # VariantQueries have only 1 chain, so this feature should be ignored
+    if len(chains) > 1:
+        residue_contacts = count_residue_contacts(pdb_path, chains)
         
-        try:
-            node.features[Nfeat.RCDTOTAL] = residue_contacts[contactdensity_id].densities['total']
-            node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.NONPOLAR]
-            node.features[Nfeat.RCDPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.POLAR]
-            node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contactdensity_id].densities[Polarity.NEGATIVE_CHARGE]
-            node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contactdensity_id].densities[Polarity.POSITIVE_CHARGE]
-        except KeyError:
-            node.features[Nfeat.RCDTOTAL] = 0
-            node.features[Nfeat.RCDNONPOLAR] = 0
-            node.features[Nfeat.RCDPOLAR] = 0
-            node.features[Nfeat.RCDNEGATIVE] = 0
-            node.features[Nfeat.RCDPOSITIVE] = 0
+        uncontacted_residues = 0
+        for node in graph.nodes:
+            if isinstance(node.id, Residue):
+                residue = node.id
+            elif isinstance(node.id, Atom):
+                atom = node.id
+                residue = atom.residue
+            else:
+                raise TypeError(f"Unexpected node type: {type(node.id)}")
 
-            uncontacted_residues += 1
+            chain_name = str(residue).split()[1] # returns name of the string
+            res_num = str(residue).split()[2] # returns the residue number
+            contactdensity_id = chain_name + res_num # reformat id to be 
+            
+            try:
+                node.features[Nfeat.RCDTOTAL] = residue_contacts[contactdensity_id].densities['total']
+                node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.NONPOLAR]
+                node.features[Nfeat.RCDPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.POLAR]
+                node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contactdensity_id].densities[Polarity.NEGATIVE_CHARGE]
+                node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contactdensity_id].densities[Polarity.POSITIVE_CHARGE]
+            except KeyError:
+                node.features[Nfeat.RCDTOTAL] = 0
+                node.features[Nfeat.RCDNONPOLAR] = 0
+                node.features[Nfeat.RCDPOLAR] = 0
+                node.features[Nfeat.RCDNEGATIVE] = 0
+                node.features[Nfeat.RCDPOSITIVE] = 0
+
+                uncontacted_residues += 1
