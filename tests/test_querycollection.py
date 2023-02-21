@@ -102,13 +102,11 @@ def test_querycollection_process_single_feature_module():
     for q in querylist:
 
         # test with single feature in list
-        feature_modules = [surfacearea]
-        _, output_directory, _ = querycollection_tester(q)
+        _, output_directory, _ = querycollection_tester(q, feature_modules=[surfacearea])
         rmtree(output_directory)
 
         # test with single feature NOT in list
-        feature_modules = surfacearea
-        _, output_directory, _ = querycollection_tester(q)
+        _, output_directory, _ = querycollection_tester(q, feature_modules=surfacearea)
         rmtree(output_directory)
 
 
