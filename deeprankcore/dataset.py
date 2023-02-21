@@ -16,10 +16,7 @@ from torch_geometric.data.data import Data
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                  targetstorage as targets, gridstorage)
 
-import cProfile, pstats, io
-
 _log = logging.getLogger(__name__)
-
 
 class DeeprankDataset(Dataset):
     def __init__(self, # pylint: disable=too-many-arguments
