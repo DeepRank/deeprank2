@@ -474,9 +474,9 @@ class SingleResidueVariantAtomicQuery(Query):
 
     @staticmethod
     def _get_atom_node_key(atom) -> str:
-       """
-       Since pickle has problems serializing the graph when the nodes are atoms,
-       this function can be used to generate a unique key for the atom."""
+        """
+        Since pickle has problems serializing the graph when the nodes are atoms,
+        this function can be used to generate a unique key for the atom."""
 
         # This should include the model, chain, residue and atom
         return str(atom)
