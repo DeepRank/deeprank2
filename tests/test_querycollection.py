@@ -7,6 +7,21 @@ from deeprankcore.query import SingleResidueVariantResidueQuery, ProteinProteinI
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from . import PATH_TEST
 
+ppi_query = ProteinProteinInterfaceResidueQuery(
+                str("tests/data/pdb/3C8P/3C8P.pdb"),
+                "A",
+                "B",
+                pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
+            )
+
+var_query = SingleResidueVariantResidueQuery(
+                str(PATH_TEST / "data/pdb/101M/101M.pdb"),
+                "A",
+                insertion_code= None,
+                wildtype_amino_acid= alanine,
+                variant_amino_acid= phenylalanine,
+                pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
+            )
 
 def variant_querycollection_tester(n_queries = 10, feature_modules = None, cpu_count = 1, combine_output = True):
     """
@@ -75,12 +90,7 @@ def ppi_querycollection_tester(n_queries = 10, feature_modules = None, cpu_count
     collection = QueryCollection()
 
     for number in range(1, n_queries + 1):
-        collection.add(ProteinProteinInterfaceResidueQuery(
-            str("tests/data/pdb/3C8P/3C8P.pdb"),
-            "A",
-            "B",
-            pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
-            ))
+        collection.add(ppi_query)
 
     output_paths = collection.process(prefix, feature_modules, cpu_count, combine_output)
     assert len(output_paths) > 0
