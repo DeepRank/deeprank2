@@ -1,5 +1,5 @@
 import pdb2sql
-from typing import Sequence, Dict
+from typing import Dict, List
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.aminoacid import Polarity
@@ -12,10 +12,10 @@ def id_from_residue(residue: tuple) -> str:
 
     Args:
         residue (tuple): Input residue as rendered by pdb2sql: ( str(<chain>), int(<residue_number>), str(<three_letter_code> )
-            For example: ('A', 27, 'GLU')
+            For example: ('A', 27, 'GLU').
     
     Returns:
-        str: Output id in form of '<chain><residue_number>'. For example: 'A27'
+        str: Output id in form of '<chain><residue_number>'. For example: 'A27'.
     """
     
     return residue[0] + str(residue[1])
@@ -34,7 +34,7 @@ class _ContactDensity:
         self.connections['all'] = []
 
 
-def count_residue_contacts(pdb_path: str, chains: Sequence[str], cutoff: float = 5.5) -> Dict[str: _ContactDensity]:
+def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str, _ContactDensity]:
     """Count total number of close contact residues and contacts of specific Polarity.
 
     Args:
