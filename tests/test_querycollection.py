@@ -25,7 +25,7 @@ ppi_query = ProteinProteinInterfaceResidueQuery(
                 pssm_paths={"A": str(PATH_TEST / "data/pssm/3C8P/3C8P.A.pdb.pssm"), "B": str(PATH_TEST / "data/pssm/3C8P/3C8P.B.pdb.pssm")},
             )
 
-querylist = [ppi_query, ]
+querylist = [var_query, ppi_query]
 
 def querycollection_tester(
     query: Union[SingleResidueVariantResidueQuery, ProteinProteinInterfaceResidueQuery], 
