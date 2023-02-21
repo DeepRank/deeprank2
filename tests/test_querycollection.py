@@ -131,9 +131,9 @@ def test_querycollection_process_combine_output_true():
 
     for q in querylist:
 
-        _, output_directory_t, output_paths_t = querycollection_tester(q, feature_modules = surfacearea, )
+        _, output_directory_t, output_paths_t = querycollection_tester(q, )
 
-        _, output_directory_f, output_paths_f = querycollection_tester(q, feature_modules = surfacearea, combine_output = False)
+        _, output_directory_f, output_paths_f = querycollection_tester(q, combine_output = False)
 
         assert len(output_paths_t) == 1
 
