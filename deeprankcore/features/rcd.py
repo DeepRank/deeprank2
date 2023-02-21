@@ -1,4 +1,5 @@
 import pdb2sql
+from typing import List
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.aminoacid import Polarity
@@ -37,23 +38,22 @@ class _ContactDensity:
         # _ContactDensity.id is: 'A27'
 
 
-def count_residue_contacts(pdb_path: str, cutoff: float = 5.5, chain1: str = 'A', chain2: str = 'B') -> dict[_ContactDensity]: #pylint: disable=too-many-locals
+def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> dict[_ContactDensity]: #pylint: disable=too-many-locals
     """Count total number of close contact residues and contacts of specific Polarity.
 
     Args:
         pdb_path (str): Path to pdb file to read molecular information from.
-        cutoff (float, optional): Cutoff distance (in Ångström) to be considered a close contact. Defaults to 10
-        chain1 (str, optional): Name of first chain from pdb file to consider. Defaults to 'A'.
-        chain2 (str, optional): Name of second chain from pdb file to consider. Defaults to 'B'.
+        chains (List[str]): List (or list-like object) containing strings of the chains to be considered.
+        cutoff (float, optional): Cutoff distance (in Ångström) to be considered a close contact. Defaults to 10.
 
     Returns:
-        dict: keys are each residue; items are _ContactDensity objects, which containing all contact density information 
+        dict: keys are each residue; items are _ContactDensity objects, which containing all contact density information.
     """
 
     sql = pdb2sql.interface(pdb_path)
     pdb2sql_contacts = sql.get_contact_residues(
         cutoff=cutoff, 
-        chain1=chain1, chain2=chain2,
+        chain1=chains[0], chain2=chains[1],
         return_contact_pairs=True
     )
     
@@ -101,7 +101,8 @@ def add_features(
     graph: Graph,
     *args, **kwargs): # pylint: disable=unused-argument
     
-    residue_contacts = count_residue_contacts(pdb_path)
+    chains = set([str(x.chain).split()[1] for x in list(graph._nodes.keys())])
+    residue_contacts = count_residue_contacts(pdb_path, chains)
     
     uncontacted_residues = 0
     for node in graph.nodes:
