@@ -2,7 +2,7 @@
 This module holds the classes that are used when working with a 3D grid.
 """
 
-
+import logging
 from enum import Enum
 from typing import Dict, Union, List
 import numpy as np
@@ -11,6 +11,9 @@ import itertools
 from scipy.signal import bspline
 
 from deeprankcore.domain import gridstorage
+
+
+_log = logging.getLogger(__name__)
 
 
 class MapMethod(Enum):
@@ -22,6 +25,22 @@ class MapMethod(Enum):
     FAST_GAUSSIAN = 2
     BSP_LINE = 3
     NEAREST_NEIGHBOURS = 4
+
+
+class Augmentation:
+    "A rotation around an axis, to be applied to a feature before mapping it to a grid"
+
+    def __init__(self, axis: np.ndarray, angle: float):
+        self._axis = axis
+        self._angle = angle
+
+    @property
+    def axis(self) -> np.ndarray:
+        return self._axis
+
+    @property
+    def angle(self) -> float:
+        return self._angle
 
 
 class GridSettings:
@@ -183,9 +202,9 @@ class Grid:
 
         fx, fy, fz = position
         bsp_data = (
-            bspline((self.xgrid - fx) / self.resolution, order)
-            * bspline((self.ygrid - fy) / self.resolution, order)
-            * bspline((self.zgrid - fz) / self.resolution, order)
+            bspline((self.xgrid - fx) / self._settings.resolutions[0], order)
+            * bspline((self.ygrid - fy) / self._settings.resolutions[1], order)
+            * bspline((self.zgrid - fz) / self._settings.resolutions[2], order)
         )
 
         return value * bsp_data
@@ -289,10 +308,10 @@ class Grid:
             elif method == MapMethod.FAST_GAUSSIAN:
                 grid_data = self._get_mapped_feature_fast_gaussian(position, value)
 
-            # elif method == MapMethod.BSP_LINE:
-            #     grid_data = self._get_mapped_feature_bsp_line(position, value)
+            elif method == MapMethod.BSP_LINE:
+                grid_data = self._get_mapped_feature_bsp_line(position, value)
 
-            elif method == MapMethod.NEAREST_NEIGHBOUR:
+            elif method == MapMethod.NEAREST_NEIGHBOURS:
                 grid_data = self._get_mapped_feature_nearest_neighbour(position, value)
 
             # set to grid
@@ -317,9 +336,8 @@ class Grid:
             features_group = grid_group.require_group(gridstorage.MAPPED_FEATURES)
             for feature_name, feature_data in self.features.items():
 
-                feature_group = features_group.require_group(feature_name)
-                feature_group.create_dataset(
-                    gridstorage.FEATURE_VALUE,
+                features_group.create_dataset(
+                    feature_name,
                     data=feature_data,
                     compression="lzf",
                     chunks=True,

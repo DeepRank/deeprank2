@@ -212,9 +212,6 @@ class DeeprankDataset(Dataset):
 GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
-MAX_ENTRY_NAME_LENGTH = 100
-
-
 class GridDataset(DeeprankDataset):
     def __init__( # pylint: disable=too-many-arguments
         self,
@@ -293,7 +290,7 @@ class GridDataset(DeeprankDataset):
         with h5py.File(hdf5_path, "r") as hdf5_file:
             entry_name = list(hdf5_file.keys())[0]
 
-            hdf5_all_feature_names = hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys()
+            hdf5_all_feature_names = list(hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys())
 
             hdf5_matching_feature_names = []  # feature names that match with the requested list of names
             unpartial_feature_names = []  # feature names without their dimension number suffix
@@ -375,7 +372,7 @@ class GridDataset(DeeprankDataset):
 
             mapped_features_group = entry_group[gridstorage.MAPPED_FEATURES]
             for feature_name in self.features:
-                feature_data.append(mapped_features_group[feature_name][gridstorage.FEATURE_VALUE][:])
+                feature_data.append(mapped_features_group[feature_name][:])
 
             target_value = entry_group[targets.VALUES][self.target][()]
 
@@ -383,10 +380,7 @@ class GridDataset(DeeprankDataset):
         data = Data(x=torch.tensor([feature_data], dtype=torch.float),
                     y=torch.tensor([target_value], dtype=torch.float))
 
-        if len(entry_name) > MAX_ENTRY_NAME_LENGTH:
-            raise ValueError(f"entry name '{entry_name}' is too long (max {MAX_ENTRY_NAME_LENGTH})")
-
-        data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
+        data.entry_names = entry_name
 
         return data
 
@@ -594,11 +588,7 @@ class GraphDataset(DeeprankDataset):
         data.cluster0 = cluster0
         data.cluster1 = cluster1
 
-        # entry name:
-        if len(entry_name) > MAX_ENTRY_NAME_LENGTH:
-            raise ValueError(f"entry name '{entry_name}' is too long (max {MAX_ENTRY_NAME_LENGTH})")
-
-        data.entry_names = torch.ByteTensor([bytes(entry_name.ljust(MAX_ENTRY_NAME_LENGTH), "utf8")])
+        data.entry_names = entry_name
 
         # apply transformation
         if self._transform is not None:

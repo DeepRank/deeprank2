@@ -9,9 +9,20 @@ from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.utils.graph import Graph
+import sys
+import signal
 
 
-logging.getLogger(__name__)
+_log = logging.getLogger(__name__)
+
+
+def handle_sigint(sig, frame): # pylint: disable=unused-argument
+    print('SIGINT received, terminating.')
+    sys.exit()
+
+
+def handle_timeout(sig, frame):
+    raise TimeoutError('Timed out!')
 
 
 def space_if_none(value):
@@ -23,31 +34,41 @@ def space_if_none(value):
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
 
+    signal.signal(signal.SIGINT, handle_sigint)
+    signal.signal(signal.SIGALRM, handle_timeout)
+
     with warnings.catch_warnings(record=PDBConstructionWarning):
         parser = PDBParser()
         structure = parser.get_structure('_tmp', pdb_path)
     
     bio_model = structure[0]
-    surface = get_surface(bio_model)
-    hse = HSExposureCA(bio_model)
 
-    for node in graph.nodes:
+    try:
+        signal.alarm(20)
+        surface = get_surface(bio_model)
+        signal.alarm(0)
+    except TimeoutError as e:
+        raise TimeoutError('Bio.PDB.ResidueDepth.get_surface timed out.') from e
+    else:
+        hse = HSExposureCA(bio_model)
 
-        # These can only be calculated per residue, not per atom.
-        # So for atomic graphs, every atom gets its residue's value.
-        if isinstance(node.id, Atom):
-            atom = node.id
-            residue = atom.residue
-        elif isinstance(node.id, Residue):
-            residue = node.id
-        else:
-            raise TypeError(f"Unexpected node type: {type(node)}")
+        for node in graph.nodes:
 
-        bio_residue = bio_model[residue.chain.id][residue.number]
-        node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)
+            # These can only be calculated per residue, not per atom.
+            # So for atomic graphs, every atom gets its residue's value.
+            if isinstance(node.id, Atom):
+                atom = node.id
+                residue = atom.residue
+            elif isinstance(node.id, Residue):
+                residue = node.id
+            else:
+                raise TypeError(f"Unexpected node type: {type(node)}")
 
-        hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
-        if hse_key in hse:
-            node.features[Nfeat.HSE] = hse[hse_key]
-        else:
-            node.features[Nfeat.HSE] = np.array((0, 0, 0))
+            bio_residue = bio_model[residue.chain.id][residue.number]
+            node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)
+
+            hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
+            if hse_key in hse:
+                node.features[Nfeat.HSE] = hse[hse_key]
+            else:
+                node.features[Nfeat.HSE] = np.array((0, 0, 0))
