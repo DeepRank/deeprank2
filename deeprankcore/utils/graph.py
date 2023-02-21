@@ -292,18 +292,6 @@ class Graph:
         self.map_to_grid(grid, method, augmentation)
         grid.to_hdf5(hdf5_path)
 
-        # store target values
-        with h5py.File(hdf5_path, 'a') as hdf5_file:
-
-            entry_group = hdf5_file[id_]
-
-            targets_group = entry_group.require_group(targets.VALUES)
-            for target_name, target_data in self.targets.items():
-                if target_name not in targets_group:
-                    targets_group.create_dataset(target_name, data=target_data)
-                else:
-                    targets_group[target_name][()] = target_data
-
         return hdf5_path
 
 
