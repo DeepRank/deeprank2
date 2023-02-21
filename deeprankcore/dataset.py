@@ -67,28 +67,7 @@ class DeeprankDataset(Dataset):
         # alows to associate each mol to an index
         # and get fname and mol name from the index
 
-        pr = cProfile.Profile()
-        pr.enable()
         self._create_index_entries()
-        pr.disable()
-        s_tot = io.StringIO()
-        s_cum = io.StringIO()
-        s_n = io.StringIO()
-
-        ps_tot = pstats.Stats(pr, stream=s_tot).strip_dirs().sort_stats('tottime').print_stats()
-        ps_cum = pstats.Stats(pr, stream=s_cum).strip_dirs().sort_stats('cumtime').print_stats()
-        ps_n = pstats.Stats(pr, stream=s_n).strip_dirs().sort_stats('ncalls').print_stats()
-
-        # Save it into disk
-        project_folder = './sample_data_221207/'
-        exp_path=f'{project_folder}/cProfileTest'
-        
-        with open(os.path.join(exp_path, 'cProfile_tottime.txt'), 'w+') as f:
-            f.write(s_tot.getvalue())
-        with open(os.path.join(exp_path, 'cProfile_cumtime.txt'), 'w+') as f:
-            f.write(s_cum.getvalue())
-        with open(os.path.join(exp_path, 'cProfile_ncalls.txt'), 'w+') as f:
-            f.write(s_n.getvalue())
 
     def _check_hdf5_files(self):
         """Checks if the data contained in the .HDF5 file is valid."""
@@ -397,7 +376,7 @@ class GridDataset(DeeprankDataset):
 
             mapped_features_group = entry_group[gridstorage.MAPPED_FEATURES]
             for feature_name in self.features:
-                feature_data.append(mapped_features_group[feature_name][:])
+                feature_data.append(mapped_features_group[feature_name][gridstorage.FEATURE_VALUE][:])
 
             target_value = entry_group[targets.VALUES][self.target][()]
 
