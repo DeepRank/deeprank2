@@ -1,5 +1,5 @@
 import pdb2sql
-from typing import List
+from typing import Sequence, Dict
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.aminoacid import Polarity
@@ -15,7 +15,7 @@ def id_from_residue(residue: tuple) -> str:
             For example: ('A', 27, 'GLU')
     
     Returns:
-        str: '<chain><residue_number>. For example: 'A27'
+        str: Output id in form of '<chain><residue_number>'. For example: 'A27'
     """
     
     return residue[0] + str(residue[1])
@@ -33,21 +33,19 @@ class _ContactDensity:
         self.connections = {pol: [] for pol in Polarity}
         self.connections['all'] = []
 
-        # example residue will hash as: <1A0Z B 118>
-        # example _ContactDensity.res will is a tuple: ('A', 27, 'GLU')
-        # _ContactDensity.id is: 'A27'
 
-
-def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> dict[_ContactDensity]: #pylint: disable=too-many-locals
+def count_residue_contacts(pdb_path: str, chains: Sequence[str], cutoff: float = 5.5) -> Dict[str: _ContactDensity]: #pylint: disable=too-many-locals
     """Count total number of close contact residues and contacts of specific Polarity.
 
     Args:
         pdb_path (str): Path to pdb file to read molecular information from.
-        chains (List[str]): List (or list-like object) containing strings of the chains to be considered.
+        chains (Sequence[str]): List (or list-like object) containing strings of the chains to be considered.
         cutoff (float, optional): Cutoff distance (in Ångström) to be considered a close contact. Defaults to 10.
 
     Returns:
-        dict: keys are each residue; items are _ContactDensity objects, which containing all contact density information.
+        Dict[str, _ContactDensity]: 
+            keys: ids of residues in form returned by id_from_residue.
+            items: _ContactDensity objects, containing all contact density information for the residue.
     """
 
     sql = pdb2sql.interface(pdb_path)
