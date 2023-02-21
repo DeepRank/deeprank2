@@ -131,15 +131,17 @@ class QueryCollection:
         self.cpu_count = None
         self.ids_count = {}
 
-    def add(self, query: Query, verbose: bool = False):
+    def add(self, query: Query, verbose: bool = False, warn_duplicate: bool = True):
         """
         Adds a new query to the collection.
 
         Args:
             query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
                 :class:`SingleResidueVariantAtomicQuery`.
-                
+
             verbose(bool, optional): For logging query IDs added, defaults to False.
+            
+            warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified
         """
         query_id = query.get_query_id()
 
@@ -152,7 +154,9 @@ class QueryCollection:
             self.ids_count[query_id] += 1
             new_id = query.model_id + "_" + str(self.ids_count[query_id])
             query.model_id = new_id
-            _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+            
+            if warn_duplicate:
+                _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
