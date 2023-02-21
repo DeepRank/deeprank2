@@ -28,32 +28,28 @@ def variant_querycollection_tester(n_queries = 10, feature_modules = None, cpu_c
     prefix = join(output_directory, "test-process-queries")
     collection = QueryCollection()
 
-    try:
-        for number in range(1, n_queries + 1):
-            collection.add(SingleResidueVariantResidueQuery(
-                str(PATH_TEST / "data/pdb/101M/101M.pdb"),
-                "A",
-                number,
-                None,
-                alanine,
-                phenylalanine,
-                pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
-                ))
+    for number in range(1, n_queries + 1):
+        collection.add(SingleResidueVariantResidueQuery(
+            str(PATH_TEST / "data/pdb/101M/101M.pdb"),
+            "A",
+            number,
+            None,
+            alanine,
+            phenylalanine,
+            pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
+            ))
 
-        output_paths = collection.process(prefix, feature_modules, cpu_count, combine_output)
-        assert len(output_paths) > 0
+    output_paths = collection.process(prefix, feature_modules, cpu_count, combine_output)
+    assert len(output_paths) > 0
 
-        graph_names = []
-        for path in output_paths:
-            with h5py.File(path, "r") as f5:
-                graph_names += list(f5.keys())
+    graph_names = []
+    for path in output_paths:
+        with h5py.File(path, "r") as f5:
+            graph_names += list(f5.keys())
 
-        for query in collection.queries:
-            query_id = query.get_query_id()
-            assert query_id in graph_names, f"missing in output: {query_id}"
-
-    except Exception as e:
-        print(e)
+    for query in collection.queries:
+        query_id = query.get_query_id()
+        assert query_id in graph_names, f"missing in output: {query_id}"
 
     return collection, output_directory, output_paths
 
@@ -78,29 +74,25 @@ def ppi_querycollection_tester(n_queries = 10, feature_modules = None, cpu_count
     prefix = join(output_directory, "test-process-queries")
     collection = QueryCollection()
 
-    try:
-        for number in range(1, n_queries + 1):
-            collection.add(ProteinProteinInterfaceResidueQuery(
-                str("tests/data/pdb/3C8P/3C8P.pdb"),
-                "A",
-                "B",
-                pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
-                ))
+    for number in range(1, n_queries + 1):
+        collection.add(ProteinProteinInterfaceResidueQuery(
+            str("tests/data/pdb/3C8P/3C8P.pdb"),
+            "A",
+            "B",
+            pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
+            ))
 
-        output_paths = collection.process(prefix, feature_modules, cpu_count, combine_output)
-        assert len(output_paths) > 0
+    output_paths = collection.process(prefix, feature_modules, cpu_count, combine_output)
+    assert len(output_paths) > 0
 
-        graph_names = []
-        for path in output_paths:
-            with h5py.File(path, "r") as f5:
-                graph_names += list(f5.keys())
+    graph_names = []
+    for path in output_paths:
+        with h5py.File(path, "r") as f5:
+            graph_names += list(f5.keys())
 
-        for query in collection.queries:
-            query_id = query.get_query_id()
-            assert query_id in graph_names, f"missing in output: {query_id}"
-
-    except Exception as e:
-        print(e)
+    for query in collection.queries:
+        query_id = query.get_query_id()
+        assert query_id in graph_names, f"missing in output: {query_id}"
 
     return collection, output_directory, output_paths
 
