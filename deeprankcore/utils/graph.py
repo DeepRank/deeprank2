@@ -226,6 +226,10 @@ class Graph:
         grid.to_hdf5(hdf5_path)
 
         return hdf5_path
+    
+    def get_all_chains(self) -> List[str]:
+        chains = set(str(res.chain).split()[1] for res in list(self._nodes.keys()))
+        return list(chains)
 
 
 def build_atomic_graph( # pylint: disable=too-many-locals

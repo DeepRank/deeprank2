@@ -34,7 +34,7 @@ class _ContactDensity:
         self.connections['all'] = []
 
 
-def count_residue_contacts(pdb_path: str, chains: Sequence[str], cutoff: float = 5.5) -> Dict[str: _ContactDensity]: #pylint: disable=too-many-locals
+def count_residue_contacts(pdb_path: str, chains: Sequence[str], cutoff: float = 5.5) -> Dict[str: _ContactDensity]:
     """Count total number of close contact residues and contacts of specific Polarity.
 
     Args:
@@ -99,7 +99,7 @@ def add_features(
     graph: Graph,
     *args, **kwargs): # pylint: disable=unused-argument
     
-    chains = set([str(x.chain).split()[1] for x in list(graph._nodes.keys())])
+    chains = graph.get_all_chains()
     residue_contacts = count_residue_contacts(pdb_path, chains)
     
     uncontacted_residues = 0
