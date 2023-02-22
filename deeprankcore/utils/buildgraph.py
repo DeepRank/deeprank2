@@ -114,17 +114,6 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
     _add_atom_to_residue(atom, residue)
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-def get_structure(pdb, id_):
-    """Builds a structure from rows in a pdb file
-    Args:
-        pdb (pdb2sql object): the pdb structure that we're investigating
-        id (str): unique id for the pdb structure
-    Returns (PDBStructure): the structure object, giving access to chains, residues, atoms
-=======
-=======
->>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
 def get_structure(pdb, id_: str):
     """Builds a structure from rows in a pdb file.
 
@@ -134,10 +123,6 @@ def get_structure(pdb, id_: str):
 
     Returns: 
         PDBStructure: The structure object, giving access to chains, residues, atoms.
-<<<<<<< HEAD
->>>>>>> main
-=======
->>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
 
     # We need these intermediary dicts to keep track of which residues and
@@ -183,9 +168,7 @@ def get_contact_atoms( # pylint: disable=too-many-locals
     chain_id2: str,
     distance_cutoff: float
 ) -> List[Atom]:
-    """
-    Gets the contact atoms from pdb2sql and wraps them in python objects
-    """
+    """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
     interface = get_interface(pdb_path)
     try:
@@ -242,17 +225,8 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
         chain_id2 (str): Second protein chain identifier.
         distance_cutoff (float): Max distance between two interacting residues.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    Returns: the pairs of contacting residues
-=======
     Returns: 
         List[Pair]: The pairs of contacting residues.
->>>>>>> main
-=======
-    Returns: 
-        List[Pair]: The pairs of contacting residues.
->>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
 
     # Find out which residues are pairs
@@ -321,17 +295,8 @@ def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Res
         residue (:class:`Residue`): The residue in the structure.
         radius (float): Max distance in Ångström between atoms of the residue and the other residues.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    Returns: (a set of deeprank residues): the surrounding residues
-=======
     Returns: 
         (a set of deeprank residues): The surrounding residues.
->>>>>>> main
-=======
-    Returns: 
-        (a set of deeprank residues): The surrounding residues.
->>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
 
     structure_atoms = structure.get_atoms()

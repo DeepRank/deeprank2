@@ -29,7 +29,7 @@ def get_preloaded_cluster(cluster, batch):
 def community_detection_per_batch( # pylint: disable=too-many-locals
     edge_index, batch, num_nodes: int, edge_attr=None, method: str = "mcl"
 ):
-    """Detects clusters of nodes based on the edge attributes (distances)
+    """Detects clusters of nodes based on the edge attributes (distances).
 
     Args:
         edge_index (Tensor): Edge index.
@@ -89,18 +89,8 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
     return torch.tensor(cluster).to(device)
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"): # pylint: disable=too-many-locals
-    """Detects clusters of nodes based on the edge attributes (distances)
-=======
 def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"): # pylint: disable=too-many-locals
     """Detects clusters of nodes based on the edge attributes (distances).
->>>>>>> main
-=======
-def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"): # pylint: disable=too-many-locals
-    """Detects clusters of nodes based on the edge attributes (distances).
->>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
 
     Args:
         edge_index (Tensor): Edge index.
@@ -113,7 +103,6 @@ def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str 
 
     Returns:
         cluster Tensor
-
 
     Examples:
 
@@ -165,7 +154,7 @@ def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str 
 
 
 def community_pooling(cluster, data):
-    """Pools features and edges of all cluster members
+    """Pools features and edges of all cluster members.
 
     All cluster members are pooled into a single node that is assigned:
     - the max cluster value for each feature
@@ -178,8 +167,8 @@ def community_pooling(cluster, data):
     Returns:
         pooled features tensor
 
-
-    Example:
+    Examples:
+    
         >>> import torch
         >>> from torch_geometric.data import Data, Batch
         >>> edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5],
