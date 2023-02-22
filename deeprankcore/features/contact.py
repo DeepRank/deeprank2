@@ -56,21 +56,24 @@ def _get_vdw_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
             However, the potential tends to 0 at large distance.
     """
 
-    # calculate intra potentials
-    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms]
-    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms]
-    mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
-    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
-    intra_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
-    
-    # calculate inter potentials
+    # calculate inter energies
     sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms]
     epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
     inter_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
-    vdw_energy = {'intra': intra_energy, 'inter': inter_energy}
+    # calculate intra energies
+    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms]
+    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms]
+    mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
+    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
+    intra_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    intra_partners = _intra_partners(distances, 3)
+
+    # unify vdw energies into single array
+    vdw_energy = inter_energy
+    vdw_energy[intra_partners] = intra_energy[intra_partners]
     return vdw_energy
 
 
