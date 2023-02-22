@@ -24,18 +24,24 @@ class Trainer():
                 self,
                 neuralnet = None,
 <<<<<<< HEAD
+<<<<<<< HEAD
                 dataset_train: Union[GraphDataset, GridDataset] = None,
                 dataset_val: Union[GraphDataset, GridDataset] = None,
                 dataset_test: Union[GraphDataset, GridDataset] = None,
                 val_size: Union[float, int] = None,
                 test_size: Union[float, int] = None,
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
                 dataset_train: Optional[Union[GraphDataset, GridDataset]] = None,
                 dataset_val: Optional[Union[GraphDataset, GridDataset]] = None,
                 dataset_test: Optional[Union[GraphDataset, GridDataset]] = None,
                 val_size: Optional[Union[float, int]] = None,
                 test_size: Optional[Union[float, int]] = None,
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
                 class_weights: bool = False,
                 pretrained_model: Optional[str] = None,
                 cuda: bool = False,
@@ -50,6 +56,7 @@ class Trainer():
                 in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
                 Defaults to None.
+<<<<<<< HEAD
 <<<<<<< HEAD
 
             dataset_train (:class:`GraphDataset`, optional): Training set used during training.
@@ -72,6 +79,8 @@ class Trainer():
             pretrained_model (str, optional): Path to pre-trained model. Defaults to None.
 
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
             dataset_train (Optional[Union[:class:`GraphDataset`, :class:`GridDataset`]], optional): Training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
             dataset_val (Optional[Union[:class:`GraphDataset`, :class:`GridDataset`]], optional): Evaluation set used during training.
@@ -84,6 +93,7 @@ class Trainer():
                 Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to None.
             class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
             pretrained_model (Optional[str], optional): Path to pre-trained model. Defaults to None.
+<<<<<<< HEAD
 >>>>>>> main
             cuda (bool, optional): Whether to use CUDA. Defaults to False.
 
@@ -96,6 +106,13 @@ class Trainer():
             output_exporters (Optional[List[OutputExporter]], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
                 over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
 >>>>>>> main
+=======
+            cuda (bool, optional): Whether to use CUDA. Defaults to False.
+
+            ngpu (int, optional): Number of GPU to be used. Defaults to 0.
+            output_exporters (Optional[List[OutputExporter]], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
+                over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
                 Defaults to None.
         """
         self.batch_size_train = None
@@ -390,10 +407,14 @@ class Trainer():
 
         Args:
 <<<<<<< HEAD
+<<<<<<< HEAD
             dataset (str): GraphDataset object
 =======
             dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): GraphDataset object.
 >>>>>>> main
+=======
+            dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): GraphDataset object.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
 
         Raises:
             ValueError: Incorrect output shape
@@ -706,10 +727,14 @@ class Trainer():
 
         Returns:
 <<<<<<< HEAD
+<<<<<<< HEAD
             running loss
 =======
             Running loss.
 >>>>>>> main
+=======
+            Running loss.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         """
 
         sum_of_losses = 0
@@ -878,11 +903,15 @@ class Trainer():
                         Defaults to 32.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
 <<<<<<< HEAD
+<<<<<<< HEAD
                         Default: 0.
 
 =======
                         Defaults to 0.
 >>>>>>> main
+=======
+                        Defaults to 0.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         """
         self.batch_size_test = batch_size
 
@@ -971,15 +1000,20 @@ class Trainer():
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Union[float, int] = None) -> \
 =======
 def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Optional[Union[float, int]] = None) -> \
 >>>>>>> main
+=======
+def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Optional[Union[float, int]] = None) -> \
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
 
     """Divides the dataset into a training set and an evaluation set
 
     Args:
+<<<<<<< HEAD
 <<<<<<< HEAD
         dataset (deeprank-core dataset object): input dataset to be split into training and validation data
 
@@ -990,6 +1024,11 @@ def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Option
         splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
             Defaults to None.
 >>>>>>> main
+=======
+        dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): Input dataset to be split into training and validation data.
+        splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+            Defaults to None.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
 
     if splitsize is None:

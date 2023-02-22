@@ -33,6 +33,7 @@ class DeeprankDataset(Dataset):
                  check_integrity: bool
     ):
 <<<<<<< HEAD
+<<<<<<< HEAD
         """
         Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
             More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
@@ -41,6 +42,11 @@ class DeeprankDataset(Dataset):
 
         More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
 >>>>>>> main
+=======
+        """Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
+
+        More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         """
 
         super().__init__(root_directory_path, transform, pre_transform)
@@ -128,12 +134,17 @@ class DeeprankDataset(Dataset):
         """Creates the indexing of each molecule in the dataset.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
         This allows to refer to one entry with its index in the list
 =======
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)].
         This allows to refer to one entry with its index in the list.
 >>>>>>> main
+=======
+        Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)].
+        This allows to refer to one entry with its index in the list.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         """
         _log.debug(f"Processing data set with .HDF5 files: {self.hdf5_paths}")
 
@@ -170,16 +181,22 @@ class DeeprankDataset(Dataset):
 
     def _filter_targets(self, entry_group: h5py.Group) -> bool:
 <<<<<<< HEAD
+<<<<<<< HEAD
         """
         Filters the entry according to a dictionary.
             The filter is based on the attribute self.target_filter that must be either
             of the form: { target_name : target_condition } or None.
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         """Filters the entry according to a dictionary.
 
         The filter is based on the attribute self.target_filter that must be either
         of the form: { target_name : target_condition } or None.
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
 
         Args:
             entry_group (:class:`h5py.Group`): The entry group in the .HDF5 file.
@@ -257,6 +274,7 @@ class GridDataset(DeeprankDataset):
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
 <<<<<<< HEAD
+<<<<<<< HEAD
 
             subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
 
@@ -291,6 +309,8 @@ class GridDataset(DeeprankDataset):
                 
             target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
             subset (Optional[List[str]], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
             target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be
                 a custom-defined target given to the Query class as input (see: `deeprankcore.query`); in this case, 
@@ -318,9 +338,11 @@ class GridDataset(DeeprankDataset):
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
             target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
-
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
@@ -462,6 +484,7 @@ class GraphDataset(DeeprankDataset):
 
         Args:
 <<<<<<< HEAD
+<<<<<<< HEAD
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
 
             subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
@@ -484,6 +507,8 @@ class GraphDataset(DeeprankDataset):
 
             clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
             hdf5_path (Union[str, List[str]]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List.
                 Defaults to None.
             subset (Optional[List[str]], optional): List of keys from .HDF5 file to include. 
@@ -508,7 +533,10 @@ class GraphDataset(DeeprankDataset):
                 The complete list can be found in `deeprankcore.domain.edgestorage`.
                 Defaults to "all".
             clustering_method (Optional[str], optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
                 or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
                 In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates
                 a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved in
@@ -517,6 +545,7 @@ class GraphDataset(DeeprankDataset):
                 The latter tensor is saved into the .HDF5 file as a :class:`Dataset` called "depth_1". Both "depth_0" and "depth_1"
                 :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to make them available to networks
                 that make use of clustering methods. Defaults to None.
+<<<<<<< HEAD
 <<<<<<< HEAD
 
             classes (Union[List[str], List[int], List[float]], optional): Define the dataset target classes in classification mode. Defaults to [0, 1].
@@ -539,6 +568,8 @@ class GraphDataset(DeeprankDataset):
 
             target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
             classes (Optional[Union[List[str], List[int], List[float]]], optional): Define the dataset target classes in classification mode.
                 Defaults to None.
             tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
@@ -555,9 +586,11 @@ class GraphDataset(DeeprankDataset):
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
             target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
-
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
@@ -761,6 +794,7 @@ def save_hdf5_keys(
     Args:
         f_src_path (str): The path to the .HDF5 file containing the keys.
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         src_ids(List[str]): Keys to be saved in the new .HDF5 file. It should be a list containing at least one key.
 
@@ -770,13 +804,18 @@ def save_hdf5_keys(
             to the original .HDF5 file. If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`).
             Default = False.
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         src_ids (List[str]): Keys to be saved in the new .HDF5 file. It should be a list containing at least one key.
         f_dest_path (str): The path to the new .HDF5 file.
         hardcopy (bool, optional): If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`)
             to the original .HDF5 file. 
             If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`).
             Defaults to False.
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
     if not all(isinstance(d, str) for d in src_ids):
         raise TypeError("data_ids should be a list containing strings.")

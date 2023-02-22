@@ -29,10 +29,14 @@ class MapMethod(Enum):
 
 class Augmentation:
 <<<<<<< HEAD
+<<<<<<< HEAD
     "A rotation around an axis, to be applied to a feature before mapping it to a grid"
 =======
     """A rotation around an axis, to be applied to a feature before mapping it to a grid."""
 >>>>>>> main
+=======
+    """A rotation around an axis, to be applied to a feature before mapping it to a grid."""
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
 
     def __init__(self, axis: np.ndarray, angle: float):
         self._axis = axis

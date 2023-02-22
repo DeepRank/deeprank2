@@ -94,14 +94,9 @@ class Residue:
 
 
 def get_residue_center(residue: Residue) -> np.ndarray:
-<<<<<<< HEAD
-    """
-    Chooses a center position for a residue, based on the atoms it has:
-=======
     """Chooses a center position for a residue. 
     
     Based on the atoms it has:
->>>>>>> main
     1. find beta carbon, if present
     2. find alpha carbon, if present
     3. else take the mean of the atom positions

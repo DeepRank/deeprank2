@@ -90,12 +90,17 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"): # pylint: disable=too-many-locals
     """Detects clusters of nodes based on the edge attributes (distances)
 =======
 def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"): # pylint: disable=too-many-locals
     """Detects clusters of nodes based on the edge attributes (distances).
 >>>>>>> main
+=======
+def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"): # pylint: disable=too-many-locals
+    """Detects clusters of nodes based on the edge attributes (distances).
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
 
     Args:
         edge_index (Tensor): Edge index.

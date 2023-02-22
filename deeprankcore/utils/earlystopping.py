@@ -15,6 +15,7 @@ class EarlyStopping:
 
         Args:
 <<<<<<< HEAD
+<<<<<<< HEAD
             patience (int): How long to wait after last time validation loss improved.
                 Default: 10
             
@@ -30,6 +31,8 @@ class EarlyStopping:
             trace_func (function): Function used for recording EarlyStopping status.
                 Default: print            
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
             patience (int, optional): How long to wait after last time validation loss improved.
                 Defaults to 10.
             delta (float, optional): Minimum change required to reset the early stopping counter.
@@ -40,7 +43,10 @@ class EarlyStopping:
                 Defaults to True.
             trace_func (Callable, optional): Function used for recording EarlyStopping status.
                 Defaults to print.            
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
         """
 
         self.patience = patience

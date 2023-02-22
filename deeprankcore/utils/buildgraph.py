@@ -115,6 +115,7 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def get_structure(pdb, id_):
     """Builds a structure from rows in a pdb file
     Args:
@@ -122,6 +123,8 @@ def get_structure(pdb, id_):
         id (str): unique id for the pdb structure
     Returns (PDBStructure): the structure object, giving access to chains, residues, atoms
 =======
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
 def get_structure(pdb, id_: str):
     """Builds a structure from rows in a pdb file.
 
@@ -131,7 +134,10 @@ def get_structure(pdb, id_: str):
 
     Returns: 
         PDBStructure: The structure object, giving access to chains, residues, atoms.
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
 
     # We need these intermediary dicts to keep track of which residues and
@@ -237,11 +243,16 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
         distance_cutoff (float): Max distance between two interacting residues.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     Returns: the pairs of contacting residues
 =======
     Returns: 
         List[Pair]: The pairs of contacting residues.
 >>>>>>> main
+=======
+    Returns: 
+        List[Pair]: The pairs of contacting residues.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
 
     # Find out which residues are pairs
@@ -311,11 +322,16 @@ def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Res
         radius (float): Max distance in Ångström between atoms of the residue and the other residues.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     Returns: (a set of deeprank residues): the surrounding residues
 =======
     Returns: 
         (a set of deeprank residues): The surrounding residues.
 >>>>>>> main
+=======
+    Returns: 
+        (a set of deeprank residues): The surrounding residues.
+>>>>>>> c37531ecbb8bf7128ff20f7b713d0b5c2f4dd2d3
     """
 
     structure_atoms = structure.get_atoms()
