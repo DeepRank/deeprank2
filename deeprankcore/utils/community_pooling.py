@@ -27,15 +27,15 @@ def get_preloaded_cluster(cluster, batch):
 
 
 def community_detection_per_batch( # pylint: disable=too-many-locals
-    edge_index, batch, num_nodes, edge_attr=None, method="mcl"
+    edge_index, batch, num_nodes: int, edge_attr=None, method: str = "mcl"
 ):
-    """Detects clusters of nodes based on the edge attributes (distances)
+    """Detects clusters of nodes based on the edge attributes (distances).
 
     Args:
-        edge_index (Tensor): Edge index
-        num_nodes (int): Number of nodes
+        edge_index (Tensor): Edge index.
+        num_nodes (int): Number of nodes.
         edge_attr (Tensor, optional): Edge attributes. Defaults to None.
-        method (str, optional): method. Defaults to 'mcl'.
+        method (str, optional): Method. Defaults to "mcl".
 
     Raises:
         ValueError: Requires a valid clustering method ('mcl' or 'louvain')
@@ -89,21 +89,20 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
     return torch.tensor(cluster).to(device)
 
 
-def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"): # pylint: disable=too-many-locals
-    """Detects clusters of nodes based on the edge attributes (distances)
+def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"): # pylint: disable=too-many-locals
+    """Detects clusters of nodes based on the edge attributes (distances).
 
     Args:
-        edge_index (Tensor): Edge index
-        num_nodes (int): Number of nodes
+        edge_index (Tensor): Edge index.
+        num_nodes (int): Number of nodes.
         edge_attr (Tensor, optional): Edge attributes. Defaults to None.
-        method (str, optional): method. Defaults to 'mcl'.
+        method (str, optional): Method. Defaults to "mcl".
 
     Raises:
         ValueError: Requires a valid clustering method ('mcl' or 'louvain')
 
     Returns:
         cluster Tensor
-
 
     Examples:
 
@@ -155,21 +154,21 @@ def community_detection(edge_index, num_nodes, edge_attr=None, method="mcl"): # 
 
 
 def community_pooling(cluster, data):
-    """Pools features and edges of all cluster members
+    """Pools features and edges of all cluster members.
 
     All cluster members are pooled into a single node that is assigned:
     - the max cluster value for each feature
     - the average cluster nodes position
 
     Args:
-        cluster ([type]): clusters
-        data ([type]): features tensor
+        cluster: Clusters.
+        data: Features tensor.
 
     Returns:
         pooled features tensor
 
-
-    Example:
+    Examples:
+    
         >>> import torch
         >>> from torch_geometric.data import Data, Batch
         >>> edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5],

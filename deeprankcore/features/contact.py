@@ -37,10 +37,10 @@ def _intra_partners(distance_matrix: npt.NDArray[np.float64], max_hops: int) -> 
 
 
 def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """ 
-        Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
-            However, the potential tends to 0 at large distance.
+    """Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
+
+    Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
+    However, the potential tends to 0 at large distance.
     """
 
     EPSILON0 = 1.0
@@ -51,10 +51,10 @@ def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float
 
 
 def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64], max_intra_separation: int = 3) -> npt.NDArray[np.float64]:
-    """ 
-        Calculates van der waals energies (Lennard-Jones potentials) between all Atoms in atom.
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
-            However, the potential tends to 0 at large distance.
+    """Calculates Van der Waals energies (Lennard-Jones potentials) between all Atoms in atom.
+
+    Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
+    However, the potential tends to 0 at large distance.
     """
 
     # calculate inter energies
