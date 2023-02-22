@@ -8,12 +8,13 @@ from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
 from deeprankcore.domain import edgestorage as Efeat
 from deeprankcore.utils.parsing import atomic_forcefield
+import numpy.typing as npt
 
 _log = logging.getLogger(__name__)
 
 MAX_COVALENT_DISTANCE = 2.1
 
-def _intra_partners(distance_matrix: np.ndarray[float], max_hops: int) -> np.ndarray[bool]:
+def _intra_partners(distance_matrix: npt.NDArray[np.float64], max_hops: int) -> npt.NDArray[np.bool_]:
     """Converts a distance matrix to a boolean matrix of atom pairs separated within a specified number of covalent bonds
 
     Args:
@@ -30,12 +31,12 @@ def _intra_partners(distance_matrix: np.ndarray[float], max_hops: int) -> np.nda
 
     # use covalent_partners matrix to determine linkage within max_hops
     intra_partners = covalent_partners.copy()
-    for x in range(max_hops-1):  # adjusted because distance 1 is calculated above
+    for _ in range(max_hops-1):  # adjusted because distance 1 is calculated above
         intra_partners = np.matmul(intra_partners, covalent_partners)
     return intra_partners
 
 
-def _get_electrostatic_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
+def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """ 
         Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
@@ -49,7 +50,7 @@ def _get_electrostatic_energy(atoms: List[Atom], distances: np.ndarray) -> np.nd
     return electrostatic_energy
 
 
-def _get_vdw_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
+def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64], max_intra_separation: int = 3) -> npt.NDArray[np.float64]:
     """ 
         Calculates van der waals energies (Lennard-Jones potentials) between all Atoms in atom.
         Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
@@ -69,7 +70,7 @@ def _get_vdw_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
     intra_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
-    intra_partners = _intra_partners(distances, 3)
+    intra_partners = _intra_partners(distances, max_intra_separation)
 
     # unify vdw energies into single array
     vdw_energy = inter_energy
@@ -102,7 +103,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         positions = [atom.position for atom in all_atoms]
         interatomic_distances = distance_matrix(positions, positions)
         interatomic_electrostatic_energy = _get_electrostatic_energy(all_atoms, interatomic_distances)
-        interatomic_vanderwaals_energy = _get_vdw_energy(all_atoms, interatomic_distances)
+        interatomic_vanderwaals_energy = _get_vdw_energy(all_atoms, interatomic_distances, 3)
 
     # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
