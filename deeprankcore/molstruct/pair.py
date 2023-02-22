@@ -6,8 +6,8 @@ from deeprankcore.molstruct.atom import Atom
 class Pair:
     """A hashable, comparable object for any set of two inputs where order doesn't matter.
     Args:
-        item1 (object): the pair's first object, must be convertable to string
-        item2 (object): the pair's second object, must be convertable to string
+        item1 (Any object): The pair's first object, must be convertable to string.
+        item2 (Any object): The pair's second object, must be convertable to string.
     """
 
     def __init__(self, item1: Any, item2: Any):
