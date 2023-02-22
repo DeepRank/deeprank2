@@ -6,7 +6,7 @@ from deeprankcore.utils.pssmdata import PssmRow
 
 
 class Residue:
-    """Represents a pdb residue."""
+    "represents a pdb residue"
 
     def __init__(
         self,
@@ -71,7 +71,7 @@ class Residue:
 
     @property
     def number_string(self) -> str:
-        """Contains both the number and the insertion code (if any)."""
+        "contains both the number and the insertion code (if any)"
 
         if self._insertion_code is not None:
             return f"{self._number}{self._insertion_code}"

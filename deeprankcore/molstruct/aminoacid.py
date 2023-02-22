@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class Polarity(Enum):
-    """A value to express a residue's polarity."""
+    "a value to express a residue's polarity"
 
     NONPOLAR = 0
     POLAR = 1
@@ -19,7 +19,7 @@ class Polarity(Enum):
 
 
 class AminoAcid:
-    """A value to represent one of the amino acids."""
+    "a value to represent one of the amino acids"
 
     def __init__( # pylint: disable=too-many-arguments
         self,

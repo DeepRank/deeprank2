@@ -3,7 +3,7 @@ from deeprankcore.utils.pssmdata import PssmRow
 
 
 class PDBStructure:
-    """Represents one entire pdb structure."""
+    "represents one entire pdb structure"
 
     def __init__(self, id_: Optional[str] = None):
         """
@@ -40,7 +40,7 @@ class PDBStructure:
         return list(self._chains.values())
 
     def get_atoms(self):
-        """Shortcut to list all atoms in this structure."""
+        "shortcut to list all atoms in this structure"
         atoms = []
         for chain in self._chains.values():
             for residue in chain.residues:
@@ -54,7 +54,7 @@ class PDBStructure:
 
 
 class Chain:
-    """Represents one pdb chain."""
+    "represents one pdb chain"
 
     def __init__(self, model: PDBStructure, id_: Optional[str]):
         """
