@@ -13,11 +13,11 @@ _log = logging.getLogger(__name__)
 
 MAX_COVALENT_DISTANCE = 2.1
 
-def _get_electrostatic_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
-    """ 
-        Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
-            However, the potential tends to 0 at large distance.
+def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
+    """Calculate Coulomb potentials between between all Atoms in atom.
+
+    Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
+    However, the potential tends to 0 at large distance.
     """
 
     EPSILON0 = 1.0
@@ -27,11 +27,11 @@ def _get_electrostatic_energy(atoms: List[Atom], distances: np.ndarray) -> np.nd
     return electrostatic_energy
 
 
-def _get_vdw_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
-    """ 
-        Calculates van der waals energies (Lennard-Jones potentials) between all Atoms in atom.
-        Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
-            However, the potential tends to 0 at large distance.
+def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
+    """Calculate Lennard-Jones potentials between all Atoms in atom.
+
+    Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
+    However, the potential tends to 0 at large distance.
     """
 
     # calculate intra potentials
@@ -76,8 +76,8 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         warnings.simplefilter("ignore")
         positions = [atom.position for atom in all_atoms]
         interatomic_distances = distance_matrix(positions, positions)
-        interatomic_electrostatic_energy = _get_electrostatic_energy(all_atoms, interatomic_distances)
-        interatomic_vanderwaals_energy = _get_vdw_energy(all_atoms, interatomic_distances)
+        interatomic_electrostatic_energy = _get_coulomb_potentials(all_atoms, interatomic_distances)
+        interatomic_vanderwaals_energy = _get_lennard_jones_potentials(all_atoms, interatomic_distances)
 
     # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
