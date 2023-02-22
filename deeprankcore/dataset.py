@@ -197,7 +197,8 @@ class DeeprankDataset(Dataset):
         return True
 
     def len(self) -> int:
-        """Gets the length of the dataset, either :class:`GridDataset` or :class:`GraphDataset` object.
+        """
+        Gets the length of the dataset, either :class:`GridDataset` or :class:`GraphDataset` object.
 
         Returns:
             int: Number of complexes in the dataset.
@@ -228,7 +229,8 @@ class GridDataset(DeeprankDataset):
         target_filter: Optional[Dict[str, str]] = None,
         check_integrity: bool = True
     ):
-        """Class to load the .HDF5 files data into grids.
+        """
+        Class to load the .HDF5 files data into grids.
 
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
@@ -260,6 +262,7 @@ class GridDataset(DeeprankDataset):
                 Defaults to False.
             target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
+
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
@@ -273,7 +276,7 @@ class GridDataset(DeeprankDataset):
         self._check_features()
 
     def _check_features(self):
-        """Checks if the required features exist."""
+        """Checks if the required features exist"""
 
         hdf5_path = self.hdf5_paths[0]
 
@@ -363,7 +366,7 @@ class GridDataset(DeeprankDataset):
 
             mapped_features_group = entry_group[gridstorage.MAPPED_FEATURES]
             for feature_name in self.features:
-                feature_data.append(mapped_features_group[feature_name][gridstorage.FEATURE_VALUE][:])
+                feature_data.append(mapped_features_group[feature_name][:])
 
             target_value = entry_group[targets.VALUES][self.target][()]
 
@@ -396,7 +399,8 @@ class GraphDataset(DeeprankDataset):
         target_filter: Optional[Dict[str, str]] = None,
         check_integrity: bool = True
     ):
-        """Class to load the .HDF5 files data into graphs.
+        """
+        Class to load the .HDF5 files data into graphs.
 
         Args:
             hdf5_path (Union[str, List[str]]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List.
@@ -448,6 +452,7 @@ class GraphDataset(DeeprankDataset):
                 Defaults to False.
             target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
+
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
@@ -464,7 +469,8 @@ class GraphDataset(DeeprankDataset):
         self._check_features()
 
     def get(self, idx: int) -> Data:
-        """Gets one graph item from its unique index.
+        """
+        Gets one graph item from its unique index.
 
         Args:
             idx (int): Index of the item, ranging from 0 to len(dataset).
@@ -584,7 +590,7 @@ class GraphDataset(DeeprankDataset):
         return data
 
     def _check_features(self):
-        """Checks if the required features exist."""
+        """Checks if the required features exist"""
         f = h5py.File(self.hdf5_paths[0], "r")
         mol_key = list(f.keys())[0]
 
@@ -644,7 +650,8 @@ def save_hdf5_keys(
     f_dest_path: str,
     hardcopy = False
     ):
-    """Save references to keys in src_ids in a new .HDF5 file.
+    """
+    Save references to keys in src_ids in a new .HDF5 file.
 
     Args:
         f_src_path (str): The path to the .HDF5 file containing the keys.
