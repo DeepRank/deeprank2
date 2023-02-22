@@ -13,6 +13,28 @@ _log = logging.getLogger(__name__)
 
 MAX_COVALENT_DISTANCE = 2.1
 
+def _intra_partners(distance_matrix: np.ndarray[float], max_hops: int) -> np.ndarray[bool]:
+    """Converts a distance matrix to a boolean matrix of atom pairs separated within a specified number of covalent bonds
+
+    Args:
+        distance_matrix (np.ndarray[float]): interatomic distance matrix
+        max_hops (int): maximum number of covalent bonds separating two atoms still considered as an 'intra' bond
+
+    Returns:
+        np.ndarray[bool]: matrix containing boolean values depending for atoms that are within the maximum 
+            covalent bond separation
+    """
+
+    # convert distance matrix to a boolean matrix of covalent bonds
+    covalent_partners = distance_matrix < MAX_COVALENT_DISTANCE
+
+    # use covalent_partners matrix to determine linkage within max_hops
+    intra_partners = covalent_partners.copy()
+    for x in range(max_hops-1):  # adjusted because distance 1 is calculated above
+        intra_partners = np.matmul(intra_partners, covalent_partners)
+    return intra_partners
+
+
 def _get_electrostatic_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     """ 
         Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
@@ -50,14 +72,6 @@ def _get_vdw_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
 
     vdw_energy = {'intra': intra_energy, 'inter': inter_energy}
     return vdw_energy
-
-
-def _covalent_distance(distance_matrix: np.ndarray, max_hops):
-    covalent_distance_1 = distance_matrix < MAX_COVALENT_DISTANCE
-    output = covalent_distance_1.copy()
-    for x in range(max_hops-1):
-        output = np.matmul(output, covalent_distance_1)
-    return output
 
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
