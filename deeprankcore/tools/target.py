@@ -18,12 +18,12 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
         target_list (str): Name of the file containing the data.
         sep (str, optional): Separator in target list. Defaults to " ".
 
-    Note:
+    Notes:
         The input target list should respect the following format :
-            1ATN_xxx-1 0
-            1ATN_xxx-2 1
-            1ATN_xxx-3 0
-            1ATN_xxx-4 0
+        1ATN_xxx-1 0
+        1ATN_xxx-2 1
+        1ATN_xxx-3 0
+        1ATN_xxx-4 0
     """
 
     target_dict = {}
@@ -83,23 +83,22 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
 
 def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
 
-    """Compute targets and outputs them as a dictionary.
-
+    """
+    Compute targets and outputs them as a dictionary.
     For classification: 
-    - binary (scalar value is expected to be either 0 or 1)
-    - capri_classes (scalar integer values are expected)
+       - binary (scalar value is expected to be either 0 or 1)
+       - capri_classes (scalar integer values are expected)
     For regression:
-    - irmsd
-    - lrmsd
-    - fnat
-    - dockq
+       - irmsd
+       - lrmsd
+       - fnat
+       - dockq
 
     Args:
         pdb_path (str): Path to the scored pdb structure.
         reference_pdb_path (str): Path to the reference structure required to compute the different target.
 
-    Returns: 
-        A dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.
+    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class
     """
 
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
