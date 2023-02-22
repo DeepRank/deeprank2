@@ -37,7 +37,7 @@ class Edge:
         return self.id.item2.position
 
     def has_nan(self) -> bool:
-        "whether there are any NaN values in the edge's features"
+        """Whether there are any NaN values in the edge's features."""
 
         for feature_data in self.features.values():
             if np.any(np.isnan(feature_data)):
@@ -64,7 +64,7 @@ class Node:
         return self._type
 
     def has_nan(self) -> bool:
-        "whether there are any NaN values in the node's features"
+        """Whether there are any NaN values in the node's features."""
 
         for feature_data in self.features.values():
             if np.any(np.isnan(feature_data)):
@@ -125,7 +125,7 @@ class Graph:
         return list(self._edges.values())
 
     def has_nan(self) -> bool:
-        "whether there are any NaN values in the graph's features"
+        """Whether there are any NaN values in the graph's features."""
 
         for node in self._nodes.values():
             if node.has_nan():
@@ -187,7 +187,7 @@ class Graph:
             self._map_point_features(grid, method, feature_name, points, values, augmentation)
 
     def write_to_hdf5(self, hdf5_path: str): # pylint: disable=too-many-locals
-        "Write a featured graph to an hdf5 file, according to deeprank standards."
+        """Write a featured graph to an hdf5 file, according to deeprank standards."""
 
         with h5py.File(hdf5_path, "a") as hdf5_file:
 
@@ -292,6 +292,18 @@ class Graph:
         self.map_to_grid(grid, method, augmentation)
         grid.to_hdf5(hdf5_path)
 
+        # store target values
+        with h5py.File(hdf5_path, 'a') as hdf5_file:
+
+            entry_group = hdf5_file[id_]
+
+            targets_group = entry_group.require_group(targets.VALUES)
+            for target_name, target_data in self.targets.items():
+                if target_name not in targets_group:
+                    targets_group.create_dataset(target_name, data=target_data)
+                else:
+                    targets_group[target_name][()] = target_data
+
         return hdf5_path
 
 
@@ -299,6 +311,7 @@ def build_atomic_graph( # pylint: disable=too-many-locals
     atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
 ) -> Graph:
     """Builds a graph, using the atoms as nodes.
+
     The edge distance cutoff is in Ångströms.
     """
 
@@ -333,6 +346,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     residues: List[Residue], graph_id: str, edge_distance_cutoff: float
 ) -> Graph:
     """Builds a graph, using the residues as nodes.
+    
     The edge distance cutoff is in Ångströms.
     It's the shortest interatomic distance between two residues.
     """
