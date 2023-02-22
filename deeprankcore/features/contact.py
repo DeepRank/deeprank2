@@ -52,11 +52,12 @@ def _get_vdw_energy(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
     return vdw_energy
 
 
-def _triple_covalent_hop(distance_matrix: np.ndarray):
+def _covalent_distance(distance_matrix: np.ndarray, max_hops):
     covalent_distance_1 = distance_matrix < MAX_COVALENT_DISTANCE
-    covalent_distance_2 = np.matmul(covalent_distance_1, covalent_distance_1)
-    covalent_distance_3 = np.matmul(covalent_distance_2, covalent_distance_1)
-    return covalent_distance_3
+    output = covalent_distance_1.copy()
+    for x in range(max_hops-1):
+        output = np.matmul(output, covalent_distance_1)
+    return output
 
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
