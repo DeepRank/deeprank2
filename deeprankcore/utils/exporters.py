@@ -153,9 +153,16 @@ class ScatterPlotExporter(OutputExporter):
     """
 
     def __init__(self, directory_path: str, epoch_interval: int = 1):
+<<<<<<< HEAD
         """ Args:
                 directory_path: where to store the plots
                 epoch_interval: how often to make a plot, 5 means: every 5 epochs
+=======
+        """ 
+        Args:
+            directory_path (str): Where to store the plots.
+            epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
+>>>>>>> main
         """
         super().__init__(directory_path)
         self._epoch_interval = epoch_interval

@@ -8,7 +8,8 @@ class PDBStructure:
     def __init__(self, id_: Optional[str] = None):
         """
         Args:
-            id_(str): an unique identifier for this structure, can be the pdb accession code.
+            id_ (str, optional): An unique identifier for this structure, can be the pdb accession code.
+                Defaults to None.
         """
         self._id = id_
         self._chains = {}
@@ -58,8 +59,8 @@ class Chain:
     def __init__(self, model: PDBStructure, id_: Optional[str]):
         """
         Args:
-            model(deeprank structure object): the model that this chain is part of
-            id_(str): the pdb identifier of this chain
+            model (:class:`PDBStructure`): The model that this chain is part of.
+            id_ (str): The pdb identifier of this chain.
         """
 
         self._model = model
@@ -97,7 +98,7 @@ class Chain:
         return list(self._residues.values())
 
     def get_atoms(self):
-        "shortcut to list all atoms in this chain"
+        """Shortcut to list all atoms in this chain."""
         atoms = []
         for residue in self._residues.values():
             atoms.extend(residue.atoms)
