@@ -56,7 +56,7 @@ class Query:
             self._targets = targets
 
     def _set_graph_targets(self, graph: Graph):
-        """Simply copies target data from query to graph."""
+        "Simply copies target data from query to graph."
 
         for target_name, target_data in self._targets.items():
             graph.targets[target_name] = target_data
@@ -65,7 +65,7 @@ class Query:
         self, pdb_path: str, pssm_paths: Optional[Dict[str, str]],
         include_hydrogens: bool
     ):
-        """A helper function, to build the structure from .PDB and .PSSM files."""
+        "A helper function, to build the structure from .PDB and .PSSM files."
 
         # make a copy of the pdb, with hydrogens
         pdb_name = os.path.basename(pdb_path)
@@ -103,7 +103,7 @@ class Query:
 
     @property
     def model_id(self) -> str:
-        """The ID of the model, usually a .PDB accession code."""
+        "The ID of the model, usually a .PDB accession code."
         return self._model_id
 
     @model_id.setter
@@ -112,7 +112,7 @@ class Query:
 
     @property
     def targets(self) -> Dict[str, float]:
-        """The target values associated with the query."""
+        "The target values associated with the query."
         return self._targets
 
     def __repr__(self) -> str:
@@ -120,7 +120,11 @@ class Query:
 
 
 class QueryCollection:
-    """Represents the collection of data queries.Queries can be saved as a dictionary to easily navigate through their data."""
+    """
+    Represents the collection of data queries.
+        Queries can be saved as a dictionary to easily navigate through their data.
+    
+    """
 
     def __init__(self):
 
@@ -129,7 +133,8 @@ class QueryCollection:
         self.ids_count = {}
 
     def add(self, query: Query, verbose: bool = False):
-        """Adds a new query to the collection.
+        """
+        Adds a new query to the collection.
 
         Args:
             query (:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
@@ -162,7 +167,7 @@ class QueryCollection:
             
     @property
     def queries(self) -> List[Query]:
-        """The list of queries added to the collection."""
+        "The list of queries added to the collection."
         return self._queries
 
     def __contains__(self, query: Query) -> bool:
@@ -271,7 +276,8 @@ class QueryCollection:
         if combine_output:
             for output_path in output_paths:
                 with h5py.File(f"{prefix}.hdf5",'a') as f_dest, h5py.File(output_path,'r') as f_src:
-                    for _, value in f_src.items():
+                    for key, value in f_src.items():
+                        _log.debug(f"copy {key} from {output_path} to {prefix}.hdf5")
                         f_src.copy(value, f_dest)
                 os.remove(output_path)
             return glob(f"{prefix}.hdf5")
@@ -294,7 +300,8 @@ class SingleResidueVariantResidueQuery(Query):
         distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
     ):
-        """Creates a residue graph from a single residue variant in a .PDB file.
+        """
+        Creates a residue graph from a single residue variant in a .PDB file.
 
         Args:
             pdb_path (str): The path to the .PDB file.
@@ -328,7 +335,7 @@ class SingleResidueVariantResidueQuery(Query):
 
     @property
     def residue_id(self) -> str:
-        """String representation of the residue number and insertion code."""
+        "String representation of the residue number and insertion code."
 
         if self._insertion_code is not None:
 
@@ -337,7 +344,7 @@ class SingleResidueVariantResidueQuery(Query):
         return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        """Returns the string representing the complete query ID."""
+        "Returns the string representing the complete query ID."
         return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
@@ -405,7 +412,8 @@ class SingleResidueVariantAtomicQuery(Query):
         distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
     ):
-        """Creates an atomic graph for a single residue variant in a .PDB file.
+        """
+        Creates an atomic graph for a single residue variant in a .PDB file.
 
         Args:
             pdb_path (str): The path to the .PDB file.
@@ -440,7 +448,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
     @property
     def residue_id(self) -> str:
-        """String representation of the residue number and insertion code."""
+        "String representation of the residue number and insertion code."
 
         if self._insertion_code is not None:
             return f"{self._residue_number}{self._insertion_code}"
@@ -448,7 +456,7 @@ class SingleResidueVariantAtomicQuery(Query):
         return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        """Returns the string representing the complete query ID."""
+        "Returns the string representing the complete query ID."
         return f"{self.model_id,}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
 
     def __eq__(self, other) -> bool:
@@ -476,7 +484,8 @@ class SingleResidueVariantAtomicQuery(Query):
     def _get_atom_node_key(atom) -> str:
         """
         Since pickle has problems serializing the graph when the nodes are atoms,
-        this function can be used to generate a unique key for the atom."""
+        this function can be used to generate a unique key for the atom.
+        """
 
         # This should include the model, chain, residue and atom
         return str(atom)
@@ -599,7 +608,8 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         distance_cutoff: Optional[float] = 5.5,
         targets: Optional[Dict[str, float]] = None,
     ):
-        """A query that builds atom-based graphs, using the residues at a protein-protein interface.
+        """
+        A query that builds atom-based graphs, using the residues at a protein-protein interface.
 
         Args:
             pdb_path (str): The path to the .PDB file.
@@ -625,7 +635,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
-        """Returns the string representing the complete query ID."""
+        "Returns the string representing the complete query ID."
         return f"atom-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
 
     def __eq__(self, other) -> bool:
@@ -689,7 +699,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
         distance_cutoff: Optional[float] = 10,
         targets: Optional[Dict[str, float]] = None,
     ):
-        """A query that builds residue-based graphs, using the residues at a protein-protein interface.
+        """
+        A query that builds residue-based graphs, using the residues at a protein-protein interface.
 
         Args:
             pdb_path (str): The path to the .PDB file.

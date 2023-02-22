@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List
+from typing import Union, List
 import numpy as np
 import subprocess
 from scipy.spatial import distance_matrix
@@ -15,7 +15,7 @@ _log = logging.getLogger(__name__)
 
 
 def add_hydrogens(input_pdb_path, output_pdb_path):
-    "this requires reduce: https://github.com/rlabduke/reduce"
+    """This requires reduce: https://github.com/rlabduke/reduce."""
 
     with open(output_pdb_path, "wt", encoding = "utf-8") as f:
         p = subprocess.run(["reduce", input_pdb_path], stdout=subprocess.PIPE, check=True)
@@ -60,18 +60,18 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
     deeprank structure object. It should be called for one atom.
 
     Args:
-        structure: where this atom should be added to
-        x: x-coordinate of atom
-        y: y-coordinate of atom
-        z: z-coordinate of atom
-        atom_name: name of atom: 'CA', 'C', 'N', 'O', 'CB', etc.
-        altloc: pdb alternative location id for this atom (can be empty): 'A', 'B', 'C', etc.
-        occupancy: pdb occupancy of this atom, ranging from 0.0 to 1.0. Should be used with altloc.
-        element_name: pdb element symbol of this atom: 'C', 'O', 'H', 'N', 'S'
-        chain_id: pdb chain identifier: 'A', 'B', 'C', etc.
-        residue_number: pdb residue number, a positive integer
-        residue_name: pdb residue name: "ALA", "CYS", "ASP", etc.
-        insertion_code: pdb residue insertion code (can be empty) : '', 'A', 'B', 'C', etc.
+        structure (:class:`PDBStructure`): Where this atom should be added to.
+        x (float): x-coordinate of atom.
+        y (float): y-coordinate of atom.
+        z (float): z-coordinate of atom.
+        atom_name (str): Name of atom: 'CA', 'C', 'N', 'O', 'CB', etc.
+        altloc (str): Pdb alternative location id for this atom (can be empty): 'A', 'B', 'C', etc.
+        occupancy (float): Pdb occupancy of this atom, ranging from 0.0 to 1.0. Should be used with altloc.
+        element_name (str): Pdb element symbol of this atom: 'C', 'O', 'H', 'N', 'S'.
+        chain_id (str): Pdb chain identifier: 'A', 'B', 'C', etc.
+        residue_number (int): Pdb residue number, a positive integer.
+        residue_name (str): Pdb residue name: "ALA", "CYS", "ASP", etc.
+        insertion_code (str): Pdb residue insertion code (can be empty) : '', 'A', 'B', 'C', etc.
     """
 
     # Make sure not to take the same atom twice.
@@ -114,12 +114,15 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
     _add_atom_to_residue(atom, residue)
 
 
-def get_structure(pdb, id_):
-    """Builds a structure from rows in a pdb file
+def get_structure(pdb, id_: str):
+    """Builds a structure from rows in a pdb file.
+
     Args:
-        pdb (pdb2sql object): the pdb structure that we're investigating
-        id (str): unique id for the pdb structure
-    Returns (PDBStructure): the structure object, giving access to chains, residues, atoms
+        pdb (pdb2sql object): The pdb structure that we're investigating.
+        id (str): Unique id for the pdb structure.
+
+    Returns: 
+        PDBStructure: The structure object, giving access to chains, residues, atoms.
     """
 
     # We need these intermediary dicts to keep track of which residues and
@@ -165,9 +168,7 @@ def get_contact_atoms( # pylint: disable=too-many-locals
     chain_id2: str,
     distance_cutoff: float
 ) -> List[Atom]:
-    """
-    Gets the contact atoms from pdb2sql and wraps them in python objects
-    """
+    """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
     interface = get_interface(pdb_path)
     try:
@@ -218,13 +219,14 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     """Get the residues that contact each other at a protein-protein interface.
 
     Args:
-        pdb_path: the path of the pdb file, that the structure was built from
-        structure: from which to take the residues
-        chain_id1: first protein chain identifier
-        chain_id2: second protein chain identifier
-        distance_cutoff: max distance between two interacting residues
+        pdb_path (str): The path of the pdb file, that the structure was built from.
+        structure (:class:`PDBStructure`): From which to take the residues.
+        chain_id1 (str): First protein chain identifier.
+        chain_id2 (str): Second protein chain identifier.
+        distance_cutoff (float): Max distance between two interacting residues.
 
-    Returns: the pairs of contacting residues
+    Returns: 
+        List[Pair]: The pairs of contacting residues.
     """
 
     # Find out which residues are pairs
@@ -285,15 +287,16 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     return residue_pairs
 
 
-def get_surrounding_residues(structure, residue, radius):
+def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Residue, radius: float):
     """Get the residues that lie within a radius around a residue.
 
     Args:
-        structure(deeprank structure object): the structure to take residues from
-        residue(deeprank residue object): the residue in the structure
-        radius(float): max distance in Ångström between atoms of the residue and the other residues
+        structure (Union[:class:`Chain`, :class:`PDBStructure`]): The structure to take residues from.
+        residue (:class:`Residue`): The residue in the structure.
+        radius (float): Max distance in Ångström between atoms of the residue and the other residues.
 
-    Returns: (a set of deeprank residues): the surrounding residues
+    Returns: 
+        (a set of deeprank residues): The surrounding residues.
     """
 
     structure_atoms = structure.get_atoms()
