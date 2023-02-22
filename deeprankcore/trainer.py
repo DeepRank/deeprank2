@@ -423,12 +423,12 @@ class Trainer():
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise e
 
-    def set_lossfunction(self, lossfunction = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
+    def set_lossfunction(self, lossfunction: Optional = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
 
         """Set the loss function.
         
         Args:
-            lossfunction (optional): Make sure to use a loss function that is appropriate for
+            lossfunction (Optional, optional): Make sure to use a loss function that is appropriate for
                 your task (classification or regression). All loss functions
                 from torch.nn.modules.loss are listed as belonging to either
                 category (or to neither) and an exception is raised if an invalid
@@ -514,7 +514,7 @@ class Trainer():
             batch_size (int, optional): Sets the size of the batch.
                         Defaults to 32.
             shuffle (bool, optional): Whether to shuffle the training dataloaders data (train set and validation set).
-                        Default: True.
+                        Defaults to True.
             earlystop_patience (Optional[int], optional): Training ends if the model has run for this number of epochs without improving the validation loss.
                         Defaults to None.
             earlystop_maxgap (Optional[float], optional): Training ends if the difference between validation and training loss exceeds this value.
