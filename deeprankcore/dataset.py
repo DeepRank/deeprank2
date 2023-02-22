@@ -21,20 +21,20 @@ _log = logging.getLogger(__name__)
 class DeeprankDataset(Dataset):
     def __init__(self, # pylint: disable=too-many-arguments
                  hdf5_path: Union[str, List[str]],
-                 subset: Union[List[str], None],
-                 target: Union[str, None],
-                 task: Union[str, None],
-                 classes: Union[List[str], List[int], List[float], None],
+                 subset: Optional[Union[List[str]]],
+                 target: Optional[Union[str]],
+                 task: Optional[Union[str]],
+                 classes: Optional[Union[List[str], List[int], List[float]]],
                  use_tqdm: bool,
                  root_directory_path: str,
-                 transform: Union[Callable, None],
-                 pre_transform: Union[Callable, None],
-                 target_filter: Union[Dict[str, str], None],
+                 transform: Optional[Union[Callable]],
+                 pre_transform: Optional[Union[Callable]],
+                 target_filter: Optional[Union[Dict[str, str]]],
                  check_integrity: bool
     ):
-        """
-        Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
-            More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
+        """Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
+
+        More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
         """
 
         super().__init__(root_directory_path, transform, pre_transform)
@@ -121,8 +121,8 @@ class DeeprankDataset(Dataset):
     def _create_index_entries(self):
         """Creates the indexing of each molecule in the dataset.
 
-        Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)]
-        This allows to refer to one entry with its index in the list
+        Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)].
+        This allows to refer to one entry with its index in the list.
         """
         _log.debug(f"Processing data set with .HDF5 files: {self.hdf5_paths}")
 
@@ -158,13 +158,13 @@ class DeeprankDataset(Dataset):
         
 
     def _filter_targets(self, entry_group: h5py.Group) -> bool:
-        """
-        Filters the entry according to a dictionary.
-            The filter is based on the attribute self.target_filter that must be either
-            of the form: { target_name : target_condition } or None.
+        """Filters the entry according to a dictionary.
+
+        The filter is based on the attribute self.target_filter that must be either
+        of the form: { target_name : target_condition } or None.
 
         Args:
-            entry_group(:class:`h5py.Group`): The entry group in the .HDF5 file.
+            entry_group (:class:`h5py.Group`): The entry group in the .HDF5 file.
 
         Returns:
             bool: True if we keep the entry False otherwise.
@@ -238,41 +238,34 @@ class GridDataset(DeeprankDataset):
 
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
-
-            subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
-
-            target (str, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be a custom-defined target
-                given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
-                Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into
+            subset (Optional[List[str]], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
+            target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be
+                a custom-defined target given to the Query class as input (see: `deeprankcore.query`); in this case, 
+                the task parameter needs to be explicitly specified as well.
+                Only numerical target variables are supported, not categorical.
+                If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
-
-            task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
+            task (Optional[str], optional): 'regress' for regression or 'classif' for classification. Required if target not in
                 ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
                 Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
-
-            features (Union[List[str], str], optional): Consider all pre-computed features ("all") or some defined node features
-                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.gridstorage`. 
-
-            classes (Union[List[str], List[int], List[float]], optional): Define the dataset target classes in classification mode. Defaults to [0, 1].
-
-            tqdm (bool, optional): Show progress bar. Defaults to True.
-
-            root (str, optional): Root directory where the dataset should be saved, defaults to "./".
-
+                Defaults to None.
+            features (Optional[Union[List[str], str]], optional): Consider all pre-computed features ("all") or some defined node features
+                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.gridstorage`.
+                Defaults to "all". 
+            classes (Optional[Union[List[str], List[int], List[float]], optional]): Define the dataset target classes in classification mode.
+                Defaults to None.
+            tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
+            root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
             transform (Callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a
                 transformed version. The data object will be transformed before every access. Defaults to None.
-
-            pre_transform (Callable, optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns
+            pre_transform (Optional[Callable], optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns
                 a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
-
-            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
+            target_transform (Optional[bool], optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
-                
-            target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
+            target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
-
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
@@ -348,7 +341,7 @@ class GridDataset(DeeprankDataset):
         """Gets one grid item from its unique index.
 
         Args:
-            idx(int): Index of the item, ranging from 0 to len(dataset).
+            idx (int): Index of the item, ranging from 0 to len(dataset).
 
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
@@ -361,7 +354,7 @@ class GridDataset(DeeprankDataset):
         """Loads one grid.
 
         Args:
-            fname (str): .HDF5 file name.
+            hdf5_path (str): .HDF5 file name.
             entry_name (str): Name of the entry.
             
         Returns:
@@ -376,7 +369,7 @@ class GridDataset(DeeprankDataset):
 
             mapped_features_group = entry_group[gridstorage.MAPPED_FEATURES]
             for feature_name in self.features:
-                feature_data.append(mapped_features_group[feature_name][gridstorage.FEATURE_VALUE][:])
+                feature_data.append(mapped_features_group[feature_name][:])
 
             target_value = entry_group[targets.VALUES][self.target][()]
 
@@ -413,27 +406,30 @@ class GraphDataset(DeeprankDataset):
         Class to load the .HDF5 files data into graphs.
 
         Args:
-            hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
-
-            subset (List[str], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
-
-            target (str, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be a custom-defined target
-                given to the Query class as input (see: `deeprankcore.query`); in this case, the task parameter needs to be explicitly specified as well.
-                Only numerical target variables are supported, not categorical. If the latter is your case, please convert the categorical classes into
+            hdf5_path (Union[str, List[str]]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List.
+                Defaults to None.
+            subset (Optional[List[str]], optional): List of keys from .HDF5 file to include. 
+                Defaults to None (meaning include all).
+            target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA.
+                It can also be a custom-defined target given to the Query class as input (see: `deeprankcore.query`); 
+                in this case, the task parameter needs to be explicitly specified as well.
+                Only numerical target variables are supported, not categorical. 
+                If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance. Defaults to None.
-
-            task (str, optional): 'regress' for regression or 'classif' for classification. Required if target not in
+            task (Optional[str], optional): 'regress' for regression or 'classif' for classification. Required if target not in
                 ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
                 Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
-
-            node_features (Union[List[str], str, optional): Consider all pre-computed node features ("all") or some defined node features
-                (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprankcore.domain.nodestorage`.
-
-            edge_features (Union[List[str], str, optional): Consider all pre-computed edge features ("all") or some defined edge features
-                (provide a list, example: ["dist", "coulomb"]). The complete list can be found in `deeprankcore.domain.edgestorage`.
-
-            clustering_method (str, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
+                Defaults to None.
+            node_features (Optional[Union[List[str], str], optional): Consider all pre-computed node features ("all") or
+                some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
+                The complete list can be found in `deeprankcore.domain.nodestorage`.
+                Defaults to "all".
+            edge_features (Optional[Union[List[str], str], optional): Consider all pre-computed edge features ("all") or
+                some defined edge features (provide a list, example: ["dist", "coulomb"]).
+                The complete list can be found in `deeprankcore.domain.edgestorage`.
+                Defaults to "all".
+            clustering_method (Optional[str], optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
                 or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
                 In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates
                 a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved in
@@ -442,28 +438,23 @@ class GraphDataset(DeeprankDataset):
                 The latter tensor is saved into the .HDF5 file as a :class:`Dataset` called "depth_1". Both "depth_0" and "depth_1"
                 :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to make them available to networks
                 that make use of clustering methods. Defaults to None.
-
-            classes (Union[List[str], List[int], List[float]], optional): Define the dataset target classes in classification mode. Defaults to [0, 1].
-
-            tqdm (bool, optional): Show progress bar. Defaults to True.
-
-            root (str, optional): Root directory where the dataset should be saved, defaults to "./".
-
-            transform (Callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a
-                transformed version. The data object will be transformed before every access. Defaults to None.
-
-            pre_transform (Callable, optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns
-                a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
-
-            edge_features_transform (Callable, optional): Transformation applied to the edge features. Defaults to lambda x: np.tanh(-x/2+2)+1.
-
-            target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
+            classes (Optional[Union[List[str], List[int], List[float]]], optional): Define the dataset target classes in classification mode.
+                Defaults to None.
+            tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
+            root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
+            transform (Optional[Callable], optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object
+                and returns a transformed version. 
+                The data object will be transformed before every access. Defaults to None.
+            pre_transform (Optional[Callable], optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object
+                and returns a transformed version. 
+                The data object will be transformed before being saved to disk. Defaults to None.
+            edge_features_transform (Optional[Callable], optional): Transformation applied to the edge features.
+                Defaults to lambda x: np.tanh(-x/2+2)+1.
+            target_transform (Optional[bool], optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
-
-            target_filter (Dict[str, str], optional): Dictionary of type [target: cond] to filter the molecules.
+            target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
-
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
@@ -484,7 +475,7 @@ class GraphDataset(DeeprankDataset):
         Gets one graph item from its unique index.
 
         Args:
-            idx(int): Index of the item, ranging from 0 to len(dataset).
+            idx (int): Index of the item, ranging from 0 to len(dataset).
 
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
@@ -666,14 +657,12 @@ def save_hdf5_keys(
 
     Args:
         f_src_path (str): The path to the .HDF5 file containing the keys.
-
-        src_ids(List[str]): Keys to be saved in the new .HDF5 file. It should be a list containing at least one key.
-
-        f_dest_path(str): The path to the new .HDF5 file.
-
-        hardcopy(bool, optional): If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`)
-            to the original .HDF5 file. If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`).
-            Default = False.
+        src_ids (List[str]): Keys to be saved in the new .HDF5 file. It should be a list containing at least one key.
+        f_dest_path (str): The path to the new .HDF5 file.
+        hardcopy (bool, optional): If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`)
+            to the original .HDF5 file. 
+            If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`).
+            Defaults to False.
     """
     if not all(isinstance(d, str) for d in src_ids):
         raise TypeError("data_ids should be a list containing strings.")
