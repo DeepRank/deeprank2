@@ -127,8 +127,6 @@ class DeeprankDataset(Dataset):
         """
         _log.debug(f"Processing data set with .HDF5 files: {self.hdf5_paths}")
 
-        self.index_entries = []
-
         desc = f"   {self.hdf5_paths}{' dataset':25s}"
         if self.use_tqdm:
             hdf5_path_iterator = tqdm(self.hdf5_paths, desc=desc, file=sys.stdout)
