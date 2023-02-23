@@ -437,7 +437,7 @@ class Trainer():
         Set the loss function.
         
         Args:
-           lossfunction (optional): Make sure to use a loss function that is appropriate for
+            lossfunction (optional): Make sure to use a loss function that is appropriate for
                 your task (classification or regression). All loss functions
                 from torch.nn.modules.loss are listed as belonging to either
                 category (or to neither) and an exception is raised if an invalid
