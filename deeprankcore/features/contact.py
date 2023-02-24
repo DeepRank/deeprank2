@@ -8,11 +8,10 @@ from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
 from deeprankcore.domain import edgestorage as Efeat
 from deeprankcore.utils.parsing import atomic_forcefield
+from deeprankcore.domain import MAX_COVALENT_DISTANCE
 import numpy.typing as npt
 
 _log = logging.getLogger(__name__)
-
-MAX_COVALENT_DISTANCE = 2.1
 
 def _intra_partners(distance_matrix: npt.NDArray[np.float64], max_hops: int) -> npt.NDArray[np.bool_]:
     """Converts a distance matrix to a boolean matrix of atom pairs separated within a specified number of covalent bonds
