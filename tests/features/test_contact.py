@@ -32,7 +32,7 @@ def _wrap_in_graph(edge: Edge):
     return g
 
 
-def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str, atomic_level: bool = True):
+def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str, residue_level: bool = False):
     pdb_path = "tests/data/pdb/101M/101M.pdb"
 
     pdb = pdb2sql(pdb_path)
@@ -43,7 +43,7 @@ def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_nam
 
     variant = SingleResidueVariant(structure.chains[0].residues[10], alanine)
 
-    if atomic_level:
+    if not residue_level:
         contact = AtomicContact(
             _get_atom(structure.chains[0], residue_num1, atom_name1), 
             _get_atom(structure.chains[0], residue_num2, atom_name2)
@@ -62,7 +62,7 @@ def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_nam
     assert not np.isnan(edge_obj.features[Efeat.DISTANCE]), 'isnan distance'
     assert not np.isnan(edge_obj.features[Efeat.SAMECHAIN]), 'isnan samechain'
     assert not np.isnan(edge_obj.features[Efeat.COVALENT]), 'isnan covalent'
-    if atomic_level:
+    if not residue_level:
             assert not np.isnan(edge_obj.features[Efeat.SAMERES]), 'isnan, sameres'
 
     return edge_obj
@@ -152,7 +152,7 @@ def test_residue_contact():
     """Check that we can calculate features for residue contacts.
     """
 
-    res_edge = _get_contact(0, '', 1, '', False)
+    res_edge = _get_contact(0, '', 1, '', residue_level = True)
     assert res_edge.features[Efeat.DISTANCE] > 0.0, 'distance <= 0'
     assert res_edge.features[Efeat.DISTANCE] < 1e5, 'distance > 1e5'
     assert res_edge.features[Efeat.ELECTROSTATIC] != 0.0, 'electrostatic == 0'
