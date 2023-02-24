@@ -31,7 +31,7 @@ def _wrap_in_graph(edge: Edge):
     g.add_edge(edge)
     return g
 
-def _get_atomiccontact(residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str):
+def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str, atomic_level: bool = True):
     pdb_path = "tests/data/pdb/101M/101M.pdb"
 
     pdb = pdb2sql(pdb_path)
@@ -42,10 +42,17 @@ def _get_atomiccontact(residue_num1: int, atom_name1: str, residue_num2: int, at
 
     variant = SingleResidueVariant(structure.chains[0].residues[10], alanine)
 
-    contact = AtomicContact(
-        _get_atom(structure.chains[0], residue_num1, atom_name1), 
-        _get_atom(structure.chains[0], residue_num2, atom_name2)
-    )
+    if atomic_level:
+        contact = AtomicContact(
+            _get_atom(structure.chains[0], residue_num1, atom_name1), 
+            _get_atom(structure.chains[0], residue_num2, atom_name2)
+        )
+    else:
+        contact = ResidueContact(
+            structure.chains[0].residues[residue_num1], 
+            structure.chains[0].residues[residue_num2]
+        )
+
     edge_obj = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_obj), variant)
     
@@ -63,7 +70,7 @@ def test_vanderwaals_positive():
     Should have positive vanderwaals energy.
     """
 
-    edge_close=_get_atomiccontact(0,"N",0,"CA")
+    edge_close=_get_contact(0,"N",0,"CA")
     assert edge_close.features[Efeat.VANDERWAALS] > 0.0, edge_close.features[
         Efeat.VANDERWAALS
     ]
@@ -74,7 +81,7 @@ def test_vanderwaals_negative():
     Should have negative vanderwaals energy.
     """
 
-    edge_far = _get_atomiccontact(0,"N",27,"CB")
+    edge_far = _get_contact(0,"N",27,"CB")
     assert edge_far.features[Efeat.VANDERWAALS] < 0.0, edge_far.features[
         Efeat.VANDERWAALS
     ]
@@ -85,8 +92,8 @@ def test_vanderwaals_morenegative():
     Should have more negative vanderwaals energy than the war interaction.
     """
     
-    edge_intermediate=_get_atomiccontact(0,"N",138,"CG")
-    edge_far = _get_atomiccontact(0,"N",27,"CB")
+    edge_intermediate=_get_contact(0,"N",138,"CG")
+    edge_far = _get_contact(0,"N",27,"CB")
     assert (
         edge_intermediate.features[Efeat.VANDERWAALS]
         < edge_far.features[Efeat.VANDERWAALS]
@@ -96,9 +103,9 @@ def test_edge_distance():
     """Check the edge distances.
     """
 
-    edge_close=_get_atomiccontact(0,"N",0,"CA")
-    edge_intermediate=_get_atomiccontact(0,"N",138,"CG")
-    edge_far = _get_atomiccontact(0,"N",27,"CB")
+    edge_close=_get_contact(0,"N",0,"CA")
+    edge_intermediate=_get_contact(0,"N",138,"CG")
+    edge_far = _get_contact(0,"N",27,"CB")
 
     assert (
         edge_close.features[Efeat.DISTANCE]
@@ -113,7 +120,7 @@ def test_attractive_electrostatic_close():
     """ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy.
     """
 
-    close_attracting_edge = _get_atomiccontact(139,"CZ",136,"OE2")
+    close_attracting_edge = _get_contact(139,"CZ",136,"OE2")
     assert (
         close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
     ), close_attracting_edge.features[Efeat.ELECTROSTATIC]
@@ -122,8 +129,8 @@ def test_attractive_electrostatic_far():
     """ARG 139 CZ - ASP 20 OD2, far attractive electrostatic energy.
     """
 
-    far_attracting_edge=_get_atomiccontact(139,"CZ",20,"OD2")
-    close_attracting_edge = _get_atomiccontact(139,"CZ",136,"OE2")
+    far_attracting_edge=_get_contact(139,"CZ",20,"OD2")
+    close_attracting_edge = _get_contact(139,"CZ",136,"OE2")
     assert (
         far_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
     ), far_attracting_edge.features[Efeat.ELECTROSTATIC]
@@ -136,39 +143,25 @@ def test_repulsive_electrostatic():
     """GLU 109 OE2 - GLU 105 OE1, repulsive electrostatic energy.
     """
 
-    opposing_edge=_get_atomiccontact(109,"OE2",105,"OE1")
+    opposing_edge=_get_contact(109,"OE2",105,"OE1")
     assert (
         opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
     ), opposing_edge.features[Efeat.ELECTROSTATIC]
 
-def test_cal_residue_contact():
-    pdb_path = "tests/data/pdb/101M/101M.pdb"
-
-    pdb = pdb2sql(pdb_path)
-    try:
-        structure = get_structure(pdb, "101m")
-    finally:
-        pdb._close() # pylint: disable=protected-access
-
-    variant = SingleResidueVariant(structure.chains[0].residues[10], alanine)
-    
+def test_residue_contact():
     """Check that we can calculate residue contacts.
     """
-    contact = ResidueContact(
-        structure.chains[0].residues[0], structure.chains[0].residues[1]
-    )
-    edge = Edge(contact)
-    add_features(pdb_path, _wrap_in_graph(edge), variant)
-    assert not np.isnan(edge.features[Efeat.DISTANCE]) > 0.0
-    assert edge.features[Efeat.DISTANCE] > 0.0
-    assert edge.features[Efeat.DISTANCE] < 1e5
 
-    assert not np.isnan(edge.features[Efeat.ELECTROSTATIC])
-    assert edge.features[Efeat.ELECTROSTATIC] != 0.0, edge.features[
+    res_edge = _get_contact(0, '', 1, '', False)
+    assert not np.isnan(res_edge.features[Efeat.SAMERES])
+
+    assert res_edge.features[Efeat.DISTANCE] > 0.0
+    assert res_edge.features[Efeat.DISTANCE] < 1e5
+
+    assert res_edge.features[Efeat.ELECTROSTATIC] != 0.0, res_edge.features[
         Efeat.ELECTROSTATIC
     ]
 
-    assert not np.isnan(edge.features[Efeat.VANDERWAALS])
-    assert edge.features[Efeat.VANDERWAALS] != 0.0, edge.features[
+    assert res_edge.features[Efeat.VANDERWAALS] != 0.0, res_edge.features[
         Efeat.VANDERWAALS
     ]
