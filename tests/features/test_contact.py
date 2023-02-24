@@ -56,11 +56,13 @@ def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_nam
     edge_obj = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_obj), variant)
     
-    assert not np.isnan(edge_obj.features[Efeat.VANDERWAALS])
-    assert not np.isnan(edge_obj.features[Efeat.ELECTROSTATIC])
-    assert not np.isnan(edge_obj.features[Efeat.DISTANCE])
-    assert not np.isnan(edge_obj.features[Efeat.SAMECHAIN])
-    assert not np.isnan(edge_obj.features[Efeat.COVALENT])
+    assert not np.isnan(edge_obj.features[Efeat.VANDERWAALS]), 'isnan vdw'
+    assert not np.isnan(edge_obj.features[Efeat.ELECTROSTATIC]), 'isnan electrostatic'
+    assert not np.isnan(edge_obj.features[Efeat.DISTANCE]), 'isnan distance'
+    assert not np.isnan(edge_obj.features[Efeat.SAMECHAIN]), 'isnan samechain'
+    assert not np.isnan(edge_obj.features[Efeat.COVALENT]), 'isnan covalent'
+    if atomic_level:
+            assert not np.isnan(edge_obj.features[Efeat.SAMERES]), 'isnan, sameres'
 
     return edge_obj
 
@@ -82,9 +84,7 @@ def test_vanderwaals_negative():
     """
 
     edge_far = _get_contact(0,"N",27,"CB")
-    assert edge_far.features[Efeat.VANDERWAALS] < 0.0, edge_far.features[
-        Efeat.VANDERWAALS
-    ]
+    assert edge_far.features[Efeat.VANDERWAALS] < 0.0
     
 def test_vanderwaals_morenegative():
     """MET 0 N - PHE 138 CG, intermediate distance.
@@ -94,10 +94,7 @@ def test_vanderwaals_morenegative():
     
     edge_intermediate=_get_contact(0,"N",138,"CG")
     edge_far = _get_contact(0,"N",27,"CB")
-    assert (
-        edge_intermediate.features[Efeat.VANDERWAALS]
-        < edge_far.features[Efeat.VANDERWAALS]
-    ), f"{edge_intermediate.features[Efeat.VANDERWAALS]} >= {edge_far.features[Efeat.VANDERWAALS]}"
+    assert edge_intermediate.features[Efeat.VANDERWAALS] < edge_far.features[Efeat.VANDERWAALS]
 
 def test_edge_distance():
     """Check the edge distances.
@@ -110,20 +107,18 @@ def test_edge_distance():
     assert (
         edge_close.features[Efeat.DISTANCE]
         < edge_intermediate.features[Efeat.DISTANCE]
-    ), f"{edge_close.features[Efeat.DISTANCE]} >= {edge_intermediate.features[Efeat.DISTANCE]}"
+    ), 'close distance > intermediate distance'
     assert (
         edge_far.features[Efeat.DISTANCE]
         > edge_intermediate.features[Efeat.DISTANCE]
-    ), f"{edge_far.features[Efeat.DISTANCE]} <= {edge_intermediate.features[Efeat.DISTANCE]}"
+    ), 'far distance < intermediate distance'
 
 def test_attractive_electrostatic_close():
     """ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy.
     """
 
     close_attracting_edge = _get_contact(139,"CZ",136,"OE2")
-    assert (
-        close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
-    ), close_attracting_edge.features[Efeat.ELECTROSTATIC]
+    assert close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
 
 def test_attractive_electrostatic_far():
     """ARG 139 CZ - ASP 20 OD2, far attractive electrostatic energy.
@@ -133,35 +128,25 @@ def test_attractive_electrostatic_far():
     close_attracting_edge = _get_contact(139,"CZ",136,"OE2")
     assert (
         far_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
-    ), far_attracting_edge.features[Efeat.ELECTROSTATIC]
+    ), 'far electrostatic > 0'
     assert (
         far_attracting_edge.features[Efeat.ELECTROSTATIC]
         > close_attracting_edge.features[Efeat.ELECTROSTATIC]
-    ), f"{far_attracting_edge.features[Efeat.ELECTROSTATIC]} <= {close_attracting_edge.features[Efeat.ELECTROSTATIC]}"
+    ), 'far electrostatic <= close electrostatic'
    
 def test_repulsive_electrostatic():
     """GLU 109 OE2 - GLU 105 OE1, repulsive electrostatic energy.
     """
 
     opposing_edge=_get_contact(109,"OE2",105,"OE1")
-    assert (
-        opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
-    ), opposing_edge.features[Efeat.ELECTROSTATIC]
+    assert opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
 
 def test_residue_contact():
     """Check that we can calculate residue contacts.
     """
 
     res_edge = _get_contact(0, '', 1, '', False)
-    assert not np.isnan(res_edge.features[Efeat.SAMERES])
-
-    assert res_edge.features[Efeat.DISTANCE] > 0.0
-    assert res_edge.features[Efeat.DISTANCE] < 1e5
-
-    assert res_edge.features[Efeat.ELECTROSTATIC] != 0.0, res_edge.features[
-        Efeat.ELECTROSTATIC
-    ]
-
-    assert res_edge.features[Efeat.VANDERWAALS] != 0.0, res_edge.features[
-        Efeat.VANDERWAALS
-    ]
+    assert res_edge.features[Efeat.DISTANCE] > 0.0, 'distance <= 0'
+    assert res_edge.features[Efeat.DISTANCE] < 1e5, 'distance > 1e5'
+    assert res_edge.features[Efeat.ELECTROSTATIC] != 0.0, 'electrostatic == 0'
+    assert res_edge.features[Efeat.VANDERWAALS] != 0.0, 'vanderwaals == 0'
