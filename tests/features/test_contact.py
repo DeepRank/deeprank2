@@ -31,7 +31,7 @@ def _wrap_in_graph(edge: Edge):
     g.add_edge(edge)
     return g
 
-def _wrap_pdb_get_atomiccontact(residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str):
+def _get_atomiccontact(residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str):
     pdb_path = "tests/data/pdb/101M/101M.pdb"
 
     pdb = pdb2sql(pdb_path)
@@ -57,7 +57,7 @@ def test_vanderwaals_positive():
     Should have positive vanderwaals energy.
     """
 
-    edge_close=_wrap_pdb_get_atomiccontact(0,"N",0,"CA")
+    edge_close=_get_atomiccontact(0,"N",0,"CA")
     assert not np.isnan(edge_close.features[Efeat.VANDERWAALS])
     assert edge_close.features[Efeat.VANDERWAALS] > 0.0, edge_close.features[
         Efeat.VANDERWAALS
@@ -69,7 +69,7 @@ def test_vanderwaals_negative():
     Should have negative vanderwaals energy.
     """
 
-    edge_far = _wrap_pdb_get_atomiccontact(0,"N",27,"CB")
+    edge_far = _get_atomiccontact(0,"N",27,"CB")
     assert not np.isnan(edge_far.features[Efeat.VANDERWAALS])
     assert edge_far.features[Efeat.VANDERWAALS] < 0.0, edge_far.features[
         Efeat.VANDERWAALS
@@ -81,8 +81,8 @@ def test_vanderwaals_morenegative():
     Should have more negative vanderwaals energy than the war interaction.
     """
     
-    edge_intermediate=_wrap_pdb_get_atomiccontact(0,"N",138,"CG")
-    edge_far = _wrap_pdb_get_atomiccontact(0,"N",27,"CB")
+    edge_intermediate=_get_atomiccontact(0,"N",138,"CG")
+    edge_far = _get_atomiccontact(0,"N",27,"CB")
     assert not np.isnan(edge_intermediate.features[Efeat.VANDERWAALS])
     assert (
         edge_intermediate.features[Efeat.VANDERWAALS]
@@ -93,9 +93,9 @@ def test_edge_distance():
     """Check the edge distances.
     """
 
-    edge_close=_wrap_pdb_get_atomiccontact(0,"N",0,"CA")
-    edge_intermediate=_wrap_pdb_get_atomiccontact(0,"N",138,"CG")
-    edge_far = _wrap_pdb_get_atomiccontact(0,"N",27,"CB")
+    edge_close=_get_atomiccontact(0,"N",0,"CA")
+    edge_intermediate=_get_atomiccontact(0,"N",138,"CG")
+    edge_far = _get_atomiccontact(0,"N",27,"CB")
 
     assert (
         edge_close.features[Efeat.DISTANCE]
@@ -110,7 +110,7 @@ def test_attractive_electrostatic_close():
     """ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy.
     """
 
-    close_attracting_edge = _wrap_pdb_get_atomiccontact(139,"CZ",136,"OE2")
+    close_attracting_edge = _get_atomiccontact(139,"CZ",136,"OE2")
     assert not np.isnan(close_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
         close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
@@ -120,8 +120,8 @@ def test_attractive_electrostatic_far():
     """ARG 139 CZ - ASP 20 OD2, far attractive electrostatic energy.
     """
 
-    far_attracting_edge=_wrap_pdb_get_atomiccontact(139,"CZ",20,"OD2")
-    close_attracting_edge = _wrap_pdb_get_atomiccontact(139,"CZ",136,"OE2")
+    far_attracting_edge=_get_atomiccontact(139,"CZ",20,"OD2")
+    close_attracting_edge = _get_atomiccontact(139,"CZ",136,"OE2")
     assert not np.isnan(far_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
         far_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
@@ -135,7 +135,7 @@ def test_repulsive_electrostatic():
     """GLU 109 OE2 - GLU 105 OE1, repulsive electrostatic energy.
     """
 
-    opposing_edge=_wrap_pdb_get_atomiccontact(109,"OE2",105,"OE1")
+    opposing_edge=_get_atomiccontact(109,"OE2",105,"OE1")
     assert not np.isnan(opposing_edge.features[Efeat.ELECTROSTATIC])
     assert (
         opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
