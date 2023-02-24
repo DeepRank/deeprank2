@@ -31,6 +31,7 @@ def _wrap_in_graph(edge: Edge):
     g.add_edge(edge)
     return g
 
+
 def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str, atomic_level: bool = True):
     pdb_path = "tests/data/pdb/101M/101M.pdb"
 
@@ -66,35 +67,34 @@ def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_nam
 
     return edge_obj
 
+
 def test_vanderwaals_positive():
-    """MET 0: N - CA, very close. 
-    
+    """MET 0: N - CA, very close.
     Should have positive vanderwaals energy.
     """
 
     edge_close=_get_contact(0,"N",0,"CA")
-    assert edge_close.features[Efeat.VANDERWAALS] > 0.0, edge_close.features[
-        Efeat.VANDERWAALS
-    ]
+    assert edge_close.features[Efeat.VANDERWAALS] > 0.0
+
 
 def test_vanderwaals_negative():
     """MET 0 N - ASP 27 CB, very far.
-    
     Should have negative vanderwaals energy.
     """
 
     edge_far = _get_contact(0,"N",27,"CB")
     assert edge_far.features[Efeat.VANDERWAALS] < 0.0
+
     
 def test_vanderwaals_morenegative():
     """MET 0 N - PHE 138 CG, intermediate distance.
-      
-    Should have more negative vanderwaals energy than the war interaction.
+    Should have more negative vanderwaals energy than the far interaction.
     """
-    
+
     edge_intermediate=_get_contact(0,"N",138,"CG")
     edge_far = _get_contact(0,"N",27,"CB")
     assert edge_intermediate.features[Efeat.VANDERWAALS] < edge_far.features[Efeat.VANDERWAALS]
+
 
 def test_edge_distance():
     """Check the edge distances.
@@ -113,15 +113,19 @@ def test_edge_distance():
         > edge_intermediate.features[Efeat.DISTANCE]
     ), 'far distance < intermediate distance'
 
+
 def test_attractive_electrostatic_close():
-    """ARG 139 CZ - GLU 136 OE2, very close attractive electrostatic energy.
+    """ARG 139 CZ - GLU 136 OE2, very close.
+    Should have attractive electrostatic energy.
     """
 
     close_attracting_edge = _get_contact(139,"CZ",136,"OE2")
     assert close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
 
+
 def test_attractive_electrostatic_far():
-    """ARG 139 CZ - ASP 20 OD2, far attractive electrostatic energy.
+    """ARG 139 CZ - ASP 20 OD2, far.
+    Should have attractive more electrostatic energy than above.
     """
 
     far_attracting_edge=_get_contact(139,"CZ",20,"OD2")
@@ -134,15 +138,18 @@ def test_attractive_electrostatic_far():
         > close_attracting_edge.features[Efeat.ELECTROSTATIC]
     ), 'far electrostatic <= close electrostatic'
    
+
 def test_repulsive_electrostatic():
-    """GLU 109 OE2 - GLU 105 OE1, repulsive electrostatic energy.
+    """GLU 109 OE2 - GLU 105 OE1. 
+    Should have repulsive electrostatic energy.
     """
 
     opposing_edge=_get_contact(109,"OE2",105,"OE1")
     assert opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
 
+
 def test_residue_contact():
-    """Check that we can calculate residue contacts.
+    """Check that we can calculate features for residue contacts.
     """
 
     res_edge = _get_contact(0, '', 1, '', False)
