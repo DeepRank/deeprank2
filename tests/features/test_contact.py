@@ -48,6 +48,12 @@ def _get_atomiccontact(residue_num1: int, atom_name1: str, residue_num2: int, at
     )
     edge_obj = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_obj), variant)
+    
+    assert not np.isnan(edge_obj.features[Efeat.VANDERWAALS])
+    assert not np.isnan(edge_obj.features[Efeat.ELECTROSTATIC])
+    assert not np.isnan(edge_obj.features[Efeat.DISTANCE])
+    assert not np.isnan(edge_obj.features[Efeat.SAMECHAIN])
+    assert not np.isnan(edge_obj.features[Efeat.COVALENT])
 
     return edge_obj
 
@@ -58,7 +64,6 @@ def test_vanderwaals_positive():
     """
 
     edge_close=_get_atomiccontact(0,"N",0,"CA")
-    assert not np.isnan(edge_close.features[Efeat.VANDERWAALS])
     assert edge_close.features[Efeat.VANDERWAALS] > 0.0, edge_close.features[
         Efeat.VANDERWAALS
     ]
@@ -70,7 +75,6 @@ def test_vanderwaals_negative():
     """
 
     edge_far = _get_atomiccontact(0,"N",27,"CB")
-    assert not np.isnan(edge_far.features[Efeat.VANDERWAALS])
     assert edge_far.features[Efeat.VANDERWAALS] < 0.0, edge_far.features[
         Efeat.VANDERWAALS
     ]
@@ -83,7 +87,6 @@ def test_vanderwaals_morenegative():
     
     edge_intermediate=_get_atomiccontact(0,"N",138,"CG")
     edge_far = _get_atomiccontact(0,"N",27,"CB")
-    assert not np.isnan(edge_intermediate.features[Efeat.VANDERWAALS])
     assert (
         edge_intermediate.features[Efeat.VANDERWAALS]
         < edge_far.features[Efeat.VANDERWAALS]
@@ -111,7 +114,6 @@ def test_attractive_electrostatic_close():
     """
 
     close_attracting_edge = _get_atomiccontact(139,"CZ",136,"OE2")
-    assert not np.isnan(close_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
         close_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
     ), close_attracting_edge.features[Efeat.ELECTROSTATIC]
@@ -122,7 +124,6 @@ def test_attractive_electrostatic_far():
 
     far_attracting_edge=_get_atomiccontact(139,"CZ",20,"OD2")
     close_attracting_edge = _get_atomiccontact(139,"CZ",136,"OE2")
-    assert not np.isnan(far_attracting_edge.features[Efeat.ELECTROSTATIC])
     assert (
         far_attracting_edge.features[Efeat.ELECTROSTATIC] < 0.0
     ), far_attracting_edge.features[Efeat.ELECTROSTATIC]
@@ -136,7 +137,6 @@ def test_repulsive_electrostatic():
     """
 
     opposing_edge=_get_atomiccontact(109,"OE2",105,"OE1")
-    assert not np.isnan(opposing_edge.features[Efeat.ELECTROSTATIC])
     assert (
         opposing_edge.features[Efeat.ELECTROSTATIC] > 0.0
     ), opposing_edge.features[Efeat.ELECTROSTATIC]
