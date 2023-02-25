@@ -63,7 +63,7 @@ def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_nam
     assert not np.isnan(edge_obj.features[Efeat.SAMECHAIN]), 'isnan samechain'
     assert not np.isnan(edge_obj.features[Efeat.COVALENT]), 'isnan covalent'
     if not residue_level:
-            assert not np.isnan(edge_obj.features[Efeat.SAMERES]), 'isnan sameres'
+        assert not np.isnan(edge_obj.features[Efeat.SAMERES]), 'isnan sameres'
 
     return edge_obj
 
