@@ -56,34 +56,33 @@ def test_within_3bonds_distinction():
     index_D_gly89_N = atoms.index(_get_atom(chain_D, 89, "N"))
 
     # one bond away
-    print('1', _abs_distance(positions, index_D_pro93_CA, index_D_pro93_CB))
-    assert intra_matrix[index_D_pro93_CA, index_D_pro93_CB]
-    assert intra_matrix[index_D_pro93_CB, index_D_pro93_CA]
+    dist = _abs_distance(positions, index_D_pro93_CA, index_D_pro93_CB)
+    assert intra_matrix[index_D_pro93_CA, index_D_pro93_CB], f'1-2 pairing not considered intra; distance == {dist}'
+    assert intra_matrix[index_D_pro93_CB, index_D_pro93_CA], '1-2 pairing, inverted'
 
     # two bonds away
-    print('2', _abs_distance(positions, index_D_pro93_CA, index_D_pro93_CG))
-    assert intra_matrix[index_D_pro93_CA, index_D_pro93_CG]
-    assert intra_matrix[index_D_pro93_CG, index_D_pro93_CA]
+    dist = _abs_distance(positions, index_D_pro93_CA, index_D_pro93_CG)
+    assert intra_matrix[index_D_pro93_CA, index_D_pro93_CG], f'1-3 paring not considered intra; distance == {dist}'
+    assert intra_matrix[index_D_pro93_CG, index_D_pro93_CA], '1-3 pairing, inverted'
 
     # three bonds away
-    print('3', _abs_distance(positions, index_D_pro93_CA, index_D_ala92_CA))
-    assert intra_matrix[index_D_pro93_CA, index_D_ala92_CA]
-    assert intra_matrix[index_D_ala92_CA, index_D_pro93_CA]
+    dist = _abs_distance(positions, index_D_pro93_CA, index_D_ala92_CA)
+    assert intra_matrix[index_D_pro93_CA, index_D_ala92_CA], f'1-4 pairing not considered intra; distance == {dist}'
+    assert intra_matrix[index_D_ala92_CA, index_D_pro93_CA], '1-4 pairing inverted'
 
     # four bonds away
-    print('4', _abs_distance(positions, index_D_pro93_CA, index_D_ala92_CB))
-    assert not intra_matrix[index_D_pro93_CA, index_D_ala92_CB]
-
-    # in different chain, but hydrogen bonded
-    print('Hbond, diff chain', _abs_distance(positions, index_D_gly89_N, index_C_asn102_O))
-    assert not intra_matrix[index_D_gly89_N, index_C_asn102_O]
-
-    # close, but not connected
-    print('close, but not connected', _abs_distance(positions, index_C_trp121_CZ2, index_C_phe60_CE1))
-    assert not intra_matrix[index_C_trp121_CZ2, index_C_phe60_CE1]
+    dist = _abs_distance(positions, index_D_pro93_CA, index_D_ala92_CB)
+    assert not intra_matrix[index_D_pro93_CA, index_D_ala92_CB], f'1-5 pairing is considered intra; distance == {dist}'
+    assert not intra_matrix[index_D_ala92_CB, index_D_pro93_CA], '1-5 pairing inverted'
 
     # far away from each other
-    print('far', _abs_distance(positions, index_D_leu111_CG, index_D_pro93_CA))
-    assert not intra_matrix[index_D_leu111_CG, index_D_pro93_CA]
+    dist = _abs_distance(positions, index_D_leu111_CG, index_D_pro93_CA)
+    assert not intra_matrix[index_D_leu111_CG, index_D_pro93_CA], f'far is considered intra; distance == {dist}'
 
-    assert True==False, "no other test failed"
+    # in different chain, but hydrogen bonded
+    dist = _abs_distance(positions, index_D_gly89_N, index_C_asn102_O)
+    assert not intra_matrix[index_D_gly89_N, index_C_asn102_O], f'close, H-bonded separate chains is considered intra; distance == {dist}'
+
+    # close, but not connected
+    dist = _abs_distance(positions, index_C_trp121_CZ2, index_C_phe60_CE1)
+    assert not intra_matrix[index_C_trp121_CZ2, index_C_phe60_CE1], f'close but not connected is considered intra; distance == {dist}'
