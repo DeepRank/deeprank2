@@ -69,8 +69,7 @@ def _get_contact(residue_num1: int, atom_name1: str, residue_num2: int, atom_nam
 
 
 def test_vanderwaals_positive():
-    """MET 0: N - CA, very close.
-    Should have positive vanderwaals energy.
+    """MET 0: N - CA, very close. Should have positive vanderwaals energy.
     """
 
     edge_close=_get_contact(0,"N",0,"CA")
@@ -78,8 +77,7 @@ def test_vanderwaals_positive():
 
 
 def test_vanderwaals_negative():
-    """MET 0 N - ASP 27 CB, very far.
-    Should have negative vanderwaals energy.
+    """MET 0 N - ASP 27 CB, very far. Should have negative vanderwaals energy.
     """
 
     edge_far = _get_contact(0,"N",27,"CB")
@@ -87,8 +85,7 @@ def test_vanderwaals_negative():
 
     
 def test_vanderwaals_morenegative():
-    """MET 0 N - PHE 138 CG, intermediate distance.
-    Should have more negative vanderwaals energy than the far interaction.
+    """MET 0 N - PHE 138 CG, intermediate distance. Should have more negative vanderwaals energy than the far interaction.
     """
 
     edge_intermediate=_get_contact(0,"N",138,"CG")
@@ -115,8 +112,7 @@ def test_edge_distance():
 
 
 def test_attractive_electrostatic_close():
-    """ARG 139 CZ - GLU 136 OE2, very close.
-    Should have attractive electrostatic energy.
+    """ARG 139 CZ - GLU 136 OE2, very close. Should have attractive electrostatic energy.
     """
 
     close_attracting_edge = _get_contact(139,"CZ",136,"OE2")
@@ -124,8 +120,7 @@ def test_attractive_electrostatic_close():
 
 
 def test_attractive_electrostatic_far():
-    """ARG 139 CZ - ASP 20 OD2, far.
-    Should have attractive more electrostatic energy than above.
+    """ARG 139 CZ - ASP 20 OD2, far. Should have attractive more electrostatic energy than above.
     """
 
     far_attracting_edge=_get_contact(139,"CZ",20,"OD2")
@@ -140,8 +135,7 @@ def test_attractive_electrostatic_far():
    
 
 def test_repulsive_electrostatic():
-    """GLU 109 OE2 - GLU 105 OE1. 
-    Should have repulsive electrostatic energy.
+    """GLU 109 OE2 - GLU 105 OE1. Should have repulsive electrostatic energy.
     """
 
     opposing_edge=_get_contact(109,"OE2",105,"OE1")
