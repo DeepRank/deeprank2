@@ -1,17 +1,9 @@
-from uuid import uuid4
 from pdb2sql import pdb2sql
 import numpy as np
 from typing import List
 from scipy.spatial import distance_matrix
-from deeprankcore.molstruct.structure import Chain, PDBStructure
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
-from deeprankcore.molstruct.variant import SingleResidueVariant
-from deeprankcore.utils.graph import Edge, Graph
 from deeprankcore.utils.buildgraph import get_structure
-from deeprankcore.features.contact import add_features, _intra_partners
-from deeprankcore.domain.aminoacidlist import alanine
-from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.features.contact import _intra_partners
 from tests.features.test_contact import _get_atom
 
 
