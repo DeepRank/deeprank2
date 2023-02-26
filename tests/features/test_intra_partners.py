@@ -23,7 +23,7 @@ def _abs_distance(positions, atom1: List[int], atom2: List[int]):
     return np.sqrt(sum_of_squares)
 
 
-def test_within_3bonds_distinction():
+def test_intra_partners():
     pdb = pdb2sql("tests/data/pdb/1ak4/1ak4.pdb")
     try:
         structure = get_structure(pdb, "101m")
@@ -50,7 +50,6 @@ def test_within_3bonds_distinction():
     index_D_pro93_CA = atoms.index(_get_atom(chain_D, 93, "CA"))
     index_D_pro93_CB = atoms.index(_get_atom(chain_D, 93, "CB"))
     index_D_pro93_CG = atoms.index(_get_atom(chain_D, 93, "CG"))
-    index_D_pro93_CD = atoms.index(_get_atom(chain_D, 93, "CD"))
     index_D_ala92_CA = atoms.index(_get_atom(chain_D, 92, "CA"))
     index_D_ala92_CB = atoms.index(_get_atom(chain_D, 92, "CB"))
     index_D_gly89_N = atoms.index(_get_atom(chain_D, 89, "N"))
@@ -86,3 +85,10 @@ def test_within_3bonds_distinction():
     # close, but not connected
     dist = _abs_distance(positions, index_C_trp121_CZ2, index_C_phe60_CE1)
     assert not intra_matrix[index_C_trp121_CZ2, index_C_phe60_CE1], f'close but not connected is considered intra; distance == {dist}'
+
+    # very close connections are not always intra
+    max_dist = 3.0
+    very_close_by = distances < max_dist
+    not_intra = np.logical_not(intra_matrix)
+    assert np.any(np.logical_and(very_close_by, not_intra)), f'all connections within {dist} A are considered intra'
+     
