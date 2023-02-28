@@ -23,15 +23,15 @@ _log = logging.getLogger(__name__)
 class DeeprankDataset(Dataset):
     def __init__(self, # pylint: disable=too-many-arguments
                  hdf5_path: Union[str, List[str]],
-                 subset: Optional[Union[List[str]]],
-                 target: Optional[Union[str]],
-                 task: Optional[Union[str]],
+                 subset: Optional[List[str]],
+                 target: Optional[str],
+                 task: Optional[str],
                  classes: Optional[Union[List[str], List[int], List[float]]],
                  use_tqdm: bool,
                  root_directory_path: str,
-                 transform: Optional[Union[Callable]],
-                 pre_transform: Optional[Union[Callable]],
-                 target_filter: Optional[Union[Dict[str, str]]],
+                 transform: Optional[Callable],
+                 pre_transform: Optional[Callable],
+                 target_filter: Optional[Dict[str, str]],
                  check_integrity: bool
     ):
         """Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
