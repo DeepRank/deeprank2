@@ -10,14 +10,14 @@ amino_acids_by_letter = {
 
 
 def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
-    """
-    Read the PSSM data.
+    """Read the PSSM data.
 
     Args:
-        file_(python text file object): the pssm file
-        chain(deeprank Chain object): the chain that the pssm file represents, residues from this chain must match the pssm file
+        file_ (python text file object): The pssm file.
+        chain (:class:`Chain`): The chain that the pssm file represents, residues from this chain must match the pssm file.
 
-    Returns(ConservationTable): the position-specific scoring table, parsed from the pssm file
+    Returns
+        PssmTable: The position-specific scoring table, parsed from the pssm file.
     """
 
     conservation_rows = {}

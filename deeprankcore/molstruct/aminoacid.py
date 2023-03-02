@@ -37,17 +37,17 @@ class AminoAcid:
     ):
         """
         Args:
-            name (str): full name of the amino acid
-            three_letter_code (str): three-letter code of the amino acid (as in PDB)
-            one_letter_code (str): one-letter of the amino acid (as in fasta)
-            charge (int): charge of the amino acid
-            polarity (deeprank polarity enum): the polarity of the amino acid
-            size (int): the number of non-hydrogen atoms in the side chain
-            mass (float): average residue mass (i.e. mass of amino acid - H20) in Daltons
-            pI (float): isolectric point; pH at which the molecule has no net electric charge
-            hydrogen_bond_donors (int): number of hydrogen bond donors
-            hydrogen_bond_acceptors (int): number of hydrogen bond acceptors
-            index (int): the rank of the amino acid, used for computing one-hot encoding
+            name (str): Full name of the amino acid.
+            three_letter_code (str): Three-letter code of the amino acid (as in PDB).
+            one_letter_code (str): One-letter of the amino acid (as in fasta).
+            charge (int): Charge of the amino acid.
+            polarity (:class:`Polarity`): The polarity of the amino acid.
+            size (int): The number of non-hydrogen atoms in the side chain.
+            mass (float): Average residue mass (i.e. mass of amino acid - H20) in Daltons.
+            pI (float): Isolectric point; pH at which the molecule has no net electric charge.
+            hydrogen_bond_donors (int): Number of hydrogen bond donors.
+            hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
+            index (int): The rank of the amino acid, used for computing one-hot encoding.
         """
 
         # amino acid nomenclature
