@@ -519,6 +519,7 @@ class Trainer():
         shuffle: bool = True,
         earlystop_patience: Optional[int] = None,
         earlystop_maxgap: Optional[float] = None,
+        min_epoch: int = 10, 
         validate: bool = False,
         num_workers: int = 0,
         save_best_model: Optional[bool] = True,
@@ -538,6 +539,8 @@ class Trainer():
                         Default: None.
             earlystop_maxgap (float, optional): Training ends if the difference between validation and training loss exceeds this value.
                         Default: None. 
+            min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
+                        Default: 10
             validate (bool): Perform validation on independent data set (requires a validation data set).
                         Default: False.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
@@ -604,7 +607,7 @@ class Trainer():
         valid_losses = []
         
         if earlystop_patience or earlystop_maxgap:
-            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, trace_func=_log.info)
+            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, min_epoch=min_epoch, trace_func=_log.info)
         else: 
             early_stopping = None
 
