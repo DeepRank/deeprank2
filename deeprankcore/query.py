@@ -148,15 +148,16 @@ class QueryCollection:
         if verbose:
             _log.info(f'Adding query with ID {query_id}.')
 
-        if query_id not in self.ids_count:
-            self.ids_count[query_id] = 1
+        query_id_base = query_id.split("_")[0]
+        if query_id_base not in self.ids_count:
+            self.ids_count[query_id_base] = 1
         else:
-            self.ids_count[query_id] += 1
-            new_id = query.model_id + "_" + str(self.ids_count[query_id])
+            self.ids_count[query_id_base] += 1
+            new_id = query.model_id.split("_")[0] + "_" + str(self.ids_count[query_id_base])
             query.model_id = new_id
             
             if warn_duplicate:
-                _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+                _log.warning(f'Query with ID {query_id_base} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
@@ -353,7 +354,7 @@ class SingleResidueVariantResidueQuery(Query):
 
     def get_query_id(self) -> str:
         "Returns the string representing the complete query ID."
-        return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
+        return f"residue-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
 
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the .PDB structure.
@@ -465,7 +466,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
     def get_query_id(self) -> str:
         "Returns the string representing the complete query ID."
-        return f"{self.model_id,}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
+        return f"atomic-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
         return (
@@ -644,7 +645,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
     def get_query_id(self) -> str:
         "Returns the string representing the complete query ID."
-        return f"atom-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
+        return f"atom-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
         return (
@@ -734,7 +735,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
-        return f"residue-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
+        return f"residue-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
         return (
