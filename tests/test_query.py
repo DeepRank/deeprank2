@@ -341,10 +341,10 @@ def test_augmentation():
         with h5py.File(hdf5_path, 'r') as f5:
             entry_names = list(f5.keys())
 
-        assert len(entry_names) == expected_entry_count, f"only entries {len(entry_names)} found, expected {expected_entry_count} entries"
+        assert len(entry_names) == expected_entry_count, f"Found {len(entry_names)} entries, expected {expected_entry_count}"
 
         dataset = GridDataset(hdf5_path)
 
-        assert len(dataset) == expected_entry_count, f"only {len(dataset)} found, expected {expected_entry_count}"
+        assert len(dataset) == expected_entry_count, f"Found {len(dataset)} data points, expected {expected_entry_count}"
     finally:
         shutil.rmtree(tmp_dir)
