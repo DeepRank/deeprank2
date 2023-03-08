@@ -18,7 +18,7 @@ def _abs_distance(positions, atom1: List[int], atom2: List[int]):
 def test_intra_partners():
     pdb = pdb2sql("tests/data/pdb/1ak4/1ak4.pdb")
     try:
-        structure = get_structure(pdb, "101m")
+        structure = get_structure(pdb, "1ak4")
     finally:
         pdb._close() # pylint: disable=protected-access
 
