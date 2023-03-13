@@ -8,14 +8,14 @@ from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
 from deeprankcore.domain import edgestorage as Efeat
 from deeprankcore.utils.parsing import atomic_forcefield
-from deeprankcore.domain import MAX_COVALENT_DISTANCE
 import numpy.typing as npt
 
 _log = logging.getLogger(__name__)
 
 # cutoff distances for 1-3 and 1-4 pairing. See issue: https://github.com/DeepRank/deeprank-core/issues/357#issuecomment-1461813723
-cutoff_14 = 4.2
+covalent_cutoff = 2.1
 cutoff_13 = 3.6
+cutoff_14 = 4.2
 
 
 def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
@@ -114,7 +114,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             edge.features[Efeat.SAMERES] = float( contact.atom1.residue == contact.atom2.residue)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.SAMECHAIN] = float( contact.atom1.residue.chain == contact.atom1.residue.chain )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = interatomic_distances[atom1_index, atom2_index]
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < covalent_cutoff )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_energy[atom1_index, atom2_index]
             edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy[atom1_index, atom2_index]
     
@@ -127,6 +127,6 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
             ## set features
             edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < covalent_cutoff )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = np.sum([[interatomic_electrostatic_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
             edge.features[Efeat.VANDERWAALS] = np.sum([[interatomic_vanderwaals_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
