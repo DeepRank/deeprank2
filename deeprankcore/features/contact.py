@@ -28,6 +28,7 @@ def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float
     COULOMB_CONSTANT = 332.0636
     charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
     electrostatic_energy = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
+    electrostatic_energy[distances < cutoff_13] = 0
     return electrostatic_energy
 
 
