@@ -1,6 +1,9 @@
 import unittest
-from torch_geometric.data.data import Data
+import numpy as np
 import h5py
+from tempfile import mkdtemp
+from shutil import rmtree
+import os
 from torch_geometric.loader import DataLoader
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
@@ -83,24 +86,6 @@ class TestDataSet(unittest.TestCase):
             target_filter={targets.IRMSD: "<10"},
         )
 
-    def test_transform(self):
-
-        def operator(data: Data):
-            data.x = data.x / 10
-            return data
-
-        dataset = GraphDataset(
-            hdf5_path=self.hdf5_path,
-            node_features=node_feats,
-            edge_features=[Efeat.DISTANCE],
-            target=targets.IRMSD,
-            subset=None,
-            transform=operator
-        )
-
-        assert dataset.len() > 0
-        assert dataset.get(0) is not None
-
     def test_multi_file_dataset(self):
         dataset = GraphDataset(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
@@ -181,7 +166,248 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             dataset.get(0)
 
+    def test_graph_hdf5_to_pandas(self):
+
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            node_features='charge',
+            edge_features=['distance', 'same_chain'],
+            target='binary'
+        )
+        dataset.hdf5_to_pandas()
+        cols = list(dataset.df.columns)
+        cols.sort()
         
+        # assert dataset and df shapes
+        assert dataset.df.shape[0] == len(dataset)
+        assert dataset.df.shape[1] == 5
+        assert cols == ['binary', 'charge', 'distance', 'id', 'same_chain']
+
+        # assert dataset and df values
+        with h5py.File(hdf5_path, 'r') as f5:
+
+            # getting nodes values with get()
+            tensor_idx = 0
+            features_dict = {}
+            for feat in dataset.node_features:
+                vals = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        features_dict[feat + f'_{ch}'] = arr
+
+            for feat, values in features_dict.items():
+                assert np.allclose(values, np.concatenate(dataset.df[feat].values))
+
+            # getting edges values with get()
+            tensor_idx = 0
+            features_dict = {}
+            for feat in dataset.edge_features:
+                vals = f5[list(f5.keys())[0]][f"{Efeat.EDGE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        features_dict[feat + f'_{ch}'] = arr
+
+            for feat, values in features_dict.items():
+                # edge_attr contains stacked edges (doubled) so we test on mean and std
+                assert np.float32(round(values.mean(), 2)) == np.float32(round(np.concatenate(dataset.df[feat].values).mean(), 2))
+                assert np.float32(round(values.std(), 2)) == np.float32(round(np.concatenate(dataset.df[feat].values).std(), 2))
+        
+        # assert dataset and df shapes in subset case
+        with h5py.File(hdf5_path, 'r') as f:
+            keys = list(f.keys())
+
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            node_features='charge',
+            edge_features=['distance', 'same_chain'],
+            target='binary',
+            subset=keys[2:]
+        )
+        dataset.hdf5_to_pandas()
+
+        assert dataset.df.shape[0] == len(keys[2:])
+
+    def test_graph_save_hist(self):
+
+        output_directory = mkdtemp()
+        fname = os.path.join(output_directory, "test.png")
+        hdf5_path = "tests/data/hdf5/test.hdf5"
+
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary'
+        )
+
+        with self.assertRaises(ValueError):
+            dataset.save_hist(['non existing feature'], fname = fname)
+
+        dataset.save_hist(['charge', 'binary'], fname = fname)
+
+        assert len(os.listdir(output_directory)) > 0
+
+        rmtree(output_directory)
+
+    def test_graph_standardize(self):
+
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+
+        dataset = GraphDataset(
+            hdf5_path = "tests/data/hdf5/train.hdf5",
+            target='binary',
+            standardize=True
+        )
+
+        with h5py.File(hdf5_path, 'r') as f5:
+            grp = f5[list(f5.keys())[0]]
+
+            # getting all node features values
+            tensor_idx = 0
+            features_dict = {}
+            for feat in dataset.node_features:
+                vals = grp[f"{Nfeat.NODE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        features_dict[feat + f'_{ch}'] = arr
+
+            for _, values in features_dict.items():
+
+                mean = values.mean()
+                dev = values.std()
+
+                assert -0.3 < mean < 0.3
+                # for one hot encoded features, with few data points it can happen that mean and std are not exactly 0 and 1
+                assert 0.7 < dev < 1.5
+
+            # getting all edge features values
+            tensor_idx = 0
+            features_dict = {}
+            for feat in dataset.edge_features:
+                vals = grp[f"{Efeat.EDGE}/{feat}"][()]
+                if vals.ndim == 1: # features with only one channel
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                    arr = np.concatenate(arr)
+                    features_dict[feat] = arr
+                    tensor_idx += 1
+                else:
+                    for ch in range(vals.shape[1]):
+                        arr = []
+                        for entry_idx in range(len(dataset)):
+                            arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                        tensor_idx += 1
+                        arr = np.concatenate(arr)
+                        features_dict[feat + f'_{ch}'] = arr
+
+            for _, values in features_dict.items():
+
+                mean = values.mean()
+                dev = values.std()
+
+                assert -0.2 < mean < 0.2
+                assert 0.8 < dev < 1.2
+
+    def test_graph_standardization_logic(self):
+
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+
+        # normal logic 
+        dataset_train = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary', 
+            standardize=True
+        )
+
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary',
+            standardize=True,
+            train=False,
+            dataset_train=dataset_train
+        )
+
+        assert dataset_train.means == dataset_test.means
+        assert dataset_train.devs == dataset_test.devs
+
+        # without specifying standardization in training set
+        dataset_train = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary'
+        )
+
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            target='binary',
+            standardize=True,
+            train=False,
+            dataset_train=dataset_train
+        )
+
+        assert dataset_train.means == dataset_test.means
+        assert dataset_train.devs == dataset_test.devs
+
+        # raise error if dataset_train is not provided
+        with self.assertRaises(TypeError):
+            GraphDataset(
+                hdf5_path = hdf5_path,
+                target='binary',
+                standardize=True,
+                train=False
+            )
+
+        # raise error if dataset_train is of the wrong type
+        with self.assertRaises(TypeError):
+
+            dataset_train = GridDataset(
+                hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
+                target='binary'
+            )
+
+            GraphDataset(
+                hdf5_path = hdf5_path,
+                target='binary',
+                standardize=True,
+                train=False,
+                dataset_train=dataset_train
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

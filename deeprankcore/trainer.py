@@ -510,6 +510,7 @@ class Trainer():
         shuffle: bool = True,
         earlystop_patience: Optional[int] = None,
         earlystop_maxgap: Optional[float] = None,
+        min_epoch: int = 10, 
         validate: bool = False,
         num_workers: int = 0,
         save_best_model: Optional[bool] = True,
@@ -528,7 +529,9 @@ class Trainer():
             earlystop_patience (Optional[int], optional): Training ends if the model has run for this number of epochs without improving the validation loss.
                         Defaults to None.
             earlystop_maxgap (Optional[float], optional): Training ends if the difference between validation and training loss exceeds this value.
-                        Defaults to None. 
+                        Defaults to None.
+            min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
+                        Defaults to 10.
             validate (bool, optional): Perform validation on independent data set (requires a validation data set).
                         Defaults to False.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
@@ -582,7 +585,7 @@ class Trainer():
             _log.info(f"class weights: {self.weights}")
 
             try:
-                self.lossfunction = self.lossfunction(weight=self.weights)  # Check whether loss allows for weighted classes
+                self.lossfunction = self.lossfunction(weight=self.weights.to(self.device))  # Check whether loss allows for weighted classes
             except TypeError as e:
                 weight_error = (f"Loss function {self.lossfunction} does not allow for weighted classes.\n\t" +
                                 "Please use a different loss function or set class_weights to False.\n")
@@ -595,7 +598,7 @@ class Trainer():
         valid_losses = []
         
         if earlystop_patience or earlystop_maxgap:
-            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, trace_func=_log.info)
+            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, min_epoch=min_epoch, trace_func=_log.info)
         else: 
             early_stopping = None
 
