@@ -69,7 +69,7 @@ def _get_contact(pdb_id: str, residue_num1: int, atom_name1: str, residue_num2: 
 
 
 def test_covalent_pair():
-    """MET 0: N - CA, 1-2 covalent pair (at 1.49 A distance). Should have 0 vanderwaals and electrostatic energies.
+    """MET 0: N - CA, covalent pair (at 1.49 A distance). Should have 0 vanderwaals and electrostatic energies.
     """
 
     edge_covalent = _get_contact('101M', 0, "N", 0, "CA")
@@ -172,5 +172,6 @@ def test_residue_contact():
     assert res_edge.features[Efeat.DISTANCE] < 1e5, 'distance > 1e5'
     assert res_edge.features[Efeat.ELECTROSTATIC] != 0.0, 'electrostatic == 0'
     assert res_edge.features[Efeat.VANDERWAALS] != 0.0, 'vanderwaals == 0'
+    assert res_edge.features[Efeat.COVALENT] == 1.0, 'neighboring residues not seen as covalent'
 
 
