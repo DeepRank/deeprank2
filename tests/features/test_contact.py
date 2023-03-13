@@ -77,9 +77,11 @@ def test_covalent_pair():
     assert edge_covalent.features[Efeat.ELECTROSTATIC] == 0.0, 'nonzero electrostatic energy for covalent pair'
     assert edge_covalent.features[Efeat.COVALENT] == 1.0, 'covalent pair not recognized as covalent'
 
+
 def test_13_pair():
     """MET 0: N - CB, 1-3 pair (at 2.47 A distance). Should have 0 vanderwaals and electrostatic energies.
     """
+
     edge_13 = _get_contact('101M', 0, "N", 0, "CB")
     assert edge_13.features[Efeat.VANDERWAALS] == 0.0, 'nonzero vdw energy for 1-3 pair'
     assert edge_13.features[Efeat.ELECTROSTATIC] == 0.0, 'nonzero electrostatic energy for 1-3 pair'
@@ -173,5 +175,3 @@ def test_residue_contact():
     assert res_edge.features[Efeat.ELECTROSTATIC] != 0.0, 'electrostatic == 0'
     assert res_edge.features[Efeat.VANDERWAALS] != 0.0, 'vanderwaals == 0'
     assert res_edge.features[Efeat.COVALENT] == 1.0, 'neighboring residues not seen as covalent'
-
-
