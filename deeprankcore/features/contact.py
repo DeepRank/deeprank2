@@ -55,6 +55,7 @@ def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> np
     # unify vdw energies into single array
     vdw_energy = inter_energy
     vdw_energy[distances < cutoff_14] = intra_energy[distances < cutoff_14]
+    vdw_energy[distances < cutoff_13] = 0
     return vdw_energy
 
 
