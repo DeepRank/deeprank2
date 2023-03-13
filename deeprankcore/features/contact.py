@@ -13,6 +13,9 @@ import numpy.typing as npt
 
 _log = logging.getLogger(__name__)
 
+# cutoff distances for 1-3 and 1-4 pairing. See issue: https://github.com/DeepRank/deeprank-core/issues/357#issuecomment-1461813723
+cutoff_14 = 3.6
+cutoff_13 = 2.9
 
 def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
@@ -28,7 +31,7 @@ def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float
     return electrostatic_energy
 
 
-def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64], max_intra_separation: int = 3) -> npt.NDArray[np.float64]:
+def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Calculates Van der Waals energies (Lennard-Jones potentials) between all Atoms in atom.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
@@ -51,7 +54,7 @@ def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64], max_i
 
     # unify vdw energies into single array
     vdw_energy = inter_energy
-    vdw_energy[intra_partners] = intra_energy[intra_partners]
+    vdw_energy[distances < cutoff_14] = intra_energy[distances < cutoff_14]
     return vdw_energy
 
 
@@ -80,7 +83,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         positions = [atom.position for atom in all_atoms]
         interatomic_distances = distance_matrix(positions, positions)
         interatomic_electrostatic_energy = _get_electrostatic_energy(all_atoms, interatomic_distances)
-        interatomic_vanderwaals_energy = _get_vdw_energy(all_atoms, interatomic_distances, 3)
+        interatomic_vanderwaals_energy = _get_vdw_energy(all_atoms, interatomic_distances)
 
     # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
