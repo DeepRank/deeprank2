@@ -56,23 +56,22 @@ def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> np
         npt.NDArray[np.float64]: matrix containing all pairwise Van der Waals potential energies in same format as `distances`
     """
 
-    # calculate inter energies
-    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms]
-    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms]
+    # calculate main vdw energies
+    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).sigma_main for atom in atoms]
+    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).epsilon_main for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
-    inter_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    vdw_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
-    # calculate intra energies
-    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms]
-    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms]
+    # calculate energies for 1-4 pairs
+    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).sigma_14 for atom in atoms]
+    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).epsilon_14 for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
-    intra_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    energy_14pairs = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
-    # unify vdw energies into single array
-    vdw_energy = inter_energy
-    vdw_energy[distances < cutoff_14] = intra_energy[distances < cutoff_14]
+    # adjust vdw energy for close contacts
+    vdw_energy[distances < cutoff_14] = energy_14pairs[distances < cutoff_14]
     vdw_energy[distances < cutoff_13] = 0
     return vdw_energy
 
