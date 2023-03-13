@@ -68,12 +68,33 @@ def _get_contact(pdb_id: str, residue_num1: int, atom_name1: str, residue_num2: 
     return edge_obj
 
 
-def test_vanderwaals_positive():
-    """MET 0: N - CA, very close (1.49 A). Should have positive vanderwaals energy.
+def test_covalent_pair():
+    """MET 0: N - CA, 1-2 covalent pair (at 1.49 A distance). Should have 0 vanderwaals and electrostatic energies.
     """
 
-    edge_close = _get_contact('101M', 0, "N", 0, "CA")
-    assert edge_close.features[Efeat.VANDERWAALS] > 0.0
+    edge_covalent = _get_contact('101M', 0, "N", 0, "CA")
+    assert edge_covalent.features[Efeat.VANDERWAALS] == 0.0, 'nonzero vdw energy for covalent pair'
+    assert edge_covalent.features[Efeat.ELECTROSTATIC] == 0.0, 'nonzero electrostatic energy for covalent pair'
+    assert edge_covalent.features[Efeat.COVALENT] == 1.0, 'covalent pair not recognized as covalent'
+
+def test_13_pair():
+    """MET 0: N - CB, 1-3 pair (at 2.47 A distance). Should have 0 vanderwaals and electrostatic energies.
+    """
+    edge_13 = _get_contact('101M', 0, "N", 0, "CB")
+    assert edge_13.features[Efeat.VANDERWAALS] == 0.0, 'nonzero vdw energy for 1-3 pair'
+    assert edge_13.features[Efeat.ELECTROSTATIC] == 0.0, 'nonzero electrostatic energy for 1-3 pair'
+    assert edge_13.features[Efeat.COVALENT] == 0.0, '1-3 pair recognized as covalent'
+    
+
+def test_14_pair():
+    """MET 0: N - CG, 1-4 pair (at 4.12 A distance). Should have non-zero electrostatic energy and small non-zero vdw energy.
+    """
+
+    edge_14 = _get_contact('101M', 0, "CA", 0, "SD")
+    assert edge_14.features[Efeat.VANDERWAALS] != 0.0, '1-4 pair with 0 vdw energy'
+    assert abs(edge_14.features[Efeat.VANDERWAALS]) < 0.1, '1-4 pair with large vdw energy'
+    assert edge_14.features[Efeat.ELECTROSTATIC] != 0.0, '1-4 pair with 0 electrostatic'
+    assert edge_14.features[Efeat.COVALENT] == 0.0, '1-4 pair recognized as covalent'
 
 
 def test_vanderwaals_negative():
