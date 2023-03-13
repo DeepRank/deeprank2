@@ -13,27 +13,6 @@ import numpy.typing as npt
 
 _log = logging.getLogger(__name__)
 
-def _intra_partners(distance_matrix: npt.NDArray[np.float64], max_hops: int) -> npt.NDArray[np.bool_]:
-    """Converts a distance matrix to a boolean matrix of atom pairs separated within a specified number of covalent bonds
-
-    Args:
-        distance_matrix (np.ndarray[float]): interatomic distance matrix
-        max_hops (int): maximum number of covalent bonds separating two atoms still considered as an 'intra' bond
-
-    Returns:
-        np.ndarray[bool]: matrix containing boolean values depending for atoms that are within the maximum 
-            covalent bond separation
-    """
-
-    # convert distance matrix to a boolean matrix of covalent bonds
-    covalent_partners = distance_matrix < MAX_COVALENT_DISTANCE
-
-    # use covalent_partners matrix to determine linkage within max_hops
-    intra_partners = covalent_partners.copy()
-    for _ in range(max_hops-1):  # adjusted because distance 1 is calculated above
-        intra_partners = np.matmul(intra_partners, covalent_partners)
-    return intra_partners
-
 
 def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
@@ -69,7 +48,6 @@ def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64], max_i
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
     intra_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
-    intra_partners = _intra_partners(distances, max_intra_separation)
 
     # unify vdw energies into single array
     vdw_energy = inter_energy
