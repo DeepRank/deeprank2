@@ -14,14 +14,23 @@ import numpy.typing as npt
 _log = logging.getLogger(__name__)
 
 # cutoff distances for 1-3 and 1-4 pairing. See issue: https://github.com/DeepRank/deeprank-core/issues/357#issuecomment-1461813723
-cutoff_14 = 3.6
-cutoff_13 = 2.9
+cutoff_14 = 4.2
+cutoff_13 = 3.6
+
 
 def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Calculates electrostatic energies (Coulomb potentials) between between all Atoms in atom.
+    """Calculates all pairwise electrostatic potential energies (Coulomb potentials) between all atoms in the structure.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
     However, the potential tends to 0 at large distance.
+
+    Args:
+        atoms (List[Atom]): list of all atoms in the structure 
+        distances (npt.NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure 
+            in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
+
+    Returns:
+        npt.NDArray[np.float64]: matrix containing all pairwise electrostatic potential energies in same format as `distances`
     """
 
     EPSILON0 = 1.0
@@ -33,10 +42,18 @@ def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float
 
 
 def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Calculates Van der Waals energies (Lennard-Jones potentials) between all Atoms in atom.
+    """Calculates all pairwise Van der Waals potential energies (Lennard-Jones potentials) between all atoms in the structure.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
     However, the potential tends to 0 at large distance.
+    
+    Args:
+        atoms (List[Atom]): list of all atoms in the structure 
+        distances (npt.NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure 
+            in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
+
+    Returns:
+        npt.NDArray[np.float64]: matrix containing all pairwise Van der Waals potential energies in same format as `distances`
     """
 
     # calculate inter energies
