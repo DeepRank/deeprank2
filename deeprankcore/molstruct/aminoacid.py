@@ -131,4 +131,4 @@ class AminoAcid:
         return isinstance(other, type(self)) and other.name == self.name
 
     def __repr__(self):
-        return self._name
+        return self._three_letter_code
