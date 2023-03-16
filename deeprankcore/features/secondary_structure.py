@@ -3,7 +3,7 @@ from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.utils.graph import Graph
 from typing import Optional
-import numpy
+import numpy as np
 import os	
 
 
