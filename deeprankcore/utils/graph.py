@@ -307,7 +307,10 @@ class Graph:
         return hdf5_path
     
     def get_all_chains(self) -> List[str]:
-        chains = set(str(res.chain).split()[1] for res in list(self._nodes.keys()))
+        if isinstance(self.nodes[0].id, Residue):
+            chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
+        elif isinstance(self.nodes[0].id, Atom):
+            chains = set(str(res.chain).split()[1] for res in [node.id.residue for node in self.nodes])
         return list(chains)
 
 
