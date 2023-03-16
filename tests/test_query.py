@@ -299,6 +299,28 @@ def test_res_ppi():
 def test_augmentation():
     qc = QueryCollection()
 
+    qc.add(ProteinProteinInterfaceResidueQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+        },
+        targets={targets.BINARY: 0},
+    ))
+    
+    qc.add(ProteinProteinInterfaceAtomicQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+        },
+        targets={targets.BINARY: 0},
+    ))
+    
     qc.add(SingleResidueVariantResidueQuery(
         "tests/data/pdb/101M/101M.pdb",
         "A",
