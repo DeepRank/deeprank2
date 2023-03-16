@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import logging
 import warnings
 import numpy as np
@@ -18,8 +18,8 @@ cutoff_13 = 3.6
 cutoff_14 = 4.2
 
 
-def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Calculates all pairwise electrostatic potential energies (Coulomb potentials) between all atoms in the structure.
+def _get_nonbonded_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Calculates all pairwise electrostatic (Coulomb) and Van der Waals (Lennard Jones) potential energies between all atoms in the structure.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
     However, the potential tends to 0 at large distance.
@@ -30,32 +30,20 @@ def _get_electrostatic_energy(atoms: List[Atom], distances: npt.NDArray[np.float
             in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
 
     Returns:
-        npt.NDArray[np.float64]: matrix containing all pairwise electrostatic potential energies in same format as `distances`
+        Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]: matrices in same format as `distances` containing
+            all pairwise electrostatic potential energies and all pairwise Van der Waals potential energies
     """
 
+    # ELECTROSTATIC POTENTIAL
     EPSILON0 = 1.0
     COULOMB_CONSTANT = 332.0636
     charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
     electrostatic_energy = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
+    # remove for close contacts
     electrostatic_energy[distances < cutoff_13] = 0
-    return electrostatic_energy
 
 
-def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Calculates all pairwise Van der Waals potential energies (Lennard-Jones potentials) between all atoms in the structure.
-
-    Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
-    However, the potential tends to 0 at large distance.
-    
-    Args:
-        atoms (List[Atom]): list of all atoms in the structure 
-        distances (npt.NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure 
-            in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
-
-    Returns:
-        npt.NDArray[np.float64]: matrix containing all pairwise Van der Waals potential energies in same format as `distances`
-    """
-
+    # VAN DER WAALS POTENTIAL
     # calculate main vdw energies
     sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).sigma_main for atom in atoms]
     epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).epsilon_main for atom in atoms]
@@ -73,7 +61,9 @@ def _get_vdw_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> np
     # adjust vdw energy for close contacts
     vdw_energy[distances < cutoff_14] = energy_14pairs[distances < cutoff_14]
     vdw_energy[distances < cutoff_13] = 0
-    return vdw_energy
+    
+    
+    return electrostatic_energy, vdw_energy
 
 
 def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
@@ -100,8 +90,7 @@ def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disabl
         warnings.simplefilter("ignore")
         positions = [atom.position for atom in all_atoms]
         interatomic_distances = distance_matrix(positions, positions)
-        interatomic_electrostatic_energy = _get_electrostatic_energy(all_atoms, interatomic_distances)
-        interatomic_vanderwaals_energy = _get_vdw_energy(all_atoms, interatomic_distances)
+        interatomic_electrostatic_energy, interatomic_vanderwaals_energy = _get_nonbonded_energy(all_atoms, interatomic_distances)
 
     # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
