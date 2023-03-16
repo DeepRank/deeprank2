@@ -6,7 +6,7 @@ dummy_val_losses =   [3,2,1,2,0.5,2,3,4,5,6,7]
 dummy_train_losses = [3,2,1,2,0.5,2,3,4,5,1,7]
 
 def base_earlystopper(patience=10, delta=0, maxgap=None):
-    early_stopping = EarlyStopping(patience=patience, delta=delta, maxgap=maxgap)
+    early_stopping = EarlyStopping(patience=patience, delta=delta, maxgap=maxgap, min_epoch=0)
 
     for ep, loss in enumerate(dummy_val_losses):
         # check early stopping criteria

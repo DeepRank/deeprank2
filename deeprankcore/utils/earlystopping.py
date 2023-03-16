@@ -7,6 +7,7 @@ class EarlyStopping:
         patience: int = 10,
         delta: float = 0,
         maxgap: Optional[float] = None,
+        min_epoch: int = 10,
         verbose: bool = True,
         trace_func: Callable = print,
     ):
@@ -21,6 +22,8 @@ class EarlyStopping:
                 Defaults to 0.
             maxgap (float, optional): Maximum difference between between training and validation loss.
                 Defaults to None.
+            min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
+                Defaults to 10.
             verbose (bool, optional): If True, prints a message for each validation loss improvement. 
                 Defaults to True.
             trace_func (Callable, optional): Function used for recording EarlyStopping status.
@@ -30,6 +33,7 @@ class EarlyStopping:
         self.patience = patience
         self.delta = delta
         self.maxgap = maxgap
+        self.min_epoch = min_epoch
         self.verbose = verbose
         self.trace_func = trace_func
 
@@ -70,7 +74,7 @@ class EarlyStopping:
             self.val_loss_min = val_loss
         
         # check maxgap
-        if self.maxgap and epoch > 0:
+        if self.maxgap and epoch > self.min_epoch:
             if train_loss is None:
                 raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping.")
             gap = val_loss - train_loss
