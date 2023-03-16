@@ -1,14 +1,13 @@
 from tempfile import mkdtemp
 from shutil import rmtree
 from os.path import join
-from typing import Union, List
 import h5py
 from deeprankcore.features import surfacearea
 from deeprankcore.query import QueryCollection, Query, SingleResidueVariantResidueQuery, ProteinProteinInterfaceResidueQuery
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from . import PATH_TEST
 
-def querycollection_tester(
+def _querycollection_tester( # pylint: disable = too-many-locals
     query_type: str = 'ppi',
     n_queries: int = 10, 
     feature_modules = None, 
@@ -55,7 +54,7 @@ def querycollection_tester(
 
     for idx in range(n_queries):
         if query_type == 'var':
-            queries[idx]._residue_number = idx + 1 
+            queries[idx]._residue_number = idx + 1 # pylint: disable=protected-access
             collection.add(queries[idx])
         else:
             collection.add(queries[idx], warn_duplicate=False)
@@ -83,7 +82,7 @@ def test_querycollection_process():
     for query_type in ['ppi', 'var']:
         n_queries = 5
 
-        collection, output_directory, _ = querycollection_tester(query_type, n_queries=n_queries)
+        collection, output_directory, _ = _querycollection_tester(query_type, n_queries=n_queries)
         
         assert isinstance(collection.queries, list)
         assert len(collection.queries) == n_queries
@@ -101,11 +100,11 @@ def test_querycollection_process_single_feature_module():
     for query_type in ['ppi', 'var']:
 
         # test with single feature in list
-        _, output_directory, _ = querycollection_tester(query_type, feature_modules=[surfacearea])
+        _, output_directory, _ = _querycollection_tester(query_type, feature_modules=[surfacearea])
         rmtree(output_directory)
 
         # test with single feature NOT in list
-        _, output_directory, _ = querycollection_tester(query_type, feature_modules=surfacearea)
+        _, output_directory, _ = _querycollection_tester(query_type, feature_modules=surfacearea)
         rmtree(output_directory)
 
 
@@ -116,7 +115,7 @@ def test_querycollection_process_all_features_modules():
 
     for query_type in ['ppi', 'var']:
 
-        _, output_directory, _ = querycollection_tester(query_type)
+        _, output_directory, _ = _querycollection_tester(query_type)
 
         rmtree(output_directory)
 
@@ -128,9 +127,9 @@ def test_querycollection_process_combine_output_true():
 
     for query_type in ['ppi', 'var']:
 
-        _, output_directory_t, output_paths_t = querycollection_tester(query_type)
+        _, output_directory_t, output_paths_t = _querycollection_tester(query_type)
 
-        _, output_directory_f, output_paths_f = querycollection_tester(query_type, combine_output = False, cpu_count=2)
+        _, output_directory_f, output_paths_f = _querycollection_tester(query_type, combine_output = False, cpu_count=2)
 
         assert len(output_paths_t) == 1
 
@@ -161,7 +160,7 @@ def test_querycollection_process_combine_output_false():
         cpu_count = 2
         combine_output = False
 
-        collection, output_directory, output_paths = querycollection_tester(query_type, cpu_count = cpu_count, combine_output = combine_output)
+        _, output_directory, output_paths = _querycollection_tester(query_type, cpu_count = cpu_count, combine_output = combine_output)
 
         assert len(output_paths) == cpu_count
 
