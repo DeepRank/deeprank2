@@ -1,6 +1,5 @@
 import logging
 import os
-from time import time
 from typing import Dict, List, Optional, Iterator, Union
 import tempfile
 import pdb2sql
@@ -117,7 +116,11 @@ class Query:
 
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
-
+    
+    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+        raise NotImplementedError("Must be defined in child classes.")
+    def get_query_id(self) -> str:
+        raise NotImplementedError("Must be defined in child classes.")
 
 class QueryCollection:
     """
@@ -181,6 +184,9 @@ class QueryCollection:
     def __iter__(self) -> Iterator[Query]:
         return iter(self._queries)
 
+    def __len__(self) -> int:
+        return len(self._queries)
+
     def _process_one_query(  # pylint: disable=too-many-arguments
         self,
         prefix: str,
@@ -188,10 +194,11 @@ class QueryCollection:
         grid_settings: Union[GridSettings, None],
         grid_map_method: Union[MapMethod, None],
         grid_augmentation_count: int,
-        query: Query):
+        query: Query
+    ):
 
         try:
-            # because only one process may access an hdf5 file at the time:
+            # because only one process may access an hdf5 file at a time:
             output_path = f"{prefix}-{os.getpid()}.hdf5"
 
             feature_modules = [
@@ -205,14 +212,14 @@ class QueryCollection:
 
                 for _ in range(grid_augmentation_count):
                     # repeat with random augmentation
-                    axis, angle = pdb2sql.transform.get_rot_axis_angle(int(time() * 1000) % (2 ** 32 - 1))
+                    axis, angle = pdb2sql.transform.get_rot_axis_angle()  # insert numpy random seed once implemented
                     augmentation = Augmentation(axis, angle)
                     graph.write_as_grid_to_hdf5(output_path, grid_settings, grid_map_method, augmentation)
 
             return None
 
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
-            _log.warning(f'\nGraph/Query with ID {query.get_query_id()} run into an Exception ({e.__class__.__name__}: {e}),'
+            _log.warning(f'\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),'
             ' and it has not been written to the hdf5 file. More details below:')
             _log.exception(e)
             return None
@@ -226,7 +233,7 @@ class QueryCollection:
         grid_settings: Optional[GridSettings] = None,
         grid_map_method: Optional[MapMethod] = None,
         grid_augmentation_count: int = 0
-        ) -> List[str]:
+    ) -> List[str]:
         """
         Args:
             prefix (Optional[str], optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
@@ -736,6 +743,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
+        "Returns the string representing the complete query ID."
         return f"residue-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
