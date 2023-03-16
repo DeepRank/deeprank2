@@ -348,11 +348,12 @@ def test_augmentation():
     augmentation_count = 5
     grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
 
-    expected_entry_count = (augmentation_count + 1) * 2
+    expected_entry_count = (augmentation_count + 1) * len(qc)
 
     tmp_dir = mkdtemp()
     try:
         qc.process(f"{tmp_dir}/qc",
+                   feature_modules=None,
                    grid_settings=grid_settings,
                    grid_map_method=MapMethod.GAUSSIAN,
                    grid_augmentation_count=augmentation_count)
