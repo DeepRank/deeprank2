@@ -102,12 +102,10 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
 def add_features(
     pdb_path: str, 
     graph: Graph,
-    *args, **kwargs): # pylint: disable=unused-argument
+    single_amino_acid_variant = None):
     
-    chains = graph.get_all_chains()
-    
-    # VariantQueries have only 1 chain, so this feature should be ignored
-    if len(chains) > 1:
+    if not single_amino_acid_variant: # VariantQueries do not use this feature
+        chains = graph.get_all_chains()
         residue_contacts = count_residue_contacts(pdb_path, chains)
         
         noncontact_residues = 0
