@@ -59,7 +59,7 @@ runs:
         conda install -c bioconda msms
         # Safest way to install PyTorch and PyTorch Geometric is through conda
         conda install pytorch torchvision torchaudio cpuonly -c pytorch
-        conda install pyg -c pyg
+        conda install pyg -c pyg==2.1.0post1
         # In the future, release h5xplorer on PyPI
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
 
