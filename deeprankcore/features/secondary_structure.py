@@ -7,9 +7,6 @@ import numpy
 import os	
 
 
-import os
-import numpy as np
-
 def dssp(pdb_path: str):
     """
     Process the output of the DSSP program to extract secondary structure information.
