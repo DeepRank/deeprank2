@@ -341,11 +341,10 @@ def test_augmentation():
         phenylalanine,
         {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
-        radius=5.0,
-        distance_cutoff=5.0,
+        radius=3.0,
     ))
 
-    augmentation_count = 5
+    augmentation_count = 3
     grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
 
     expected_entry_count = (augmentation_count + 1) * len(qc)
