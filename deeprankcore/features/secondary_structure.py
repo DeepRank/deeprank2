@@ -93,10 +93,6 @@ def add_features(pdb_path: str, graph: Graph):
         # Add the secondary structure feature to the node
         node.features['ss'] = sec_structure_features[chain_id][residue_position]
 
-        # Print the residue position, chain ID, and secondary structure feature
-        print(residue_position, chain_id, node.features['ss'])
-
-
 
 
 
