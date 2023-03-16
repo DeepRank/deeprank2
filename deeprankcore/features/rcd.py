@@ -1,3 +1,4 @@
+import logging
 import pdb2sql
 from typing import Dict, List
 from deeprankcore.utils.graph import Graph
@@ -6,6 +7,10 @@ from deeprankcore.molstruct.aminoacid import Polarity
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import amino_acids
+
+
+_log = logging.getLogger(__name__)
+
 
 def id_from_residue(residue: tuple) -> str:
     """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes
@@ -105,7 +110,7 @@ def add_features(
     if len(chains) > 1:
         residue_contacts = count_residue_contacts(pdb_path, chains)
         
-        uncontacted_residues = 0
+        noncontact_residues = 0
         for node in graph.nodes:
             if isinstance(node.id, Residue):
                 residue = node.id
@@ -132,4 +137,7 @@ def add_features(
                 node.features[Nfeat.RCDNEGATIVE] = 0
                 node.features[Nfeat.RCDPOSITIVE] = 0
 
-                uncontacted_residues += 1
+                noncontact_residues += 1
+        
+        if noncontact_residues == len(graph.nodes):
+            _log.warning(f"No residue contacts detected for {pdb_path}.")
