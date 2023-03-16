@@ -118,16 +118,16 @@ def add_features(
             else:
                 raise TypeError(f"Unexpected node type: {type(node.id)}")
 
-            chain_name = str(residue).split()[1] # returns name of the string
-            res_num = str(residue).split()[2] # returns the residue number
-            contactdensity_id = chain_name + res_num # reformat id to be 
+            chain_name = str(residue).split()[1]  # returns the name of the chain
+            res_num = str(residue).split()[2]  # returns the residue number
+            contact_id = chain_name + res_num  # reformat id to be in line with residue_contacts keys
             
             try:
-                node.features[Nfeat.RCDTOTAL] = residue_contacts[contactdensity_id].densities['total']
-                node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.NONPOLAR]
-                node.features[Nfeat.RCDPOLAR] = residue_contacts[contactdensity_id].densities[Polarity.POLAR]
-                node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contactdensity_id].densities[Polarity.NEGATIVE_CHARGE]
-                node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contactdensity_id].densities[Polarity.POSITIVE_CHARGE]
+                node.features[Nfeat.RCDTOTAL] = residue_contacts[contact_id].densities['total']
+                node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contact_id].densities[Polarity.NONPOLAR]
+                node.features[Nfeat.RCDPOLAR] = residue_contacts[contact_id].densities[Polarity.POLAR]
+                node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contact_id].densities[Polarity.NEGATIVE_CHARGE]
+                node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contact_id].densities[Polarity.POSITIVE_CHARGE]
             except KeyError:
                 node.features[Nfeat.RCDTOTAL] = 0
                 node.features[Nfeat.RCDNONPOLAR] = 0
