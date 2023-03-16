@@ -79,7 +79,7 @@ def test_graph_build_and_export(): # pylint: disable=too-many-locals
         grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
         assert np.all(grid_settings.resolutions == np.array((1.0, 1.0, 1.0)))
 
-        axis, angle = get_rot_axis_angle()
+        axis, angle = get_rot_axis_angle(412346587)
         augmentation = Augmentation(axis, angle)
 
         graph.write_as_grid_to_hdf5(hdf5_path, grid_settings, MapMethod.GAUSSIAN)
