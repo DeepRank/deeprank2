@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sys
 import os
 import re
@@ -5,14 +6,14 @@ import logging
 import warnings
 import numpy as np
 import h5py
-from typing import Callable, List, Union, Optional, Dict
-
+from typing import List, Union, Optional, Dict, Tuple
+import matplotlib.pyplot as plt
+import pandas as pd
 from tqdm import tqdm
 from ast import literal_eval
 import torch
 from torch_geometric.data.dataset import Dataset
 from torch_geometric.data.data import Data
-
 from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                  targetstorage as targets, gridstorage)
 
@@ -23,15 +24,13 @@ _log = logging.getLogger(__name__)
 class DeeprankDataset(Dataset):
     def __init__(self, # pylint: disable=too-many-arguments
                  hdf5_path: Union[str, List[str]],
-                 subset: Optional[Union[List[str]]],
-                 target: Optional[Union[str]],
-                 task: Optional[Union[str]],
+                 subset: Optional[List[str]],
+                 target: Optional[str],
+                 task: Optional[str],
                  classes: Optional[Union[List[str], List[int], List[float]]],
                  use_tqdm: bool,
                  root_directory_path: str,
-                 transform: Optional[Union[Callable]],
-                 pre_transform: Optional[Union[Callable]],
-                 target_filter: Optional[Union[Dict[str, str]]],
+                 target_filter: Union[Dict[str, str], None],
                  check_integrity: bool
     ):
         """Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
@@ -39,7 +38,7 @@ class DeeprankDataset(Dataset):
         More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
         """
 
-        super().__init__(root_directory_path, transform, pre_transform)
+        super().__init__(root_directory_path)
 
         if isinstance(hdf5_path, str):
             self.hdf5_paths = [hdf5_path]
@@ -66,6 +65,13 @@ class DeeprankDataset(Dataset):
         # alows to associate each mol to an index
         # and get fname and mol name from the index
         self._create_index_entries()
+
+        self.df = None
+        self.means = None
+        self.devs = None
+
+        # get the device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def _check_hdf5_files(self):
         """Checks if the data contained in the .HDF5 file is valid."""
@@ -127,8 +133,6 @@ class DeeprankDataset(Dataset):
         """
         _log.debug(f"Processing data set with .HDF5 files: {self.hdf5_paths}")
 
-        self.index_entries = []
-
         desc = f"   {self.hdf5_paths}{' dataset':25s}"
         if self.use_tqdm:
             hdf5_path_iterator = tqdm(self.hdf5_paths, desc=desc, file=sys.stdout)
@@ -147,9 +151,13 @@ class DeeprankDataset(Dataset):
                     else:
                         entry_names = [entry_name for entry_name in self.subset if entry_name in list(hdf5_file.keys())]
 
-                    for entry_name in entry_names:
-                        if self._filter_targets(hdf5_file[entry_name]):
-                            self.index_entries += [(hdf5_path, entry_name)]
+                    #skip self._filter_targets when target_filter is None, improve performance using list comprehension.
+                    if self.target_filter is None:
+                        self.index_entries = [(hdf5_path, entry_name) for entry_name in entry_names]
+                    else:
+                        self.index_entries = [(hdf5_path, entry_name) for entry_name in entry_names \
+                        if self._filter_targets(hdf5_file[entry_name])]
+                        
             except Exception:
                 _log.exception(f"on {hdf5_path}")
 
@@ -197,13 +205,136 @@ class DeeprankDataset(Dataset):
         return True
 
     def len(self) -> int:
-        """
-        Gets the length of the dataset, either :class:`GridDataset` or :class:`GraphDataset` object.
+        """Gets the length of the dataset, either :class:`GridDataset` or :class:`GraphDataset` object.
 
         Returns:
             int: Number of complexes in the dataset.
         """
         return len(self.index_entries)
+
+    def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
+        self
+    ) -> pd.DataFrame:
+        """Loads features data from the HDF5 files into a Pandas DataFrame in the attribute `df` of the class.
+
+        Returns:
+            :class:`pd.DataFrame`: Pandas DataFrame containing the selected features as columns per all data points in
+                hdf5_path files.   
+        """
+
+        df_final = pd.DataFrame()
+
+        for fname in self.hdf5_paths:
+            with h5py.File(fname, 'r') as f:
+
+                entry_name = list(f.keys())[0]
+                
+                if self.subset is not None:
+                    entry_names = [entry for entry, _ in f.items() if entry in self.subset]
+                else:
+                    entry_names = [entry for entry, _ in f.items()]
+
+                df_dict = {}
+                df_dict['id'] = entry_names
+
+                for feat_type in self.features_dict:
+                    for feat in self.features_dict[feat_type]:
+                        if f[entry_name][feat_type][feat][()].ndim == 2:
+                            for i in range(f[entry_name][feat_type][feat][:].shape[1]):
+                                df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
+                        else:
+                            df_dict[feat] = [
+                                f[entry_name][feat_type][feat][:]
+                                if f[entry_name][feat_type][feat][()].ndim == 1
+                                else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
+
+                df = pd.DataFrame(data=df_dict)
+
+            df_final = pd.concat([df_final, df])
+
+        df_final.reset_index(drop=True, inplace=True)
+        self.df = df_final
+
+        return df_final
+
+    def save_hist(
+            self,
+            features: Union[str,List[str]],
+            fname: str = 'features_hist.png',
+            bins: Union[int,List[float],str] = 10,
+            figsize: Tuple = (15, 15)
+    ):
+        """After having generated a pd.DataFrame using hdf5_to_pandas method, histograms of the features can be saved in an image.
+
+        Args:
+            features (Union[str, List[str]]): Features to be plotted. 
+            fname (str): str or path-like or binary file-like object.
+                Defaults to 'features_hist.png'.
+            bins (Union[int, List[float], str, optional]): If bins is an integer, it defines the number of equal-width bins in the range.
+                If bins is a sequence, it defines the bin edges, including the left edge of the first bin and the right edge
+                of the last bin; in this case, bins may be unequally spaced. All but the last (righthand-most) bin is half-open.
+                If bins is a string, it is one of the binning strategies supported by numpy.histogram_bin_edges:
+                'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
+                Defaults to 10.
+            figsize (Tuple, optional): Saved figure sizes. Defaults to (15, 15).
+        """
+        if self.df is None:
+            self.hdf5_to_pandas()
+        
+        if not isinstance(features, list):
+            features = [features]
+
+        features_df = [col for feat in features for col in self.df.columns.values.tolist() if feat in col]
+
+        means = [
+            round(np.concatenate(self.df[feat].values).mean(), 1) if isinstance(self.df[feat].values[0], np.ndarray) \
+            else round(self.df[feat].values.mean(), 1) \
+            for feat in features_df]
+        devs = [
+            round(np.concatenate(self.df[feat].values).std(), 1) if isinstance(self.df[feat].values[0], np.ndarray) \
+            else round(self.df[feat].values.std(), 1) \
+            for feat in features_df]
+
+        if len(features_df) > 1:
+
+            fig, axs = plt.subplots(len(features_df), figsize=figsize)
+
+            for row, feat in enumerate(features_df):
+
+                if isinstance(self.df[feat].values[0], np.ndarray):
+                    axs[row].hist(np.concatenate(self.df[feat].values), bins=bins)
+                else:
+                    axs[row].hist(self.df[feat].values, bins=bins)
+                axs[row].set(xlabel=f'{feat} (mean {means[row]}, std {devs[row]})', ylabel='Count')
+            fig.tight_layout()
+
+        elif len(features_df) == 1:
+
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_subplot(111)
+            if isinstance(self.df[features_df[0]].values[0], np.ndarray):
+                ax.hist(np.concatenate(self.df[features_df[0]].values), bins=bins)
+            else:
+                ax.hist(self.df[features_df[0]].values, bins=bins)
+            ax.set(xlabel=f'{features_df[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
+
+        else:
+            raise ValueError("Please provide valid features names. They must be present in the current :class:`DeeprankDataset` children instance.")
+        
+        fig.tight_layout()
+        fig.savefig(fname)
+        plt.close(fig)
+    
+    def _compute_mean_std(self):
+
+        means = {col: round(np.concatenate(self.df[col].values).mean(), 1) if isinstance(self.df[col].values[0], np.ndarray) \
+            else round(self.df[col].values.mean(), 1) \
+            for col in self.df.columns[1:]}
+        devs = {col: round(np.concatenate(self.df[col].values).std(), 1) if isinstance(self.df[col].values[0], np.ndarray) \
+            else round(self.df[col].values.std(), 1) \
+            for col in self.df.columns[1:]}
+        self.means = means
+        self.devs = devs
 
 
 # Grid features are stored per dimension and named accordingly.
@@ -223,14 +354,12 @@ class GridDataset(DeeprankDataset):
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
-        transform: Optional[Callable] = None,
-        pre_transform: Optional[Callable] = None,
+        standardize: bool = False,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
         check_integrity: bool = True
     ):
-        """
-        Class to load the .HDF5 files data into grids.
+        """Class to load the .HDF5 files data into grids.
 
         Args:
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
@@ -253,27 +382,36 @@ class GridDataset(DeeprankDataset):
                 Defaults to None.
             tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
             root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
-            transform (Callable, optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns a
-                transformed version. The data object will be transformed before every access. Defaults to None.
-            pre_transform (Optional[Callable], optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object and returns
-                a transformed version. The data object will be transformed before being saved to disk. Defaults to None.
+            standardize (bool, optional): Whether to standardize all the features, centering each feature's mean at 0 with a standard deviation
+                of 1. Defaults to False.
             target_transform (Optional[bool], optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
             target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target. Defaults to None.
-
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.features = features
 
-        self._transform = transform
+        self._standardize = standardize
         self.target_transform = target_transform
 
         self._check_features()
+
+        self.features_dict = {}
+        self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
+        if self.target is not None:
+            if isinstance(self.target, str):
+                self.features_dict[targets.VALUES] = [self.target]
+            else:
+                self.features_dict[targets.VALUES] = self.target
+
+        if self._standardize:
+            self.hdf5_to_pandas()
+            self._compute_mean_std()
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -318,6 +456,8 @@ class GridDataset(DeeprankDataset):
         if self.features == "all":
             self.features = sorted(hdf5_all_feature_names)
         else:
+            if not isinstance(self.features, list):
+                self.features = [self.features]
             for feature_name in self.features:
                 if feature_name not in unpartial_feature_names:
                     _log.info(f"The feature {feature_name} was not found in the file {hdf5_path}.")
@@ -392,15 +532,14 @@ class GraphDataset(DeeprankDataset):
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
-        transform: Optional[Callable] = None,
-        pre_transform: Optional[Callable] = None,
-        edge_features_transform: Optional[Callable] = lambda x: np.tanh(-x / 2 + 2) + 1,
+        standardize: bool = False,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
-        check_integrity: bool = True
+        check_integrity: bool = True,
+        train: bool = True,
+        dataset_train: GraphDataset = None
     ):
-        """
-        Class to load the .HDF5 files data into graphs.
+        """Class to load the .HDF5 files data into graphs.
 
         Args:
             hdf5_path (Union[str, List[str]]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List.
@@ -439,14 +578,10 @@ class GraphDataset(DeeprankDataset):
                 Defaults to None.
             tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
             root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
-            transform (Optional[Callable], optional): A function/transform that takes in a :class:`torch_geometric.data.Data` object
-                and returns a transformed version. 
-                The data object will be transformed before every access. Defaults to None.
-            pre_transform (Optional[Callable], optional):  A function/transform that takes in a :class:`torch_geometric.data.Data` object
-                and returns a transformed version. 
-                The data object will be transformed before being saved to disk. Defaults to None.
             edge_features_transform (Optional[Callable], optional): Transformation applied to the edge features.
                 Defaults to lambda x: np.tanh(-x/2+2)+1.
+            standardize (bool, optional): Whether to standardize all the features, centering each feature's mean at 0 with a standard deviation
+                of 1. Defaults to False.
             target_transform (Optional[bool], optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
@@ -455,22 +590,68 @@ class GraphDataset(DeeprankDataset):
 
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
+            
+            train (bool, optional): Boolean flag to determine if the instance represents the training set. If False, a dataset_train of the same class must
+                be provided as well. The latter will be used to scale the validation/testing set according to its features values. This parameter is considered
+                only if standardize flag is set to True.
+                Defaults to True.
+
+            dataset_train: (class:`GraphDataset`, optional): if train is True, assign here the training set. This parameter is considered only if standardize
+                flag is set to True.
+                Defaults to None.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, transform, pre_transform, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
 
-        self._transform = transform
-        self.edge_features_transform = edge_features_transform
+        self._standardize = standardize
         self.target_transform = target_transform
 
         self._check_features()
 
+        self.features_dict = {}
+        self.features_dict[Nfeat.NODE] = self.node_features
+        self.features_dict[Efeat.EDGE] = self.edge_features
+        if self.target is not None:
+            if isinstance(self.target, str):
+                self.features_dict[targets.VALUES] = [self.target]
+            else:
+                self.features_dict[targets.VALUES] = self.target
+
+        if not train and not isinstance(dataset_train, GraphDataset):
+            raise TypeError("Please provide a valid training GraphDataset.")
+        
+        if train and dataset_train:
+            _log.warning("""dataset_train has been set but train flag was set to True.
+            dataset_train will be ignored since the current dataset will be considered as training set.""")
+
+        if self._standardize:
+            if not train and not isinstance(dataset_train, GraphDataset):
+                raise TypeError("Please provide a valid training GraphDataset.")
+            
+            if train and dataset_train:
+                _log.warning("""dataset_train has been set but train flag was set to True.
+                dataset_train will be ignored since the current dataset will be considered as training set.""")
+            
+            if train:
+                if self.means or self.devs is None:
+                    if self.df is None:
+                        self.hdf5_to_pandas()
+                    self._compute_mean_std()
+            else:
+                if (dataset_train.means or dataset_train.devs) is None:
+                    if dataset_train.df is None:
+                        dataset_train.hdf5_to_pandas()
+                    dataset_train._compute_mean_std()
+                self.means = dataset_train.means
+                self.devs = dataset_train.devs
+        elif not self._standardize and (not train or dataset_train):
+            _log.warning("No scaling method has been set, and train and dataset_train parameters will be ignored.")
+
     def get(self, idx: int) -> Data:
-        """
-        Gets one graph item from its unique index.
+        """Gets one graph item from its unique index.
 
         Args:
             idx (int): Index of the item, ranging from 0 to len(dataset).
@@ -501,8 +682,15 @@ class GraphDataset(DeeprankDataset):
             for feat in self.node_features:
                 if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
-                    if vals.ndim == 1:
+                    if vals.ndim == 1: # features with only one channel
                         vals = vals.reshape(-1, 1)
+                        if self._standardize:
+                            vals = (vals-self.means[feat])/self.devs[feat]
+                    else:
+                        if self._standardize:
+                            reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
+                            reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
+                            vals = (vals - reshaped_mean)/reshaped_dev
                     node_data += (vals,)
             x = torch.tensor(np.hstack(node_data), dtype=torch.float)
 
@@ -527,10 +715,16 @@ class GraphDataset(DeeprankDataset):
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
+                            if self._standardize:
+                                vals = (vals-self.means[feat])/self.devs[feat]
+                        else:
+                            if self._standardize:
+                                reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
+                                reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
+                                vals = (vals - reshaped_mean)/reshaped_dev
                         edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
-                edge_data = self.edge_features_transform(edge_data)
                 edge_attr = torch.tensor(edge_data, dtype=torch.float).contiguous()
             else:
                 edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float).contiguous()
@@ -583,10 +777,6 @@ class GraphDataset(DeeprankDataset):
 
         data.entry_names = entry_name
 
-        # apply transformation
-        if self._transform is not None:
-            data = self._transform(data)
-
         return data
 
     def _check_features(self):
@@ -609,6 +799,8 @@ class GraphDataset(DeeprankDataset):
         if self.node_features == "all":
             self.node_features = self.available_node_features
         else:
+            if not isinstance(self.node_features, list):
+                self.node_features = [self.node_features]
             for feat in self.node_features:
                 if feat not in self.available_node_features:
                     _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")
@@ -618,7 +810,9 @@ class GraphDataset(DeeprankDataset):
         missing_edge_features = []
         if self.edge_features == "all":
             self.edge_features = self.available_edge_features
-        elif self.edge_features is not None:
+        else:
+            if not isinstance(self.edge_features, list):
+                self.edge_features = [self.edge_features]
             for feat in self.edge_features:
                 if feat not in self.available_edge_features:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")
@@ -650,8 +844,7 @@ def save_hdf5_keys(
     f_dest_path: str,
     hardcopy = False
     ):
-    """
-    Save references to keys in src_ids in a new .HDF5 file.
+    """Save references to keys in src_ids in a new .HDF5 file.
 
     Args:
         f_src_path (str): The path to the .HDF5 file containing the keys.
