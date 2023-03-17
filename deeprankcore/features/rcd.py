@@ -31,8 +31,9 @@ class _ContactDensity:
     """Internal class that holds contact density information for a given residue.
     """
     
-    def __init__(self, residue):
+    def __init__(self, residue, polarity):
         self.res = residue
+        self.polarity = polarity
         self.id = id_from_residue(self.res)
         self.densities = {pol: 0 for pol in Polarity}
         self.densities['total'] = 0
@@ -72,7 +73,7 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
 
         # add chain1_res to residue_contact dict
         contact1_id = id_from_residue(chain1_res)
-        residue_contacts[contact1_id] = _ContactDensity(chain1_res)
+        residue_contacts[contact1_id] = _ContactDensity(chain1_res, aa1.polarity)
         
         for chain2_res in chain2_residues:
             aa2_code = chain2_res[2]
@@ -90,7 +91,7 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
             # add chain2_res to residue_contact dict if it doesn't exist yet
             contact2_id = id_from_residue(chain2_res)
             if contact2_id not in residue_contacts:
-                residue_contacts[contact2_id] = _ContactDensity(chain2_res)
+                residue_contacts[contact2_id] = _ContactDensity(chain2_res, aa2.polarity)
             # populate densities and connections for chain2_res
             residue_contacts[contact2_id].densities['total'] += 1
             residue_contacts[contact2_id].densities[aa1.polarity] += 1
@@ -122,6 +123,9 @@ def add_features(
             res_num = str(residue).split()[2]  # returns the residue number
             contact_id = chain_name + res_num  # reformat id to be in line with residue_contacts keys
             
+            for IRC_type in Nfeat.IRC_FEATURES:
+                node.features[IRC_type] = 0
+            
             try:
                 node.features[Nfeat.RCDTOTAL] = residue_contacts[contact_id].densities['total']
                 node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contact_id].densities[Polarity.NONPOLAR]
@@ -129,12 +133,9 @@ def add_features(
                 node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contact_id].densities[Polarity.NEGATIVE_CHARGE]
                 node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contact_id].densities[Polarity.POSITIVE_CHARGE]
                 total_contacts += 1
-            except KeyError:
-                node.features[Nfeat.RCDTOTAL] = 0
-                node.features[Nfeat.RCDNONPOLAR] = 0
-                node.features[Nfeat.RCDPOLAR] = 0
-                node.features[Nfeat.RCDNEGATIVE] = 0
-                node.features[Nfeat.RCDPOSITIVE] = 0
+            except KeyError:  # node has no contact residues
+                pass
+
         
         if total_contacts < 5:
             _log.warning(f"Few ({total_contacts}) contacts detected for {pdb_path}.")
