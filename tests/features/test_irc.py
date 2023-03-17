@@ -1,6 +1,6 @@
 import numpy as np
 from pdb2sql import pdb2sql
-from deeprankcore.features.rcd import add_features
+from deeprankcore.features.irc import add_features
 from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.utils.buildgraph import get_structure, get_residue_contact_pairs
 from deeprankcore.domain import nodestorage as Nfeat
