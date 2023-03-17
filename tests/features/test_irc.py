@@ -4,6 +4,7 @@ from deeprankcore.features.irc import add_features
 from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph
 from deeprankcore.utils.buildgraph import get_structure, get_residue_contact_pairs
 from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.utils.graph import Graph
 
 
 def _load_pdb_structure(pdb_path: str, id_: str):
@@ -14,9 +15,26 @@ def _load_pdb_structure(pdb_path: str, id_: str):
         pdb._close() # pylint: disable=protected-access
 
 
+def _run_assertions(graph: Graph):
+    
+    assert not np.any(
+        np.isnan(node.features[Nfeat.IRCTOTAL]) 
+            for node in graph.nodes
+    ), 'nan found'
+    
+    assert np.any(
+        node.features[Nfeat.IRCTOTAL] > 0 
+            for node in graph.nodes
+    ), 'no contacts'
+    
+    assert np.all(
+        node.features[Nfeat.IRCTOTAL] == sum([node.features[IRCtype] for IRCtype in Nfeat.IRC_FEATURES[:-1]])
+            for node in graph.nodes
+    ), 'incorrect total'
+    
+
 def test_residue_features():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-
     structure = _load_pdb_structure(pdb_path, "1ATN_1w")
 
     residues = set([])
@@ -30,15 +48,10 @@ def test_residue_features():
     graph = build_residue_graph(residues, "1ATN-1w", 8.5)
 
     add_features(pdb_path, graph)
+    _run_assertions(graph)
 
-
-    assert np.any(
-        node.features[Nfeat.RCDTOTAL] > 0 for node in graph.nodes
-    )
-    
 
 def test_atom_features():
-
     pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
     structure = _load_pdb_structure(pdb_path, "1A0Z")
 
@@ -52,6 +65,7 @@ def test_atom_features():
             atoms.add(atom)
     atoms = list(atoms)
 
-    atom_graph = build_atomic_graph(atoms, "1A0Z", 4.5)
+    graph = build_atomic_graph(atoms, "1A0Z", 4.5)
 
-    add_features(pdb_path, atom_graph)
+    add_features(pdb_path, graph)
+    _run_assertions(graph)
