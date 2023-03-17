@@ -1,5 +1,6 @@
 import logging
 import pdb2sql
+from itertools import combinations_with_replacement as combinations
 from typing import Dict, List, Optional
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
@@ -108,6 +109,8 @@ def add_features(
     
     if not single_amino_acid_variant: # VariantQueries do not use this feature
         residue_contacts = count_residue_contacts(pdb_path, graph.get_all_chains())
+        polarity_pairs = list(combinations(Polarity, 2))
+        polarity_pair_string = [f'irc_{x[0].name.lower()}_{x[1].name.lower()}' for x in polarity_pairs]
         
         total_contacts = 0
         for node in graph.nodes:
@@ -123,17 +126,22 @@ def add_features(
             res_num = str(residue).split()[2]  # returns the residue number
             contact_id = chain_name + res_num  # reformat id to be in line with residue_contacts keys
             
+            # initialize all IRC features to 0
             for IRC_type in Nfeat.IRC_FEATURES:
                 node.features[IRC_type] = 0
             
+            # load correct values to IRC features
             try:
-                node.features[Nfeat.RCDTOTAL] = residue_contacts[contact_id].densities['total']
-                node.features[Nfeat.RCDNONPOLAR] = residue_contacts[contact_id].densities[Polarity.NONPOLAR]
-                node.features[Nfeat.RCDPOLAR] = residue_contacts[contact_id].densities[Polarity.POLAR]
-                node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contact_id].densities[Polarity.NEGATIVE_CHARGE]
-                node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contact_id].densities[Polarity.POSITIVE_CHARGE]
+                node.features[Nfeat.IRCTOTAL] = residue_contacts[contact_id].densities['total']
+                for i, pair in enumerate(polarity_pairs):
+                    if residue_contacts[contact_id].polarity == pair[0]:
+                        node.features[polarity_pair_string[i]] += residue_contacts[contact_id].densities[pair[1]]
+                    elif residue_contacts[contact_id].polarity == pair[1]:
+                        node.features[polarity_pair_string[i]] += residue_contacts[contact_id].densities[pair[0]]
                 total_contacts += 1
-            except KeyError:  # node has no contact residues
+
+            except KeyError:
+                # node has no contact residues
                 pass
 
         
