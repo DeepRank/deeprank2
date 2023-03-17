@@ -122,9 +122,7 @@ def add_features(
             else:
                 raise TypeError(f"Unexpected node type: {type(node.id)}")
 
-            chain_name = str(residue).split()[1]  # returns the name of the chain
-            res_num = str(residue).split()[2]  # returns the residue number
-            contact_id = chain_name + res_num  # reformat id to be in line with residue_contacts keys
+            contact_id = residue.chain.id + residue.number_string  # reformat id to be in line with residue_contacts keys
             
             # initialize all IRC features to 0
             for IRC_type in Nfeat.IRC_FEATURES:
