@@ -19,7 +19,7 @@ def add_features(
 
 ### `deeprankcore.features.components`
 These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in deeprankcore.domain.aminoacidlist.py.
-For atomic graphs, when features relate to residue then _all_ atoms of one residue receive the feature value for that residue.
+For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
 | feature | description | type | notes | restrictions | sources |
 | --- | --------- | --- | --- | --- | --- |
@@ -95,7 +95,7 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 
 ### `deeprankcore.features.contact`
 These features relate to relationships between individual nodes.
-For atomic graphs, when features relate to residue then _all_ atoms of one residue receive the feature value for that residue.
+For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
 | feature | description | type | notes | restrictions | 
 | --- | --------- | --- | --- | --- | --- |
