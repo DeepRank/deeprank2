@@ -1,6 +1,8 @@
 from tempfile import mkdtemp
 from shutil import rmtree
 from os.path import join
+from typing import Optional, Union, List
+from types import ModuleType
 import h5py
 from deeprankcore.features import surfacearea
 from deeprankcore.query import QueryCollection, Query, SingleResidueVariantResidueQuery, ProteinProteinInterfaceResidueQuery
@@ -10,7 +12,7 @@ from . import PATH_TEST
 def _querycollection_tester( # pylint: disable = too-many-locals
     query_type: str = 'ppi',
     n_queries: int = 10, 
-    feature_modules = None, 
+    feature_modules: Optional[Union[ModuleType, List[ModuleType]]] = None, 
     cpu_count: int = 1, 
     combine_output: bool = True,
 ):
