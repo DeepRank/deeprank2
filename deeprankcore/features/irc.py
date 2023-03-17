@@ -108,11 +108,12 @@ def add_features(
     ):
     
     if not single_amino_acid_variant: # VariantQueries do not use this feature
-        residue_contacts = count_residue_contacts(pdb_path, graph.get_all_chains())
         polarity_pairs = list(combinations(Polarity, 2))
         polarity_pair_string = [f'irc_{x[0].name.lower()}_{x[1].name.lower()}' for x in polarity_pairs]
         
         total_contacts = 0
+        residue_contacts = count_residue_contacts(pdb_path, graph.get_all_chains())
+
         for node in graph.nodes:
             if isinstance(node.id, Residue):
                 residue = node.id
@@ -133,9 +134,9 @@ def add_features(
                 node.features[Nfeat.IRCTOTAL] = residue_contacts[contact_id].densities['total']
                 for i, pair in enumerate(polarity_pairs):
                     if residue_contacts[contact_id].polarity == pair[0]:
-                        node.features[polarity_pair_string[i]] += residue_contacts[contact_id].densities[pair[1]]
+                        node.features[polarity_pair_string[i]] = residue_contacts[contact_id].densities[pair[1]]
                     elif residue_contacts[contact_id].polarity == pair[1]:
-                        node.features[polarity_pair_string[i]] += residue_contacts[contact_id].densities[pair[0]]
+                        node.features[polarity_pair_string[i]] = residue_contacts[contact_id].densities[pair[0]]
                 total_contacts += 1
 
             except KeyError:
