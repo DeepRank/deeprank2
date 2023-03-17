@@ -17,20 +17,20 @@ def _load_pdb_structure(pdb_path: str, id_: str):
 
 def _run_assertions(graph: Graph):
     
-    assert not np.any([
-        np.isnan(node.features[Nfeat.IRCTOTAL]) 
-            for node in graph.nodes
-    ]), 'nan found'
+    assert not np.any(
+        [np.isnan(node.features[Nfeat.IRCTOTAL]) 
+            for node in graph.nodes]
+    ), 'nan found'
     
-    assert np.any([
-        node.features[Nfeat.IRCTOTAL] > 0 
-            for node in graph.nodes
-    ]), 'no contacts'
+    assert np.any(
+        [node.features[Nfeat.IRCTOTAL] > 0
+            for node in graph.nodes]
+    ), 'no contacts'
     
-    assert np.all([
-        node.features[Nfeat.IRCTOTAL] == sum([node.features[IRCtype] for IRCtype in Nfeat.IRC_FEATURES[:-1]])
-            for node in graph.nodes
-    ]), 'incorrect total'
+    assert np.all(
+        [node.features[Nfeat.IRCTOTAL] == sum(node.features[IRCtype] for IRCtype in Nfeat.IRC_FEATURES[:-1])
+            for node in graph.nodes]
+    ), 'incorrect total'
     
 
 def test_residue_features():
