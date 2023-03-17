@@ -311,6 +311,8 @@ class Graph:
             chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
         elif isinstance(self.nodes[0].id, Atom):
             chains = set(str(res.chain).split()[1] for res in [node.id.residue for node in self.nodes])
+        else:
+            return None
         return list(chains)
 
 
