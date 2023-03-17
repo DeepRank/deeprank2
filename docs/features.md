@@ -9,8 +9,7 @@ Users can add custom features by creating a new module and placing it in `deepra
 
 ```python
 def add_features(
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    pdb_path: str, graph: Graph /    single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):
     pass
 ```
@@ -88,7 +87,8 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 
 | feature | description | type | notes | restrictions
 | --- | --------- | --- | --- | --- | 
-| `irc_total` | Total inter-residue contacts | int | Number of residues on opposite chain within 5.5 Å distance | ProteinProteinInteraction graphs only |
+| `irc_total` | Total inter-residue contacts | int | Number of residues on opposite chain within a 5.5 Å cutoff distance | ProteinProteinInteraction graphs only |
+| `irc_nonpolar_nonpolar` / `irc_nonpolar_polar` / `irc_nonpolar_negative` / `irc_nonpolar_positive` / `irc_polar_polar` / `irc_polar_negative` / `irc_polar_positive` / `irc_negative_negative` / `irc_negative_positive` / `irc_positive_positive` | Inter-residue contacts per polarity pairing | int | As above | ProteinProteinInteraction graphs only |
 
 
 ## Edge features module
