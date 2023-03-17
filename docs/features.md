@@ -52,21 +52,36 @@ Sources:
 
 
 ### `deeprankcore.features.conservation`
+These features relate to the conservation state of individual residues.
+For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
 
-- `pssm`: It represents the row of the position weight matrix (PWM) relative to the amino acid, which in turns represents the conservation of the amino acid along all the 20 amino acids. In the atomic graph case, it represents the PWM row relative to the amino acid to which the atom belongs. Array of int values of length 20.
-- `info_content`: It represents how different a given PWM (row) for a given amino acid is from a uniform distribution. Float value.
-- `conservation`: If a variant is present, it represents the conservation of the amino acid variant. Float value. 
-- `diff_conservation`: If a variant is present, it represents the difference between the conservation of the variant and the conservation of the wild type amino acid. 
+| feature | description | type | notes | restrictions | 
+| --- | --------- | --- | --- | --- | --- |
+| `pssm` | Position weight matrix (PWM) values relative to the residue | Array of floats of length 20 | The conservation of the residue along all the 20 amino acids |
+| `info_content` | Difference between PWM and unoform distribution | float |
+| `conservation` | Conservation of the wild type residue | float | | SingleResidueVariant graphs only |
+| `diff_conservation` | Difference between conservation of the wild type and variant residue | float | | SingleResidueVariant graphs only |
+
 
 ### `deeprankcore.features.exposure`
-
-- `res_depth`: Average distance to surface for all atoms in a residue. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. Computed using `Bio.PDB.ResidueDepth`, in Angstrom. Float value. 
-- `hse`: Half Sphere exposure (HSE) measures how buried amino acid residues are in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. It is calculated using biopython, so for more details see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) biopython module. Array of float values of length 3.
+These features relate to the exposure of residues to the surface, and are computed using [biopython](https://biopython.org/docs/1.75/api/Bio.PDB.html). Note that these features can only be calculated per residue and not per atom.
+For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
   
-### `deeprankcore.features.surfacearea`
+| feature | description | type | notes | 
+| --- | --------- | --- | --- | --- | 
+| `res_depth` | Distance to the surface in Å | float | Average distance for all atoms in residue. See also [`Bio.PDB.ResidueDepth`](https://biopython.org/docs/1.75/api/Bio.PDB.ResidueDepth.html) | 
+| `hse` | Half Sphere Exposure (HSE) | Array of floats of length 3 | Measures the buried-ness of a residues in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. See also [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html) |
 
-- `sasa`: Solvent-Accessible Surface Area. It is defined as the surface characterized around a protein by a hypothetical centre of a solvent sphere with the van der Waals contact surface of the molecule. Computed using FreeSASA (https://freesasa.github.io/doxygen/Geometry.html), in square Angstrom. Float value. 
-- `bsa`: the Buried interfacial Surface Area is the area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. Computed using FreeSASA, in square Angstrom. Float value. 
+
+### `deeprankcore.features.surfacearea`
+These features relate to the surface area of the residue, and are computed using [freesasa](https://freesasa.github.io) 
+For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
+
+| feature | description | type | notes | 
+| --- | --------- | --- | --- | --- | 
+| `sasa` | Solvent-Accessible Surface Area in Å^2 | float | Surface area characterized around a protein by a hypothetical centre of a solvent sphere with the van der Waals contact surface of the molecule. See also: https://freesasa.github.io/doxygen/Geometry.html.
+| `bsa` | Buried interfacial Surface Area in Å^2 | float | Area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. |
+
 
 ## Edge features
 
