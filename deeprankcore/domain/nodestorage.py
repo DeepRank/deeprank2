@@ -33,31 +33,31 @@ HSE = "hse" # list[3xfloat]; former FEATURENAME_HALFSPHEREEXPOSURE
 SASA = "sasa" # float; former FEATURENAME_SASA
 RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
 
-## residue contact density
-IRCTOTAL = 'irc_total' # int
+## inter-residue contacts (IRCs)
 IRC_NONNON = 'irc_nonpolar_nonpolar' # int
-IRC_POLNON = 'irc_polar_nonpolar' # int
-IRC_POSNON = 'irc_positive_nonpolar' # int
-IRC_NEGNON = 'irc_negative_nonpolar' # int
+IRC_NONPOL = 'irc_nonpolar_polar' # int
+IRC_NONNEG = 'irc_nonpolar_negative' # int
+IRC_NONPOS = 'irc_nonpolar_positive' # int
 IRC_POLPOL = 'irc_polar_polar' # int
-IRC_POSPOL = 'irc_positive_polar' # int
-IRC_NEGPOL = 'irc_negative_polar' # int
-IRC_POSPOS = 'irc_positive_positive' # int
-IRC_NEGPOS = 'irc_negative_positive' # int
+IRC_POLNEG = 'irc_polar_negative' # int
+IRC_POLPOS = 'irc_polar_positive' # int
 IRC_NEGNEG = 'irc_negative_negative' # int
+IRC_NEGPOS = 'irc_negative_positive' # int
+IRC_POSPOS = 'irc_positive_positive' # int
+IRCTOTAL = 'irc_total' # int
 
 IRC_FEATURES = [
-    IRCTOTAL,
     IRC_NONNON,
-    IRC_POLNON,
-    IRC_POSNON,
-    IRC_NEGNON,
+    IRC_NONPOL,
+    IRC_NONNEG,
+    IRC_NONPOS,
     IRC_POLPOL,
-    IRC_POSPOL,
-    IRC_NEGPOL,
+    IRC_POLNEG,
+    IRC_POLPOS,
+    IRC_NEGNEG,
     IRC_POSPOS,
     IRC_NEGPOS,
-    IRC_NEGNEG
+    IRCTOTAL,
 ]
 
 ## conservation features
