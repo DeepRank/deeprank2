@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Tuple, Optional
 import logging
 import warnings
 import numpy as np
@@ -9,48 +9,62 @@ from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import edgestorage as Efeat
 from deeprankcore.utils.parsing import atomic_forcefield
+import numpy.typing as npt
 
 _log = logging.getLogger(__name__)
 
-MAX_COVALENT_DISTANCE = 2.1
+# cutoff distances for 1-3 and 1-4 pairing. See issue: https://github.com/DeepRank/deeprank-core/issues/357#issuecomment-1461813723
+covalent_cutoff = 2.1
+cutoff_13 = 3.6
+cutoff_14 = 4.2
 
-def _get_coulomb_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
-    """Calculate Coulomb potentials between between all Atoms in atom.
+
+def _get_nonbonded_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Calculates all pairwise electrostatic (Coulomb) and Van der Waals (Lennard Jones) potential energies between all atoms in the structure.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
     However, the potential tends to 0 at large distance.
+
+    Args:
+        atoms (List[Atom]): list of all atoms in the structure 
+        distances (npt.NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure 
+            in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
+
+    Returns:
+        Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]: matrices in same format as `distances` containing
+            all pairwise electrostatic potential energies and all pairwise Van der Waals potential energies
     """
 
+    # ELECTROSTATIC POTENTIAL
     EPSILON0 = 1.0
     COULOMB_CONSTANT = 332.0636
     charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
     electrostatic_energy = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
-    return electrostatic_energy
+    # remove for close contacts
+    electrostatic_energy[distances < cutoff_13] = 0
 
 
-def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> np.ndarray:
-    """Calculate Lennard-Jones potentials between all Atoms in atom.
-
-    Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
-    However, the potential tends to 0 at large distance.
-    """
-
-    # calculate intra potentials
-    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_sigma for atom in atoms]
-    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).intra_epsilon for atom in atoms]
+    # VAN DER WAALS POTENTIAL
+    # calculate main vdw energies
+    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).sigma_main for atom in atoms]
+    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).epsilon_main for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
-    intra_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    vdw_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+
+    # calculate energies for 1-4 pairs
+    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).sigma_14 for atom in atoms]
+    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).epsilon_14 for atom in atoms]
+    mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
+    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
+    energy_14pairs = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+
+    # adjust vdw energy for close contacts
+    vdw_energy[distances < cutoff_14] = energy_14pairs[distances < cutoff_14]
+    vdw_energy[distances < cutoff_13] = 0
     
-    # calculate inter potentials
-    sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_sigma for atom in atoms]
-    epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).inter_epsilon for atom in atoms]
-    mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
-    geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
-    inter_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
-
-    vdw_energy = {'intra': intra_energy, 'inter': inter_energy}
-    return vdw_energy
+    
+    return electrostatic_energy, vdw_energy
 
 
 def add_features( # pylint: disable=unused-argument, too-many-locals
@@ -81,8 +95,7 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
         warnings.simplefilter("ignore")
         positions = [atom.position for atom in all_atoms]
         interatomic_distances = distance_matrix(positions, positions)
-        interatomic_electrostatic_energy = _get_coulomb_potentials(all_atoms, interatomic_distances)
-        interatomic_vanderwaals_energy = _get_lennard_jones_potentials(all_atoms, interatomic_distances)
+        interatomic_electrostatic_energy, interatomic_vanderwaals_energy = _get_nonbonded_energy(all_atoms, interatomic_distances)
 
     # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
@@ -95,12 +108,9 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
             edge.features[Efeat.SAMERES] = float( contact.atom1.residue == contact.atom2.residue)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.SAMECHAIN] = float( contact.atom1.residue.chain == contact.atom1.residue.chain )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = interatomic_distances[atom1_index, atom2_index]
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < covalent_cutoff )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_energy[atom1_index, atom2_index]
-            if edge.features[Efeat.SAMERES]:
-                edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy['intra'][atom1_index, atom2_index]
-            else:
-                edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy['inter'][atom1_index, atom2_index]
+            edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy[atom1_index, atom2_index]
     
     elif isinstance(contact, ResidueContact):
         for edge in graph.edges:        
@@ -111,6 +121,6 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
             ## set features
             edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < MAX_COVALENT_DISTANCE )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < covalent_cutoff )  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = np.sum([[interatomic_electrostatic_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-            edge.features[Efeat.VANDERWAALS] = np.sum([[interatomic_vanderwaals_energy['inter'][a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
+            edge.features[Efeat.VANDERWAALS] = np.sum([[interatomic_vanderwaals_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])

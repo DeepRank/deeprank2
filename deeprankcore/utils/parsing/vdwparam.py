@@ -1,17 +1,17 @@
 class VanderwaalsParam:
     def __init__(
             self,
-            inter_epsilon: float,
-            inter_sigma: float,
-            intra_epsilon: float,
-            intra_sigma: float):
-        self.inter_epsilon = inter_epsilon
-        self.inter_sigma = inter_sigma
-        self.intra_epsilon = intra_epsilon
-        self.intra_sigma = intra_sigma
+            epsilon_main: float,
+            sigma_main: float,
+            epsilon_14: float,
+            sigma_14: float):
+        self.epsilon_main = epsilon_main
+        self.sigma_main = sigma_main
+        self.epsilon_14 = epsilon_14
+        self.sigma_14 = sigma_14
     
     def __str__(self) -> str:
-        return f"{self.inter_epsilon}, {self.inter_sigma}, {self.intra_epsilon}, {self.intra_sigma}"
+        return f"{self.epsilon_main}, {self.sigma_main}, {self.epsilon_14}, {self.sigma_14}"
 
 
 class ParamParser:
@@ -26,17 +26,17 @@ class ParamParser:
                 (
                     _,
                     type_,
-                    inter_epsilon,
-                    inter_sigma,
-                    intra_epsilon,
-                    intra_sigma,
+                    epsilon_main,
+                    sigma_main,
+                    epsilon_14,
+                    sigma_14,
                 ) = line.split()
 
                 result[type_] = VanderwaalsParam(
-                    float(inter_epsilon),
-                    float(inter_sigma),
-                    float(intra_epsilon),
-                    float(intra_sigma),
+                    float(epsilon_main),
+                    float(sigma_main),
+                    float(epsilon_14),
+                    float(sigma_14),
                 )
             elif len(line.strip()) == 0:
                 continue
