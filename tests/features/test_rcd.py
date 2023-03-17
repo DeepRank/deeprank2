@@ -44,7 +44,7 @@ def test_atom_features():
 
     atoms = set([])
     for residue1, residue2 in get_residue_contact_pairs(
-        pdb_path, structure, "A", "B", 8.5
+        pdb_path, structure, "A", "B", 4.5
     ):
         for atom in residue1.atoms:
             atoms.add(atom)
@@ -52,6 +52,6 @@ def test_atom_features():
             atoms.add(atom)
     atoms = list(atoms)
 
-    atom_graph = build_atomic_graph(atoms, "1A0Z", 8.5)
+    atom_graph = build_atomic_graph(atoms, "1A0Z", 4.5)
 
     add_features(pdb_path, atom_graph)
