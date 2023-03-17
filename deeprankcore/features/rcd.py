@@ -39,7 +39,7 @@ class _ContactDensity:
         self.connections['all'] = []
 
 
-def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float) -> Dict[str, _ContactDensity]:
+def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str, _ContactDensity]:
     """Count total number of close contact residues and contacts of specific Polarity.
 
     Args:
@@ -105,8 +105,7 @@ def add_features(
     single_amino_acid_variant = None):
     
     if not single_amino_acid_variant: # VariantQueries do not use this feature
-        chains = graph.get_all_chains()
-        residue_contacts = count_residue_contacts(pdb_path, chains, graph.cutoff_distance)
+        residue_contacts = count_residue_contacts(pdb_path, graph.get_all_chains())
         
         noncontact_residues = 0
         for node in graph.nodes:
