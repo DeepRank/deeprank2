@@ -1,10 +1,11 @@
 import logging
 import pdb2sql
-from typing import Dict, List
+from typing import Dict, List, Optional
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.aminoacid import Polarity
 from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import amino_acids
 
@@ -99,10 +100,10 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
     return residue_contacts
 
 
-def add_features(
-    pdb_path: str, 
-    graph: Graph,
-    single_amino_acid_variant = None):
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):
     
     if not single_amino_acid_variant: # VariantQueries do not use this feature
         residue_contacts = count_residue_contacts(pdb_path, graph.get_all_chains())

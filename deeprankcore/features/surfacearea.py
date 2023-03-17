@@ -1,10 +1,11 @@
 import logging
 import freesasa
 import numpy as np
-from typing import List
+from typing import List, Optional
 from deeprankcore.utils.graph import Node, Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import nodestorage as Nfeat
 
 freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member
@@ -110,8 +111,11 @@ def add_bsa(graph: Graph):
         node.features[Nfeat.BSA] = area_monomer - area_multimer
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
-
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):
+    
     """calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
     BSA: the area of the protein, that only gets exposed in monomeric state"""
 
