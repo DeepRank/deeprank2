@@ -14,7 +14,7 @@ from deeprankcore.domain.aminoacidlist import amino_acids
 _log = logging.getLogger(__name__)
 
 
-def id_from_residue(residue: tuple) -> str:
+def _id_from_residue(residue: tuple) -> str:
     """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes
 
     Args:
@@ -35,15 +35,15 @@ class _ContactDensity:
     def __init__(self, residue, polarity):
         self.res = residue
         self.polarity = polarity
-        self.id = id_from_residue(self.res)
+        self.id = _id_from_residue(self.res)
         self.densities = {pol: 0 for pol in Polarity}
         self.densities['total'] = 0
         self.connections = {pol: [] for pol in Polarity}
         self.connections['all'] = []
 
 
-def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str, _ContactDensity]:
-    """Count total number of close contact residues and contacts of specific Polarity.
+def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str, _ContactDensity]:
+    """Get all close contact residues from the opposite chain.
 
     Args:
         pdb_path (str): Path to pdb file to read molecular information from.
@@ -56,6 +56,8 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
             items: _ContactDensity objects, containing all contact density information for the residue.
     """
 
+    residue_contacts: Dict[str, _ContactDensity] = {}
+
     sql = pdb2sql.interface(pdb_path)
     pdb2sql_contacts = sql.get_contact_residues(
         cutoff=cutoff, 
@@ -63,8 +65,6 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
         return_contact_pairs=True
     )
     
-    residue_contacts = {}
-
     for chain1_res, chain2_residues in pdb2sql_contacts.items():
         aa1_code = chain1_res[2]
         try:
@@ -73,7 +73,7 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
             continue  # skip keys that are not an amino acid
 
         # add chain1_res to residue_contact dict
-        contact1_id = id_from_residue(chain1_res)
+        contact1_id = _id_from_residue(chain1_res)
         residue_contacts[contact1_id] = _ContactDensity(chain1_res, aa1.polarity)
         
         for chain2_res in chain2_residues:
@@ -90,7 +90,7 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
             residue_contacts[contact1_id].connections[aa2.polarity].append(chain2_res)
             
             # add chain2_res to residue_contact dict if it doesn't exist yet
-            contact2_id = id_from_residue(chain2_res)
+            contact2_id = _id_from_residue(chain2_res)
             if contact2_id not in residue_contacts:
                 residue_contacts[contact2_id] = _ContactDensity(chain2_res, aa2.polarity)
             # populate densities and connections for chain2_res
@@ -112,7 +112,7 @@ def add_features(
         polarity_pair_string = [f'irc_{x[0].name.lower()}_{x[1].name.lower()}' for x in polarity_pairs]
         
         total_contacts = 0
-        residue_contacts = count_residue_contacts(pdb_path, graph.get_all_chains())
+        residue_contacts = get_IRCs(pdb_path, graph.get_all_chains())
 
         for node in graph.nodes:
             if isinstance(node.id, Residue):
