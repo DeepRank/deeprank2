@@ -82,6 +82,15 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 | `bsa` | Buried interfacial Surface Area in Å^2 | float | Area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. |
 
 
+### `deeprankcore.features.irc`
+These features relate to the inter-residue contacs (IRCs), i.e. the number of residues on the opposite chain within a cutoff distance of 5.5 Å. IRCs are found using the `get_contact_residues` function of [pdb2sql.interface](https://github.com/DeepRank/pdb2sql/blob/master/pdb2sql/interface.py)
+For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
+
+| feature | description | type | notes | restrictions
+| --- | --------- | --- | --- | --- | 
+| `irc_total` | Total inter-residue contacts | int | Number of residues on opposite chain within 5.5 Å distance | ProteinProteinInteraction graphs only |
+
+
 ## Edge features module
 
 ### `deeprankcore.features.contact`
