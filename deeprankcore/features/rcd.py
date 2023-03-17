@@ -100,7 +100,7 @@ def count_residue_contacts(pdb_path: str, chains: List[str], cutoff: float = 5.5
     return residue_contacts
 
 
-def add_features( # pylint: disable=unused-argument
+def add_features(
     pdb_path: str, graph: Graph,
     single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):

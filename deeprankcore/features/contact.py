@@ -53,7 +53,7 @@ def _get_lennard_jones_potentials(atoms: List[Atom], distances: np.ndarray) -> n
     return vdw_energy
 
 
-def add_features( # pylint: disable=unused-argument
+def add_features( # pylint: disable=unused-argument, too-many-locals
     pdb_path: str, graph: Graph,
     single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):
