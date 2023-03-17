@@ -107,7 +107,7 @@ def add_features(
     if not single_amino_acid_variant: # VariantQueries do not use this feature
         residue_contacts = count_residue_contacts(pdb_path, graph.get_all_chains())
         
-        noncontact_residues = 0
+        total_contacts = 0
         for node in graph.nodes:
             if isinstance(node.id, Residue):
                 residue = node.id
@@ -127,14 +127,13 @@ def add_features(
                 node.features[Nfeat.RCDPOLAR] = residue_contacts[contact_id].densities[Polarity.POLAR]
                 node.features[Nfeat.RCDNEGATIVE] = residue_contacts[contact_id].densities[Polarity.NEGATIVE_CHARGE]
                 node.features[Nfeat.RCDPOSITIVE] = residue_contacts[contact_id].densities[Polarity.POSITIVE_CHARGE]
+                total_contacts += 1
             except KeyError:
                 node.features[Nfeat.RCDTOTAL] = 0
                 node.features[Nfeat.RCDNONPOLAR] = 0
                 node.features[Nfeat.RCDPOLAR] = 0
                 node.features[Nfeat.RCDNEGATIVE] = 0
                 node.features[Nfeat.RCDPOSITIVE] = 0
-
-                noncontact_residues += 1
         
-        if noncontact_residues == len(graph.nodes):
-            _log.warning(f"No residue contacts detected for {pdb_path}.")
+        if total_contacts < 5:
+            _log.warning(f"Few ({total_contacts}) contacts detected for {pdb_path}.")
