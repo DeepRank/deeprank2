@@ -16,24 +16,40 @@ def add_features(
 ```
 
 
-## Node features 
+## Predefined node features
+Organized by module
 
 ### `deeprankcore.features.components`
+These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in deeprankcore.domain.aminoacidlist.py.
 
-- Detailed information about sources used for the hard coded features (e.g., `polarity`) can be found in deeprankcore.domain.aminoacidlist.py.
-- `atom_type`: Only for atomic graph, one hot encodes the type of atom (C, O, N, S, P, H).
-- `pdb_occupancy`: Only for atomic graph, it represents the proportion of structures where the atom is detected at a given position. Sometimes a single atom can be detected at multiple positions, and in that case separate structures exist whose occupancies sum gives 1. Note that only the highest occupancy atom is used by deeprankcore. Float value.
-- `atom_charge`: Only for atomic graph, atomic charge in Coulomb. Taken from deeprankcore.domain.forcefield.patch.top file. Float value.
-- `res_type`: One hot encodes the type of amino acid (20).
-- `charge`: The charge property of the amino acid. Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
-- `polarity`: One hot encodes the polarity of the amino acid (nonpolar, polar, negative charge, positive charge).
-- `res_size`: The number of heavy atoms in the side chain. Int value.
-- `res_mass`: The average residue mass (i.e. mass of amino acid - H20) in Daltons. Float value.
-- `res_pI`: The isolectric point, which represents the pH at which the molecule has no net electric charge. Float value.
-- `hb_donors`, `hb_acceptors`: Represents the number of donor/acceptor atoms, from 0 to 5. Amino acids can have hydrogen donor/acceptor atoms in their side chain. Hydrogen Bonds (HB) are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair. In hydrogen bonds there is a distinction between the electronegative atoms (O, N, F) based on which one the hydrogen is covalently bonded to. Based on this, hydrogens can be named either acceptors or donators. Int value.
-- `variant_res`: If a variant is present, one hot encodes the type of amino acid variant (20).
-- `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: If a variant is present, they represent the differences between the variant and the wild type amino acid in charge, polarity, size, mass, isoelectric point, donor/acceptor atoms.
-  
+| feature | description | type | restrictions | notes | sources |
+| --- | --------- | --- | --- | --- | --- |
+| `atom_type` | Atomic element | one hot encoded: [C, O, N, S, P, H] | atomic graphs only |
+| `atom_charge` | Charge of the atom in Coulomb | float | atomic graphs only | Values can be found in deeprankcore.domain.forcefield.patch.top
+| `pdb_occupancy` | Proportion of structures where the atom was detected at this position | float | atomic graphs only | In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprankcore.
+| `res_type` | Amino acid residue | one hot encoded (size 20) | 
+| `polarity` | Polarity of the amino acid | one hot encoded: [NONPOLAR, POLAR, NEGATIVE, POSITIVE] | | Sources vary on the polarity for few of the amino acids; see detailed information in deeprankcore.domain.aminoacidlist.py | 1-6 |
+| `res_size` | Number of non-hydrogen atoms in the side chain | int | | | 2 |
+| `res_mass` | Residue mass (average) in Da | float | | Amino acid mass minus mass of H~2~0 | 2, 7, 8 |
+| `charge` | Charge of the residue (in fully protonated state) in Coulomb | float | | Calculated by summing all atomic charges in the residue, resulting in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
+| `res_pI` | Isolectric point of the residue (pH at which the molecule has no net electric charge) | float | | Minor discrepancies between sources exists for few amino acids; see detailed information in deeprankcore.domain.aminoacidlist.py | 2, 7, 8 |
+| `hb_donors` / `hb_acceptors` | Number of hydrogen bond donor/acceptor atoms in the residue | int | | Hydrogen bonds (hb) are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair. | 9, 10 |
+| `variant_res` | Variant amino acid residue. | one hot encoded (size 20) | only for SingleResidueVariant graphs |
+| `diff_charge` / `diff_polarity` / `diff_size` / `diff_mass` / `diff_pI` / `diff_hb_donors` / `diff_hb_acceptors` | Difference between the variant and the wild type equivalent for indicated feature, as described above | see above | only for SingleResidueVariant graphs |
+
+Sources:
+1. https://www.britannica.com/science/amino-acid/Standard-amino-acids
+2. https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf
+3. https://en.wikipedia.org/wiki/Amino_acid
+4. https://nld.promega.com/resources/tools/amino-acid-chart-amino-acid-structure/
+5. https://ib.bioninja.com.au/standard-level/topic-2-molecular-biology/24-proteins/amino-acids.html
+6. print book: "Biology", by Campbell & Reece, 6th ed, ISBN: 0-201-75054-6
+7. https://www.sigmaaldrich.com/NL/en/technical-documents/technical-article/protein-biology/protein-structural-analysis/amino-acid-reference-chart
+8. https://www.nectagen.com/reference-data/ingredients/amino-acids
+9. https://foldit.fandom.com/wiki/Sidechain_Bonding_Gallery
+10. https://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/charge/
+
+
 ### `deeprankcore.features.conservation`
 
 - `pssm`: It represents the row of the position weight matrix (PWM) relative to the amino acid, which in turns represents the conservation of the amino acid along all the 20 amino acids. In the atomic graph case, it represents the PWM row relative to the amino acid to which the atom belongs. Array of int values of length 20.
