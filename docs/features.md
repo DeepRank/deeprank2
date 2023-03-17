@@ -16,12 +16,11 @@ def add_features(
 ```
 
 
-## Predefined node features
-Organized by module
+## Node features modules
 
 ### `deeprankcore.features.components`
 These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in deeprankcore.domain.aminoacidlist.py.
-For features related to residues in atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
+For atomic graphs, when features relate to residue then _all_ atoms of one residue receive the feature value for that residue.
 
 | feature | description | type | notes | restrictions | sources |
 | --- | --------- | --- | --- | --- | --- |
@@ -83,13 +82,17 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 | `bsa` | Buried interfacial Surface Area in Å^2 | float | Area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. |
 
 
-## Edge features
+## Edge features module
 
 ### `deeprankcore.features.contact`
+These features relate to relationships between individual nodes.
+For atomic graphs, when features relate to residue then _all_ atoms of one residue receive the feature value for that residue.
 
-- `same_res`: Only for atomic graph, 1 if the edge connects two atoms beloging to the same residue, otherwise 0.  
-- `same_chain`: 1 if the edge connects two molecules beloging to the same chain, otherwise 0.  
-- `distance`: Interatomic distance between atoms in Angstrom. It is computed from the xyz atomic coordinates taken from the .pdb file. In the residue graph case, the minimum distance between the atoms of the first residue and the atoms from the second one is considered. Float value. 
-- `covalent`: 1 if there is a covalent bond between the two molecules, otherwise 0. A bond is considered covalent if its length is less than 2.1 Angstrom.
-- `electrostatic`: Coulomb (electrostatic) potential, given the interatomic distance/s and charge/s of the atoms. There's no distance cutoff here. The radius of influence is assumed to infinite. Float value. 
-- `vanderwaals`: Lennard-Jones potentials, given interatomic distance/s and a list of atoms with vanderwaals parameters. There's no distance cutoff here. The radius of influence is assumed to infinite. Float value.
+| feature | description | type | notes | restrictions | 
+| --- | --------- | --- | --- | --- | --- |
+| `same_res` | Whether both nodes are part of the same residue | bool | | atomic graphs only |
+| `same_chain` | Whether both nodes are part of the same chain | bool |
+| `distance` | Distance in Å | float | Computed using atomic coordinates from the .pdb file. For residue graphs, the minimum distance between atoms of each residue is used | 
+| `covalent` | Whether the edge respresents a covalent bond | bool | Edges with a distance of <2.1 Å are considered covalent.
+| `electrostatic` | Electrostatic potential energy (Coulomb potential) | float | Calculated from the interatomic distances and charges of the atoms. Note that no distance cutoff is implemented. | 
+| `vanderwaals` | Van der Waals potential energy (Lennard-Jones potentials) | float | Calculated from the interatomic distances and the forcefield in deeprankcore/domain/forcefield/protein-allhdg5-4_new.param. Note that no distance cutoff is implemented. | 
