@@ -1,10 +1,11 @@
+import os
+import numpy as np
+from typing import Optional
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.utils.graph import Graph
-from typing import Optional
-import numpy as np
-import os	
+from deeprankcore.domain import nodestorage as Nfeat
 
 
 def dssp(pdb_path: str):
@@ -61,7 +62,12 @@ def dssp(pdb_path: str):
 
 
 
-def add_features(pdb_path: str, graph: Graph):
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):    
+    
     """
     Add secondary structure features to the nodes of a graph.
 
@@ -76,16 +82,12 @@ def add_features(pdb_path: str, graph: Graph):
     # Iterate through the nodes in the graph
     for node in graph.nodes:
 
-        # Check if the node represents a Residue object
+        # Get the node type
         if isinstance(node.id, Residue):
             residue = node.id
-
-        # Check if the node represents an Atom object
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
-
-        # Raise an error if the node type is unexpected
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}")
 
@@ -94,9 +96,4 @@ def add_features(pdb_path: str, graph: Graph):
         residue_position = residue.number
 
         # Add the secondary structure feature to the node
-        node.features['ss'] = sec_structure_features[chain_id][residue_position]
-
-
-
-
-
+        node.features[Nfeat.SECSTRUCT] = sec_structure_features[chain_id][residue_position]
