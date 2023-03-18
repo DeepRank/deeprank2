@@ -1,22 +1,15 @@
 import numpy as np
-from deeprankcore.features.irc import add_features
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.utils.graph import Graph
 from . import build_testgraph
+from deeprankcore.utils.graph import Graph
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.features.irc import add_features
 
 
 def _run_assertions(graph: Graph):
-    """Check whether features are added to graph correctly
-
-    Args:
-        graph (Graph): graph to check
-    """
-
     assert not np.any(
         [np.isnan(node.features[Nfeat.IRCTOTAL]) 
             for node in graph.nodes]
     ), 'nan found'
-    
     assert np.any(
         [node.features[Nfeat.IRCTOTAL] > 0
             for node in graph.nodes]
