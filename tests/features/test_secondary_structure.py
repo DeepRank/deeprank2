@@ -1,15 +1,10 @@
 from pdb2sql import pdb2sql
 import numpy as np
-from deeprankcore.domain.aminoacidlist import alanine
-from deeprankcore.molstruct.structure import PDBStructure, Chain
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.molstruct.structure import PDBStructure
 from deeprankcore.features.secondary_structure import add_features
-from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph
-from deeprankcore.utils.buildgraph import (
-    get_structure,
-    get_residue_contact_pairs,
-    get_surrounding_residues)
+from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph, Graph
+from deeprankcore.utils.buildgraph import get_structure
+from deeprankcore.utils.buildgraph import get_residue_contact_pairs
 from deeprankcore.domain import nodestorage as Nfeat
 
 def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
