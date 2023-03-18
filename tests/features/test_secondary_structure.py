@@ -69,3 +69,26 @@ def test_secondary_structure_residue():
 
     _run_assertions(graph, node_info_list)
 
+
+def test_secondary_structure_atom():
+    pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
+    structure = _load_pdb_structure(pdb_path, "1A0Z")
+
+    atoms = set([])
+    for residue1, residue2 in get_residue_contact_pairs(
+        pdb_path, structure, "A", "B", 4.5
+    ):
+        for atom in residue1.atoms:
+            atoms.add(atom)
+        for atom in residue2.atoms:
+            atoms.add(atom)
+    atoms = list(atoms)
+
+    graph = build_atomic_graph(atoms, "1A0Z", 4.5)
+
+    add_features(pdb_path, graph)
+    
+    # Create a list of node information (residue number, chain ID, and secondary structure features)
+    node_info_list = [[node.id.residue.number, node.id.residue.chain.id, node.features[Nfeat.SECSTRUCT]] for node in graph.nodes]
+
+    _run_assertions(graph, node_info_list)
