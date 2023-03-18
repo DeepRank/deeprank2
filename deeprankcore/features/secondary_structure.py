@@ -43,7 +43,10 @@ def dssp(pdb_path: str):
         sec_structure_dict[chain] = {}
     
     # Sanity check: Ensure equal lengths of chain_ids, residue_numbers, and sec_structure_features
-    assert len(chain_ids) == len(residue_numbers) == len(sec_structure_features)
+    if not len(chain_ids) == len(residue_numbers) == len(sec_structure_features):
+        raise ValueError(
+            f'Unequal length of chain_ids {len(chain_ids)}, residue numbers {len(residue_numbers)}, \
+                and sec_structure_features {len(sec_structure_features)} objects')
     
     # Create one-hot encoding for secondary structure features
     one_hot_encoded_features = np.zeros((len(sec_structure_features), 3))
