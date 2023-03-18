@@ -27,7 +27,6 @@ def add_features( # pylint: disable=unused-argument
         pssm_row = residue.get_pssm()
         profile = np.array([pssm_row.get_conservation(amino_acid)
                                for amino_acid in profile_amino_acid_order])
-
         node.features[Nfeat.PSSM] = profile
         node.features[Nfeat.INFOCONTENT] = pssm_row.information_content
 

@@ -30,7 +30,6 @@ def handle_timeout(sig, frame):
 def space_if_none(value):
     if value is None:
         return " "
-
     return value
 
 
@@ -57,22 +56,22 @@ def add_features( # pylint: disable=unused-argument
     else:
         hse = HSExposureCA(bio_model)
 
-        for node in graph.nodes:
 
-            # These can only be calculated per residue, not per atom.
-            # So for atomic graphs, every atom gets its residue's value.
-            if isinstance(node.id, Atom):
+        # These can only be calculated per residue, not per atom.
+        # So for atomic graphs, every atom gets its residue's value.
+        for node in graph.nodes:
+            if isinstance(node.id, Residue):
+                residue = node.id
+            elif isinstance(node.id, Atom):
                 atom = node.id
                 residue = atom.residue
-            elif isinstance(node.id, Residue):
-                residue = node.id
             else:
-                raise TypeError(f"Unexpected node type: {type(node)}")
+                raise TypeError(f"Unexpected node type: {type(node.id)}")
 
             bio_residue = bio_model[residue.chain.id][residue.number]
             node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)
-
             hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
+
             if hse_key in hse:
                 node.features[Nfeat.HSE] = hse[hse_key]
             else:

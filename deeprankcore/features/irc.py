@@ -93,6 +93,7 @@ def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str,
             contact2_id = _id_from_residue(chain2_res)
             if contact2_id not in residue_contacts:
                 residue_contacts[contact2_id] = _ContactDensity(chain2_res, aa2.polarity)
+
             # populate densities and connections for chain2_res
             residue_contacts[contact2_id].densities['total'] += 1
             residue_contacts[contact2_id].densities[aa1.polarity] += 1
@@ -138,11 +139,8 @@ def add_features(
                     elif residue_contacts[contact_id].polarity == pair[1]:
                         node.features[polarity_pair_string[i]] = residue_contacts[contact_id].densities[pair[0]]
                 total_contacts += 1
-
-            except KeyError:
-                # node has no contact residues
+            except KeyError:  # node has no contact residues and all counts remain 0
                 pass
 
-        
         if total_contacts < 5:
             _log.warning(f"Few ({total_contacts}) contacts detected for {pdb_path}.")
