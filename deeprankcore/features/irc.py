@@ -1,7 +1,7 @@
 import logging
 import pdb2sql
 from itertools import combinations_with_replacement as combinations
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.aminoacid import Polarity
@@ -14,7 +14,7 @@ from deeprankcore.domain.aminoacidlist import amino_acids
 _log = logging.getLogger(__name__)
 
 
-def _id_from_residue(residue: tuple) -> str:
+def _id_from_residue(residue: Tuple[str, int, str]) -> str:
     """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes
 
     Args:
@@ -32,7 +32,7 @@ class _ContactDensity:
     """Internal class that holds contact density information for a given residue.
     """
     
-    def __init__(self, residue, polarity):
+    def __init__(self, residue: Tuple[str, int, str], polarity: Polarity):
         self.res = residue
         self.polarity = polarity
         self.id = _id_from_residue(self.res)
