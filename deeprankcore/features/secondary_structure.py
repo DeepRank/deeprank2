@@ -20,7 +20,7 @@ def dssp(pdb_path: str):
     """
     
     # Execute DSSP and read the output
-    dssp_output = os.popen('dssp -i %s' % pdb_path).read()
+    dssp_output = os.popen(f'dssp -i {pdb_path}').read()
     
     # Extract relevant lines from the output
     dssp_lines = dssp_output[dssp_output.index('  #  RESIDUE'):].split('\n')[1:-1]
@@ -51,11 +51,11 @@ def dssp(pdb_path: str):
     
     # Create one-hot encoding for secondary structure features
     one_hot_encoded_features = np.zeros((len(sec_structure_features), 3))
-    for ind in range(len(sec_structure_features)):
+    for ind, _ in enumerate(sec_structure_features):
         one_hot_encoded_features[ind]['HEC'.index(sec_structure_features[ind])] = 1
 
     # Populate the dictionary with one-hot encoded secondary structure information
-    for i in range(len(chain_ids)):
+    for i, _ in enumerate(chain_ids):
         sec_structure_dict[chain_ids[i]][residue_numbers[i]] = one_hot_encoded_features[i]
     
     return sec_structure_dict
