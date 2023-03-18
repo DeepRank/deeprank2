@@ -30,23 +30,12 @@ def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
         pdb._close()  # pylint: disable=protected-access
 
 
-def test_secondary_structure_residue():
-    # Load test PDB file and create a residue graph
-    pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
-    structure = _load_pdb_structure(pdb_path, "1ak4")
-    residues = structure.chains[0].residues + structure.chains[1].residues
-    graph = build_residue_graph(residues, "1ak4", 8.5)
-
-    # Add secondary structure features to the graph nodes
-    add_features(pdb_path, graph)
-
-    # Create a list of node information (residue number, chain ID, and secondary structure features)
-    node_info_list = [[node.id.number, node.id.chain.id, node.features['ss']] for node in graph.nodes]
+def _run_assertions(graph: Graph, node_info_list: list):
     node_info_list.sort()
-
+    
     # Check if the sum of secondary structure features equals 1.0 for all nodes
     assert np.any(
-        node.features['ss'].sum() == 1.0 for node in graph.nodes
+        node.features[Nfeat.SECSTRUCT].sum() == 1.0 for node in graph.nodes
     )
 
     # Check example 1
@@ -63,3 +52,20 @@ def test_secondary_structure_residue():
     assert node_info_list[226][0] == 114
     assert node_info_list[226][1] == 'D'
     assert np.array_equal(node_info_list[226][2], np.array([1., 0., 0.]))
+
+    
+def test_secondary_structure_residue():
+    # Load test PDB file and create a residue graph
+    pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
+    structure = _load_pdb_structure(pdb_path, "1ak4")
+    residues = structure.chains[0].residues + structure.chains[1].residues
+    graph = build_residue_graph(residues, "1ak4", 8.5)
+
+    # Add secondary structure features to the graph nodes
+    add_features(pdb_path, graph)
+
+    # Create a list of node information (residue number, chain ID, and secondary structure features)
+    node_info_list = [[node.id.number, node.id.chain.id, node.features[Nfeat.SECSTRUCT]] for node in graph.nodes]
+
+    _run_assertions(graph, node_info_list)
+
