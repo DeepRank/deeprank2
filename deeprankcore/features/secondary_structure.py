@@ -90,8 +90,8 @@ def add_features(pdb_path: str, graph: Graph):
             raise TypeError(f"Unexpected node type: {type(node.id)}")
 
         # Get the chain ID and residue position from the node
-        chain_id = node.id.chain.id
-        residue_position = node.id.number
+        chain_id = residue.chain.id
+        residue_position = residue.number
 
         # Add the secondary structure feature to the node
         node.features['ss'] = sec_structure_features[chain_id][residue_position]
