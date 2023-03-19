@@ -21,9 +21,12 @@ def add_features(
 These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in deeprankcore.domain.aminoacidlist.py.
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
++---------+-------------+------+-------+--------------+---------+
 | feature | description | type | notes | restrictions | sources |
-| --- | --------- | --- | --- | --- | --- |
++=========+=============+======+=======+==============+=========+
 | atom_type | Atomic element | one hot encoded: [C, O, N, S, P, H] | | atomic graphs only |
++---------+-------------+------+-------+--------------+---------+
+
 | atom_charge | Charge of the atom in Coulomb | float | Values can be found in deeprankcore.domain.forcefield.patch.top | atomic graphs only |
 | pdb_occupancy | Proportion of structures where the atom was detected at this position | float | In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprankcore. | atomic graphs only | 
 | res_type | Amino acid residue | one hot encoded (size 20) | 
