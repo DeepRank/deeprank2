@@ -44,7 +44,6 @@ def add_features( # pylint: disable=unused-argument
     with warnings.catch_warnings(record=PDBConstructionWarning):
         parser = PDBParser()
         structure = parser.get_structure('_tmp', pdb_path)
-    
     bio_model = structure[0]
 
     try:
@@ -55,7 +54,6 @@ def add_features( # pylint: disable=unused-argument
         raise TimeoutError('Bio.PDB.ResidueDepth.get_surface timed out.') from e
     else:
         hse = HSExposureCA(bio_model)
-
 
         # These can only be calculated per residue, not per atom.
         # So for atomic graphs, every atom gets its residue's value.
