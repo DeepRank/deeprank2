@@ -15,7 +15,7 @@ def _run_assertions(graph: Graph):
     ), 'resdepth'
 
 
-def test_residue_features():
+def test_exposure_residue():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
     graph = build_testgraph(pdb_path, 8.5, 'residue')
 
@@ -23,7 +23,7 @@ def test_residue_features():
     _run_assertions(graph)
 
 
-def test_atom_features():
+def test_exposure_atom():
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
     graph = build_testgraph(pdb_path, 4.5, 'atom')
 

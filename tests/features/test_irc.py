@@ -21,7 +21,7 @@ def _run_assertions(graph: Graph):
     ), 'incorrect total'
     
 
-def test_residue_features():
+def test_irc_residue():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
     graph = build_testgraph(pdb_path, 8.5, 'residue')
 
@@ -29,7 +29,7 @@ def test_residue_features():
     _run_assertions(graph)
 
 
-def test_atom_features():
+def test_irc_atom():
     pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
     graph = build_testgraph(pdb_path, 4.5, 'atom')
 
