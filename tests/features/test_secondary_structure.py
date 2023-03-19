@@ -4,7 +4,6 @@ from deeprankcore.molstruct.structure import PDBStructure
 from deeprankcore.features.secondary_structure import add_features
 from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph, Graph
 from deeprankcore.utils.buildgraph import get_structure
-from deeprankcore.utils.buildgraph import get_residue_contact_pairs
 from deeprankcore.domain import nodestorage as Nfeat
 
 def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
