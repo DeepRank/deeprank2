@@ -1,17 +1,11 @@
-from pdb2sql import pdb2sql
 import numpy as np
+from pdb2sql import pdb2sql
 from . import build_testgraph
-from deeprankcore.domain.aminoacidlist import alanine
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.molstruct.structure import PDBStructure, Chain
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.features.surfacearea import add_features
-from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph
-from deeprankcore.utils.buildgraph import (
-    get_structure,
-    get_residue_contact_pairs,
-    get_surrounding_residues)
-from deeprankcore.domain import nodestorage as Nfeat
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
