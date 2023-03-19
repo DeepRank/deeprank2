@@ -28,25 +28,32 @@ def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
 def _run_assertions(graph: Graph, node_info_list: list):
     node_info_list.sort()
     
-    # Check if the sum of secondary structure features equals 1.0 for all nodes
-    assert np.any(
-        node.features[Nfeat.SECSTRUCT].sum() == 1.0 for node in graph.nodes
-    )
+    # Check that all nodes have exactly 1 secondary structure type
+    assert np.all([node.features[Nfeat.SECSTRUCT].sum() == 1.0 for node in graph.nodes]), 'sum != 1'
 
-    # Check example 1
-    assert node_info_list[0][0] == 1
-    assert node_info_list[0][1] == 'D'
-    assert np.array_equal(node_info_list[0][2], np.array([0., 0., 1.]))
+    # Example of a coil (C)
+    example1_list = [node_info for node_info in node_info_list if (node_info[0] == 1 and node_info[1] == 'D')]
+    assert len(example1_list) > 0, 'no nodes detected in D 1'
+    assert np.all(
+        [np.array_equal(node_info[2], np.array([0., 0., 1.]))
+            for node_info in example1_list]
+    ), 'sec struct for D 1 is not H'
 
-    # Check example 2
-    assert node_info_list[255][0] == 129
-    assert node_info_list[255][1] == 'C'
-    assert np.array_equal(node_info_list[255][2], np.array([0., 1., 0.]))
+    # Example of an extended region (E)
+    example2_list = [node_info for node_info in node_info_list if (node_info[0] == 129 and node_info[1] == 'C')]
+    assert len(example2_list) > 0, 'no nodes detected in C 129'
+    assert np.all(
+        [np.array_equal(node_info[2], np.array([0., 1., 0.]))
+            for node_info in example2_list]
+    ), 'sec struct for C 129 is not C'
 
-    # Check example 3
-    assert node_info_list[226][0] == 114
-    assert node_info_list[226][1] == 'D'
-    assert np.array_equal(node_info_list[226][2], np.array([1., 0., 0.]))
+    # Example of an extended helix (H)
+    example3_list = [node_info for node_info in node_info_list if (node_info[0] == 114 and node_info[1] == 'D')]
+    assert len(example3_list) > 0, 'no nodes detected in D 114'
+    assert np.all(
+        [np.array_equal(node_info[2], np.array([1., 0., 0.]))
+            for node_info in example3_list]
+    ), 'sec struct for D 114 is not H'
 
     
 def test_secondary_structure_residue():
@@ -60,30 +67,27 @@ def test_secondary_structure_residue():
     add_features(pdb_path, graph)
 
     # Create a list of node information (residue number, chain ID, and secondary structure features)
-    node_info_list = [[node.id.number, node.id.chain.id, node.features[Nfeat.SECSTRUCT]] for node in graph.nodes]
-
+    node_info_list = [[node.id.number, 
+                       node.id.chain.id, 
+                       node.features[Nfeat.SECSTRUCT]] 
+                            for node in graph.nodes]
     _run_assertions(graph, node_info_list)
 
 
 def test_secondary_structure_atom():
-    pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
-    structure = _load_pdb_structure(pdb_path, "1A0Z")
+    pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
+    structure = _load_pdb_structure(pdb_path, "1ak4")
 
-    atoms = set([])
-    for residue1, residue2 in get_residue_contact_pairs(
-        pdb_path, structure, "A", "B", 4.5
-    ):
-        for atom in residue1.atoms:
-            atoms.add(atom)
-        for atom in residue2.atoms:
-            atoms.add(atom)
-    atoms = list(atoms)
+    atoms = [atom for residue in structure.chains[0].residues for atom in residue.atoms] \
+            + [atom for residue in structure.chains[1].residues for atom in residue.atoms]
 
-    graph = build_atomic_graph(atoms, "1A0Z", 4.5)
+    graph = build_atomic_graph(atoms, "1ak4", 4.5)
 
     add_features(pdb_path, graph)
     
     # Create a list of node information (residue number, chain ID, and secondary structure features)
-    node_info_list = [[node.id.residue.number, node.id.residue.chain.id, node.features[Nfeat.SECSTRUCT]] for node in graph.nodes]
-
+    node_info_list = [[node.id.residue.number, 
+                       node.id.residue.chain.id, 
+                       node.features[Nfeat.SECSTRUCT]] 
+                            for node in graph.nodes]
     _run_assertions(graph, node_info_list)
