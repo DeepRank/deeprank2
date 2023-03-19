@@ -60,7 +60,7 @@ runs:
         # Safest way to install PyTorch and PyTorch Geometric is through conda
         conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c pytorch
         conda install pyg -c pyg
-        sudo apt-get install dssp
+        # sudo apt-get install dssp
         # In the future, release h5xplorer on PyPI
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
 
