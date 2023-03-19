@@ -35,21 +35,29 @@ def build_testgraph(pdb_path: str, cutoff: float, detail: str, central_res: Opti
             if detail == 'residue':
                 nodes.add(residue1)
                 nodes.add(residue2)
-                return build_residue_graph(list(nodes), structure.id, cutoff)
             
             elif detail == 'atom':
                 for atom in residue1.atoms:
                     nodes.add(atom)
                 for atom in residue2.atoms:
                     nodes.add(atom)
-                return build_atomic_graph(list(nodes), structure.id, cutoff)
 
-            else:
-                raise TypeError('detail must be "atom" or "residue"')
+        if detail == 'residue':
+            return build_residue_graph(list(nodes), structure.id, cutoff)
+        elif detail == 'atom':
+            return build_atomic_graph(list(nodes), structure.id, cutoff)                
+        else:
+            raise TypeError('detail must be "atom" or "residue"')
 
     else:
+        residue = _get_residue(structure.chains[0], 108)
+        surrounding_residues = list(get_surrounding_residues(structure, residue, cutoff))
         if detail == 'residue':
-            residue = _get_residue(structure.chains[0], 108)
-            nodes = get_surrounding_residues(structure, residue, cutoff)
-            return build_residue_graph(list(nodes), structure.id, cutoff)
+            return build_residue_graph(surrounding_residues, structure.id, cutoff)        
+        elif detail == 'atom':
+            atoms = [atom for residue in surrounding_residues for atom in residue.atoms]
+            return build_atomic_graph(atoms, structure.id, cutoff)     
+        else:
+            raise TypeError('detail must be "atom" or "residue"')
+                   
 
