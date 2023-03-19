@@ -124,11 +124,12 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 These features relate to the inter-residue contacs (IRCs), i.e. the number of residues on the opposite chain within a cutoff distance of 5.5 Å. IRCs are found using the `get_contact_residues` function of [pdb2sql.interface](https://github.com/DeepRank/pdb2sql/blob/master/pdb2sql/interface.py)
 For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
 
+``` markdown
 | feature | description | type | notes | restrictions
 | --- | --------- | --- | --- | --- | 
 | irc_total | Total inter-residue contacts | int | Number of residues on opposite chain within a 5.5 Å cutoff distance | ProteinProteinInteraction graphs only |
 | irc_nonpolar_nonpolar / irc_nonpolar_polar / irc_nonpolar_negative / irc_nonpolar_positive / irc_polar_polar / irc_polar_negative / irc_polar_positive / irc_negative_negative / irc_negative_positive / irc_positive_positive | Inter-residue contacts per polarity pairing | int | As above | ProteinProteinInteraction graphs only |
-
+```
 
 ## Edge features module
 
@@ -136,6 +137,7 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 These features relate to relationships between individual nodes.
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
+```md
 | feature | description | type | notes | restrictions | 
 | --- | --------- | --- | --- | --- | --- |
 | same_res | Whether both nodes are part of the same residue | bool | | atomic graphs only |
@@ -144,3 +146,4 @@ For atomic graphs, when features relate to residues then _all_ atoms of one resi
 | covalent | Whether the edge respresents a covalent bond | bool | Edges with a distance of <2.1 Å are considered covalent.
 | electrostatic | Electrostatic potential energy (Coulomb potential) | float | Calculated from the interatomic distances and charges of the atoms. Note that no distance cutoff is implemented. | 
 | vanderwaals | Van der Waals potential energy (Lennard-Jones potentials) | float | Calculated from the interatomic distances and the forcefield in deeprankcore/domain/forcefield/protein-allhdg5-4_new.param. Note that no distance cutoff is implemented. | 
+```
