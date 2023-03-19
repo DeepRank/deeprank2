@@ -8,13 +8,6 @@ from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.features.surfacearea import add_features
 
 
-def _get_residue(chain: Chain, number: int) -> Residue:
-    for residue in chain.residues:
-        if residue.number == number:
-            return residue
-    raise ValueError(f"Not found: {number}")
-
-
 def _find_residue_node(graph, chain_id, residue_number):
     for node in graph.nodes:
         residue = node.id
@@ -33,13 +26,6 @@ def _find_atom_node(graph, chain_id, residue_number, atom_name):
         ):
             return node
     raise ValueError(f"Not found: {chain_id} {residue_number} {atom_name}")
-
-def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
-    pdb = pdb2sql(pdb_path)
-    try:
-        return get_structure(pdb, id_)
-    finally:
-        pdb._close() # pylint: disable=protected-access
 
 
 def test_bsa_residue():
@@ -64,7 +50,7 @@ def test_bsa_atom():
 
 def test_sasa_residue():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph = build_testgraph(pdb_path, 10, 'residue', 108)
+    graph, _ = build_testgraph(pdb_path, 10, 'residue', 108)
     add_features(pdb_path, graph)
 
     # check for NaN
@@ -83,7 +69,7 @@ def test_sasa_residue():
 
 def test_sasa_atom():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph = build_testgraph(pdb_path, 10, 'atom', 108)
+    graph, _ = build_testgraph(pdb_path, 10, 'atom', 108)
     add_features(pdb_path, graph)
 
     # check for NaN

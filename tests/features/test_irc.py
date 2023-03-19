@@ -1,8 +1,9 @@
 import numpy as np
 from . import build_testgraph
-from deeprankcore.utils.graph import Graph
 from deeprankcore.domain import nodestorage as Nfeat
+
 from deeprankcore.features.irc import add_features
+from deeprankcore.utils.graph import Graph
 
 
 def _run_assertions(graph: Graph):
