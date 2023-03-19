@@ -21,7 +21,7 @@ def add_sasa(pdb_path: str, graph: Graph):
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id
-            selection = (f"residue, (resi {residue.number_string}) and (chain {residue.chain.id})")
+            selection = (f"residue, (resi {residue.number_string}) and (chain {residue.chain.id})",)
             area = freesasa.selectArea(selection, structure, result)['residue']
 
         elif isinstance(node.id, Atom):
