@@ -4,10 +4,6 @@ from deeprankcore.molstruct.residue import Residue
 from deeprankcore.utils.pssmdata import PssmRow, PssmTable
 from deeprankcore.domain.aminoacidlist import amino_acids
 
-amino_acids_by_letter = {
-    amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids
-}
-
 
 def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
     """Read the PSSM data.
@@ -20,6 +16,7 @@ def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
         PssmTable: The position-specific scoring table, parsed from the pssm file.
     """
 
+    amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids}
     conservation_rows = {}
 
     # Read the pssm header.
