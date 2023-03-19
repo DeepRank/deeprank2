@@ -4,23 +4,18 @@ import numpy as np
 from deeprankcore.molstruct.structure import Chain
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
-from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.utils.graph import Edge, Graph
 from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.features.contact import add_features
-from deeprankcore.domain.aminoacidlist import alanine
 from deeprankcore.domain import edgestorage as Efeat
 
 
-
 def _get_atom(chain: Chain, residue_number: int, atom_name: str) -> Atom:
-
     for residue in chain.residues:
         if residue.number == residue_number:
             for atom in residue.atoms:
                 if atom.name == atom_name:
                     return atom
-
     raise ValueError(
         f"Not found: chain {chain.id} residue {residue_number} atom {atom_name}"
     )
@@ -41,8 +36,6 @@ def _get_contact(pdb_id: str, residue_num1: int, atom_name1: str, residue_num2: 
     finally:
         pdb._close() # pylint: disable=protected-access
 
-    variant = SingleResidueVariant(structure.chains[0].residues[10], alanine)
-
     if not residue_level:
         contact = AtomicContact(
             _get_atom(structure.chains[0], residue_num1, atom_name1), 
@@ -55,7 +48,7 @@ def _get_contact(pdb_id: str, residue_num1: int, atom_name1: str, residue_num2: 
         )
 
     edge_obj = Edge(contact)
-    add_features(pdb_path, _wrap_in_graph(edge_obj), variant)
+    add_features(pdb_path, _wrap_in_graph(edge_obj))
     
     assert not np.isnan(edge_obj.features[Efeat.VANDERWAALS]), 'isnan vdw'
     assert not np.isnan(edge_obj.features[Efeat.ELECTROSTATIC]), 'isnan electrostatic'
