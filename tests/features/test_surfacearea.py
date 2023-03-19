@@ -1,5 +1,6 @@
 from pdb2sql import pdb2sql
 import numpy as np
+from . import build_testgraph
 from deeprankcore.domain.aminoacidlist import alanine
 from deeprankcore.molstruct.structure import PDBStructure, Chain
 from deeprankcore.molstruct.residue import Residue
@@ -13,21 +14,20 @@ from deeprankcore.utils.buildgraph import (
 from deeprankcore.domain import nodestorage as Nfeat
 
 
-
 def _get_residue(chain: Chain, number: int) -> Residue:
     for residue in chain.residues:
         if residue.number == number:
             return residue
-
     raise ValueError(f"Not found: {number}")
+
 
 def _find_residue_node(graph, chain_id, residue_number):
     for node in graph.nodes:
         residue = node.id
         if residue.chain.id == chain_id and residue.number == residue_number:
             return node
-
     raise ValueError(f"Not found: {chain_id} {residue_number}")
+
 
 def _find_atom_node(graph, chain_id, residue_number, atom_name):
     for node in graph.nodes:
@@ -37,9 +37,7 @@ def _find_atom_node(graph, chain_id, residue_number, atom_name):
             and atom.residue.number == residue_number
             and atom.name == atom_name
         ):
-
             return node
-
     raise ValueError(f"Not found: {chain_id} {residue_number} {atom_name}")
 
 def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
@@ -53,17 +51,19 @@ def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
 def test_bsa_residue():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
 
-    structure = _load_pdb_structure(pdb_path, "1ATN_1w")
+    # structure = _load_pdb_structure(pdb_path, "1ATN_1w")
 
-    residues = set([])
-    for residue1, residue2 in get_residue_contact_pairs(
-        pdb_path, structure, "A", "B", 8.5
-    ):
-        residues.add(residue1)
-        residues.add(residue2)
-    residues = list(residues)
+    # residues = set([])
+    # for residue1, residue2 in get_residue_contact_pairs(
+    #     pdb_path, structure, structure.chains[0].id, structure.chains[1].id, 8.5
+    # ):
+    #     residues.add(residue1)
+    #     residues.add(residue2)
+    # residues = list(residues)
 
-    graph = build_residue_graph(residues, "1ATN-1w", 8.5)
+    # graph = build_residue_graph(residues, "1ATN_1w", 8.5)
+    
+    graph = build_testgraph(pdb_path, 8.5, 'residue')
 
     add_features(pdb_path, graph)
 
@@ -75,31 +75,16 @@ def test_bsa_residue():
 
 def test_bsa_atom():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-
-    structure = _load_pdb_structure(pdb_path, "1ATN_1w")
-
-    atoms = set([])
-    for residue1, residue2 in get_residue_contact_pairs(
-        pdb_path, structure, "A", "B", 8.5
-    ):
-        for atom in residue1.atoms:
-            atoms.add(atom)
-        for atom in residue2.atoms:
-            atoms.add(atom)
-    atoms = list(atoms)
-
-    graph = build_atomic_graph(atoms, "1ATN-1w", 8.5)
+    graph = build_testgraph(pdb_path, 4.5, 'atom')
 
     add_features(pdb_path, graph)
 
     # chain B ASP 93, at interface
     node = _find_atom_node(graph, "B", 93, "OD1")
-
     assert node.features[Nfeat.BSA] > 0.0
 
 
 def test_sasa_residue():
-
     pdb_path = "tests/data/pdb/101M/101M.pdb"
 
     pdb = pdb2sql(pdb_path)
