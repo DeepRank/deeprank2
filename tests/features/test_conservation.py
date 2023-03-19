@@ -10,34 +10,13 @@ from deeprankcore.utils.buildgraph import get_structure, get_surrounding_residue
 from . import build_testgraph
 
 
-
-def test_add_features():
+def test_conservation_residue():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    
-    pdb = pdb2sql(pdb_path)
-    try:
-        structure = get_structure(pdb, "101M")
-    finally:
-        pdb._close() # pylint: disable=protected-access
 
-    chain = structure.get_chain("A")
-    with open("tests/data/pssm/101M/101M.A.pdb.pssm", "rt", encoding="utf-8") as f:
-        chain.pssm = parse_pssm(f, chain)
-
+    graph = build_testgraph(pdb_path, 10, 'residue', 25)
+    chain = graph.nodes[0].id.chain
     variant_residue = chain.residues[25]
-
     variant = SingleResidueVariant(variant_residue, alanine)
-
-    residues = get_surrounding_residues(structure, variant_residue, 10.0)
-    atoms = set([])
-    for residue in residues:
-        for atom in residue.atoms:
-            atoms.add(atom)
-    atoms = list(atoms)
-    assert len(atoms) > 0
-
-    # graph = build_atomic_graph(atoms, "101M-25-atom", 4.5)
-    graph = build_testgraph(pdb_path, 10, 'atom', 25)
 
     add_features(pdb_path, graph, variant)
 
@@ -47,4 +26,23 @@ def test_add_features():
         Nfeat.CONSERVATION,
         Nfeat.INFOCONTENT,
     ):
-        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes])
+        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f'all 0s found for {feature_name}'
+
+
+def test_conservation_atom():
+    pdb_path = "tests/data/pdb/101M/101M.pdb"
+
+    graph = build_testgraph(pdb_path, 10, 'atom', 25)
+    chain = graph.nodes[0].id.residue.chain
+    variant_residue = chain.residues[25]
+    variant = SingleResidueVariant(variant_residue, alanine)
+
+    add_features(pdb_path, graph, variant)
+
+    for feature_name in (
+        Nfeat.PSSM,
+        Nfeat.DIFFCONSERVATION,
+        Nfeat.CONSERVATION,
+        Nfeat.INFOCONTENT,
+    ):
+        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f'all 0s found for {feature_name}'

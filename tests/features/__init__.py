@@ -56,7 +56,7 @@ def build_testgraph(
 
     else:
         chain: Chain = structure.chains[0]
-        residue = _get_residue(chain, 108)
+        residue = _get_residue(chain, central_res)
         surrounding_residues = list(get_surrounding_residues(structure, residue, cutoff))
         with open(f"tests/data/pssm/{structure.id}/{structure.id}.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
             chain.pssm = parse_pssm(f, chain)
