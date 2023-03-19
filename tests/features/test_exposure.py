@@ -30,4 +30,3 @@ def test_exposure_atom():
 
     add_features(pdb_path, graph)
     _run_assertions(graph)
-  
