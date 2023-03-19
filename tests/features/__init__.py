@@ -1,8 +1,9 @@
-import os
+from pathlib import Path
 from typing import Optional
 from pdb2sql import pdb2sql
 from deeprankcore.utils.graph import Graph, build_atomic_graph, build_residue_graph
 from deeprankcore.utils.buildgraph import get_structure, get_residue_contact_pairs, get_surrounding_residues
+from deeprankcore.utils.parsing.pssm import parse_pssm
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.structure import PDBStructure, Chain
 
@@ -25,7 +26,7 @@ def build_testgraph(
 
     pdb = pdb2sql(pdb_path)
     try:
-        structure: PDBStructure = get_structure(pdb, os.path.splitext(pdb_path)[0])
+        structure: PDBStructure = get_structure(pdb, Path(pdb_path).stem)
     finally:
         pdb._close() # pylint: disable=protected-access
 
@@ -54,8 +55,12 @@ def build_testgraph(
             raise TypeError('detail must be "atom" or "residue"')
 
     else:
-        residue = _get_residue(structure.chains[0], 108)
+        chain: Chain = structure.chains[0]
+        residue = _get_residue(chain, 108)
         surrounding_residues = list(get_surrounding_residues(structure, residue, cutoff))
+        with open(f"tests/data/pssm/{structure.id}/{structure.id}.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
+            chain.pssm = parse_pssm(f, chain)
+
         if detail == 'residue':
             return build_residue_graph(surrounding_residues, structure.id, cutoff)
         elif detail == 'atom':
