@@ -1,13 +1,9 @@
-from pdb2sql import pdb2sql
 import numpy as np
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.domain.aminoacidlist import alanine
-from deeprankcore.utils.parsing.pssm import parse_pssm
-from deeprankcore.molstruct.variant import SingleResidueVariant
-from deeprankcore.features.conservation import add_features
-from deeprankcore.utils.graph import build_atomic_graph
-from deeprankcore.utils.buildgraph import get_structure, get_surrounding_residues
 from . import build_testgraph
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.features.irc import add_features
+from deeprankcore.domain.aminoacidlist import alanine
+from deeprankcore.molstruct.variant import SingleResidueVariant
 
 
 def test_conservation_residue():
