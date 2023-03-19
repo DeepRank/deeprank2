@@ -1,10 +1,7 @@
 import numpy as np
-from pdb2sql import pdb2sql
 from . import build_testgraph
 from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.molstruct.structure import PDBStructure, Chain
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.utils.buildgraph import get_structure
+
 from deeprankcore.features.surfacearea import add_features
 
 

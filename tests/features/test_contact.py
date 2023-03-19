@@ -27,8 +27,16 @@ def _wrap_in_graph(edge: Edge):
     return g
 
 
-def _get_contact(pdb_id: str, residue_num1: int, atom_name1: str, residue_num2: int, atom_name2: str, residue_level: bool = False) -> Edge:
-    pdb_path = f"tests/data/pdb/101M/{pdb_id}.pdb"
+def _get_contact( # pylint: disable=too-many-arguments
+        pdb_id: str, 
+        residue_num1: int, 
+        atom_name1: str, 
+        residue_num2: int, 
+        atom_name2: str, 
+        residue_level: bool = False,
+    ) -> Edge:
+    
+    pdb_path = f"tests/data/pdb/{pdb_id}/{pdb_id}.pdb"
 
     pdb = pdb2sql(pdb_path)
     try:
