@@ -4,8 +4,11 @@ from pdb2sql import pdb2sql
 from deeprankcore.utils.graph import Graph, build_atomic_graph, build_residue_graph
 from deeprankcore.utils.buildgraph import get_structure, get_residue_contact_pairs, get_surrounding_residues
 from deeprankcore.utils.parsing.pssm import parse_pssm
+from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.structure import PDBStructure, Chain
+from deeprankcore.molstruct.variant import SingleResidueVariant
+
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
@@ -20,7 +23,8 @@ def build_testgraph(
     pdb_path: str, 
     cutoff: float, 
     detail: str, 
-    central_res: Optional[int] = None, 
+    central_res: Optional[int] = None,
+    variant: AminoAcid = None,
     ) -> Graph:
 
 
@@ -58,13 +62,15 @@ def build_testgraph(
         chain: Chain = structure.chains[0]
         residue = _get_residue(chain, central_res)
         surrounding_residues = list(get_surrounding_residues(structure, residue, cutoff))
+        residue_variant = SingleResidueVariant(chain.residues[central_res], variant)
+
         with open(f"tests/data/pssm/{structure.id}/{structure.id}.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
             chain.pssm = parse_pssm(f, chain)
 
         if detail == 'residue':
-            return build_residue_graph(surrounding_residues, structure.id, cutoff)
+            return build_residue_graph(surrounding_residues, structure.id, cutoff), residue_variant
         elif detail == 'atom':
             atoms = set([atom for residue in surrounding_residues for atom in residue.atoms])
-            return build_atomic_graph(list(atoms), structure.id, cutoff)
+            return build_atomic_graph(list(atoms), structure.id, cutoff), residue_variant
         else:
             raise TypeError('detail must be "atom" or "residue"')
