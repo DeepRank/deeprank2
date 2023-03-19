@@ -14,7 +14,7 @@ def add_features(
     pass
 ```
 
-
+.. code:: rst
 =====  =====  =======
   A      B    A and B
 =====  =====  =======
@@ -25,17 +25,37 @@ True   True   True
 =====  =====  =======
 
 
+.. code::
+=====  =====  =======
+  A      B    A and B
+=====  =====  =======
+False  False  False
+True   False  False
+False  True   False
+True   True   True
+=====  =====  =======
+
 ## Node features modules
 
 ### `deeprankcore.features.components`
 These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in deeprankcore.domain.aminoacidlist.py.
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
+.. code:: rst
 +-----------+----------------+-------------------------------------+-------+--------------------+---------+
 | feature   | description    | type                                | notes | restrictions       | sources |
 +-----------+----------------+-------------------------------------+-------+--------------------+---------+
 | atom_type | Atomic element | one hot encoded: [C, O, N, S, P, H] |       | atomic graphs only |         |
 +-----------+----------------+-------------------------------------+-------+--------------------+---------+
+
+
+.. code::
++-----------+----------------+-------------------------------------+-------+--------------------+---------+
+| feature   | description    | type                                | notes | restrictions       | sources |
++-----------+----------------+-------------------------------------+-------+--------------------+---------+
+| atom_type | Atomic element | one hot encoded: [C, O, N, S, P, H] |       | atomic graphs only |         |
++-----------+----------------+-------------------------------------+-------+--------------------+---------+
+
 
 | atom_charge | Charge of the atom in Coulomb | float | Values can be found in deeprankcore.domain.forcefield.patch.top | atomic graphs only |
 | pdb_occupancy | Proportion of structures where the atom was detected at this position | float | In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprankcore. | atomic graphs only | 
@@ -66,6 +86,7 @@ Sources:
 These features relate to the conservation state of individual residues.
 For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
 
+.. code::markdown
 | feature | description | type | notes | restrictions | 
 | --- | --------- | --- | --- | --- | --- |
 | pssm | Position weight matrix (PWM) values relative to the residue | Array of floats of length 20 | The conservation of the residue along all the 20 amino acids |
@@ -77,7 +98,8 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 ### `deeprankcore.features.exposure`
 These features relate to the exposure of residues to the surface, and are computed using [biopython](https://biopython.org/docs/1.75/api/Bio.PDB.html). Note that these features can only be calculated per residue and not per atom.
 For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
-  
+
+.. code::md
 | feature | description | type | notes | 
 | --- | --------- | --- | --- | --- | 
 | res_depth | Distance to the surface in Å | float | Average distance for all atoms in residue. See also [`Bio.PDB.ResidueDepth`](https://biopython.org/docs/1.75/api/Bio.PDB.ResidueDepth.html) | 
@@ -88,6 +110,7 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 These features relate to the surface area of the residue, and are computed using [freesasa](https://freesasa.github.io) 
 For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
 
+.. code::
 | feature | description | type | notes | 
 | --- | --------- | --- | --- | --- | 
 | sasa | Solvent-Accessible Surface Area in Å^2 | float | Surface area characterized around a protein by a hypothetical centre of a solvent sphere with the van der Waals contact surface of the molecule. See also: https://freesasa.github.io/doxygen/Geometry.html.
