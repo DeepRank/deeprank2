@@ -7,16 +7,16 @@ from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.features.conservation import add_features
 from deeprankcore.utils.graph import build_atomic_graph
 from deeprankcore.utils.buildgraph import get_structure, get_surrounding_residues
+from . import build_testgraph
 
 
 
 def test_add_features():
-
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-
+    
     pdb = pdb2sql(pdb_path)
     try:
-        structure = get_structure(pdb, "101m")
+        structure = get_structure(pdb, "101M")
     finally:
         pdb._close() # pylint: disable=protected-access
 
@@ -36,7 +36,9 @@ def test_add_features():
     atoms = list(atoms)
     assert len(atoms) > 0
 
-    graph = build_atomic_graph(atoms, "101M-25-atom", 4.5)
+    # graph = build_atomic_graph(atoms, "101M-25-atom", 4.5)
+    graph = build_testgraph(pdb_path, 10, 'atom', 25)
+
     add_features(pdb_path, graph, variant)
 
     for feature_name in (
