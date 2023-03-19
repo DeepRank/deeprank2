@@ -23,7 +23,7 @@ def _run_assertions(graph: Graph):
 
 def test_residue_features():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-    graph = build_testgraph(pdb_path, 'residue', 8.5)
+    graph = build_testgraph(pdb_path, 8.5, 'residue')
 
     add_features(pdb_path, graph)
     _run_assertions(graph)
@@ -31,7 +31,7 @@ def test_residue_features():
 
 def test_atom_features():
     pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
-    graph = build_testgraph(pdb_path, 'atom', 4.5)
+    graph = build_testgraph(pdb_path, 4.5, 'atom')
 
     add_features(pdb_path, graph)
     _run_assertions(graph)
