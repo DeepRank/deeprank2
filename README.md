@@ -57,6 +57,7 @@ Before installing deeprankcore you need to install:
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
  * [pytorch](https://pytorch.org/get-started/locally/): `conda install pytorch torchvision torchaudio cpuonly -c pytorch` or `conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia`, for taking advantage of GPUs.
  * [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
+ * [dssp](https://swift.cmbi.umcn.nl/gv/dssp/): `sudo apt-get install dssp`
  * Only if you have a MacOS with M1 chip, additional steps are needed:
     * `conda install pytables`
     * See [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution to install PyQt5 or run `conda install pyqt`
