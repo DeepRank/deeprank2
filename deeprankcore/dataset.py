@@ -257,7 +257,7 @@ class DeeprankDataset(Dataset):
 
         return df_final
 
-    def save_hist(
+    def save_hist( # pylint: disable=too-many-arguments, too-many-branches, useless-suppression
             self,
             features: Union[str,List[str]],
             fname: str = 'features_hist.png',

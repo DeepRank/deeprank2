@@ -299,6 +299,28 @@ def test_res_ppi():
 def test_augmentation():
     qc = QueryCollection()
 
+    qc.add(ProteinProteinInterfaceResidueQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+        },
+        targets={targets.BINARY: 0},
+    ))
+    
+    qc.add(ProteinProteinInterfaceAtomicQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+        },
+        targets={targets.BINARY: 0},
+    ))
+    
     qc.add(SingleResidueVariantResidueQuery(
         "tests/data/pdb/101M/101M.pdb",
         "A",
@@ -319,18 +341,18 @@ def test_augmentation():
         phenylalanine,
         {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
-        radius=5.0,
-        distance_cutoff=5.0,
+        radius=3.0,
     ))
 
-    augmentation_count = 5
+    augmentation_count = 3
     grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
 
-    expected_entry_count = (augmentation_count + 1) * 2
+    expected_entry_count = (augmentation_count + 1) * len(qc)
 
     tmp_dir = mkdtemp()
     try:
         qc.process(f"{tmp_dir}/qc",
+                   feature_modules=None,
                    grid_settings=grid_settings,
                    grid_map_method=MapMethod.GAUSSIAN,
                    grid_augmentation_count=augmentation_count)
@@ -341,10 +363,10 @@ def test_augmentation():
         with h5py.File(hdf5_path, 'r') as f5:
             entry_names = list(f5.keys())
 
-        assert len(entry_names) == expected_entry_count, f"only entries {entry_names}, expected {expected_entry_count} entries"
+        assert len(entry_names) == expected_entry_count, f"Found {len(entry_names)} entries, expected {expected_entry_count}"
 
         dataset = GridDataset(hdf5_path)
 
-        assert len(dataset) == expected_entry_count, f"only {len(dataset)}, expected {expected_entry_count}"
+        assert len(dataset) == expected_entry_count, f"Found {len(dataset)} data points, expected {expected_entry_count}"
     finally:
         shutil.rmtree(tmp_dir)

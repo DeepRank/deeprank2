@@ -12,7 +12,8 @@ profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.one_letter_code
 
 def add_features( # pylint: disable=unused-argument
     pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None):
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):
 
     for node in graph.nodes:
         if isinstance(node.id, Residue):

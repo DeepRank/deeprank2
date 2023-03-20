@@ -1,6 +1,5 @@
 import logging
 import os
-from time import time
 from typing import Dict, List, Optional, Iterator, Union
 import tempfile
 import pdb2sql
@@ -117,7 +116,11 @@ class Query:
 
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
-
+    
+    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+        raise NotImplementedError("Must be defined in child classes.")
+    def get_query_id(self) -> str:
+        raise NotImplementedError("Must be defined in child classes.")
 
 class QueryCollection:
     """
@@ -132,27 +135,32 @@ class QueryCollection:
         self.cpu_count = None
         self.ids_count = {}
 
-    def add(self, query: Query, verbose: bool = False):
+    def add(self, query: Query, verbose: bool = False, warn_duplicate: bool = True):
         """
         Adds a new query to the collection.
 
         Args:
-            query (:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
-                :class:`SingleResidueVariantAtomicQuery`.  
-            verbose (bool, optional): For logging query IDs added. Defaults to False.
+            query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
+                :class:`SingleResidueVariantAtomicQuery`.    
+            verbose(bool, optional): For logging query IDs added, defaults to False.
+            warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified.
+
         """
         query_id = query.get_query_id()
 
         if verbose:
             _log.info(f'Adding query with ID {query_id}.')
 
-        if query_id not in self.ids_count:
-            self.ids_count[query_id] = 1
+        query_id_base = query_id.split("_")[0]
+        if query_id_base not in self.ids_count:
+            self.ids_count[query_id_base] = 1
         else:
-            self.ids_count[query_id] += 1
-            new_id = query.model_id + "_" + str(self.ids_count[query_id])
+            self.ids_count[query_id_base] += 1
+            new_id = query.model_id.split("_")[0] + "_" + str(self.ids_count[query_id_base])
             query.model_id = new_id
-            _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+            
+            if warn_duplicate:
+                _log.warning(f'Query with ID {query_id_base} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
@@ -176,6 +184,9 @@ class QueryCollection:
     def __iter__(self) -> Iterator[Query]:
         return iter(self._queries)
 
+    def __len__(self) -> int:
+        return len(self._queries)
+
     def _process_one_query(  # pylint: disable=too-many-arguments
         self,
         prefix: str,
@@ -183,10 +194,11 @@ class QueryCollection:
         grid_settings: Union[GridSettings, None],
         grid_map_method: Union[MapMethod, None],
         grid_augmentation_count: int,
-        query: Query):
+        query: Query
+    ):
 
         try:
-            # because only one process may access an hdf5 file at the time:
+            # because only one process may access an hdf5 file at a time:
             output_path = f"{prefix}-{os.getpid()}.hdf5"
 
             feature_modules = [
@@ -200,14 +212,14 @@ class QueryCollection:
 
                 for _ in range(grid_augmentation_count):
                     # repeat with random augmentation
-                    axis, angle = pdb2sql.transform.get_rot_axis_angle(int(time() * 1000) % (2 ** 32 - 1))
+                    axis, angle = pdb2sql.transform.get_rot_axis_angle()  # insert numpy random seed once implemented
                     augmentation = Augmentation(axis, angle)
                     graph.write_as_grid_to_hdf5(output_path, grid_settings, grid_map_method, augmentation)
 
             return None
 
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
-            _log.warning(f'\nGraph/Query with ID {query.get_query_id()} run into an Exception ({e.__class__.__name__}: {e}),'
+            _log.warning(f'\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),'
             ' and it has not been written to the hdf5 file. More details below:')
             _log.exception(e)
             return None
@@ -215,30 +227,32 @@ class QueryCollection:
     def process( # pylint: disable=too-many-arguments, too-many-locals
         self, 
         prefix: Optional[str] = None,
-        feature_modules: Optional[List[ModuleType]] = None,
+        feature_modules: Optional[Union[ModuleType, List[ModuleType]]] = None,
         cpu_count: Optional[int] = None,
         combine_output: bool = True,
         grid_settings: Optional[GridSettings] = None,
         grid_map_method: Optional[MapMethod] = None,
         grid_augmentation_count: int = 0
-        ) -> List[str]:
+    ) -> List[str]:
         """
         Args:
             prefix (Optional[str], optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
-            feature_modules (Optional[List[ModuleType]], optional): List of features' modules used to generate features. Each feature's module must
-                implement the :py:func:`add_features` function, and features' modules can be found (or should be placed in case of a custom made feature)
-                in `deeprankcore.features` folder. Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate
+            feature_modules(Union[ModuleType, List[ModuleType]], optional): Features' module or list of features' modules used to generate features. 
+                Each feature's module must implement the :py:func:`add_features` function, and features' modules can be found (or should be placed
+                in case of a custom made feature) in `deeprankcore.features` folder. 
+                Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate
                 the features. 
             cpu_count (Optional[int], optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
-            combine_output (bool, optional): For combining the .HDF5 files generated by the processes. Defaults to True.
+            combine_output (bool, optional): For combining the HDF5 files generated by the processes. Defaults to True.
             grid_settings (Optional[:class:`GridSettings`], optional): If valid together with `grid_map_method`, the grid data will be stored as well.
                 Defaults to None.
             grid_map_method (Optional[:class:`MapMethod`], optional): If valid together with `grid_settings`, the grid data will be stored as well.
                 Defaults to None.
-            grid_augmentation_count (int, optional): Number of grid data augmentations, must be zero or a positive number. Defaults to 0.
+            grid_augmentation_count (int, optional): Number of grid data augmentations. May not be negative be zero or a positive number.
+                Defaults to 0.
         
         Returns:
-            List[str]: The list of paths of the generated .HDF5 files.
+            List[str]: The list of paths of the generated HDF5 files.
         """
 
         if cpu_count is None:
@@ -259,8 +273,11 @@ class QueryCollection:
         
         if feature_modules is None:
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__)]
-        else:
+        elif isinstance(feature_modules, list):
             feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
+        else:
+            feature_names = [basename(feature_modules.__file__)[:-3]]
+
 
         _log.info(f'Creating pool function to process {len(self.queries)} queries...')
         pool_function = partial(self._process_one_query, prefix,
@@ -345,7 +362,7 @@ class SingleResidueVariantResidueQuery(Query):
 
     def get_query_id(self) -> str:
         "Returns the string representing the complete query ID."
-        return f"residue-graph-{self.model_id}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
+        return f"residue-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
 
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the .PDB structure.
@@ -457,7 +474,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
     def get_query_id(self) -> str:
         "Returns the string representing the complete query ID."
-        return f"{self.model_id,}:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}"
+        return f"atomic-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
         return (
@@ -636,7 +653,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
     def get_query_id(self) -> str:
         "Returns the string representing the complete query ID."
-        return f"atom-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
+        return f"atom-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
         return (
@@ -726,7 +743,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
-        return f"residue-ppi-{self.model_id}:{self._chain_id1}-{self._chain_id2}"
+        "Returns the string representing the complete query ID."
+        return f"residue-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
         return (

@@ -7,8 +7,8 @@ class Polarity(Enum):
 
     NONPOLAR = 0
     POLAR = 1
-    NEGATIVE_CHARGE = 2
-    POSITIVE_CHARGE = 3
+    NEGATIVE = 2
+    POSITIVE = 3
 
     @property
     def onehot(self):

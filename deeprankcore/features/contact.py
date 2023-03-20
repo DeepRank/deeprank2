@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import logging
 import warnings
 import numpy as np
@@ -6,6 +6,7 @@ from scipy.spatial import distance_matrix
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
+from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import edgestorage as Efeat
 from deeprankcore.utils.parsing import atomic_forcefield
 import numpy.typing as npt
@@ -66,7 +67,11 @@ def _get_nonbonded_energy(atoms: List[Atom], distances: npt.NDArray[np.float64])
     return electrostatic_energy, vdw_energy
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=too-many-locals, unused-argument
+def add_features( # pylint: disable=unused-argument, too-many-locals
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):
+    
     # assign each atoms (from all edges) a unique index
     all_atoms = set() 
     if isinstance(graph.edges[0].id, AtomicContact):
