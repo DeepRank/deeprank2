@@ -263,7 +263,7 @@ class DeeprankDataset(Dataset):
             fname: str = 'features_hist.png',
             bins: Union[int,List[float],str] = 10,
             figsize: Tuple = (15, 15),
-            log_trans: bool = False
+            log: bool = False
     ):
         """After having generated a pd.DataFrame using hdf5_to_pandas method, histograms of the features can be saved in an image.
 
@@ -278,7 +278,7 @@ class DeeprankDataset(Dataset):
                 'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
                 Defaults to 10.
             figsize (Tuple, optional): Saved figure sizes. Defaults to (15, 15).
-            log_trans (bool): Whether to present log transformation on feature. Defaults to False.
+            log (bool): Whether to apply log transformation to the data indicated by the `features` parameter. Defaults to False.
         """
         if self.df is None:
             self.hdf5_to_pandas()
@@ -303,14 +303,14 @@ class DeeprankDataset(Dataset):
 
             for row, feat in enumerate(features_df):       
                 if isinstance(self.df[feat].values[0], np.ndarray):
-                    if(log_trans):
+                    if(log):
                         log_data = np.log(np.concatenate(self.df[feat].values))
                         log_data[log_data == -np.inf] = 0
                         axs[row].hist(log_data, bins=bins)
                     else:
                         axs[row].hist(np.concatenate(self.df[feat].values), bins=bins)
                 else:
-                    if(log_trans):
+                    if(log):
                         log_data = np.log(self.df[feat].values)
                         log_data[log_data == -np.inf] = 0 
                         axs[row].hist(log_data, bins=bins)
@@ -323,14 +323,14 @@ class DeeprankDataset(Dataset):
             fig = plt.figure(figsize=figsize)
             ax = fig.add_subplot(111)
             if isinstance(self.df[features_df[0]].values[0], np.ndarray):
-                if(log_trans):
+                if(log):
                     log_data = np.log(np.concatenate(self.df[features_df[0]].values))
                     log_data[log_data == -np.inf] = 0
                     ax.hist(log_data, bins=bins)
                 else:
                     ax.hist(np.concatenate(self.df[features_df[0]].values), bins=bins)
             else:
-                if(log_trans):
+                if(log):
                     log_data = np.log(self.df[features_df[0]].values)
                     log_data[log_data == -np.inf] = 0
                     ax.hist(log_data, bins=bins)
