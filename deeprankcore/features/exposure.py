@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import warnings
+from typing import Optional
 from Bio.PDB.Atom import PDBConstructionWarning
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import get_surface, residue_depth
@@ -8,6 +9,7 @@ from Bio.PDB.HSExposure import HSExposureCA
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.utils.graph import Graph
 import sys
 import signal
@@ -32,7 +34,10 @@ def space_if_none(value):
     return value
 
 
-def add_features(pdb_path: str, graph: Graph, *args, **kwargs): # pylint: disable=unused-argument
+def add_features( # pylint: disable=unused-argument
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):
 
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)

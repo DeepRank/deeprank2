@@ -8,7 +8,7 @@ POSITION = "_position" # list[3xfloat]; former FEATURENAME_POSITION
 
 ## residue core features
 RESTYPE = "res_type" # AminoAcid object; former FEATURENAME_AMINOACID
-RESCHARGE = "charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
+RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
 POLARITY = "polarity" #  Polarity object; former FEATURENAME_POLARITY
 RESSIZE = "res_size" # int; former FEATURENAME_SIZE
 RESMASS = "res_mass"
@@ -32,6 +32,33 @@ BSA = "bsa" # float; former FEATURENAME_BURIEDSURFACEAREA
 HSE = "hse" # list[3xfloat]; former FEATURENAME_HALFSPHEREEXPOSURE 
 SASA = "sasa" # float; former FEATURENAME_SASA
 RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
+
+## inter-residue contacts (IRCs)
+IRC_NONNON = 'irc_nonpolar_nonpolar' # int
+IRC_NONPOL = 'irc_nonpolar_polar' # int
+IRC_NONNEG = 'irc_nonpolar_negative' # int
+IRC_NONPOS = 'irc_nonpolar_positive' # int
+IRC_POLPOL = 'irc_polar_polar' # int
+IRC_POLNEG = 'irc_polar_negative' # int
+IRC_POLPOS = 'irc_polar_positive' # int
+IRC_NEGNEG = 'irc_negative_negative' # int
+IRC_NEGPOS = 'irc_negative_positive' # int
+IRC_POSPOS = 'irc_positive_positive' # int
+IRCTOTAL = 'irc_total' # int
+
+IRC_FEATURES = [
+    IRC_NONNON,
+    IRC_NONPOL,
+    IRC_NONNEG,
+    IRC_NONPOS,
+    IRC_POLPOL,
+    IRC_POLNEG,
+    IRC_POLPOS,
+    IRC_NEGNEG,
+    IRC_POSPOS,
+    IRC_NEGPOS,
+    IRCTOTAL,
+]
 
 ## conservation features
 PSSM = "pssm" # list[20xint]; former FEATURENAME_PSSM

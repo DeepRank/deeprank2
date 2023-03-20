@@ -16,7 +16,7 @@ from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
                                 targetstorage as targets)
 
 
-def test_integration_cnn(): # pylint: disable=too-many-locals
+def test_cnn(): # pylint: disable=too-many-locals
     """
     Tests processing several PDB files into their features representation HDF5 file.
 
@@ -108,7 +108,7 @@ def test_integration_cnn(): # pylint: disable=too-many-locals
         rmtree(hdf5_directory)
         rmtree(output_directory)
 
-def test_integration_gnn(): # pylint: disable=too-many-locals
+def test_gnn(): # pylint: disable=too-many-locals
     """
     Tests processing several PDB files into their features representation HDF5 file.
 

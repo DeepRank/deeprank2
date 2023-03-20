@@ -58,7 +58,7 @@ runs:
         # Only way to install msms is through conda
         conda install -c bioconda msms
         # Safest way to install PyTorch and PyTorch Geometric is through conda
-        conda install pytorch torchvision torchaudio cpuonly -c pytorch
+        conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c pytorch
         conda install pyg -c pyg
         sudo apt-get install dssp
         # In the future, release h5xplorer on PyPI
