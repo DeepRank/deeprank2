@@ -133,6 +133,8 @@ class DeeprankDataset(Dataset):
         """
         _log.debug(f"Processing data set with .HDF5 files: {self.hdf5_paths}")
 
+        self.index_entries = []
+        
         desc = f"   {self.hdf5_paths}{' dataset':25s}"
         if self.use_tqdm:
             hdf5_path_iterator = tqdm(self.hdf5_paths, desc=desc, file=sys.stdout)
@@ -150,12 +152,12 @@ class DeeprankDataset(Dataset):
                         entry_names = list(hdf5_file.keys())
                     else:
                         entry_names = [entry_name for entry_name in self.subset if entry_name in list(hdf5_file.keys())]
-
+                    
                     #skip self._filter_targets when target_filter is None, improve performance using list comprehension.
                     if self.target_filter is None:
-                        self.index_entries = [(hdf5_path, entry_name) for entry_name in entry_names]
+                        self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names]
                     else:
-                        self.index_entries = [(hdf5_path, entry_name) for entry_name in entry_names \
+                        self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names \
                         if self._filter_targets(hdf5_file[entry_name])]
                         
             except Exception:
