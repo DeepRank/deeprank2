@@ -278,7 +278,8 @@ class QueryCollection:
         if feature_modules is None:
             if not isinstance(exclude_feature_modules, list):
                 exclude_feature_modules = [exclude_feature_modules]
-            feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__) if modname not in exclude_feature_modules]
+            feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__) 
+                                if modname not in exclude_feature_modules.split('.')[0]]
         elif isinstance(feature_modules, list):
             feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
         else:
