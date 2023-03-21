@@ -37,6 +37,7 @@ def add_features( # pylint: disable=unused-argument
         node.features[Nfeat.HBDONORS] = residue.amino_acid.hydrogen_bond_donors
         node.features[Nfeat.HBACCEPTORS] = residue.amino_acid.hydrogen_bond_acceptors
 
+
         if single_amino_acid_variant is not None:
             wildtype = single_amino_acid_variant.wildtype_amino_acid
             variant = single_amino_acid_variant.variant_amino_acid
