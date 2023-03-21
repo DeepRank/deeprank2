@@ -12,32 +12,20 @@ def _run_assertions(graph: Graph, node_info_list: list):
     # Check that all nodes have exactly 1 secondary structure type
     assert np.all([node.features[Nfeat.SECSTRUCT].sum() == 1.0 for node in graph.nodes]), 'sum != 1'
 
-    # Example of a coil (C)
-    example1 = (90, 'D')
-    example1_list = [node_info for node_info in node_info_list if (node_info[0] == example1[0] and node_info[1] == example1[1])]
-    assert len(example1_list) > 0, f'no nodes detected in {example1[1]} {example1[0]}'
-    assert np.all(
-        [np.array_equal(node_info[2], np.array([0., 0., 1.]))
-            for node_info in example1_list]
-    ), f'sec struct for {example1[1]} {example1[0]} is not C'
+    residues = [
+        (90, 'D', np.array([0., 0., 1.]), 'C'),
+        (113, 'C', np.array([0., 1., 0.]), 'E'),
+        (121, 'C', np.array([1., 0., 0.]), 'H'),
+    ]
 
-    # Example of an extended region (E)
-    example2 = (113, 'C')
-    example2_list = [node_info for node_info in node_info_list if (node_info[0] == example2[0] and node_info[1] == example2[1])]
-    assert len(example2_list) > 0, f'no nodes detected in {example2[1]} {example2[0]}'
-    assert np.all(
-        [np.array_equal(node_info[2], np.array([0., 1., 0.]))
-            for node_info in example2_list]
-    ), f'sec struct for {example2[1]} {example2[0]} is not E'
+    for res in residues:
+        node_list = [node_info for node_info in node_info_list if (node_info[0] == res[0] and node_info[1] == res[1])]
+        assert len(node_list) > 0, f'no nodes detected in {res[1]} {res[0]}'
+        assert np.all(
+            [np.array_equal(node_info[2], res[2])
+                for node_info in node_list]
+        ), f'sec struct for {res[1]} {res[0]} is not {res[3]}'        
 
-    # Example of an extended helix (H)
-    example3 = (121, 'C')
-    example3_list = [node_info for node_info in node_info_list if (node_info[0] == example3[0] and node_info[1] == example3[1])]
-    assert len(example3_list) > 0, f'no nodes detected in {example3[1]} {example3[0]}'
-    assert np.all(
-        [np.array_equal(node_info[2], np.array([1., 0., 0.]))
-            for node_info in example3_list]
-    ), f'sec struct for {example3[1]} {example3[0]} is not H'
 
     
 def test_secondary_structure_residue():
