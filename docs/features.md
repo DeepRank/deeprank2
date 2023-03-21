@@ -14,6 +14,19 @@ def add_features(
     pass
 ```
 
+
+CHATGPT
+
++------------+--------------------------------------------+-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| feature | description | type | notes |
++============+============================================+=======+=========================================================================================================================================================================================================================================================================================================================================================+
+| sasa | Solvent-Accessible Surface Area in Å^2 | float | Surface area characterized around a protein by a hypothetical centre of a solvent sphere with the van der Waals contact surface of the molecule. See also: https://freesasa.github.io/doxygen/Geometry.html. |
++------------+--------------------------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| bsa | Buried interfacial Surface Area in Å^2 | float | Area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. |
++------------+--------------------------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
 .. list-table:: List tables can have captions like this one.
     :widths: 10 5 10 50
     :header-rows: 1
@@ -118,6 +131,7 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 | --- | --------- | --- | --- | --- | 
 | sasa | Solvent-Accessible Surface Area in Å^2 | float | Surface area characterized around a protein by a hypothetical centre of a solvent sphere with the van der Waals contact surface of the molecule. See also: https://freesasa.github.io/doxygen/Geometry.html.
 | bsa | Buried interfacial Surface Area in Å^2 | float | Area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. |
+
 
 
 ### `deeprankcore.features.irc`
