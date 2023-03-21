@@ -121,7 +121,9 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 | res_depth | Distance to the surface in Å | float | Average distance for all atoms in residue. See also [`Bio.PDB.ResidueDepth`](https://biopython.org/docs/1.75/api/Bio.PDB.ResidueDepth.html) | 
 | hse | Half Sphere Exposure (HSE) | Array of floats of length 3 | Measures the buried-ness of a residues in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. See also [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html) |
 
-
+- `res_depth`: Average distance to surface for all atoms in a residue. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. Computed using `Bio.PDB.ResidueDepth`, in Ångström. Float value. 
+- `hse`: Half Sphere exposure (HSE) measures how buried amino acid residues are in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. It is calculated using biopython, so for more details see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) biopython module. Array of float values of length 3.
+  
 ### `deeprankcore.features.surfacearea`
 These features relate to the surface area of the residue, and are computed using [freesasa](https://freesasa.github.io) 
 For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
@@ -138,12 +140,8 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 These features relate to the inter-residue contacs (IRCs), i.e. the number of residues on the opposite chain within a cutoff distance of 5.5 Å. IRCs are found using the `get_contact_residues` function of [pdb2sql.interface](https://github.com/DeepRank/pdb2sql/blob/master/pdb2sql/interface.py)
 For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.
 
-``` markdown
-| feature | description | type | notes | restrictions
-| --- | --------- | --- | --- | --- | 
-| irc_total | Total inter-residue contacts | int | Number of residues on opposite chain within a 5.5 Å cutoff distance | ProteinProteinInteraction graphs only |
-| irc_nonpolar_nonpolar / irc_nonpolar_polar / irc_nonpolar_negative / irc_nonpolar_positive / irc_polar_polar / irc_polar_negative / irc_polar_positive / irc_negative_negative / irc_negative_positive / irc_positive_positive | Inter-residue contacts per polarity pairing | int | As above | ProteinProteinInteraction graphs only |
-```
+- `sasa`: Solvent-Accessible Surface Area. It is defined as the surface characterized around a protein by a hypothetical centre of a solvent sphere with the van der Waals contact surface of the molecule. Computed using FreeSASA (https://freesasa.github.io/doxygen/Geometry.html), in square Ångström. Float value. 
+- `bsa`: the Buried interfacial Surface Area is the area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. Computed using FreeSASA, in square Ångström. Float value. 
 
 ## Edge features module
 
@@ -151,13 +149,9 @@ For atomic graphs: _all_ atoms of one residue receive the feature value for that
 These features relate to relationships between individual nodes.
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
-```md
-| feature | description | type | notes | restrictions | 
-| --- | --------- | --- | --- | --- | --- |
-| same_res | Whether both nodes are part of the same residue | bool | | atomic graphs only |
-| same_chain | Whether both nodes are part of the same chain | bool |
-| distance | Distance in Å | float | Computed using atomic coordinates from the .pdb file. For residue graphs, the minimum distance between atoms of each residue is used | 
-| covalent | Whether the edge respresents a covalent bond | bool | Edges with a distance of <2.1 Å are considered covalent.
-| electrostatic | Electrostatic potential energy (Coulomb potential) | float | Calculated from the interatomic distances and charges of the atoms. Note that no distance cutoff is implemented. | 
-| vanderwaals | Van der Waals potential energy (Lennard-Jones potentials) | float | Calculated from the interatomic distances and the forcefield in deeprankcore/domain/forcefield/protein-allhdg5-4_new.param. Note that no distance cutoff is implemented. | 
-```
+- `same_res`: Only for atomic graph, 1 if the edge connects two atoms beloging to the same residue, otherwise 0.  
+- `same_chain`: 1 if the edge connects two molecules beloging to the same chain, otherwise 0.  
+- `distance`: Interatomic distance between atoms in Ångström. It is computed from the xyz atomic coordinates taken from the .pdb file. In the residue graph case, the minimum distance between the atoms of the first residue and the atoms from the second one is considered. Float value. 
+- `covalent`: 1 if there is a covalent bond between the two molecules, otherwise 0. A bond is considered covalent if its length is less than 2.1 Ångström.
+- `electrostatic`: Coulomb (electrostatic) potential, given the interatomic distance/s and charge/s of the atoms. There's no distance cutoff here. The radius of influence is assumed to infinite. Float value. 
+- `vanderwaals`: Lennard-Jones potentials, given interatomic distance/s and a list of atoms with vanderwaals parameters. There's no distance cutoff here. The radius of influence is assumed to infinite. Float value.

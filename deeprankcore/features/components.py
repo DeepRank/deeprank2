@@ -11,8 +11,7 @@ import logging
 _log = logging.getLogger(__name__)
 
 def add_features( # pylint: disable=unused-argument
-    pdb_path: str,
-    graph: Graph,
+    pdb_path: str, graph: Graph,
     single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):
 
@@ -37,6 +36,7 @@ def add_features( # pylint: disable=unused-argument
         node.features[Nfeat.RESPI] = residue.amino_acid.pI
         node.features[Nfeat.HBDONORS] = residue.amino_acid.hydrogen_bond_donors
         node.features[Nfeat.HBACCEPTORS] = residue.amino_acid.hydrogen_bond_acceptors
+
 
         if single_amino_acid_variant is not None:
             wildtype = single_amino_acid_variant.wildtype_amino_acid
