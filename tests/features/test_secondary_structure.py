@@ -30,12 +30,13 @@ def _run_assertions(graph: Graph, node_info_list: list):
 
 
     # check entire DSSP file
+    # residue number @ pos 5-10, chain_id @ pos 11, secondary structure @ pos 16
     with open('tests/data/dssp/1ak4.dssp.txt') as file:
         dssp_lines = [line.rstrip() for line in file]
 
     for node in node_info_list:
         dssp_line = [line for line in dssp_lines 
-                        if (line[7:10] == str(node[0]).rjust(3) and line[11] == node[1])][0]
+                        if (line[5:10] == str(node[0]).rjust(5) and line[11] == node[1])][0]
         dssp_code = dssp_line[16]
         if dssp_code in [' ', 'S', 'T']:
             assert np.array_equal(node[2],np.array([0., 0., 1.])), f'Full file test: res {node[1]}{node[0]} is not C'
