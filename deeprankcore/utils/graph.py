@@ -92,8 +92,9 @@ class Node:
 
 
 class Graph:
-    def __init__(self, id_: str):
+    def __init__(self, id_: str, cutoff_distance: Optional[float] = None):
         self.id = id_
+        self.cutoff_distance = cutoff_distance
 
         self._nodes = {}
         self._edges = {}
@@ -305,6 +306,15 @@ class Graph:
                     targets_group[target_name][()] = target_data
 
         return hdf5_path
+    
+    def get_all_chains(self) -> List[str]:
+        if isinstance(self.nodes[0].id, Residue):
+            chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
+        elif isinstance(self.nodes[0].id, Atom):
+            chains = set(str(res.chain).split()[1] for res in [node.id.residue for node in self.nodes])
+        else:
+            return None
+        return list(chains)
 
 
 def build_atomic_graph( # pylint: disable=too-many-locals
@@ -322,7 +332,7 @@ def build_atomic_graph( # pylint: disable=too-many-locals
     distances = distance_matrix(positions, positions, p=2)
     neighbours = distances < edge_distance_cutoff
 
-    graph = Graph(graph_id)
+    graph = Graph(graph_id, edge_distance_cutoff)
     for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
         if atom1_index != atom2_index:
 
@@ -377,7 +387,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     residue_index_pairs = np.unique(atoms_residues[atom_index_pairs], axis=0)
 
     # build the graph
-    graph = Graph(graph_id)
+    graph = Graph(graph_id, edge_distance_cutoff)
     for residue1_index, residue2_index in residue_index_pairs:
 
         residue1 = residues[residue1_index]
