@@ -10,8 +10,10 @@ def _run_assertions(graph: Graph, node_info_list: list):
     node_info_list.sort()
     
     # Check that all nodes have exactly 1 secondary structure type
-    assert np.all([node.features[Nfeat.SECSTRUCT].sum() == 1.0 for node in graph.nodes]), 'sum != 1'
+    assert np.all([node.features[Nfeat.SECSTRUCT].sum() == 1.0 for node in graph.nodes]), 'one hot error'
 
+
+    # check ground truth examples
     residues = [
         (90, 'D', np.array([0., 0., 1.]), 'C'),
         (113, 'C', np.array([0., 1., 0.]), 'E'),
@@ -24,9 +26,26 @@ def _run_assertions(graph: Graph, node_info_list: list):
         assert np.all(
             [np.array_equal(node_info[2], res[2])
                 for node_info in node_list]
-        ), f'sec struct for {res[1]} {res[0]} is not {res[3]}'        
+        ), f'Ground truth examples: res {res[1]} {res[0]} is not {res[3]}'
 
 
+    # check entire DSSP file
+    with open('tests/data/dssp/1ak4.dssp.txt') as file:
+        dssp_lines = [line.rstrip() for line in file]
+
+    for node in node_info_list:
+        dssp_line = [line for line in dssp_lines 
+                        if (line[7:10] == str(node[0]).rjust(3) and line[11] == node[1])][0]
+        dssp_code = dssp_line[16]
+        if dssp_code in [' ', 'S', 'T']:
+            assert np.array_equal(node[2],np.array([0., 0., 1.])), f'Full file test: res {node[1]}{node[0]} is not C'
+        elif dssp_code in ['B', 'E']:
+            assert np.array_equal(node[2],np.array([0., 1., 0.])), f'Full file test: res {node[1]}{node[0]} is not E'
+        elif dssp_code in ['G', 'H', 'I']:
+            assert np.array_equal(node[2],np.array([1., 0., 0.])), f'Full file test: res {node[1]}{node[0]} is not H'
+        else:
+            raise ValueError(f'Unexpected secondary structure type found at {node[1]}{node[0]}')
+    
     
 def test_secondary_structure_residue():
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
