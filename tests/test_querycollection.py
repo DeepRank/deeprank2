@@ -151,7 +151,7 @@ def test_querycollection_process_exclude_list():
 
     for query_type in ['ppi', 'var']:
 
-        _, output_directory, output_paths = _querycollection_tester(query_type, exclude_feature_modules = ['exposure', 'surfacearea'])
+        _, output_directory, output_paths = _querycollection_tester(query_type, exclude_feature_modules = ['exposure', 'surfacearea.py'])
         
         with h5py.File(output_paths[0], "r") as f5:
             for feat in ['bsa', 'hse']:
