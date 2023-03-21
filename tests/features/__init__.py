@@ -24,7 +24,8 @@ def build_testgraph( # pylint: disable=too-many-locals
     cutoff: float, 
     detail: str, 
     central_res: Optional[int] = None,
-    variant: AminoAcid = None,
+    variant: Optional[AminoAcid] = None,
+    chain_ids: Optional[Union[str, Tuple[str, str]]] = None,
     ) -> Union[Graph, Tuple[Graph, SingleResidueVariant]]:
 
     """ Creates a Graph object for feature tests.
@@ -36,8 +37,10 @@ def build_testgraph( # pylint: disable=too-many-locals
         central_res (Optional[int], optional): Residue to center a single-chain graph around.
             Use None to create a 2-chain graph, or any value for a single-chain graph
             Defaults to None.
-        variant (AminoAcid, optional): Amino acid to use as a variant amino acid.
+        variant (Optional[AminoAcid], optional): Amino acid to use as a variant amino acid.
             Defaults to None.
+        chain_ids (Optional[Union[str, Tuple[str, str]]], optional): Explicitly specify which chain(s) to use. 
+            Defaults to None, which will use the first (two) chain(s) from the structure.
 
     Raises:
         TypeError: if detail is set to anything other than 'residue' or 'atom'
@@ -55,9 +58,13 @@ def build_testgraph( # pylint: disable=too-many-locals
 
     if not central_res: # pylint: disable=no-else-raise
         nodes = set([])
+        if not chain_ids:
+            chains = (structure.chains[0].id, structure.chains[1].id)
+        else:
+            chains = [structure.get_chain(chain_id) for chain_id in chain_ids]
         for residue1, residue2 in get_residue_contact_pairs(
             pdb_path, structure, 
-            structure.chains[0].id, structure.chains[1].id, 
+            chains[0], chains[1], 
             cutoff
         ):
             if detail == 'residue':
@@ -77,12 +84,18 @@ def build_testgraph( # pylint: disable=too-many-locals
         raise TypeError('detail must be "atom" or "residue"')
 
     else:
-        chain: Chain = structure.chains[0]
+        if not chain_ids:
+            chain: Chain = structure.chains[0]
+        else:
+            chain = structure.get_chain(chain_ids)
         residue = _get_residue(chain, central_res)
         surrounding_residues = list(get_surrounding_residues(structure, residue, cutoff))
 
-        with open(f"tests/data/pssm/{structure.id}/{structure.id}.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
-            chain.pssm = parse_pssm(f, chain)
+        try:
+            with open(f"tests/data/pssm/{structure.id}/{structure.id}.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
+                chain.pssm = parse_pssm(f, chain)
+        except:
+            pass
 
         if detail == 'residue':
             return build_residue_graph(surrounding_residues, structure.id, cutoff), SingleResidueVariant(residue, variant)
