@@ -1,27 +1,9 @@
-from pdb2sql import pdb2sql
 import numpy as np
-from deeprankcore.molstruct.structure import PDBStructure
-from deeprankcore.features.secondary_structure import add_features
-from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph, Graph
-from deeprankcore.utils.buildgraph import get_structure
+from . import build_testgraph
 from deeprankcore.domain import nodestorage as Nfeat
 
-def _load_pdb_structure(pdb_path: str, id_: str) -> PDBStructure:
-    """
-    Load PDB structure from a PDB file.
-
-    Args:
-        pdb_path (str): The file path of the PDB file.
-        id_ (str): The PDB structure ID.
-
-    Returns:
-        PDBStructure: The loaded PDB structure.
-    """
-    pdb = pdb2sql(pdb_path)
-    try:
-        return get_structure(pdb, id_)
-    finally:
-        pdb._close()  # pylint: disable=protected-access
+from deeprankcore.features.secondary_structure import add_features
+from deeprankcore.utils.graph import Graph
 
 
 def _run_assertions(graph: Graph, node_info_list: list):
