@@ -56,13 +56,8 @@ def _run_assertions(graph: Graph, node_info_list: list):
 
     
 def test_secondary_structure_residue():
-    # Load test PDB file and create a residue graph
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
-    structure = _load_pdb_structure(pdb_path, "1ak4")
-    residues = structure.chains[0].residues + structure.chains[1].residues
-    graph = build_residue_graph(residues, "1ak4", 8.5)
-
-    # Add secondary structure features to the graph nodes
+    graph = build_testgraph(pdb_path, 8.5, 'residue')
     add_features(pdb_path, graph)
 
     # Create a list of node information (residue number, chain ID, and secondary structure features)
@@ -75,13 +70,7 @@ def test_secondary_structure_residue():
 
 def test_secondary_structure_atom():
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
-    structure = _load_pdb_structure(pdb_path, "1ak4")
-
-    atoms = [atom for residue in structure.chains[0].residues for atom in residue.atoms] \
-            + [atom for residue in structure.chains[1].residues for atom in residue.atoms]
-
-    graph = build_atomic_graph(atoms, "1ak4", 4.5)
-
+    graph = build_testgraph(pdb_path, 4.5, 'atom')
     add_features(pdb_path, graph)
     
     # Create a list of node information (residue number, chain ID, and secondary structure features)
