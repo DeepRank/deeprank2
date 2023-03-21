@@ -227,7 +227,7 @@ class QueryCollection:
     def process( # pylint: disable=too-many-arguments, too-many-locals
         self, 
         prefix: Optional[str] = None,
-        feature_modules: Optional[Union[ModuleType, List[ModuleType]]] = None,
+        feature_modules: Optional[Union[ModuleType, List[ModuleType], str, List[str]]] = None,
         exclude_feature_modules: Optional[Union[str, List[str]]] = None,
         cpu_count: Optional[int] = None,
         combine_output: bool = True,
@@ -238,11 +238,12 @@ class QueryCollection:
         """
         Args:
             prefix (Optional[str], optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
-            feature_modules (Union[ModuleType, List[ModuleType]], optional): Features' module or list of features' modules used to generate features. 
-                Each feature's module must implement the :py:func:`add_features` function, and features' modules can be found (or should be placed
-                in case of a custom made feature) in `deeprankcore.features` folder. 
-                Defaults to None, which means that all available modules in `deeprankcore.features` are used to generate
-                the features. In this case, specific features modules to exclude can be set using exclude_feature_modules.
+            feature_modules (Optional[Union[ModuleType, List[ModuleType], str, List[str]]], optional): Features' module or list of features' modules
+                used to generate features (given as string or as an imported module). Each module must implement the :py:func:`add_features` function, 
+                and features' modules can be found (or should be placed in case of a custom made feature) in `deeprankcore.features` folder. 
+                If set to None, all available modules in `deeprankcore.features` are used to generate the features, except those specified in 
+                exclude_feature_modules.
+                Defaults to None. 
             exclude_feature_modules (Union[str, List[str]], optional): Specify as strings feature module names to exclude if feature_modules 
                 is set to None. This setting is not used if feature_modules is not None.
                 Defaults to None.
@@ -274,16 +275,19 @@ class QueryCollection:
 
         if prefix is None:
             prefix = "processed-queries"
-        
+
         if feature_modules is None:
             if not isinstance(exclude_feature_modules, list):
                 exclude_feature_modules = [exclude_feature_modules]
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__) 
-                                if (modname not in exclude_feature_modules and modname+'.py' not in exclude_feature_modules)]
+                                if modname.replace('.py','') not in exclude_feature_modules]
         elif isinstance(feature_modules, list):
-            feature_names = [basename(m.__file__)[:-3] for m in feature_modules]
-        else:
+            feature_names = [basename(m.__file__)[:-3] if isinstance(m,ModuleType) 
+                             else m.replace('.py','') for m in feature_modules]
+        elif isinstance(feature_modules, ModuleType):
             feature_names = [basename(feature_modules.__file__)[:-3]]
+        elif isinstance(feature_modules, str):
+            feature_names = [feature_modules.replace('py','')]
 
 
         _log.info(f'Creating pool function to process {len(self.queries)} queries...')
