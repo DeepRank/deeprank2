@@ -11,7 +11,7 @@ from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from . import PATH_TEST
 from deeprankcore.domain import nodestorage as Nfeat
 
-def _querycollection_tester( # pylint: disable = too-many-locals
+def _querycollection_tester( # pylint: disable = too-many-locals, too-many-arguments
     query_type: str = 'ppi',
     n_queries: int = 3, 
     feature_modules: Optional[Union[ModuleType, List[ModuleType]]] = None, 
@@ -137,8 +137,8 @@ def test_querycollection_process_exclude_one():
         
         with h5py.File(output_paths[0], "r") as f5:
             with pytest.raises(KeyError):
-                f5[list(f5.keys())[0]][f"{Nfeat.NODE}/hse"]
-            f5[list(f5.keys())[0]][f"{Nfeat.NODE}/bsa"]
+                _ = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/hse"]
+            _ = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/bsa"]
             
 
         rmtree(output_directory)
@@ -156,8 +156,8 @@ def test_querycollection_process_exclude_list():
         with h5py.File(output_paths[0], "r") as f5:
             for feat in ['bsa', 'hse']:
                 with pytest.raises(KeyError):
-                    f5[list(f5.keys())[0]][f"{Nfeat.NODE}/{feat}"]
-            f5[list(f5.keys())[0]][f"{Nfeat.NODE}/res_type"]
+                    _ = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/{feat}"]
+            _ = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/res_type"]
             
 
         rmtree(output_directory)

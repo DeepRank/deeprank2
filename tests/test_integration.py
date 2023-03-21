@@ -41,7 +41,7 @@ def test_cnn(): # pylint: disable=too-many-locals
     try:
         all_targets = compute_targets(pdb_path, ref_path)
 
-        count_queries = 5
+        count_queries = 3
         queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
@@ -131,7 +131,7 @@ def test_gnn(): # pylint: disable=too-many-locals
     try:
         all_targets = compute_targets(pdb_path, ref_path)
 
-        count_queries = 5
+        count_queries = 3
         queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(

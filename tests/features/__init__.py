@@ -19,7 +19,7 @@ def _get_residue(chain: Chain, number: int) -> Residue:
     raise ValueError(f"Not found: {number}")
 
 
-def build_testgraph( # pylint: disable=too-many-locals
+def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noqa:MC0001
     pdb_path: str, 
     cutoff: float, 
     detail: str, 
@@ -94,7 +94,7 @@ def build_testgraph( # pylint: disable=too-many-locals
         try:
             with open(f"tests/data/pssm/{structure.id}/{structure.id}.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
                 chain.pssm = parse_pssm(f, chain)
-        except:
+        except FileNotFoundError:
             pass
 
         if detail == 'residue':
