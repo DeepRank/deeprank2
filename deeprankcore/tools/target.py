@@ -102,7 +102,7 @@ def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[f
     """
 
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
-    sim = StructureSimilarity(pdb_path, reference_pdb_path)
+    sim = StructureSimilarity(pdb_path, reference_pdb_path, enforce_residue_matching=False)
 
     scores = {}
 

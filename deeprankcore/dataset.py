@@ -257,12 +257,13 @@ class DeeprankDataset(Dataset):
 
         return df_final
 
-    def save_hist(
+    def save_hist( # pylint: disable=too-many-arguments, too-many-branches, useless-suppression
             self,
             features: Union[str,List[str]],
             fname: str = 'features_hist.png',
             bins: Union[int,List[float],str] = 10,
-            figsize: Tuple = (15, 15)
+            figsize: Tuple = (15, 15),
+            log: bool = False
     ):
         """After having generated a pd.DataFrame using hdf5_to_pandas method, histograms of the features can be saved in an image.
 
@@ -277,6 +278,7 @@ class DeeprankDataset(Dataset):
                 'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
                 Defaults to 10.
             figsize (Tuple, optional): Saved figure sizes. Defaults to (15, 15).
+            log (bool): Whether to apply log transformation to the data indicated by the `features` parameter. Defaults to False.
         """
         if self.df is None:
             self.hdf5_to_pandas()
@@ -285,7 +287,7 @@ class DeeprankDataset(Dataset):
             features = [features]
 
         features_df = [col for feat in features for col in self.df.columns.values.tolist() if feat in col]
-
+        
         means = [
             round(np.concatenate(self.df[feat].values).mean(), 1) if isinstance(self.df[feat].values[0], np.ndarray) \
             else round(self.df[feat].values.mean(), 1) \
@@ -299,23 +301,41 @@ class DeeprankDataset(Dataset):
 
             fig, axs = plt.subplots(len(features_df), figsize=figsize)
 
-            for row, feat in enumerate(features_df):
-
+            for row, feat in enumerate(features_df):       
                 if isinstance(self.df[feat].values[0], np.ndarray):
-                    axs[row].hist(np.concatenate(self.df[feat].values), bins=bins)
+                    if(log):
+                        log_data = np.log(np.concatenate(self.df[feat].values))
+                        log_data[log_data == -np.inf] = 0
+                        axs[row].hist(log_data, bins=bins)
+                    else:
+                        axs[row].hist(np.concatenate(self.df[feat].values), bins=bins)
                 else:
-                    axs[row].hist(self.df[feat].values, bins=bins)
+                    if(log):
+                        log_data = np.log(self.df[feat].values)
+                        log_data[log_data == -np.inf] = 0 
+                        axs[row].hist(log_data, bins=bins)
+                    else:
+                        axs[row].hist(self.df[feat].values, bins=bins)
                 axs[row].set(xlabel=f'{feat} (mean {means[row]}, std {devs[row]})', ylabel='Count')
             fig.tight_layout()
 
         elif len(features_df) == 1:
-
             fig = plt.figure(figsize=figsize)
             ax = fig.add_subplot(111)
             if isinstance(self.df[features_df[0]].values[0], np.ndarray):
-                ax.hist(np.concatenate(self.df[features_df[0]].values), bins=bins)
+                if(log):
+                    log_data = np.log(np.concatenate(self.df[features_df[0]].values))
+                    log_data[log_data == -np.inf] = 0
+                    ax.hist(log_data, bins=bins)
+                else:
+                    ax.hist(np.concatenate(self.df[features_df[0]].values), bins=bins)
             else:
-                ax.hist(self.df[features_df[0]].values, bins=bins)
+                if(log):
+                    log_data = np.log(self.df[features_df[0]].values)
+                    log_data[log_data == -np.inf] = 0
+                    ax.hist(log_data, bins=bins)
+                else:
+                    ax.hist(self.df[features_df[0]].values, bins=bins)
             ax.set(xlabel=f'{features_df[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
 
         else:
