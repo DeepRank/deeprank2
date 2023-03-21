@@ -55,7 +55,8 @@ runs:
         make
         sudo make install
         cd ../..
-        sudo apt-get install dssp
+        # Install dssp
+        sudo apt-get install -y dssp
         # Only way to install msms is through conda
         conda install -c bioconda msms
         # Safest way to install PyTorch and PyTorch Geometric is through conda
