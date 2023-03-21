@@ -54,8 +54,10 @@ class TestDataSet(unittest.TestCase):
             edge_features=[Efeat.DISTANCE],
             target=targets.BINARY
         )
-        
-        assert dataset.len() == 17, f"total data points got was {dataset.len()}"
+        n = 0
+        for hdf5 in hdf5_paths:
+                n += len(hdf5.keys())      
+        assert len(dataset) == n, f"total data points got was {len(dataset)}"
     
     def test_grid_dataset_regression(self):
         dataset = GridDataset(
