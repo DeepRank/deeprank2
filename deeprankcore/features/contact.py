@@ -87,8 +87,9 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
     else:
         raise TypeError(
             f"Unexpected edge type: {type(graph.edges[0].id)}")
+
     all_atoms = list(all_atoms)
-    atom_dict = {all_atoms[i]: i for i in range(len(all_atoms))}
+    atom_dict = {atom: i for i, atom in enumerate(all_atoms)}
 
     # make pairwise calculations between all atoms in the set
     with warnings.catch_warnings(record=RuntimeWarning):
@@ -96,6 +97,7 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
         positions = [atom.position for atom in all_atoms]
         interatomic_distances = distance_matrix(positions, positions)
         interatomic_electrostatic_energy, interatomic_vanderwaals_energy = _get_nonbonded_energy(all_atoms, interatomic_distances)
+
 
     # assign features
     if isinstance(graph.edges[0].id, AtomicContact):
@@ -105,10 +107,10 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
             atom1_index = atom_dict[contact.atom1]
             atom2_index = atom_dict[contact.atom2]
             ## set features
-            edge.features[Efeat.SAMERES] = float( contact.atom1.residue == contact.atom2.residue)  # 1.0 for True; 0.0 for False
-            edge.features[Efeat.SAMECHAIN] = float( contact.atom1.residue.chain == contact.atom1.residue.chain )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMERES] = float(contact.atom1.residue == contact.atom2.residue)  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMECHAIN] = float(contact.atom1.residue.chain == contact.atom1.residue.chain)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = interatomic_distances[atom1_index, atom2_index]
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < covalent_cutoff )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float(edge.features[Efeat.DISTANCE] < covalent_cutoff)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_energy[atom1_index, atom2_index]
             edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy[atom1_index, atom2_index]
     
@@ -119,8 +121,8 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
             atom1_indices = [atom_dict[atom] for atom in contact.residue1.atoms]
             atom2_indices = [atom_dict[atom] for atom in contact.residue2.atoms]
             ## set features
-            edge.features[Efeat.SAMECHAIN] = float( contact.residue1.chain == contact.residue2.chain )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMECHAIN] = float(contact.residue1.chain == contact.residue2.chain)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-            edge.features[Efeat.COVALENT] = float( edge.features[Efeat.DISTANCE] < covalent_cutoff )  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.COVALENT] = float(edge.features[Efeat.DISTANCE] < covalent_cutoff)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = np.sum([[interatomic_electrostatic_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
             edge.features[Efeat.VANDERWAALS] = np.sum([[interatomic_vanderwaals_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])

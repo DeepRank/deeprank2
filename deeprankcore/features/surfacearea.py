@@ -1,55 +1,47 @@
 import logging
 import freesasa
 import numpy as np
-from typing import List, Optional
-from deeprankcore.utils.graph import Node, Graph
+from typing import Optional
+from deeprankcore.utils.graph import Graph
 from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.domain import nodestorage as Nfeat
 
-freesasa.setVerbosity(freesasa.nowarnings) # pylint: disable=c-extension-no-member
+# pylint: disable=c-extension-no-member
+
+freesasa.setVerbosity(freesasa.nowarnings)
 logging.getLogger(__name__)
 
 
-def add_sasa_for_residues(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
-                              result: freesasa.Result, # pylint: disable=c-extension-no-member
-                              nodes: List[Node]):
+def add_sasa(pdb_path: str, graph: Graph):
+    structure = freesasa.Structure(pdb_path) 
+    result = freesasa.calc(structure) 
 
-    for node in nodes:
+    for node in graph.nodes:
+        if isinstance(node.id, Residue):
+            residue = node.id
+            selection = (f"residue, (resi {residue.number_string}) and (chain {residue.chain.id})",)
+            area = freesasa.selectArea(selection, structure, result)['residue']
 
-        residue = node.id
+        elif isinstance(node.id, Atom):
+            atom = node.id
+            residue = atom.residue
+            selection = (f"atom, (name {atom.name}) and (resi {residue.number_string}) and (chain {residue.chain.id})",)
+            area = freesasa.selectArea(selection, structure, result)['atom']
 
-        selection = ("residue, (resi %s) and (chain %s)" % (residue.number_string, residue.chain.id),) # pylint: disable=consider-using-f-string
+        else:
+            raise TypeError(f"Unexpected node type: {type(node.id)}")
 
-        area = freesasa.selectArea(selection, structure, result)['residue'] # pylint: disable=c-extension-no-member
         if np.isnan(area):
             raise ValueError(f"freesasa returned {area} for {residue}")
-
         node.features[Nfeat.SASA] = area
 
-
-def add_sasa_for_atoms(structure: freesasa.Structure, # pylint: disable=c-extension-no-member
-                           result: freesasa.Result, # pylint: disable=c-extension-no-member
-                           nodes: List[Node]):
-
-    for node in nodes:
-
-        atom = node.id
-
-        selection = ("atom, (name %s) and (resi %s) and (chain %s)" % \
-            (atom.name, atom.residue.number_string, atom.residue.chain.id),) # pylint: disable=consider-using-f-string
-
-        area = freesasa.selectArea(selection, structure, result)['atom'] # pylint: disable=c-extension-no-member
-        if np.isnan(area):
-            raise ValueError(f"freesasa returned {area} for {atom}")
-
-        node.features[Nfeat.SASA] = area
 
 
 def add_bsa(graph: Graph):
 
-    sasa_complete_structure = freesasa.Structure() # pylint: disable=c-extension-no-member
+    sasa_complete_structure = freesasa.Structure() 
     sasa_chain_structures = {}
 
     for node in graph.nodes:
@@ -57,7 +49,7 @@ def add_bsa(graph: Graph):
             residue = node.id
             chain_id = residue.chain.id
             if chain_id not in sasa_chain_structures:
-                sasa_chain_structures[chain_id] = freesasa.Structure() # pylint: disable=c-extension-no-member
+                sasa_chain_structures[chain_id] = freesasa.Structure() 
 
             for atom in residue.atoms:
                 sasa_chain_structures[chain_id].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
@@ -72,7 +64,7 @@ def add_bsa(graph: Graph):
             residue = atom.residue
             chain_id = residue.chain.id
             if chain_id not in sasa_chain_structures:
-                sasa_chain_structures[chain_id] = freesasa.Structure() # pylint: disable=c-extension-no-member
+                sasa_chain_structures[chain_id] = freesasa.Structure() 
 
             sasa_chain_structures[chain_id].addAtom(atom.name, atom.residue.amino_acid.three_letter_code,
                                                     atom.residue.number, atom.residue.chain.id,
@@ -86,8 +78,8 @@ def add_bsa(graph: Graph):
         else:
             raise TypeError(f"Unexpected node type: {type(node.id)}")
 
-    sasa_complete_result = freesasa.calc(sasa_complete_structure) # pylint: disable=c-extension-no-member
-    sasa_chain_results = {chain_id: freesasa.calc(structure) # pylint: disable=c-extension-no-member
+    sasa_complete_result = freesasa.calc(sasa_complete_structure) 
+    sasa_chain_results = {chain_id: freesasa.calc(structure) 
                           for chain_id, structure in sasa_chain_structures.items()}
 
     for node in graph.nodes:
@@ -105,8 +97,8 @@ def add_bsa(graph: Graph):
                  (atom.name, atom.residue.number_string, atom.residue.chain.id),) # pylint: disable=consider-using-f-string
 
         area_monomer = freesasa.selectArea(selection, sasa_chain_structures[chain_id], \
-            sasa_chain_results[chain_id])[area_key] # pylint: disable=c-extension-no-member
-        area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key] # pylint: disable=c-extension-no-member
+            sasa_chain_results[chain_id])[area_key] 
+        area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key] 
 
         node.features[Nfeat.BSA] = area_monomer - area_multimer
 
@@ -123,13 +115,4 @@ def add_features( # pylint: disable=unused-argument
     add_bsa(graph)
 
     # SASA
-    structure = freesasa.Structure(pdb_path) # pylint: disable=c-extension-no-member
-    result = freesasa.calc(structure) # pylint: disable=c-extension-no-member
-
-    if isinstance(graph.nodes[0].id, Residue):
-        return add_sasa_for_residues(structure, result, graph.nodes)
-
-    if isinstance(graph.nodes[0].id, Atom):
-        return add_sasa_for_atoms(structure, result, graph.nodes)
-
-    raise TypeError(f"Unexpected node type: {type(graph.nodes[0].id)}")
+    add_sasa(pdb_path, graph)
