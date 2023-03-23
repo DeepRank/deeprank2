@@ -11,6 +11,21 @@ from Bio.PDB.DSSP import DSSP
 from enum import Enum
 
 
+class SecondarySctructure(Enum):
+    "a value to express a secondary a residue's secondary structure type"
+
+    HELIX = 0 # C
+    STRAND = 1 # E
+    COIL = 2 # C
+
+    @property
+    def onehot(self):
+        t = np.zeros(3)
+        t[self.value] = 1.0
+
+        return t
+
+
 def _get_secstruct(pdb_path: str) -> Dict:
     """Process the DSSP output to extract secondary structure information.
     
