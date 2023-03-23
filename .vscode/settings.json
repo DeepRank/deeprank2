@@ -3,5 +3,6 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
         }
-    }
+    },
+    "python.linting.prospectorEnabled": true,
 }
