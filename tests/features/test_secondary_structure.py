@@ -31,7 +31,7 @@ def _run_assertions(graph: Graph, node_info_list: list):
 
     # check entire DSSP file
     # residue number @ pos 5-10, chain_id @ pos 11, secondary structure @ pos 16
-    with open('tests/data/dssp/1ak4.dssp.txt') as file:
+    with open('tests/data/dssp/1ak4.dssp.txt', encoding="utf8") as file:
         dssp_lines = [line.rstrip() for line in file]
 
     for node in node_info_list:
