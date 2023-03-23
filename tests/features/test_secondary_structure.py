@@ -7,17 +7,16 @@ from deeprankcore.utils.graph import Graph
 
 
 def _run_assertions(graph: Graph, node_info_list: list):
-    node_info_list.sort()
     
     # Check that all nodes have exactly 1 secondary structure type
-    assert np.all([np.sum(node.features[Nfeat.SECSTRUCT].onehot) == 1.0 for node in graph.nodes]), 'one hot encoding error'
+    assert np.all([np.sum(node.features[Nfeat.SECSTRUCT]) == 1.0 for node in graph.nodes]), 'one hot encoding error'
 
 
     # check ground truth examples
     residues = [
-        (90, 'D', SecondarySctructure.COIL),
-        (113, 'C', SecondarySctructure.STRAND),
-        (121, 'C', SecondarySctructure.HELIX),
+        (90, 'D', SecondarySctructure.COIL.onehot),
+        (113, 'C', SecondarySctructure.STRAND.onehot),
+        (121, 'C', SecondarySctructure.HELIX.onehot),
     ]
 
     for res in residues:
@@ -39,11 +38,11 @@ def _run_assertions(graph: Graph, node_info_list: list):
                         if (line[5:10] == str(node[0]).rjust(5) and line[11] == node[1])][0]
         dssp_code = dssp_line[16]
         if dssp_code in [' ', 'S', 'T']:
-            assert np.array_equal(node[2],SecondarySctructure.COIL), f'Full file test: res {node[1]}{node[0]} is not a COIL'
+            assert np.array_equal(node[2],SecondarySctructure.COIL.onehot), f'Full file test: res {node[1]}{node[0]} is not a COIL'
         elif dssp_code in ['B', 'E']:
-            assert np.array_equal(node[2],SecondarySctructure.STRAND), f'Full file test: res {node[1]}{node[0]} is not a STRAND'
+            assert np.array_equal(node[2],SecondarySctructure.STRAND.onehot), f'Full file test: res {node[1]}{node[0]} is not a STRAND'
         elif dssp_code in ['G', 'H', 'I']:
-            assert np.array_equal(node[2],SecondarySctructure.HELIX), f'Full file test: res {node[1]}{node[0]} is not a HELIX'
+            assert np.array_equal(node[2],SecondarySctructure.HELIX.onehot), f'Full file test: res {node[1]}{node[0]} is not a HELIX'
         else:
             raise ValueError(f'Unexpected secondary structure type found at {node[1]}{node[0]}')
     

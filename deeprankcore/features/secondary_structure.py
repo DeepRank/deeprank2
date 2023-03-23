@@ -75,11 +75,11 @@ def add_features( # pylint: disable=unused-argument
         res_num = residue.number
 
         if sec_structure_features[chain_id][res_num] in ('-', 'S', 'T'):
-            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.COIL
+            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.COIL.onehot
         elif sec_structure_features[chain_id][res_num] in ('B', 'E'):
-            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.STRAND
+            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.STRAND.onehot
         elif sec_structure_features[chain_id][res_num] in ('G', 'H', 'I'):
-            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.HELIX
+            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.HELIX.onehot
         else:
             raise ValueError(f'Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) \
                              detected on chain{chain_id} residues{res_num}.')
