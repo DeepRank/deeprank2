@@ -46,6 +46,20 @@ class TestDataSet(unittest.TestCase):
                                             'residue-ppi-1ATN_3w:A-B',
                                             'residue-ppi-1ATN_4w:A-B']), f"entry names of {dataset_name} were not collated correctly"
 
+    def test_dataset_dataframe_size(self):
+        hdf5_paths = ["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5", "tests/data/hdf5/test.hdf5"]
+        dataset = GraphDataset(
+            hdf5_path=hdf5_paths,
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
+            target=targets.BINARY
+        )
+        n = 0
+        for hdf5 in hdf5_paths:
+            with h5py.File(hdf5, 'r') as hdf5_r:
+                n += len(hdf5_r.keys())      
+        assert len(dataset) == n, f"total data points got was {len(dataset)}"
+    
     def test_grid_dataset_regression(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
