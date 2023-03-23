@@ -1,13 +1,15 @@
+from enum import Enum
+from typing import Dict, Optional
+
 import numpy as np
-from typing import Optional, Dict
-from deeprankcore.molstruct.variant import SingleResidueVariant
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.utils.graph import Graph
-from deeprankcore.domain import nodestorage as Nfeat
 from Bio.PDB import PDBParser
 from Bio.PDB.DSSP import DSSP
-from enum import Enum
+
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.graph import Graph
 
 
 class SecondarySctructure(Enum):
