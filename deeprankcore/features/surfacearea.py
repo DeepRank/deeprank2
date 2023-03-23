@@ -1,12 +1,14 @@
 import logging
+from typing import Optional
+
 import freesasa
 import numpy as np
-from typing import Optional
-from deeprankcore.utils.graph import Graph
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.variant import SingleResidueVariant
+
 from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.graph import Graph
 
 # pylint: disable=c-extension-no-member
 

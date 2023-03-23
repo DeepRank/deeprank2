@@ -1,15 +1,17 @@
-import os
 import logging
-from typing import Union, List
-import numpy as np
+import os
 import subprocess
-from scipy.spatial import distance_matrix
+from typing import List, Union
+
+import numpy as np
 from pdb2sql import interface as get_interface
-from deeprankcore.molstruct.structure import Chain, PDBStructure
-from deeprankcore.molstruct.atom import Atom, AtomicElement
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.molstruct.pair import Pair
+from scipy.spatial import distance_matrix
+
 from deeprankcore.domain.aminoacidlist import amino_acids
+from deeprankcore.molstruct.atom import Atom, AtomicElement
+from deeprankcore.molstruct.pair import Pair
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.structure import Chain, PDBStructure
 
 _log = logging.getLogger(__name__)
 

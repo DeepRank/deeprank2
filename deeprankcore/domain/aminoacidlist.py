@@ -1,4 +1,4 @@
-from deeprankcore.molstruct.aminoacid import AminoAcid,Polarity
+from deeprankcore.molstruct.aminoacid import AminoAcid, Polarity
 
 # All info below sourced from above websites in December 2022 and summarized in deeprankcore/domain/aminoacid_summary.xlsx
 

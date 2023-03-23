@@ -1,13 +1,7 @@
-from h5xplorer.menu_tools import (
-    get_current_item,
-    get_current_hdf5_group,
-    get_group_data,
-    get_multilevel_actions,
-    send_dict_to_console)
-from h5xplorer.menu_plot import (
-    plot_histogram,
-    plot_line,
-    plot2d)
+from h5xplorer.menu_plot import plot2d, plot_histogram, plot_line
+from h5xplorer.menu_tools import (get_current_hdf5_group, get_current_item,
+                                  get_group_data, get_multilevel_actions,
+                                  send_dict_to_console)
 
 
 def context_menu(self, treeview, position): # noqa: MC0001

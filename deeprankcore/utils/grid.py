@@ -1,15 +1,15 @@
 """This module holds the classes that are used when working with a 3D grid."""
 
+import itertools
 import logging
 from enum import Enum
-from typing import Dict, Union, List
-import numpy as np
+from typing import Dict, List, Union
+
 import h5py
-import itertools
+import numpy as np
 from scipy.signal import bspline
 
 from deeprankcore.domain import gridstorage
-
 
 _log = logging.getLogger(__name__)
 
