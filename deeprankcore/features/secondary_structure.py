@@ -30,19 +30,12 @@ def _get_secstruct(pdb_path: str) -> Dict:
     res_numbers = [dssp_key[1][1] for dssp_key in dssp.property_keys]
     sec_structs = [dssp[dssp_key][2] for dssp_key in dssp.property_keys]
 
-    # Initialize dictionary to store secondary structure information
+    # Store output in Dictionary
     sec_structure_dict = {}
     for chain in set(chain_ids):
-        sec_structure_dict[chain] = {}
-    
-    # Create one-hot encoding for secondary structure features
-    one_hot_encoded_features = np.zeros((len(sec_structure_features), 3))
-    for ind, _ in enumerate(sec_structure_features):
-        one_hot_encoded_features[ind]['HEC'.index(sec_structure_features[ind])] = 1
-
-    # Populate the dictionary with one-hot encoded secondary structure information
+        sec_structure_dict[chain] = {}    
     for i, _ in enumerate(chain_ids):
-        sec_structure_dict[chain_ids[i]][residue_numbers[i]] = one_hot_encoded_features[i]
+        sec_structure_dict[chain_ids[i]][res_numbers[i]] = sec_structs[i]
     
     return sec_structure_dict
 
