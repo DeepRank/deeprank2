@@ -40,7 +40,7 @@ def _get_secstruct(pdb_path: str) -> Dict:
     # Execute DSSP and read the output
     p = PDBParser(QUIET=True)
     model = p.get_structure("", pdb_path)[0]
-    dssp = DSSP(model, pdb_path)
+    dssp = DSSP(model, pdb_path, dssp='mkdssp')
 
     chain_ids = [dssp_key[0] for dssp_key in dssp.property_keys]
     res_numbers = [dssp_key[1][1] for dssp_key in dssp.property_keys]
