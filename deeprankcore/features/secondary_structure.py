@@ -1,4 +1,3 @@
-import os
 import numpy as np
 from typing import Optional, Dict
 from deeprankcore.molstruct.variant import SingleResidueVariant
@@ -62,6 +61,7 @@ def add_features( # pylint: disable=unused-argument
     ):    
 
     sec_structure_features = _get_secstruct(pdb_path)
+
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id
@@ -73,4 +73,13 @@ def add_features( # pylint: disable=unused-argument
 
         chain_id = residue.chain.id
         res_num = residue.number
-        node.features[Nfeat.SECSTRUCT] = sec_structure_features[chain_id][res_num]
+
+        if sec_structure_features[chain_id][res_num] in ('-', 'S', 'T'):
+            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.COIL
+        elif sec_structure_features[chain_id][res_num] in ('B', 'E'):
+            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.STRAND
+        elif sec_structure_features[chain_id][res_num] in ('G', 'H', 'I'):
+            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.HELIX
+        else:
+            raise ValueError(f'Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) \
+                             detected on chain{chain_id} residues{res_num}.')
