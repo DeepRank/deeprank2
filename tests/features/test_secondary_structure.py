@@ -2,7 +2,7 @@ import numpy as np
 from . import build_testgraph
 from deeprankcore.domain import nodestorage as Nfeat
 
-from deeprankcore.features.secondary_structure import add_features
+from deeprankcore.features.secondary_structure import add_features, SecondarySctructure
 from deeprankcore.utils.graph import Graph
 
 
@@ -10,14 +10,14 @@ def _run_assertions(graph: Graph, node_info_list: list):
     node_info_list.sort()
     
     # Check that all nodes have exactly 1 secondary structure type
-    assert np.all([node.features[Nfeat.SECSTRUCT].sum() == 1.0 for node in graph.nodes]), 'one hot error'
+    assert np.all([np.sum(node.features[Nfeat.SECSTRUCT].onehot) == 1.0 for node in graph.nodes]), 'one hot encoding error'
 
 
     # check ground truth examples
     residues = [
-        (90, 'D', np.array([0., 0., 1.]), 'C'),
-        (113, 'C', np.array([0., 1., 0.]), 'E'),
-        (121, 'C', np.array([1., 0., 0.]), 'H'),
+        (90, 'D', SecondarySctructure.COIL),
+        (113, 'C', SecondarySctructure.STRAND),
+        (121, 'C', SecondarySctructure.HELIX),
     ]
 
     for res in residues:
@@ -26,7 +26,7 @@ def _run_assertions(graph: Graph, node_info_list: list):
         assert np.all(
             [np.array_equal(node_info[2], res[2])
                 for node_info in node_list]
-        ), f'Ground truth examples: res {res[1]} {res[0]} is not {res[3]}'
+        ), f'Ground truth examples: res {res[1]} {res[0]} is not {res[2]}'
 
 
     # check entire DSSP file
@@ -39,11 +39,11 @@ def _run_assertions(graph: Graph, node_info_list: list):
                         if (line[5:10] == str(node[0]).rjust(5) and line[11] == node[1])][0]
         dssp_code = dssp_line[16]
         if dssp_code in [' ', 'S', 'T']:
-            assert np.array_equal(node[2],np.array([0., 0., 1.])), f'Full file test: res {node[1]}{node[0]} is not C'
+            assert np.array_equal(node[2],SecondarySctructure.COIL), f'Full file test: res {node[1]}{node[0]} is not a COIL'
         elif dssp_code in ['B', 'E']:
-            assert np.array_equal(node[2],np.array([0., 1., 0.])), f'Full file test: res {node[1]}{node[0]} is not E'
+            assert np.array_equal(node[2],SecondarySctructure.STRAND), f'Full file test: res {node[1]}{node[0]} is not a STRAND'
         elif dssp_code in ['G', 'H', 'I']:
-            assert np.array_equal(node[2],np.array([1., 0., 0.])), f'Full file test: res {node[1]}{node[0]} is not H'
+            assert np.array_equal(node[2],SecondarySctructure.HELIX), f'Full file test: res {node[1]}{node[0]} is not a HELIX'
         else:
             raise ValueError(f'Unexpected secondary structure type found at {node[1]}{node[0]}')
     

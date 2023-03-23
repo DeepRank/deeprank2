@@ -13,9 +13,9 @@ from enum import Enum
 class SecondarySctructure(Enum):
     "a value to express a secondary a residue's secondary structure type"
 
-    HELIX = 0 # C
-    STRAND = 1 # E
-    COIL = 2 # C
+    HELIX = 0 # GHI
+    STRAND = 1 # BE
+    COIL = 2 # -ST
 
     @property
     def onehot(self):
