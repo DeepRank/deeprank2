@@ -6,6 +6,9 @@ from deeprankcore.molstruct.residue import Residue
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.utils.graph import Graph
 from deeprankcore.domain import nodestorage as Nfeat
+from Bio.PDB import PDBParser
+from Bio.PDB.DSSP import DSSP
+from enum import Enum
 
 
 def _get_secstruct(pdb_path: str) -> Dict:
@@ -17,29 +20,15 @@ def _get_secstruct(pdb_path: str) -> Dict:
     Returns:
         dict: A dictionary containing secondary structure information for each chain and residue.
     """
-    
-    # Execute DSSP and read the output
-    # outputs residue number @ pos 5-10, chain_id @ pos 11, secondary structure @ pos 16
-    dssp_output = os.popen(f'dssp -i {pdb_path}').read()
-    dssp_lines = dssp_output[dssp_output.index('  #  RESIDUE'):].split('\n')[1:-1]
-    residue_numbers = [int(line[5:10]) for line in dssp_lines if line[13] != '!']
-    chain_ids = [line[11] for line in dssp_lines if line[13] != '!']
 
-    #regroup secondary structures into 3 main classes
-    sec_structure_features = ''.join([line[16] for line in dssp_lines if line[13] != '!'])
-    sec_structure_features = (sec_structure_features.replace('B', 'E')
-                                                    .replace('G', 'H')
-                                                    .replace('I', 'H')
-                                                    .replace('S', 'C')
-                                                    .replace(' ', 'C')
-                                                    .replace('T', 'C'))
-    
-    # Sanity check: Ensure equal lengths of chain_ids, residue_numbers, and sec_structure_features
-    if not len(chain_ids) == len(residue_numbers) == len(sec_structure_features):
-        raise ValueError(
-            f'Unequal length of chain_ids {len(chain_ids)}, residue numbers {len(residue_numbers)}, \
-                and sec_structure_features {len(sec_structure_features)} objects.\n \
-                    Check DSSP output for {pdb_path}')
+    # Execute DSSP and read the output
+    p = PDBParser(QUIET=True)
+    model = p.get_structure("", pdb_path)[0]
+    dssp = DSSP(model, pdb_path)
+
+    chain_ids = [dssp_key[0] for dssp_key in dssp.property_keys]
+    res_numbers = [dssp_key[1][1] for dssp_key in dssp.property_keys]
+    sec_structs = [dssp[dssp_key][2] for dssp_key in dssp.property_keys]
 
     # Initialize dictionary to store secondary structure information
     sec_structure_dict = {}
