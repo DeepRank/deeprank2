@@ -27,7 +27,17 @@ class SecondarySctructure(Enum):
         return t
 
 
-def _get_secstruct(pdb_path: str) -> Dict:
+def _classify_secstructure(subtype: str):
+    if subtype in 'GHI':
+        return SecondarySctructure.HELIX
+    if subtype in 'BE':
+        return SecondarySctructure.STRAND
+    if subtype in ' -ST':
+        return SecondarySctructure.COIL
+    return None
+
+
+def _get_secstructure(pdb_path: str) -> Dict:
     """Process the DSSP output to extract secondary structure information.
     
     Args:
@@ -62,7 +72,7 @@ def add_features( # pylint: disable=unused-argument
     single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):    
 
-    sec_structure_features = _get_secstruct(pdb_path)
+    sec_structure_features = _get_secstructure(pdb_path)
 
     for node in graph.nodes:
         if isinstance(node.id, Residue):
@@ -76,12 +86,7 @@ def add_features( # pylint: disable=unused-argument
         chain_id = residue.chain.id
         res_num = residue.number
 
-        if sec_structure_features[chain_id][res_num] in ('-', 'S', 'T'):
-            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.COIL.onehot
-        elif sec_structure_features[chain_id][res_num] in ('B', 'E'):
-            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.STRAND.onehot
-        elif sec_structure_features[chain_id][res_num] in ('G', 'H', 'I'):
-            node.features[Nfeat.SECSTRUCT] = SecondarySctructure.HELIX.onehot
-        else:
-            raise ValueError(f'Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) \
-                             detected on chain{chain_id} residues{res_num}.')
+        node.features[Nfeat.SECSTRUCT] = _classify_secstructure(sec_structure_features[chain_id][res_num]).onehot
+        if not np.any(node.features[Nfeat.SECSTRUCT]):
+            raise ValueError(f'Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) ' +
+                             f'detected on chain {chain_id} residues {res_num}.')
