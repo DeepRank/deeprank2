@@ -5,4 +5,5 @@
         }
     },
     "python.linting.prospectorEnabled": true,
+    "notebook.lineNumbers": "on",
 }
