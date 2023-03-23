@@ -1,17 +1,16 @@
+import logging
 import os
 import shutil
-import logging
 import unittest
-import pandas as pd
 from tempfile import mkdtemp
 from unittest.mock import patch
+
 import h5py
+import pandas as pd
+
 from deeprankcore.utils.exporters import (
-    OutputExporterCollection,
-    TensorboardBinaryClassificationExporter,
-    ScatterPlotExporter,
-    HDF5OutputExporter
-)
+    HDF5OutputExporter, OutputExporterCollection, ScatterPlotExporter,
+    TensorboardBinaryClassificationExporter)
 
 logging.getLogger(__name__)
 

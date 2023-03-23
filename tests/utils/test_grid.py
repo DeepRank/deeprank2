@@ -1,8 +1,9 @@
 import h5py
 import numpy as np
 
-from deeprankcore.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
-from deeprankcore.utils.grid import MapMethod, GridSettings, Grid
+from deeprankcore.query import (ProteinProteinInterfaceAtomicQuery,
+                                ProteinProteinInterfaceResidueQuery)
+from deeprankcore.utils.grid import Grid, GridSettings, MapMethod
 
 
 def test_residue_grid_orientation():

@@ -1,10 +1,11 @@
 
-from multiprocessing.connection import _ForkingPickler
 import pickle
+from multiprocessing.connection import _ForkingPickler
+
 from pdb2sql import pdb2sql
 
-from deeprankcore.utils.buildgraph import get_structure
 from deeprankcore.molstruct.structure import PDBStructure
+from deeprankcore.utils.buildgraph import get_structure
 
 
 def _get_structure(path) -> PDBStructure:
