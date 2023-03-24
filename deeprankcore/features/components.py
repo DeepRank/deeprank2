@@ -1,12 +1,14 @@
+import logging
 from typing import Optional
+
 import numpy as np
-from deeprankcore.utils.graph import Graph
-from deeprankcore.utils.parsing import atomic_forcefield
-from deeprankcore.molstruct.variant import SingleResidueVariant
+
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.domain import nodestorage as Nfeat
-import logging
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.graph import Graph
+from deeprankcore.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 

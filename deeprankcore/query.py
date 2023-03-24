@@ -1,35 +1,33 @@
+import importlib
 import logging
 import os
-from typing import Dict, List, Optional, Iterator, Union
-import tempfile
-import pdb2sql
 import pickle
-from glob import glob
-from types import ModuleType
-from functools import partial
-from multiprocessing import Pool
-import importlib
-from os.path import basename
-import h5py
 import pkgutil
-import numpy as np
-from deeprankcore.utils.graph import Graph
-from deeprankcore.utils.grid import GridSettings, MapMethod, Augmentation
-from deeprankcore.molstruct.aminoacid import AminoAcid
-from deeprankcore.molstruct.residue import get_residue_center
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.structure import PDBStructure
-from deeprankcore.utils.buildgraph import (
-    get_contact_atoms,
-    get_surrounding_residues,
-    get_structure,
-    add_hydrogens,
-)
-from deeprankcore.utils.parsing.pssm import parse_pssm
-from deeprankcore.utils.graph import build_residue_graph, build_atomic_graph
-from deeprankcore.molstruct.variant import SingleResidueVariant
-import deeprankcore.features
+import tempfile
+from functools import partial
+from glob import glob
+from multiprocessing import Pool
+from os.path import basename
+from types import ModuleType
+from typing import Dict, Iterator, List, Optional, Union
 
+import h5py
+import numpy as np
+import pdb2sql
+
+import deeprankcore.features
+from deeprankcore.molstruct.aminoacid import AminoAcid
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import get_residue_center
+from deeprankcore.molstruct.structure import PDBStructure
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.buildgraph import (add_hydrogens, get_contact_atoms,
+                                           get_structure,
+                                           get_surrounding_residues)
+from deeprankcore.utils.graph import (Graph, build_atomic_graph,
+                                      build_residue_graph)
+from deeprankcore.utils.grid import Augmentation, GridSettings, MapMethod
+from deeprankcore.utils.parsing.pssm import parse_pssm
 
 _log = logging.getLogger(__name__)
 

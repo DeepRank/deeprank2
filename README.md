@@ -58,6 +58,11 @@ Before installing deeprankcore you need to install:
  * [dssp](https://swift.cmbi.umcn.nl/gv/dssp/): `sudo apt-get install dssp`
  * [pytorch](https://pytorch.org/get-started/locally/): `conda install pytorch torchvision torchaudio cpuonly -c pytorch` or `conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia`, for taking advantage of GPUs.
  * [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
+ * [Dependencies for pytorch geometric from wheels](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html#installation-from-wheels): `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-${TORCH}+${CUDA}.html`. 
+    - Here, `${TORCH}` and `${CUDA}` should be replaced by the pytorch and CUDA versions installed. You can find these using:
+      - `python -c "import torch; print(torch.__version__)"` and
+      - `python -c "import torch; print(torch.version.cuda)"`
+    - For example: `https://data.pyg.org/whl/torch-2.0.0+cpu.html`
  * Only if you have a MacOS with M1 chip, additional steps are needed:
     * `conda install pytables`
     * See [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution to install PyQt5 or run `conda install pyqt`

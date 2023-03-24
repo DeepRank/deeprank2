@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 
-
 __author__ = "Daniel-Tobias Rademaker"
 
 class GNNLayer(nn.Module):

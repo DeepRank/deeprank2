@@ -1,9 +1,11 @@
 import glob
-import h5py
 import os
+from typing import Dict, List, Union
+
+import h5py
 import numpy as np
-from typing import Dict, Union, List
 from pdb2sql import StructureSimilarity
+
 from deeprankcore.domain import targetstorage as targets
 
 

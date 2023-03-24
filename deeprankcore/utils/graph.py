@@ -1,17 +1,19 @@
-from typing import Callable, Union, List, Optional
-import os
 import logging
-import numpy as np
+import os
+from typing import Callable, List, Optional, Union
+
 import h5py
+import numpy as np
 import pdb2sql.transform
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.residue import Residue, get_residue_center
-from deeprankcore.molstruct.pair import Contact, AtomicContact, ResidueContact
-from deeprankcore.utils.grid import MapMethod, Grid, GridSettings, Augmentation
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat, 
-                                targetstorage as targets)
 from scipy.spatial import distance_matrix
 
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.pair import AtomicContact, Contact, ResidueContact
+from deeprankcore.molstruct.residue import Residue, get_residue_center
+from deeprankcore.utils.grid import Augmentation, Grid, GridSettings, MapMethod
 
 _log = logging.getLogger(__name__)
 

@@ -1,8 +1,9 @@
 import numpy as np
-from . import build_testgraph
-from deeprankcore.domain import nodestorage as Nfeat
 
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.features.surfacearea import add_features
+
+from . import build_testgraph
 
 
 def _find_residue_node(graph, chain_id, residue_number):

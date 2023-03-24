@@ -1,6 +1,5 @@
 from torch import nn
 
-
 regression_losses = (nn.L1Loss, 
                     nn.SmoothL1Loss, 
                     nn.MSELoss, 
