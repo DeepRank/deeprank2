@@ -1,12 +1,12 @@
-import os
 import logging
+import os
+
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import Residue
-from deeprankcore.utils.parsing.top import TopParser
-from deeprankcore.utils.parsing.patch import PatchParser, PatchActionType
+from deeprankcore.utils.parsing.patch import PatchActionType, PatchParser
 from deeprankcore.utils.parsing.residue import ResidueClassParser
-from deeprankcore.utils.parsing.vdwparam import VanderwaalsParam, ParamParser
-
+from deeprankcore.utils.parsing.top import TopParser
+from deeprankcore.utils.parsing.vdwparam import ParamParser, VanderwaalsParam
 
 _log = logging.getLogger(__name__)
 

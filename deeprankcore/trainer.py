@@ -1,20 +1,24 @@
-from time import time
-from typing import List, Optional, Union, Tuple
-import logging
-from tqdm import tqdm
-import h5py
 import copy
+import logging
+from time import time
+from typing import List, Optional, Tuple, Union
+
+import h5py
 import numpy as np
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
-from deeprankcore.utils.exporters import OutputExporterCollection, OutputExporter, HDF5OutputExporter
-from deeprankcore.utils.community_pooling import community_detection, community_pooling
-from deeprankcore.utils.earlystopping import EarlyStopping
-from deeprankcore.domain import targetstorage as targets, losstypes as losses
 from deeprankcore.dataset import GraphDataset, GridDataset
+from deeprankcore.domain import losstypes as losses
+from deeprankcore.domain import targetstorage as targets
+from deeprankcore.utils.community_pooling import (community_detection,
+                                                  community_pooling)
+from deeprankcore.utils.earlystopping import EarlyStopping
+from deeprankcore.utils.exporters import (HDF5OutputExporter, OutputExporter,
+                                          OutputExporterCollection)
 
 _log = logging.getLogger(__name__)
 

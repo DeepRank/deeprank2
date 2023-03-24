@@ -1,9 +1,8 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
-from torch_scatter import scatter_mean
-from torch_scatter import scatter_sum
+from torch import nn
 from torch_geometric.nn.inits import uniform
+from torch_scatter import scatter_mean, scatter_sum
 
 
 class GINetConvLayer(torch.nn.Module):

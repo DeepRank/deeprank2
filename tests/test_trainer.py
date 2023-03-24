@@ -1,28 +1,29 @@
-import tempfile
-import shutil
-import os
 import glob
-import unittest
-import pytest
 import logging
+import os
+import shutil
+import tempfile
+import unittest
 import warnings
-import torch
+
 import h5py
-from deeprankcore.trainer import Trainer, _divide_dataset
+import pytest
+import torch
+
 from deeprankcore.dataset import GraphDataset, GridDataset
-from deeprankcore.neuralnets.gnn.ginet import GINet
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
+from deeprankcore.neuralnets.cnn.model3d import (CnnClassification,
+                                                 CnnRegression)
 from deeprankcore.neuralnets.gnn.foutnet import FoutNet
+from deeprankcore.neuralnets.gnn.ginet import GINet
 from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
 from deeprankcore.neuralnets.gnn.sgat import SGAT
-from deeprankcore.neuralnets.cnn.model3d import CnnRegression, CnnClassification
+from deeprankcore.trainer import Trainer, _divide_dataset
 from deeprankcore.utils.exporters import (
-    HDF5OutputExporter,
-    TensorboardBinaryClassificationExporter,
-    ScatterPlotExporter
-)
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
-                                targetstorage as targets)
-
+    HDF5OutputExporter, ScatterPlotExporter,
+    TensorboardBinaryClassificationExporter)
 
 _log = logging.getLogger(__name__)
 

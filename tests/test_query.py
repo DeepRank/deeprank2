@@ -1,29 +1,24 @@
-from tempfile import mkstemp, mkdtemp
-import shutil
-import numpy as np
 import os
+import shutil
+from tempfile import mkdtemp, mkstemp
+
 import h5py
-from deeprankcore.domain.aminoacidlist import (
-    alanine,
-    arginine,
-    asparagine,
-    glutamate,
-    glycine,
-    leucine,
-    lysine,
-    phenylalanine
-)
-from deeprankcore.query import (
-    SingleResidueVariantResidueQuery,
-    SingleResidueVariantAtomicQuery,
-    ProteinProteinInterfaceAtomicQuery,
-    ProteinProteinInterfaceResidueQuery,
-    QueryCollection
-)
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
-                                targetstorage as targets)
-from deeprankcore.features import components, conservation, contact, surfacearea
+import numpy as np
+
 from deeprankcore.dataset import GraphDataset, GridDataset
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
+from deeprankcore.domain.aminoacidlist import (alanine, arginine, asparagine,
+                                               glutamate, glycine, leucine,
+                                               lysine, phenylalanine)
+from deeprankcore.features import (components, conservation, contact,
+                                   surfacearea)
+from deeprankcore.query import (ProteinProteinInterfaceAtomicQuery,
+                                ProteinProteinInterfaceResidueQuery,
+                                QueryCollection,
+                                SingleResidueVariantAtomicQuery,
+                                SingleResidueVariantResidueQuery)
 from deeprankcore.utils.grid import GridSettings, MapMethod
 
 

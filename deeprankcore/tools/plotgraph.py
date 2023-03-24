@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import os
+
 from h5xplorer.h5xplorer import h5xplorer
+
 from deeprankcore.tools.visualization.h5x_menu import context_menu
 
 baseimport = os.path.dirname(

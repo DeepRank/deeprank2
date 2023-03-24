@@ -1,13 +1,15 @@
 from uuid import uuid4
-from pdb2sql import pdb2sql
+
 import numpy as np
-from deeprankcore.molstruct.structure import Chain
+from pdb2sql import pdb2sql
+
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.features.contact import add_features
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
-from deeprankcore.utils.graph import Edge, Graph
+from deeprankcore.molstruct.structure import Chain
 from deeprankcore.utils.buildgraph import get_structure
-from deeprankcore.features.contact import add_features
-from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.utils.graph import Edge, Graph
 
 
 def _get_atom(chain: Chain, residue_number: int, atom_name: str) -> Atom:

@@ -1,19 +1,21 @@
-import tempfile
-import shutil
 import os
+import shutil
+import tempfile
+
 import h5py
+import numpy as np
 from pdb2sql import pdb2sql
 from pdb2sql.transform import get_rot_axis_angle
-import numpy as np
-from deeprankcore.utils.grid import GridSettings, MapMethod, Augmentation
-from deeprankcore.utils.graph import Graph, Edge, Node
-from deeprankcore.utils.buildgraph import get_structure
+
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import gridstorage
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as Target
 from deeprankcore.molstruct.pair import ResidueContact
 from deeprankcore.molstruct.residue import get_residue_center
-from deeprankcore.domain import (edgestorage as Efeat,
-                                 nodestorage as Nfeat,
-                                 targetstorage as Target,
-                                 gridstorage)
+from deeprankcore.utils.buildgraph import get_structure
+from deeprankcore.utils.graph import Edge, Graph, Node
+from deeprankcore.utils.grid import Augmentation, GridSettings, MapMethod
 
 
 def test_graph_build_and_export(): # pylint: disable=too-many-locals

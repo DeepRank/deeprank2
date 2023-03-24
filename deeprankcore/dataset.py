@@ -1,22 +1,26 @@
 from __future__ import annotations
-import sys
+
+import logging
 import os
 import re
-import logging
+import sys
 import warnings
-import numpy as np
-import h5py
-from typing import List, Union, Optional, Dict, Tuple
-import matplotlib.pyplot as plt
-import pandas as pd
-from tqdm import tqdm
 from ast import literal_eval
-import torch
-from torch_geometric.data.dataset import Dataset
-from torch_geometric.data.data import Data
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
-                                 targetstorage as targets, gridstorage)
+from typing import Dict, List, Optional, Tuple, Union
 
+import h5py
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import torch
+from torch_geometric.data.data import Data
+from torch_geometric.data.dataset import Dataset
+from tqdm import tqdm
+
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import gridstorage
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
 
 _log = logging.getLogger(__name__)
 

@@ -1,0 +1,9 @@
+{
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+    "python.linting.prospectorEnabled": true,
+    "notebook.lineNumbers": "on",
+}

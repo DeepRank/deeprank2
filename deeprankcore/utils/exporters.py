@@ -1,14 +1,15 @@
-import os
-from typing import List, Tuple, Any, Dict, Optional
-from math import sqrt
 import logging
+import os
 import random
+from math import sqrt
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
 from matplotlib import pyplot
+from sklearn.metrics import roc_auc_score
 from torch import argmax, tensor
 from torch.nn.functional import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
-from sklearn.metrics import roc_auc_score
-import pandas as pd
 
 _log = logging.getLogger(__name__)
 

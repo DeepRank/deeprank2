@@ -1,11 +1,13 @@
 from typing import Optional
+
 import numpy as np
-from deeprankcore.molstruct.variant import SingleResidueVariant
-from deeprankcore.domain.aminoacidlist import amino_acids
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.utils.graph import Graph
+
 from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain.aminoacidlist import amino_acids
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.graph import Graph
 
 profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.one_letter_code)
 
