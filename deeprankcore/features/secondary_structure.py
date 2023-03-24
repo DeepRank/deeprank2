@@ -16,9 +16,9 @@ from deeprankcore.utils.graph import Graph
 class SecondarySctructure(Enum):
     "a value to express a secondary a residue's secondary structure type"
 
-    HELIX = 0 # GHI
-    STRAND = 1 # BE
-    COIL = 2 # -ST
+    HELIX = 0 # 'GHI'
+    STRAND = 1 # 'BE'
+    COIL = 2 # ' -ST'
 
     @property
     def onehot(self):
