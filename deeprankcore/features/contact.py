@@ -100,7 +100,6 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
         interatomic_distances = distance_matrix(positions, positions)
         interatomic_electrostatic_energy, interatomic_vanderwaals_energy = _get_nonbonded_energy(all_atoms, interatomic_distances)
 
-
     # assign features
     for edge in graph.edges:
         contact = edge.id
@@ -116,7 +115,6 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
             edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_energy[atom1_index, atom2_index]
             edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy[atom1_index, atom2_index]
 
-    
         elif isinstance(contact, ResidueContact):
             ## find the indices
             atom1_indices = [atom_dict[atom] for atom in contact.residue1.atoms]
@@ -129,4 +127,3 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
         
         # Calculate irrespective of node type
         edge.features[Efeat.COVALENT] = float(edge.features[Efeat.DISTANCE] < covalent_cutoff and edge.features[Efeat.SAMECHAIN])
-
