@@ -9,7 +9,7 @@ import pytest
 
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
-from deeprankcore.features import surfacearea
+from deeprankcore.features import exposure, surfacearea
 from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
                                 QueryCollection,
                                 SingleResidueVariantResidueQuery)

@@ -277,6 +277,7 @@ class QueryCollection:
         if feature_modules is None:
             if not isinstance(exclude_feature_modules, list):
                 exclude_feature_modules = [exclude_feature_modules]
+            exclude_feature_modules = [mod.replace('.py','') for mod in exclude_feature_modules]
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__) 
                                 if modname.replace('.py','') not in exclude_feature_modules]
         elif isinstance(feature_modules, list):
@@ -285,7 +286,7 @@ class QueryCollection:
         elif isinstance(feature_modules, ModuleType):
             feature_names = [basename(feature_modules.__file__)[:-3]]
         elif isinstance(feature_modules, str):
-            feature_names = [feature_modules.replace('py','')]
+            feature_names = [feature_modules.replace('.py','')]
 
 
         _log.info(f'Creating pool function to process {len(self.queries)} queries...')
