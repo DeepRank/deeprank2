@@ -102,29 +102,31 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
 
 
     # assign features
-    if isinstance(graph.edges[0].id, AtomicContact):
-        for edge in graph.edges:        
+    for edge in graph.edges:
+        contact = edge.id
+        
+        if isinstance(contact, AtomicContact):    
             ## find the indices
-            contact = edge.id
             atom1_index = atom_dict[contact.atom1]
             atom2_index = atom_dict[contact.atom2]
             ## set features
-            edge.features[Efeat.SAMERES] = float(contact.atom1.residue == contact.atom2.residue)  # 1.0 for True; 0.0 for False
-            edge.features[Efeat.SAMECHAIN] = float(contact.atom1.residue.chain == contact.atom1.residue.chain)  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMERES] = float(contact.atom1.residue == contact.atom2.residue)
+            edge.features[Efeat.SAMECHAIN] = float(contact.atom1.residue.chain == contact.atom1.residue.chain)
             edge.features[Efeat.DISTANCE] = interatomic_distances[atom1_index, atom2_index]
-            edge.features[Efeat.COVALENT] = float(edge.features[Efeat.DISTANCE] < covalent_cutoff)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = interatomic_electrostatic_energy[atom1_index, atom2_index]
             edge.features[Efeat.VANDERWAALS] = interatomic_vanderwaals_energy[atom1_index, atom2_index]
+
     
-    elif isinstance(contact, ResidueContact):
-        for edge in graph.edges:        
+        elif isinstance(contact, ResidueContact):
             ## find the indices
-            contact = edge.id
             atom1_indices = [atom_dict[atom] for atom in contact.residue1.atoms]
             atom2_indices = [atom_dict[atom] for atom in contact.residue2.atoms]
             ## set features
-            edge.features[Efeat.SAMECHAIN] = float(contact.residue1.chain == contact.residue2.chain)  # 1.0 for True; 0.0 for False
+            edge.features[Efeat.SAMECHAIN] = float(contact.residue1.chain == contact.residue2.chain)
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-            edge.features[Efeat.COVALENT] = float(edge.features[Efeat.DISTANCE] < covalent_cutoff)  # 1.0 for True; 0.0 for False
             edge.features[Efeat.ELECTROSTATIC] = np.sum([[interatomic_electrostatic_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
             edge.features[Efeat.VANDERWAALS] = np.sum([[interatomic_vanderwaals_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
+        
+        # Calculate irrespective of node type
+        edge.features[Efeat.COVALENT] = float(edge.features[Efeat.DISTANCE] < covalent_cutoff and edge.features[Efeat.SAMECHAIN])
+
