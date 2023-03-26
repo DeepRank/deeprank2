@@ -1,15 +1,17 @@
-from typing import List, Tuple, Optional
 import logging
 import warnings
+from typing import List, Optional, Tuple
+
 import numpy as np
-from scipy.spatial import distance_matrix
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.utils.graph import Graph
-from deeprankcore.molstruct.pair import ResidueContact, AtomicContact
-from deeprankcore.molstruct.variant import SingleResidueVariant
-from deeprankcore.domain import edgestorage as Efeat
-from deeprankcore.utils.parsing import atomic_forcefield
 import numpy.typing as npt
+from scipy.spatial import distance_matrix
+
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.graph import Graph
+from deeprankcore.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 

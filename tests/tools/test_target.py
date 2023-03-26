@@ -1,7 +1,8 @@
-import tempfile
 import os
 import shutil
+import tempfile
 import unittest
+
 from deeprankcore.tools.target import add_target, compute_targets
 
 

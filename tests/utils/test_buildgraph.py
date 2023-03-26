@@ -1,11 +1,10 @@
 from pdb2sql import pdb2sql
-from deeprankcore.utils.buildgraph import (
-    get_structure,
-    get_residue_contact_pairs,
-    get_surrounding_residues,
-)
+
 from deeprankcore.domain.aminoacidlist import valine
 from deeprankcore.molstruct.atom import AtomicElement
+from deeprankcore.utils.buildgraph import (get_residue_contact_pairs,
+                                           get_structure,
+                                           get_surrounding_residues)
 
 
 def test_get_structure_complete():

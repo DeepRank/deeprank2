@@ -1,17 +1,18 @@
 import logging
 from copy import deepcopy
 from typing import Optional
-import plotly.graph_objs as go
-import matplotlib.pyplot as plt
-import h5py
-import numpy as np
-import networkx
+
 import community
+import h5py
 import markov_clustering
+import matplotlib.pyplot as plt
+import networkx
+import numpy as np
+import plotly.graph_objs as go
+
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.tools.visualization.embedding import manifold_embedding
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat)
-
-
 
 _log = logging.getLogger(__name__)
 
@@ -97,9 +98,9 @@ def plotly_2d( # noqa
     """Plots the interface graph in 2D."""
 
     if offline:
-        import plotly.offline as py # pylint: disable=import-outside-toplevel
+        import plotly.offline as py  # pylint: disable=import-outside-toplevel
     else:
-        import chart_studio.plotly as py # pylint: disable=import-outside-toplevel
+        import chart_studio.plotly as py  # pylint: disable=import-outside-toplevel
 
     pos = np.array(
         [v.tolist() for _, v in networkx.get_node_attributes(graph, Nfeat.POSITION).items()]
@@ -282,9 +283,9 @@ def plotly_3d( # pylint: disable=too-many-locals, too-many-branches # noqa: MC00
     """
 
     if offline:
-        import plotly.offline as py # pylint: disable=import-outside-toplevel
+        import plotly.offline as py  # pylint: disable=import-outside-toplevel
     else:
-        import chart_studio.plotly as py # pylint: disable=import-outside-toplevel
+        import chart_studio.plotly as py  # pylint: disable=import-outside-toplevel
 
     edge_trace_list, internal_edge_trace_list = [], []
     node_connect = {}

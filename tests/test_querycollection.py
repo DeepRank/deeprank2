@@ -1,15 +1,21 @@
-from tempfile import mkdtemp
-from shutil import rmtree
 from os.path import join
-from typing import Optional, Union, List
+from shutil import rmtree
+from tempfile import mkdtemp
 from types import ModuleType
+from typing import List, Optional, Union
+
 import h5py
 import pytest
-from deeprankcore.features import surfacearea
-from deeprankcore.query import QueryCollection, Query, SingleResidueVariantResidueQuery, ProteinProteinInterfaceResidueQuery
-from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
-from . import PATH_TEST
+
 from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
+from deeprankcore.features import surfacearea
+from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
+                                QueryCollection,
+                                SingleResidueVariantResidueQuery)
+
+from . import PATH_TEST
+
 
 def _querycollection_tester( # pylint: disable = too-many-locals, too-many-arguments
     query_type: str = 'ppi',

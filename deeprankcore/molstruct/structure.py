@@ -1,4 +1,5 @@
 from typing import Optional
+
 from deeprankcore.utils.pssmdata import PssmRow
 
 

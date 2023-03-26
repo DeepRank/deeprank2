@@ -1,13 +1,16 @@
-import unittest
-import numpy as np
-import h5py
-from tempfile import mkdtemp
-from shutil import rmtree
 import os
+import unittest
+from shutil import rmtree
+from tempfile import mkdtemp
+
+import h5py
+import numpy as np
 from torch_geometric.loader import DataLoader
+
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
-                                targetstorage as targets)
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 

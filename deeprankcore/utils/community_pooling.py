@@ -1,14 +1,15 @@
 import warnings
+
 import community
-import torch
-import matplotlib.pyplot as plt
-import numpy as np
 import markov_clustering as mc
+import matplotlib.pyplot as plt
 import networkx as nx
-from torch_scatter import scatter_max, scatter_mean
-from torch_geometric.nn.pool.pool import pool_edge, pool_batch
-from torch_geometric.nn.pool.consecutive import consecutive_cluster
+import numpy as np
+import torch
 from torch_geometric.data import Batch, Data
+from torch_geometric.nn.pool.consecutive import consecutive_cluster
+from torch_geometric.nn.pool.pool import pool_batch, pool_edge
+from torch_scatter import scatter_max, scatter_mean
 
 
 def plot_graph(graph, cluster):

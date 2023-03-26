@@ -1,10 +1,11 @@
 import numpy as np
 import pytest
-from . import build_testgraph
-from deeprankcore.domain import nodestorage as Nfeat
 
-from deeprankcore.features.conservation import add_features
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import alanine
+from deeprankcore.features.conservation import add_features
+
+from . import build_testgraph
 
 
 def test_conservation_residue():

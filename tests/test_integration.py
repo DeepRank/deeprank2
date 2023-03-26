@@ -1,19 +1,24 @@
-from tempfile import mkdtemp
-from shutil import rmtree
-import warnings
 import os
+import warnings
+from shutil import rmtree
+from tempfile import mkdtemp
+
 import h5py
-from . import PATH_TEST
-from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+
 from deeprankcore.dataset import GraphDataset, GridDataset
-from deeprankcore.trainer import Trainer
-from deeprankcore.neuralnets.gnn.ginet import GINet
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
 from deeprankcore.neuralnets.cnn.model3d import CnnClassification
-from deeprankcore.utils.grid import MapMethod, GridSettings
-from deeprankcore.utils.exporters import HDF5OutputExporter
+from deeprankcore.neuralnets.gnn.ginet import GINet
+from deeprankcore.query import (ProteinProteinInterfaceResidueQuery,
+                                QueryCollection)
 from deeprankcore.tools.target import compute_targets
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
-                                targetstorage as targets)
+from deeprankcore.trainer import Trainer
+from deeprankcore.utils.exporters import HDF5OutputExporter
+from deeprankcore.utils.grid import GridSettings, MapMethod
+
+from . import PATH_TEST
 
 
 def test_cnn(): # pylint: disable=too-many-locals

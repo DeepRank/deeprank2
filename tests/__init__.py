@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pkg_resources as pkg
 
 __all__ = ["PATH_DEEPRANK_CORE", "PATH_TEST"]

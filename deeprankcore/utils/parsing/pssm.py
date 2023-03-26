@@ -1,8 +1,9 @@
 from typing import TextIO
-from deeprankcore.molstruct.structure import Chain
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.utils.pssmdata import PssmRow, PssmTable
+
 from deeprankcore.domain.aminoacidlist import amino_acids
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.structure import Chain
+from deeprankcore.utils.pssmdata import PssmRow, PssmTable
 
 
 def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:

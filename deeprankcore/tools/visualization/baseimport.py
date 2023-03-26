@@ -1,5 +1,8 @@
 import plotly.offline as py
-from deeprankcore.tools.visualization.plotting import hdf5_to_networkx, plotly_3d, plotly_2d
+
+from deeprankcore.tools.visualization.plotting import (hdf5_to_networkx,
+                                                       plotly_2d, plotly_3d)
+
 
 def tsne_graph(grp, method):
 

@@ -1,11 +1,14 @@
 import torch
+import torch.nn.functional as F
 from torch import nn
 from torch.nn import Parameter
-import torch.nn.functional as F
-from torch_scatter import scatter_mean
-from torch_geometric.nn.inits import uniform
 from torch_geometric.nn import max_pool_x
-from deeprankcore.utils.community_pooling import get_preloaded_cluster, community_pooling 
+from torch_geometric.nn.inits import uniform
+from torch_scatter import scatter_mean
+
+from deeprankcore.utils.community_pooling import (community_pooling,
+                                                  get_preloaded_cluster)
+
 
 class FoutLayer(torch.nn.Module):
 

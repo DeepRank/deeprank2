@@ -1,9 +1,10 @@
 import numpy as np
-from . import build_testgraph
-from deeprankcore.domain import nodestorage as Nfeat
 
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain.aminoacidlist import glycine, serine
 from deeprankcore.features.components import add_features
-from deeprankcore.domain.aminoacidlist import serine, glycine
+
+from . import build_testgraph
 
 
 def test_atom_features():

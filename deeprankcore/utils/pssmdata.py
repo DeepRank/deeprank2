@@ -1,4 +1,5 @@
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
+
 from deeprankcore.molstruct.aminoacid import AminoAcid
 
 
