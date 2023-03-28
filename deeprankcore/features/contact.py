@@ -64,8 +64,8 @@ def _get_nonbonded_energy( #pylint: disable=too-many-locals
     # Fix energies for close contacts on same chain
     chains = [atom.residue.chain.id for atom in atoms]
     chain_matrix = [[chain_1==chain_2 for chain_2 in chains] for chain_1 in chains]
-    pair_14 = np.logical_and(distances < cutoff_13, chain_matrix)
-    pair_13 = np.logical_and(distances < cutoff_14, chain_matrix)
+    pair_14 = np.logical_and(distances < cutoff_14, chain_matrix)
+    pair_13 = np.logical_and(distances < cutoff_13, chain_matrix)
 
     E_vdw[pair_14] = E_vdw_14pairs[pair_14]
     E_vdw[pair_13] = 0
