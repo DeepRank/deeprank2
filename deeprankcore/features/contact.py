@@ -15,13 +15,15 @@ from deeprankcore.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 
-# cutoff distances for 1-3 and 1-4 pairing. See issue: https://github.com/DeepRank/deeprank-core/issues/357#issuecomment-1461813723
+# for cutoff distances, see: https://github.com/DeepRank/deeprank-core/issues/357#issuecomment-1461813723
 covalent_cutoff = 2.1
 cutoff_13 = 3.6
 cutoff_14 = 4.2
 
-
-def _get_nonbonded_energy(atoms: List[Atom], distances: npt.NDArray[np.float64]) -> Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+def _get_nonbonded_energy( #pylint: disable=too-many-locals
+    atoms: List[Atom], 
+    distances: npt.NDArray[np.float64],
+    ) -> Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Calculates all pairwise electrostatic (Coulomb) and Van der Waals (Lennard Jones) potential energies between all atoms in the structure.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
@@ -41,10 +43,7 @@ def _get_nonbonded_energy(atoms: List[Atom], distances: npt.NDArray[np.float64])
     EPSILON0 = 1.0
     COULOMB_CONSTANT = 332.0636
     charges = [atomic_forcefield.get_charge(atom) for atom in atoms]
-    electrostatic_energy = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
-    # remove for close contacts
-    electrostatic_energy[distances < cutoff_13] = 0
-
+    E_elec = np.expand_dims(charges, axis=1) * np.expand_dims(charges, axis=0) * COULOMB_CONSTANT / (EPSILON0 * distances)
 
     # VAN DER WAALS POTENTIAL
     # calculate main vdw energies
@@ -52,21 +51,28 @@ def _get_nonbonded_energy(atoms: List[Atom], distances: npt.NDArray[np.float64])
     epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).epsilon_main for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
-    vdw_energy = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    E_vdw = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
-    # calculate energies for 1-4 pairs
+    # calculate vdw energies for 1-4 pairs
     sigmas = [atomic_forcefield.get_vanderwaals_parameters(atom).sigma_14 for atom in atoms]
     epsilons = [atomic_forcefield.get_vanderwaals_parameters(atom).epsilon_14 for atom in atoms]
     mean_sigmas = 0.5 * np.add.outer(sigmas,sigmas)
     geomean_eps = np.sqrt(np.multiply.outer(epsilons,epsilons))     # sqrt(eps1*eps2)
-    energy_14pairs = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
+    E_vdw_14pairs = 4.0 * geomean_eps * ((mean_sigmas / distances) ** 12 - (mean_sigmas / distances) ** 6)
 
-    # adjust vdw energy for close contacts
-    vdw_energy[distances < cutoff_14] = energy_14pairs[distances < cutoff_14]
-    vdw_energy[distances < cutoff_13] = 0
+
+    # Fix energies for close contacts on same chain
+    chains = [atom.residue.chain.id for atom in atoms]
+    chain_matrix = [[chain_1==chain_2 for chain_2 in chains] for chain_1 in chains]
+    pair_14 = np.logical_and(distances < cutoff_14, chain_matrix)
+    pair_13 = np.logical_and(distances < cutoff_13, chain_matrix)
+
+    E_vdw[pair_14] = E_vdw_14pairs[pair_14]
+    E_vdw[pair_13] = 0
+    E_elec[pair_13] = 0
     
     
-    return electrostatic_energy, vdw_energy
+    return E_elec, E_vdw
 
 
 def add_features( # pylint: disable=unused-argument, too-many-locals

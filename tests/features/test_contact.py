@@ -1,10 +1,12 @@
+from typing import Tuple
 from uuid import uuid4
 
 import numpy as np
 from pdb2sql import pdb2sql
 
 from deeprankcore.domain import edgestorage as Efeat
-from deeprankcore.features.contact import add_features
+from deeprankcore.features.contact import (add_features, covalent_cutoff,
+                                           cutoff_13, cutoff_14)
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
 from deeprankcore.molstruct.structure import Chain
@@ -31,11 +33,12 @@ def _wrap_in_graph(edge: Edge):
 
 def _get_contact( # pylint: disable=too-many-arguments
         pdb_id: str, 
-        residue_num1: int, 
-        atom_name1: str, 
-        residue_num2: int, 
-        atom_name2: str, 
+        residue_num1: int,
+        atom_name1: str,
+        residue_num2: int,
+        atom_name2: str,
         residue_level: bool = False,
+        chains: Tuple[str,str] = None,
     ) -> Edge:
     
     pdb_path = f"tests/data/pdb/{pdb_id}/{pdb_id}.pdb"
@@ -46,15 +49,20 @@ def _get_contact( # pylint: disable=too-many-arguments
     finally:
         pdb._close() # pylint: disable=protected-access
 
+    if not chains:
+        chains = [structure.chains[0], structure.chains[0]]
+    else:
+        chains = [structure.get_chain(chain) for chain in chains]
+
     if not residue_level:
         contact = AtomicContact(
-            _get_atom(structure.chains[0], residue_num1, atom_name1), 
-            _get_atom(structure.chains[0], residue_num2, atom_name2)
+            _get_atom(chains[0], residue_num1, atom_name1), 
+            _get_atom(chains[1], residue_num2, atom_name2)
         )
     else:
         contact = ResidueContact(
-            structure.chains[0].residues[residue_num1], 
-            structure.chains[0].residues[residue_num2]
+            chains[0].residues[residue_num1], 
+            chains[1].residues[residue_num2]
         )
 
     edge_obj = Edge(contact)
@@ -76,6 +84,7 @@ def test_covalent_pair():
     """
 
     edge_covalent = _get_contact('101M', 0, "N", 0, "CA")
+    assert edge_covalent.features[Efeat.DISTANCE] < covalent_cutoff
     assert edge_covalent.features[Efeat.VANDERWAALS] == 0.0, 'nonzero vdw energy for covalent pair'
     assert edge_covalent.features[Efeat.ELECTROSTATIC] == 0.0, 'nonzero electrostatic energy for covalent pair'
     assert edge_covalent.features[Efeat.COVALENT] == 1.0, 'covalent pair not recognized as covalent'
@@ -86,20 +95,46 @@ def test_13_pair():
     """
 
     edge_13 = _get_contact('101M', 0, "N", 0, "CB")
+    assert edge_13.features[Efeat.DISTANCE] < cutoff_13
     assert edge_13.features[Efeat.VANDERWAALS] == 0.0, 'nonzero vdw energy for 1-3 pair'
     assert edge_13.features[Efeat.ELECTROSTATIC] == 0.0, 'nonzero electrostatic energy for 1-3 pair'
     assert edge_13.features[Efeat.COVALENT] == 0.0, '1-3 pair recognized as covalent'
     
+
+def test_very_close_opposing_chains():
+    """ChainA THR 118 O - ChainB ARG 30 NH1 (3.55 A). Should have non-zero energy despite close contact, because opposing chains.
+    """
+
+    opposing_edge = _get_contact('1A0Z', 118, "O", 30, "NH1", chains=('A', 'B'))
+    assert opposing_edge.features[Efeat.DISTANCE] < cutoff_13
+    assert opposing_edge.features[Efeat.ELECTROSTATIC] != 0.0
+    assert opposing_edge.features[Efeat.VANDERWAALS] != 0.0
+
 
 def test_14_pair():
     """MET 0: N - CG, 1-4 pair (at 4.12 A distance). Should have non-zero electrostatic energy and small non-zero vdw energy.
     """
 
     edge_14 = _get_contact('101M', 0, "CA", 0, "SD")
+    assert edge_14.features[Efeat.DISTANCE] > cutoff_13
+    assert edge_14.features[Efeat.DISTANCE] < cutoff_14
     assert edge_14.features[Efeat.VANDERWAALS] != 0.0, '1-4 pair with 0 vdw energy'
     assert abs(edge_14.features[Efeat.VANDERWAALS]) < 0.1, '1-4 pair with large vdw energy'
     assert edge_14.features[Efeat.ELECTROSTATIC] != 0.0, '1-4 pair with 0 electrostatic'
     assert edge_14.features[Efeat.COVALENT] == 0.0, '1-4 pair recognized as covalent'
+
+
+def test_14dist_opposing_chains():
+    """ChainA PRO 114 CA - ChainB HIS 116 CD2 (3.62 A). Should have non-zero energy despite close contact, because opposing chains.
+    E_vdw for this pair if they were on the same chain: 0.018
+    E_vdw for this pair on opposing chains: 0.146
+    """
+
+    opposing_edge = _get_contact('1A0Z', 114, "CA", 116, "CD2", chains=('A', 'B'))
+    assert opposing_edge.features[Efeat.DISTANCE] > cutoff_13
+    assert opposing_edge.features[Efeat.DISTANCE] < cutoff_14
+    assert opposing_edge.features[Efeat.ELECTROSTATIC] > 1.0, f'electrostatic: {opposing_edge.features[Efeat.ELECTROSTATIC]}'
+    assert opposing_edge.features[Efeat.VANDERWAALS] > 0.1, f'vdw: {opposing_edge.features[Efeat.VANDERWAALS]}'
 
 
 def test_vanderwaals_negative():
