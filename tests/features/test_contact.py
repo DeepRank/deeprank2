@@ -116,11 +116,25 @@ def test_14_pair():
     """
 
     edge_14 = _get_contact('101M', 0, "CA", 0, "SD")
+    assert edge_14.features[Efeat.DISTANCE] > cutoff_13
     assert edge_14.features[Efeat.DISTANCE] < cutoff_14
     assert edge_14.features[Efeat.VANDERWAALS] != 0.0, '1-4 pair with 0 vdw energy'
     assert abs(edge_14.features[Efeat.VANDERWAALS]) < 0.1, '1-4 pair with large vdw energy'
     assert edge_14.features[Efeat.ELECTROSTATIC] != 0.0, '1-4 pair with 0 electrostatic'
     assert edge_14.features[Efeat.COVALENT] == 0.0, '1-4 pair recognized as covalent'
+
+
+def test_14dist_opposing_chains():
+    """ChainA PRO 114 CA - ChainB HIS 116 CD2 (3.62 A). Should have non-zero energy despite close contact, because opposing chains.
+    E_vdw for this pair if they were on the same chain: 0.018
+    E_vdw for this pair on opposing chains: 0.146
+    """
+
+    opposing_edge = _get_contact('1A0Z', 114, "CA", 116, "CD2", chains=('A', 'B'))
+    assert opposing_edge.features[Efeat.DISTANCE] > cutoff_13
+    assert opposing_edge.features[Efeat.DISTANCE] < cutoff_14
+    assert opposing_edge.features[Efeat.ELECTROSTATIC] > 1.0, f'electrostatic: {opposing_edge.features[Efeat.ELECTROSTATIC]}'
+    assert opposing_edge.features[Efeat.VANDERWAALS] > 0.1, f'vdw: {opposing_edge.features[Efeat.VANDERWAALS]}'
 
 
 def test_vanderwaals_negative():
