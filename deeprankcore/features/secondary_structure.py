@@ -100,7 +100,9 @@ def add_features( # pylint: disable=unused-argument
         chain_id = residue.chain.id
         res_num = residue.number
 
-        node.features[Nfeat.SECSTRUCT] = _classify_secstructure(sec_structure_features[chain_id][res_num]).onehot
-        if not np.any(node.features[Nfeat.SECSTRUCT]):
+        # pylint: disable=raise-missing-from
+        try:
+            node.features[Nfeat.SECSTRUCT] = _classify_secstructure(sec_structure_features[chain_id][res_num]).onehot
+        except AttributeError:
             raise ValueError(f'Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) ' +
                              f'detected on chain {chain_id} residues {res_num}.')
