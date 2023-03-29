@@ -18,7 +18,7 @@ class SecondarySctructure(Enum):
 
     HELIX = 0 # 'GHI'
     STRAND = 1 # 'BE'
-    COIL = 2 # ' -ST'
+    COIL = 2 # ' -STP'
 
     @property
     def onehot(self):
@@ -33,7 +33,7 @@ def _classify_secstructure(subtype: str):
         return SecondarySctructure.HELIX
     if subtype in 'BE':
         return SecondarySctructure.STRAND
-    if subtype in ' -ST':
+    if subtype in ' -STP':
         return SecondarySctructure.COIL
     return None
 
