@@ -48,6 +48,19 @@ def _get_secstructure(pdb_path: str) -> Dict:
         dict: A dictionary containing secondary structure information for each chain and residue.
     """
 
+    # Check/add HEADER to pdb file
+    with open(pdb_path, encoding="utf-8") as f:
+        lines = f.readlines()
+        firstline = lines[0]
+
+    if not firstline.startswith('HEADER'):
+        if firstline.startswith('EXPDTA'):
+            lines = [f'HEADER {firstline}'] + lines[1:]
+        else:
+            lines = ['HEADER \n'] + lines
+        with open(pdb_path, 'w', encoding="utf-8") as f:
+            f.writelines(lines)
+ 
     # Execute DSSP and read the output
     p = PDBParser(QUIET=True)
     model = p.get_structure(Path(pdb_path).stem, pdb_path)[0]
