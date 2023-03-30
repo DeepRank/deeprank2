@@ -41,6 +41,13 @@ def _check_pdb(pdb_path):
             lines = [f'HEADER {firstline}'] + lines[1:]
         else:
             lines = ['HEADER \n'] + lines
+    
+    # check for COMPND, SOURCE, AUTHOR
+    record_types = [line.split(' ')[0] for line in lines]
+    for entry in ['COMPND', 'SOURCE', 'AUTHOR']:
+        if entry not in record_types:
+            fix_pdb = True
+            lines = lines[0] + [entry] + lines[1:]
 
     # check for unnumbered REMARK lines
     for i, line in enumerate(lines):
