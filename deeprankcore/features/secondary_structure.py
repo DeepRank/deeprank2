@@ -28,6 +28,34 @@ class SecondarySctructure(Enum):
         return t
 
 
+def _check_pdb(pdb_path):
+    fix_pdb = False
+    with open(pdb_path, encoding='utf-8') as f:
+        lines = f.readlines()
+        firstline = lines[0]
+
+    # check for HEADER
+    if not firstline.startswith('HEADER'):
+        fix_pdb = True
+        if firstline.startswith('EXPDTA'):
+            lines = [f'HEADER {firstline}'] + lines[1:]
+        else:
+            lines = ['HEADER \n'] + lines
+
+    # check for unnumbered REMARK lines
+    for i, line in enumerate(lines):
+        if line.startswith('REMARK '):
+            try:
+                int(line.split(' ')[1])
+            except ValueError:
+                fix_pdb = True
+                lines[i] = f'REMARK 999 {line[7:]}'
+
+    if fix_pdb:
+        with open(pdb_path, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+
+
 def _classify_secstructure(subtype: str):
     if subtype in 'GHI':
         return SecondarySctructure.HELIX
@@ -47,21 +75,9 @@ def _get_secstructure(pdb_path: str) -> Dict:
     Returns:
         dict: A dictionary containing secondary structure information for each chain and residue.
     """
-
-    # Check/add HEADER to pdb file
-    with open(pdb_path, encoding="utf-8") as f:
-        lines = f.readlines()
-        firstline = lines[0]
-
-    if not firstline.startswith('HEADER'):
-        if firstline.startswith('EXPDTA'):
-            lines = [f'HEADER {firstline}'] + lines[1:]
-        else:
-            lines = ['HEADER \n'] + lines
-        with open(pdb_path, 'w', encoding="utf-8") as f:
-            f.writelines(lines)
  
     # Execute DSSP and read the output
+    _check_pdb(pdb_path)
     p = PDBParser(QUIET=True)
     model = p.get_structure(Path(pdb_path).stem, pdb_path)[0]
     dssp = DSSP(model, pdb_path, dssp='mkdssp')
