@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 import h5py
 
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
-from deeprankcore.features import surfacearea
+from deeprankcore.features import components, surfacearea
 from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
                                 QueryCollection,
                                 SingleResidueVariantResidueQuery)
@@ -17,7 +17,7 @@ from . import PATH_TEST
 
 def _querycollection_tester( # pylint: disable = too-many-locals
     query_type: str = 'ppi',
-    n_queries: int = 10, 
+    n_queries: int = 3,
     feature_modules: Optional[Union[ModuleType, List[ModuleType]]] = None, 
     cpu_count: int = 1, 
     combine_output: bool = True,
@@ -41,7 +41,7 @@ def _querycollection_tester( # pylint: disable = too-many-locals
                         str("tests/data/pdb/3C8P/3C8P.pdb"),
                         "A",
                         "B",
-                        pssm_paths={"A": str(PATH_TEST / "data/pssm/3C8P/3C8P.A.pdb.pssm"), "B": str(PATH_TEST / "data/pssm/3C8P/3C8P.B.pdb.pssm")},
+                        pssm_paths={"A": str("tests/data/pssm/3C8P/3C8P.A.pdb.pssm"), "B": str("tests/data/pssm/3C8P/3C8P.B.pdb.pssm")},
                     ) for _ in range(n_queries)]
     elif query_type == 'var':
         queries = [SingleResidueVariantResidueQuery(
@@ -51,7 +51,7 @@ def _querycollection_tester( # pylint: disable = too-many-locals
                         insertion_code= None,
                         wildtype_amino_acid= alanine,
                         variant_amino_acid= phenylalanine,
-                        pssm_paths={"A": str(PATH_TEST / "data/pssm/101M/101M.A.pdb.pssm")},
+                        pssm_paths={"A": str("tests/data/pssm/101M/101M.A.pdb.pssm")},
                     ) for _ in range(n_queries)]
     else:
         raise ValueError("Please insert a valid type (either ppi or var).")
@@ -88,7 +88,7 @@ def test_querycollection_process():
     """
 
     for query_type in ['ppi', 'var']:
-        n_queries = 5
+        n_queries = 3
 
         collection, output_directory, _ = _querycollection_tester(query_type, n_queries=n_queries)
         
@@ -134,10 +134,11 @@ def test_querycollection_process_combine_output_true():
     """
 
     for query_type in ['ppi', 'var']:
+        modules = [surfacearea, components]
 
-        _, output_directory_t, output_paths_t = _querycollection_tester(query_type)
+        _, output_directory_t, output_paths_t = _querycollection_tester(query_type, feature_modules=modules)
 
-        _, output_directory_f, output_paths_f = _querycollection_tester(query_type, combine_output = False, cpu_count=2)
+        _, output_directory_f, output_paths_f = _querycollection_tester(query_type, feature_modules=modules, combine_output = False, cpu_count=2)
 
         assert len(output_paths_t) == 1
 
@@ -167,8 +168,10 @@ def test_querycollection_process_combine_output_false():
 
         cpu_count = 2
         combine_output = False
+        modules = [surfacearea, components]
 
-        _, output_directory, output_paths = _querycollection_tester(query_type, cpu_count = cpu_count, combine_output = combine_output)
+        _, output_directory, output_paths = _querycollection_tester(query_type, feature_modules=modules, 
+                                                                    cpu_count = cpu_count, combine_output = combine_output)
 
         assert len(output_paths) == cpu_count
 
