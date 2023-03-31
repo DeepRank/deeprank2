@@ -63,9 +63,9 @@ def _check_pdb(pdb_path):
     
     # check for unnumbered REMARK lines
     for i, line in enumerate(lines):
-        if line.startswith('REMARK '):
+        if line.startswith('REMARK'):
             try:
-                int(line.split(' ')[1])
+                int(line.split()[1])
             except ValueError:
                 fix_pdb = True
                 lines[i] = f'REMARK 999 {line[7:]}'
