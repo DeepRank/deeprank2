@@ -4,29 +4,39 @@ from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.features.secondary_structure import (SecondarySctructure,
                                                        _classify_secstructure,
                                                        add_features)
-from deeprankcore.utils.graph import Graph
 
 from . import build_testgraph
 
 
-def _run_assertions(graph: Graph, node_info_list: list):
-    
+def test_secondary_structure_residue():
+    test_case = '9api'
+    pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
+    graph = build_testgraph(pdb_path, 10, 'residue')
+    add_features(pdb_path, graph)
+
+    # Create a list of node information (residue number, chain ID, and secondary structure features)
+    node_info_list = [[node.id.number, 
+                       node.id.chain.id, 
+                       node.features[Nfeat.SECSTRUCT]] 
+                            for node in graph.nodes]
+    print(node_info_list)
+
     # Check that all nodes have exactly 1 secondary structure type
     assert np.all([np.sum(node.features[Nfeat.SECSTRUCT]) == 1.0 for node in graph.nodes]), 'one hot encoding error'
 
-
     # check ground truth examples
     residues = [
-        (90, 'D', ' ', SecondarySctructure.COIL),
-        (89, 'D', 'S', SecondarySctructure.COIL),
-        (69, 'C', 'T', SecondarySctructure.COIL),
-        (108, 'C', 'B', SecondarySctructure.STRAND),
-        (113, 'C', 'E', SecondarySctructure.STRAND),
-        (121, 'C', 'G', SecondarySctructure.HELIX),
-        (113, 'D', 'H', SecondarySctructure.HELIX),
-        #(0, '', 'I', SecondarySctructure.HELIX),
+        (267, 'A', ' ', SecondarySctructure.COIL),
+        (46, 'A', 'S', SecondarySctructure.COIL),
+        (104, 'A', 'T', SecondarySctructure.COIL),
+        # (None, '', 'P', SecondarySctructure.COIL),
+        (194, 'A', 'B', SecondarySctructure.STRAND),
+        (385, 'B', 'E', SecondarySctructure.STRAND),
+        (235, 'A', 'G', SecondarySctructure.HELIX),
+        (263, 'A', 'H', SecondarySctructure.HELIX),
+        # (0, '', 'I', SecondarySctructure.HELIX),
     ]
-    
+
     for res in residues:
         node_list = [node_info for node_info in node_info_list if (node_info[0] == res[0] and node_info[1] == res[1])]
         assert len(node_list) > 0, f'no nodes detected in {res[1]} {res[0]}'
@@ -40,9 +50,21 @@ def _run_assertions(graph: Graph, node_info_list: list):
         ), f'Ground truth examples: res {res[1]} {res[0]} is not {res[3]}.'
 
 
+def test_secondary_structure_atom():
+    test_case = '9api'
+    pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
+    graph = build_testgraph(pdb_path, 4.5, 'atom')
+    add_features(pdb_path, graph)
+    
+    # Create a list of node information (residue number, chain ID, and secondary structure features)
+    node_info_list = [[node.id.residue.number, 
+                       node.id.residue.chain.id, 
+                       node.features[Nfeat.SECSTRUCT]] 
+                            for node in graph.nodes]
+
     # check entire DSSP file
     # residue number @ pos 5-10, chain_id @ pos 11, secondary structure @ pos 16
-    with open('tests/data/dssp/1ak4.dssp.txt', encoding="utf8") as file:
+    with open(f'tests/data/dssp/{test_case}.dssp.txt', encoding="utf8") as file:
         dssp_lines = [line.rstrip() for line in file]
 
     for node in node_info_list:
@@ -57,29 +79,3 @@ def _run_assertions(graph: Graph, node_info_list: list):
             assert np.array_equal(node[2],SecondarySctructure.HELIX.onehot), f'Full file test: res {node[1]}{node[0]} is not a HELIX'
         else:
             raise ValueError(f'Unexpected secondary structure type found at {node[1]}{node[0]}')
-    
-    
-def test_secondary_structure_residue():
-    pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
-    graph = build_testgraph(pdb_path, 8.5, 'residue')
-    add_features(pdb_path, graph)
-
-    # Create a list of node information (residue number, chain ID, and secondary structure features)
-    node_info_list = [[node.id.number, 
-                       node.id.chain.id, 
-                       node.features[Nfeat.SECSTRUCT]] 
-                            for node in graph.nodes]
-    _run_assertions(graph, node_info_list)
-
-
-def test_secondary_structure_atom():
-    pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
-    graph = build_testgraph(pdb_path, 8.5, 'atom')
-    add_features(pdb_path, graph)
-    
-    # Create a list of node information (residue number, chain ID, and secondary structure features)
-    node_info_list = [[node.id.residue.number, 
-                       node.id.residue.chain.id, 
-                       node.features[Nfeat.SECSTRUCT]] 
-                            for node in graph.nodes]
-    _run_assertions(graph, node_info_list)
