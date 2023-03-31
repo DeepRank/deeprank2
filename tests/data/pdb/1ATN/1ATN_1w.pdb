@@ -1,47 +1,43 @@
-HEADER 
-COMPND	XXX
-SOURCE	XXX
-AUTHOR	XXX
-REMARK 999 FILENAME="1ATN_1w.pdb0"
-REMARK 999 ===============================================================
-REMARK 999 HADDOCK run for 1ATN
-REMARK 999 final NOE weights: unambig 50 amb: 50
-REMARK 999 ===============================================================
-REMARK 999            total,bonds,angles,improper,dihe,vdw,elec,air,cdih,coup,rdcs,vean,dani,xpcs,rg
-REMARK 999 energies: -400.031, 0, 0, 0, 0, -41.7467, -358.284, 0, 0, 0, 0, 0, 0, 0, 0
-REMARK 999 ===============================================================
-REMARK 999            bonds,angles,impropers,dihe,air,cdih,coup,rdcs,vean,dani,xpcs
-REMARK 999 rms-dev.: 0,0,0,0,3080,0,0, 0, 0, 0, 0
-REMARK 999 ===============================================================
-REMARK 999               air,cdih,coup,rdcs,vean,dani,xpcs
-REMARK 999               >0.3,>5,>1,>0,>5,>0.2,>0.2
-REMARK 999 violations.: 0, 0, 0, 0, 0, 0, 0
-REMARK 999 ===============================================================
-REMARK 999                        CVpartition#,violations,rms
-REMARK 999 AIRs cross-validation: 0, 0, 0
-REMARK 999 ===============================================================
-REMARK 999 NCS energy: 0
-REMARK 999 ===============================================================
-REMARK 999 Symmetry energy: 0
-REMARK 999 ===============================================================
-REMARK 999 Desolvation energy: 41.6023
-REMARK 999 Internal energy free molecules: -6877.26
-REMARK 999 Internal energy complex: -25546.6
-REMARK 999 Binding energy: -19027.8
-REMARK 999 ===============================================================
-REMARK 999 buried surface area: 2045.58
-REMARK 999 ===============================================================
-REMARK 999 water - chain1: 0 0 0
-REMARK 999 water - chain2: 0 0 0
-REMARK 999 water - chain3: 0 0 0
-REMARK 999 water - chain4: 0 0 0
-REMARK 999 water - chain5: 0 0 0
-REMARK 999 water - chain6: 0 0 0
-REMARK 999 ===============================================================
-REMARK 999 water - water: 0 0 0
-REMARK 999 ===============================================================
-REMARK 999 DATE:23-Oct-2013  00:44:27       created by user: benchmark
-REMARK 999 VERSION:1.3U
+REMARK FILENAME="1ATN_1w.pdb0"
+REMARK ===============================================================
+REMARK HADDOCK run for 1ATN
+REMARK final NOE weights: unambig 50 amb: 50
+REMARK ===============================================================
+REMARK            total,bonds,angles,improper,dihe,vdw,elec,air,cdih,coup,rdcs,vean,dani,xpcs,rg
+REMARK energies: -400.031, 0, 0, 0, 0, -41.7467, -358.284, 0, 0, 0, 0, 0, 0, 0, 0
+REMARK ===============================================================
+REMARK            bonds,angles,impropers,dihe,air,cdih,coup,rdcs,vean,dani,xpcs
+REMARK rms-dev.: 0,0,0,0,3080,0,0, 0, 0, 0, 0
+REMARK ===============================================================
+REMARK               air,cdih,coup,rdcs,vean,dani,xpcs
+REMARK               >0.3,>5,>1,>0,>5,>0.2,>0.2
+REMARK violations.: 0, 0, 0, 0, 0, 0, 0
+REMARK ===============================================================
+REMARK                        CVpartition#,violations,rms
+REMARK AIRs cross-validation: 0, 0, 0
+REMARK ===============================================================
+REMARK NCS energy: 0
+REMARK ===============================================================
+REMARK Symmetry energy: 0
+REMARK ===============================================================
+REMARK Desolvation energy: 41.6023
+REMARK Internal energy free molecules: -6877.26
+REMARK Internal energy complex: -25546.6
+REMARK Binding energy: -19027.8
+REMARK ===============================================================
+REMARK buried surface area: 2045.58
+REMARK ===============================================================
+REMARK water - chain1: 0 0 0
+REMARK water - chain2: 0 0 0
+REMARK water - chain3: 0 0 0
+REMARK water - chain4: 0 0 0
+REMARK water - chain5: 0 0 0
+REMARK water - chain6: 0 0 0
+REMARK ===============================================================
+REMARK water - water: 0 0 0
+REMARK ===============================================================
+REMARK DATE:23-Oct-2013  00:44:27       created by user: benchmark
+REMARK VERSION:1.3U
 ATOM      1  CB  GLU A 404     -33.067  23.479 -10.622  1.00 10.00      A
 ATOM      2  CG  GLU A 404     -33.135  24.747 -11.460  1.00 10.00      A
 ATOM      3  CD  GLU A 404     -33.231  26.000 -10.615  1.00 10.00      A
