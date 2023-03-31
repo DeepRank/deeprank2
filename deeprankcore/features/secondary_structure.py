@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 from Bio.PDB import PDBParser
@@ -27,14 +27,18 @@ class SecondarySctructure(Enum):
 
         return t
 
+def _get_records(lines: List[str]):
+    seen = set()
+    seen_add = seen.add
+    return [x.split()[0] for x in lines if not (x in seen or seen_add(x))]
 
 def _check_pdb(pdb_path):
     fix_pdb = False
     with open(pdb_path, encoding='utf-8') as f:
         lines = f.readlines()
-        firstline = lines[0]
 
     # check for HEADER
+    firstline = lines[0]
     if not firstline.startswith('HEADER'):
         fix_pdb = True
         if firstline.startswith('EXPDTA'):
@@ -43,12 +47,20 @@ def _check_pdb(pdb_path):
             lines = ['HEADER \n'] + lines
     
     # check for COMPND, SOURCE, AUTHOR
-    record_types = [line.split(' ')[0] for line in lines]
-    for entry in ['COMPND', 'SOURCE', 'AUTHOR']:
-        if entry not in record_types:
+    existing_records = _get_records(lines)
+    missing_records = []
+    for i, entry in enumerate(['COMPND', 'SOURCE', 'AUTHOR']):
+        if entry not in existing_records:
             fix_pdb = True
-            lines = lines[0] + [entry] + lines[1:]
-
+            missing_records.append(entry+'\tXXX\n')
+    lines = [lines[0]] + missing_records + lines[1:]
+    
+    # check order of records
+    existing_records = _get_records(lines)
+    iCOMPND, iSOURCE, iAUTHOR = existing_records.index('COMPND'), existing_records.index('SOURCE'), existing_records.index('AUTHOR')
+    if not iCOMPND < iSOURCE < iAUTHOR:
+        raise ValueError('Entries not in correct order. _check_pdb function needs additional code to fix order.')
+    
     # check for unnumbered REMARK lines
     for i, line in enumerate(lines):
         if line.startswith('REMARK '):
