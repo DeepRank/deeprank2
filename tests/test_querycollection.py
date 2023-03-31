@@ -12,8 +12,6 @@ from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
                                 QueryCollection,
                                 SingleResidueVariantResidueQuery)
 
-from . import PATH_TEST
-
 
 def _querycollection_tester( # pylint: disable = too-many-locals
     query_type: str = 'ppi',
@@ -41,11 +39,11 @@ def _querycollection_tester( # pylint: disable = too-many-locals
                         str("tests/data/pdb/3C8P/3C8P.pdb"),
                         "A",
                         "B",
-                        pssm_paths={"A": str("tests/data/pssm/3C8P/3C8P.A.pdb.pssm"), "B": str("tests/data/pssm/3C8P/3C8P.B.pdb.pssm")},
+                        pssm_paths={"A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm", "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm"},
                     ) for _ in range(n_queries)]
     elif query_type == 'var':
         queries = [SingleResidueVariantResidueQuery(
-                        str(PATH_TEST / "data/pdb/101M/101M.pdb"),
+                        str("tests/data/pdb/101M/101M.pdb"),
                         "A",
                         None, # placeholder
                         insertion_code= None,
