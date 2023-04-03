@@ -13,6 +13,10 @@ from deeprankcore.molstruct.variant import SingleResidueVariant
 from deeprankcore.utils.graph import Graph
 
 
+class DSSPError(Exception):
+    "Raised if DSSP fails to produce an output"
+
+
 class SecondarySctructure(Enum):
     "a value to express a secondary a residue's secondary structure type"
 
@@ -99,7 +103,16 @@ def _get_secstructure(pdb_path: str) -> Dict:
     _check_pdb(pdb_path)
     p = PDBParser(QUIET=True)
     model = p.get_structure(Path(pdb_path).stem, pdb_path)[0]
-    dssp = DSSP(model, pdb_path, dssp='mkdssp')
+    
+    # pylint: disable=raise-missing-from
+    try:
+        dssp = DSSP(model, pdb_path, dssp='mkdssp')
+    except Exception as e: # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
+        pdb_format_link = 'https://www.wwpdb.org/documentation/file-format-content/format33/sect1.html#Order'
+        raise DSSPError(f'DSSP has raised the following exception: {e}.\
+            \nThis is likely due to an improrperly formatted pdb file: {pdb_path}.\
+            \nSee {pdb_format_link} for guidance on how to format your pdb files.\
+            \nAlternatively, turn off secondary_structure feature module during QueryCollection.process().')
 
     chain_ids = [dssp_key[0] for dssp_key in dssp.property_keys]
     res_numbers = [dssp_key[1][1] for dssp_key in dssp.property_keys]
