@@ -128,6 +128,7 @@ class Query:
 
         # read the pssm
         if pssm_paths is not None:
+            _check_pssm(pdb_path, pssm_paths)
             for chain in structure.chains:
                 if chain.id in pssm_paths:
                     pssm_path = pssm_paths[chain.id]
