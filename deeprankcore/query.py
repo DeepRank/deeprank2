@@ -43,11 +43,7 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
     Raises:
         ValueError: Raised if info between PDB and PSSM doesn't match
     """
-    
-    # load pssm data
-    if not isinstance(pssm_paths, list):
-        pssm_paths = [pssm_paths]
-    
+        
     pssm_data = {}
     for chain in pssm_paths:
         with open(pssm_paths[chain], encoding='utf-8') as f:
