@@ -50,14 +50,18 @@ def _check_pdb(pdb_path):
         else:
             lines = ['HEADER \n'] + lines
     
-    # check for COMPND, SOURCE, AUTHOR
+    # check for COMPND, SOURCE, AUTHOR, add dummy data
     existing_records = _get_records(lines)
     required_records = ['COMPND', 'SOURCE', 'AUTHOR', 'CRYST1']
     missing_records = []
     for i, entry in enumerate(required_records):
         if entry not in existing_records:
             fix_pdb = True
-            missing_records.append(entry+'\tXXX\n')
+            if entry == required_records[3]:
+                missing_records.append('CRYST1   00.000   00.000   00.000  00.00  00.00  00.00 X 00 00 0    00\n')
+            else:
+                missing_records.append(f'{entry}\tXXX\n')
+                
     lines = [lines[0]] + missing_records + lines[1:]
     
     # check order of records
