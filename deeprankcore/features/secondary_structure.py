@@ -52,8 +52,9 @@ def _check_pdb(pdb_path):
     
     # check for COMPND, SOURCE, AUTHOR
     existing_records = _get_records(lines)
+    required_records = ['COMPND', 'SOURCE', 'AUTHOR', 'CRYST1']
     missing_records = []
-    for i, entry in enumerate(['COMPND', 'SOURCE', 'AUTHOR']):
+    for i, entry in enumerate(required_records):
         if entry not in existing_records:
             fix_pdb = True
             missing_records.append(entry+'\tXXX\n')
@@ -61,8 +62,10 @@ def _check_pdb(pdb_path):
     
     # check order of records
     existing_records = _get_records(lines)
-    iCOMPND, iSOURCE, iAUTHOR = existing_records.index('COMPND'), existing_records.index('SOURCE'), existing_records.index('AUTHOR')
-    if not iCOMPND < iSOURCE < iAUTHOR:
+    indices = [existing_records.index(record) for record in required_records]
+    sorted_indices = indices[:]
+    sorted_indices.sort()
+    if not indices == sorted_indices:
         raise ValueError('Entries not in correct order. _check_pdb function needs additional code to fix order.')
     
     # check for unnumbered REMARK lines
