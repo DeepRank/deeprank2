@@ -9,7 +9,7 @@ from . import build_testgraph
 
 
 def test_secondary_structure_residue():
-    test_case = '9api'
+    test_case = '9api' # properly formatted pdb file
     pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
     graph = build_testgraph(pdb_path, 10, 'residue')
     add_features(pdb_path, graph)
@@ -51,7 +51,7 @@ def test_secondary_structure_residue():
 
 
 def test_secondary_structure_atom():
-    test_case = '1ak4'
+    test_case = '1ak4' # ATOM list
     pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
     graph = build_testgraph(pdb_path, 4.5, 'atom')
     add_features(pdb_path, graph)
