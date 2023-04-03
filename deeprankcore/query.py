@@ -33,34 +33,42 @@ from deeprankcore.utils.parsing.pssm import parse_pssm
 _log = logging.getLogger(__name__)
 
 
-def _check_pssm(pdb_path: str, pssm_paths: Union[List[str], str]):
+def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
+    """Checks whether information stored in PSSM file matches the PDB file.
+
+    Args:
+        pdb_path (str): Path to the PDB file.
+        pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
+
+    Raises:
+        ValueError: Raised if info between PDB and PSSM doesn't match
+    """
     
-    # pssm data
+    # load pssm data
     if not isinstance(pssm_paths, list):
         pssm_paths = [pssm_paths]
     
     pssm_data = {}
-    for pssm_file in pssm_paths:
-        chain = pssm_file[-10]
-        with open(pssm_file, encoding='utf-8') as f:
+    for chain in pssm_paths:
+        with open(pssm_paths[chain], encoding='utf-8') as f:
             lines = f.readlines()[1:]
         for line in lines:
             pssm_data[chain + line.split()[0].zfill(4)] = convert_aa_nomenclature(line.split()[1], 3)
     
-    # ground truth pdb data
+    # load ground truth from pdb file
     pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
     pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth}
 
     error = False
     for residue in pdb_truth:
         try: 
-            if pdb_truth[residue] != pssm_data[residue]:
+            if pdb_truth[residue] != pssm_data[residue]: # residue doesn't match
                 error = True
         except KeyError: # residue not present in pssm
             error = True
 
     if error:
-        raise ValueError(f'Amino acids in PSSM files {pssm_paths} do not match pdb file {pdb_path}.')
+        raise ValueError(f'Amino acids in PSSM files do not match pdb file for {pdb_path}.')
 
 
 class Query:
@@ -364,13 +372,13 @@ class SingleResidueVariantResidueQuery(Query):
         Creates a residue graph from a single residue variant in a .PDB file.
 
         Args:
-            pdb_path (str): The path to the .PDB file.
+            pdb_path (str): The path to the PDB file.
             chain_id (str): The .PDB chain identifier of the variant residue.
             residue_number (int): The number of the variant residue.
             insertion_code (str): The insertion code of the variant residue, set to None if not applicable.
             wildtype_amino_acid (:class:`AminoAcid`): The wildtype amino acid.
             variant_amino_acid (:class:`AminoAcid`): The variant amino acid.
-            pssm_paths (Optional[Dict(str,str)], optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
+            pssm_paths (Optional[Dict(str,str)], optional): The paths to the PSSM files, per chain identifier. Defaults to None.
             radius (float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0.
             distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
                 Defaults to 4.5.
