@@ -32,6 +32,20 @@ from deeprankcore.utils.parsing.pssm import parse_pssm
 _log = logging.getLogger(__name__)
 
 
+def _check_pssm(pdb_path: str, pssm_paths: Union[List[str], str]):
+    
+    
+    
+    if not isinstance(pssm_paths, list):
+        pssm_paths = [pssm_paths]
+    
+    for pssm_file in pssm_paths:
+        with open(pssm_file, encoding='utf-8') as f:
+            lines = f.readlines()[1:]
+        pssm_truth = {line.split()[0]:line.split()[1] for line in lines} # dictionary of pdbresi: aa.one_letter_code
+        
+
+
 class Query:
 
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
@@ -119,6 +133,7 @@ class Query:
         raise NotImplementedError("Must be defined in child classes.")
     def get_query_id(self) -> str:
         raise NotImplementedError("Must be defined in child classes.")
+
 
 class QueryCollection:
     """
@@ -622,7 +637,6 @@ def _load_ppi_pssms(pssm_paths: Union[Dict[str, str], None],
 
                 with open(pssm_path, "rt", encoding="utf-8") as f:
                     chain.pssm = parse_pssm(f, chain)
-
 
 
 class ProteinProteinInterfaceAtomicQuery(Query):
