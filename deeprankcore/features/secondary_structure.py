@@ -31,10 +31,12 @@ class SecondarySctructure(Enum):
 
         return t
 
+
 def _get_records(lines: List[str]):
     seen = set()
     seen_add = seen.add
     return [x.split()[0] for x in lines if not (x in seen or seen_add(x))]
+
 
 def _check_pdb(pdb_path):
     fix_pdb = False

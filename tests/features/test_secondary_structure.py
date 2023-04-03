@@ -29,12 +29,12 @@ def test_secondary_structure_residue():
         (267, 'A', ' ', SecondarySctructure.COIL),
         (46, 'A', 'S', SecondarySctructure.COIL),
         (104, 'A', 'T', SecondarySctructure.COIL),
-        # (None, '', 'P', SecondarySctructure.COIL),
+        # (None, '', 'P', SecondarySctructure.COIL), # not found in test file
         (194, 'A', 'B', SecondarySctructure.STRAND),
         (385, 'B', 'E', SecondarySctructure.STRAND),
         (235, 'A', 'G', SecondarySctructure.HELIX),
         (263, 'A', 'H', SecondarySctructure.HELIX),
-        # (0, '', 'I', SecondarySctructure.HELIX),
+        # (0, '', 'I', SecondarySctructure.HELIX), # not found in test file
     ]
 
     for res in residues:
