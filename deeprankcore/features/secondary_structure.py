@@ -50,6 +50,12 @@ def _check_pdb(pdb_path):
         else:
             lines = ['HEADER \n'] + lines
     
+    # check CRYST1 record
+    existing_records = _get_records(lines)
+    if 'CRYST1' not in existing_records:
+        dummy_CRYST1 = 'CRYST1   00.000   00.000   00.000  00.00  00.00  00.00 X 00 00 0    00\n'
+        lines = [lines[0]] + dummy_CRYST1 + lines[1:]
+    
     # # check for COMPND, SOURCE, AUTHOR, add dummy data
     # existing_records = _get_records(lines)
     # required_records = ['COMPND', 'SOURCE', 'AUTHOR', 'CRYST1']
