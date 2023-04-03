@@ -16,6 +16,7 @@ import numpy as np
 import pdb2sql
 
 import deeprankcore.features
+from deeprankcore.domain.aminoacidlist import convert_aa_nomenclature
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import get_residue_center
@@ -34,16 +35,32 @@ _log = logging.getLogger(__name__)
 
 def _check_pssm(pdb_path: str, pssm_paths: Union[List[str], str]):
     
-    
-    
+    # pssm data
     if not isinstance(pssm_paths, list):
         pssm_paths = [pssm_paths]
     
+    pssm_data = {}
     for pssm_file in pssm_paths:
+        chain = pssm_file[-10]
         with open(pssm_file, encoding='utf-8') as f:
             lines = f.readlines()[1:]
-        pssm_truth = {line.split()[0]:line.split()[1] for line in lines} # dictionary of pdbresi: aa.one_letter_code
-        
+        for line in lines:
+            pssm_data[chain + line.split()[0].zfill(4)] = convert_aa_nomenclature(line.split()[1], 3)
+    
+    # ground truth pdb data
+    pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
+    pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth}
+
+    error = False
+    for residue in pdb_truth:
+        try: 
+            if pdb_truth[residue] != pssm_data[residue]:
+                error = True
+        except KeyError: # residue not present in pssm
+            error = True
+
+    if error:
+        raise ValueError(f'Amino acids in PSSM files {pssm_paths} do not match pdb file {pdb_path}.')
 
 
 class Query:
