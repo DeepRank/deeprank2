@@ -249,7 +249,7 @@ trainer = Trainer(
 )
 ```
 
-By default, the Trainer class creates the folder `./output` and uses `HDF5OutputExporter`. In the latter case, results are saved in `output_exporter.hdf5` both during the training (`.train()`) and during the testing (`.test()`) phases. `output_exporter.hdf5` contains Groups which refer to each phase, e.g. `training` and `testing` if both were run, only one of them otherwise. Training here includes validation as well. The HDF5 file can then be read as a [Pandas Dataframe](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html):
+By default, the Trainer class creates the folder `./output` and uses `HDF5OutputExporter`. In the latter case, results are saved in `output_exporter.hdf5` both during the training (`.train()`) and during the testing (`.test()`) phases. `output_exporter.hdf5` contains Groups which refer to each phase, e.g. `training` and `testing` if both are run, only one of them otherwise. Training phase includes validation results as well. The HDF5 file can then be read as a [Pandas Dataframe](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html):
 
 ```python
 import os
