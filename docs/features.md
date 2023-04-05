@@ -24,7 +24,7 @@ The following is a brief description of the features already implemented in the 
 - `pdb_occupancy`: Only for atomic graph, it represents the proportion of structures where the atom is detected at a given position. Sometimes a single atom can be detected at multiple positions, and in that case separate structures exist whose occupancies sum gives 1. Note that only the highest occupancy atom is used by deeprankcore. Float value.
 - `atom_charge`: Only for atomic graph, atomic charge in Coulomb. Taken from deeprankcore.domain.forcefield.patch.top file. Float value.
 - `res_type`: One hot encodes the type of amino acid (20).
-- `charge`: The charge property of the amino acid. Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
+- `res_charge`: The charge property of the amino acid. Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
 - `polarity`: One hot encodes the polarity of the amino acid (nonpolar, polar, negative charge, positive charge).
 - `res_size`: The number of heavy atoms in the side chain. Int value.
 - `res_mass`: The average residue mass (i.e. mass of amino acid - H20) in Daltons. Float value.
