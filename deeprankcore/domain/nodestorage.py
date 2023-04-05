@@ -70,3 +70,6 @@ ATOMTYPE = "atom_type"
 ATOMCHARGE = "atom_charge"
 PDBOCCUPANCY = "pdb_occupancy"
 VDWPARAMETERS = "vdw_parameters"
+
+## other features
+SECSTRUCT = "sec_struct" #secondary structure
