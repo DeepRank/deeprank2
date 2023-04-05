@@ -38,7 +38,7 @@ def _get_records(lines: List[str]):
     return [x.split()[0] for x in lines if not (x in seen or seen_add(x))]
 
 
-def _check_pdb(pdb_path):
+def _check_pdb(pdb_path: str):
     fix_pdb = False
     with open(pdb_path, encoding='utf-8') as f:
         lines = f.readlines()
