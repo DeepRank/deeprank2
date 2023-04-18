@@ -690,31 +690,31 @@ class GraphDataset(DeeprankDataset):
         return self.load_one_graph(fname, mol)
 
     # The dictionary will be in this format:
-    #feat_dict={'bsa':{'Transformation':'log_one','Standardization':True},
-               #'res_depth':{'Transformation':'log_one','Standardization':True},
-               #'info_content':{'Transformation':'log_one','Standardization':True},
-               #'sasa':{'Transformation':'square','Standardization':True},
-               #'electrostatic':{'Transformation':'cube','Standardization':True},
-               #'vanderwaals':{'Transformation':'cube','Standardization':True},
-               #'res_size':{'Transformation':'None','Standardization':True},
-               #'res_charge':{'Transformation':'None','Standardization':True},
-               #'hb_donors':{'Transformation':'None','Standardization':True},
-               #'hb_acceptors':{'Transformation':'None','Standardization':True},
-               #'hse':{'Transformation':'None','Standardization':True},
-               #'irc_nonpolar_negative':{'Transformation':'None','Standardization':True},
-               #'irc_nonpolar_nonpolar':{'Transformation':'None','Standardization':True},
-               #'irc_nonpolar_polar':{'Transformation':'None','Standardization':True},
-               #'irc_nonpolar_positive':{'Transformation':'None','Standardization':True},
-               #'irc_polar_polar':{'Transformation':'None','Standardization':True},
-               #'irc_polar_positive':{'Transformation':'None','Standardization':True},
-               #'irc_total':{'Transformation':'None','Standardization':True},
-               #'irc_negative_positive':{'Transformation':'None','Standardization':True},
-               #'irc_positive_positive':{'Transformation':'None','Standardization':True},
+    #feat_dict={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
+               #'res_depth':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
+               #'info_content':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
+               #'sasa':{'Transformation':lambda t:np.sqrt(t),'Standardization':True},
+               #'electrostatic':{'Transformation':lambda t:np.cbrt(t),'Standardization':True},
+               #'vanderwaals':{'Transformation':lambda t:np.cbrt(t),'Standardization':True},
+               #'res_size':{'Transformation':None,'Standardization':True},
+               #'res_charge':{'Transformation':None,'Standardization':True},
+               #'hb_donors':{'Transformation':None,'Standardization':True},
+               #'hb_acceptors':{'Transformation':None,'Standardization':True},
+               #'hse':{'Transformation':None,'Standardization':True},
+               #'irc_nonpolar_negative':{'Transformation':None,'Standardization':True},
+               #'irc_nonpolar_nonpolar':{'Transformation':None,'Standardization':True},
+               #'irc_nonpolar_polar':{'Transformation':None,'Standardization':True},
+               #'irc_nonpolar_positive':{'Transformation':None,'Standardization':True},
+               #'irc_polar_polar':{'Transformation':None,'Standardization':True},
+               #'irc_polar_positive':{'Transformation':None,'Standardization':True},
+               #'irc_total':{'Transformation':None,'Standardization':True},
+               #'irc_negative_positive':{'Transformation':None,'Standardization':True},
+               #'irc_positive_positive':{'Transformation':None,'Standardization':True},
                #'irc_polar_negative':{'Transformation':'None','Standardization':True},
-               #'irc_negative_negative':{'Transformation':'None','Standardization':True},
-               #'res_mass':{'Transformation':'None','Standardization':True},
-               #'res_pI':{'Transformation':'None','Standardization':True},
-               #'distance':{'Transformation':'None','Standardization':True}}
+               #'irc_negative_negative':{'Transformation':None,'Standardization':True},
+               #'res_mass':{'Transformation':None,'Standardization':True},
+               #'res_pI':{'Transformation':None,'Standardization':True},
+               #'distance':{'Transformation':None,'Standardization':True}}
     
     def load_one_graph(self, fname: str, entry_name: str, feat_dict:dict)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
         """Loads one graph.
@@ -744,24 +744,16 @@ class GraphDataset(DeeprankDataset):
                         vals = vals.reshape(-1, 1)
                         
                         #apply transformation
-                        if (transform == 'log_one'):
-                            vals = np.log(vals+1)
-                        elif(transform == 'square'):
-                            vals=np.sqrt(vals)
-                        elif(transform == 'cube'):
-                            vals=np.cbrt(vals)
+                        if(transform != None):
+                            vals=feat_dict[feat]['Transformation'](vals)
                                 
                         #if self._standardize:
                         if standardize:
                             vals = (vals-self.means[feat])/self.devs[feat]
                     else:
                         #apply transformation
-                        if (transform == 'log_one'):
-                            vals = np.log(vals+1)
-                        elif(transform == 'square'):
-                            vals=np.sqrt(vals)
-                        elif(transform == 'cube'):
-                            vals=np.cbrt(vals)
+                        if(transform != None):
+                            vals=feat_dict[feat]['Transformation'](vals)
                                 
                         #if self._standardize:
                         if standardize:
@@ -799,24 +791,16 @@ class GraphDataset(DeeprankDataset):
                             vals = vals.reshape(-1, 1)
                             
                             #apply transformation
-                            if (transform == 'log_one'):
-                                vals = np.log(vals+1)
-                            elif(transform == 'square'):
-                                vals=np.sqrt(vals)
-                            elif(transform == 'cube'):
-                                vals=np.cbrt(vals)
+                        if(transform != None):
+                            vals=feat_dict[feat]['Transformation'](vals)
                                 
                             #if self._standardize:    
                             if standardize: 
                                 vals = (vals-self.means[feat])/self.devs[feat]
                         else:
                             #apply transformation
-                            if (transform == 'log_one'):
-                                vals = np.log(vals+1)
-                            elif(transform == 'square'):
-                                vals=np.sqrt(vals)
-                            elif(transform == 'cube'):
-                                vals=np.cbrt(vals)
+                            if(transform != None):
+                                vals=feat_dict[feat]['Transformation'](vals)
                                 
                             #if self._standardize:
                             if standardize:
