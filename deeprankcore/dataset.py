@@ -791,8 +791,8 @@ class GraphDataset(DeeprankDataset):
                             vals = vals.reshape(-1, 1)
                             
                             #apply transformation
-                        if(transform != None):
-                            vals=feat_dict[feat]['Transformation'](vals)
+                            if(transform != None):
+                                vals=feat_dict[feat]['Transformation'](vals)
                                 
                             #if self._standardize:    
                             if standardize: 
