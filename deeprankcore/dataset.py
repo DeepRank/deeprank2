@@ -710,7 +710,7 @@ class GraphDataset(DeeprankDataset):
                #'irc_total':{'Transformation':None,'Standardization':True},
                #'irc_negative_positive':{'Transformation':None,'Standardization':True},
                #'irc_positive_positive':{'Transformation':None,'Standardization':True},
-               #'irc_polar_negative':{'Transformation':'None','Standardization':True},
+               #'irc_polar_negative':{'Transformation':None,'Standardization':True},
                #'irc_negative_negative':{'Transformation':None,'Standardization':True},
                #'res_mass':{'Transformation':None,'Standardization':True},
                #'res_pI':{'Transformation':None,'Standardization':True},
