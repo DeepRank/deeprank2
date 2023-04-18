@@ -689,7 +689,34 @@ class GraphDataset(DeeprankDataset):
         fname, mol = self.index_entries[idx]
         return self.load_one_graph(fname, mol)
 
-    def load_one_graph(self, fname: str, entry_name: str)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
+    # The dictionary will be in this format:
+    #feat_dict={'bsa':{'Transformation':'log_one','Standardization':True},
+               #'res_depth':{'Transformation':'log_one','Standardization':True},
+               #'info_content':{'Transformation':'log_one','Standardization':True},
+               #'sasa':{'Transformation':'square','Standardization':True},
+               #'electrostatic':{'Transformation':'cube','Standardization':True},
+               #'vanderwaals':{'Transformation':'cube','Standardization':True},
+               #'res_size':{'Transformation':'None','Standardization':True},
+               #'res_charge':{'Transformation':'None','Standardization':True},
+               #'hb_donors':{'Transformation':'None','Standardization':True},
+               #'hb_acceptors':{'Transformation':'None','Standardization':True},
+               #'hse':{'Transformation':'None','Standardization':True},
+               #'irc_nonpolar_negative':{'Transformation':'None','Standardization':True},
+               #'irc_nonpolar_nonpolar':{'Transformation':'None','Standardization':True},
+               #'irc_nonpolar_polar':{'Transformation':'None','Standardization':True},
+               #'irc_nonpolar_positive':{'Transformation':'None','Standardization':True},
+               #'irc_polar_polar':{'Transformation':'None','Standardization':True},
+               #'irc_polar_positive':{'Transformation':'None','Standardization':True},
+               #'irc_total':{'Transformation':'None','Standardization':True},
+               #'irc_negative_positive':{'Transformation':'None','Standardization':True},
+               #'irc_positive_positive':{'Transformation':'None','Standardization':True},
+               #'irc_polar_negative':{'Transformation':'None','Standardization':True},
+               #'irc_negative_negative':{'Transformation':'None','Standardization':True},
+               #'res_mass':{'Transformation':'None','Standardization':True},
+               #'res_pI':{'Transformation':'None','Standardization':True},
+               #'distance':{'Transformation':'None','Standardization':True}}
+    
+    def load_one_graph(self, fname: str, entry_name: str, feat_dict:dict)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
         """Loads one graph.
 
         Args:
@@ -708,12 +735,36 @@ class GraphDataset(DeeprankDataset):
             for feat in self.node_features:
                 if feat[0] != '_':  # ignore metafeatures
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
+                    
+                    #get feat transformation and standardization
+                    transform=feat_dict.get(feat, {}).get('Transformation')
+                    standardize=feat_dict.get(feat, {}).get('Standardization')
+                    
                     if vals.ndim == 1: # features with only one channel
                         vals = vals.reshape(-1, 1)
-                        if self._standardize:
+                        
+                        #apply transformation
+                        if (transform == 'log_one'):
+                            vals = np.log(vals+1)
+                        elif(transform == 'square'):
+                            vals=np.sqrt(vals)
+                        elif(transform == 'cube'):
+                            vals=np.cbrt(vals)
+                                
+                        #if self._standardize:
+                        if standardize:
                             vals = (vals-self.means[feat])/self.devs[feat]
                     else:
-                        if self._standardize:
+                        #apply transformation
+                        if (transform == 'log_one'):
+                            vals = np.log(vals+1)
+                        elif(transform == 'square'):
+                            vals=np.sqrt(vals)
+                        elif(transform == 'cube'):
+                            vals=np.cbrt(vals)
+                                
+                        #if self._standardize:
+                        if standardize:
                             reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
                             reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
                             vals = (vals - reshaped_mean)/reshaped_dev
@@ -739,12 +790,36 @@ class GraphDataset(DeeprankDataset):
                 for feat in self.edge_features:
                     if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
+                        
+                        #get feat transformation and standardization
+                        transform=feat_dict.get(feat, {}).get('Transformation')
+                        standardize=feat_dict.get(feat, {}).get('Standardization')
+                        
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
-                            if self._standardize:
+                            
+                            #apply transformation
+                            if (transform == 'log_one'):
+                                vals = np.log(vals+1)
+                            elif(transform == 'square'):
+                                vals=np.sqrt(vals)
+                            elif(transform == 'cube'):
+                                vals=np.cbrt(vals)
+                                
+                            #if self._standardize:    
+                            if standardize: 
                                 vals = (vals-self.means[feat])/self.devs[feat]
                         else:
-                            if self._standardize:
+                            #apply transformation
+                            if (transform == 'log_one'):
+                                vals = np.log(vals+1)
+                            elif(transform == 'square'):
+                                vals=np.sqrt(vals)
+                            elif(transform == 'cube'):
+                                vals=np.cbrt(vals)
+                                
+                            #if self._standardize:
+                            if standardize:
                                 reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
                                 reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
                                 vals = (vals - reshaped_mean)/reshaped_dev
