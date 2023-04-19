@@ -245,21 +245,26 @@ class DeeprankDataset(Dataset):
 
                 for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
+                        #get transformation type
+                        transform=None
+                        if(feat_trans_dict is not None):
+                            transform=feat_trans_dict.get(feat, {}).get('Transformation')
+                        #Check the number of channels the features have    
                         if f[entry_name][feat_type][feat][()].ndim == 2:
                             for i in range(f[entry_name][feat_type][feat][:].shape[1]):
                                 df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
+                                #apply transformation for each channel in this feature
+                                if(transform is not None):
+                                    df_dict[feat + '_' + str(i)]=feat_trans_dict[feat]['Transformation'](df_dict[feat + '_' + str(i)])
                         else:
                             df_dict[feat] = [
                                 f[entry_name][feat_type][feat][:]
                                 if f[entry_name][feat_type][feat][()].ndim == 1
                                 else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
+                            #apply transformation
+                            if(transform is not None):
+                                df_dict[feat]=feat_trans_dict[feat]['Transformation'](df_dict[feat])
                 
-                #apply transformation
-                transform=None
-                if(feat_trans_dict is not None):
-                    transform=feat_trans_dict.get(feat, {}).get('Transformation')
-                if(transform is not None):
-                    df_dict[feat]=feat_trans_dict[feat]['Transformation'](df_dict[feat])
                 df = pd.DataFrame(data=df_dict)
 
             df_final = pd.concat([df_final, df])
