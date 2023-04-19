@@ -363,7 +363,7 @@ class DeeprankDataset(Dataset):
         plt.close(fig)
     
     def _compute_mean_std(self):
-
+               
         means = {col: round(np.concatenate(self.df[col].values).mean(), 1) if isinstance(self.df[col].values[0], np.ndarray) \
             else round(self.df[col].values.mean(), 1) \
             for col in self.df.columns[1:]}
@@ -447,9 +447,8 @@ class GridDataset(DeeprankDataset):
             else:
                 self.features_dict[targets.VALUES] = self.target
 
-        if self._standardize:
-            self.hdf5_to_pandas(feat_trans_dict)
-            self._compute_mean_std()
+        self.hdf5_to_pandas(feat_trans_dict)
+        self._compute_mean_std()
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -762,7 +761,6 @@ class GraphDataset(DeeprankDataset):
                         if(transform is not None):
                             vals=feat_trans_dict[feat]['Transformation'](vals)
                                 
-                        #if self._standardize:
                         if standardize:
                             vals = (vals-self.means[feat])/self.devs[feat]
                     else:
@@ -770,7 +768,6 @@ class GraphDataset(DeeprankDataset):
                         if(transform is not None):
                             vals=feat_trans_dict[feat]['Transformation'](vals)
                                 
-                        #if self._standardize:
                         if standardize:
                             reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
                             reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
@@ -811,8 +808,7 @@ class GraphDataset(DeeprankDataset):
                             #apply transformation
                             if(transform is not None):
                                 vals=feat_trans_dict[feat]['Transformation'](vals)
-                                
-                            #if self._standardize:    
+                                 
                             if standardize: 
                                 vals = (vals-self.means[feat])/self.devs[feat]
                         else:
@@ -820,7 +816,6 @@ class GraphDataset(DeeprankDataset):
                             if(transform is not None):
                                 vals=feat_trans_dict[feat]['Transformation'](vals)
                                 
-                            #if self._standardize:
                             if standardize:
                                 reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
                                 reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
