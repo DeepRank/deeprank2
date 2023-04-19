@@ -219,7 +219,7 @@ class DeeprankDataset(Dataset):
         return len(self.index_entries)
 
     def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
-        self
+        self, feat_trans_dict: Optional[dict] = None
     ) -> pd.DataFrame:
         """Loads features data from the HDF5 files into a Pandas DataFrame in the attribute `df` of the class.
 
@@ -690,7 +690,7 @@ class GraphDataset(DeeprankDataset):
         return self.load_one_graph(fname, mol)
 
     # The dictionary will be in this format:
-    #feat_dict={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
+    #feat_trans_dict={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
                #'res_depth':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
                #'info_content':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
                #'sasa':{'Transformation':lambda t:np.sqrt(t),'Standardization':True},
@@ -716,7 +716,7 @@ class GraphDataset(DeeprankDataset):
                #'res_pI':{'Transformation':None,'Standardization':True},
                #'distance':{'Transformation':None,'Standardization':True}}
     
-    def load_one_graph(self, fname: str, entry_name: str, feat_dict:dict)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
+    def load_one_graph(self, fname: str, entry_name: str, feat_trans_dict:Optional[dict] = None)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
         """Loads one graph.
 
         Args:
@@ -737,23 +737,26 @@ class GraphDataset(DeeprankDataset):
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                     
                     #get feat transformation and standardization
-                    transform=feat_dict.get(feat, {}).get('Transformation')
-                    standardize=feat_dict.get(feat, {}).get('Standardization')
+                    transform=None
+                    standardize=False
+                    if(feat_trans_dict is not None):
+                        transform=feat_trans_dict.get(feat, {}).get('Transformation')
+                        standardize=feat_trans_dict.get(feat, {}).get('Standardization')
                     
                     if vals.ndim == 1: # features with only one channel
                         vals = vals.reshape(-1, 1)
                         
                         #apply transformation
-                        if(transform != None):
-                            vals=feat_dict[feat]['Transformation'](vals)
+                        if(transform is not None):
+                            vals=feat_trans_dict[feat]['Transformation'](vals)
                                 
                         #if self._standardize:
                         if standardize:
                             vals = (vals-self.means[feat])/self.devs[feat]
                     else:
                         #apply transformation
-                        if(transform != None):
-                            vals=feat_dict[feat]['Transformation'](vals)
+                        if(transform is not None):
+                            vals=feat_trans_dict[feat]['Transformation'](vals)
                                 
                         #if self._standardize:
                         if standardize:
@@ -784,23 +787,26 @@ class GraphDataset(DeeprankDataset):
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         
                         #get feat transformation and standardization
-                        transform=feat_dict.get(feat, {}).get('Transformation')
-                        standardize=feat_dict.get(feat, {}).get('Standardization')
+                        transform=None
+                        standardize=False
+                        if(feat_trans_dict is not None):
+                            transform=feat_trans_dict.get(feat, {}).get('Transformation')
+                            standardize=feat_trans_dict.get(feat, {}).get('Standardization')
                         
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
                             
                             #apply transformation
-                            if(transform != None):
-                                vals=feat_dict[feat]['Transformation'](vals)
+                            if(transform is not None):
+                                vals=feat_trans_dict[feat]['Transformation'](vals)
                                 
                             #if self._standardize:    
                             if standardize: 
                                 vals = (vals-self.means[feat])/self.devs[feat]
                         else:
                             #apply transformation
-                            if(transform != None):
-                                vals=feat_dict[feat]['Transformation'](vals)
+                            if(transform is not None):
+                                vals=feat_trans_dict[feat]['Transformation'](vals)
                                 
                             #if self._standardize:
                             if standardize:
