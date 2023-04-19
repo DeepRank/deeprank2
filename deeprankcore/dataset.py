@@ -253,7 +253,13 @@ class DeeprankDataset(Dataset):
                                 f[entry_name][feat_type][feat][:]
                                 if f[entry_name][feat_type][feat][()].ndim == 1
                                 else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
-
+                
+                #apply transformation
+                transform=None
+                if(feat_trans_dict is not None):
+                    transform=feat_trans_dict.get(feat, {}).get('Transformation')
+                if(transform is not None):
+                    df_dict[feat]=feat_trans_dict[feat]['Transformation'](df_dict[feat])
                 df = pd.DataFrame(data=df_dict)
 
             df_final = pd.concat([df_final, df])
@@ -383,7 +389,8 @@ class GridDataset(DeeprankDataset):
         standardize: bool = False,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
-        check_integrity: bool = True
+        check_integrity: bool = True,
+        feat_trans_dict:Optional[dict] = None
     ):
         """Class to load the .HDF5 files data into grids.
 
@@ -436,7 +443,7 @@ class GridDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = self.target
 
         if self._standardize:
-            self.hdf5_to_pandas()
+            self.hdf5_to_pandas(feat_trans_dict)
             self._compute_mean_std()
 
     def _check_features(self):
