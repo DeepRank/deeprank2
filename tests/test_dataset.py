@@ -328,7 +328,7 @@ class TestDataSet(unittest.TestCase):
 
             for key, values in features_dict.items():
                 if(key in feat_trans_dict):
-                    standardization=feat_trans_dict.get(feat, {}).get('Standardization')
+                    standardization=feat_trans_dict.get(key, {}).get('Standardization')
                     if standardization: #Feature contains in dictionary & standardization=True
                         mean = values.mean()
                         dev = values.std()
@@ -359,7 +359,7 @@ class TestDataSet(unittest.TestCase):
 
             for key_, values in features_dict.items():
                 if(key in feat_trans_dict):
-                    standardization=feat_trans_dict.get(feat, {}).get('Standardization')
+                    standardization=feat_trans_dict.get(key, {}).get('Standardization')
                     if standardization: #Feature contains in dictionary & standardization=True
                         mean = values.mean()
                         dev = values.std()
