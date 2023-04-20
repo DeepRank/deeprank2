@@ -357,7 +357,7 @@ class TestDataSet(unittest.TestCase):
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
 
-            for key_, values in features_dict.items():
+            for key, values in features_dict.items():
                 if(key in feat_trans_dict):
                     standardization=feat_trans_dict.get(key, {}).get('Standardization')
                     if standardization: #Feature contains in dictionary & standardization=True
