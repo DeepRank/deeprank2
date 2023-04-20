@@ -664,7 +664,6 @@ class GraphDataset(DeeprankDataset):
             _log.warning("""dataset_train has been set but train flag was set to True.
             dataset_train will be ignored since the current dataset will be considered as training set.""")
 
-        if self._standardize:
             if not train and not isinstance(dataset_train, GraphDataset):
                 raise TypeError("Please provide a valid training GraphDataset.")
             
@@ -684,7 +683,7 @@ class GraphDataset(DeeprankDataset):
                     dataset_train._compute_mean_std()
                 self.means = dataset_train.means
                 self.devs = dataset_train.devs
-        elif not self._standardize and (not train or dataset_train):
+        if (not train or dataset_train):
             _log.warning("No scaling method has been set, and train and dataset_train parameters will be ignored.")
 
     def get(self, idx: int) -> Data:
