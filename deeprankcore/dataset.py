@@ -394,8 +394,7 @@ class GridDataset(DeeprankDataset):
         standardize: bool = False,
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
-        check_integrity: bool = True,
-        feat_trans_dict:Optional[dict] = None
+        check_integrity: bool = True
     ):
         """Class to load the .HDF5 files data into grids.
 
@@ -446,9 +445,9 @@ class GridDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = [self.target]
             else:
                 self.features_dict[targets.VALUES] = self.target
-
-        self.hdf5_to_pandas(feat_trans_dict)
-        self._compute_mean_std()
+        if self._standardize:
+            self.hdf5_to_pandas()
+            self._compute_mean_std()
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -574,7 +573,8 @@ class GraphDataset(DeeprankDataset):
         target_filter: Optional[Dict[str, str]] = None,
         check_integrity: bool = True,
         train: bool = True,
-        dataset_train: GraphDataset = None
+        dataset_train: GraphDataset = None,
+        feat_trans_dict:Optional[dict] = None
     ):
         """Class to load the .HDF5 files data into graphs.
 
@@ -674,12 +674,12 @@ class GraphDataset(DeeprankDataset):
             if train:
                 if self.means or self.devs is None:
                     if self.df is None:
-                        self.hdf5_to_pandas()
+                        self.hdf5_to_pandas(feat_trans_dict)
                     self._compute_mean_std()
             else:
                 if (dataset_train.means or dataset_train.devs) is None:
                     if dataset_train.df is None:
-                        dataset_train.hdf5_to_pandas()
+                        dataset_train.hdf5_to_pandas(feat_trans_dict)
                     dataset_train._compute_mean_std()
                 self.means = dataset_train.means
                 self.devs = dataset_train.devs
@@ -700,31 +700,7 @@ class GraphDataset(DeeprankDataset):
         return self.load_one_graph(fname, mol)
 
     # The dictionary will be in this format:
-    #feat_trans_dict={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
-               #'res_depth':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
-               #'info_content':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
-               #'sasa':{'Transformation':lambda t:np.sqrt(t),'Standardization':True},
-               #'electrostatic':{'Transformation':lambda t:np.cbrt(t),'Standardization':True},
-               #'vanderwaals':{'Transformation':lambda t:np.cbrt(t),'Standardization':True},
-               #'res_size':{'Transformation':None,'Standardization':True},
-               #'res_charge':{'Transformation':None,'Standardization':True},
-               #'hb_donors':{'Transformation':None,'Standardization':True},
-               #'hb_acceptors':{'Transformation':None,'Standardization':True},
-               #'hse':{'Transformation':None,'Standardization':True},
-               #'irc_nonpolar_negative':{'Transformation':None,'Standardization':True},
-               #'irc_nonpolar_nonpolar':{'Transformation':None,'Standardization':True},
-               #'irc_nonpolar_polar':{'Transformation':None,'Standardization':True},
-               #'irc_nonpolar_positive':{'Transformation':None,'Standardization':True},
-               #'irc_polar_polar':{'Transformation':None,'Standardization':True},
-               #'irc_polar_positive':{'Transformation':None,'Standardization':True},
-               #'irc_total':{'Transformation':None,'Standardization':True},
-               #'irc_negative_positive':{'Transformation':None,'Standardization':True},
-               #'irc_positive_positive':{'Transformation':None,'Standardization':True},
-               #'irc_polar_negative':{'Transformation':None,'Standardization':True},
-               #'irc_negative_negative':{'Transformation':None,'Standardization':True},
-               #'res_mass':{'Transformation':None,'Standardization':True},
-               #'res_pI':{'Transformation':None,'Standardization':True},
-               #'distance':{'Transformation':None,'Standardization':True}}
+    
     
     def load_one_graph(self, fname: str, entry_name: str, feat_trans_dict:Optional[dict] = None)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
         """Loads one graph.
