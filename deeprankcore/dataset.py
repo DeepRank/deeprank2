@@ -255,7 +255,7 @@ class DeeprankDataset(Dataset):
                                 df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
                                 #apply transformation for each channel in this feature
                                 if(transform is not None):
-                                    df_dict[feat + '_' + str(i)]=feat_trans_dict[feat]['Transformation'](df_dict[feat + '_' + str(i)])
+                                    df_dict[feat + '_' + str(i)]=transform(df_dict[feat + '_' + str(i)])
                         else:
                             df_dict[feat] = [
                                 f[entry_name][feat_type][feat][:]
@@ -263,7 +263,7 @@ class DeeprankDataset(Dataset):
                                 else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
                             #apply transformation
                             if(transform is not None):
-                                df_dict[feat]=feat_trans_dict[feat]['Transformation'](df_dict[feat])
+                                df_dict[feat]=transform(df_dict[feat])
                 
                 df = pd.DataFrame(data=df_dict)
 
