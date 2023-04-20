@@ -13,7 +13,10 @@ from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain import targetstorage as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-
+feat_trans_dict={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
+                 'sasa':{'Transformation':lambda t:np.sqrt(t),'Standardization':True},
+                 'hb_donors':{'Transformation':None,'Standardization':False}
+}
 class TestDataSet(unittest.TestCase):
     def setUp(self):
         self.hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5"
@@ -289,14 +292,14 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
 
-    def test_graph_standardize(self):
+    def test_graph_standardize_dictionary(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
             target='binary',
-            standardize=True
+            feat_trans_dict=feat_trans_dict
         )
 
         with h5py.File(hdf5_path, 'r') as f5:
@@ -323,14 +326,15 @@ class TestDataSet(unittest.TestCase):
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
 
-            for _, values in features_dict.items():
-
-                mean = values.mean()
-                dev = values.std()
-
-                assert -0.3 < mean < 0.3
-                # for one hot encoded features, with few data points it can happen that mean and std are not exactly 0 and 1
-                assert 0.7 < dev < 1.5
+            for key, values in features_dict.items():
+                if(key in feat_trans_dict):
+                    standardization=feat_trans_dict.get(feat, {}).get('Standardization')
+                    if standardization: #Feature contains in dictionary & standardization=True
+                        mean = values.mean()
+                        dev = values.std()
+                        assert -0.3 < mean < 0.3
+                        # for one hot encoded features, with few data points it can happen that mean and std are not exactly 0 and 1
+                        assert 0.7 < dev < 1.5      
 
             # getting all edge features values
             tensor_idx = 0
@@ -353,13 +357,14 @@ class TestDataSet(unittest.TestCase):
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
 
-            for _, values in features_dict.items():
-
-                mean = values.mean()
-                dev = values.std()
-
-                assert -0.2 < mean < 0.2
-                assert 0.8 < dev < 1.2
+            for key_, values in features_dict.items():
+                if(key in feat_trans_dict):
+                    standardization=feat_trans_dict.get(feat, {}).get('Standardization')
+                    if standardization: #Feature contains in dictionary & standardization=True
+                        mean = values.mean()
+                        dev = values.std()
+                        assert -0.2 < mean < 0.2
+                        assert 0.8 < dev < 1.2
 
     def test_graph_standardization_logic(self):
 
