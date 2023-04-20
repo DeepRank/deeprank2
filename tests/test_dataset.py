@@ -15,7 +15,8 @@ from deeprankcore.domain import targetstorage as targets
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 feat_trans_dict={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
                  'sasa':{'Transformation':lambda t:np.sqrt(t),'Standardization':True},
-                 'hb_donors':{'Transformation':None,'Standardization':False}
+                 'hb_donors':{'Transformation':None,'Standardization':False},
+                 'hse':{'Transformation':None,'Standardization':True}
 }
 class TestDataSet(unittest.TestCase):
     def setUp(self):
@@ -313,7 +314,7 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                        arr.append(dataset.get(entry_idx,feat_trans_dict).x[:, tensor_idx])
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -321,7 +322,7 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx).x[:, tensor_idx])
+                            arr.append(dataset.get(entry_idx,feat_trans_dict).x[:, tensor_idx])
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
@@ -330,6 +331,7 @@ class TestDataSet(unittest.TestCase):
                 if(key in feat_trans_dict):
                     standardization=feat_trans_dict.get(key, {}).get('Standardization')
                     if standardization: #Feature contains in dictionary & standardization=True
+                        #assert key == 'bsa'
                         mean = values.mean()
                         dev = values.std()
                         assert -0.3 < mean < 0.3
@@ -344,7 +346,7 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                        arr.append(dataset.get(entry_idx,feat_trans_dict).edge_attr[:, tensor_idx])
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -352,7 +354,7 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
+                            arr.append(dataset.get(entry_idx,feat_trans_dict).edge_attr[:, tensor_idx])
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
