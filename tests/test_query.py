@@ -365,3 +365,15 @@ def test_augmentation():
         assert len(dataset) == expected_entry_count, f"Found {len(dataset)} data points, expected {expected_entry_count}"
     finally:
         shutil.rmtree(tmp_dir)
+
+
+def test_incorrect_pssm_order():
+    _ = ProteinProteinInterfaceResidueQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
+            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+        },
+    )

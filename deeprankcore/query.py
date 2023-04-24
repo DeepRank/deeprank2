@@ -653,9 +653,11 @@ def _load_ppi_atoms(pdb_path: str,
 
 def _load_ppi_pssms(pssm_paths: Union[Dict[str, str], None],
                     chain_id1: str, chain_id2: str,
-                    structure: PDBStructure):
+                    structure: PDBStructure,
+                    pdb_path):
 
     if pssm_paths is not None:
+        _check_pssm(pdb_path, pssm_paths)
         for chain_id in [chain_id1, chain_id2]:
             if chain_id in pssm_paths:
 
@@ -748,7 +750,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         _load_ppi_pssms(self._pssm_paths,
                         self._chain_id1, self._chain_id2,
-                        structure)
+                        structure, self._pdb_path)
 
         # add the features
         for feature_module in feature_modules:
@@ -846,7 +848,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         _load_ppi_pssms(self._pssm_paths,
                         self._chain_id1, self._chain_id2,
-                        structure)
+                        structure, self._pdb_path)
 
         # add the features
         for feature_module in feature_modules:
