@@ -30,7 +30,7 @@ For atomic graphs, when features relate to residues then _all_ atoms of one resi
 These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in `deeprankcore.domain.aminoacidlist.py`.
 
 #### Atom properties:
-These features only exist in atomic level graphs.
+These features are only used in atomic graphs.
 
 - `atom_type`: One hot encoding of the atomic element. Options are: C, O, N, S, P, H.
 - `atom_charge`: Atomic charge in Coulomb (float). Taken from `deeprankcore.domain.forcefield.patch.top`.
@@ -85,13 +85,22 @@ These features are only calculated for ProteinProteinInterface queries.
 - `irc_nonpolar_nonpolar`, `irc_nonpolar_polar`, `irc_nonpolar_negative`, `irc_nonpolar_positive`, `irc_polar_polar`, `irc_polar_negative`, `irc_polar_positive`, `irc_negative_negative`, `irc_positive_positive`, `irc_negative_positive`: As above, but for specific residue polarity pairings.
 
 
-## Edge features
+## Default edge features 
 
-### `deeprankcore.features.contact`
+### Contact features: `deeprankcore.features.contact`
+These features relate to relationships between individual nodes.
+For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
-- `same_res`: Only for atomic graph, 1 if the edge connects two atoms beloging to the same residue, otherwise 0.  
-- `same_chain`: 1 if the edge connects two molecules beloging to the same chain, otherwise 0.  
-- `distance`: Interatomic distance between atoms in Ångström. It is computed from the xyz atomic coordinates taken from the .pdb file. In the residue graph case, the minimum distance between the atoms of the first residue and the atoms from the second one is considered. Float value. 
-- `covalent`: 1 if there is a covalent bond between the two molecules, otherwise 0. A bond is considered covalent if its length is less than 2.1 Ångström.
-- `electrostatic`: Coulomb (electrostatic) potential, given the interatomic distance/s and charge/s of the atoms. There's no distance cutoff here. The radius of influence is assumed to infinite. Float value. 
-- `vanderwaals`: Lennard-Jones potentials, given interatomic distance/s and a list of atoms with vanderwaals parameters. There's no distance cutoff here. The radius of influence is assumed to infinite. Float value.
+#### Distance:
+- `distance`: Interatomic distance between atoms in Å, computed from the xyz atomic coordinates taken from the .pdb file (float). For residue graphs, the the minimum distance between any atom of each residues is used. 
+
+#### Structural features:
+- `same_chain`: Boolean indicating whether the edge connects nodes belonging to the same chain (1) or separate chains (0).
+- `same_res`: Boolean indicating whether atoms belong to the same residue (1) or separate residues (0). Only used in atomic graphs.
+- `covalent`: Boolean indicating whether nodes are covalently bound (1) or not (0). Note that covalency is not directly assessed, but any edge with a maximum distance of 2.1 Å is considered covalent.
+
+#### Nonbond energies:
+These features measure nonbond energy potentials between nodes. 
+For residue graphs, the pairwise sum of potentials for all atoms from each residue is used. Note that no distance cutoff is used and the radius of influence is assumed to be infinite (although edges are only assigned within a given cutoff radius when graphs are created). 
+- `electrostatic`: Electrostatic potential (also known as Coulomb potential) between two nodes, calculated using interatomic distances and charges of each atom (float). 
+- `vanderwaals`: Van der Waals potential (also known as Lennard-Jones potential) between two nodes, calculated using interatomic distance/s and a list of atoms with vanderwaals parameters (`deeprankcore.domain.forcefield.protein-allhdg5-4_new`).
