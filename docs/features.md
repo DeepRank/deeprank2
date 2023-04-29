@@ -53,21 +53,26 @@ These features are only used in SingleVariantQueries.
 - `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: Subtraction of the wildtype value of indicated feature from the variant value. For example, if the variant has 4 hb_donors and the wildtype has 5, then `diff_hb_donors == -1`.
 
 ### Conservation features: `deeprankcore.features.conservation`
+These features relate to the conservation state of individual residues.
 
 - `pssm`: Position-specific scoring matrix (also known as position weight matrix, PWM) values relative to the residue, is a score of the conservation of the amino acid along all 20 amino acids. 
 - `info_content`: Information content: difference between the given PSSM for an amino acid and a uniform distribution (float).
 - `conservation` (only used in SingleVariantQueries): Conservation of the wild type amino acid (float). *More details required.*
 - `diff_conservation` (only used in SingleVariantQueries): Subtraction of wildtype conservation from the variant conservation (float). 
 
-### `deeprankcore.features.exposure`
+### Protein context features:
 
-- `res_depth`: Average distance to surface for all atoms in a residue. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. Computed using `Bio.PDB.ResidueDepth`, in Ångström. Float value. 
-- `hse`: Half Sphere exposure (HSE) measures how buried amino acid residues are in a protein. It is found by counting the number of amino acid neighbors within two half spheres of chosen radius around the amino acid. It can only be calculated per residue, not per atom. So for atomic graphs, every atom gets its residue's value. It is calculated using biopython, so for more details see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) biopython module. Array of float values of length 3.
-  
-### `deeprankcore.features.surfacearea`
+#### Surface exposure: `deeprankcore.features.exposure`
+These features relate to the exposure of residues to the surface, and are computed using [biopython](https://biopython.org/docs/1.81/api/Bio.PDB.html). Note that these features can only be calculated per residue and not per atom.
 
-- `sasa`: Solvent-Accessible Surface Area. It is defined as the surface characterized around a protein by a hypothetical centre of a solvent sphere with the van der Waals contact surface of the molecule. Computed using FreeSASA (https://freesasa.github.io/doxygen/Geometry.html), in square Ångström. Float value. 
-- `bsa`: the Buried interfacial Surface Area is the area of the protein that only gets exposed in monomeric state. It measures the size of the interface in a protein-protein. Computed using FreeSASA, in square Ångström. Float value. 
+- `res_depth`: [Residue depth](https://en.wikipedia.org/wiki/Residue_depth) is the average distance (in Å) of the residue to the closest molecule of bulk water (float). See also [`Bio.PDB.ResidueDepth`](https://biopython.org/docs/1.75/api/Bio.PDB.ResidueDepth.html).
+- `hse`: [Half sphere exposure (HSE)](https://en.wikipedia.org/wiki/Half_sphere_exposure) is a protein solvent exposure measure indicating how buried an amino acid residue is in a protein (3 float values, see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) for details).
+
+### Surface accessibility: `deeprankcore.features.surfacearea`
+These features relate to the surface area of the residue, and are computed using [freesasa](https://freesasa.github.io). Note that these features can only be calculated per residue and not per atom.
+
+- `sasa`: Solvent-Accessible Surface Area is the surface area (in Å^2) of a biomolecule that is accessible to the solvent (float).
+- `bsa`: Buried interfacial Surface Area is the surface area (in Å^2) that is buried away from the solvent when two or more proteins or subunits associate to form a complex, i.e. it measures the size of the complex interface (float).
 
 ## Edge features
 
