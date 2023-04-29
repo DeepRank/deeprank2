@@ -74,6 +74,9 @@ These features relate to the surface area of the residue, and are computed using
 - `sasa`: Solvent-Accessible Surface Area is the surface area (in Å^2) of a biomolecule that is accessible to the solvent (float).
 - `bsa`: Buried interfacial Surface Area is the surface area (in Å^2) that is buried away from the solvent when two or more proteins or subunits associate to form a complex, i.e. it measures the size of the complex interface (float).
 
+### Secondary structure: `deeprankcore.features.secondary_structure`
+- `sec_struct`: One hot encoding of the [DSSP](https://en.wikipedia.org/wiki/DSSP_(algorithm)) assigned secondary structure of the amino acid, using the three major classes (HELIX, STRAND, COIL). Calculated using [DSSP4](https://github.com/PDB-REDO/dssp).
+
 ## Edge features
 
 ### `deeprankcore.features.contact`
