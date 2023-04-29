@@ -55,8 +55,8 @@ These features are only used in SingleResidueVariant queries.
 ### Conservation features: `deeprankcore.features.conservation`
 These features relate to the conservation state of individual residues.
 
-- `pssm`: Position-specific scoring matrix (also known as position weight matrix, PWM) values relative to the residue, is a score of the conservation of the amino acid along all 20 amino acids. 
-- `info_content`: Information content: difference between the given PSSM for an amino acid and a uniform distribution (float).
+- `pssm`: [Position-specific scoring matrix](https://en.wikipedia.org/wiki/Position_weight_matrix) (also known as position weight matrix, PWM) values relative to the residue, is a score of the conservation of the amino acid along all 20 amino acids. 
+- `info_content`: Information content is the difference between the given PSSM for an amino acid and a uniform distribution (float).
 - `conservation` (only used in SingleResidueVariant queries): Conservation of the wild type amino acid (float). *More details required.*
 - `diff_conservation` (only used in SingleResidueVariant queries): Subtraction of wildtype conservation from the variant conservation (float). 
 
@@ -71,8 +71,8 @@ These features relate to the exposure of residues to the surface, and are comput
 #### Surface accessibility: `deeprankcore.features.surfacearea`
 These features relate to the surface area of the residue, and are computed using [freesasa](https://freesasa.github.io). Note that these features can only be calculated per residue and not per atom.
 
-- `sasa`: Solvent-Accessible Surface Area is the surface area (in Å^2) of a biomolecule that is accessible to the solvent (float).
-- `bsa`: Buried interfacial Surface Area is the surface area (in Å^2) that is buried away from the solvent when two or more proteins or subunits associate to form a complex, i.e. it measures the size of the complex interface (float).
+- `sasa`: [Solvent-Accessible Surface Area](https://en.wikipedia.org/wiki/Accessible_surface_area) is the surface area (in Å^2) of a biomolecule that is accessible to the solvent (float).
+- `bsa`: Buried Surface Area is the surface area (in Å^2) that is buried away from the solvent when two or more proteins or subunits associate to form a complex, i.e. it measures the size of the complex interface (float).
 
 #### Secondary structure: `deeprankcore.features.secondary_structure`
 
@@ -94,7 +94,8 @@ For atomic graphs, when features relate to residues then _all_ atoms of one resi
 #### Distance:
 - `distance`: Interatomic distance between atoms in Å, computed from the xyz atomic coordinates taken from the .pdb file (float). For residue graphs, the the minimum distance between any atom of each residues is used. 
 
-#### Structural features:
+#### Structure:
+These features relate to the structural relationship between nodes.
 - `same_chain`: Boolean indicating whether the edge connects nodes belonging to the same chain (1) or separate chains (0).
 - `same_res`: Boolean indicating whether atoms belong to the same residue (1) or separate residues (0). Only used in atomic graphs.
 - `covalent`: Boolean indicating whether nodes are covalently bound (1) or not (0). Note that covalency is not directly assessed, but any edge with a maximum distance of 2.1 Å is considered covalent.
