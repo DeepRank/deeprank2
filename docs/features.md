@@ -44,10 +44,10 @@ These features only exist in atomic level graphs.
 - `res_charge`: The charge of the residue (in fully protonated state) in Coulomb (int). Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
 - `res_pI`: The isolectric point, i.e. the pH at which the molecule has no net electric charge (float).
 
-- `hb_donors` / `hb_acceptors`: The number of hydrogen bond donor/acceptor atoms in the residue (int). Hydrogen bonds are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair.
+- `hb_donors`, `hb_acceptors`: The number of hydrogen bond donor/acceptor atoms in the residue (int). Hydrogen bonds are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair.
 
 #### Properties related to variant residues:
-These features are only used in SingleVariantQueries.
+These features are only used in SingleResidueVariant queries.
 
 - `variant_res`: One hot encoding of variant amino acid (size 20).
 - `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: Subtraction of the wildtype value of indicated feature from the variant value. For example, if the variant has 4 hb_donors and the wildtype has 5, then `diff_hb_donors == -1`.
@@ -57,8 +57,8 @@ These features relate to the conservation state of individual residues.
 
 - `pssm`: Position-specific scoring matrix (also known as position weight matrix, PWM) values relative to the residue, is a score of the conservation of the amino acid along all 20 amino acids. 
 - `info_content`: Information content: difference between the given PSSM for an amino acid and a uniform distribution (float).
-- `conservation` (only used in SingleVariantQueries): Conservation of the wild type amino acid (float). *More details required.*
-- `diff_conservation` (only used in SingleVariantQueries): Subtraction of wildtype conservation from the variant conservation (float). 
+- `conservation` (only used in SingleResidueVariant queries): Conservation of the wild type amino acid (float). *More details required.*
+- `diff_conservation` (only used in SingleResidueVariant queries): Subtraction of wildtype conservation from the variant conservation (float). 
 
 ### Protein context features:
 
@@ -68,14 +68,22 @@ These features relate to the exposure of residues to the surface, and are comput
 - `res_depth`: [Residue depth](https://en.wikipedia.org/wiki/Residue_depth) is the average distance (in Å) of the residue to the closest molecule of bulk water (float). See also [`Bio.PDB.ResidueDepth`](https://biopython.org/docs/1.75/api/Bio.PDB.ResidueDepth.html).
 - `hse`: [Half sphere exposure (HSE)](https://en.wikipedia.org/wiki/Half_sphere_exposure) is a protein solvent exposure measure indicating how buried an amino acid residue is in a protein (3 float values, see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) for details).
 
-### Surface accessibility: `deeprankcore.features.surfacearea`
+#### Surface accessibility: `deeprankcore.features.surfacearea`
 These features relate to the surface area of the residue, and are computed using [freesasa](https://freesasa.github.io). Note that these features can only be calculated per residue and not per atom.
 
 - `sasa`: Solvent-Accessible Surface Area is the surface area (in Å^2) of a biomolecule that is accessible to the solvent (float).
 - `bsa`: Buried interfacial Surface Area is the surface area (in Å^2) that is buried away from the solvent when two or more proteins or subunits associate to form a complex, i.e. it measures the size of the complex interface (float).
 
-### Secondary structure: `deeprankcore.features.secondary_structure`
+#### Secondary structure: `deeprankcore.features.secondary_structure`
+
 - `sec_struct`: One hot encoding of the [DSSP](https://en.wikipedia.org/wiki/DSSP_(algorithm)) assigned secondary structure of the amino acid, using the three major classes (HELIX, STRAND, COIL). Calculated using [DSSP4](https://github.com/PDB-REDO/dssp).
+
+#### Inter-residue contacts (IRCs): `deeprankcore.features.irc`
+These features are only calculated for ProteinProteinInterface queries.
+
+- `irc_total`: The number of residues on the other chain that are within a cutoff distance of 5.5 Å (int).
+- `irc_nonpolar_nonpolar`, `irc_nonpolar_polar`, `irc_nonpolar_negative`, `irc_nonpolar_positive`, `irc_polar_polar`, `irc_polar_negative`, `irc_polar_positive`, `irc_negative_negative`, `irc_positive_positive`, `irc_negative_positive`: As above, but for specific residue polarity pairings.
+
 
 ## Edge features
 
