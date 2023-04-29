@@ -24,6 +24,7 @@ def add_features(
 The following is a brief description of the features already implemented in the code-base, for each features' module. 
 
 ## Default node features 
+For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
 ### Core properties of atoms and residues: `deeprankcore.features.components`
 These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in `deeprankcore.domain.aminoacidlist.py`.
@@ -36,8 +37,6 @@ These features only exist in atomic level graphs.
 - `pdb_occupancy`: Proportion of structures where the atom was detected at this position (float). In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprankcore. 
 
 #### Residue properties:
-For atomic level graphs, _all_ atoms of one residue receive the feature value for that residue.
-
 - `res_type`: One hot encoding of the amino acid residue (size 20).
 - `polarity`: One hot encoding of the polarity of the amino acid (options: NONPOLAR, POLAR, NEGATIVE, POSITIVE). Note that sources vary on the polarity for few of the amino acids; see detailed information in `deeprankcore.domain.aminoacidlist.py`.
 - `res_size`: The number of non-hydrogen atoms in the side chain (int). 
@@ -53,12 +52,12 @@ These features are only used in SingleVariantQueries.
 - `variant_res`: One hot encoding of variant amino acid (size 20).
 - `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: Subtraction of the wildtype value of indicated feature from the variant value. For example, if the variant has 4 hb_donors and the wildtype has 5, then `diff_hb_donors == -1`.
 
-### `deeprankcore.features.conservation`
+### Conservation features: `deeprankcore.features.conservation`
 
-- `pssm`: It represents the row of the position weight matrix (PWM) relative to the amino acid, which in turns represents the conservation of the amino acid along all the 20 amino acids. In the atomic graph case, it represents the PWM row relative to the amino acid to which the atom belongs. Array of int values of length 20.
-- `info_content`: It represents how different a given PWM (row) for a given amino acid is from a uniform distribution. Float value.
-- `conservation`: If a variant is present, it represents the conservation of the amino acid variant. Float value. 
-- `diff_conservation`: If a variant is present, it represents the difference between the conservation of the variant and the conservation of the wild type amino acid. 
+- `pssm`: Position-specific scoring matrix (also known as position weight matrix, PWM) values relative to the residue, is a score of the conservation of the amino acid along all 20 amino acids. 
+- `info_content`: Information content: difference between the given PSSM for an amino acid and a uniform distribution (float).
+- `conservation` (only used in SingleVariantQueries): Conservation of the wild type amino acid (float). *More details required.*
+- `diff_conservation` (only used in SingleVariantQueries): Subtraction of wildtype conservation from the variant conservation (float). 
 
 ### `deeprankcore.features.exposure`
 
