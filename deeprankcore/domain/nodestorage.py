@@ -76,3 +76,5 @@ PSSM = "pssm" # list[20xint]; former FEATURENAME_PSSM
 INFOCONTENT = "info_content" # float; former FEATURENAME_INFORMATIONCONTENT
 CONSERVATION = "conservation" # int; former FEATURENAME_PSSMWILDTYPE
 
+## other features
+SECSTRUCT = "sec_struct" #secondary structure

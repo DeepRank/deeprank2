@@ -98,6 +98,20 @@ Sources:
 10. https://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/charge/
 
 
+- Detailed information about sources used for the hard coded features (e.g., `polarity`) can be found in deeprankcore.domain.aminoacidlist.py.
+- `atom_type`: Only for atomic graph, one hot encodes the type of atom (C, O, N, S, P, H).
+- `pdb_occupancy`: Only for atomic graph, it represents the proportion of structures where the atom is detected at a given position. Sometimes a single atom can be detected at multiple positions, and in that case separate structures exist whose occupancies sum gives 1. Note that only the highest occupancy atom is used by deeprankcore. Float value.
+- `atom_charge`: Only for atomic graph, atomic charge in Coulomb. Taken from deeprankcore.domain.forcefield.patch.top file. Float value.
+- `res_type`: One hot encodes the type of amino acid (20).
+- `res_charge`: The charge property of the amino acid. Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
+- `polarity`: One hot encodes the polarity of the amino acid (nonpolar, polar, negative charge, positive charge).
+- `res_size`: The number of heavy atoms in the side chain. Int value.
+- `res_mass`: The average residue mass (i.e. mass of amino acid - H20) in Daltons. Float value.
+- `res_pI`: The isolectric point, which represents the pH at which the molecule has no net electric charge. Float value.
+- `hb_donors`, `hb_acceptors`: Represents the number of donor/acceptor atoms, from 0 to 5. Amino acids can have hydrogen donor/acceptor atoms in their side chain. Hydrogen Bonds (HB) are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair. In hydrogen bonds there is a distinction between the electronegative atoms (O, N, F) based on which one the hydrogen is covalently bonded to. Based on this, hydrogens can be named either acceptors or donators. Int value.
+- `variant_res`: If a variant is present, one hot encodes the type of amino acid variant (20).
+- `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: If a variant is present, they represent the differences between the variant and the wild type amino acid in charge, polarity, size, mass, isoelectric point, donor/acceptor atoms.
+  
 ### `deeprankcore.features.conservation`
 These features relate to the conservation state of individual residues.
 For atomic graphs: _all_ atoms of one residue receive the feature value for that residue.

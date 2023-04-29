@@ -165,8 +165,6 @@ trainer = Trainer(
 )
 ```
 
-By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
-
 Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
 
 ```python
@@ -231,6 +229,55 @@ trainer = Trainer(
 )
 
 trainer.train(nepoch=50, batch_size = 64)
+```
+
+### Results export and visualization
+
+The user can specify a deeprankcore exporter or a custom one in `output_exporters` parameter of the Trainer class, together with the path where to save the results. Exporters are used for storing predictions information collected later on during training and testing. Example:
+
+```python
+from deeprankcore.trainer import Trainer
+from deeprankcore.ginet import GINet
+from deeprankcore.utils.exporters import HDF5OutputExporter
+
+trainer = Trainer(
+    GINet,
+    dataset_train,
+    dataset_val,
+    dataset_test,
+    output_exporters = [HDF5OutputExporter("<output_folder_path>")]
+)
+```
+
+By default, the Trainer class creates the folder `./output` and uses `HDF5OutputExporter`. In the latter case, results are saved in `output_exporter.hdf5` both during the training (`.train()`) and during the testing (`.test()`) phases. `output_exporter.hdf5` contains Groups which refer to each phase, e.g. `training` and `testing` if both are run, only one of them otherwise. Training phase includes validation results as well. The HDF5 file can then be read as a [Pandas Dataframe](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html):
+
+```python
+import os
+import pandas as pd
+
+output_train = pd.read_hdf(os.path.join("<output_folder_path>", "output_exporter.hdf5"), key="training")
+output_test = pd.read_hdf(os.path.join("<output_folder_path>", "output_exporter.hdf5"), key="testing")
+```
+
+The dataframes contain `phase`, `epoch`, `entry`, `output`, `target`, and `loss` columns, and can be easily used to visualize the results. 
+
+Example for plotting training loss curves using [Plotly Express](https://plotly.com/python/plotly-express/):
+
+```python
+import plotly.express as px
+
+fig = px.line(
+    output_train,
+    x='epoch',
+    y='loss',
+    color='phase',
+    markers=True)
+
+fig.update_layout(
+    xaxis_title='Epoch #',
+    yaxis_title='Loss',
+    title='Loss vs epochs'
+)
 ```
 
 ## h5x support
