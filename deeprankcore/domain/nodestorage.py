@@ -38,10 +38,10 @@ CONSERVATION = "conservation" # int; former FEATURENAME_PSSMWILDTYPE
 DIFFCONSERVATION = "diff_conservation" # int; former FEATURENAME_PSSMDIFFERENCE & FEATURENAME_CONSERVATIONDIFFERENCE
 
 ## protein context features
-BSA = "bsa" # float; former FEATURENAME_BURIEDSURFACEAREA
+RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
 HSE = "hse" # list[3xfloat]; former FEATURENAME_HALFSPHEREEXPOSURE 
 SASA = "sasa" # float; former FEATURENAME_SASA
-RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
+BSA = "bsa" # float; former FEATURENAME_BURIEDSURFACEAREA
 SECSTRUCT = "sec_struct" #secondary structure
 
 ## inter-residue contacts (IRCs)
