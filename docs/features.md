@@ -2,13 +2,18 @@
 
 Features implemented in the code-base are defined in `deeprankcore.feature` subpackage.
 
-Users can also add customized features by creating a new module and inserting it in `deeprankcore.feature` subpackage; the only requirement in the latter case is that the module must implement the `add_features` function, that will be used in `deeprankcore.models.query` to build the graph with nodes' and edges' features:
+Users can add custom features by creating a new module and placing it in `deeprankcore.feature` subpackage. One requirement for any feature module is to implement an `add_features` function, as shown below. This will be used in `deeprankcore.models.query` to add the features to the nodes or edges of the graph.
 
 ```python
+from typing import Optional
+
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.graph import Graph
+
+
 def add_features(
-    pdb_path: str, 
-    graph: Graph, 
-    *args, **kwargs
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):
     pass
 ```
