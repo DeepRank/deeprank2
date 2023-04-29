@@ -2,6 +2,9 @@
 
 Features implemented in the code-base are defined in `deeprankcore.feature` subpackage.
 
+
+## Custom features
+
 Users can add custom features by creating a new module and placing it in `deeprankcore.feature` subpackage. One requirement for any feature module is to implement an `add_features` function, as shown below. This will be used in `deeprankcore.models.query` to add the features to the nodes or edges of the graph.
 
 ```python
@@ -20,24 +23,36 @@ def add_features(
 
 The following is a brief description of the features already implemented in the code-base, for each features' module. 
 
-## Node features 
+## Default node features 
 
-### `deeprankcore.features.components`
+### Core properties of atoms and residues: `deeprankcore.features.components`
+These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in `deeprankcore.domain.aminoacidlist.py`.
 
-- Detailed information about sources used for the hard coded features (e.g., `polarity`) can be found in deeprankcore.domain.aminoacidlist.py.
-- `atom_type`: Only for atomic graph, one hot encodes the type of atom (C, O, N, S, P, H).
-- `pdb_occupancy`: Only for atomic graph, it represents the proportion of structures where the atom is detected at a given position. Sometimes a single atom can be detected at multiple positions, and in that case separate structures exist whose occupancies sum gives 1. Note that only the highest occupancy atom is used by deeprankcore. Float value.
-- `atom_charge`: Only for atomic graph, atomic charge in Coulomb. Taken from deeprankcore.domain.forcefield.patch.top file. Float value.
-- `res_type`: One hot encodes the type of amino acid (20).
-- `res_charge`: The charge property of the amino acid. Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
-- `polarity`: One hot encodes the polarity of the amino acid (nonpolar, polar, negative charge, positive charge).
-- `res_size`: The number of heavy atoms in the side chain. Int value.
-- `res_mass`: The average residue mass (i.e. mass of amino acid - H20) in Daltons. Float value.
-- `res_pI`: The isolectric point, which represents the pH at which the molecule has no net electric charge. Float value.
-- `hb_donors`, `hb_acceptors`: Represents the number of donor/acceptor atoms, from 0 to 5. Amino acids can have hydrogen donor/acceptor atoms in their side chain. Hydrogen Bonds (HB) are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair. In hydrogen bonds there is a distinction between the electronegative atoms (O, N, F) based on which one the hydrogen is covalently bonded to. Based on this, hydrogens can be named either acceptors or donators. Int value.
-- `variant_res`: If a variant is present, one hot encodes the type of amino acid variant (20).
-- `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: If a variant is present, they represent the differences between the variant and the wild type amino acid in charge, polarity, size, mass, isoelectric point, donor/acceptor atoms.
-  
+#### Atom properties:
+These features only exist in atomic level graphs.
+
+- `atom_type`: One hot encoding of the atomic element. Options are: C, O, N, S, P, H.
+- `atom_charge`: Atomic charge in Coulomb (float). Taken from `deeprankcore.domain.forcefield.patch.top`.
+- `pdb_occupancy`: Proportion of structures where the atom was detected at this position (float). In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprankcore. 
+
+#### Residue properties:
+For atomic level graphs, _all_ atoms of one residue receive the feature value for that residue.
+
+- `res_type`: One hot encoding of the amino acid residue (size 20).
+- `polarity`: One hot encoding of the polarity of the amino acid (options: NONPOLAR, POLAR, NEGATIVE, POSITIVE). Note that sources vary on the polarity for few of the amino acids; see detailed information in `deeprankcore.domain.aminoacidlist.py`.
+- `res_size`: The number of non-hydrogen atoms in the side chain (int). 
+- `res_mass`: The (average) residue mass in Da (float).
+- `res_charge`: The charge of the residue (in fully protonated state) in Coulomb (int). Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
+- `res_pI`: The isolectric point, i.e. the pH at which the molecule has no net electric charge (float).
+
+- `hb_donors` / `hb_acceptors`: The number of hydrogen bond donor/acceptor atoms in the residue (int). Hydrogen bonds are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair.
+
+#### Properties related to variant residues:
+These features are only used in SingleVariantQueries.
+
+- `variant_res`: One hot encoding of variant amino acid (size 20).
+- `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: Subtraction of the wildtype value of indicated feature from the variant value. For example, if the variant has 4 hb_donors and the wildtype has 5, then `diff_hb_donors == -1`.
+
 ### `deeprankcore.features.conservation`
 
 - `pssm`: It represents the row of the position weight matrix (PWM) relative to the amino acid, which in turns represents the conservation of the amino acid along all the 20 amino acids. In the atomic graph case, it represents the PWM row relative to the amino acid to which the atom belongs. Array of int values of length 20.
