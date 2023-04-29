@@ -1,7 +1,9 @@
 from abc import ABC
 from typing import Any
-from deeprankcore.molstruct.residue import Residue
+
 from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
+
 
 class Pair:
     """A hashable, comparable object for any set of two inputs where order doesn't matter.

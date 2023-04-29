@@ -1,5 +1,6 @@
 import re
-from typing import Union, List
+from typing import List, Union
+
 
 class ResidueClassCriterium:
     def __init__(

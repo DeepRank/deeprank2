@@ -1,15 +1,16 @@
 import logging
-import pdb2sql
 from itertools import combinations_with_replacement as combinations
 from typing import Dict, List, Optional, Tuple
-from deeprankcore.utils.graph import Graph
-from deeprankcore.molstruct.residue import Residue
-from deeprankcore.molstruct.aminoacid import Polarity
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.variant import SingleResidueVariant
+
+import pdb2sql
+
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import amino_acids
-
+from deeprankcore.molstruct.aminoacid import Polarity
+from deeprankcore.molstruct.atom import Atom
+from deeprankcore.molstruct.residue import Residue
+from deeprankcore.molstruct.variant import SingleResidueVariant
+from deeprankcore.utils.graph import Graph
 
 _log = logging.getLogger(__name__)
 

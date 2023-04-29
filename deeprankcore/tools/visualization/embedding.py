@@ -1,4 +1,5 @@
-from sklearn.manifold import TSNE, SpectralEmbedding, MDS
+from sklearn.manifold import MDS, TSNE, SpectralEmbedding
+
 
 def manifold_embedding(pos,method='tsne'):
     n_components = 2

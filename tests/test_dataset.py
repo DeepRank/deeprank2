@@ -1,13 +1,16 @@
-import unittest
-import numpy as np
-import h5py
-from tempfile import mkdtemp
-from shutil import rmtree
 import os
+import unittest
+from shutil import rmtree
+from tempfile import mkdtemp
+
+import h5py
+import numpy as np
 from torch_geometric.loader import DataLoader
+
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
-                                targetstorage as targets)
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
@@ -34,7 +37,7 @@ class TestDataSet(unittest.TestCase):
                                                                     edge_features=[Efeat.DISTANCE],
                                                                     target=targets.IRMSD)),
                                       ("GridDataset", GridDataset(self.hdf5_path,
-                                                                  features=[Efeat.VANDERWAALS],
+                                                                  features=[Efeat.VDW],
                                                                   target=targets.IRMSD))]:
 
             entry_names = []
@@ -46,10 +49,24 @@ class TestDataSet(unittest.TestCase):
                                             'residue-ppi-1ATN_3w:A-B',
                                             'residue-ppi-1ATN_4w:A-B']), f"entry names of {dataset_name} were not collated correctly"
 
+    def test_dataset_dataframe_size(self):
+        hdf5_paths = ["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5", "tests/data/hdf5/test.hdf5"]
+        dataset = GraphDataset(
+            hdf5_path=hdf5_paths,
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
+            target=targets.BINARY
+        )
+        n = 0
+        for hdf5 in hdf5_paths:
+            with h5py.File(hdf5, 'r') as hdf5_r:
+                n += len(hdf5_r.keys())      
+        assert len(dataset) == n, f"total data points got was {len(dataset)}"
+    
     def test_grid_dataset_regression(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
-            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            features=[Efeat.VDW, Efeat.ELEC],
             target=targets.IRMSD
         )
 
@@ -64,7 +81,7 @@ class TestDataSet(unittest.TestCase):
     def test_grid_dataset_classification(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
-            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            features=[Efeat.VDW, Efeat.ELEC],
             target=targets.BINARY
         )
 

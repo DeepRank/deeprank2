@@ -1,22 +1,26 @@
 from __future__ import annotations
-import sys
+
+import logging
 import os
 import re
-import logging
+import sys
 import warnings
-import numpy as np
-import h5py
-from typing import List, Union, Optional, Dict, Tuple
-import matplotlib.pyplot as plt
-import pandas as pd
-from tqdm import tqdm
 from ast import literal_eval
-import torch
-from torch_geometric.data.dataset import Dataset
-from torch_geometric.data.data import Data
-from deeprankcore.domain import (edgestorage as Efeat, nodestorage as Nfeat,
-                                 targetstorage as targets, gridstorage)
+from typing import Dict, List, Optional, Tuple, Union
 
+import h5py
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import torch
+from torch_geometric.data.data import Data
+from torch_geometric.data.dataset import Dataset
+from tqdm import tqdm
+
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import gridstorage
+from deeprankcore.domain import nodestorage as Nfeat
+from deeprankcore.domain import targetstorage as targets
 
 _log = logging.getLogger(__name__)
 
@@ -133,6 +137,8 @@ class DeeprankDataset(Dataset):
         """
         _log.debug(f"Processing data set with .HDF5 files: {self.hdf5_paths}")
 
+        self.index_entries = []
+        
         desc = f"   {self.hdf5_paths}{' dataset':25s}"
         if self.use_tqdm:
             hdf5_path_iterator = tqdm(self.hdf5_paths, desc=desc, file=sys.stdout)
@@ -150,12 +156,12 @@ class DeeprankDataset(Dataset):
                         entry_names = list(hdf5_file.keys())
                     else:
                         entry_names = [entry_name for entry_name in self.subset if entry_name in list(hdf5_file.keys())]
-
+                    
                     #skip self._filter_targets when target_filter is None, improve performance using list comprehension.
                     if self.target_filter is None:
-                        self.index_entries = [(hdf5_path, entry_name) for entry_name in entry_names]
+                        self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names]
                     else:
-                        self.index_entries = [(hdf5_path, entry_name) for entry_name in entry_names \
+                        self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names \
                         if self._filter_targets(hdf5_file[entry_name])]
                         
             except Exception:
