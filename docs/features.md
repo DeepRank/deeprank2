@@ -32,7 +32,7 @@ These features relate to the chemical components (atoms and amino acid residues)
 #### Atom properties:
 These features are only used in atomic graphs.
 
-- `atom_type`: One hot encoding of the atomic element. Options are: C, O, N, S, P, H.
+- `atom_type`: One-hot encoding of the atomic element. Options are: C, O, N, S, P, H.
 - `atom_charge`: Atomic charge in Coulomb (float). Taken from `deeprankcore.domain.forcefield.patch.top`.
 - `pdb_occupancy`: Proportion of structures where the atom was detected at this position (float). In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprankcore. 
 
