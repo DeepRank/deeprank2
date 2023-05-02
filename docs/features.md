@@ -49,7 +49,7 @@ These features are only used in atomic graphs.
 #### Properties related to variant residues:
 These features are only used in SingleResidueVariant queries.
 
-- `variant_res`: One hot encoding of variant amino acid (size 20).
+- `variant_res`: One-hot encoding of variant amino acid (size 20).
 - `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: Subtraction of the wildtype value of indicated feature from the variant value. For example, if the variant has 4 hb_donors and the wildtype has 5, then `diff_hb_donors == -1`.
 
 ### Conservation features: `deeprankcore.features.conservation`
