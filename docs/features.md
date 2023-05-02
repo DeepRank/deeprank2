@@ -37,7 +37,7 @@ These features are only used in atomic graphs.
 - `pdb_occupancy`: Proportion of structures where the atom was detected at this position (float). In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprankcore. 
 
 #### Residue properties:
-- `res_type`: One hot encoding of the amino acid residue (size 20).
+- `res_type`: One-hot encoding of the amino acid residue (size 20).
 - `polarity`: One hot encoding of the polarity of the amino acid (options: NONPOLAR, POLAR, NEGATIVE, POSITIVE). Note that sources vary on the polarity for few of the amino acids; see detailed information in `deeprankcore.domain.aminoacidlist.py`.
 - `res_size`: The number of non-hydrogen atoms in the side chain (int). 
 - `res_mass`: The (average) residue mass in Da (float).
