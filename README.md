@@ -13,9 +13,10 @@
 
 ![alt-text](./deeprankcore.png)
 
-DeeprankCore is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using Graph Neural Networks. 
 
-DeeprankCore contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN models.
+DeeprankCore is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using either Graph Neural Networks (GNNs) or Convolutional Neural Networks (CNNs). 
+
+DeeprankCore contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN and CNN models.
 
 Main features:
 - Predefined atom-level and residue-level PPI feature types
@@ -23,7 +24,7 @@ Main features:
 - Predefined target type
   - e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
 - Flexible definition of both new features and targets
-- Graphs feature mapping
+- Graphs and grids feature mapping
 - Efficient data storage in HDF5 format
 - Support both classification and regression (based on PyTorch and PyTorch Geometric)
 
@@ -39,8 +40,10 @@ DeeprankCore documentation can be found here : https://deeprankcore.rtfd.io/.
     - [Deeprank-Core Package](#deeprank-core-package)
   - [Documentation](#documentation)
   - [Quick start](#quick-start)
-    - [Graphs generation](#graphs-generation)
+    - [Data mapping](#data-mapping)
     - [Dataset](#dataset)
+      - [GraphDataset](#graphdataset)
+      - [GridDataset](#griddataset)
     - [Training](#training)
       - [Custom GNN](#custom-gnn)
   - [h5x support](#h5x-support)
@@ -89,9 +92,9 @@ More extensive and detailed documentation can be found [here](https://deeprankco
 
 ## Quick start
 
-### Graphs generation
+### Data mapping
 
-The process of generating graphs takes as input `.pdb` files representing protein-protein structural complexes and the correspondent Position-Specific Scoring Matrices (PSSMs) in the form of `.pssm` files. Query objects describe how the graphs should be built.
+For each protein-protein complex, a query is created and added to the `QueryCollection` object, and processed later on. Different types of query exist, based on the molecular resolution needed (`ProteinProteinInterfaceResidueQuery`, `ProteinProteinInterfaceAtomicQuery`). Each query takes as input a `.pdb` file, representing the protein-protein structural complex, the ids of the two chains composing the complex, and the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -136,29 +139,35 @@ queries.add(ProteinProteinInterfaceResidueQuery(
     }
 ))
 
-# Generate graphs and save them in hdf5 files
-output_paths = queries.process("<output_folder>/<prefix_for_outputs>")
-
 ```
 
 The user is free to implement his/her own query class. Each implementation requires the `build` method to be present.
 
+The queries can then be processed into 3D-graphs only or both 3D-graphs and 3D-grids, depending on which kind of network will be used later for training. 
+
+```python
+from deeprankcore.utils.grid import GridSettings, MapMethod
+
+# Save data into 3D-graphs only
+hdf5_paths = queries.process("<output_folder>/<prefix_for_outputs>")
+
+# Save data into 3D-graphs and 3D-grids
+hdf5_paths = queries.process(prefix = prefix,
+                                grid_settings = GridSettings(
+                                    # the number of points on the x, y, z edges of the cube
+                                    points_counts = [20, 20, 20],
+                                    # the size in Å of one x, y, z edge subdivision
+                                    resolutions = [1.0, 1.0, 1.0]),
+                                grid_map_method = MapMethod.GAUSSIAN)
+```
 
 ### Dataset
 
-Data can be split in sets implementing custom splits according to the specific application. Utility splitting functions are currently under development.
+Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file), then the `DeeprankDataset` objects can be defined.
 
-Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file), then the corresponding graphs can be saved in hdf5 files containing only references (external links) to the original one. For example:
+#### GraphDataset
 
-```python
-from deeprankcore.dataset import save_hdf5_keys
-
-save_hdf5_keys("<original_hdf5_path.hdf5>", train_ids, "<train_hdf5_path.hdf5>")
-save_hdf5_keys("<original_hdf5_path.hdf5>", valid_ids, "<val_hdf5_path.hdf5>")
-save_hdf5_keys("<original_hdf5_path.hdf5>", test_ids, "<test_hdf5_path.hdf5>")
-```
-
-Now the GraphDataset objects can be defined:
+For later GNN's training. 
 
 ```python
 from deeprankcore.dataset import GraphDataset
@@ -169,20 +178,59 @@ target = "binary"
 
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
-    hdf5_path = "<train_hdf5_path.hdf5>",
+    hdf5_path = hdf5_paths,
+    subset = train_ids, 
     node_features = node_features,
     edge_features = edge_features,
     target = target
 )
 dataset_val = GraphDataset(
-    hdf5_path = "<val_hdf5_path.hdf5>",
+    hdf5_path = hdf5_paths,
+    subset = valid_ids, 
     node_features = node_features,
     edge_features = edge_features,
     target = target
 
 )
 dataset_test = GraphDataset(
-    hdf5_path = "<test_hdf5_path.hdf5>",
+    hdf5_path = hdf5_paths,
+    subset = test_ids, 
+    node_features = node_features,
+    edge_features = edge_features,
+    target = target
+)
+```
+
+#### GridDataset
+
+For later CNN training. 
+
+```python
+from deeprankcore.dataset import GridDataset
+
+node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
+edge_features = ["distance"]
+target = "binary"
+
+# Creating GraphDataset objects
+dataset_train = GridDataset(
+    hdf5_path = hdf5_paths,
+    subset = train_ids, 
+    node_features = node_features,
+    edge_features = edge_features,
+    target = target
+)
+dataset_val = GridDataset(
+    hdf5_path = hdf5_paths,
+    subset = valid_ids, 
+    node_features = node_features,
+    edge_features = edge_features,
+    target = target
+
+)
+dataset_test = GridDataset(
+    hdf5_path = hdf5_paths,
+    subset = test_ids, 
     node_features = node_features,
     edge_features = edge_features,
     target = target
