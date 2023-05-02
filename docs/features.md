@@ -38,7 +38,7 @@ These features are only used in atomic graphs.
 
 #### Residue properties:
 - `res_type`: One-hot encoding of the amino acid residue (size 20).
-- `polarity`: One hot encoding of the polarity of the amino acid (options: NONPOLAR, POLAR, NEGATIVE, POSITIVE). Note that sources vary on the polarity for few of the amino acids; see detailed information in `deeprankcore.domain.aminoacidlist.py`.
+- `polarity`: One-hot encoding of the polarity of the amino acid (options: NONPOLAR, POLAR, NEGATIVE, POSITIVE). Note that sources vary on the polarity for few of the amino acids; see detailed information in `deeprankcore.domain.aminoacidlist.py`.
 - `res_size`: The number of non-hydrogen atoms in the side chain (int). 
 - `res_mass`: The (average) residue mass in Da (float).
 - `res_charge`: The charge of the residue (in fully protonated state) in Coulomb (int). Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
