@@ -76,7 +76,7 @@ These features relate to the surface area of the residue, and are computed using
 
 #### Secondary structure: `deeprankcore.features.secondary_structure`
 
-- `sec_struct`: One hot encoding of the [DSSP](https://en.wikipedia.org/wiki/DSSP_(algorithm)) assigned secondary structure of the amino acid, using the three major classes (HELIX, STRAND, COIL). Calculated using [DSSP4](https://github.com/PDB-REDO/dssp).
+- `sec_struct`: One-hot encoding of the [DSSP](https://en.wikipedia.org/wiki/DSSP_(algorithm)) assigned secondary structure of the amino acid, using the three major classes (HELIX, STRAND, COIL). Calculated using [DSSP4](https://github.com/PDB-REDO/dssp).
 
 #### Inter-residue contacts (IRCs): `deeprankcore.features.irc`
 These features are only calculated for ProteinProteinInterface queries.
