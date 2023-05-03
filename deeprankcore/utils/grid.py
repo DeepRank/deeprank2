@@ -49,7 +49,7 @@ class GridSettings:
     the following properties:
     - sizes: x, y, z sizes of the box in Å
     - points_counts: the number of points on the x, y, z edges of the cube
-    - resolutions: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
+    - sizes: the size in Å of one x, y, z edge subdivision. Also the distance between two points on the edge.
     """
 
     def __init__(

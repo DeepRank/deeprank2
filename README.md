@@ -14,7 +14,7 @@
 ![alt-text](./deeprankcore.png)
 
 
-DeeprankCore is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using either Graph Neural Networks (GNNs) or Convolutional Neural Networks (CNNs). 
+DeeprankCore is a Deep Learning (DL) framework for data mining Protein-Protein Interactions (PPIs) using either Graph Neural Networks (GNNs) or Convolutional Neural Networks (CNNs). It is an improved and unified version of the previously depeloped [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
 DeeprankCore contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN and CNN models.
 
@@ -26,9 +26,9 @@ Main features:
 - Flexible definition of both new features and targets
 - Graphs and grids feature mapping
 - Efficient data storage in HDF5 format
-- Support both classification and regression (based on PyTorch and PyTorch Geometric)
+- Support both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
-DeeprankCore documentation can be found here : https://deeprankcore.rtfd.io/.
+DeeprankCore extensive documentation can be found [here](https://deeprankcore.rtfd.io/).
 
 ## Table of contents
 
@@ -41,11 +41,10 @@ DeeprankCore documentation can be found here : https://deeprankcore.rtfd.io/.
   - [Documentation](#documentation)
   - [Quick start](#quick-start)
     - [Data mapping](#data-mapping)
-    - [Dataset](#dataset)
+    - [Datasets](#datasets)
       - [GraphDataset](#graphdataset)
       - [GridDataset](#griddataset)
     - [Training](#training)
-      - [Custom GNN](#custom-gnn)
   - [h5x support](#h5x-support)
   - [Package development](#package-development)
 
@@ -59,6 +58,7 @@ Before installing deeprankcore you need to install:
     * **How to build it without sudo privileges on a Linux machine**. After having run `make` in the reduce/ root directory, go to reduce/reduce_src/Makefile and modify `/usr/local/` to a folder in your home directory, such as `/home/user_name/apps`. Note that such a folder needs to be added to the PATH in the `.bashrc` file. Then run `make install` from reduce/. 
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
  * [dssp](https://swift.cmbi.umcn.nl/gv/dssp/): `sudo apt-get install dssp`
+    * See [DSSP docs](https://ssbio.readthedocs.io/en/latest/instructions/dssp.html) for installing it on Mac OSX
  * [pytorch](https://pytorch.org/get-started/locally/): `conda install pytorch torchvision torchaudio cpuonly -c pytorch` or `conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia`, for taking advantage of GPUs.
  * [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
  * [Dependencies for pytorch geometric from wheels](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html#installation-from-wheels): `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-${TORCH}+${CUDA}.html`. 
@@ -94,7 +94,7 @@ More extensive and detailed documentation can be found [here](https://deeprankco
 
 ### Data mapping
 
-For each protein-protein complex, a query is created and added to the `QueryCollection` object, and processed later on. Different types of query exist, based on the molecular resolution needed (`ProteinProteinInterfaceResidueQuery`, `ProteinProteinInterfaceAtomicQuery`). Each query takes as input a `.pdb` file, representing the protein-protein structural complex, the ids of the two chains composing the complex, and the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
+For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed (`ProteinProteinInterfaceResidueQuery`, `ProteinProteinInterfaceAtomicQuery`). Each query takes as input a `.pdb` file, representing the protein-protein structural complex, the ids of the two chains composing the complex, and the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -103,71 +103,78 @@ queries = QueryCollection()
 
 # Append data points
 queries.add(ProteinProteinInterfaceResidueQuery(
-    pdb_path = "1ATN_1w.pdb",
+    pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb",
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
         "binary": 0
     },
     pssm_paths = {
-        "A": "1ATN.A.pdb.pssm",
-        "B": "1ATN.B.pdb.pssm"
+        "A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
+        "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
 queries.add(ProteinProteinInterfaceResidueQuery(
-    pdb_path = "1ATN_2w.pdb",
+    pdb_path = "tests/data/pdb/1ATN/1ATN_2w.pdb",
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
         "binary": 1
     },
     pssm_paths = {
-        "A": "1ATN.A.pdb.pssm",
-        "B": "1ATN.B.pdb.pssm"
+        "A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
+        "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
 queries.add(ProteinProteinInterfaceResidueQuery(
-    pdb_path = "1ATN_3w.pdb",
+    pdb_path = "tests/data/pdb/1ATN/1ATN_3w.pdb",
     chain_id1 = "A",
     chain_id2 = "B",
     targets = {
         "binary": 0
     },
     pssm_paths = {
-        "A": "1ATN.A.pdb.pssm",
-        "B": "1ATN.B.pdb.pssm"
+        "A": "tests/data/pssm/1ATN/1ATN.A.pdb.pssm",
+        "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
 
 ```
 
-The user is free to implement his/her own query class. Each implementation requires the `build` method to be present.
+The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
 The queries can then be processed into 3D-graphs only or both 3D-graphs and 3D-grids, depending on which kind of network will be used later for training. 
 
 ```python
+from deeprankcore.features import components, conservation, contact, exposure, irc, surfacearea
 from deeprankcore.utils.grid import GridSettings, MapMethod
 
+feature_modules = [components, conservation, contact, exposure, irc, surfacearea]
+
 # Save data into 3D-graphs only
-hdf5_paths = queries.process("<output_folder>/<prefix_for_outputs>")
+hdf5_paths = queries.process(
+    "<output_folder>/<prefix_for_outputs>",
+    feature_modules = feature_modules)
 
 # Save data into 3D-graphs and 3D-grids
-hdf5_paths = queries.process(prefix = prefix,
-                                grid_settings = GridSettings(
-                                    # the number of points on the x, y, z edges of the cube
-                                    points_counts = [20, 20, 20],
-                                    # the size in Å of one x, y, z edge subdivision
-                                    resolutions = [1.0, 1.0, 1.0]),
-                                grid_map_method = MapMethod.GAUSSIAN)
+hdf5_paths = queries.process(
+    "<output_folder>/<prefix_for_outputs>",
+    feature_modules = feature_modules,
+    grid_settings = GridSettings(
+        # the number of points on the x, y, z edges of the cube
+        points_counts = [20, 20, 20],
+        # the size in Å of one x, y, z edge subdivision
+        sizes = [1.0, 1.0, 1.0]),
+    grid_map_method = MapMethod.GAUSSIAN)
 ```
 
-### Dataset
+### Datasets
 
-Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file), then the `DeeprankDataset` objects can be defined.
+Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file/s), then the `DeeprankDataset` objects can be defined.
 
 #### GraphDataset
 
-For later GNN's training. 
+For later GNNs training. 
 
 ```python
 from deeprankcore.dataset import GraphDataset
@@ -203,55 +210,65 @@ dataset_test = GraphDataset(
 
 #### GridDataset
 
-For later CNN training. 
+For later CNNs training. 
 
 ```python
 from deeprankcore.dataset import GridDataset
 
-node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
-edge_features = ["distance"]
+features = ["bsa", "res_depth", "hse", "info_content", "pssm", "distance"]
 target = "binary"
 
 # Creating GraphDataset objects
 dataset_train = GridDataset(
     hdf5_path = hdf5_paths,
     subset = train_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
+    features = features,
     target = target
 )
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
+    features = features,
     target = target
 
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
+    features = features,
     target = target
 )
 ```
 
 ### Training
 
-Let's define a Trainer instance, using for example of the already existing GNNs, GINet:
+Let's define a Trainer instance, using for example of the already existing GNNs, GINet. Note that being GINet a GNN, it expects datasets' instances of type `GraphDataset`.
 
 ```python
 from deeprankcore.trainer import Trainer
-from deeprankcore.ginet import GINet
+from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
 
 trainer = Trainer(
-    GINet,
+    NaiveNetwork,
     dataset_train,
     dataset_val,
     dataset_test
 )
 
+```
+
+The same can be done using a CNN, for example `CnnClassification`. Note that in this case the network expects datasets' instances of type `GridDataset`.
+
+```python
+from deeprankcore.trainer import Trainer
+from deeprankcore.neuralnets.cnn.model3d import CnnClassification
+
+trainer = Trainer(
+    CnnClassification,
+    dataset_train,
+    dataset_val,
+    dataset_test
+)
 ```
 
 By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
@@ -271,53 +288,6 @@ Then the Trainer can be trained and tested, and the model can be saved:
 trainer.train(nepoch = 50, batch_size = 64, validate = True)
 trainer.test()
 trainer.save_model(filename = "<output_model_path.pth.tar>")
-
-```
-
-#### Custom GNN
-
-It is also possible to define new network architectures:
-
-```python
-import torch 
-
-def normalized_cut_2d(edge_index, pos):
-    row, col = edge_index
-    edge_attr = torch.norm(pos[row] - pos[col], p=2, dim=1)
-    return normalized_cut(edge_index, edge_attr, num_nodes=pos.size(0))
-
-class CustomNet(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = SplineConv(d.num_features, 32, dim=2, kernel_size=5)
-        self.conv2 = SplineConv(32, 64, dim=2, kernel_size=5)
-        self.fc1 = torch.nn.Linear(64, 128)
-        self.fc2 = torch.nn.Linear(128, 1)
-
-    def forward(self, data):
-        data.x = F.elu(self.conv1(data.x, data.edge_index, data.edge_attr))
-        weight = normalized_cut_2d(data.edge_index, data.pos)
-        cluster = graclus(data.edge_index, weight)
-        data = max_pool(cluster, data)
-
-        data.x = F.elu(self.conv2(data.x, data.edge_index, data.edge_attr))
-        weight = normalized_cut_2d(data.edge_index, data.pos)
-        cluster = graclus(data.edge_index, weight)
-        x, batch = max_pool_x(cluster, data.x, data.batch)
-
-        x = scatter_mean(x, batch, dim=0)
-        x = F.elu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        return F.log_softmax(self.fc2(x), dim=1)
-
-trainer = Trainer(
-    CustomNet,
-    dataset_train,
-    dataset_val,
-    dataset_test
-)
-
-trainer.train(nepoch=50, batch_size = 64)
 
 ```
 
