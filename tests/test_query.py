@@ -4,6 +4,7 @@ from tempfile import mkdtemp, mkstemp
 
 import h5py
 import numpy as np
+import pytest
 
 from deeprankcore.dataset import GraphDataset, GridDataset
 from deeprankcore.domain import edgestorage as Efeat
@@ -368,12 +369,26 @@ def test_augmentation():
 
 
 def test_incorrect_pssm_order():
-    _ = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
-            "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
-            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
-        },
-    )
+    with pytest.raises(ValueError):
+        _ = ProteinProteinInterfaceResidueQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+            {
+                "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
+                "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+            },
+        ).build(components)
+
+
+def test_incomplete_pssm():
+    with pytest.raises(ValueError):
+        _ = ProteinProteinInterfaceResidueQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+            {
+                "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
+            },
+        ).build(components)

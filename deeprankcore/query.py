@@ -43,14 +43,14 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
     Raises:
         ValueError: Raised if info between PDB and PSSM doesn't match
     """
-        
+
     pssm_data = {}
     for chain in pssm_paths:
         with open(pssm_paths[chain], encoding='utf-8') as f:
             lines = f.readlines()[1:]
         for line in lines:
             pssm_data[chain + line.split()[0].zfill(4)] = convert_aa_nomenclature(line.split()[1], 3)
-    
+
     # load ground truth from pdb file
     pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
     pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth}
