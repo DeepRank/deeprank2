@@ -248,7 +248,7 @@ dataset_test = GridDataset(
 
 ### Training
 
-Let's define a Trainer instance, using for example of the already existing GNNs, GINet. Note that being GINet a GNN, it expects datasets' instances of type `GraphDataset`.
+Let's define a Trainer instance, using for example of the already existing GINet. Because GINet is a GNN, it requires a dataset instance of type `GraphDataset`.
 
 ```python
 from deeprankcore.trainer import Trainer
