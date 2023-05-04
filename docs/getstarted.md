@@ -3,7 +3,13 @@
 
 ### Data mapping
 
-For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed (`ProteinProteinInterfaceResidueQuery`, `ProteinProteinInterfaceAtomicQuery`). Each query takes as input a `.pdb` file, representing the protein-protein structural complex, the ids of the two chains composing the complex, and the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
+For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed:
+- In a `ProteinProteinInterfaceResidueQuery` each node represents one amino acid residue
+- In a `ProteinProteinInterfaceAtomicQuery` each node represents one atom within the amino acid residues.
+A query takes as inputs:
+- a `.pdb` file, representing the protein-protein structural complex
+- the ids of the two chains composing the complex, and 
+- the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -221,9 +227,9 @@ dataset_test = GridDataset(
 )
 ```
 
-## Training
+### Training
 
-Let's define a Trainer instance, using for example of the already existing GNNs, GINet. Note that being GINet a GNN, it expects datasets' instances of type `GraphDataset`.
+Let's define a Trainer instance, using for example of the already existing GINet. Because GINet is a GNN, it requires a dataset instance of type `GraphDataset`.
 
 ```python
 from deeprankcore.trainer import Trainer
@@ -238,7 +244,7 @@ trainer = Trainer(
 
 ```
 
-The same can be done using a CNN, for example `CnnClassification`. Note that in this case the network expects datasets' instances of type `GridDataset`.
+The same can be done using a CNN, for example `CnnClassification`. Here a dataset instance of type `GridDataset` is required.
 
 ```python
 from deeprankcore.trainer import Trainer
