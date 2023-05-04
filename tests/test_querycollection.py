@@ -14,8 +14,6 @@ from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
                                 QueryCollection,
                                 SingleResidueVariantResidueQuery)
 
-from . import PATH_TEST
-
 
 def _querycollection_tester( # pylint: disable = too-many-locals, too-many-arguments
     query_type: str = 'ppi',
