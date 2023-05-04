@@ -170,6 +170,7 @@ class Trainer():
                 raise ValueError("No target set. Make sure the pretrained model explicitly defines the target to train against.")
 
             self.pretrained_model_path = pretrained_model
+            self.classes_to_index = self.dataset_test.classes_to_index 
 
             self._load_params()
             self._load_pretrained_model()

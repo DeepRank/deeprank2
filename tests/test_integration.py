@@ -18,7 +18,14 @@ from deeprankcore.trainer import Trainer
 from deeprankcore.utils.exporters import HDF5OutputExporter
 from deeprankcore.utils.grid import GridSettings, MapMethod
 
-from . import PATH_TEST
+pdb_path = str("tests/data/pdb/3C8P/3C8P.pdb")
+ref_path = str("tests/data/ref/3C8P/3C8P.pdb")
+pssm_path1 = str("tests/data/pssm/3C8P/3C8P.A.pdb.pssm")
+pssm_path2 = str("tests/data/pssm/3C8P/3C8P.B.pdb.pssm")
+chain_id1 = "A"
+chain_id2 = "B"
+
+count_queries = 3
 
 
 def test_cnn(): # pylint: disable=too-many-locals
@@ -27,13 +34,6 @@ def test_cnn(): # pylint: disable=too-many-locals
 
     Then uses HDF5 generated files to train and test a CnnRegression network.
     """
-
-    pdb_path = str(PATH_TEST / "data/pdb/1ATN/1ATN_1w.pdb")
-    ref_path = str(PATH_TEST / "data/ref/1ATN/1ATN.pdb")
-    pssm_path1 = str(PATH_TEST / "data/pssm/1ATN/1ATN.A.pdb.pssm")
-    pssm_path2 = str(PATH_TEST / "data/pssm/1ATN/1ATN.B.pdb.pssm")
-    chain_id1 = "A"
-    chain_id2 = "B"
 
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
@@ -46,7 +46,6 @@ def test_cnn(): # pylint: disable=too-many-locals
     try:
         all_targets = compute_targets(pdb_path, ref_path)
 
-        count_queries = 3
         queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
@@ -120,13 +119,6 @@ def test_gnn(): # pylint: disable=too-many-locals
     Then uses HDF5 generated files to train and test a GINet network.
     """
 
-    pdb_path = str(PATH_TEST / "data/pdb/1ATN/1ATN_1w.pdb")
-    ref_path = str(PATH_TEST / "data/ref/1ATN/1ATN.pdb")
-    pssm_path1 = str(PATH_TEST / "data/pssm/1ATN/1ATN.A.pdb.pssm")
-    pssm_path2 = str(PATH_TEST / "data/pssm/1ATN/1ATN.B.pdb.pssm")
-    chain_id1 = "A"
-    chain_id2 = "B"
-
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
     model_path = output_directory + 'test.pth.tar'
@@ -136,7 +128,6 @@ def test_gnn(): # pylint: disable=too-many-locals
     try:
         all_targets = compute_targets(pdb_path, ref_path)
 
-        count_queries = 3
         queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(

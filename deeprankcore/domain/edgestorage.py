@@ -12,5 +12,5 @@ SAMERES = "same_res" # bool
 
 ## interactions
 COVALENT = "covalent" # bool; former FEATURENAME_COVALENT
-ELECTROSTATIC = "electrostatic" # float; former FEATURENAME_EDGECOULOMB
-VANDERWAALS = "vanderwaals" # float; former FEATURENAME_EDGEVANDERWAALS
+ELEC = "electrostatic" # float; former FEATURENAME_EDGECOULOMB
+VDW = "vanderwaals" # float; former FEATURENAME_EDGEVANDERWAALS

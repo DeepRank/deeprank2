@@ -37,7 +37,7 @@ class TestDataSet(unittest.TestCase):
                                                                     edge_features=[Efeat.DISTANCE],
                                                                     target=targets.IRMSD)),
                                       ("GridDataset", GridDataset(self.hdf5_path,
-                                                                  features=[Efeat.VANDERWAALS],
+                                                                  features=[Efeat.VDW],
                                                                   target=targets.IRMSD))]:
 
             entry_names = []
@@ -66,7 +66,7 @@ class TestDataSet(unittest.TestCase):
     def test_grid_dataset_regression(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
-            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            features=[Efeat.VDW, Efeat.ELEC],
             target=targets.IRMSD
         )
 
@@ -81,7 +81,7 @@ class TestDataSet(unittest.TestCase):
     def test_grid_dataset_classification(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
-            features=[Efeat.VANDERWAALS, Efeat.ELECTROSTATIC],
+            features=[Efeat.VDW, Efeat.ELEC],
             target=targets.BINARY
         )
 

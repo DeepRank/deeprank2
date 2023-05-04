@@ -170,8 +170,8 @@ def test_variant_graph_101M():
         ],
         [
             Efeat.DISTANCE,
-            Efeat.VANDERWAALS,
-            Efeat.ELECTROSTATIC,
+            Efeat.VDW,
+            Efeat.ELEC,
         ],
     )
 
@@ -210,8 +210,8 @@ def test_variant_graph_1A0Z():
         ],
         [
             Efeat.DISTANCE,
-            Efeat.VANDERWAALS,
-            Efeat.ELECTROSTATIC,
+            Efeat.VDW,
+            Efeat.ELEC,
         ],
     )
 
@@ -248,8 +248,8 @@ def test_variant_graph_9API():
         ],
         [
             Efeat.DISTANCE,
-            Efeat.VANDERWAALS,
-            Efeat.ELECTROSTATIC,
+            Efeat.VDW,
+            Efeat.ELEC,
         ],
     )
 
@@ -289,7 +289,7 @@ def test_res_ppi():
 
     g = query.build([surfacearea, contact])
 
-    _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELECTROSTATIC])
+    _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELEC])
 
 
 def test_augmentation():
