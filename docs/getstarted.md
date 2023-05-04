@@ -72,7 +72,7 @@ hdf5_paths = queries.process(
     grid_settings = GridSettings(
         # the number of points on the x, y, z edges of the cube
         points_counts = [20, 20, 20],
-        # the size in Å of one x, y, z edge subdivision
+        # x, y, z sizes of the box in Å
         sizes = [1.0, 1.0, 1.0]),
     grid_map_method = MapMethod.GAUSSIAN)
 ```
