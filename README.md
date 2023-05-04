@@ -263,7 +263,7 @@ trainer = Trainer(
 
 ```
 
-The same can be done using a CNN, for example `CnnClassification`. Note that in this case the network expects datasets' instances of type `GridDataset`.
+The same can be done using a CNN, for example `CnnClassification`. Here a dataset instance of type `GridDataset` is required.
 
 ```python
 from deeprankcore.trainer import Trainer
