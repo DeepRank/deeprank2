@@ -94,7 +94,13 @@ More extensive and detailed documentation can be found [here](https://deeprankco
 
 ### Data mapping
 
-For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed (`ProteinProteinInterfaceResidueQuery`, `ProteinProteinInterfaceAtomicQuery`). Each query takes as input a `.pdb` file, representing the protein-protein structural complex, the ids of the two chains composing the complex, and the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
+For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed:
+- In a `ProteinProteinInterfaceResidueQuery` each node represents one amino acid residue
+- In a `ProteinProteinInterfaceAtomicQuery` each node represents one atom within the amino acid residues.
+A query takes as inputs:
+- a `.pdb` file, representing the protein-protein structural complex
+- the ids of the two chains composing the complex, and 
+- the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
