@@ -180,7 +180,7 @@ Data can be split in sets implementing custom splits according to the specific a
 
 #### GraphDataset
 
-For later GNNs training. 
+For training GNNs the user can create a GraphDataset instance:
 
 ```python
 from deeprankcore.dataset import GraphDataset
@@ -216,7 +216,7 @@ dataset_test = GraphDataset(
 
 #### GridDataset
 
-For later CNNs training. 
+For training CNNs the user can create a GridDataset instance:
 
 ```python
 from deeprankcore.dataset import GridDataset
