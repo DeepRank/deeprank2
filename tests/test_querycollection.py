@@ -80,6 +80,35 @@ def _querycollection_tester( # pylint: disable = too-many-locals
     return collection, output_directory, output_paths
 
 
+def _assert_correct_modules(output_paths: str, features: Union[str, List[str]], absent: str):
+    """Helper function to assert inclusion of correct features
+
+    Args:
+        output_paths (str): output_paths as returned from _querycollection_tester
+        features (Union[str, List[str]]): feature(s) that should be present
+        absent (str): feature that should be absent
+    """
+    
+    if isinstance(features,str):
+        features = [features]
+
+    with h5py.File(output_paths[0], "r") as f5:
+        missing = []
+        for feat in features:
+            try:
+                if feat == Efeat.DISTANCE:
+                    _ = f5[list(f5.keys())[0]][f"{Efeat.EDGE}/{feat}"]
+                else:
+                    _ = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/{feat}"]
+            except KeyError:
+                missing.append(feat)
+            if missing:
+                raise KeyError(f'The following feature(s) were not created: {missing}.')
+        
+        with pytest.raises(KeyError):
+            _ = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/{absent}"]
+
+
 def test_querycollection_process():
     """
     Tests processing method of QueryCollection class.
