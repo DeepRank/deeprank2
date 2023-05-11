@@ -130,14 +130,14 @@ def test_querycollection_process():
 
 def test_querycollection_process_single_feature_module():
     """
-    Tests processing for generating a single feature.
+    Tests processing for generating from a single feature module for following input types: ModuleType, List[ModuleType] str, List[str]
     """
 
     for query_type in ['ppi', 'var']:
-
-        # test with single feature in list
-        _, output_directory, _ = _querycollection_tester(query_type, feature_modules=[surfacearea])
-        rmtree(output_directory)
+        for testcase in [surfacearea, [surfacearea], 'surfacearea', ['surfacearea']]:
+            _, output_directory, output_paths = _querycollection_tester(query_type, feature_modules=testcase)
+            _assert_correct_modules(output_paths, Nfeat.BSA, Nfeat.HSE)
+            rmtree(output_directory)
 
         # test with single feature NOT in list
         _, output_directory, _ = _querycollection_tester(query_type, feature_modules=surfacearea)
