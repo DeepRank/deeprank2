@@ -5,7 +5,10 @@ from types import ModuleType
 from typing import List, Optional, Union
 
 import h5py
+import pytest
 
+from deeprankcore.domain import edgestorage as Efeat
+from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import alanine, phenylalanine
 from deeprankcore.features import components, surfacearea
 from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
@@ -14,7 +17,7 @@ from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
 
 
 def _querycollection_tester( # pylint: disable = too-many-locals
-    query_type: str = 'ppi',
+    query_type: str,
     n_queries: int = 3,
     feature_modules: Optional[Union[ModuleType, List[ModuleType]]] = None, 
     cpu_count: int = 1, 
@@ -139,9 +142,6 @@ def test_querycollection_process_single_feature_module():
             _assert_correct_modules(output_paths, Nfeat.BSA, Nfeat.HSE)
             rmtree(output_directory)
 
-        # test with single feature NOT in list
-        _, output_directory, _ = _querycollection_tester(query_type, feature_modules=surfacearea)
-        rmtree(output_directory)
 
 
 def test_querycollection_process_all_features_modules():
@@ -149,12 +149,28 @@ def test_querycollection_process_all_features_modules():
     Tests processing for generating all features.
     """
 
+    one_feature_from_each_module = [Nfeat.RESTYPE, Nfeat.PSSM, Efeat.DISTANCE, Nfeat.HSE, Nfeat.SECSTRUCT, Nfeat.BSA, Nfeat.IRCTOTAL]        
+
+    _, output_directory, output_paths = _querycollection_tester('ppi', feature_modules='all')
+    _assert_correct_modules(output_paths, one_feature_from_each_module, 'dummy_feature')
+    rmtree(output_directory)
+    
+    _, output_directory, output_paths = _querycollection_tester('var', feature_modules='all')
+    _assert_correct_modules(output_paths, one_feature_from_each_module[:-1], Nfeat.IRCTOTAL)
+    rmtree(output_directory)
+    
+
+
+def test_querycollection_process_default_features_modules():
+    """
+    Tests processing for generating all features.
+    """
+
     for query_type in ['ppi', 'var']:
 
-        _, output_directory, _ = _querycollection_tester(query_type)
-
+        _, output_directory, output_paths = _querycollection_tester(query_type)
+        _assert_correct_modules(output_paths, [Nfeat.RESTYPE, Efeat.DISTANCE], Nfeat.HSE)
         rmtree(output_directory)
-
 
 
 def test_querycollection_process_combine_output_true():
