@@ -14,6 +14,7 @@ from deeprankcore.domain import targetstorage as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 features_transform={'bsa':{'transform':lambda t:np.log(t+1),'standardize':True},
+                #pylint: disable=unnecessary-lambda
                  'sasa':{'transform':lambda t:np.sqrt(t),'standardize':True},
                  'hb_donors':{'transform':None,'standardize':False},
                  'hse':{'transform':None,'standardize':True}
@@ -293,6 +294,7 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
 
+    #pylint: disable=too-many-locals
     def test_graph_standardize(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
@@ -314,7 +316,8 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) #pylint: disable=too-many-arguments
+                        #pylint: disable=too-many-arguments
+                        arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -322,7 +325,8 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) #pylint: disable=too-many-arguments
+                            #pylint: disable=too-many-arguments
+                            arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
@@ -346,7 +350,8 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) #pylint: disable=too-many-arguments
+                        #pylint: disable=too-many-arguments
+                        arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -354,7 +359,8 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) #pylint: disable=too-many-arguments
+                            #pylint: disable=too-many-arguments
+                            arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
