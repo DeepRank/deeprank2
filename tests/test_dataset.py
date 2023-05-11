@@ -13,7 +13,7 @@ from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain import targetstorage as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-feat_trans_dict={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
+features_transform={'bsa':{'Transformation':lambda t:np.log(t+1),'Standardization':True},
                  'sasa':{'Transformation':lambda t:np.sqrt(t),'Standardization':True},
                  'hb_donors':{'Transformation':None,'Standardization':False},
                  'hse':{'Transformation':None,'Standardization':True}
@@ -300,7 +300,7 @@ class TestDataSet(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
             target='binary',
-            feat_trans_dict=feat_trans_dict
+            features_transform=features_transform
         )
 
         with h5py.File(hdf5_path, 'r') as f5:
@@ -314,7 +314,7 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx,feat_trans_dict).x[:, tensor_idx])
+                        arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx])
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -322,14 +322,14 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx,feat_trans_dict).x[:, tensor_idx])
+                            arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx])
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
 
             for key, values in features_dict.items():
-                if(key in feat_trans_dict):
-                    standardization=feat_trans_dict.get(key, {}).get('Standardization')
+                if(key in features_transform):
+                    standardization=features_transform.get(key, {}).get('standardize')
                     if standardization: #Feature contains in dictionary & standardization=True
                         #assert key == 'bsa'
                         mean = values.mean()
@@ -346,7 +346,7 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx,feat_trans_dict).edge_attr[:, tensor_idx])
+                        arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx])
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -354,14 +354,14 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx,feat_trans_dict).edge_attr[:, tensor_idx])
+                            arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx])
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
 
             for key, values in features_dict.items():
-                if(key in feat_trans_dict):
-                    standardization=feat_trans_dict.get(key, {}).get('Standardization')
+                if(key in features_transform):
+                    standardization=features_transform.get(key, {}).get('standardize')
                     if standardization: #Feature contains in dictionary & standardization=True
                         mean = values.mean()
                         dev = values.std()
@@ -375,14 +375,12 @@ class TestDataSet(unittest.TestCase):
         # normal logic 
         dataset_train = GraphDataset(
             hdf5_path = hdf5_path,
-            target='binary', 
-            standardize=True
+            target='binary'
         )
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             target='binary',
-            standardize=True,
             train=False,
             dataset_train=dataset_train
         )
@@ -399,7 +397,6 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             target='binary',
-            standardize=True,
             train=False,
             dataset_train=dataset_train
         )
@@ -412,7 +409,6 @@ class TestDataSet(unittest.TestCase):
             GraphDataset(
                 hdf5_path = hdf5_path,
                 target='binary',
-                standardize=True,
                 train=False
             )
 
@@ -427,7 +423,6 @@ class TestDataSet(unittest.TestCase):
             GraphDataset(
                 hdf5_path = hdf5_path,
                 target='binary',
-                standardize=True,
                 train=False,
                 dataset_train=dataset_train
             )
