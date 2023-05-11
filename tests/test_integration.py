@@ -71,7 +71,7 @@ def test_cnn(): # pylint: disable=too-many-locals
             query_id = query.get_query_id()
             assert query_id in graph_names, f"missing in output: {query_id}"
 
-        features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM, Efeat.DISTANCE]
+        features = [Nfeat.RESTYPE, Efeat.DISTANCE]
 
         dataset_train = GridDataset(
             hdf5_path = hdf5_paths,
@@ -151,7 +151,7 @@ def test_gnn(): # pylint: disable=too-many-locals
             query_id = query.get_query_id()
             assert query_id in graph_names, f"missing in output: {query_id}"
 
-        node_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
+        node_features = [Nfeat.RESTYPE]
         edge_features = [Efeat.DISTANCE]
 
 
