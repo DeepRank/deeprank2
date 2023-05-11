@@ -324,8 +324,8 @@ class QueryCollection:
         elif isinstance(feature_modules, str):
             feature_names = [feature_modules.replace('.py','')]
         else:
-            raise ValueError(f'feature_modules has received an invalid input type: {type(feature_modules)}')
-
+            raise ValueError(f'Feature_modules has received an invalid input type: {type(feature_modules)}.')
+        _log.info(f'\nSelected feature modules: {feature_names}.')
 
         _log.info(f'Creating pool function to process {len(self.queries)} queries...')
         pool_function = partial(self._process_one_query, prefix,
