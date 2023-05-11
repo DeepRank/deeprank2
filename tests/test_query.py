@@ -348,7 +348,6 @@ def test_augmentation():
     tmp_dir = mkdtemp()
     try:
         qc.process(f"{tmp_dir}/qc",
-                   feature_modules=None,
                    grid_settings=grid_settings,
                    grid_map_method=MapMethod.GAUSSIAN,
                    grid_augmentation_count=augmentation_count)
