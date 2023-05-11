@@ -1,16 +1,16 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'Deeprank-Core: Mining Protein-Protein Structures with Geometric Deep Learning'
 tags:
   - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - PyTorch
+  - structural biology
+  - geometric deep learning
+  - 
 authors:
-  - name: Adrian M. Price-Whelan
-    orcid: 0000-0000-0000-0000
+  - name: Giulia Crocioni
+    orcid: 0000-0002-0823-0121
     equal-contrib: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: 1
   - name: Author Without ORCID
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     affiliation: 2
@@ -18,7 +18,7 @@ authors:
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 3
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, USA
+ - name: Netherlands eScience Center, Amsterdam, The Netherlands
    index: 1
  - name: Institution Name, Country
    index: 2
@@ -35,37 +35,28 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+TODO: A summary describing the high-level functionality and purpose of the software for a diverse, non-specialist audience.
+Has a clear description of the high-level functionality and purpose of the software for a diverse, non-specialist audience been provided?
+
+The combination of physics-based 3D modeling and data-driven deep learning has the potential
+to revolutionize drug design and protein engineering. There is a wealth of Protein-Protein Interface
+(PPI) data available, both experimentally and computationally obtained, that can be used to train deep
+learning models for biologically relevant predictions. We previously developed DeepRank [@renaud_deeprank_2021] and DeepRank-GNN [@reau_deeprank-gnn_2022],
+two deep learning frameworks for PPIs data mining using Convolutional Neural Networks (CNNs) and Graph
+Neural Networks (GNNs), respectively. We present here DeepRank-Core, a unified and user-friendly open-source
+deep learning framework that converts 3D representations of PPIs into either grids or graphs for efficient
+training of CNNs or GNNs. DeepRank-Core is designed to be customizable, offering users the ability to choose
+the deep learning architecture that best fits the specific interaction patterns they aim to model. 
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+TODO: A Statement of need section that clearly illustrates the research purpose of the software and places it in the context of related work.
+Do the authors clearly state what problems the software is designed to solve and who the target audience is?
+TODO: State of the field: Do the authors describe how this software compares to other commonly-used packages?
+TODO: Mention (if applicable) a representative set of past or ongoing research projects using the software and recent scholarly publications enabled by it.
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+![DeepRank-Core framework overview. 3D coordinates of interface residues are extracted from PDB files and converted into interface graphs or grids, depending on the user’s choice. The data are then passed through a Neural Network to compute predictions. \label{fig:flowchart}](deeprankcore.png)
+and referenced from text using \autoref{fig:flowchart}.
 
 # Mathematics
 
@@ -111,5 +102,7 @@ Figure sizes can be customized by adding an optional second parameter:
 
 We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
 Oh, and support from Kathryn Johnston during the genesis of this project.
+
+TODO: Acknowledgement of any financial support (ask Pablo).
 
 # References
