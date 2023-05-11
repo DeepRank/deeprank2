@@ -8,6 +8,7 @@ from functools import partial
 from glob import glob
 from multiprocessing import Pool
 from os.path import basename
+from random import randrange
 from types import ModuleType
 from typing import Dict, Iterator, List, Optional, Union
 
@@ -254,7 +255,7 @@ class QueryCollection:
 
                 for _ in range(grid_augmentation_count):
                     # repeat with random augmentation
-                    axis, angle = pdb2sql.transform.get_rot_axis_angle()  # insert numpy random seed once implemented
+                    axis, angle = pdb2sql.transform.get_rot_axis_angle(randrange(100))
                     augmentation = Augmentation(axis, angle)
                     graph.write_as_grid_to_hdf5(output_path, grid_settings, grid_map_method, augmentation)
 
