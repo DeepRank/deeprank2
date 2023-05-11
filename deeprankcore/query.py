@@ -298,23 +298,21 @@ class QueryCollection:
             List[str]: The list of paths of the generated HDF5 files.
         """
 
+        # set defaults
+        if prefix is None:
+            prefix = "processed-queries"
+        if feature_modules is None:
+            feature_modules = [components, contact]
         if cpu_count is None:
-            # returns the number of CPUs in the system
-            cpu_count = os.cpu_count()
+            cpu_count = os.cpu_count()  # returns the number of CPUs in the system
         else:
             cpu_count_system = os.cpu_count()
             if cpu_count > cpu_count_system:
                 _log.warning(f'\nTried to set {cpu_count} CPUs, but only {cpu_count_system} are present in the system.')
                 cpu_count = cpu_count_system
-        
         self.cpu_count = cpu_count
-
         _log.info(f'\nNumber of CPUs for processing the queries set to: {self.cpu_count}.')
 
-        if prefix is None:
-            prefix = "processed-queries"
-        if feature_modules is None:
-            feature_modules = [components, contact]
 
         if feature_modules == 'all':
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__)]
@@ -325,6 +323,8 @@ class QueryCollection:
             feature_names = [basename(feature_modules.__file__)[:-3]]
         elif isinstance(feature_modules, str):
             feature_names = [feature_modules.replace('.py','')]
+        else:
+            raise ValueError(f'feature_modules has received an invalid input type: {type(feature_modules)}')
 
 
         _log.info(f'Creating pool function to process {len(self.queries)} queries...')
