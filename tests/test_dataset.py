@@ -294,7 +294,7 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
 
-    #pylint: disable=too-many-locals
+    #pylint: disable=mccabe: MC0001
     def test_graph_standardize(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
@@ -316,7 +316,7 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        #pylint: disable=too-many-arguments
+                        #pylint: disable=too-many-function-args
                         arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
@@ -325,7 +325,7 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            #pylint: disable=too-many-arguments
+                            #pylint: disable=too-many-function-args
                             arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
@@ -350,7 +350,7 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        #pylint: disable=too-many-arguments
+                        #pylint: disable=too-many-function-args
                         arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
@@ -359,7 +359,7 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            #pylint: disable=too-many-arguments
+                            #pylint: disable=too-many-function-args
                             arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
