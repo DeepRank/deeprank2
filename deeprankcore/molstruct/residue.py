@@ -51,9 +51,7 @@ class Residue:
 
         pssm = self._chain.pssm
         if pssm is None:
-            raise FileNotFoundError(f'No pssm file found for Chain {self._chain}.\n\
-                To exclude all features using pssm for your entire model, add "conservation" as an argument to \n\
-                    `exclude_feature_module` setting when calling process on your QueryCollection.')
+            raise FileNotFoundError(f'No pssm file found for Chain {self._chain}.')
 
         return pssm[self]
 
