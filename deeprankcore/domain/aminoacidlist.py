@@ -1,3 +1,5 @@
+from typing import Optional
+
 from deeprankcore.molstruct.aminoacid import AminoAcid, Polarity
 
 # All info below sourced from above websites in December 2022 and summarized in deeprankcore/domain/aminoacid_summary.xlsx
@@ -349,3 +351,24 @@ amino_acids = [
     # selenocysteine,
     # pyrrolysine,
     ]
+
+def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
+    
+    # pylint: disable = raise-missing-from
+    try: 
+        if len(aa) == 1:
+            aa: AminoAcid = [entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower()][0]
+        elif len(aa) == 3:
+            aa: AminoAcid = [entry for entry in amino_acids if entry.three_letter_code.lower() == aa.lower()][0]
+        else:
+            aa: AminoAcid = [entry for entry in amino_acids if entry.name.lower() == aa.lower()][0]
+    except IndexError:
+        raise ValueError(f'{aa} is not a valid amino acid.')
+
+    if not output_type:
+        return aa.name
+    if output_type == 3: 
+        return aa.three_letter_code
+    if output_type == 1:
+        return aa.one_letter_code
+    raise ValueError(f'output_type {output_type} not recognized. Must be set to None (amino acid name), 1 (one letter code), or 3 (three letter code).')
