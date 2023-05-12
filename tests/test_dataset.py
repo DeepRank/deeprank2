@@ -293,8 +293,8 @@ class TestDataSet(unittest.TestCase):
         assert len(os.listdir(output_directory)) > 0
 
         rmtree(output_directory)
-
-    # pylint: disable=too-many-locals # noqa: MC0001
+    
+    # noqa: MC0001, pylint: disable=too-many-locals
     def test_graph_standardize(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
@@ -317,7 +317,7 @@ class TestDataSet(unittest.TestCase):
                     arr = []
                     for entry_idx in range(len(dataset)):
                         #pylint: disable=too-many-function-args
-                        arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) 
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -326,7 +326,7 @@ class TestDataSet(unittest.TestCase):
                         arr = []
                         for entry_idx in range(len(dataset)):
                             #pylint: disable=too-many-function-args
-                            arr.append(dataset.get(entry_idx,features_transform).x[:, tensor_idx]) 
+                            arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
@@ -351,7 +351,7 @@ class TestDataSet(unittest.TestCase):
                     arr = []
                     for entry_idx in range(len(dataset)):
                         #pylint: disable=too-many-function-args
-                        arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) 
+                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
                     tensor_idx += 1
@@ -360,7 +360,7 @@ class TestDataSet(unittest.TestCase):
                         arr = []
                         for entry_idx in range(len(dataset)):
                             #pylint: disable=too-many-function-args
-                            arr.append(dataset.get(entry_idx,features_transform).edge_attr[:, tensor_idx]) 
+                            arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr

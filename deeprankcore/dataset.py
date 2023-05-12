@@ -247,7 +247,7 @@ class DeeprankDataset(Dataset):
                     for feat in self.features_dict[feat_type]:
                         #get transformation type
                         transform=None
-                        if(self.dataset_type is 'Graph') and (self.features_transform is not None):
+                        if(self.dataset_type == 'Graph') and (self.features_transform is not None):
                             #check if there is a "all" key describing the transform for all the features
                             if 'all' in self.features_transform:
                                 transform=self.features_transform.get('all', {}).get('transform')
