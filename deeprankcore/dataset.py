@@ -668,6 +668,7 @@ class GraphDataset(DeeprankDataset):
             dataset_train will be ignored since the current dataset will be considered as training set.""")
         
         if (self.features_transform is not None):
+            standardize_all=None
             if ('all' in self.features_transform):
                 standardize_all= self.features_transform.get('all', {}).get('standardize')
             if train and (standardize_all is not False):
