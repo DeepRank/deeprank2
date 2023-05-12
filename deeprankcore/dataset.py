@@ -247,7 +247,7 @@ class DeeprankDataset(Dataset):
                     for feat in self.features_dict[feat_type]:
                         #get transformation type
                         transform=None
-                        if(self.features_transform is not None):
+                        if(self.dataset_type is 'Graph') and (self.features_transform is not None):
                             #check if there is a "all" key describing the transform for all the features
                             if 'all' in self.features_transform:
                                 transform=self.features_transform.get('all', {}).get('transform')
@@ -397,7 +397,7 @@ class GridDataset(DeeprankDataset):
         root: Optional[str] = "./",
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
-        check_integrity: bool = True
+        check_integrity: bool = True,
     ):
         """Class to load the .HDF5 files data into grids.
 
@@ -435,7 +435,8 @@ class GridDataset(DeeprankDataset):
         self.features = features
 
         self.target_transform = target_transform
-
+        
+        self.dataset_type='Grid'
         self._check_features()
 
         self.features_dict = {}
@@ -640,7 +641,7 @@ class GraphDataset(DeeprankDataset):
         """
 
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
-
+        _log.warning("Into Graph Dataset")
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
@@ -649,6 +650,8 @@ class GraphDataset(DeeprankDataset):
 
         self.features_transform = features_transform
 
+        self.dataset_type='Graph'
+        
         self._check_features()
 
         self.features_dict = {}
@@ -668,14 +671,20 @@ class GraphDataset(DeeprankDataset):
             dataset_train will be ignored since the current dataset will be considered as training set.""")
         
         if (self.features_transform is not None):
+            _log.warning("feat_transform is not None")
             standardize_all=None
             if ('all' in self.features_transform):
+                _log.warning("all option on")
                 standardize_all= self.features_transform.get('all', {}).get('standardize')
             if train and (standardize_all is not False):
+                _log.warning("Into train=True")
                 if self.means or self.devs is None:
                     if self.df is None:
+                        _log.warning("hdf5_to_pandas")
                         self.hdf5_to_pandas()
+                        _log.warning("Finish hdf5_to_pandas")
                     self._compute_mean_std()
+                    _log.warning("Finish _compute_mean_std")
             elif not train and (standardize_all is not False):
                 if (dataset_train.means or dataset_train.devs) is None:
                     if dataset_train.df is None:
