@@ -294,8 +294,7 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
 
-    #pylint: disable=too-many-locals
-    #mccabe: disable=MC0001
+    # pylint: disable=too-many-locals # noqa: MC0001
     def test_graph_standardize(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"

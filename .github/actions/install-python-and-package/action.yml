@@ -62,6 +62,8 @@ runs:
         # Safest way to install PyTorch and PyTorch Geometric is through conda
         conda install pytorch==2.0.0 torchvision=0.15.0 torchaudio=2.0.0 cpuonly -c pytorch
         conda install pyg -c pyg
+        # Install optional pyg dependencies
+        python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # In the future, release h5xplorer on PyPI
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
 
