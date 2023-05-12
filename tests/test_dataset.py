@@ -316,7 +316,6 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        #pylint: disable=too-many-function-args
                         arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
@@ -325,7 +324,6 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            #pylint: disable=too-many-function-args
                             arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
@@ -350,7 +348,6 @@ class TestDataSet(unittest.TestCase):
                 if vals.ndim == 1: # features with only one channel
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        #pylint: disable=too-many-function-args
                         arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
                     arr = np.concatenate(arr)
                     features_dict[feat] = arr
@@ -359,7 +356,6 @@ class TestDataSet(unittest.TestCase):
                     for ch in range(vals.shape[1]):
                         arr = []
                         for entry_idx in range(len(dataset)):
-                            #pylint: disable=too-many-function-args
                             arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
                         tensor_idx += 1
                         arr = np.concatenate(arr)
