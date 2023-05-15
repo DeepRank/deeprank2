@@ -34,7 +34,7 @@ from deeprankcore.utils.parsing.pssm import parse_pssm
 _log = logging.getLogger(__name__)
 
 
-def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], verbose = False):
+def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
     """Checks whether information stored in PSSM file matches the PDB file.
 
     Args:
@@ -59,24 +59,13 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], verbose = False):
     pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
     pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth}
 
-    n_wrong = 0
-    n_missing = 0
+    error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
     for residue in pdb_truth:
         try: 
             if pdb_truth[residue] != pssm_data[residue]:
-                n_wrong += 1
+                raise ValueError(error_message)
         except KeyError:
-            n_missing += 1
-
-    if n_missing + n_wrong > 0:
-        _, filename = os.path.split(pdb_path)
-        error_message = f'Amino acids in PSSM files do not match pdb file for {filename}.'
-        if verbose:
-            if n_wrong > 0:
-                error_message = error_message + f'\n\t{n_wrong} entries are incorrect.'
-            if n_missing > 0:
-                error_message = error_message + f'\n\t{n_missing} entries are missing.'
-        raise ValueError(error_message)
+            raise ValueError(error_message) #pylint: disable = raise-missing-from
 
 
 class Query:
