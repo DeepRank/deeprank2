@@ -7,7 +7,6 @@ import tempfile
 from functools import partial
 from glob import glob
 from multiprocessing import Pool
-from os.path import basename
 from random import randrange
 from types import ModuleType
 from typing import Dict, Iterator, List, Optional, Union
@@ -35,7 +34,7 @@ from deeprankcore.utils.parsing.pssm import parse_pssm
 _log = logging.getLogger(__name__)
 
 
-def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
+def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], verbose = False):
     """Checks whether information stored in PSSM file matches the PDB file.
 
     Args:
@@ -67,11 +66,13 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
             n_missing += 1
 
     if n_missing + n_wrong > 0:
-        error_message = f'Amino acids in PSSM files do not match pdb file for {pdb_path}.'
-        if n_wrong > 0:
-            error_message = error_message + f'\n\t{n_wrong} entries are incorrect.'
-        if n_missing > 0:
-            error_message = error_message + f'\n\t{n_missing} entries are missing.'
+        _, filename = os.path.split(pdb_path)
+        error_message = f'Amino acids in PSSM files do not match pdb file for {filename}.'
+        if verbose:
+            if n_wrong > 0:
+                error_message = error_message + f'\n\t{n_wrong} entries are incorrect.'
+            if n_missing > 0:
+                error_message = error_message + f'\n\t{n_missing} entries are missing.'
         raise ValueError(error_message)
 
 
@@ -316,10 +317,10 @@ class QueryCollection:
         if feature_modules == 'all':
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__)]
         elif isinstance(feature_modules, list):
-            feature_names = [basename(m.__file__)[:-3] if isinstance(m,ModuleType) 
+            feature_names = [os.path.basename(m.__file__)[:-3] if isinstance(m,ModuleType) 
                              else m.replace('.py','') for m in feature_modules]
         elif isinstance(feature_modules, ModuleType):
-            feature_names = [basename(feature_modules.__file__)[:-3]]
+            feature_names = [os.path.basename(feature_modules.__file__)[:-3]]
         elif isinstance(feature_modules, str):
             feature_names = [feature_modules.replace('.py','')]
         else:
@@ -423,7 +424,10 @@ class SingleResidueVariantResidueQuery(Query):
         """
 
         # load .PDB structure
-        load_pssms = conservation in feature_modules
+        if isinstance(feature_modules, List):
+            load_pssms = conservation in feature_modules
+        else:
+            load_pssms = conservation == feature_modules
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
@@ -567,7 +571,10 @@ class SingleResidueVariantAtomicQuery(Query):
         """
 
         # load .PDB structure
-        load_pssms = conservation in feature_modules
+        if isinstance(feature_modules, List):
+            load_pssms = conservation in feature_modules
+        else:
+            load_pssms = conservation == feature_modules
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
@@ -742,6 +749,8 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         # read the pssm
         structure = contact_atoms[0].residue.chain.model
 
+        if not isinstance(feature_modules, List):
+            feature_modules = [feature_modules]
         if conservation in feature_modules:
             _load_ppi_pssms(self._pssm_paths,
                             self._chain_id1, self._chain_id2,
@@ -841,6 +850,8 @@ class ProteinProteinInterfaceResidueQuery(Query):
         # read the pssm
         structure = contact_atoms[0].residue.chain.model
 
+        if not isinstance(feature_modules, List):
+            feature_modules = [feature_modules]
         if conservation in feature_modules:
             _load_ppi_pssms(self._pssm_paths,
                             self._chain_id1, self._chain_id2,
