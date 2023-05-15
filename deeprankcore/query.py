@@ -18,7 +18,7 @@ import pdb2sql
 
 import deeprankcore.features
 from deeprankcore.domain.aminoacidlist import convert_aa_nomenclature
-from deeprankcore.features import components, contact
+from deeprankcore.features import components, conservation, contact
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import get_residue_center
@@ -103,7 +103,8 @@ class Query:
 
     def _load_structure(
         self, pdb_path: str, pssm_paths: Optional[Dict[str, str]],
-        include_hydrogens: bool
+        include_hydrogens: bool,
+        load_pssms: bool,
     ):
         "A helper function, to build the structure from .PDB and .PSSM files."
 
@@ -131,7 +132,7 @@ class Query:
             pdb._close() # pylint: disable=protected-access
 
         # read the pssm
-        if pssm_paths is not None:
+        if load_pssms:
             _check_pssm(pdb_path, pssm_paths)
             for chain in structure.chains:
                 if chain.id in pssm_paths:
@@ -422,7 +423,8 @@ class SingleResidueVariantResidueQuery(Query):
         """
 
         # load .PDB structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
+        load_pssms = conservation in feature_modules
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
         variant_residue = None
@@ -565,7 +567,8 @@ class SingleResidueVariantAtomicQuery(Query):
         """
 
         # load .PDB structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
+        load_pssms = conservation in feature_modules
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
         variant_residue = None
@@ -648,17 +651,16 @@ def _load_ppi_pssms(pssm_paths: Union[Dict[str, str], None],
                     structure: PDBStructure,
                     pdb_path):
 
-    if pssm_paths is not None:
-        _check_pssm(pdb_path, pssm_paths)
-        for chain_id in [chain_id1, chain_id2]:
-            if chain_id in pssm_paths:
+    _check_pssm(pdb_path, pssm_paths)
+    for chain_id in [chain_id1, chain_id2]:
+        if chain_id in pssm_paths:
 
-                chain = structure.get_chain(chain_id)
+            chain = structure.get_chain(chain_id)
 
-                pssm_path = pssm_paths[chain_id]
+            pssm_path = pssm_paths[chain_id]
 
-                with open(pssm_path, "rt", encoding="utf-8") as f:
-                    chain.pssm = parse_pssm(f, chain)
+            with open(pssm_path, "rt", encoding="utf-8") as f:
+                chain.pssm = parse_pssm(f, chain)
 
 
 class ProteinProteinInterfaceAtomicQuery(Query):
@@ -740,9 +742,10 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         # read the pssm
         structure = contact_atoms[0].residue.chain.model
 
-        _load_ppi_pssms(self._pssm_paths,
-                        self._chain_id1, self._chain_id2,
-                        structure, self._pdb_path)
+        if conservation in feature_modules:
+            _load_ppi_pssms(self._pssm_paths,
+                            self._chain_id1, self._chain_id2,
+                            structure, self._pdb_path)
 
         # add the features
         for feature_module in feature_modules:
@@ -838,9 +841,10 @@ class ProteinProteinInterfaceResidueQuery(Query):
         # read the pssm
         structure = contact_atoms[0].residue.chain.model
 
-        _load_ppi_pssms(self._pssm_paths,
-                        self._chain_id1, self._chain_id2,
-                        structure, self._pdb_path)
+        if conservation in feature_modules:
+            _load_ppi_pssms(self._pssm_paths,
+                            self._chain_id1, self._chain_id2,
+                            structure, self._pdb_path)
 
         # add the features
         for feature_module in feature_modules:
