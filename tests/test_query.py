@@ -377,7 +377,7 @@ def test_incorrect_pssm_order():
                 "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
                 "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
             },
-        ).build(components)
+        ).build(conservation)
 
 
 def test_incomplete_pssm():
@@ -390,4 +390,4 @@ def test_incomplete_pssm():
                 "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
                 "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
             },
-        ).build(components)
+        ).build(conservation)
