@@ -671,20 +671,14 @@ class GraphDataset(DeeprankDataset):
             dataset_train will be ignored since the current dataset will be considered as training set.""")
         
         if (self.features_transform is not None):
-            _log.warning("feat_transform is not None")
             standardize_all=None
             if ('all' in self.features_transform):
-                _log.warning("all option on")
                 standardize_all= self.features_transform.get('all', {}).get('standardize')
             if train and (standardize_all is not False):
-                _log.warning("Into train=True")
                 if self.means or self.devs is None:
                     if self.df is None:
-                        _log.warning("hdf5_to_pandas")
                         self.hdf5_to_pandas()
-                        _log.warning("Finish hdf5_to_pandas")
                     self._compute_mean_std()
-                    _log.warning("Finish _compute_mean_std")
             elif not train and (standardize_all is not False):
                 if (dataset_train.means or dataset_train.devs) is None:
                     if dataset_train.df is None:
@@ -725,10 +719,16 @@ class GraphDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
-
+        #need improvement
         with h5py.File(fname, 'r') as f5:
             grp = f5[entry_name]
 
+            # get feat transformation and standardization if all option on
+            all_option=False
+            if (self.features_transform is not None) and ('all' in self.features_transform):
+                all_option=True
+                transform = self.features_transform.get('all', {}).get('transform')
+                standard = self.features_transform.get('all', {}).get('standardize')
             # node features
             node_data = ()
             for feat in self.node_features:
@@ -736,13 +736,10 @@ class GraphDataset(DeeprankDataset):
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                     
                     # get feat transformation and standardization
-                    transform = None
-                    standard = False
-                    if self.features_transform is not None:
-                        if 'all' in self.features_transform:
-                            transform = self.features_transform.get('all', {}).get('transform')
-                            standard = self.features_transform.get('all', {}).get('standardize')
-                        else:    
+                    if all_option is False:
+                        transform = None
+                        standard = False
+                        if self.features_transform is not None:
                             transform = self.features_transform.get(feat, {}).get('transform')
                             standard = self.features_transform.get(feat, {}).get('standardize')
 
@@ -783,13 +780,10 @@ class GraphDataset(DeeprankDataset):
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         
                         # get feat transformation and standardization
-                        transform = None
-                        standard = False
-                        if self.features_transform is not None:
-                            if 'all' in self.features_transform:
-                                transform = self.features_transform.get('all', {}).get('transform')
-                                standard = self.features_transform.get('all', {}).get('standardize')
-                            else:    
+                        if all_option is False:
+                            transform = None
+                            standard = False
+                            if self.features_transform is not None:
                                 transform = self.features_transform.get(feat, {}).get('transform')
                                 standard = self.features_transform.get(feat, {}).get('standardize')
 
