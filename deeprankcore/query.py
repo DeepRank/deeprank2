@@ -42,8 +42,11 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], verbose = False):
         pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
 
     Raises:
-        ValueError: Raised if info between PDB and PSSM doesn't match
+        ValueError: Raised if info between PDB and PSSM doesn't match or if no pssms were provided
     """
+
+    if not pssm_paths:
+        raise ValueError('No pssm paths provided for conservation feature module.')
 
     pssm_data = {}
     for chain in pssm_paths:

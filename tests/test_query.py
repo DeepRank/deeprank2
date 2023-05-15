@@ -391,3 +391,42 @@ def test_incomplete_pssm():
                 "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
             },
         ).build(conservation)
+
+
+def test_no_pssm_provided():
+    with pytest.raises(ValueError):
+        _ = ProteinProteinInterfaceResidueQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+            {},
+        ).build(conservation)
+        
+        _ = ProteinProteinInterfaceResidueQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+        ).build(conservation)
+
+
+def test_incorrect_pssm_provided():
+    with pytest.raises(FileNotFoundError):
+        _ = ProteinProteinInterfaceResidueQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+            {
+                "A": "dummy_non_existing_file",
+                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
+            },
+        ).build(conservation)
+
+    with pytest.raises(ValueError):
+        _ = ProteinProteinInterfaceResidueQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+            {
+                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
+            },
+        ).build(conservation)
