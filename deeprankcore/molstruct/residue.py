@@ -51,7 +51,7 @@ class Residue:
 
         pssm = self._chain.pssm
         if pssm is None:
-            raise ValueError(f"pssm not set on {self._chain}")
+            raise FileNotFoundError(f'No pssm file found for Chain {self._chain}.')
 
         return pssm[self]
 
