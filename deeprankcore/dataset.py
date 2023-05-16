@@ -437,6 +437,8 @@ class GridDataset(DeeprankDataset):
         self.target_transform = target_transform
         
         self.dataset_type='Grid'
+        self.features_transform=None
+        
         self._check_features()
 
         self.features_dict = {}
