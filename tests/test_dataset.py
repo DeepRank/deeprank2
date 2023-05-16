@@ -425,10 +425,11 @@ class TestDataSet(unittest.TestCase):
                 train=False,
                 dataset_train=dataset_train
             )
-
 # TODO: add test for transformations. An idea could be using a transformation such as np.log
 # on a feature, and then compute its mean and std and compare those with the same feature manually
 # transformed with np.log
 
+
 if __name__ == "__main__":
     unittest.main()
+    
