@@ -243,30 +243,31 @@ class DeeprankDataset(Dataset):
                 df_dict = {}
                 df_dict['id'] = entry_names
 
+                transform = False
+                if self.features_transform:
+                    if 'all' in self.features_transform:
+                        transform = self.features_transform.get('all', {}).get('transform')
+
                 for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
                         #get transformation type
-                        transform=None
-                        if(self.dataset_type == 'Graph') and (self.features_transform is not None):
-                            #check if there is a "all" key describing the transform for all the features
-                            if 'all' in self.features_transform:
-                                transform=self.features_transform.get('all', {}).get('transform')
-                            else:
-                                transform=self.features_transform.get(feat, {}).get('transform')
+                        if self.features_transform:
+                            if feat in self.features_transform:
+                                transform = self.features_transform.get(feat, {}).get('transform')
                         #Check the number of channels the features have    
                         if f[entry_name][feat_type][feat][()].ndim == 2:
                             for i in range(f[entry_name][feat_type][feat][:].shape[1]):
                                 df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
                                 #apply transformation for each channel in this feature
-                                if(transform is not None):
-                                    df_dict[feat + '_' + str(i)]=[transform(row) for row in df_dict[feat + '_' + str(i)]]
+                                if transform:
+                                    df_dict[feat + '_' + str(i)] = [transform(row) for row in df_dict[feat + '_' + str(i)]]
                         else:
                             df_dict[feat] = [
                                 f[entry_name][feat_type][feat][:]
                                 if f[entry_name][feat_type][feat][()].ndim == 1
                                 else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
                             #apply transformation
-                            if(transform is not None):
+                            if transform:
                                 df_dict[feat]=[transform(row) for row in df_dict[feat]]
                 
                 df = pd.DataFrame(data=df_dict)
@@ -433,14 +434,8 @@ class GridDataset(DeeprankDataset):
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.features = features
-
         self.target_transform = target_transform
-        
-        self.dataset_type='Grid'
-        self.features_transform=None
-        
         self._check_features()
-
         self.features_dict = {}
         self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
         if self.target is not None:
@@ -448,8 +443,6 @@ class GridDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = [self.target]
             else:
                 self.features_dict[targets.VALUES] = self.target
-        self.hdf5_to_pandas()
-        self._compute_mean_std()
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -616,8 +609,6 @@ class GraphDataset(DeeprankDataset):
                 Defaults to None.
             tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
             root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
-            edge_features_transform (Optional[Callable], optional): Transformation applied to the edge features.
-                Defaults to lambda x: np.tanh(-x/2+2)+1.
             target_transform (Optional[bool], optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
                 Defaults to False.
@@ -643,19 +634,13 @@ class GraphDataset(DeeprankDataset):
         """
 
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
-        _log.warning("Into Graph Dataset")
+
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
-
         self.target_transform = target_transform
-
         self.features_transform = features_transform
-
-        self.dataset_type='Graph'
-        
         self._check_features()
-
         self.features_dict = {}
         self.features_dict[Nfeat.NODE] = self.node_features
         self.features_dict[Efeat.EDGE] = self.edge_features
@@ -665,35 +650,36 @@ class GraphDataset(DeeprankDataset):
             else:
                 self.features_dict[targets.VALUES] = self.target
 
-        if not train and not isinstance(dataset_train, GraphDataset):
-            raise TypeError("Please provide a valid training GraphDataset.")
-        
-        if train and dataset_train:
+        if not train:
+            if not isinstance(dataset_train, GraphDataset):
+                raise TypeError("Please provide a valid training GraphDataset.")
+
+            if dataset_train.features_transform is not None:
+                self.features_transform = dataset_train.features_transform
+            else:
+                self.features_transform = None
+            _log.warning("features_transform parameter, if set, will be ignored." + "\n" +
+                        "features_transform will remain the same as the one used in training phase.")
+        elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.
             dataset_train will be ignored since the current dataset will be considered as training set.""")
-        
-        if (self.features_transform is not None):
-            standardize_all=None
-            if ('all' in self.features_transform):
-                standardize_all= self.features_transform.get('all', {}).get('standardize')
-            if train and (standardize_all is not False):
-                if self.means or self.devs is None:
-                    if self.df is None:
-                        self.hdf5_to_pandas()
-                    self._compute_mean_std()
-            elif not train and (standardize_all is not False):
-                if (dataset_train.means or dataset_train.devs) is None:
-                    if dataset_train.df is None:
-                        dataset_train.hdf5_to_pandas()
-                    dataset_train._compute_mean_std()
-                self.means = dataset_train.means
-                self.devs = dataset_train.devs
-                self.features_transform = dataset_train.features_transform
-                _log.warning("The features_transform has been set but will be ignored." + "\n" +
-                         "features_transform will remain the same as the one used in training phase.")
-                
-        if (not train or dataset_train):
-            _log.warning("No scaling method has been set, and train and dataset_train parameters will be ignored.")
+            
+        standardize = False
+        if self.features_transform:
+            standardize = any(self.features_transform[key].get("standardize") for key, _ in features_transform.items())
+
+        if standardize and train: 
+            if self.means or self.devs is None:
+                if self.df is None:
+                    self.hdf5_to_pandas()
+                self._compute_mean_std()
+        elif standardize and (not train):
+            if (dataset_train.means is None) or (dataset_train.devs is None):
+                if dataset_train.df is None:
+                    dataset_train.hdf5_to_pandas()
+                dataset_train._compute_mean_std()
+            self.means = dataset_train.means
+            self.devs = dataset_train.devs
 
     def get(self, idx: int) -> Data:
         """Gets one graph item from its unique index.
@@ -707,9 +693,6 @@ class GraphDataset(DeeprankDataset):
 
         fname, mol = self.index_entries[idx]
         return self.load_one_graph(fname, mol)
-
-    # The dictionary will be in this format:
-    
     
     def load_one_graph(self, fname: str, entry_name: str)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
         """Loads one graph.
@@ -725,12 +708,12 @@ class GraphDataset(DeeprankDataset):
         with h5py.File(fname, 'r') as f5:
             grp = f5[entry_name]
 
-            # get feat transformation and standardization if all option on
-            all_option=False
-            if (self.features_transform is not None) and ('all' in self.features_transform):
-                all_option=True
+            if (self.features_transform) and ('all' in self.features_transform):
                 transform = self.features_transform.get('all', {}).get('transform')
                 standard = self.features_transform.get('all', {}).get('standardize')
+            else:
+                transform = False
+                standard = False
             # node features
             node_data = ()
             for feat in self.node_features:
@@ -738,15 +721,12 @@ class GraphDataset(DeeprankDataset):
                     vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                     
                     # get feat transformation and standardization
-                    if all_option is False:
-                        transform = None
-                        standard = False
-                        if self.features_transform is not None:
-                            transform = self.features_transform.get(feat, {}).get('transform')
-                            standard = self.features_transform.get(feat, {}).get('standardize')
+                    if (self.features_transform is not None) and (feat in self.features_transform):
+                        transform = self.features_transform.get(feat, {}).get('transform')
+                        standard = self.features_transform.get(feat, {}).get('standardize')
 
                     # apply transformation
-                    if transform is not None:
+                    if transform:
                         vals = transform(vals)
 
                     if vals.ndim == 1: # features with only one channel
@@ -782,15 +762,12 @@ class GraphDataset(DeeprankDataset):
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         
                         # get feat transformation and standardization
-                        if all_option is False:
-                            transform = None
-                            standard = False
-                            if self.features_transform is not None:
-                                transform = self.features_transform.get(feat, {}).get('transform')
-                                standard = self.features_transform.get(feat, {}).get('standardize')
+                        if (self.features_transform is not None) and (feat in self.features_transform):
+                            transform = self.features_transform.get(feat, {}).get('transform')
+                            standard = self.features_transform.get(feat, {}).get('standardize')
 
                         # apply transformation
-                        if transform is not None:
+                        if transform:
                             vals = transform(vals)
 
                         if vals.ndim == 1:

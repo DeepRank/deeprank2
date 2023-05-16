@@ -13,29 +13,11 @@ from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain import targetstorage as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
-features_transform={'bsa':{'transform':lambda t:np.log(t+1),'standardize':True},
-                #pylint: disable=unnecessary-lambda
-                 'sasa':{'transform':lambda t:np.sqrt(t),'standardize':True},
-                 'hb_donors':{'transform':None,'standardize':False},
-                 'hse':{'transform':None,'standardize':True}
-}
 class TestDataSet(unittest.TestCase):
     def setUp(self):
         self.hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5"
 
-    def test_graph_dataset(self):
-        dataset = GraphDataset(
-            hdf5_path=self.hdf5_path,
-            node_features=node_feats,
-            edge_features=[Efeat.DISTANCE],
-            target=targets.IRMSD,
-            subset=None,
-        )
-
-        assert len(dataset) == 4
-        assert dataset[0] is not None
-
-    def test_dataset_collates_entry_names(self):
+    def test_collates_entry_names_datasets(self):
 
         for dataset_name, dataset in [("GraphDataset", GraphDataset(self.hdf5_path,
                                                                     node_features=node_feats,
@@ -54,21 +36,28 @@ class TestDataSet(unittest.TestCase):
                                             'residue-ppi-1ATN_3w:A-B',
                                             'residue-ppi-1ATN_4w:A-B']), f"entry names of {dataset_name} were not collated correctly"
 
-    def test_dataset_dataframe_size(self):
-        hdf5_paths = ["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5", "tests/data/hdf5/test.hdf5"]
-        dataset = GraphDataset(
-            hdf5_path=hdf5_paths,
+    def test_datasets(self):
+        dataset_graph = GraphDataset(
+            hdf5_path=self.hdf5_path,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
-            target=targets.BINARY
+            target=targets.IRMSD,
+            subset=None,
         )
-        n = 0
-        for hdf5 in hdf5_paths:
-            with h5py.File(hdf5, 'r') as hdf5_r:
-                n += len(hdf5_r.keys())      
-        assert len(dataset) == n, f"total data points got was {len(dataset)}"
+
+        dataset_grid = GridDataset(
+            hdf5_path=self.hdf5_path,
+            features=[Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
+            target=targets.IRMSD,
+            subset=None,
+        )
+
+        assert len(dataset_graph) == 4
+        assert dataset_graph[0] is not None
+        assert len(dataset_grid) == 4
+        assert dataset_grid[0] is not None
     
-    def test_grid_dataset_regression(self):
+    def test_regression_griddataset(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
             features=[Efeat.VDW, Efeat.ELEC],
@@ -83,7 +72,7 @@ class TestDataSet(unittest.TestCase):
         # 1 entry with rmsd value
         assert dataset[0].y.shape == (1,)
 
-    def test_grid_dataset_classification(self):
+    def test_classification_griddataset(self):
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
             features=[Efeat.VDW, Efeat.ELEC],
@@ -98,7 +87,7 @@ class TestDataSet(unittest.TestCase):
         # 1 entry with class value
         assert dataset[0].y.shape == (1,)
 
-    def test_dataset_filter(self):
+    def test_filter_graphdataset(self):
         GraphDataset(
             hdf5_path=self.hdf5_path,
             node_features=node_feats,
@@ -108,7 +97,7 @@ class TestDataSet(unittest.TestCase):
             target_filter={targets.IRMSD: "<10"},
         )
 
-    def test_multi_file_dataset(self):
+    def test_multi_file_graphdataset(self):
         dataset = GraphDataset(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
             node_features=node_feats,
@@ -119,7 +108,7 @@ class TestDataSet(unittest.TestCase):
         assert dataset.len() > 0
         assert dataset.get(0) is not None
 
-    def test_save_external_links(self):
+    def test_save_external_links_graphdataset(self):
         n = 2
 
         with h5py.File("tests/data/hdf5/test.hdf5", 'r') as hdf5:
@@ -135,7 +124,7 @@ class TestDataSet(unittest.TestCase):
         for new_id in new_ids:
             assert new_id in original_ids
 
-    def test_save_hard_links(self):
+    def test_save_hard_links_graphdataset(self):
         n = 2
 
         with h5py.File("tests/data/hdf5/test.hdf5", 'r') as hdf5:
@@ -151,7 +140,7 @@ class TestDataSet(unittest.TestCase):
         for new_id in new_ids:
             assert new_id in original_ids
 
-    def test_subset(self):
+    def test_subset_graphdataset(self):
         hdf5 = h5py.File("tests/data/hdf5/train.hdf5", 'r')  # contains 44 datapoints
         hdf5_keys = list(hdf5.keys())
         n = 10
@@ -166,7 +155,7 @@ class TestDataSet(unittest.TestCase):
 
         hdf5.close()
 
-    def test_target_transform(self):
+    def test_target_transform_graphdataset(self):
 
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
@@ -177,7 +166,7 @@ class TestDataSet(unittest.TestCase):
         for i in range(len(dataset)):
             assert(0 <= dataset.get(i).y <= 1)
 
-    def test_invalid_target_transform(self):
+    def test_invalid_target_transform_graphdataset(self):
 
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
@@ -188,7 +177,21 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             dataset.get(0)
 
-    def test_graph_hdf5_to_pandas(self):
+    def test_size_graphdataset(self):
+        hdf5_paths = ["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5", "tests/data/hdf5/test.hdf5"]
+        dataset = GraphDataset(
+            hdf5_path=hdf5_paths,
+            node_features=node_feats,
+            edge_features=[Efeat.DISTANCE],
+            target=targets.BINARY
+        )
+        n = 0
+        for hdf5 in hdf5_paths:
+            with h5py.File(hdf5, 'r') as hdf5_r:
+                n += len(hdf5_r.keys())      
+        assert len(dataset) == n, f"total data points got was {len(dataset)}"
+    
+    def test_hdf5_to_pandas_graphdataset(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
         dataset = GraphDataset(
@@ -274,7 +277,7 @@ class TestDataSet(unittest.TestCase):
 
         assert dataset.df.shape[0] == len(keys[2:])
 
-    def test_graph_save_hist(self):
+    def test_save_hist_graphdataset(self):
 
         output_directory = mkdtemp()
         fname = os.path.join(output_directory, "test.png")
@@ -294,15 +297,19 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
     
-    
-    def test_graph_standardize(self):# noqa: MC0001, pylint: disable=too-many-locals
+    def test_standardize_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
+        features_transform = {'bsa': {'standardize': True},
+                        'sasa': {'standardize': True},
+                        'hb_donors':{'standardize': False},
+                        'hse': {'standardize': True}}
+        
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
-            target='binary',
-            features_transform=features_transform
+            target = 'binary',
+            features_transform = features_transform
         )
 
         with h5py.File(hdf5_path, 'r') as f5:
@@ -329,20 +336,8 @@ class TestDataSet(unittest.TestCase):
                         arr = np.concatenate(arr)
                         features_dict[feat + f'_{ch}'] = arr
 
-            for key, values in features_dict.items():
-                if(key in features_transform):
-                    standardization=features_transform.get(key, {}).get('standardize')
-                    if standardization: #Feature contains in dictionary & standardization=True
-                        #assert key == 'bsa'
-                        mean = values.mean()
-                        dev = values.std()
-                        assert -0.3 < mean < 0.3
-                        # for one hot encoded features, with few data points it can happen that mean and std are not exactly 0 and 1
-                        assert 0.7 < dev < 1.5      
-
             # getting all edge features values
             tensor_idx = 0
-            features_dict = {}
             for feat in dataset.edge_features:
                 vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                 if vals.ndim == 1: # features with only one channel
@@ -363,14 +358,16 @@ class TestDataSet(unittest.TestCase):
 
             for key, values in features_dict.items():
                 if(key in features_transform):
-                    standardization=features_transform.get(key, {}).get('standardize')
+                    standardization = features_transform.get(key, {}).get('standardize')
                     if standardization: #Feature contains in dictionary & standardization=True
                         mean = values.mean()
                         dev = values.std()
                         assert -0.2 < mean < 0.2
                         assert 0.8 < dev < 1.2
 
-    def test_graph_standardization_logic(self):
+    # TODO: this test needs to be readapted for testing the new logic. We need to pass features_transform as input
+    # and verify that the exception cases work
+    def test_standardization_logic_graphdataset(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
@@ -429,6 +426,9 @@ class TestDataSet(unittest.TestCase):
                 dataset_train=dataset_train
             )
 
+# TODO: add test for transformations. An idea could be using a transformation such as np.log
+# on a feature, and then compute its mean and std and compare those with the same feature manually
+# transformed with np.log
 
 if __name__ == "__main__":
     unittest.main()
