@@ -21,24 +21,24 @@ def _cal_mean_std( # noqa: MC0001, pylint: disable=too-many-locals
                        feat:str
     ):
 
-        with h5py.File(hdf5_path, 'r') as f:
-            entry_names = [entry for entry, _ in f.items()]
+    with h5py.File(hdf5_path, 'r') as f:
+        entry_names = [entry for entry, _ in f.items()]
 
-            df_dict = {}
-            df_dict['id'] = entry_names
+        df_dict = {}
+        df_dict['id'] = entry_names
 
-            transform = False
-            transform = features_transform.get(feat, {}).get('transform')
-                    
-            df_dict[feat] = [
-                f[entry_name][Nfeat.NODE][feat][:]
-                if f[entry_name][Nfeat.NODE][feat][()].ndim == 1
-                else f[entry_name][Nfeat.NODE][feat][()] for entry_name in entry_names]
-            #apply transformation
-            if transform:
-                df_dict[feat]=[transform(row) for row in df_dict[feat]]
-            
-            df = pd.DataFrame(data=df_dict)
+        transform = False
+        transform = features_transform.get(feat, {}).get('transform')
+                
+        df_dict[feat] = [
+            f[entry_name][Nfeat.NODE][feat][:]
+            if f[entry_name][Nfeat.NODE][feat][()].ndim == 1
+            else f[entry_name][Nfeat.NODE][feat][()] for entry_name in entry_names]
+        #apply transformation
+        if transform:
+            df_dict[feat]=[transform(row) for row in df_dict[feat]]
+        
+        df = pd.DataFrame(data=df_dict)
  
         means = {col: round(np.concatenate(df[col].values).mean(), 1) if isinstance(df[col].values[0], np.ndarray) \
             else round(df[col].values.mean(), 1) \
@@ -461,8 +461,8 @@ class TestDataSet(unittest.TestCase):
         # mean and devs should be None
         assert dataset_train.means == dataset_test.means
         assert dataset_train.devs == dataset_test.devs
-        assert dataset_train.means == None
-        assert dataset_train.devs == None
+        assert dataset_train.means is None
+        assert dataset_train.devs is None
 
         # raise error if dataset_train is not provided
         with self.assertRaises(TypeError):
@@ -506,6 +506,7 @@ class TestDataSet(unittest.TestCase):
         
         assert means_devs[0].get(node_feat_test) == dataset_test_transform.means.get(node_feat_test)
         assert means_devs[1].get(node_feat_test) == dataset_test_transform.devs.get(node_feat_test)
+
 
 if __name__ == "__main__":
     unittest.main()
