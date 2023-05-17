@@ -21,33 +21,25 @@ def _cal_mean_std( # noqa: MC0001, pylint: disable=too-many-locals
                        feat:str
     ):
 
-        df_final = pd.DataFrame()
+        with h5py.File(hdf5_path, 'r') as f:
+            entry_names = [entry for entry, _ in f.items()]
 
-        for fname in hdf5_path:
-            with h5py.File(fname, 'r') as f:
-                entry_names = [entry for entry, _ in f.items()]
+            df_dict = {}
+            df_dict['id'] = entry_names
 
-                df_dict = {}
-                df_dict['id'] = entry_names
-
-                transform = False
-                transform = features_transform.get(feat, {}).get('transform')
-                        
-                df_dict[feat] = [
-                    f[entry_name][Nfeat.NODE][feat][:]
-                    if f[entry_name][Nfeat.NODE][feat][()].ndim == 1
-                    else f[entry_name][Nfeat.NODE][feat][()] for entry_name in entry_names]
-                #apply transformation
-                if transform:
-                    df_dict[feat]=[transform(row) for row in df_dict[feat]]
-                
-                df = pd.DataFrame(data=df_dict)
-
-            df_final = pd.concat([df_final, df])
-
-        df_final.reset_index(drop=True, inplace=True)
-        df = df_final
-        
+            transform = False
+            transform = features_transform.get(feat, {}).get('transform')
+                    
+            df_dict[feat] = [
+                f[entry_name][Nfeat.NODE][feat][:]
+                if f[entry_name][Nfeat.NODE][feat][()].ndim == 1
+                else f[entry_name][Nfeat.NODE][feat][()] for entry_name in entry_names]
+            #apply transformation
+            if transform:
+                df_dict[feat]=[transform(row) for row in df_dict[feat]]
+            
+            df = pd.DataFrame(data=df_dict)
+ 
         means = {col: round(np.concatenate(df[col].values).mean(), 1) if isinstance(df[col].values[0], np.ndarray) \
             else round(df[col].values.mean(), 1) \
             for col in df.columns[1:]}
@@ -496,21 +488,24 @@ class TestDataSet(unittest.TestCase):
             )
             
     def test_feature_transform_mean_std(self):
+        node_feat_test='bsa'
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform={'bsa':{'transform':lambda t:np.log(t+1),'standardize':True}}
         
+        #calculate transformation and standardization form GraphDataset object
         dataset_test_transform = GraphDataset(
             hdf5_path = hdf5_path,
             target='binary',
-            node_features = ['bsa'],
+            node_features = [node_feat_test],
             edge_features =[],
             features_transform=features_transform
         )
         
-        means_devs=_cal_mean_std(hdf5_path,features_transform,'bsa')
+        #calculate transformation and standardization maunally
+        means_devs=_cal_mean_std(hdf5_path,features_transform,node_feat_test)
         
-        assert means_devs[0] == dataset_test_transform.means
-        assert means_devs[1] == dataset_test_transform.devs
+        assert means_devs[0].get(node_feat_test) == dataset_test_transform.means.get(node_feat_test)
+        assert means_devs[1].get(node_feat_test) == dataset_test_transform.devs.get(node_feat_test)
 
 if __name__ == "__main__":
     unittest.main()
