@@ -666,7 +666,7 @@ class GraphDataset(DeeprankDataset):
             
         standardize = False
         if self.features_transform:
-            standardize = any(self.features_transform[key].get("standardize") for key, _ in features_transform.items())
+            standardize = any(self.features_transform[key].get("standardize") for key, _ in self.features_transform.items())
 
         if standardize and train: 
             if self.means or self.devs is None:
