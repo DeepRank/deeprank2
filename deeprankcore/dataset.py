@@ -704,7 +704,7 @@ class GraphDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
-        #need improvement
+       
         with h5py.File(fname, 'r') as f5:
             grp = f5[entry_name]
 
