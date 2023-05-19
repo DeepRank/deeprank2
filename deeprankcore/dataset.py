@@ -625,11 +625,11 @@ class GraphDataset(DeeprankDataset):
             dataset_train (class:`GraphDataset`, optional): if train is True, assign here the training set.
                 Defaults to None.
                 
-            features_transform (Optional[dict], optional): Dictionary to determine the transformation methods and whether to apply
+            features_transform (Optional[dict], optional): Dictionary to indicate the transformations and whether to apply
                 standardization to each feature in the dictionary.
-                For example: features_transform = {'bsa':{'transform':lambda t:np.log(t+1),'standardize':True}} for feature bsa.
-                A "all" key can be set in the dictionary, which performs the same standardize and transform for all features,
-                for example: features_transform = {'all':{'transform':lambda t:np.log(t+1),'standardize':True}}.
+                For example: features_transform = {'bsa': {'transform': lambda t:np.log(t+1),' standardize': True}} for the feature `bsa`.
+                A "all" key can be set in the dictionary, which indicate to perform the same `standardize` and `transform` for all features,
+                for example: features_transform = {'all': {'transform': lambda t:np.log(t+1), 'standardize': True}}.
                 Defaults to None.
         """
 
