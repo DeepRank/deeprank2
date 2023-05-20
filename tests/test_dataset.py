@@ -17,39 +17,83 @@ node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HS
 
 def _cal_mean_std( # noqa: MC0001, pylint: disable=too-many-locals
                        hdf5_path: str,
-                       features_transform:dict,
-                       feat:str
+                       features_transform: dict,
+                       feat: str
     ):
 
     with h5py.File(hdf5_path, 'r') as f:
         entry_names = [entry for entry, _ in f.items()]
 
-        df_dict = {}
-        df_dict['id'] = entry_names
-
         transform = False
         transform = features_transform.get(feat, {}).get('transform')
                 
-        df_dict[feat] = [
+        feat_values = [
             f[entry_name][Nfeat.NODE][feat][:]
             if f[entry_name][Nfeat.NODE][feat][()].ndim == 1
             else f[entry_name][Nfeat.NODE][feat][()] for entry_name in entry_names]
         #apply transformation
         if transform:
-            df_dict[feat]=[transform(row) for row in df_dict[feat]]
+            feat_values=[transform(row) for row in feat_values]
         
-        df = pd.DataFrame(data=df_dict)
- 
-        means = {col: round(np.concatenate(df[col].values).mean(), 1) if isinstance(df[col].values[0], np.ndarray) \
-            else round(df[col].values.mean(), 1) \
-            for col in df.columns[1:]}
-        devs = {col: round(np.concatenate(df[col].values).std(), 1) if isinstance(df[col].values[0], np.ndarray) \
-            else round(df[col].values.std(), 1) \
-            for col in df.columns[1:]}
+        arr = np.array(feat_values)    
         
-        means_devs=[means,devs]
+        mean = {round(np.concatenate(arr).mean(), 1) if isinstance(arr[0], np.ndarray) \
+                else round(arr.mean(), 1)}
+        dev = {round(np.concatenate(arr).std(), 1) if isinstance(arr[0], np.ndarray) \
+                else round(arr.std(), 1)}
 
-        return means_devs
+        mean = mean.pop()
+        dev = dev.pop()
+        return mean, dev
+
+def _get_features(
+                    hdf5_path: str, 
+                    dataset: GraphDataset
+    ):
+    with h5py.File(hdf5_path, 'r') as f5:
+        grp = f5[list(f5.keys())[0]]
+
+        # getting all node features values
+        tensor_idx = 0
+        features_dict = {}
+        for feat in dataset.node_features:
+            vals = grp[f"{Nfeat.NODE}/{feat}"][()]
+            if vals.ndim == 1: # features with only one channel
+                arr = []
+                for entry_idx in range(len(dataset)):
+                    arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
+                arr = np.concatenate(arr)
+                features_dict[feat] = arr
+                tensor_idx += 1
+            else:
+                for ch in range(vals.shape[1]):
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
+                    tensor_idx += 1
+                    arr = np.concatenate(arr)
+                    features_dict[feat + f'_{ch}'] = arr
+
+        # getting all edge features values
+        tensor_idx = 0
+        for feat in dataset.edge_features:
+            vals = grp[f"{Efeat.EDGE}/{feat}"][()]
+            if vals.ndim == 1: # features with only one channel
+                arr = []
+                for entry_idx in range(len(dataset)):
+                    arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
+                arr = np.concatenate(arr)
+                features_dict[feat] = arr
+                tensor_idx += 1
+            else:
+                for ch in range(vals.shape[1]):
+                    arr = []
+                    for entry_idx in range(len(dataset)):
+                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
+                    tensor_idx += 1
+                    arr = np.concatenate(arr)
+                    features_dict[feat + f'_{ch}'] = arr
+    return features_dict
 
 class TestDataSet(unittest.TestCase):
     def setUp(self):
@@ -185,8 +229,8 @@ class TestDataSet(unittest.TestCase):
         subset = hdf5_keys[:n]
 
         dataset = GraphDataset(
-            hdf5_path="tests/data/hdf5/train.hdf5",
-            subset=subset,
+            hdf5_path = "tests/data/hdf5/train.hdf5",
+            subset = subset,
         )
 
         assert n == len(dataset)
@@ -334,14 +378,14 @@ class TestDataSet(unittest.TestCase):
         assert len(os.listdir(output_directory)) > 0
 
         rmtree(output_directory)
-    
+        
     def test_standardize_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
         features_transform = {'bsa': {'standardize': True},
                         'sasa': {'standardize': True},
-                        'hb_donors':{'standardize': False},
+                        'hb_donors': {'standardize': False},
                         'hse': {'standardize': True}}
         
         dataset = GraphDataset(
@@ -350,113 +394,31 @@ class TestDataSet(unittest.TestCase):
             features_transform = features_transform
         )
 
-        with h5py.File(hdf5_path, 'r') as f5:
-            grp = f5[list(f5.keys())[0]]
-
-            # getting all node features values
-            tensor_idx = 0
-            features_dict = {}
-            for feat in dataset.node_features:
-                vals = grp[f"{Nfeat.NODE}/{feat}"][()]
-                if vals.ndim == 1: # features with only one channel
-                    arr = []
-                    for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
-                    arr = np.concatenate(arr)
-                    features_dict[feat] = arr
-                    tensor_idx += 1
-                else:
-                    for ch in range(vals.shape[1]):
-                        arr = []
-                        for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
-                        tensor_idx += 1
-                        arr = np.concatenate(arr)
-                        features_dict[feat + f'_{ch}'] = arr
-
-            # getting all edge features values
-            tensor_idx = 0
-            for feat in dataset.edge_features:
-                vals = grp[f"{Efeat.EDGE}/{feat}"][()]
-                if vals.ndim == 1: # features with only one channel
-                    arr = []
-                    for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
-                    arr = np.concatenate(arr)
-                    features_dict[feat] = arr
-                    tensor_idx += 1
-                else:
-                    for ch in range(vals.shape[1]):
-                        arr = []
-                        for entry_idx in range(len(dataset)):
-                            arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
-                        tensor_idx += 1
-                        arr = np.concatenate(arr)
-                        features_dict[feat + f'_{ch}'] = arr
-
-            for key, values in features_dict.items():
-                if(key in features_transform):
-                    standardization = features_transform.get(key, {}).get('standardize')
-                    if standardization: #Feature contains in dictionary & standardization=True
-                        mean = values.mean()
-                        dev = values.std()
-                        assert -0.2 < mean < 0.2
-                        assert 0.8 < dev < 1.2
-
-    def test_standardization_logic_graphdataset(self):
-
+        features_dict = _get_features(hdf5_path, dataset)
+        
+        for key, values in features_dict.items():
+            if key in features_transform: 
+                standardization = features_transform.get(key, {}).get('standardize')
+                if standardization: #Feature contains in dictionary & standardization=True
+                    mean = values.mean()
+                    dev = values.std()
+                    assert -0.2 < mean < 0.2
+                    assert 0.8 < dev < 1.2
+    
+    def test_logic_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform={'all':{'transform':None,'standardize':True}}
-        features_transform_nostandardize={'all':{'transform':None,'standardize':False}}
-        
-        # features_transform setted only in train
-        dataset_train = GraphDataset(
-            hdf5_path = hdf5_path,
-            target='binary',
-            features_transform=features_transform
-        )
-
-        dataset_test = GraphDataset(
-            hdf5_path = hdf5_path,
-            target='binary',
-            train=False,
-            dataset_train=dataset_train
-        )
-        
-        assert dataset_train.features_transform == dataset_test.features_transform
-        assert dataset_train.means == dataset_test.means
-        assert dataset_train.devs == dataset_test.devs
-
-        # features_transform setted in train
-        dataset_train = GraphDataset(
-            hdf5_path = hdf5_path,
-            target='binary',
-            features_transform=features_transform
-        )
-        # features_transform setted in test and should be ignore
-        dataset_test = GraphDataset(
-            hdf5_path = hdf5_path,
-            target='binary',
-            train=False,
-            dataset_train=dataset_train,
-            features_transform=features_transform_nostandardize
-        )
-        
-        assert dataset_train.features_transform == dataset_test.features_transform
-        assert dataset_train.means == dataset_test.means
-        assert dataset_train.devs == dataset_test.devs
         
         # without specifying features_transform in training set
         dataset_train = GraphDataset(
             hdf5_path = hdf5_path,
-            target='binary'
+            target = 'binary'
         )
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            target='binary',
-            train=False,
-            dataset_train=dataset_train
+            target = 'binary',
+            train = False,
+            dataset_train = dataset_train
         )
         # mean and devs should be None
         assert dataset_train.means == dataset_test.means
@@ -468,8 +430,8 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(TypeError):
             GraphDataset(
                 hdf5_path = hdf5_path,
-                target='binary',
-                train=False
+                target = 'binary',
+                train = False
             )
 
         # raise error if dataset_train is of the wrong type
@@ -477,35 +439,91 @@ class TestDataSet(unittest.TestCase):
 
             dataset_train = GridDataset(
                 hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
-                target='binary'
+                target = 'binary'
             )
 
             GraphDataset(
                 hdf5_path = hdf5_path,
-                target='binary',
-                train=False,
-                dataset_train=dataset_train
+                target = 'binary',
+                train = False,
+                dataset_train = dataset_train
             )
+
+    def test_standardization_logic_graphdataset(self):
+
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        features_transform = {'all': {'transform': None, 'standardize': True}}
+        other_feature_transform = {'all': {'transform': None, 'standardize': False}}
+        
+        # features_transform setted only in train
+        dataset_train = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            features_transform = features_transform
+        )
+
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            train = False,
+            dataset_train = dataset_train
+        )
+        
+        assert dataset_train.features_transform == dataset_test.features_transform
+        assert dataset_train.means == dataset_test.means
+        assert dataset_train.devs == dataset_test.devs
+
+        # features_transform setted in test and should be ignore
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            train = False,
+            dataset_train = dataset_train,
+            features_transform = other_feature_transform
+        )
+        
+        assert dataset_train.features_transform == dataset_test.features_transform
+        assert dataset_train.means == dataset_test.means
+        assert dataset_train.devs == dataset_test.devs
+    
+    def test_standardize_all_graphdataset(self):
+        node_feat_test = "bsa"
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        features_allstd = {'all': {'transform': None, 'standardize': True}}   
+        
+        dataset_test_transform = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            node_features = node_feat_test,
+            edge_features = [],
+            features_transform = features_allstd
+        )
+        
+        #calculate transformation and standardization maunally
+        mean, dev = _cal_mean_std(hdf5_path, features_allstd, node_feat_test)
+        
+        assert mean == dataset_test_transform.means.get(node_feat_test)
+        assert dev == dataset_test_transform.devs.get(node_feat_test)     
             
     def test_feature_transform_mean_std(self):
-        node_feat_test='bsa'
+        node_feat_test = "bsa"
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform={'bsa':{'transform':lambda t:np.log(t+1),'standardize':True}}
+        features_transform = {'bsa': {'transform': lambda t: np.log(t+1), 'standardize': True}}
         
         #calculate transformation and standardization form GraphDataset object
         dataset_test_transform = GraphDataset(
             hdf5_path = hdf5_path,
-            target='binary',
-            node_features = [node_feat_test],
-            edge_features =[],
-            features_transform=features_transform
+            target = 'binary',
+            node_features = node_feat_test,
+            edge_features = [],
+            features_transform = features_transform
         )
         
         #calculate transformation and standardization maunally
-        means_devs=_cal_mean_std(hdf5_path,features_transform,node_feat_test)
+        mean, dev = _cal_mean_std(hdf5_path, features_transform, node_feat_test)
         
-        assert means_devs[0].get(node_feat_test) == dataset_test_transform.means.get(node_feat_test)
-        assert means_devs[1].get(node_feat_test) == dataset_test_transform.devs.get(node_feat_test)
+        assert mean == dataset_test_transform.means.get(node_feat_test)
+        assert dev == dataset_test_transform.devs.get(node_feat_test)
 
 
 if __name__ == "__main__":
