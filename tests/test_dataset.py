@@ -5,7 +5,6 @@ from tempfile import mkdtemp
 
 import h5py
 import numpy as np
-import pandas as pd
 from torch_geometric.loader import DataLoader
 
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
