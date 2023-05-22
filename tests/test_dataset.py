@@ -378,32 +378,73 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
         
-    def test_standardize_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
+    def test_transformation_features_transform_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
-        features_transform = {'bsa': {'standardize': True},
-                        'sasa': {'standardize': True},
-                        'hb_donors': {'standardize': False},
-                        'hse': {'standardize': True}}
+        features_transform = {'bsa': {'transform': lambda t:np.log(t+1), 'standardize': True},
+                        'sasa': {'transform': lambda t:np.sqrt(t), 'standardize': True},
+                        'hb_donors': {'transform': None, 'standardize': True}}
         
         dataset = GraphDataset(
-            hdf5_path = "tests/data/hdf5/train.hdf5",
+            hdf5_path = hdf5_path,
             target = 'binary',
             features_transform = features_transform
         )
-
-        features_dict = _get_features(hdf5_path, dataset)
         
+        dataset_nodict = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+        )
+
+        # test transformation in features_transform
+        features_dict = _get_features(hdf5_path, dataset_nodict)
         for key, values in features_dict.items():
-            if key in features_transform: 
-                standardization = features_transform.get(key, {}).get('standardize')
-                if standardization: #Feature contains in dictionary & standardization=True
-                    mean = values.mean()
-                    dev = values.std()
-                    assert -0.2 < mean < 0.2
-                    assert 0.8 < dev < 1.2
-    
+            if key in features_transform:
+                transform = features_transform.get(key, {}).get('transform')
+                if transform: #test transformed features
+                    assert dataset.means.get(key) != round(values.mean(), 1)
+                    assert dataset.devs.get(key) != round(values.std(), 1)
+                    assert -10 < dataset.means.get(key) < 10
+                    assert -5 < dataset.devs.get(key) < 5
+                else: #test hb_doners, no transformation so mean & std remain the same.
+                    assert dataset.means.get(key) == round(values.mean(), 1)
+                    assert dataset.devs.get(key) == round(values.std(), 1)
+                
+        #test if features_transform has same result with those calculated manually
+        for key in features_transform:
+            mean, dev = _cal_mean_std(hdf5_path, features_transform, key)
+            assert mean == dataset.means.get(key)
+            assert dev == dataset.devs.get(key)
+              
+    def test_standardize_features_transform_graphdataset(self):
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        features_transform = {'bsa': {'transform': lambda t:np.log(t+1), 'standardize': True}}
+        features_transform_nostd = {'bsa': {'transform': lambda t:np.log(t+1), 'standardize': False}}
+        
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            features_transform = features_transform
+        )
+        
+        dataset_nostd = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            features_transform = features_transform_nostd
+        )
+        
+        #calculate transformation and standardization maunally
+        for key in features_transform:
+                mean, dev = _cal_mean_std(hdf5_path, features_transform, key)
+                assert mean == dataset.means.get(key)
+                assert dev == dataset.devs.get(key)
+                    
+        for key in features_transform_nostd:
+            assert dataset_nostd.means is None
+            assert dataset_nostd.devs is None
+            
+                
     def test_logic_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
         hdf5_path = "tests/data/hdf5/train.hdf5"
         
@@ -503,27 +544,7 @@ class TestDataSet(unittest.TestCase):
         
         assert mean == dataset_test_transform.means.get(node_feat_test)
         assert dev == dataset_test_transform.devs.get(node_feat_test)     
-            
-    def test_feature_transform_mean_std(self):
-        node_feat_test = "bsa"
-        hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {'bsa': {'transform': lambda t: np.log(t+1), 'standardize': True}}
         
-        #calculate transformation and standardization form GraphDataset object
-        dataset_test_transform = GraphDataset(
-            hdf5_path = hdf5_path,
-            target = 'binary',
-            node_features = node_feat_test,
-            edge_features = [],
-            features_transform = features_transform
-        )
-        
-        #calculate transformation and standardization maunally
-        mean, dev = _cal_mean_std(hdf5_path, features_transform, node_feat_test)
-        
-        assert mean == dataset_test_transform.means.get(node_feat_test)
-        assert dev == dataset_test_transform.devs.get(node_feat_test)
-
 
 if __name__ == "__main__":
     unittest.main()
