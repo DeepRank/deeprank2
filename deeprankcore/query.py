@@ -228,8 +228,8 @@ class QueryCollection:
         self,
         prefix: str,
         feature_names: List[str],
-        grid_settings: Union[GridSettings, None],
-        grid_map_method: Union[MapMethod, None],
+        grid_settings: Optional[GridSettings],
+        grid_map_method: Optional[MapMethod],
         grid_augmentation_count: int,
         query: Query
     ):
@@ -645,7 +645,7 @@ def _load_ppi_atoms(pdb_path: str,
     return contact_atoms
 
 
-def _load_ppi_pssms(pssm_paths: Union[Dict[str, str], None],
+def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
                     chain_id1: str, chain_id2: str,
                     structure: PDBStructure,
                     pdb_path):
