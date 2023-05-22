@@ -519,7 +519,8 @@ class Trainer():
         min_epoch: int = 10, 
         validate: bool = False,
         num_workers: int = 0,
-        save_best_model: Optional[bool] = True,
+        best_model: bool = True,
+        save_model: bool = True,
         output_prefix: Optional[str] = None,
     ):
         """
@@ -542,10 +543,13 @@ class Trainer():
                         Defaults to False.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
                         Defaults to 0.
-            save_best_model (Optional[bool], optional): 
-                        If True, the best model (in terms of validation loss) is saved.
-                        If False, the last model tried is saved.
-                        If None, no model is saved.
+            best_model (bool, optional): 
+                        If True, the best model (in terms of validation loss) is selected for later testing or saving.
+                        If False, the last model tried is selected.
+                        Defaults to True.
+            save_model (bool, optional): 
+                        If True, the selected model is saved in a file whose prefix is indicated in <output_prefix>.
+                        If False, no model is saved.
                         Defaults to True.
             output_prefix (Optional[str], optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
                         Defaults to None.
@@ -624,8 +628,6 @@ class Trainer():
 
             # Loop over epochs
             for epoch in range(1, nepoch + 1):
-
-                checkpoint_model = None
                 _log.info(f'Epoch {epoch}:')
 
                 # Set the module in training mode
@@ -637,7 +639,7 @@ class Trainer():
                 if validate:
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
                     valid_losses.append(loss_)
-                    if save_best_model:
+                    if best_model:
                         if min(valid_losses) == loss_:
                             checkpoint_model = self.save_model()
                             self.epoch_saved_model = epoch
@@ -651,7 +653,7 @@ class Trainer():
 
                 else:
                     # if no validation set, save the best performing model on the training set
-                    if save_best_model:
+                    if best_model:
                         if min(train_losses) == loss_:
                             _log.warning(
                                 "Training data is used both for learning and model selection, which will to overfitting." +
@@ -661,13 +663,14 @@ class Trainer():
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
 
             # Save the last model
-            if (save_best_model is False) or (checkpoint_model is None):
+            if best_model is False:
                 checkpoint_model = self.save_model()
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
         # Now that the training loop is over, save the model on a file
-        torch.save(checkpoint_model, output_file)
+        if save_model:
+            torch.save(checkpoint_model, output_file)
         self.opt_loaded_state_dict = checkpoint_model["optimizer_state"]
         self.model_load_state_dict = checkpoint_model["model_state"]
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
