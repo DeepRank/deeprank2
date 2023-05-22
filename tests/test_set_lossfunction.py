@@ -21,8 +21,7 @@ def base_test(model_path, trainer: Trainer, lossfunction = None, override = Fals
 
     # check correct passing to/picking up from pretrained model 
     with warnings.catch_warnings(record=UserWarning):
-        trainer.train(nepoch=2, best_model=False, save_model=False)
-        trainer.save_model(model_path)
+        trainer.train(nepoch=2, best_model=False)
 
         trainer_pretrained = Trainer(
             neuralnet = NaiveNetwork,

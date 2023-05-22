@@ -104,8 +104,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
     with warnings.catch_warnings(record=UserWarning):
-        trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, save_model=False)
-        trainer.save_model(save_path)
+        trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False)
 
         Trainer(
             model_class,
@@ -382,8 +381,7 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True, best_model=False, save_model=False)
-                trainer.save_model(self.save_path)
+                trainer.train(nepoch=3, validate=True, best_model=False)
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset,
@@ -403,8 +401,7 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True, best_model=False, save_model=False)
-                trainer.save_model(self.save_path)
+                trainer.train(nepoch=3, validate=True, best_model=False)
                 Trainer(
                     dataset_test = dataset,
                     pretrained_model=self.save_path
@@ -459,8 +456,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer.weight_decay == weight_decay
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, best_model=False, save_model=False)
-            trainer.save_model(self.save_path)
+            trainer.train(nepoch=3, best_model=False)
             trainer_pretrained = Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_test=dataset,
@@ -550,8 +546,7 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True, best_model=False, save_model=False)
-                trainer.save_model(self.save_path)
+                trainer.train(nepoch=3, validate=True, best_model=False)
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset_train,
