@@ -102,7 +102,7 @@ def test_cnn(): # pylint: disable=too-many-locals
         )
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, batch_size=64, validate=True, save_best_model=None)
+            trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, save_model=False)
             trainer.save_model(model_path)
 
             Trainer(CnnClassification, dataset_train, dataset_val, dataset_test, pretrained_model=model_path)
@@ -190,7 +190,7 @@ def test_gnn(): # pylint: disable=too-many-locals
         )
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, batch_size=64, validate=True, save_best_model=None) 
+            trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, save_model=False) 
             trainer.save_model(model_path)
 
             Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model=model_path)
