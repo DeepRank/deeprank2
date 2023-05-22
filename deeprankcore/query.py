@@ -295,6 +295,8 @@ class QueryCollection:
         # set defaults
         if prefix is None:
             prefix = "processed-queries"
+        elif prefix.endswith('.hdf5'):
+            prefix = prefix[:-5]
         if cpu_count is None:
             cpu_count = os.cpu_count()  # returns the number of CPUs in the system
         else:
