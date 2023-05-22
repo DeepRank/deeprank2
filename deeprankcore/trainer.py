@@ -641,7 +641,7 @@ class Trainer():
                     valid_losses.append(loss_)
                     if best_model:
                         if min(valid_losses) == loss_:
-                            checkpoint_model = self.save_model()
+                            checkpoint_model = self._save_model()
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
                     # check early stopping criteria (in validation case only)
@@ -658,13 +658,13 @@ class Trainer():
                             _log.warning(
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
-                            checkpoint_model = self.save_model()
+                            checkpoint_model = self._save_model()
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
 
             # Save the last model
             if best_model is False:
-                checkpoint_model = self.save_model()
+                checkpoint_model = self._save_model()
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
@@ -906,7 +906,7 @@ class Trainer():
         self.cuda = state["cuda"]
         self.ngpu = state["ngpu"]
 
-    def save_model(self, filename: Optional[str] = None):
+    def _save_model(self, filename: Optional[str] = None):
         """
         Saves the model to a file.
 
