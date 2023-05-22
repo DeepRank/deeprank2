@@ -104,7 +104,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
     with warnings.catch_warnings(record=UserWarning):
-        trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False)
+        trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=save_path)
 
         Trainer(
             model_class,
@@ -456,7 +456,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer.weight_decay == weight_decay
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, best_model=False)
+            trainer.train(nepoch=3, best_model=False, filename=self.save_path)
             trainer_pretrained = Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_test=dataset,
