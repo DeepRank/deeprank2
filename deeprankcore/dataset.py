@@ -488,7 +488,10 @@ class GridDataset(DeeprankDataset):
             self.features = sorted(hdf5_all_feature_names)
         else:
             if not isinstance(self.features, list):
-                self.features = [self.features]
+                if self.features is None:
+                    self.features = []
+                else:
+                    self.features = [self.features]
             for feature_name in self.features:
                 if feature_name not in unpartial_feature_names:
                     _log.info(f"The feature {feature_name} was not found in the file {hdf5_path}.")
@@ -857,7 +860,10 @@ class GraphDataset(DeeprankDataset):
             self.node_features = self.available_node_features
         else:
             if not isinstance(self.node_features, list):
-                self.node_features = [self.node_features]
+                if self.node_features is None:
+                    self.node_features = []
+                else:
+                    self.node_features = [self.node_features]
             for feat in self.node_features:
                 if feat not in self.available_node_features:
                     _log.info(f"The node feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")
@@ -869,7 +875,10 @@ class GraphDataset(DeeprankDataset):
             self.edge_features = self.available_edge_features
         else:
             if not isinstance(self.edge_features, list):
-                self.edge_features = [self.edge_features]
+                if self.edge_features is None:
+                    self.edge_features = []
+                else:
+                    self.edge_features = [self.edge_features]
             for feat in self.edge_features:
                 if feat not in self.available_edge_features:
                     _log.info(f"The edge feature _{feat}_ was not found in the file {self.hdf5_paths[0]}.")

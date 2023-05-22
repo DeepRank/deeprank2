@@ -261,10 +261,10 @@ class TestDataSet(unittest.TestCase):
     def test_size_graphdataset(self):
         hdf5_paths = ["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5", "tests/data/hdf5/test.hdf5"]
         dataset = GraphDataset(
-            hdf5_path=hdf5_paths,
-            node_features=node_feats,
-            edge_features=[Efeat.DISTANCE],
-            target=targets.BINARY
+            hdf5_path = hdf5_paths,
+            node_features = node_feats,
+            edge_features = [Efeat.DISTANCE],
+            target = targets.BINARY
         )
         n = 0
         for hdf5 in hdf5_paths:
@@ -277,9 +277,9 @@ class TestDataSet(unittest.TestCase):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
-            node_features='charge',
-            edge_features=['distance', 'same_chain'],
-            target='binary'
+            node_features = 'charge',
+            edge_features = ['distance', 'same_chain'],
+            target = 'binary'
         )
         dataset.hdf5_to_pandas()
         cols = list(dataset.df.columns)
@@ -349,10 +349,10 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
-            node_features='charge',
-            edge_features=['distance', 'same_chain'],
-            target='binary',
-            subset=keys[2:]
+            node_features = 'charge',
+            edge_features = ['distance', 'same_chain'],
+            target = 'binary',
+            subset = keys[2:]
         )
         dataset.hdf5_to_pandas()
 
@@ -366,7 +366,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
-            target='binary'
+            target = 'binary'
         )
 
         with self.assertRaises(ValueError):
@@ -383,7 +383,7 @@ class TestDataSet(unittest.TestCase):
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
         features_transform = {'bsa': {'transform': lambda t:np.log(t+1), 'standardize': True},
-                        'sasa': {'transform': lambda t:np.sqrt(t), 'standardize': True},
+                        'sasa': {'transform': lambda t:np.sqrt(t), 'standardize': True},  # pylint: disable=unnecessary-lambda
                         'hb_donors': {'transform': None, 'standardize': True}}
         
         dataset = GraphDataset(
@@ -436,9 +436,9 @@ class TestDataSet(unittest.TestCase):
         
         #calculate transformation and standardization maunally
         for key in features_transform:
-                mean, dev = _cal_mean_std(hdf5_path, features_transform, key)
-                assert mean == dataset.means.get(key)
-                assert dev == dataset.devs.get(key)
+            mean, dev = _cal_mean_std(hdf5_path, features_transform, key)
+            assert mean == dataset.means.get(key)
+            assert dev == dataset.devs.get(key)
                     
         for key in features_transform_nostd:
             assert dataset_nostd.means is None
@@ -535,7 +535,7 @@ class TestDataSet(unittest.TestCase):
             hdf5_path = hdf5_path,
             target = 'binary',
             node_features = node_feat_test,
-            edge_features = [],
+            edge_features = None,
             features_transform = features_allstd
         )
         
