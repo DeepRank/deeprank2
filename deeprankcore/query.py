@@ -551,11 +551,11 @@ class SingleResidueVariantAtomicQuery(Query):
         # This should include the model, chain, residue and atom
         return str(atom)
 
-    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+    def build(self, feature_modules: Union[ModuleType, List[ModuleType]], include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the .PDB structure.
 
         Args:
-            feature_modules (List[ModuleType]): Each must implement the :py:func:`add_features` function.
+            feature_modules (Union[ModuleType, List[ModuleType]]): Each must implement the :py:func:`add_features` function.
             include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
@@ -567,6 +567,7 @@ class SingleResidueVariantAtomicQuery(Query):
             load_pssms = conservation in feature_modules
         else:
             load_pssms = conservation == feature_modules
+            feature_modules = [feature_modules]
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
