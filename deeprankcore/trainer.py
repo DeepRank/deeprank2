@@ -519,8 +519,7 @@ class Trainer():
         validate: bool = False,
         num_workers: int = 0,
         best_model: bool = True,
-        save_model: bool = True,
-        filename: str = 'model.pth.tar'
+        filename: Optional[str] = 'model.pth.tar'
     ):
         """
         Performs the training of the model.
@@ -546,11 +545,8 @@ class Trainer():
                         If True, the best model (in terms of validation loss) is selected for later testing or saving.
                         If False, the last model tried is selected.
                         Defaults to True.
-            save_model (bool, optional): 
-                        If True, the selected model is saved in <filename>.
-                        If False, no model is saved.
-                        Defaults to True.
-            filename (str, optional): Name of the file where to save the selected model. Defaults to 'model.pth.tar'.
+            filename (str, optional): Name of the file where to save the selected model. If not None, the model is saved to `filename`.
+                If None, the model is not saved. Defaults to 'model.pth.tar'.
         """
         self.batch_size_train = batch_size
         self.shuffle = shuffle
@@ -663,7 +659,7 @@ class Trainer():
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
         # Now that the training loop is over, save the model
-        if save_model:
+        if filename:
             torch.save(checkpoint_model, filename)
         self.opt_loaded_state_dict = checkpoint_model["optimizer_state"]
         self.model_load_state_dict = checkpoint_model["model_state"]
@@ -900,7 +896,7 @@ class Trainer():
         self.cuda = state["cuda"]
         self.ngpu = state["ngpu"]
 
-    def _save_model(self, filename: Optional[str] = None):
+    def _save_model(self):
         """
         Saves the model to a file.
 
@@ -931,9 +927,6 @@ class Trainer():
             "cuda": self.cuda,
             "ngpu": self.ngpu
         }
-
-        if filename:
-            torch.save(state, filename)
         
         return state
 
