@@ -521,7 +521,7 @@ class Trainer():
         num_workers: int = 0,
         best_model: bool = True,
         save_model: bool = True,
-        output_prefix: Optional[str] = None,
+        filename: str = 'model.pth.tar'
     ):
         """
         Performs the training of the model.
@@ -548,11 +548,10 @@ class Trainer():
                         If False, the last model tried is selected.
                         Defaults to True.
             save_model (bool, optional): 
-                        If True, the selected model is saved in a file whose prefix is indicated in <output_prefix>.
+                        If True, the selected model is saved in <filename>.
                         If False, no model is saved.
                         Defaults to True.
-            output_prefix (Optional[str], optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
-                        Defaults to None.
+            filename (str, optional): Name of the file where to save the selected model. Defaults to 'model.pth.tar'.
         """
         self.batch_size_train = batch_size
         self.shuffle = shuffle
@@ -612,10 +611,6 @@ class Trainer():
         else: 
             early_stopping = None
 
-        if output_prefix is None:
-            output_prefix = 'model'
-        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size_train)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
-
         with self._output_exporters:
             # Number of epochs
             self.nepoch = nepoch
@@ -668,9 +663,9 @@ class Trainer():
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
 
-        # Now that the training loop is over, save the model on a file
+        # Now that the training loop is over, save the model
         if save_model:
-            torch.save(checkpoint_model, output_file)
+            torch.save(checkpoint_model, filename)
         self.opt_loaded_state_dict = checkpoint_model["optimizer_state"]
         self.model_load_state_dict = checkpoint_model["model_state"]
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
