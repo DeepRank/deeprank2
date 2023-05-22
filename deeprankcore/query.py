@@ -57,7 +57,7 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
 
     # load ground truth from pdb file
     pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
-    pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth}
+    pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth if res[0] in pssm_paths}
 
     error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
     for residue in pdb_truth:
