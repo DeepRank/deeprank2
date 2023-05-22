@@ -1,5 +1,6 @@
 import copy
 import logging
+from pathlib import Path
 from time import time
 from typing import List, Optional, Tuple, Union
 
@@ -623,6 +624,8 @@ class Trainer():
 
             # Loop over epochs
             for epoch in range(1, nepoch + 1):
+
+                checkpoint_model = None
                 _log.info(f'Epoch {epoch}:')
 
                 # Set the module in training mode
@@ -636,9 +639,16 @@ class Trainer():
                     valid_losses.append(loss_)
                     if save_best_model:
                         if min(valid_losses) == loss_:
-                            self.save_model(output_file)
+                            checkpoint_model = self.save_model()
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
+                    # check early stopping criteria (in validation case only)
+                    if early_stopping:
+                        # compare last validation and training loss
+                        early_stopping(epoch, valid_losses[-1], train_losses[-1])
+                        if early_stopping.early_stop:
+                            break
+
                 else:
                     # if no validation set, save the best performing model on the training set
                     if save_best_model:
@@ -646,21 +656,22 @@ class Trainer():
                             _log.warning(
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
-                            self.save_model(output_file)
+                            checkpoint_model = self.save_model()
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
-                
-                # check early stopping criteria
-                if early_stopping:
-                    early_stopping(epoch, loss_, min(train_losses))
-                    if early_stopping.early_stop:
-                        break
 
             # Save the last model
-            if save_best_model is False:
-                self.save_model(output_file)
+            if (save_best_model is False) or (checkpoint_model is None):
+                checkpoint_model = self.save_model()
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
+
+        # Now that the training loop is over, save the model on a file
+        torch.save(checkpoint_model, output_file)
+        self.opt_loaded_state_dict = checkpoint_model["optimizer_state"]
+        self.model_load_state_dict = checkpoint_model["model_state"]
+        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
+        self.model.load_state_dict(self.model_load_state_dict)
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
@@ -860,7 +871,7 @@ class Trainer():
         with self._output_exporters:
 
             # Run test
-            self._eval(self.test_loader, 0, "testing")
+            self._eval(self.test_loader, self.epoch_saved_model, "testing")
 
     def _load_params(self):
         """
@@ -892,12 +903,12 @@ class Trainer():
         self.cuda = state["cuda"]
         self.ngpu = state["ngpu"]
 
-    def save_model(self, filename='model.pth.tar'):
+    def save_model(self, filename: Optional[str] = None):
         """
         Saves the model to a file.
 
         Args:
-            filename (str, optional): Name of the file. Defaults to 'model.pth.tar'.
+            filename (str, optional): Name of the file. Defaults to None.
         """
         state = {
             "model_state": self.model.state_dict(),
@@ -924,7 +935,10 @@ class Trainer():
             "ngpu": self.ngpu
         }
 
-        torch.save(state, filename)
+        if filename:
+            torch.save(state, filename)
+        
+        return state
 
 
 def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Optional[Union[float, int]] = None) -> \
