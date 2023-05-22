@@ -268,10 +268,14 @@ trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-0
 
 ```
 
-Then the Trainer can be trained and tested; the best model in terms of validation loss is saved by default, and the user can modify so or indicate where to save it using the `train()` method parameters `save_model` and `filename`.
+Then the Trainer can be trained and tested; the best model in terms of validation loss is saved by default, and the user can modify so or indicate where to save it using the `train()` method parameter `filename`.
 
 ```python
-trainer.train(nepoch = 50, batch_size = 64, validate = True)
+trainer.train(
+    nepoch = 50,
+    batch_size = 64,
+    validate = True,
+    filename = "<my_folder/model.pth.tar>")
 trainer.test()
 
 ```
