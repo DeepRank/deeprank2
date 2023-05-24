@@ -178,11 +178,11 @@ hdf5_paths = queries.process(
 
 ### Datasets
 
-Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file/s), then the `DeeprankDataset` objects can be defined.
+Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the HDF5 file/s), then the `DeeprankDataset` objects can be defined.
 
 #### GraphDataset
 
-For training GNNs the user can create a GraphDataset instance:
+For training GNNs the user can create a `GraphDataset` instance:
 
 ```python
 from deeprankcore.dataset import GraphDataset
@@ -218,7 +218,7 @@ dataset_test = GraphDataset(
 
 #### GridDataset
 
-For training CNNs the user can create a GridDataset instance:
+For training CNNs the user can create a `GridDataset` instance:
 
 ```python
 from deeprankcore.dataset import GridDataset
@@ -250,7 +250,7 @@ dataset_test = GridDataset(
 
 ### Training
 
-Let's define a Trainer instance, using for example of the already existing GINet. Because GINet is a GNN, it requires a dataset instance of type `GraphDataset`.
+Let's define a `Trainer` instance, using for example of the already existing `GINet`. Because `GINet` is a GNN, it requires a dataset instance of type `GraphDataset`.
 
 ```python
 from deeprankcore.trainer import Trainer
@@ -279,7 +279,7 @@ trainer = Trainer(
 )
 ```
 
-By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
+By default, the `Trainer` class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
 
 Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
 
@@ -290,7 +290,7 @@ trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-0
 
 ```
 
-Then the Trainer can be trained and tested; the best model in terms of validation loss is saved by default, and the user can modify so or indicate where to save it using the `train()` method parameter `filename`.
+Then the `Trainer` can be trained and tested; the best model in terms of validation loss is saved by default, and the user can modify so or indicate where to save it using the `train()` method parameter `filename`.
 
 ```python
 trainer.train(
