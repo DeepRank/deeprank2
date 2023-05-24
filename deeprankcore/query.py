@@ -7,7 +7,6 @@ import tempfile
 from functools import partial
 from glob import glob
 from multiprocessing import Pool
-from os.path import basename
 from random import randrange
 from types import ModuleType
 from typing import Dict, Iterator, List, Optional, Union
@@ -18,7 +17,7 @@ import pdb2sql
 
 import deeprankcore.features
 from deeprankcore.domain.aminoacidlist import convert_aa_nomenclature
-from deeprankcore.features import components, contact
+from deeprankcore.features import components, conservation, contact
 from deeprankcore.molstruct.aminoacid import AminoAcid
 from deeprankcore.molstruct.atom import Atom
 from deeprankcore.molstruct.residue import get_residue_center
@@ -43,8 +42,11 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
         pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
 
     Raises:
-        ValueError: Raised if info between PDB and PSSM doesn't match
+        ValueError: Raised if info between PDB and PSSM doesn't match or if no pssms were provided
     """
+
+    if not pssm_paths:
+        raise ValueError('No pssm paths provided for conservation feature module.')
 
     pssm_data = {}
     for chain in pssm_paths:
@@ -57,22 +59,13 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
     pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
     pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth}
 
-    n_wrong = 0
-    n_missing = 0
+    error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
     for residue in pdb_truth:
         try: 
             if pdb_truth[residue] != pssm_data[residue]:
-                n_wrong += 1
+                raise ValueError(error_message)
         except KeyError:
-            n_missing += 1
-
-    if n_missing + n_wrong > 0:
-        error_message = f'Amino acids in PSSM files do not match pdb file for {pdb_path}.'
-        if n_wrong > 0:
-            error_message = error_message + f'\n\t{n_wrong} entries are incorrect.'
-        if n_missing > 0:
-            error_message = error_message + f'\n\t{n_missing} entries are missing.'
-        raise ValueError(error_message)
+            raise ValueError(error_message) #pylint: disable = raise-missing-from
 
 
 class Query:
@@ -103,7 +96,8 @@ class Query:
 
     def _load_structure(
         self, pdb_path: str, pssm_paths: Optional[Dict[str, str]],
-        include_hydrogens: bool
+        include_hydrogens: bool,
+        load_pssms: bool,
     ):
         "A helper function, to build the structure from .PDB and .PSSM files."
 
@@ -131,7 +125,7 @@ class Query:
             pdb._close() # pylint: disable=protected-access
 
         # read the pssm
-        if pssm_paths is not None:
+        if load_pssms:
             _check_pssm(pdb_path, pssm_paths)
             for chain in structure.chains:
                 if chain.id in pssm_paths:
@@ -315,10 +309,10 @@ class QueryCollection:
         if feature_modules == 'all':
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprankcore.features.__path__)]
         elif isinstance(feature_modules, list):
-            feature_names = [basename(m.__file__)[:-3] if isinstance(m,ModuleType) 
+            feature_names = [os.path.basename(m.__file__)[:-3] if isinstance(m,ModuleType) 
                              else m.replace('.py','') for m in feature_modules]
         elif isinstance(feature_modules, ModuleType):
-            feature_names = [basename(feature_modules.__file__)[:-3]]
+            feature_names = [os.path.basename(feature_modules.__file__)[:-3]]
         elif isinstance(feature_modules, str):
             feature_names = [feature_modules.replace('.py','')]
         else:
@@ -422,7 +416,11 @@ class SingleResidueVariantResidueQuery(Query):
         """
 
         # load .PDB structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
+        if isinstance(feature_modules, List):
+            load_pssms = conservation in feature_modules
+        else:
+            load_pssms = conservation == feature_modules
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
         variant_residue = None
@@ -565,7 +563,11 @@ class SingleResidueVariantAtomicQuery(Query):
         """
 
         # load .PDB structure
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens)
+        if isinstance(feature_modules, List):
+            load_pssms = conservation in feature_modules
+        else:
+            load_pssms = conservation == feature_modules
+        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
         variant_residue = None
@@ -648,17 +650,16 @@ def _load_ppi_pssms(pssm_paths: Union[Dict[str, str], None],
                     structure: PDBStructure,
                     pdb_path):
 
-    if pssm_paths is not None:
-        _check_pssm(pdb_path, pssm_paths)
-        for chain_id in [chain_id1, chain_id2]:
-            if chain_id in pssm_paths:
+    _check_pssm(pdb_path, pssm_paths)
+    for chain_id in [chain_id1, chain_id2]:
+        if chain_id in pssm_paths:
 
-                chain = structure.get_chain(chain_id)
+            chain = structure.get_chain(chain_id)
 
-                pssm_path = pssm_paths[chain_id]
+            pssm_path = pssm_paths[chain_id]
 
-                with open(pssm_path, "rt", encoding="utf-8") as f:
-                    chain.pssm = parse_pssm(f, chain)
+            with open(pssm_path, "rt", encoding="utf-8") as f:
+                chain.pssm = parse_pssm(f, chain)
 
 
 class ProteinProteinInterfaceAtomicQuery(Query):
@@ -740,9 +741,12 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         # read the pssm
         structure = contact_atoms[0].residue.chain.model
 
-        _load_ppi_pssms(self._pssm_paths,
-                        self._chain_id1, self._chain_id2,
-                        structure, self._pdb_path)
+        if not isinstance(feature_modules, List):
+            feature_modules = [feature_modules]
+        if conservation in feature_modules:
+            _load_ppi_pssms(self._pssm_paths,
+                            self._chain_id1, self._chain_id2,
+                            structure, self._pdb_path)
 
         # add the features
         for feature_module in feature_modules:
@@ -838,9 +842,12 @@ class ProteinProteinInterfaceResidueQuery(Query):
         # read the pssm
         structure = contact_atoms[0].residue.chain.model
 
-        _load_ppi_pssms(self._pssm_paths,
-                        self._chain_id1, self._chain_id2,
-                        structure, self._pdb_path)
+        if not isinstance(feature_modules, List):
+            feature_modules = [feature_modules]
+        if conservation in feature_modules:
+            _load_ppi_pssms(self._pssm_paths,
+                            self._chain_id1, self._chain_id2,
+                            structure, self._pdb_path)
 
         # add the features
         for feature_module in feature_modules:

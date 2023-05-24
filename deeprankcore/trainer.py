@@ -518,8 +518,8 @@ class Trainer():
         min_epoch: int = 10, 
         validate: bool = False,
         num_workers: int = 0,
-        save_best_model: Optional[bool] = True,
-        output_prefix: Optional[str] = None,
+        best_model: bool = True,
+        filename: Optional[str] = 'model.pth.tar'
     ):
         """
         Performs the training of the model.
@@ -541,13 +541,12 @@ class Trainer():
                         Defaults to False.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
                         Defaults to 0.
-            save_best_model (Optional[bool], optional): 
-                        If True, the best model (in terms of validation loss) is saved.
-                        If False, the last model tried is saved.
-                        If None, no model is saved.
+            best_model (bool, optional): 
+                        If True, the best model (in terms of validation loss) is selected for later testing or saving.
+                        If False, the last model tried is selected.
                         Defaults to True.
-            output_prefix (Optional[str], optional): Name under which the model is saved. A description of the model settings is appended to the prefix.
-                        Defaults to None.
+            filename (str, optional): Name of the file where to save the selected model. If not None, the model is saved to `filename`.
+                If None, the model is not saved. Defaults to 'model.pth.tar'.
         """
         self.batch_size_train = batch_size
         self.shuffle = shuffle
@@ -607,10 +606,6 @@ class Trainer():
         else: 
             early_stopping = None
 
-        if output_prefix is None:
-            output_prefix = 'model'
-        output_file = output_prefix + f'_t{self.task}_y{self.target}_b{str(self.batch_size_train)}_e{str(nepoch)}_lr{str(self.lr)}_{str(nepoch)}.pth.tar'
-
         with self._output_exporters:
             # Number of epochs
             self.nepoch = nepoch
@@ -634,33 +629,42 @@ class Trainer():
                 if validate:
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
                     valid_losses.append(loss_)
-                    if save_best_model:
+                    if best_model:
                         if min(valid_losses) == loss_:
-                            self.save_model(output_file)
+                            checkpoint_model = self._save_model()
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
+                    # check early stopping criteria (in validation case only)
+                    if early_stopping:
+                        # compare last validation and training loss
+                        early_stopping(epoch, valid_losses[-1], train_losses[-1])
+                        if early_stopping.early_stop:
+                            break
+
                 else:
                     # if no validation set, save the best performing model on the training set
-                    if save_best_model:
+                    if best_model:
                         if min(train_losses) == loss_:
                             _log.warning(
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
-                            self.save_model(output_file)
+                            checkpoint_model = self._save_model()
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
-                
-                # check early stopping criteria
-                if early_stopping:
-                    early_stopping(epoch, loss_, min(train_losses))
-                    if early_stopping.early_stop:
-                        break
 
             # Save the last model
-            if save_best_model is False:
-                self.save_model(output_file)
+            if best_model is False:
+                checkpoint_model = self._save_model()
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
+
+        # Now that the training loop is over, save the model
+        if filename:
+            torch.save(checkpoint_model, filename)
+        self.opt_loaded_state_dict = checkpoint_model["optimizer_state"]
+        self.model_load_state_dict = checkpoint_model["model_state"]
+        self.optimizer.load_state_dict(self.opt_loaded_state_dict)
+        self.model.load_state_dict(self.model_load_state_dict)
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
@@ -860,7 +864,7 @@ class Trainer():
         with self._output_exporters:
 
             # Run test
-            self._eval(self.test_loader, 0, "testing")
+            self._eval(self.test_loader, self.epoch_saved_model, "testing")
 
     def _load_params(self):
         """
@@ -892,12 +896,12 @@ class Trainer():
         self.cuda = state["cuda"]
         self.ngpu = state["ngpu"]
 
-    def save_model(self, filename='model.pth.tar'):
+    def _save_model(self):
         """
         Saves the model to a file.
 
         Args:
-            filename (str, optional): Name of the file. Defaults to 'model.pth.tar'.
+            filename (str, optional): Name of the file. Defaults to None.
         """
         state = {
             "model_state": self.model.state_dict(),
@@ -923,8 +927,8 @@ class Trainer():
             "cuda": self.cuda,
             "ngpu": self.ngpu
         }
-
-        torch.save(state, filename)
+        
+        return state
 
 
 def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Optional[Union[float, int]] = None) -> \
