@@ -50,10 +50,9 @@ class Residue:
         """
 
         pssm = self._chain.pssm
-        if pssm is None:
-            raise FileNotFoundError(f'No pssm file found for Chain {self._chain}.')
-
-        return pssm[self]
+        if pssm:
+            return pssm[self]
+        return None
 
     @property
     def number(self) -> int:
