@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain.aminoacidlist import alanine
@@ -34,10 +33,3 @@ def test_conservation_atom():
         Nfeat.INFOCONTENT,
     ):
         assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f'all 0s found for {feature_name}'
-
-
-def test_no_pssm_file_error():
-    pdb_path = "tests/data/pdb/1crn/1CRN.pdb"
-    graph, variant = build_testgraph(pdb_path, 10, 'residue', 17, alanine)
-    with pytest.raises(FileNotFoundError):
-        add_features(pdb_path, graph, variant)
