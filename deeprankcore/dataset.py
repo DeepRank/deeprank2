@@ -369,11 +369,11 @@ class DeeprankDataset(Dataset):
     
     def _compute_mean_std(self):
                
-        means = {col: round(np.concatenate(self.df[col].values).mean(), 1) if isinstance(self.df[col].values[0], np.ndarray) \
-            else round(self.df[col].values.mean(), 1) \
+        means = {col: round(np.nanmean(np.concatenate(self.df[col].values)), 1) if isinstance(self.df[col].values[0], np.ndarray) \
+            else round(np.nanmean(self.df[col].values), 1) \
             for col in self.df.columns[1:]}
-        devs = {col: round(np.concatenate(self.df[col].values).std(), 1) if isinstance(self.df[col].values[0], np.ndarray) \
-            else round(self.df[col].values.std(), 1) \
+        devs = {col: round(np.nanstd(np.concatenate(self.df[col].values)), 1) if isinstance(self.df[col].values[0], np.ndarray) \
+            else round(np.nanstd(self.df[col].values), 1) \
             for col in self.df.columns[1:]}
         self.means = means
         self.devs = devs
@@ -628,11 +628,12 @@ class GraphDataset(DeeprankDataset):
             dataset_train (class:`GraphDataset`, optional): if train is True, assign here the training set.
                 Defaults to None.
                 
-            features_transform (Optional[dict], optional): Dictionary to indicate the transformations and whether to apply
-                standardization to each feature in the dictionary.
-                For example: features_transform = {'bsa': {'transform': lambda t:np.log(t+1),' standardize': True}} for the feature `bsa`.
-                A "all" key can be set in the dictionary, which indicate to perform the same `standardize` and `transform` for all features,
-                for example: features_transform = {'all': {'transform': lambda t:np.log(t+1), 'standardize': True}}.
+            features_transform (Optional[dict], optional): Dictionary to indicate the transformations to apply to each feature in the dictionary, being the
+                transformations lambda functions and/or standardization.
+                Example: `features_transform = {'bsa': {'transform': lambda t:np.log(t+1),' standardize': True}}` for the feature `bsa`.
+                An `all` key can be set in the dictionary for indicating to apply the same `standardize` and `transform` to all the features.
+                Example: `features_transform = {'all': {'transform': lambda t:np.log(t+1), 'standardize': True}}`.
+                If both `all` and feature name/s are present, the latter have the priority over what indicated in `all`.
                 Defaults to None.
         """
 
@@ -718,31 +719,35 @@ class GraphDataset(DeeprankDataset):
                 transform = False
                 standard = False
             # node features
-            node_data = ()
-            for feat in self.node_features:
-                if feat[0] != '_':  # ignore metafeatures
-                    vals = grp[f"{Nfeat.NODE}/{feat}"][()]
-                    
-                    # get feat transformation and standardization
-                    if (self.features_transform is not None) and (feat in self.features_transform):
-                        transform = self.features_transform.get(feat, {}).get('transform')
-                        standard = self.features_transform.get(feat, {}).get('standardize')
+            if len(self.node_features) > 0:
+                node_data = ()
+                for feat in self.node_features:
+                    if feat[0] != '_':  # ignore metafeatures
+                        vals = grp[f"{Nfeat.NODE}/{feat}"][()]
+                        
+                        # get feat transformation and standardization
+                        if (self.features_transform is not None) and (feat in self.features_transform):
+                            transform = self.features_transform.get(feat, {}).get('transform')
+                            standard = self.features_transform.get(feat, {}).get('standardize')
 
-                    # apply transformation
-                    if transform:
-                        vals = transform(vals)
+                        # apply transformation
+                        if transform:
+                            vals = transform(vals)
 
-                    if vals.ndim == 1: # features with only one channel
-                        vals = vals.reshape(-1, 1)   
-                        if standard:
-                            vals = (vals-self.means[feat])/self.devs[feat]
-                    else:       
-                        if standard:
-                            reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
-                            reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
-                            vals = (vals - reshaped_mean)/reshaped_dev
-                    node_data += (vals,)
-            x = torch.tensor(np.hstack(node_data), dtype=torch.float)
+                        if vals.ndim == 1: # features with only one channel
+                            vals = vals.reshape(-1, 1)   
+                            if standard:
+                                vals = (vals-self.means[feat])/self.devs[feat]
+                        else:       
+                            if standard:
+                                reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
+                                reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
+                                vals = (vals - reshaped_mean)/reshaped_dev
+                        node_data += (vals,)
+                x = torch.tensor(np.hstack(node_data), dtype=torch.float)
+            else:
+                x = None
+                _log.warning("No node features set.")
 
             # edge index,
             # we have to have all the edges i.e : (i,j) and (j,i)
@@ -756,9 +761,7 @@ class GraphDataset(DeeprankDataset):
 
             # edge feature
             # we have to have all the edges i.e : (i,j) and (j,i)
-            if (self.edge_features is not None 
-                    and len(self.edge_features) > 0 
-                    and Efeat.EDGE in grp):
+            if len(self.edge_features) > 0:
                 edge_data = ()
                 for feat in self.edge_features:
                     if feat[0] != '_':   # ignore metafeatures
