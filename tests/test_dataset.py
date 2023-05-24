@@ -513,13 +513,21 @@ class TestDataSet(unittest.TestCase):
                         assert np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(arr[:, i]))
                         if transform:
                             # check that the feature mean and std are different in transf_dataset and dataset
-                            assert not np.allclose(np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')), np.nanmean(features_dict.get(orig_feat + f'_{i}')))
-                            assert not np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(features_dict.get(orig_feat + f'_{i}')))
+                            assert not np.allclose(
+                                np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanmean(features_dict.get(orig_feat + f'_{i}')))
+                            assert not np.allclose(
+                                np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanstd(features_dict.get(orig_feat + f'_{i}')))
                         else:
                             # check that the feature mean and std are the same in transf_dataset and dataset, because
                             # no transformation should be applied
-                            assert np.allclose(np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')), np.nanmean(features_dict.get(orig_feat + f'_{i}')))
-                            assert np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(features_dict.get(orig_feat + f'_{i}')))
+                            assert np.allclose(
+                                np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanmean(features_dict.get(orig_feat + f'_{i}')))
+                            assert np.allclose(
+                                np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanstd(features_dict.get(orig_feat + f'_{i}')))
 
         assert (sorted(checked_features) == sorted(list(features_transform.keys()))) and (len(checked_features) == len(features_transform.keys()))
 
@@ -648,8 +656,12 @@ class TestDataSet(unittest.TestCase):
                         assert np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(arr[:, i]))
                         if standardize:
                             # check that the feature mean and std are different in transf_dataset and dataset
-                            assert not np.allclose(np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')), np.nanmean(features_dict.get(orig_feat + f'_{i}')))
-                            assert not np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(features_dict.get(orig_feat + f'_{i}')))
+                            assert not np.allclose(
+                                np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanmean(features_dict.get(orig_feat + f'_{i}')))
+                            assert not np.allclose(
+                                np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanstd(features_dict.get(orig_feat + f'_{i}')))
                         else:
                             # check that the feature mean and std are the same in transf_dataset and dataset, because
                             # no standardization should be applied
@@ -788,12 +800,20 @@ class TestDataSet(unittest.TestCase):
                         assert np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(arr[:, i]))
                         if transform or standardize:
                             # check that the feature mean and std are different in transf_dataset and dataset
-                            assert not np.allclose(np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')), np.nanmean(features_dict.get(orig_feat + f'_{i}')))
-                            assert not np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(features_dict.get(orig_feat + f'_{i}')))
+                            assert not np.allclose(
+                                np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanmean(features_dict.get(orig_feat + f'_{i}')))
+                            assert not np.allclose(
+                                np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanstd(features_dict.get(orig_feat + f'_{i}')))
                         else:
                             # check that the feature mean and std are the same in transf_dataset and dataset, because
-                            assert np.allclose(np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')), np.nanmean(features_dict.get(orig_feat + f'_{i}')))
-                            assert np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(features_dict.get(orig_feat + f'_{i}')))
+                            assert np.allclose(
+                                np.nanmean(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanmean(features_dict.get(orig_feat + f'_{i}')))
+                            assert np.allclose(
+                                np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')),
+                                np.nanstd(features_dict.get(orig_feat + f'_{i}')))
 
         assert (sorted(checked_features) == sorted(list(features_transform.keys()))) and (len(checked_features) == len(features_transform.keys()))
 
