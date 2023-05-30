@@ -24,6 +24,10 @@
         },
         {
           "pattern": "^https://readthedocs.org/dashboard/import.*"
+        },
+        {
+          "pattern": "^https://opensource.org/license/*",
+          "//comment": "for some reason this is flagged as a broken link even though it is not."
         }
     ],
     "replacementPatterns": [
