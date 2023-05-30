@@ -59,7 +59,7 @@ Before installing deeprankcore you need to install:
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
  * [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/): 
     * on ubuntu 22.04 or newer: `sudo apt-get install dssp`
-    * on older versions of ubuntu or on mac, install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
+    * on older versions of ubuntu or on mac, or lacking sudo sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
    * CPU only: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 cpuonly -c pytorch`
    * if using GPU: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia`
  * [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
