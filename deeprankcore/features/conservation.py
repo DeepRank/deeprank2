@@ -27,13 +27,9 @@ def add_features( # pylint: disable=unused-argument
             raise TypeError(f"Unexpected node type: {type(node.id)}")
 
         pssm_row = residue.get_pssm()
-        if not pssm_row:
-            node.features[Nfeat.PSSM] = [np.zeros(20)]
-            node.features[Nfeat.INFOCONTENT] = np.zeros(20)
-        else:
-            profile = np.array([pssm_row.get_conservation(amino_acid) for amino_acid in profile_amino_acid_order])
-            node.features[Nfeat.PSSM] = profile
-            node.features[Nfeat.INFOCONTENT] = pssm_row.information_content
+        profile = np.array([pssm_row.get_conservation(amino_acid) for amino_acid in profile_amino_acid_order])
+        node.features[Nfeat.PSSM] = profile
+        node.features[Nfeat.INFOCONTENT] = pssm_row.information_content
 
         if single_amino_acid_variant is not None:            
             if residue == single_amino_acid_variant.residue:
