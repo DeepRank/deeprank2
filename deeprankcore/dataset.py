@@ -540,12 +540,13 @@ class GridDataset(DeeprankDataset):
 
             mapped_features_group = entry_group[gridstorage.MAPPED_FEATURES]
             for feature_name in self.features:
-                feature_data.append(mapped_features_group[feature_name][:])
+                if feature_name[0] != '_':  # ignore metafeatures     
+                    feature_data.append(mapped_features_group[feature_name][:])
 
             target_value = entry_group[targets.VALUES][self.target][()]
 
         # Wrap up the data in this object, for the collate_fn to handle it properly:
-        data = Data(x=torch.tensor([feature_data], dtype=torch.float),
+        data = Data(x=torch.tensor(np.expand_dims(np.array(feature_data), axis=0), dtype=torch.float),
                     y=torch.tensor([target_value], dtype=torch.float))
 
         data.entry_names = entry_name
