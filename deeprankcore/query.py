@@ -35,15 +35,20 @@ from deeprankcore.utils.parsing.pssm import parse_pssm
 _log = logging.getLogger(__name__)
 
 
-def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress = False, verbosity = 0):
-    """Checks whether information stored in PSSM file matches the PDB file.
+def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool = False, verbosity: int = 0):
+    """Checks whether information stored in pssm file matches the corresponding pdb file.
 
     Args:
         pdb_path (str): Path to the PDB file.
         pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
+        suppress (bool): Suppress errors and throw warnings instead. Defaults to False.
+        verbosity (int): Level of verbosity of error/warning. Defaults to 0.
+            0 (low): Only state file name where error occurred;
+            1 (medium): Also state number of incorrect and missing residues;
+            2 (high): Also list the incorrect residues 
 
     Raises:
-        ValueError: Raised if info between PDB and PSSM doesn't match or if no pssms were provided
+        ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
     """
 
     if not pssm_paths:
@@ -87,7 +92,6 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress = False, ver
     
     warnings.warn(error_message)
     _log.warning(error_message)
-    
 
 
 class Query:
