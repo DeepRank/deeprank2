@@ -387,7 +387,7 @@ def test_incorrect_pssm_order():
 
     # check that error suppression works
     with pytest.warns(UserWarning):
-        q.suppress = True
+        q._suppress = True  # pylint: disable = protected-access
         _ = q.build(conservation)
 
 
@@ -410,7 +410,7 @@ def test_incomplete_pssm():
 
     # check that error suppression works
     with pytest.warns(UserWarning):
-        q.suppress = True
+        q._suppress = True  # pylint: disable = protected-access
         _ = q.build(conservation)
 
 
@@ -493,7 +493,7 @@ def test_variant_query_multiple_chains():
         _ = q.build(conservation)
     
     # at radius 7, chain B is not included in graph
-    q._radius = 7.0 # pylint: disable = protected-access
+    q._radius = 7.0  # pylint: disable = protected-access
     graph = q.build(conservation)
     assert 'B' not in graph.get_all_chains()
     

@@ -110,7 +110,7 @@ class Query:
         """
 
         self._model_id = model_id
-        self.suppress = suppress_pssm_errors
+        self._suppress = suppress_pssm_errors
 
         if targets is None:
             self._targets = {}
@@ -155,7 +155,7 @@ class Query:
 
         # read the pssm
         if load_pssms:
-            _check_pssm(pdb_path, pssm_paths, suppress = self.suppress)
+            _check_pssm(pdb_path, pssm_paths, suppress = self._suppress)
             for chain in structure.chains:
                 if chain.id in pssm_paths:
                     pssm_path = pssm_paths[chain.id]
@@ -789,7 +789,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             _load_ppi_pssms(self._pssm_paths,
                             [self._chain_id1, self._chain_id2],
                             structure, self._pdb_path,
-                            suppress_error=self.suppress)
+                            suppress_error=self._suppress)
 
         # add the features
         for feature_module in feature_modules:
@@ -894,7 +894,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             _load_ppi_pssms(self._pssm_paths,
                             [self._chain_id1, self._chain_id2],
                             structure, self._pdb_path,
-                            suppress_error=self.suppress)
+                            suppress_error=self._suppress)
 
         # add the features
         for feature_module in feature_modules:
