@@ -453,7 +453,7 @@ class TestDataSet(unittest.TestCase):
         
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'bsa': {'transform': lambda t: np.log(t+10)},
-                        'electrostatic': {'transform': lambda t:np.cbrt(t)},
+                        'electrostatic': {'transform': lambda t:np.cbrt(t)}, # pylint: disable=unnecessary-lambda
                         'sasa': {'transform': None},
                         'hse': {'transform': lambda t: np.log(t+10)}
                         }
@@ -737,7 +737,7 @@ class TestDataSet(unittest.TestCase):
         
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'bsa': {'transform': lambda t: np.log(t+10), 'standardize': True},
-                        'electrostatic': {'transform': lambda t:np.cbrt(t), 'standardize': True},
+                        'electrostatic': {'transform': lambda t:np.cbrt(t), 'standardize': True}, # pylint: disable=unnecessary-lambda
                         'sasa': {'transform': None, 'standardize': False},
                         'hse': {'transform': lambda t: np.log(t+10), 'standardize': False}
                         }
@@ -820,7 +820,7 @@ class TestDataSet(unittest.TestCase):
     def test_features_transform_logic_graphdataset(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {'all': {'transform': lambda t:np.cbrt(t), 'standardize': True}}
+        features_transform = {'all': {'transform': lambda t:np.cbrt(t), 'standardize': True}} # pylint: disable=unnecessary-lambda
         other_feature_transform = {'all': {'transform': None, 'standardize': False}}
         
         dataset_train = GraphDataset(
