@@ -87,11 +87,11 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
                 if verbosity == 2:
                     error_message = error_message[-1] + f':\n\t{missing_list}'
     
-    if not suppress:
-        raise ValueError(error_message)
-    
-    warnings.warn(error_message)
-    _log.warning(error_message)
+        if not suppress:
+            raise ValueError(error_message)
+        
+        warnings.warn(error_message)
+        _log.warning(error_message)
 
 
 class Query:
@@ -684,7 +684,7 @@ def _load_ppi_atoms(pdb_path: str,
 
 
 def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
-                    chains: List[str, str],
+                    chains: List[str],
                     structure: PDBStructure,
                     pdb_path,
                     suppress_error):
