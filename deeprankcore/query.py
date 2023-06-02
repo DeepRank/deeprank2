@@ -105,7 +105,7 @@ class Query:
         Args:
             model_id (str): The ID of the model to load, usually a .PDB accession code.
             targets (Optional[Dict[str, Union[float, int]]], optional): Target values associated with the query. Defaults to None.
-            suppress_pssm_errors (bool): Suppress error raised if .pssm files do not match .pdb files (will still throw a warning).
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
 
@@ -404,7 +404,7 @@ class SingleResidueVariantResidueQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
                 Defaults to 4.5.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool): Suppress error raised if .pssm files do not match .pdb files (will still throw a warning).
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
 
@@ -523,7 +523,7 @@ class SingleResidueVariantAtomicQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
                 Defaults to 4.5.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool): Suppress error raised if .pssm files do not match .pdb files (will still throw a warning).
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
 
@@ -724,7 +724,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between two interacting atoms of the two proteins.
                 Defaults to 5.5.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool): Suppress error raised if .pssm files do not match .pdb files (will still throw a warning).
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
 
@@ -822,7 +822,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between two interacting residues of the two proteins.
                 Defaults to 10.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool): Suppress error raised if .pssm files do not match .pdb files (will still throw a warning).
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
 
