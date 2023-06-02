@@ -4,6 +4,7 @@ import os
 import pickle
 import pkgutil
 import tempfile
+import warnings
 from functools import partial
 from glob import glob
 from multiprocessing import Pool
@@ -81,7 +82,12 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress = False, ver
                 if verbosity == 2:
                     error_message = error_message[-1] + f':\n\t{missing_list}'
     
+    if not suppress:
         raise ValueError(error_message)
+    
+    warnings.warn(error_message)
+    _log.warning(error_message)
+    
 
 
 class Query:
