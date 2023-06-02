@@ -59,13 +59,26 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
     pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
     pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth if res[0] in pssm_paths}
 
+    wrong_list = []
+    missing_list = []
+
     error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
     for residue in pdb_truth:
         try: 
             if pdb_truth[residue] != pssm_data[residue]:
-                raise ValueError(error_message)
+                wrong_list.append(residue)
         except KeyError:
-            raise ValueError(error_message) #pylint: disable = raise-missing-from
+            missing_list.append(residue)
+
+    if len(wrong_list) + len(missing_list) > 0:
+        error_message = f'Amino acids in PSSM files do not match pdb file for {pdb_path}.'
+        if len(missing_list) > 0:
+            error_message = error_message + f'\n\t{len(missing_list)} entries are incorrect.'
+            long_error_message = error_message[-1] + f':\n\t{missing_list}'
+        if len(missing_list) > 0:
+            error_message = error_message + f'\n\t{len(missing_list)} entries are missing.'
+            long_error_message = error_message[-1] + f':\n\t{missing_list}'
+        raise ValueError(error_message)
 
 
 class Query:
