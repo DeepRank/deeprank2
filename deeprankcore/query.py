@@ -684,13 +684,13 @@ def _load_ppi_atoms(pdb_path: str,
 
 
 def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
-                    chain_id1: str, chain_id2: str,
+                    chains: List[str, str],
                     structure: PDBStructure,
                     pdb_path,
                     suppress_error):
 
     _check_pssm(pdb_path, pssm_paths, suppress_error, verbosity = 0)
-    for chain_id in [chain_id1, chain_id2]:
+    for chain_id in chains:
         if chain_id in pssm_paths:
 
             chain = structure.get_chain(chain_id)
@@ -787,7 +787,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
             _load_ppi_pssms(self._pssm_paths,
-                            self._chain_id1, self._chain_id2,
+                            [self._chain_id1, self._chain_id2],
                             structure, self._pdb_path,
                             suppress_error=self.suppress)
 
@@ -892,7 +892,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
             _load_ppi_pssms(self._pssm_paths,
-                            self._chain_id1, self._chain_id2,
+                            [self._chain_id1, self._chain_id2],
                             structure, self._pdb_path,
                             suppress_error=self.suppress)
 
