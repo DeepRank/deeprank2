@@ -34,7 +34,7 @@ from deeprankcore.utils.parsing.pssm import parse_pssm
 _log = logging.getLogger(__name__)
 
 
-def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
+def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress = False, verbosity = 0):
     """Checks whether information stored in PSSM file matches the PDB file.
 
     Args:
@@ -62,7 +62,6 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
     wrong_list = []
     missing_list = []
 
-    error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
     for residue in pdb_truth:
         try: 
             if pdb_truth[residue] != pssm_data[residue]:
@@ -71,13 +70,17 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
             missing_list.append(residue)
 
     if len(wrong_list) + len(missing_list) > 0:
-        error_message = f'Amino acids in PSSM files do not match pdb file for {pdb_path}.'
-        if len(missing_list) > 0:
-            error_message = error_message + f'\n\t{len(missing_list)} entries are incorrect.'
-            long_error_message = error_message[-1] + f':\n\t{missing_list}'
-        if len(missing_list) > 0:
-            error_message = error_message + f'\n\t{len(missing_list)} entries are missing.'
-            long_error_message = error_message[-1] + f':\n\t{missing_list}'
+        error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
+        if verbosity:
+            if len(wrong_list) > 0:
+                error_message = error_message + f'\n\t{len(wrong_list)} entries are incorrect.'
+                if verbosity == 2:
+                    error_message = error_message[-1] + f':\n\t{missing_list}'
+            if len(missing_list) > 0:
+                error_message = error_message + f'\n\t{len(missing_list)} entries are missing.'
+                if verbosity == 2:
+                    error_message = error_message[-1] + f':\n\t{missing_list}'
+    
         raise ValueError(error_message)
 
 
