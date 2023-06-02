@@ -468,4 +468,3 @@ def test_incorrect_pssm_provided():
     # no error if conservation module is not used
     _ = q_non_existing.build(components)
     _ = q_missing.build(components)
-
