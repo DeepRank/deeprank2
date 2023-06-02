@@ -11,8 +11,8 @@ from deeprankcore.domain import edgestorage as Efeat
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain import targetstorage as targets
 from deeprankcore.domain.aminoacidlist import (alanine, arginine, asparagine,
-                                               glutamate, glycine, leucine,
-                                               lysine, phenylalanine)
+                                               cysteine, glutamate, glycine,
+                                               leucine, lysine, phenylalanine)
 from deeprankcore.features import (components, conservation, contact,
                                    surfacearea)
 from deeprankcore.query import (ProteinProteinInterfaceAtomicQuery,
@@ -468,3 +468,32 @@ def test_incorrect_pssm_provided():
     # no error if conservation module is not used
     _ = q_non_existing.build(components)
     _ = q_missing.build(components)
+
+
+def test_variant_query_multiple_chains():
+    q = SingleResidueVariantAtomicQuery(
+        pdb_path = "tests/data/pdb/2g98/pdb2g98.pdb",
+        chain_id = "A",
+        residue_number = 14,
+        insertion_code = None,
+        wildtype_amino_acid = arginine,
+        variant_amino_acid = cysteine,
+        pssm_paths = {"A": "tests/data/pssm/2g98/2g98.A.pdb.pssm"},
+        targets = {targets.BINARY: 1},
+        radius = 10.0,
+        distance_cutoff = 4.5,
+        )
+    
+    # at radius 10, chain B is included in graph
+    # no error without conservation module
+    graph = q.build(components)
+    assert 'B' in graph.get_all_chains()
+    # if we rebuild the graph with conservation module it should fail
+    with pytest.raises(FileNotFoundError):
+        _ = q.build(conservation)
+    
+    # at radius 7, chain B is not included in graph
+    q._radius = 7.0 # pylint: disable = protected-access
+    graph = q.build(conservation)
+    assert 'B' not in graph.get_all_chains()
+    
