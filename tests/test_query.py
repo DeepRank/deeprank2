@@ -385,6 +385,10 @@ def test_incorrect_pssm_order():
     # no error if conservation module is not used
     _ = q.build(components)
 
+    # check that error suppression works
+    with pytest.warns(UserWarning):
+        q.suppress = True
+        _ = q.build(conservation)
 
 
 def test_incomplete_pssm():
@@ -404,6 +408,10 @@ def test_incomplete_pssm():
     # no error if conservation module is not used
     _ = q.build(components)
 
+    # check that error suppression works
+    with pytest.warns(UserWarning):
+        q.suppress = True
+        _ = q.build(conservation)
 
 
 def test_no_pssm_provided():
