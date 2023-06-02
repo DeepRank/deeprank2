@@ -368,19 +368,7 @@ def test_augmentation():
 
 
 def test_incorrect_pssm_order():
-    with pytest.raises(ValueError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
-                "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
-            },
-        ).build(conservation)
-    
-    # should not raise error conservation module is not used
-    _ = ProteinProteinInterfaceResidueQuery(
+    q = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
@@ -388,109 +376,88 @@ def test_incorrect_pssm_order():
             "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
             "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
         },
-    ).build(components)
+    )
+
+    # check that error is thrown for incorrect pssm
+    with pytest.raises(ValueError):
+        _ = q.build(conservation)
+
+    # no error if conservation module is not used
+    _ = q.build(components)
+
 
 
 def test_incomplete_pssm():
-    with pytest.raises(ValueError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
-                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-            },
-        ).build(conservation)
-
-    # no error if conservation module is not used
-    _ = ProteinProteinInterfaceResidueQuery(
+    q = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
         {
-            "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
-            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
         },
-    ).build(components)
+    )
+
+    with pytest.raises(ValueError):
+        _ = q.build(conservation)
+
+    # no error if conservation module is not used
+    _ = q.build(components)
+
 
 
 def test_no_pssm_provided():
-    with pytest.raises(ValueError):
-        # pssm_paths is empty dictionary
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {},
-        ).build(conservation)
-        
-        # pssm_paths not provided 
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-        ).build(conservation)
-
-    # no error if conservation module is not used
     # pssm_paths is empty dictionary
-    _ = ProteinProteinInterfaceResidueQuery(
+    q_empty_dict = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
         {},
-    ).build(components)
-    
-    # pssm_paths not provided 
-    _ = ProteinProteinInterfaceResidueQuery(
+    )
+
+    # pssm_paths not provided
+    q_not_provided = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
-    ).build(components)
+    )
+
+    with pytest.raises(ValueError):
+        _ = q_empty_dict.build(conservation)
+        _ = q_not_provided.build(conservation)
+
+    # no error if conservation module is not used
+    _ = q_empty_dict.build(components)
+    _ = q_not_provided.build(components)
 
 
 def test_incorrect_pssm_provided():
     # non-existing file
-    with pytest.raises(FileNotFoundError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "A": "tests/data/pssm/3C8P_incorrect/dummy_non_existing_file.pssm",
-                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-            },
-        ).build(conservation)
+    q_non_existing = ProteinProteinInterfaceResidueQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P_incorrect/dummy_non_existing_file.pssm",
+        },
+    )
 
     # missing file
-    with pytest.raises(ValueError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-            },
-        ).build(conservation)
+    q_missing = ProteinProteinInterfaceResidueQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+        },
+    )
+
+    with pytest.raises(FileNotFoundError):
+        _ = q_non_existing.build(conservation)
+        _ = q_missing.build(conservation)
     
     # no error if conservation module is not used
-    # non-existing file
-    _ = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
-            "A": "tests/data/pssm/3C8P_incorrect/dummy_non_existing_file.pssm",
-            "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-        },
-    ).build(components)
+    _ = q_non_existing.build(components)
+    _ = q_missing.build(components)
 
-    # missing file
-    _ = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
-            "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-        },
-    ).build(components)
