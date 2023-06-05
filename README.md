@@ -52,7 +52,7 @@ DeeprankCore extensive documentation can be found [here](https://deeprankcore.rt
 
 ### Dependencies
 
-Before installing deeprankcore you need to install:
+Before installing deeprankcore you need to install some dependencies. We advice to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed. 
 
  * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
     * **How to build it without sudo privileges on a Linux machine**. After having run `make` in the reduce/ root directory, go to reduce/reduce_src/Makefile and modify `/usr/local/` to a folder in your home directory, such as `/home/user_name/apps`. Note that such a folder needs to be added to the PATH in the `.bashrc` file. Then run `make install` from reduce/. 
