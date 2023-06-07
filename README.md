@@ -54,8 +54,6 @@ DeeprankCore extensive documentation can be found [here](https://deeprankcore.rt
 
 Before installing deeprankcore you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed. 
 
- * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
-    * **How to build it without sudo privileges on a Linux machine**. After having run `make` in the reduce/ root directory, go to reduce/reduce_src/Makefile and modify `/usr/local/` to a folder in your home directory, such as `/home/user_name/apps`. Note that such a folder needs to be added to the PATH in the `.bashrc` file. Then run `make install` from reduce/. 
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
  * [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/): 
     * on ubuntu 22.04 or newer: `sudo apt-get install dssp`
