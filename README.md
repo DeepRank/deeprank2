@@ -80,7 +80,7 @@ Once the dependencies installed, you can install the latest release of deeprankc
 pip install deeprankcore
 ```
 
-Please note that the PyPi release is currently outdated and we will do a new release very soon. In the meantime, you can get all the new developments by cloning the repo and installing the code with
+You can get all the new developments by cloning the repo and installing the code with
 
 ```
 git clone https://github.com/DeepRank/deeprank-core
