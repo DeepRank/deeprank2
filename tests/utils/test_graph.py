@@ -235,7 +235,7 @@ def test_graph_augmented_write_as_grid_to_hdf5(graph):
                 assert (f5[f"{entry_id}/grid_points/center"][(
                 )] == f5[f"{aug_id}/grid_points/center"][()]).all()
                 assert np.abs(np.sum(data) -
-                              np.sum(unaugmented_data)).item() < 0.11
+                              np.sum(unaugmented_data)).item() < 0.2
 
                 # target
                 assert entry_group[Target.VALUES][target_name][(

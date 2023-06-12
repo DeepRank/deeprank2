@@ -47,14 +47,6 @@ runs:
         CMAKE_INSTALL_PREFIX: .local
       run: |
         python3 -m pip install --upgrade pip setuptools wheel
-        # install reduce from git
-        git clone https://github.com/rlabduke/reduce
-        mkdir -p build/reduce
-        cd build/reduce
-        cmake ../../reduce
-        make
-        sudo make install
-        cd ../..
         # Install dssp
         sudo apt-get install -y dssp
         # Only way to install msms is through conda
