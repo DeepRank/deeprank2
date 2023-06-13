@@ -689,7 +689,11 @@ class GraphDataset(DeeprankDataset):
             _log.warning("features_dict will remain the same as the one used in training phase.")
                         
             #set check_integrity as the same in dataset_train
-            self.check_integrity = dataset_train.check_integrity
+            if dataset_train.check_integrity is not None:
+                self.check_integrity = dataset_train.check_integrity
+            else:
+                self.check_integrity = None
+            #self.check_integrity = dataset_train.check_integrity
             _log.warning("check_integrity parameter, if set, will be ignored." + "\n" +
                         "check_integrity will remain the same as the one used in training phase.")
             
