@@ -6,6 +6,7 @@ from tempfile import mkdtemp
 import h5py
 import numpy as np
 from torch_geometric.loader import DataLoader
+import warnings
 
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import edgestorage as Efeat
@@ -532,22 +533,24 @@ class TestDataSet(unittest.TestCase):
         assert (sorted(checked_features) == sorted(list(features_transform.keys()))) and (len(checked_features) == len(features_transform.keys()))
 
     def test_only_transform_all_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
-        # define a features_transform dict for only transformations for `all` features
-        hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {'all': {'transform': lambda t: np.log(t+10)}}
-        
-        # dataset that has the transformations applied using features_transform dict
-        transf_dataset = GraphDataset(
-            hdf5_path = hdf5_path,
-            target = 'binary',
-            features_transform = features_transform
-        )
-        
-        # dataset with no transformations applied
-        dataset = GraphDataset(
-            hdf5_path = hdf5_path,
-            target = 'binary',
-        )
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', r'invalid value encountered in log')
+            # define a features_transform dict for only transformations for `all` features
+            hdf5_path = "tests/data/hdf5/train.hdf5"
+            features_transform = {'all': {'transform': lambda t: np.log(t+10)}}
+            
+            # dataset that has the transformations applied using features_transform dict
+            transf_dataset = GraphDataset(
+                hdf5_path = hdf5_path,
+                target = 'binary',
+                features_transform = features_transform
+            )
+            
+            # dataset with no transformations applied
+            dataset = GraphDataset(
+                hdf5_path = hdf5_path,
+                target = 'binary',
+            )
 
         # transformed features
         transf_features_dict = _compute_features_with_get(hdf5_path, transf_dataset)
