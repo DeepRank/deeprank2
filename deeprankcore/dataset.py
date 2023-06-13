@@ -658,17 +658,45 @@ class GraphDataset(DeeprankDataset):
         if not train:
             if not isinstance(dataset_train, GraphDataset):
                 raise TypeError("Please provide a valid training GraphDataset.")
-
-            if dataset_train.features_transform is not None:
-                self.features_transform = dataset_train.features_transform
-            else:
-                self.features_transform = None
+            
+            #set features_transform as the same in dataset_train
+            self.features_transform = dataset_train.features_transform
             _log.warning("features_transform parameter, if set, will be ignored." + "\n" +
                         "features_transform will remain the same as the one used in training phase.")
+
+            #set task as the same in dataset_train
+            self.task = dataset_train.task
+            _log.warning("task parameter, if set, will be ignored." + "\n" +
+                        "task will remain the same as the one used in training phase.")            
+
+            #set node_features as the same in dataset_train
+            self.node_features = dataset_train.node_features
+            _log.warning("node_features parameter, if set, will be ignored." + "\n" +
+                        "node_features will remain the same as the one used in training phase.")
+            
+            #set edge_features as the same in dataset_train
+            self.edge_features = dataset_train.edge_features
+            _log.warning("edge_features parameter, if set, will be ignored." + "\n" +
+                        "edge_features will remain the same as the one used in training phase.")
+            
+            #set target as the same in dataset_train
+            self.target = dataset_train.target
+            _log.warning("target parameter, if set, will be ignored." + "\n" +
+                        "target will remain the same as the one used in training phase.")
+
+            #set features_dict as the same in dataset_train
+            self.features_dict = dataset_train.features_dict
+            _log.warning("features_dict will remain the same as the one used in training phase.")
+                        
+            #set check_integrity as the same in dataset_train
+            self.check_integrity = dataset_train.check_integrity
+            _log.warning("check_integrity parameter, if set, will be ignored." + "\n" +
+                        "check_integrity will remain the same as the one used in training phase.")
+            
         elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.
             dataset_train will be ignored since the current dataset will be considered as training set.""")
-            
+                 
         standardize = False
         if self.features_transform:
             standardize = any(self.features_transform[key].get("standardize") for key, _ in self.features_transform.items())
