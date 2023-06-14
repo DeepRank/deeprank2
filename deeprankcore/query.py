@@ -189,15 +189,27 @@ class QueryCollection:
             _log.info(f'Adding query with ID {query_id}.')
 
         query_id_base = query_id.split("_")[0]
+        
+        warn_duplicate = False    
         if query_id_base not in self.ids_count:
             self.ids_count[query_id_base] = 1
         else:
             self.ids_count[query_id_base] += 1
-            new_id = query.model_id.split("_")[0] + "_" + str(self.ids_count[query_id_base])
-            query.model_id = new_id
             
-            if warn_duplicate:
-                _log.warning(f'Query with ID {query_id_base} has already been added to the collection. Renaming it as {query.get_query_id()}')
+            if "_" in query_id:
+                for q in self._queries:
+                    if (q.model_id == query_id):
+                        new_id = query.model_id.split("_")[0] + "_" + str(self.ids_count[query_id_base])
+                        query.model_id = new_id
+                        warn_duplicate = True
+                        break
+            else:
+                new_id = query.model_id.split("_")[0] + "_" + str(self.ids_count[query_id_base])
+                query.model_id = new_id
+                warn_duplicate = True
+                
+        if warn_duplicate:
+            _log.warning(f'Query with ID {query_id_base} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
