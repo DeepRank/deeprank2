@@ -198,8 +198,8 @@ class QueryCollection:
             
             if "_" in query_id:
                 for q in self._queries:
-                    if (q.model_id == query_id):
-                        new_id = query.model_id.split("_")[0] + "_" + str(self.ids_count[query_id_base])
+                    if (q.model_id in query_id):
+                        new_id = query.model_id + "_" + str(self.ids_count[query_id_base])
                         query.model_id = new_id
                         warn_duplicate = True
                         break
@@ -209,7 +209,7 @@ class QueryCollection:
                 warn_duplicate = True
                 
         if warn_duplicate:
-            _log.warning(f'Query with ID {query_id_base} has already been added to the collection. Renaming it as {query.get_query_id()}')
+            _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
