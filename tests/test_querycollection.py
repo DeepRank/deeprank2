@@ -14,7 +14,7 @@ from deeprankcore.features import components, contact, surfacearea
 from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
                                 QueryCollection,
                                 SingleResidueVariantResidueQuery)
-
+from deeprankcore.tools.target import compute_targets
 
 def _querycollection_tester( # pylint: disable = too-many-locals, dangerous-default-value
     query_type: str,
@@ -219,3 +219,49 @@ def test_querycollection_process_combine_output_false():
         assert len(output_paths) == cpu_count
 
         rmtree(output_directory)
+
+def test_add():
+    """
+    Tests add method of QueryCollection class.
+    """
+    ref_path = "tests/data/ref/1ATN/1ATN.pdb"
+    pssm_path1 = "tests/data/pssm/1ATN/1ATN.A.pdb.pssm"
+    pssm_path2 = "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
+    chain_id1 = "A"
+    chain_id2 = "B"
+    pdb_paths = [
+        "tests/data/pdb/1ATN/1ATN_1w.pdb",
+        "tests/data/pdb/1ATN/1ATN_1w.pdb",
+        "tests/data/pdb/1ATN/1ATN_2w.pdb",
+        "tests/data/pdb/1ATN/1ATN_3w.pdb"]
+
+    queries = QueryCollection()
+
+    for pdb_path in pdb_paths:
+        # Append data points
+        targets = compute_targets(pdb_path, ref_path)
+        queries.add(ProteinProteinInterfaceResidueQuery(
+            pdb_path = pdb_path,
+            chain_id1 = chain_id1,
+            chain_id2 = chain_id2,
+            targets = targets,
+            pssm_paths = {
+                chain_id1: pssm_path1,
+                chain_id2: pssm_path2
+            }
+        ))
+    duplicate_pdb = "1ATN_1w"
+    duplicate_pdb_id = "residue-ppi:" + chain_id1 + '-' + chain_id2 + ':' + duplicate_pdb
+    duplicate_pdb_index = queries.ids_count[duplicate_pdb_id]
+    
+    #check total id column    
+    assert len(queries.ids_count) == 3
+    #check index of duplicated pdb 
+    assert duplicate_pdb_index == 2
+    
+    #check index naming for duplicated pdb
+    duplicate_found = False
+    for q in queries._queries:
+        if (q.model_id == (duplicate_pdb + '_' + str(duplicate_pdb_index))):
+            duplicate_found = True
+    assert duplicate_found == True
