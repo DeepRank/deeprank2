@@ -260,8 +260,8 @@ def test_querycollection_add():
     assert duplicate_pdb_index == 2
     
     #check index naming for duplicated pdb
-    duplicate_found = False
-    for q in queries._queries:
+    index_correct = False
+    for q in queries._queries: # pylint: disable = protected-access
         if (q.model_id == (duplicate_pdb + '_' + str(duplicate_pdb_index))):
-            duplicate_found = True
-    assert duplicate_found == True
+            index_correct = True
+    assert index_correct is True
