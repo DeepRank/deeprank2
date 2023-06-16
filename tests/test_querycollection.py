@@ -220,7 +220,7 @@ def test_querycollection_process_combine_output_false():
 
         rmtree(output_directory)
 
-def test_add():
+def test_querycollection_add():
     """
     Tests add method of QueryCollection class.
     """
