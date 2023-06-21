@@ -857,6 +857,38 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.means == dataset_test.means
         assert dataset_train.devs == dataset_test.devs
 
+    def test_inherit_info_training(self):
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        feature_transform = {'all': {'transform': None, 'standardize': True}}
+        
+        dataset_train = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            task = 'classif',
+            node_features = ['bsa', 'hb_acceptors', 'hb_donors'],
+            edge_features = ['covalent', 'distance'],
+            features_transform = feature_transform
+        )
+
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'ba',
+            task = "regress",
+            node_features = "all",
+            edge_features = "all",
+            train = False,
+            dataset_train = dataset_train,
+            features_transform = None   
+        )
+        
+        # target, task, node_features , edge_features, features_dict, and feature_transform
+        # in the test should be the same as in the train
+        assert dataset_train.features_transform == dataset_test.features_transform
+        assert dataset_train.node_features == dataset_test.node_features
+        assert dataset_train.edge_features == dataset_test.edge_features
+        assert dataset_train.task == dataset_test.task
+        assert dataset_train.target == dataset_test.target
+        assert dataset_train.features_dict == dataset_test.features_dict
 
 if __name__ == "__main__":
     unittest.main()

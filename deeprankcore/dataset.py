@@ -660,33 +660,36 @@ class GraphDataset(DeeprankDataset):
                 raise TypeError("Please provide a valid training GraphDataset.")
             
             #set features_transform as the same in dataset_train
-            self.features_transform = dataset_train.features_transform
+            if dataset_train.features_transform is not None:
+                self.features_transform = dataset_train.features_transform
+            else:
+                self.features_transform = None
             _log.warning("features_transform parameter, if set, will be ignored." + "\n" +
-                        "features_transform will remain the same as the one used in training phase.")
+                        "features_transform will remain the same as the one used in training phase: %s.", self.features_transform)
 
             #set task as the same in dataset_train
             self.task = dataset_train.task
             _log.warning("task parameter, if set, will be ignored." + "\n" +
-                        "task will remain the same as the one used in training phase.")            
+                        "task will remain the same as the one used in training phase: %s.", self.task)            
 
             #set node_features as the same in dataset_train
             self.node_features = dataset_train.node_features
             _log.warning("node_features parameter, if set, will be ignored." + "\n" +
-                        "node_features will remain the same as the one used in training phase.")
+                        "node_features will remain the same as the one used in training phase: %s.", self.node_features)
             
             #set edge_features as the same in dataset_train
             self.edge_features = dataset_train.edge_features
             _log.warning("edge_features parameter, if set, will be ignored." + "\n" +
-                        "edge_features will remain the same as the one used in training phase.")
+                        "edge_features will remain the same as the one used in training phase: %s.", self.edge_features)
             
             #set target as the same in dataset_train
             self.target = dataset_train.target
             _log.warning("target parameter, if set, will be ignored." + "\n" +
-                        "target will remain the same as the one used in training phase.")
+                        "target will remain the same as the one used in training phase: %s.", self.target)
 
             #set features_dict as the same in dataset_train
             self.features_dict = dataset_train.features_dict
-            _log.warning("features_dict will remain the same as the one used in training phase.")
+            _log.warning("features_dict will remain the same as the one used in training phase: %s.", self.features_dict)
             
         elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.
