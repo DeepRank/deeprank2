@@ -890,5 +890,6 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.target == dataset_test.target
         assert dataset_train.features_dict == dataset_test.features_dict
 
+
 if __name__ == "__main__":
     unittest.main()
