@@ -220,7 +220,8 @@ def test_querycollection_process_combine_output_false():
 
         rmtree(output_directory)
 
-def test_querycollection_add():
+
+def test_querycollection_duplicates_add():
     """
     Tests add method of QueryCollection class.
     """
@@ -232,6 +233,8 @@ def test_querycollection_add():
     pdb_paths = [
         "tests/data/pdb/1ATN/1ATN_1w.pdb",
         "tests/data/pdb/1ATN/1ATN_1w.pdb",
+        "tests/data/pdb/1ATN/1ATN_1w.pdb",
+        "tests/data/pdb/1ATN/1ATN_2w.pdb",
         "tests/data/pdb/1ATN/1ATN_2w.pdb",
         "tests/data/pdb/1ATN/1ATN_3w.pdb"]
 
@@ -250,18 +253,14 @@ def test_querycollection_add():
                 chain_id2: pssm_path2
             }
         ))
-    duplicate_pdb = "1ATN_1w"
-    duplicate_pdb_id = "residue-ppi:" + chain_id1 + '-' + chain_id2 + ':' + duplicate_pdb
-    duplicate_pdb_index = queries.ids_count[duplicate_pdb_id]
+        
+    #check id naming for all pdb files
+    model_ids = []
+    for query in queries.queries:
+        model_ids.append(query.model_id)
+    model_ids.sort()
     
-    #check total id column    
-    assert len(queries.ids_count) == 3
-    #check index of duplicated pdb 
-    assert duplicate_pdb_index == 2
-    
-    #check index naming for duplicated pdb
-    index_correct = False
-    for q in queries._queries: # pylint: disable = protected-access
-        if (q.model_id == (duplicate_pdb + '_' + str(duplicate_pdb_index))):
-            index_correct = True
-    assert index_correct is True
+    assert model_ids == ['1ATN_1w', '1ATN_1w_2', '1ATN_1w_3', '1ATN_2w', '1ATN_2w_2', '1ATN_3w']
+    assert queries.ids_count['residue-ppi:A-B:1ATN_1w'] == 3
+    assert queries.ids_count['residue-ppi:A-B:1ATN_2w'] == 2
+    assert queries.ids_count['residue-ppi:A-B:1ATN_3w'] == 1
