@@ -20,7 +20,7 @@ RESMASS = "res_mass"
 RESPI = "res_pI"
 HBDONORS = "hb_donors" # int; former FEATURENAME_HYDROGENBONDDONORS
 HBACCEPTORS = "hb_acceptors"# int; former FEATURENAME_HYDROGENBONDACCEPTORS
-TORSIONANGLES = "torsion_angles"
+TORSIONANGLE = "torsion_angles"
 
 ## variant residue features
 VARIANTRES = "variant_res" # AminoAcid object; former FEATURENAME_VARIANTAMINOACID
