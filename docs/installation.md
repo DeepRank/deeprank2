@@ -41,10 +41,12 @@ pip install -e ./
 
 ## Test installation
 
-To check that all components were installed correctly, run either of the following commands and ensure that all tests pass. 
-The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
-- Quick test: `pytest tests/test_integration.py`
-- Full test: `pytest`
+* Install pytest to run the test scripts: `pip install pytest`
+* Run test:
+  - Quick test: `pytest tests/test_integration.py`
+  - Full test: `pytest`
+
+In either case, all tests should pass.
 
 ## Contributing
 If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
