@@ -2,30 +2,36 @@ name: build
 
 on:
   push:
-    # paths-ignore:
-    #   - "**.md"
-    #   - "**.rst"
-    #   - "**.ipynb"
     paths:
+      # specific folder locations
       - "deeprankcore/**"
       - "tests/**"
+      # exclude filetypes
+      - "!**.md"
+      - "!**.rst"
+      - "!**.ipynb"
+      # self
       - ".github/workflows/build.yml"
+      # setup
       - ".github/actions/install-python-and-package/action.yml"
       - "setup.cfg"
     branches:
       - main
   pull_request:
-      types: [opened, synchronize, reopened, ready_for_review]
-    # paths-ignore:
-    #   - "**.md"
-    #   - "**.rst"
-    #   - "**.ipynb"
-    # paths:
-    #   - "deeprankcore/**"
-    #   - "tests/**"
-    #   - ".github/workflows/build.yml"
-    #   - ".github/actions/install-python-and-package/action.yml"
-    #   - "setup.cfg"
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      # specific folder locations
+      - "deeprankcore/**"
+      - "tests/**"
+      # exclude filetypes
+      - "!**.md"
+      - "!**.rst"
+      - "!**.ipynb"
+      # self
+      - ".github/workflows/build.yml"
+      # setup
+      - ".github/actions/install-python-and-package/action.yml"
+      - "setup.cfg"
 
 jobs:
   build:

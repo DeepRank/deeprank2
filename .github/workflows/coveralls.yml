@@ -2,26 +2,30 @@ name: coveralls
 
 on:
   push:
-    paths-ignore:
-      - "**.md"
-      - "**.rst"
-      - "**.ipynb"
     paths:
+      # specific folder locations
       - "deeprankcore/**"
       - "tests/**"
-      - ".github/workflows/linting.yml"
+      # exclude filetypes
+      - "!**.md"
+      - "!**.rst"
+      - "!**.ipynb"
+      # self
+      - ".github/workflows/coveralls.yml"
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "**.md"
-      - "**.rst"
-      - "**.ipynb"
     paths:
+      # specific folder locations
       - "deeprankcore/**"
       - "tests/**"
-      - ".github/workflows/linting.yml"
+      # exclude filetypes
+      - "!**.md"
+      - "!**.rst"
+      - "!**.ipynb"
+      # self
+      - ".github/workflows/coveralls.yml"
 
 jobs:
   build:
