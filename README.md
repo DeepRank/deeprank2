@@ -83,11 +83,21 @@ pip install deeprankcore
 
 You can get all the new developments by cloning the repo and installing the code with
 
-```
+```bash
 git clone https://github.com/DeepRank/deeprank-core
 cd deeprank-core
 pip install -e ./
 ```
+
+### Test installation
+
+* Install pytest to run the test scripts: `pip install pytest`
+* Run test:
+  - Quick test: `pytest tests/test_integration.py`
+  - Full test: `pytest`
+
+In either case, all tests should pass.
+
 
 ## Documentation
 
