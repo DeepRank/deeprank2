@@ -2,16 +2,16 @@ name: build
 
 on:
   push:
-    paths-ignore:
-      - "**.md"
-      - "**.rst"
-      - "**.ipynb"
-    paths:
-      - "deeprankcore/**"
-      - "tests/**"
-      - ".github/workflows/build.yml"
-      - ".github/actions/install-python-and-package/action.yml"
-      - "setup.cfg"
+    # paths-ignore:
+    #   - "**.md"
+    #   - "**.rst"
+    #   - "**.ipynb"
+    # paths:
+    #   - "deeprankcore/**"
+    #   - "tests/**"
+    #   - ".github/workflows/build.yml"
+    #   - ".github/actions/install-python-and-package/action.yml"
+    #   - "setup.cfg"
     branches:
       - main
   pull_request:
@@ -36,8 +36,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest"]
-        python-version: ["3.9", "3.10"]
+        os: ['ubuntu-latest']
+        python-version: ['3.9', '3.10']
 
     steps:
       - uses: actions/checkout@v3
