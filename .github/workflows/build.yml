@@ -10,6 +10,8 @@ on:
       - 'deeprankcore/**'
       - 'tests/**'
       - '.github/workflows/build.yml'
+      - '.github/actions/install-python-and-package/action.yml'
+      - 'setup.cfg'
     branches:
       - main
   pull_request:
@@ -22,6 +24,8 @@ on:
       - 'deeprankcore/**'
       - 'tests/**'
       - '.github/workflows/build.yml'
+      - '.github/actions/install-python-and-package/action.yml'
+      - 'setup.cfg'
 
 jobs:
   build:
