@@ -2,16 +2,16 @@ name: build
 
 on:
   push:
-    # paths-ignore:
-    #   - "**.md"
-    #   - "**.rst"
-    #   - "**.ipynb"
-    # paths:
-    #   - "deeprankcore/**"
-    #   - "tests/**"
-    #   - ".github/workflows/build.yml"
-    #   - ".github/actions/install-python-and-package/action.yml"
-    #   - "setup.cfg"
+    paths-ignore:
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
+    paths:
+      - "deeprankcore/**"
+      - "tests/**"
+      - ".github/workflows/build.yml"
+      - ".github/actions/install-python-and-package/action.yml"
+      - "setup.cfg"
     branches:
       - main
   pull_request:
