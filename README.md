@@ -98,7 +98,8 @@ pip install -e ./
 
 In either case, all tests should pass.
 
-
+### Contributing
+If you would like to contribute to the package in any way, please see [our guidelines](https://github.com/DeepRank/deeprank-core/blob/main/CONTRIBUTING.rst)
 ## Documentation
 
 More extensive and detailed documentation can be found [here](https://deeprankcore.rtfd.io/).
