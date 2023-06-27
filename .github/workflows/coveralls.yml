@@ -5,7 +5,7 @@ on:
     branches:
     - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   build:
@@ -26,6 +26,6 @@ jobs:
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.github_token }}
-          COVERALLS_FLAG_NAME: python-${{ matrix.version }}
+          COVERALLS_FLAG_NAME: python-${{ matrix.os }}
         run: |
           coveralls --service=github
