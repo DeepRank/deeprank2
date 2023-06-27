@@ -1,14 +1,27 @@
 name: build
 
 on:
-  # Trigger analysis when pushing in main or pull requests, and when creating
-  # a pull request. 
   push:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - '**.ipynb'
+    paths:
+      - 'deeprankcore/**'
+      - 'tests/**'
+      - '.github/workflows/build.yml'
     branches:
       - main
   pull_request:
-      types: [opened, synchronize, reopened, ready_for_review]
-
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - '**.ipynb'
+    paths:
+      - 'deeprankcore/**'
+      - 'tests/**'
+      - '.github/workflows/build.yml'
 
 jobs:
   build:
