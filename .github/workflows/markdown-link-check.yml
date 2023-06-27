@@ -8,12 +8,14 @@ on:
       - "**.md"
       - "**.rst"
       - ".github/workflows/markdown-link-check.yml"
+      - ".github/workflows/.mlc-config.json"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "**.md"
       - "**.rst"
       - ".github/workflows/markdown-link-check.yml"
+      - ".github/workflows/.mlc-config.json"
 
 jobs:
   markdown-link-check:
