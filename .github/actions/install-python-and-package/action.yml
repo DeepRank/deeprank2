@@ -41,7 +41,14 @@ runs:
     - run: which python
       shell: bash {0}
 
+    - uses: actions/cache@v3
+      id: cache-python-env
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
+
     - name: Upgrade pip and install dependencies
+      if: steps.cache-python-env.outputs.cache-hit != 'true'
       shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
@@ -60,6 +67,7 @@ runs:
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
 
     - name: Install the package
+      if: steps.cache-python-env.outputs.cache-hit != 'true'
       shell: bash {0}
       run: python3 -m pip install .[${{ inputs.extras-require }}]
       env:
