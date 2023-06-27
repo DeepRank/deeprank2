@@ -16,16 +16,16 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "**.md"
-      - "**.rst"
-      - "**.ipynb"
-    paths:
-      - "deeprankcore/**"
-      - "tests/**"
-      - ".github/workflows/build.yml"
-      - ".github/actions/install-python-and-package/action.yml"
-      - "setup.cfg"
+    # paths-ignore:
+    #   - "**.md"
+    #   - "**.rst"
+    #   - "**.ipynb"
+    # paths:
+    #   - "deeprankcore/**"
+    #   - "tests/**"
+    #   - ".github/workflows/build.yml"
+    #   - ".github/actions/install-python-and-package/action.yml"
+    #   - "setup.cfg"
 
 jobs:
   build:
