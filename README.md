@@ -99,12 +99,13 @@ pip install -e ./
 In either case, all tests should pass.
 
 ### Contributing
-If you would like to contribute to the package in any way, please see [our guidelines](https://github.com/DeepRank/deeprank-core/blob/main/CONTRIBUTING.rst)
-## Documentation
+If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst)
 
-More extensive and detailed documentation can be found [here](https://deeprankcore.rtfd.io/).
 
 ## Quick start
+The following section serves as a first guide to start using the package.
+You can also learn to use the software by following the [tutorial notebooks](tutorials).
+For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
 
 ### Data generation
 
