@@ -77,7 +77,7 @@ Before installing deeprankcore you need to install some dependencies. We advise 
 
 Once the dependencies installed, you can install the latest release of deeprankcore using the PyPi package manager:
 
-```
+```bash
 pip install deeprankcore
 ```
 
@@ -99,7 +99,7 @@ pip install -e ./
 In either case, all tests should pass.
 
 ### Contributing
-If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst)
+If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
 
 
 ## Quick start
