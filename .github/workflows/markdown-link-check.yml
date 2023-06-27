@@ -5,12 +5,11 @@ on:
     branches:
     - main
   pull_request:
-    branches:
-    - main
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
-
   markdown-link-check:
+    if: github.event.pull_request.draft == false
     name: Check markdown links
     runs-on: ubuntu-latest
     steps:
