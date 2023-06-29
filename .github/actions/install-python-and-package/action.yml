@@ -41,14 +41,14 @@ runs:
     - run: which python
       shell: bash {0}
 
-    - uses: actions/cache@v3
-      id: cache-python-env
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
+    # - uses: actions/cache@v3
+    #   id: cache-python-env
+    #   with:
+    #     path: ${{ env.pythonLocation }}
+    #     key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
 
     - name: Upgrade pip, install dependencies and package
-      if: steps.cache-python-env.outputs.cache-hit != 'true'
+      # if: steps.cache-python-env.outputs.cache-hit != 'true'
       shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
