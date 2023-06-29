@@ -47,11 +47,12 @@ runs:
         path: ${{ env.pythonLocation }}
         key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
 
-    - name: Upgrade pip and install dependencies
+    - name: Upgrade pip, install dependencies and package
       if: steps.cache-python-env.outputs.cache-hit != 'true'
       shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
+        CONDA_PREFIX: /usr/share/miniconda
       run: |
         python3 -m pip install --upgrade pip setuptools wheel
         # Install dssp
@@ -65,11 +66,6 @@ runs:
         python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # In the future, release h5xplorer on PyPI
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
-
-    - name: Install the package
-      if: steps.cache-python-env.outputs.cache-hit != 'true'
-      shell: bash {0}
-      run: python3 -m pip install .[${{ inputs.extras-require }}]
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
+        # install the package
+        python3 -m pip install .[${{ inputs.extras-require }}]        
         
