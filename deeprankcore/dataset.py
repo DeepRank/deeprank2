@@ -555,7 +555,7 @@ class GridDataset(DeeprankDataset):
 
 
 class GraphDataset(DeeprankDataset):
-    def __init__( # pylint: disable=too-many-arguments, too-many-locals
+    def __init__( # noqa: MC0001, pylint: disable=too-many-arguments, too-many-locals
         self,
         hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]] = None,
