@@ -2,29 +2,25 @@ name: linting
 
 on:
   push:
+    paths-ignore:
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
     paths:
-      # specific folder locations
       - "deeprankcore/**"
       - "tests/**"
-      # exclude filetypes
-      - "!**.md"
-      - "!**.rst"
-      - "!**.ipynb"
-      # self
       - ".github/workflows/linting.yml"
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
     paths:
-      # specific folder locations
       - "deeprankcore/**"
       - "tests/**"
-      # exclude filetypes
-      - "!**.md"
-      - "!**.rst"
-      - "!**.ipynb"
-      # self
       - ".github/workflows/linting.yml"
 
 jobs:

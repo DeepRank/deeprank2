@@ -5,18 +5,14 @@ on:
     branches:
     - main
     paths:
-      # filetypes
       - "**.md"
       - "**.rst"
-      # self
       - ".github/workflows/markdown-link-check.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
-      # filetypes
       - "**.md"
       - "**.rst"
-      # self
       - ".github/workflows/markdown-link-check.yml"
 
 jobs:
