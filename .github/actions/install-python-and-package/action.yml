@@ -55,8 +55,6 @@ runs:
         CONDA_PREFIX: /usr/share/miniconda
       run: |
         python3 -m pip install --upgrade pip setuptools wheel
-        # Install dssp
-        sudo apt-get install -y dssp
         # Only way to install msms is through conda
         conda install -c bioconda msms
         # Safest way to install PyTorch and PyTorch Geometric is through conda
@@ -66,4 +64,11 @@ runs:
         python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # install the package
         python3 -m pip install .[${{ inputs.extras-require }}]        
-        
+
+  # apt installs aren't cached, so needs to be separate
+  steps:
+    - name: Install dssp (via apt)
+      shell: bash {0}
+      run: |
+        # Install dssp
+        sudo apt-get install -y dssp
