@@ -70,3 +70,5 @@ runs:
         python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # install the package
         python3 -m pip install .[${{ inputs.extras-require }}]        
+        # In the future, release h5xplorer on PyPI
+        pip install git+https://github.com/DeepRank/h5xplorer.git@master
