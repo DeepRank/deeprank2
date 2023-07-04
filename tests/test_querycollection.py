@@ -14,7 +14,7 @@ from deeprankcore.features import components, contact, surfacearea
 from deeprankcore.query import (ProteinProteinInterfaceResidueQuery, Query,
                                 QueryCollection,
                                 SingleResidueVariantResidueQuery)
-
+from deeprankcore.tools.target import compute_targets
 
 def _querycollection_tester( # pylint: disable = too-many-locals, dangerous-default-value
     query_type: str,
@@ -219,3 +219,48 @@ def test_querycollection_process_combine_output_false():
         assert len(output_paths) == cpu_count
 
         rmtree(output_directory)
+
+
+def test_querycollection_duplicates_add():
+    """
+    Tests add method of QueryCollection class.
+    """
+    ref_path = "tests/data/ref/1ATN/1ATN.pdb"
+    pssm_path1 = "tests/data/pssm/1ATN/1ATN.A.pdb.pssm"
+    pssm_path2 = "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
+    chain_id1 = "A"
+    chain_id2 = "B"
+    pdb_paths = [
+        "tests/data/pdb/1ATN/1ATN_1w.pdb",
+        "tests/data/pdb/1ATN/1ATN_1w.pdb",
+        "tests/data/pdb/1ATN/1ATN_1w.pdb",
+        "tests/data/pdb/1ATN/1ATN_2w.pdb",
+        "tests/data/pdb/1ATN/1ATN_2w.pdb",
+        "tests/data/pdb/1ATN/1ATN_3w.pdb"]
+
+    queries = QueryCollection()
+
+    for pdb_path in pdb_paths:
+        # Append data points
+        targets = compute_targets(pdb_path, ref_path)
+        queries.add(ProteinProteinInterfaceResidueQuery(
+            pdb_path = pdb_path,
+            chain_id1 = chain_id1,
+            chain_id2 = chain_id2,
+            targets = targets,
+            pssm_paths = {
+                chain_id1: pssm_path1,
+                chain_id2: pssm_path2
+            }
+        ))
+        
+    #check id naming for all pdb files
+    model_ids = []
+    for query in queries.queries:
+        model_ids.append(query.model_id)
+    model_ids.sort()
+    
+    assert model_ids == ['1ATN_1w', '1ATN_1w_2', '1ATN_1w_3', '1ATN_2w', '1ATN_2w_2', '1ATN_3w']
+    assert queries.ids_count['residue-ppi:A-B:1ATN_1w'] == 3
+    assert queries.ids_count['residue-ppi:A-B:1ATN_2w'] == 2
+    assert queries.ids_count['residue-ppi:A-B:1ATN_3w'] == 1
