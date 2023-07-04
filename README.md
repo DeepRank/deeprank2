@@ -6,7 +6,7 @@
 | **package** |  [![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade) |
 | **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprankcore/badge/?version=latest)](https://deeprankcore.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
 | **tests** | [![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions) ![Linting status](https://github.com/DeepRank/deeprank-core/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main) |
-| **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)  |
+| **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)  |
 
 
 ## Overview
@@ -52,14 +52,12 @@ DeeprankCore extensive documentation can be found [here](https://deeprankcore.rt
 
 ### Dependencies
 
-Before installing deeprankcore you need to install:
+Before installing deeprankcore you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed. 
 
- * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
-    * **How to build it without sudo privileges on a Linux machine**. After having run `make` in the reduce/ root directory, go to reduce/reduce_src/Makefile and modify `/usr/local/` to a folder in your home directory, such as `/home/user_name/apps`. Note that such a folder needs to be added to the PATH in the `.bashrc` file. Then run `make install` from reduce/. 
  * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
- * [dssp](https://swift.cmbi.umcn.nl/gv/dssp/): `sudo apt-get install dssp`
-    * See [DSSP docs](https://ssbio.readthedocs.io/en/latest/instructions/dssp.html) for installing it on Mac OSX
- * [pytorch](https://pytorch.org/get-started/locally/): 
+ * [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/): 
+    * on ubuntu 22.04 or newer: `sudo apt-get install dssp`
+    * on older versions of ubuntu or on mac, or lacking sudo sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
    * CPU only: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 cpuonly -c pytorch`
    * if using GPU: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia`
  * [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
@@ -178,11 +176,11 @@ hdf5_paths = queries.process(
 
 ### Datasets
 
-Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file/s), then the `DeeprankDataset` objects can be defined.
+Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the HDF5 file/s), then the `DeeprankDataset` objects can be defined.
 
 #### GraphDataset
 
-For training GNNs the user can create a GraphDataset instance:
+For training GNNs the user can create a `GraphDataset` instance:
 
 ```python
 from deeprankcore.dataset import GraphDataset
@@ -218,7 +216,7 @@ dataset_test = GraphDataset(
 
 #### GridDataset
 
-For training CNNs the user can create a GridDataset instance:
+For training CNNs the user can create a `GridDataset` instance:
 
 ```python
 from deeprankcore.dataset import GridDataset
@@ -250,7 +248,7 @@ dataset_test = GridDataset(
 
 ### Training
 
-Let's define a Trainer instance, using for example of the already existing GINet. Because GINet is a GNN, it requires a dataset instance of type `GraphDataset`.
+Let's define a `Trainer` instance, using for example of the already existing `GINet`. Because `GINet` is a GNN, it requires a dataset instance of type `GraphDataset`.
 
 ```python
 from deeprankcore.trainer import Trainer
@@ -279,7 +277,7 @@ trainer = Trainer(
 )
 ```
 
-By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
+By default, the `Trainer` class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
 
 Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
 
@@ -290,12 +288,15 @@ trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-0
 
 ```
 
-Then the Trainer can be trained and tested, and the model can be saved:
+Then the `Trainer` can be trained and tested; the best model in terms of validation loss is saved by default, and the user can modify so or indicate where to save it using the `train()` method parameter `filename`.
 
 ```python
-trainer.train(nepoch = 50, batch_size = 64, validate = True)
+trainer.train(
+    nepoch = 50,
+    batch_size = 64,
+    validate = True,
+    filename = "<my_folder/model.pth.tar>")
 trainer.test()
-trainer.save_model(filename = "<output_model_path.pth.tar>")
 
 ```
 

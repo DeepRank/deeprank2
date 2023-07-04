@@ -104,8 +104,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
                 assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
     with warnings.catch_warnings(record=UserWarning):
-        trainer.train(nepoch=3, batch_size=64, validate=True, save_best_model=None)
-        trainer.save_model(save_path)
+        trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=save_path)
 
         Trainer(
             model_class,
@@ -136,7 +135,7 @@ class TestTrainer(unittest.TestCase):
             CnnRegression,
             dataset
         )
-        trainer.train(nepoch=1, batch_size=2, save_best_model=None)
+        trainer.train(nepoch=1, batch_size=2, best_model=False, filename=None)
 
     def test_grid_classification(self):
         dataset = GridDataset(
@@ -149,7 +148,7 @@ class TestTrainer(unittest.TestCase):
             CnnClassification,
             dataset
         )
-        trainer.train(nepoch=1, batch_size = 2, save_best_model=None)
+        trainer.train(nepoch=1, batch_size = 2, best_model=False, filename=None)
 
     def test_grid_graph_incompatible(self):
         dataset_train = GridDataset(
@@ -382,8 +381,7 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True, save_best_model=None)
-                trainer.save_model(self.save_path)
+                trainer.train(nepoch=3, validate=True, best_model=False, filename=self.save_path)
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset,
@@ -403,8 +401,7 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True, save_best_model=None)
-                trainer.save_model(self.save_path)
+                trainer.train(nepoch=3, validate=True, best_model=False, filename=self.save_path)
                 Trainer(
                     dataset_test = dataset,
                     pretrained_model=self.save_path
@@ -420,7 +417,7 @@ class TestTrainer(unittest.TestCase):
             neuralnet = GINet,
             dataset_train = dataset,
         )
-        trainer.train(batch_size = 1, save_best_model=None)
+        trainer.train(batch_size = 1, best_model=False, filename=None)
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
 
@@ -435,7 +432,7 @@ class TestTrainer(unittest.TestCase):
             dataset_train = dataset,
             val_size = 0
         )
-        trainer.train(batch_size=1, save_best_model=None)
+        trainer.train(batch_size=1, best_model=False, filename=None)
         assert len(trainer.train_loader) == len(dataset)
         assert trainer.valid_loader is None
 
@@ -459,8 +456,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer.weight_decay == weight_decay
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, save_best_model=None)
-            trainer.save_model(self.save_path)
+            trainer.train(nepoch=3, best_model=False, filename=self.save_path)
             trainer_pretrained = Trainer(
                 neuralnet = NaiveNetwork,
                 dataset_test=dataset,
@@ -550,8 +546,7 @@ class TestTrainer(unittest.TestCase):
             )
 
             with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True, save_best_model=None)
-                trainer.save_model(self.save_path)
+                trainer.train(nepoch=3, validate=True, best_model=False, filename=self.save_path)
                 Trainer(
                     neuralnet = GINet,
                     dataset_train = dataset_train,
