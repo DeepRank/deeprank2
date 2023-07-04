@@ -559,6 +559,7 @@ class GraphDataset(DeeprankDataset):
         self,
         hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]] = None,
+        train: bool = True,
         dataset_train: GraphDataset = None,
         target: Optional[str] = None,
         task: Optional[str] = None,
@@ -571,7 +572,6 @@ class GraphDataset(DeeprankDataset):
         target_transform: Optional[bool] = False,
         target_filter: Optional[Dict[str, str]] = None,
         check_integrity: bool = True,
-        train: bool = True,
         features_transform: Optional[dict] = None
     ):
         """Class to load the .HDF5 files data into graphs.
