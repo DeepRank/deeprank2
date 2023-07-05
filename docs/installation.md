@@ -31,7 +31,7 @@ Once the dependencies installed, you can install the latest release of deeprankc
 pip install deeprankcore
 ```
 
-You can get all the new developments by cloning the repo and installing the code with
+Alternatively, get all the new developments by cloning the repo and installing the code with
 
 ```bash
 git clone https://github.com/DeepRank/deeprank-core
@@ -41,11 +41,11 @@ pip install -e ./
 
 ## Test installation
 
-To check that all components were installed correctly, run either of the following commands and ensure that all tests pass. 
+If you have installed the package from a cloned repository (second option above), you can check that all components were installed correctly, using pytest.
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
 
 First, install [pytest](https://docs.pytest.org/): `pip install pytest`.
-Then run `pytest tests/test_integration.py` for the quick test or only `pytest` for the full test (expect a few minutes to run).
+Then run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
 
 ## Contributing
 If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
