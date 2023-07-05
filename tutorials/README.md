@@ -1,6 +1,6 @@
 ## Introduction
 
-The two tutorial notebooks in this section can be run to learn to use DeepRank-Core. 
+The two tutorial notebooks in this section can be run to learn how to use DeepRank-Core. 
 - The [data generation tutorial](tutorials/data_generation_ppi.ipynb) will demonstrate how to create *.hdf5-formatted input training data from rar *.pdb-formatted data using DeepRank-Core.
 - The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to run a neural network using DeepRank-core.
 
