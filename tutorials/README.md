@@ -30,5 +30,5 @@ On the left an example of a pMHC structure is shown, rendered using [ProteinView
 ## Running the notebooks
 
 The tutorial notebooks can be run:
-- from inside your IDE, if it has that functionality, 
+- from inside your IDE, if it has that functionality (e.g., VS Code), 
 - on JupyterLab by navigating to the tutorials directory in your terminal and running `jupyter-lab`.
