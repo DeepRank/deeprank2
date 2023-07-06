@@ -665,7 +665,7 @@ class GraphDataset(DeeprankDataset):
                 raise TypeError("Please provide a valid training GraphDataset.")
             
             #check inherited parameter with the ones in the training set
-            inherited_param = ["target", "task", "node_features", "edge_features", "features_dict", "classes", "target_transform", "features_transform"]
+            inherited_param = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
             self._check_inherited_param(inherited_param, dataset_train)
             
             #set features_transform as the same in dataset_train
