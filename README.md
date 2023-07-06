@@ -199,18 +199,11 @@ dataset_train = GraphDataset(
 )
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = valid_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target
-
+    subset = valid_ids
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = test_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target
+    subset = test_ids
 )
 ```
 

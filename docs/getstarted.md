@@ -179,18 +179,11 @@ dataset_train = GraphDataset(
 )
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = valid_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target
-
+    subset = valid_ids
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target
 )
 ```
 
@@ -217,8 +210,8 @@ dataset_train = GraphDataset(
     subset = train_ids, 
     node_features = node_features,
     edge_features = edge_features,
-    target = target,
-    features_transform = features_transform
+    features_transform = features_transform,
+    target = target
 )
 ```
 
@@ -234,8 +227,8 @@ dataset_train = GraphDataset(
     subset = train_ids, 
     node_features = node_features,
     edge_features = edge_features,
-    target = target,
     features_transform = features_transform
+    target = target
 )
 ```
 
@@ -252,25 +245,18 @@ dataset_train = GraphDataset(
     subset = train_ids, 
     node_features = node_features,
     edge_features = edge_features,
-    target = target,
-    features_transform = features_transform
+    features_transform = features_transform,
+    target = target
 )
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target,
     train = False,
     dataset_train = dataset_train # dataset_train means and stds will be used
-
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = test_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target,
+    subset = test_ids,
     train = False,
     dataset_train = dataset_train # dataset_train means and stds will be used
 )
@@ -286,7 +272,7 @@ from deeprankcore.dataset import GridDataset
 features = ["bsa", "res_depth", "hse", "info_content", "pssm", "distance"]
 target = "binary"
 
-# Creating GraphDataset objects
+# Creating GridDataset objects
 dataset_train = GridDataset(
     hdf5_path = hdf5_paths,
     subset = train_ids, 
