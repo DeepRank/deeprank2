@@ -2,20 +2,41 @@ name: linting
 
 on:
   push:
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
+      - "**.cff"
+      - "**.png"
     branches:
-    - main
+      - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
+      - "**.cff"
+      - "**.png"
 
 jobs:
   build:
+    if: github.event.pull_request.draft == false
     name: Linting build
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest']
+        os: ["ubuntu-latest"]
         python-version: [3.9]
 
     steps:
