@@ -49,20 +49,22 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         hdf5_path=train_hdf5_path,
         node_features=node_features,
         edge_features=edge_features,
-        target=target,
-        task = task,
         clustering_method=clustering_method,
-        target_transform = target_transform)
+        target=target,
+        target_transform = target_transform,
+        task = task
+        )
 
     if val_hdf5_path is not None:
         dataset_val = GraphDataset(
             hdf5_path=val_hdf5_path,
             node_features=node_features,
             edge_features=edge_features,
-            target=target,
-            task = task,
             clustering_method=clustering_method,
-            target_transform = target_transform)
+            target=target,
+            target_transform = target_transform,
+            task = task
+            )
     else:
         dataset_val = None
 
@@ -71,10 +73,11 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
             hdf5_path=test_hdf5_path,
             node_features=node_features,
             edge_features=edge_features,
-            target=target,
-            task=task,
             clustering_method=clustering_method,
-            target_transform = target_transform)
+            target=target,
+            target_transform = target_transform,
+            task=task
+            )
     else:
         dataset_test = None
 
@@ -372,8 +375,8 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
-                target=targets.BINARY,
-                clustering_method="mcl"
+                clustering_method="mcl",
+                target=targets.BINARY
             )
             trainer = Trainer(
                 neuralnet = GINet,
@@ -392,8 +395,8 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
-                target=targets.BINARY,
-                clustering_method="mcl"
+                clustering_method="mcl",
+                target=targets.BINARY
             )
             trainer = Trainer(
                 neuralnet = GINet,
@@ -410,8 +413,8 @@ class TestTrainer(unittest.TestCase):
     def test_no_valid_provided(self):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
+            clustering_method="mcl",
             target=targets.BINARY,
-            clustering_method="mcl"
         )
         trainer = Trainer(
             neuralnet = GINet,
@@ -424,8 +427,8 @@ class TestTrainer(unittest.TestCase):
     def test_no_valid_full_train(self):
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
-            target=targets.BINARY,
-            clustering_method = "mcl"
+            clustering_method = "mcl",
+            target=targets.BINARY
         )
         trainer = Trainer(
             neuralnet = GINet,
@@ -512,13 +515,13 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset_train = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
-                target=targets.BINARY,
-                edge_features=[Efeat.DISTANCE, Efeat.COVALENT]
+                edge_features=[Efeat.DISTANCE, Efeat.COVALENT],
+                target=targets.BINARY
             )
             dataset_val = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
-                target=targets.BINARY,
-                edge_features=[Efeat.DISTANCE]
+                edge_features=[Efeat.DISTANCE],
+                target=targets.BINARY
             )
             Trainer(
                 neuralnet = GINet,
@@ -530,15 +533,15 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset_train = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
-                target=targets.BINARY,
                 edge_features=[Efeat.DISTANCE, Efeat.COVALENT],
-                clustering_method="mcl"
+                clustering_method="mcl",
+                target=targets.BINARY
             )
             dataset_test = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
-                target=targets.BINARY,
                 edge_features=[Efeat.DISTANCE],
-                clustering_method="mcl"
+                clustering_method="mcl",
+                target=targets.BINARY
             )
             trainer = Trainer(
                 neuralnet = GINet,

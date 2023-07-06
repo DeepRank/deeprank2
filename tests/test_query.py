@@ -493,4 +493,4 @@ def test_incorrect_pssm_provided():
         {
             "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
         },
-    ).build(components)
+    ).build(components)     
