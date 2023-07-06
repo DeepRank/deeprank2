@@ -144,10 +144,10 @@ class TestDataSet(unittest.TestCase):
     def test_datasets(self):
         dataset_graph = GraphDataset(
             hdf5_path=self.hdf5_path,
+            subset=None,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
-            target=targets.IRMSD,
-            subset=None,
+            target=targets.IRMSD 
         )
 
         dataset_grid = GridDataset(
@@ -195,11 +195,11 @@ class TestDataSet(unittest.TestCase):
     def test_filter_graphdataset(self):
         GraphDataset(
             hdf5_path=self.hdf5_path,
+            subset=None,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
-            subset=None,
-            target_filter={targets.IRMSD: "<10"},
+            target_filter={targets.IRMSD: "<10"}
         )
 
     def test_multi_file_graphdataset(self):
@@ -441,9 +441,9 @@ class TestDataSet(unittest.TestCase):
 
             GraphDataset(
                 hdf5_path = hdf5_path,
-                target = 'binary',
                 train = False,
-                dataset_train = dataset_train
+                dataset_train = dataset_train,
+                target = 'binary',
             )
 
     def test_only_transform_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
@@ -461,8 +461,8 @@ class TestDataSet(unittest.TestCase):
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
+            features_transform = features_transform,
             target = 'binary',
-            features_transform = features_transform
         )
         
         # dataset with no transformations applied
@@ -539,8 +539,8 @@ class TestDataSet(unittest.TestCase):
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
+            features_transform = features_transform,
             target = 'binary',
-            features_transform = features_transform
         )
         
         # dataset with no transformations applied
@@ -602,8 +602,8 @@ class TestDataSet(unittest.TestCase):
         
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
-            target = 'binary',
-            features_transform = features_transform
+            features_transform = features_transform,
+            target = 'binary'
         )
         
         dataset = GraphDataset(
@@ -679,8 +679,8 @@ class TestDataSet(unittest.TestCase):
         # dataset that has the standardization applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
-            target = 'binary',
-            features_transform = features_transform
+            features_transform = features_transform,
+            target = 'binary'
         )
         
         # dataset with no standardization applied
@@ -745,8 +745,8 @@ class TestDataSet(unittest.TestCase):
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
-            target = 'binary',
-            features_transform = features_transform
+            features_transform = features_transform,
+            target = 'binary'
         )
         
         # dataset with no transformations applied
@@ -825,15 +825,15 @@ class TestDataSet(unittest.TestCase):
         
         dataset_train = GraphDataset(
             hdf5_path = hdf5_path,
-            target = 'binary',
-            features_transform = features_transform
+            features_transform = features_transform,
+            target = 'binary'
         )
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            target = 'binary',
             train = False,
-            dataset_train = dataset_train
+            dataset_train = dataset_train,
+            target = 'binary'
         )
         
         # features_transform in the test should be the same as in the train
@@ -846,10 +846,10 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            target = 'binary',
             train = False,
             dataset_train = dataset_train,
-            features_transform = other_feature_transform
+            features_transform = other_feature_transform,
+            target = 'binary'
         )
         
         # features_transform setted in the testset should be ignored
@@ -863,32 +863,54 @@ class TestDataSet(unittest.TestCase):
         
         dataset_train = GraphDataset(
             hdf5_path = hdf5_path,
-            target = 'binary',
-            task = 'classif',
             node_features = ['bsa', 'hb_acceptors', 'hb_donors'],
             edge_features = ['covalent', 'distance'],
-            features_transform = feature_transform
-        )
-
-        dataset_test = GraphDataset(
-            hdf5_path = hdf5_path,
-            target = 'ba',
-            task = "regress",
-            node_features = "all",
-            edge_features = "all",
-            train = False,
-            dataset_train = dataset_train,
-            features_transform = None   
+            features_transform = feature_transform,
+            target = 'binary',
+            target_transform = False,
+            task = 'classif',
+            classes = None
         )
         
-        # target, task, node_features , edge_features, features_dict, and feature_transform
-        # in the test should be the same as in the train
-        assert dataset_train.features_transform == dataset_test.features_transform
+        dataset_valid = GraphDataset(
+            hdf5_path = hdf5_path,
+            train = False,
+            dataset_train = dataset_train,
+        )
+        
+        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
+        # in the valid should be inherited from the train
+        
+        assert dataset_train.node_features == dataset_valid.node_features
+        assert dataset_train.edge_features == dataset_valid.edge_features
+        assert dataset_train.features_dict == dataset_valid.features_dict
+        assert dataset_train.features_transform == dataset_valid.features_transform
+        assert dataset_train.target == dataset_valid.target
+        assert dataset_train.target_transform == dataset_valid.target_transform
+        assert dataset_train.task == dataset_valid.task
+        
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            train = False,
+            dataset_train = dataset_train,
+            node_features = "all",
+            edge_features = "all",
+            features_transform = None,  
+            target = 'ba',
+            target_transform = True,
+            task = "regress",
+            classes = None
+        )
+        
+        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
+        # in the test should be inherited from the train
         assert dataset_train.node_features == dataset_test.node_features
         assert dataset_train.edge_features == dataset_test.edge_features
-        assert dataset_train.task == dataset_test.task
-        assert dataset_train.target == dataset_test.target
         assert dataset_train.features_dict == dataset_test.features_dict
+        assert dataset_train.features_transform == dataset_test.features_transform
+        assert dataset_train.target == dataset_test.target
+        assert dataset_train.target_transform == dataset_test.target_transform
+        assert dataset_train.task == dataset_test.task
 
 
 if __name__ == "__main__":
