@@ -81,14 +81,14 @@ def test_cnn(): # pylint: disable=too-many-locals
 
         dataset_val = GridDataset(
             hdf5_path = hdf5_paths,
-            features = features,
-            target = targets.BINARY
+            train = False,
+            dataset_train = dataset_train,
         )
 
         dataset_test = GridDataset(
             hdf5_path = hdf5_paths,
-            features = features,
-            target = targets.BINARY
+            train = False,
+            dataset_train = dataset_train,
         )
 
         output_exporters = [HDF5OutputExporter(output_directory)]
@@ -164,18 +164,16 @@ def test_gnn(): # pylint: disable=too-many-locals
 
         dataset_val = GraphDataset(
             hdf5_path = hdf5_paths,
-            node_features = node_features,
-            edge_features = edge_features,
-            clustering_method = "mcl",
-            target = targets.BINARY
+            train = False,
+            dataset_train = dataset_train,
+            clustering_method = "mcl"
         )
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_paths,
-            node_features = node_features,
-            edge_features = edge_features,
-            clustering_method = "mcl",
-            target = targets.BINARY
+            train = False,
+            dataset_train = dataset_train,
+            clustering_method = "mcl"
         )
 
         output_exporters = [HDF5OutputExporter(output_directory)]

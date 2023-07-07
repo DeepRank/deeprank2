@@ -581,8 +581,9 @@ class GraphDataset(DeeprankDataset):
                 Defaults to None.
             subset (Optional[List[str]], optional): List of keys from .HDF5 file to include. 
                 Defaults to None (meaning include all).
-            train (bool, optional): Boolean flag to determine if the instance represents the training set. If False, a dataset_train of the same class must
-                be provided as well. The latter will be used to scale the validation/testing set according to its features values.
+            train (bool, optional): Boolean flag to determine if the instance represents the training set.
+                If False, a dataset_train of the same class must be provided as well.
+                The latter will be used to scale the validation/testing set according to its features values and to match the datasets' parameters.
                 Defaults to True.    
             dataset_train (class:`GraphDataset`, optional): If `train` is True, assign here the training set.
                 If `train` is False and `dataset_train` is assigned,
@@ -668,11 +669,6 @@ class GraphDataset(DeeprankDataset):
             inherited_param = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
             self._check_inherited_param(inherited_param, dataset_train)
             
-            #set features_transform as the same in dataset_train
-            if dataset_train.features_transform is not None:
-                self.features_transform = dataset_train.features_transform
-            else:
-                self.features_transform = None
         elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.
             dataset_train will be ignored since the current dataset will be considered as training set.""")
@@ -696,15 +692,15 @@ class GraphDataset(DeeprankDataset):
             
     def _check_inherited_param(
         self,
-        inherited_param: List[str] = None,
-        dataset_train: GraphDataset = None,
+        inherited_param: List[str],
+        dataset_train: GraphDataset,
     ):
-        """Check if the parameters from validation and testing are same as the training set.
+        """Check if the parameters from validation or testing are same as the training set.
         
         Args:
-        inherited_param (List[str], optional): List of parameters that need to be check for inheritance.
+        inherited_param (List[str]): List of parameters that need to be checked for inheritance.
             Defaults to None.
-        dataset_train (class:`GraphDataset`, optional): The parameters in `inherited_param` will be inherited from `dataset_train`.
+        dataset_train (class:`GraphDataset`): The parameters in `inherited_param` will be inherited from `dataset_train`.
             Defaults to None.
         """
         

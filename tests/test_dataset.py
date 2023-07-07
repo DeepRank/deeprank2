@@ -872,7 +872,7 @@ class TestDataSet(unittest.TestCase):
             classes = None
         )
         
-        dataset_valid = GraphDataset(
+        dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             train = False,
             dataset_train = dataset_train,
@@ -881,13 +881,13 @@ class TestDataSet(unittest.TestCase):
         # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
         # in the valid should be inherited from the train
         
-        assert dataset_train.node_features == dataset_valid.node_features
-        assert dataset_train.edge_features == dataset_valid.edge_features
-        assert dataset_train.features_dict == dataset_valid.features_dict
-        assert dataset_train.features_transform == dataset_valid.features_transform
-        assert dataset_train.target == dataset_valid.target
-        assert dataset_train.target_transform == dataset_valid.target_transform
-        assert dataset_train.task == dataset_valid.task
+        assert dataset_train.node_features == dataset_test.node_features
+        assert dataset_train.edge_features == dataset_test.edge_features
+        assert dataset_train.features_dict == dataset_test.features_dict
+        assert dataset_train.features_transform == dataset_test.features_transform
+        assert dataset_train.target == dataset_test.target
+        assert dataset_train.target_transform == dataset_test.target_transform
+        assert dataset_train.task == dataset_test.task
         
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
