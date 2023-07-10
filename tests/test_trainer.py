@@ -122,11 +122,11 @@ class TestTrainer(unittest.TestCase):
 
     def test_grid_regression(self):
         dataset = GridDataset(
-            hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+            hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
             subset = None,
+            features = [Efeat.VDW],
             target = targets.IRMSD,
-            task = targets.REGRESS,
-            features = [Efeat.VDW]
+            task = targets.REGRESS
         )
         trainer = Trainer(
             CnnRegression,
@@ -138,9 +138,10 @@ class TestTrainer(unittest.TestCase):
         dataset = GridDataset(
             hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
             subset = None,
+            features = [Efeat.VDW],
             target = targets.BINARY,
-            task = targets.CLASSIF,
-            features = [Efeat.VDW])
+            task = targets.CLASSIF
+            )
         trainer = Trainer(
             CnnClassification,
             dataset
@@ -151,9 +152,9 @@ class TestTrainer(unittest.TestCase):
         dataset_train = GridDataset(
             hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
             subset = None,
+            features = [Efeat.VDW],
             target = targets.BINARY,
-            task = targets.CLASSIF,
-            features = [Efeat.VDW]
+            task = targets.CLASSIF 
         )
         dataset_valid = GraphDataset(
             hdf5_path = "tests/data/hdf5/valid.hdf5",

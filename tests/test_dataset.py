@@ -125,12 +125,12 @@ class TestDataSet(unittest.TestCase):
     def test_collates_entry_names_datasets(self):
 
         for dataset_name, dataset in [("GraphDataset", GraphDataset(self.hdf5_path,
-                                                                    node_features=node_feats,
-                                                                    edge_features=[Efeat.DISTANCE],
-                                                                    target=targets.IRMSD)),
+                                                                    node_features = node_feats,
+                                                                    edge_features = [Efeat.DISTANCE],
+                                                                    target = targets.IRMSD)),
                                       ("GridDataset", GridDataset(self.hdf5_path,
-                                                                  features=[Efeat.VDW],
-                                                                  target=targets.IRMSD))]:
+                                                                  features = [Efeat.VDW],
+                                                                  target = targets.IRMSD))]:
 
             entry_names = []
             for batch_data in DataLoader(dataset, batch_size=2, shuffle=True):
@@ -151,10 +151,10 @@ class TestDataSet(unittest.TestCase):
         )
 
         dataset_grid = GridDataset(
-            hdf5_path=self.hdf5_path,
-            features=[Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
-            target=targets.IRMSD,
-            subset=None,
+            hdf5_path = self.hdf5_path,
+            subset = None,
+            features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
+            target = targets.IRMSD
         )
 
         assert len(dataset_graph) == 4
@@ -164,9 +164,9 @@ class TestDataSet(unittest.TestCase):
     
     def test_regression_griddataset(self):
         dataset = GridDataset(
-            hdf5_path=self.hdf5_path,
-            features=[Efeat.VDW, Efeat.ELEC],
-            target=targets.IRMSD
+            hdf5_path = self.hdf5_path,
+            features = [Efeat.VDW, Efeat.ELEC],
+            target = targets.IRMSD
         )
 
         assert len(dataset) == 4
@@ -179,9 +179,9 @@ class TestDataSet(unittest.TestCase):
 
     def test_classification_griddataset(self):
         dataset = GridDataset(
-            hdf5_path=self.hdf5_path,
-            features=[Efeat.VDW, Efeat.ELEC],
-            target=targets.BINARY
+            hdf5_path = self.hdf5_path,
+            features = [Efeat.VDW, Efeat.ELEC],
+            target = targets.BINARY
         )
 
         assert len(dataset) == 4
@@ -191,6 +191,51 @@ class TestDataSet(unittest.TestCase):
 
         # 1 entry with class value
         assert dataset[0].y.shape == (1,)
+    
+    def test_inherit_info_training_griddataset(self):
+        
+        dataset_train = GridDataset(
+            hdf5_path = self.hdf5_path,
+            features = [Efeat.VDW, Efeat.ELEC],
+            target = targets.BINARY,
+            target_transform = False,
+            task = targets.CLASSIF,
+            classes = None
+        )
+        
+        dataset_test = GridDataset(
+            hdf5_path = self.hdf5_path,
+            train = False,
+            dataset_train = dataset_train
+        )
+        
+        # features, features_dict, target, target_transform, task, and classes 
+        # in the test should be inherited from the train
+        
+        assert dataset_train.features == dataset_test.features
+        assert dataset_train.features_dict == dataset_test.features_dict
+        assert dataset_train.target == dataset_test.target
+        assert dataset_train.target_transform == dataset_test.target_transform
+        assert dataset_train.task == dataset_test.task
+        
+        dataset_test = GridDataset(
+            hdf5_path = self.hdf5_path,
+            train = False,
+            dataset_train = dataset_train,
+            features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
+            target = targets.IRMSD,
+            target_transform = True,
+            task = targets.REGRESS,
+            classes = None
+        )
+        
+        # features, features_dict, target, target_transform, task, and classes 
+        # in the test should be inherited from the train
+        assert dataset_train.features == dataset_test.features
+        assert dataset_train.features_dict == dataset_test.features_dict
+        assert dataset_train.target == dataset_test.target
+        assert dataset_train.target_transform == dataset_test.target_transform
+        assert dataset_train.task == dataset_test.task
 
     def test_filter_graphdataset(self):
         GraphDataset(
@@ -857,7 +902,7 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.means == dataset_test.means
         assert dataset_train.devs == dataset_test.devs
 
-    def test_inherit_info_training(self):
+    def test_inherit_info_training_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         feature_transform = {'all': {'transform': None, 'standardize': True}}
         
@@ -879,7 +924,7 @@ class TestDataSet(unittest.TestCase):
         )
         
         # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
-        # in the valid should be inherited from the train
+        # in the test should be inherited from the train
         
         assert dataset_train.node_features == dataset_test.node_features
         assert dataset_train.edge_features == dataset_test.edge_features
@@ -911,7 +956,6 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.target == dataset_test.target
         assert dataset_train.target_transform == dataset_test.target_transform
         assert dataset_train.task == dataset_test.task
-
 
 if __name__ == "__main__":
     unittest.main()
