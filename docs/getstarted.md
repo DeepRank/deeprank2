@@ -173,18 +173,22 @@ target = "binary"
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = train_ids, 
+    subset = train_ids,
     node_features = node_features,
     edge_features = edge_features,
     target = target
 )
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = valid_ids
+    subset = valid_ids,
+    train = False,
+    dataset_train = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = test_ids, 
+    subset = test_ids,
+    train = False,
+    dataset_train = dataset_train
 )
 ```
 
@@ -282,16 +286,15 @@ dataset_train = GridDataset(
 )
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
-    subset = valid_ids, 
-    features = features,
-    target = target
-
+    subset = valid_ids,
+    train = False,
+    dataset_train = dataset_train
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
-    subset = test_ids, 
-    features = features,
-    target = target
+    subset = test_ids,
+    train = False,
+    dataset_train = dataset_train
 )
 ```
 
