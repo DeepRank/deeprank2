@@ -148,27 +148,6 @@ class TestTrainer(unittest.TestCase):
         )
         trainer.train(nepoch=1, batch_size = 2, best_model=False, filename=None)
 
-    def test_grid_graph_incompatible(self):
-        dataset_train = GridDataset(
-            hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
-            subset = None,
-            features = [Efeat.VDW],
-            target = targets.BINARY,
-            task = targets.CLASSIF 
-        )
-        dataset_valid = GraphDataset(
-            hdf5_path = "tests/data/hdf5/valid.hdf5",
-            train = False,
-            dataset_train = dataset_train
-        )
-
-        with pytest.raises(TypeError):
-            Trainer(
-                CnnClassification,
-                dataset_train = dataset_train,
-                dataset_val = dataset_valid
-            )
-
     def test_ginet_sigmoid(self):
         files = glob.glob(self.work_directory + '/*')
         for f in files:
@@ -508,49 +487,100 @@ class TestTrainer(unittest.TestCase):
             _log.info("CUDA is not available; test_cuda was skipped")
 
     def test_dataset_equivalence_no_pretrained(self):
+        # TestCase: dataset_train set (no pretrained model assigned).
+        
+        # Raise error when train dataset is neither a GraphDataset or GridDataset.
+        with pytest.raises(TypeError):
+            dataset_invalid_train = GINet(
+                input_shape = 2
+            )
+            Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_invalid_train,
+            )
+            
+        # Raise error when train parameter in dataset_val/test not set as False.
+        dataset_train = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
+            target = targets.BINARY
+        )
+        dataset_val = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train = True,
+            dataset_train = dataset_train
+        )
+        dataset_test = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train = True,
+            dataset_train = dataset_train
+        )
         with pytest.raises(ValueError):
-            dataset_train = GraphDataset(
-                hdf5_path = "tests/data/hdf5/test.hdf5",
-                edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
-                target = targets.BINARY
-            )
-            dataset_val = GraphDataset(
-                hdf5_path = "tests/data/hdf5/test.hdf5",
-                train = False,
-                dataset_train = dataset_train
-            )
             Trainer(
                 neuralnet = GINet,
                 dataset_train = dataset_train,
                 dataset_val = dataset_val,
             )
-
-    def test_dataset_equivalence_pretrained(self):
         with pytest.raises(ValueError):
-            dataset_train = GraphDataset(
-                hdf5_path = "tests/data/hdf5/test.hdf5",
-                edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
-                clustering_method = "mcl",
-                target = targets.BINARY
-            )
-            dataset_test = GraphDataset(
-                hdf5_path = "tests/data/hdf5/test.hdf5",
-                train = False,
-                dataset_train = dataset_train,
-                clustering_method="mcl",
-                
-            )
-            trainer = Trainer(
+            Trainer(
                 neuralnet = GINet,
                 dataset_train = dataset_train,
+                dataset_test = dataset_test,
+            )
+    
+        # Raise error when dataset_train parameter in GraphDataset/GridDataset
+        # not equivalent to the dataset_train passed to Trainer.
+        dataset_train_other = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            edge_features = [Efeat.SAMECHAIN, Efeat.COVALENT],
+            target = targets.BA
+        )
+        dataset_val = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train = False,
+            dataset_train = dataset_train
+        )
+        dataset_test = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train = False,
+            dataset_train = dataset_train
+        )
+        with pytest.raises(ValueError):
+            Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_train_other,
+                dataset_val = dataset_val
+            )
+        with pytest.raises(ValueError):
+            Trainer(
+                neuralnet = GINet,
+                dataset_train = dataset_train_other,
+                dataset_test = dataset_test
             )
 
-            with warnings.catch_warnings(record=UserWarning):
-                trainer.train(nepoch=3, validate=True, best_model=False, filename=self.save_path)
+    def test_dataset_equivalence_pretrained(self):
+        # TestCase: No dataset_train set (pretrained model assigned). 
+        # Raise error when no dataset_test is set. 
+    
+        dataset_train = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
+            clustering_method = "mcl",
+            target = targets.BINARY
+        )
+
+        trainer = Trainer(
+            neuralnet = GINet,
+            dataset_train = dataset_train,
+        )
+        
+        with pytest.raises(ValueError):
+            with warnings.catch_warnings(record = UserWarning):
+                #train pretrained model
+                trainer.train(nepoch = 3, validate = True, best_model = False, filename = self.save_path)
+                #pretrained model assigned(no dataset_train needed)
                 Trainer(
                     neuralnet = GINet,
-                    dataset_train = dataset_train,
-                    dataset_test = dataset_test,
                     pretrained_model = self.save_path
                 )
 

@@ -77,8 +77,6 @@ class DeeprankDataset(Dataset):
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-        
-
     def _check_hdf5_files(self):
         """Checks if the data contained in the .HDF5 file is valid."""
         _log.info("\nChecking dataset Integrity...")
@@ -130,6 +128,28 @@ class DeeprankDataset(Dataset):
         else:
             self.classes = None
             self.classes_to_index = None
+            
+    def _check_inherited_params(
+        self,
+        inherited_params: List[str],
+        dataset_train: Union[GraphDataset, GridDataset],
+    ):
+        """"Check if the parameters for validation and/or testing are the same as in the training set.
+        
+        Args:
+        inherited_params (List[str]): List of parameters that need to be checked for inheritance.
+        dataset_train (Union[class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited from `dataset_train`.
+        """
+        
+        self_vars = vars(self)
+        dataset_train_vars = vars(dataset_train)
+
+        for param in inherited_params:
+            if (self_vars[param] != dataset_train_vars[param]):
+                setattr(self, param, dataset_train_vars[param])
+                _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
+                    f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}" +
+                    f"Overwriting {param} parameter with the one used in the training phase.")
 
     def _create_index_entries(self):
         """Creates the indexing of each molecule in the dataset.
@@ -212,7 +232,7 @@ class DeeprankDataset(Dataset):
                              f"   :Filter options are: {present_target_names}")
         return True
 
-    def __len__(self) -> int:
+    def len(self) -> int:
         """Gets the length of the dataset, either :class:`GridDataset` or :class:`GraphDataset` object.
 
         Returns:
@@ -380,27 +400,6 @@ class DeeprankDataset(Dataset):
         self.means = means
         self.devs = devs
 
-    def _check_inherited_param(
-        self,
-        inherited_param: List[str],
-        dataset_train: Union[GraphDataset, GridDataset],
-    ):
-        """Check if the parameters from validation or testing are same as the training set.
-        
-        Args:
-        inherited_param (List[str]): List of parameters that need to be checked for inheritance.
-        dataset_train (Union[class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited from `dataset_train`.
-        """
-        
-        self_vars = vars(self)
-        dataset_train_vars = vars(dataset_train)
-
-        for param in inherited_param:
-            if (self_vars[param] != dataset_train_vars[param]):
-                setattr(self, param, dataset_train_vars[param])
-                _log.warning(f"The {param} parameter set here is: {self_vars[param]}, "
-                             f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}"
-                             f"Overwriting {param} parameter with the one used in the training phase.")
                         
 # Grid features are stored per dimension and named accordingly.
 # Example: position_001, position_002, position_003 (for x,y,z)
@@ -475,6 +474,8 @@ class GridDataset(DeeprankDataset):
         """
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
+        self.train = train
+        self.dataset_train = dataset_train
         self.features = features
         self.target_transform = target_transform
         self._check_features()
@@ -492,8 +493,8 @@ class GridDataset(DeeprankDataset):
                                 Please provide a valid training GridDataset.""")
             
             #check inherited parameter with the ones in the training set
-            inherited_param = ["features", "features_dict", "target", "target_transform", "task", "classes"]
-            self._check_inherited_param(inherited_param, dataset_train)
+            inherited_params = ["features", "features_dict", "target", "target_transform", "task", "classes"]
+            self._check_inherited_params(inherited_params, dataset_train)
             
         elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.
@@ -704,6 +705,8 @@ class GraphDataset(DeeprankDataset):
 
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
+        self.train = train
+        self.dataset_train = dataset_train
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
@@ -725,8 +728,8 @@ class GraphDataset(DeeprankDataset):
                                 Please provide a valid training GraphDataset.""")
             
             #check inherited parameter with the ones in the training set
-            inherited_param = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
-            self._check_inherited_param(inherited_param, dataset_train)
+            inherited_params = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
+            self._check_inherited_params(inherited_params, dataset_train)
             
         elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.

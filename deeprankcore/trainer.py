@@ -236,66 +236,45 @@ class Trainer():
         self.task = dataset.task
 
     def _load_model(self):
-        """
-        Loads the neural network model.
-        """
+        """Loads the neural network model."""
 
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
         self.set_lossfunction()
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
-
+        """Check train_dataset type, train parameter and dataset_train parameter settings."""
+        
+        # dataset_train is None when pretrained_model is set
         if dataset_train is None:
             # only check the test dataset
             if dataset_test is None:
                 raise ValueError("Please provide at least a train or test dataset")
-
-            if not isinstance(dataset_test, GraphDataset) and not isinstance(dataset_test, GridDataset):
-                raise TypeError(f"""test dataset is not the right type {type(dataset_test)}
-                                Make sure it's either GraphDataset or GridDataset""")
-            return
-
-        # Compare the datasets to each other
-        for dataset_other_name, dataset_other in [("validation", dataset_val),
-                                                  ("testing", dataset_test)]:
-            if dataset_other is not None:
-
-                if dataset_other.target != dataset_train.target:
-                    raise ValueError(f"training dataset has target {dataset_train.target} while "
-                                     f"{dataset_other_name} dataset has target {dataset_other.target}")
-
-                if dataset_other.task != dataset_other.task:
-                    raise ValueError(f"training dataset has task {dataset_train.task} while "
-                                     f"{dataset_other_name} dataset has task {dataset_other.task}")
-
-                if dataset_other.classes != dataset_other.classes:
-                    raise ValueError(f"training dataset has classes {dataset_train.classes} while "
-                                     f"{dataset_other_name} dataset has classes {dataset_other.classes}")
-
-                if isinstance(dataset_train, GraphDataset) and isinstance(dataset_other, GraphDataset):
-
-                    if dataset_other.node_features != dataset_train.node_features:
-                        raise ValueError(f"training dataset has node_features {dataset_train.node_features} while "
-                                         f"{dataset_other_name} dataset has node_features {dataset_other.node_features}")
-
-                    if dataset_other.edge_features != dataset_train.edge_features:
-                        raise ValueError(f"training dataset has edge_features {dataset_train.edge_features} while "
-                                         f"{dataset_other_name} dataset has edge_features {dataset_other.edge_features}")
-
-                    if dataset_other.clustering_method != dataset_other.clustering_method:
-                        raise ValueError(f"training dataset has clustering method {dataset_train.clustering_method} while "
-                                         f"{dataset_other_name} dataset has clustering method {dataset_other.clustering_method}")
-
-                elif isinstance(dataset_train, GridDataset) and isinstance(dataset_other, GridDataset):
-
-                    if dataset_other.features != dataset_train.features:
-                        raise ValueError(f"training dataset has features {dataset_train.features} while "
-                                         f"{dataset_other_name} dataset has features {dataset_other.features}")
-
-                else:
-                    raise TypeError(f"Training and {dataset_other_name} datasets are not the same type.\n"
-                                     "Make sure to use only graph or only grid datasets")
+        else:
+            # Make sure train dataset has valid type
+            if not isinstance(dataset_train, GraphDataset) and not isinstance(dataset_train, GridDataset):
+                raise TypeError(f"""test dataset is not the right type {type(dataset_train)}
+                                Make sure it's either GraphDataset or GridDataset""") 
+            
+            if dataset_val is not None:
+                # Check train parameter in valid is set as False.
+                if dataset_val.train is not False:
+                    raise ValueError(f"""valid dataset has train parameter {dataset_val.train}
+                                Make sure to set it as False""")
+                # Check dataset_train parameter in valid is equivalent to train which passed to Trainer.
+                if dataset_val.dataset_train != dataset_train:
+                    raise ValueError(f"""valid dataset has different dataset_train parameter compared to the one in Trainer. 
+                                Make sure to assign equivalent dataset_train in Trainer""")
+                    
+            if dataset_test is not None:
+                # Check train parameter in test is set as False.
+                if dataset_test.train is not False:
+                    raise ValueError(f"""test dataset has train parameter {dataset_test.train}
+                                Make sure to set it as False""")
+                # Check dataset_train parameter in test is equivalent to train which passed to Trainer.
+                if dataset_test.dataset_train != dataset_train:
+                    raise ValueError(f"""test dataset has different dataset_train parameter compared to the one in Trainer. 
+                                Make sure to assign equivalent dataset_train in Trainer""")
 
     def _load_pretrained_model(self):
         """

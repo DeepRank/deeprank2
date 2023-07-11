@@ -7,6 +7,7 @@ import h5py
 import numpy as np
 from torch_geometric.loader import DataLoader
 from typing import List, Union
+import pytest
 
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import edgestorage as Efeat
@@ -949,6 +950,20 @@ class TestDataSet(unittest.TestCase):
         # in the test should be inherited from the train
         _check_inherited_param(inherited_param, dataset_train, dataset_test)
 
+    def test_incompatible_dataset_train_type(self): 
+        dataset_train = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
+            target = targets.BINARY
+        )
+        
+        # Raise error when val dataset don't have the same data type as train dataset.
+        with pytest.raises(TypeError):
+            GridDataset(
+                hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
+                train = False,
+                dataset_train = dataset_train
+            )  
 
 if __name__ == "__main__":
     unittest.main()
