@@ -212,7 +212,7 @@ class DeeprankDataset(Dataset):
                              f"   :Filter options are: {present_target_names}")
         return True
 
-    def len(self) -> int:
+    def __len__(self) -> int:
         """Gets the length of the dataset, either :class:`GridDataset` or :class:`GraphDataset` object.
 
         Returns:
@@ -389,9 +389,7 @@ class DeeprankDataset(Dataset):
         
         Args:
         inherited_param (List[str]): List of parameters that need to be checked for inheritance.
-            Defaults to None.
         dataset_train (Union[class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited from `dataset_train`.
-            Defaults to None.
         """
         
         self_vars = vars(self)
@@ -400,10 +398,10 @@ class DeeprankDataset(Dataset):
         for param in inherited_param:
             if (self_vars[param] != dataset_train_vars[param]):
                 setattr(self, param, dataset_train_vars[param])
-                _log.warning(f"Overwriting {param} parameter with the one " +
-                            f"used in the training phase: {self_vars[param]}.")
-
-
+                _log.warning(f"The {param} parameter set here is: {self_vars[param]}, "
+                             f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}"
+                             f"Overwriting {param} parameter with the one used in the training phase.")
+                        
 # Grid features are stored per dimension and named accordingly.
 # Example: position_001, position_002, position_003 (for x,y,z)
 # Use this regular expression to take the feature name apart
@@ -416,7 +414,7 @@ class GridDataset(DeeprankDataset):
         hdf5_path: Union[str, list],
         subset: Optional[List[str]] = None,
         train: bool = True,
-        dataset_train: GridDataset = None,
+        dataset_train: Optional[GridDataset] = None,
         features: Optional[Union[List[str], str]] = "all",
         target: Optional[str] = None,
         target_transform: Optional[bool] = False,
@@ -490,7 +488,8 @@ class GridDataset(DeeprankDataset):
 
         if not train:
             if not isinstance(dataset_train, GridDataset):
-                raise TypeError("Please provide a valid training GridDataset.")
+                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
+                                Please provide a valid training GridDataset.""")
             
             #check inherited parameter with the ones in the training set
             inherited_param = ["features", "features_dict", "target", "target_transform", "task", "classes"]
@@ -616,7 +615,7 @@ class GraphDataset(DeeprankDataset):
         hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]] = None,
         train: bool = True,
-        dataset_train: GraphDataset = None,
+        dataset_train: Optional[GraphDataset] = None,
         node_features: Optional[Union[List[str], str]] = "all",
         edge_features: Optional[Union[List[str], str]] = "all",
         features_transform: Optional[dict] = None,
@@ -722,7 +721,8 @@ class GraphDataset(DeeprankDataset):
 
         if not train:
             if not isinstance(dataset_train, GraphDataset):
-                raise TypeError("Please provide a valid training GraphDataset.")
+                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
+                                Please provide a valid training GraphDataset.""")
             
             #check inherited parameter with the ones in the training set
             inherited_param = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]

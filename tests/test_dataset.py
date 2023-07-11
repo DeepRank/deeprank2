@@ -6,6 +6,7 @@ from tempfile import mkdtemp
 import h5py
 import numpy as np
 from torch_geometric.loader import DataLoader
+from typing import List, Union
 
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import edgestorage as Efeat
@@ -118,6 +119,17 @@ def _compute_features_with_get(
                     features_dict[feat + f'_{ch}'] = arr
     return features_dict
 
+def _check_inherited_param(
+    inherited_param: List[str],
+    dataset_train: Union[GraphDataset, GridDataset],
+    dataset_test: Union[GraphDataset, GridDataset],
+):
+    dataset_train_vars = vars(dataset_train)
+    dataset_test_vars = vars(dataset_test)
+
+    for param in inherited_param:
+        assert dataset_test_vars[param] == dataset_train_vars[param]
+    
 class TestDataSet(unittest.TestCase):
     def setUp(self):
         self.hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5"
@@ -211,12 +223,8 @@ class TestDataSet(unittest.TestCase):
         
         # features, features_dict, target, target_transform, task, and classes 
         # in the test should be inherited from the train
-        
-        assert dataset_train.features == dataset_test.features
-        assert dataset_train.features_dict == dataset_test.features_dict
-        assert dataset_train.target == dataset_test.target
-        assert dataset_train.target_transform == dataset_test.target_transform
-        assert dataset_train.task == dataset_test.task
+        inherited_param = ["features", "features_dict", "target", "target_transform", "task", "classes"]
+        _check_inherited_param(inherited_param, dataset_train, dataset_test)
         
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
@@ -231,11 +239,7 @@ class TestDataSet(unittest.TestCase):
         
         # features, features_dict, target, target_transform, task, and classes 
         # in the test should be inherited from the train
-        assert dataset_train.features == dataset_test.features
-        assert dataset_train.features_dict == dataset_test.features_dict
-        assert dataset_train.target == dataset_test.target
-        assert dataset_train.target_transform == dataset_test.target_transform
-        assert dataset_train.task == dataset_test.task
+        _check_inherited_param(inherited_param, dataset_train, dataset_test)
 
     def test_filter_graphdataset(self):
         GraphDataset(
@@ -925,14 +929,8 @@ class TestDataSet(unittest.TestCase):
         
         # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
         # in the test should be inherited from the train
-        
-        assert dataset_train.node_features == dataset_test.node_features
-        assert dataset_train.edge_features == dataset_test.edge_features
-        assert dataset_train.features_dict == dataset_test.features_dict
-        assert dataset_train.features_transform == dataset_test.features_transform
-        assert dataset_train.target == dataset_test.target
-        assert dataset_train.target_transform == dataset_test.target_transform
-        assert dataset_train.task == dataset_test.task
+        inherited_param = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
+        _check_inherited_param(inherited_param, dataset_train, dataset_test)
         
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
@@ -949,13 +947,8 @@ class TestDataSet(unittest.TestCase):
         
         # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
         # in the test should be inherited from the train
-        assert dataset_train.node_features == dataset_test.node_features
-        assert dataset_train.edge_features == dataset_test.edge_features
-        assert dataset_train.features_dict == dataset_test.features_dict
-        assert dataset_train.features_transform == dataset_test.features_transform
-        assert dataset_train.target == dataset_test.target
-        assert dataset_train.target_transform == dataset_test.target_transform
-        assert dataset_train.task == dataset_test.task
+        _check_inherited_param(inherited_param, dataset_train, dataset_test)
+
 
 if __name__ == "__main__":
     unittest.main()
