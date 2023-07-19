@@ -257,22 +257,22 @@ class Trainer():
                                 Make sure it's either GraphDataset or GridDataset""") 
             
             if dataset_val is not None:
-                self._check_dataset_value(dataset_train, dataset_val, type = "valid")
+                self._check_dataset_value(dataset_train, dataset_val, type_dataset = "valid")
                     
             if dataset_test is not None:
-                self._check_dataset_value(dataset_train, dataset_test, type = "test")
+                self._check_dataset_value(dataset_train, dataset_test, type_dataset = "test")
     
-    def _check_dataset_value(self, dataset_train, dataset_check, type):
+    def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
         """Check valid/test dataset settings."""
         
         # Check train parameter in valid/test is set as False.
         if dataset_check.train is not False:
-            raise ValueError(f"""{type} dataset has train parameter {dataset_check.train}
+            raise ValueError(f"""{type_dataset} dataset has train parameter {dataset_check.train}
                         Make sure to set it as False""")
         # Check dataset_train parameter in valid/test is equivalent to train which passed to Trainer.
         if dataset_check.dataset_train != dataset_train:
-            raise ValueError("""{type} dataset has different dataset_train parameter compared to the one given in Trainer.\n""" +
-                        "Make sure to assign equivalent dataset_train in Trainer")
+            raise ValueError(f"""{type_dataset} dataset has different dataset_train parameter compared to the one given in Trainer.
+                        Make sure to assign equivalent dataset_train in Trainer""")
 
     def _load_pretrained_model(self):
         """
