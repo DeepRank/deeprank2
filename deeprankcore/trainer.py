@@ -253,28 +253,26 @@ class Trainer():
         else:
             # Make sure train dataset has valid type
             if not isinstance(dataset_train, GraphDataset) and not isinstance(dataset_train, GridDataset):
-                raise TypeError(f"""test dataset is not the right type {type(dataset_train)}
+                raise TypeError(f"""train dataset is not the right type {type(dataset_train)}
                                 Make sure it's either GraphDataset or GridDataset""") 
             
             if dataset_val is not None:
-                # Check train parameter in valid is set as False.
-                if dataset_val.train is not False:
-                    raise ValueError(f"""valid dataset has train parameter {dataset_val.train}
-                                Make sure to set it as False""")
-                # Check dataset_train parameter in valid is equivalent to train which passed to Trainer.
-                if dataset_val.dataset_train != dataset_train:
-                    raise ValueError("valid dataset has different dataset_train parameter compared to the one given in Trainer.\n" +
-                                "Make sure to assign equivalent dataset_train in Trainer")
+                self._check_dataset_value(dataset_train, dataset_val, type = "valid")
                     
             if dataset_test is not None:
-                # Check train parameter in test is set as False.
-                if dataset_test.train is not False:
-                    raise ValueError(f"""test dataset has train parameter {dataset_test.train}
-                                Make sure to set it as False""")
-                # Check dataset_train parameter in test is equivalent to train which passed to Trainer.
-                if dataset_test.dataset_train != dataset_train:
-                    raise ValueError("test dataset has different dataset_train parameter compared to the one given in Trainer.\n" +
-                                "Make sure to assign equivalent dataset_train in Trainer")
+                self._check_dataset_value(dataset_train, dataset_test, type = "test")
+    
+    def _check_dataset_value(self, dataset_train, dataset_check, type):
+        """Check valid/test dataset settings."""
+        
+        # Check train parameter in valid/test is set as False.
+        if dataset_check.train is not False:
+            raise ValueError(f"""{type} dataset has train parameter {dataset_check.train}
+                        Make sure to set it as False""")
+        # Check dataset_train parameter in valid/test is equivalent to train which passed to Trainer.
+        if dataset_check.dataset_train != dataset_train:
+            raise ValueError("""{type} dataset has different dataset_train parameter compared to the one given in Trainer.\n""" +
+                        "Make sure to assign equivalent dataset_train in Trainer")
 
     def _load_pretrained_model(self):
         """

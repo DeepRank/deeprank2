@@ -203,6 +203,9 @@ from deeprankcore.dataset import GraphDataset
 node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
 edge_features = ["distance"]
 target = "binary"
+train_ids = [<ids>]
+valid_ids = [<ids>]
+test_ids = [<ids>]
 
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
@@ -235,6 +238,9 @@ from deeprankcore.dataset import GridDataset
 
 features = ["bsa", "res_depth", "hse", "info_content", "pssm", "distance"]
 target = "binary"
+train_ids = [<ids>]
+valid_ids = [<ids>]
+test_ids = [<ids>]
 
 # Creating GraphDataset objects
 dataset_train = GridDataset(
