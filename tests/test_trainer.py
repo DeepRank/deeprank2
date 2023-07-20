@@ -175,7 +175,7 @@ class TestTrainer(unittest.TestCase):
         for f in files:
             os.remove(f)
         assert len(os.listdir(self.work_directory)) == 0
-        
+
         _model_base_test(
             self.save_path,
             GINet,
@@ -488,7 +488,7 @@ class TestTrainer(unittest.TestCase):
 
     def test_dataset_equivalence_no_pretrained(self):
         # TestCase: dataset_train set (no pretrained model assigned).
-        
+
         # Raise error when train dataset is neither a GraphDataset or GridDataset.
         with pytest.raises(TypeError):
             dataset_invalid_train = GINet(
@@ -498,7 +498,7 @@ class TestTrainer(unittest.TestCase):
                 neuralnet = GINet,
                 dataset_train = dataset_invalid_train,
             )
-            
+
         # Raise error when train parameter in dataset_val/test not set as False.
         dataset_train = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
@@ -527,7 +527,7 @@ class TestTrainer(unittest.TestCase):
                 dataset_train = dataset_train,
                 dataset_test = dataset_test,
             )
-    
+
         # Raise error when dataset_train parameter in GraphDataset/GridDataset
         # not equivalent to the dataset_train passed to Trainer.
         dataset_train_other = GraphDataset(
@@ -559,9 +559,9 @@ class TestTrainer(unittest.TestCase):
             )
 
     def test_dataset_equivalence_pretrained(self):
-        # TestCase: No dataset_train set (pretrained model assigned). 
-        # Raise error when no dataset_test is set. 
-    
+        # TestCase: No dataset_train set (pretrained model assigned).
+        # Raise error when no dataset_test is set.
+
         dataset_train = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
@@ -573,7 +573,7 @@ class TestTrainer(unittest.TestCase):
             neuralnet = GINet,
             dataset_train = dataset_train,
         )
-        
+
         with pytest.raises(ValueError):
             with warnings.catch_warnings(record = UserWarning):
                 #train pretrained model
@@ -590,7 +590,7 @@ class TestTrainer(unittest.TestCase):
         n_val = int ( 0.25 * len(hdf5_file) )
         n_train = len(hdf5_file) - n_val
         test_cases = [None, 0.25, n_val]
-        
+
         for t in test_cases:
             dataset_train, dataset_val =_divide_dataset(
                 dataset = GraphDataset(hdf5_path = hdf5),
@@ -600,17 +600,17 @@ class TestTrainer(unittest.TestCase):
             assert len(dataset_val) == n_val
 
         hdf5_file.close()
-        
+
     def test_invalid_trainsize(self):
         hdf5 = "tests/data/hdf5/train.hdf5"
         hdf5_file = h5py.File(hdf5, 'r')    # contains 44 datapoints
         n = len(hdf5_file)
         test_cases = [
             1.0, n,     # cannot be 100% validation data
-            -0.5, -1,   # no negative values 
+            -0.5, -1,   # no negative values
             1.1, n + 1, # cannot use more than all data as input
             ]
-        
+
         for t in test_cases:
             print(t)
             with self.assertRaises(ValueError):
@@ -618,13 +618,13 @@ class TestTrainer(unittest.TestCase):
                     dataset = GraphDataset(hdf5_path = hdf5),
                     splitsize = t,
                 )
-        
+
         hdf5_file.close()
 
     def test_invalid_cuda_ngpus(self):
         dataset_train = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5"
-        )            
+        )
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = False,
@@ -643,7 +643,7 @@ class TestTrainer(unittest.TestCase):
         if not torch.cuda.is_available():
             dataset_train = GraphDataset(
                 hdf5_path = "tests/data/hdf5/test.hdf5"
-            )            
+            )
             dataset_val = GraphDataset(
                 hdf5_path = "tests/data/hdf5/test.hdf5",
                 train = False,
@@ -657,7 +657,7 @@ class TestTrainer(unittest.TestCase):
                     dataset_val = dataset_val,
                     cuda = True
                 )
-        
+
         else:
             warnings.warn('CUDA is available; test_invalid_no_cuda_available was skipped')
             _log.info('CUDA is available; test_invalid_no_cuda_available was skipped')

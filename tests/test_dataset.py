@@ -21,9 +21,9 @@ def _compute_features_manually( # noqa: MC0001, pylint: disable=too-many-locals
                        features_transform: dict,
                        feat: str
     ):
-    # This function returns the feature specified read from the hdf5 file, 
+    # This function returns the feature specified read from the hdf5 file,
     # after applying manually features_transform dict. It returns its mean
-    # and its std after having applied eventual transformations. 
+    # and its std after having applied eventual transformations.
     # Multi-channels features are returned as an array with multiple channels.
     with h5py.File(hdf5_path, 'r') as f:
         entry_names = [entry for entry, _ in f.items()]
@@ -40,8 +40,8 @@ def _compute_features_manually( # noqa: MC0001, pylint: disable=too-many-locals
             transform = features_transform.get('all', {}).get('transform')
         else:
             transform = features_transform.get(feat, {}).get('transform')
-        
-        if feat in available_node_features: 
+
+        if feat in available_node_features:
             feat_values = [
                 f[entry_name][Nfeat.NODE][feat][:]
                 if f[entry_name][Nfeat.NODE][feat][()].ndim == 1
@@ -53,25 +53,25 @@ def _compute_features_manually( # noqa: MC0001, pylint: disable=too-many-locals
                 else f[entry_name][Efeat.EDGE][feat][()] for entry_name in entry_names]
         else:
             print(f'Feat {feat} not present in the file.')
-            
+
         #apply transformation
         if transform:
             feat_values=[transform(row) for row in feat_values]
-        
+
         arr = np.array(np.concatenate(feat_values))
-        
+
         mean = np.round(np.nanmean(arr, axis=0), 1) if isinstance(arr[0], np.ndarray) \
                 else round(np.nanmean(arr), 1)
         dev = np.round(np.nanstd(arr, axis=0), 1) if isinstance(arr[0], np.ndarray) \
                 else round(np.nanstd(arr), 1)
-        
+
         return arr, mean, dev
 
 def _compute_features_with_get(
-                    hdf5_path: str, 
+                    hdf5_path: str,
                     dataset: GraphDataset
     ):
-    # This function computes features using the Dataset `get` method, 
+    # This function computes features using the Dataset `get` method,
     # so as they will be seen by the network. It returns a dictionary
     # whose keys are the features' names and values are the features' values.
     # Multi-channels features are splitted into different keys
@@ -86,7 +86,7 @@ def _compute_features_with_get(
             if vals.ndim == 1: # features with only one channel
                 arr = []
                 for entry_idx in range(len(dataset)):
-                    arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
+                    arr.append(dataset.get(entry_idx).x[:, tensor_idx])
                 arr = np.concatenate(arr)
                 features_dict[feat] = arr
                 tensor_idx += 1
@@ -94,7 +94,7 @@ def _compute_features_with_get(
                 for ch in range(vals.shape[1]):
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx).x[:, tensor_idx]) 
+                        arr.append(dataset.get(entry_idx).x[:, tensor_idx])
                     tensor_idx += 1
                     arr = np.concatenate(arr)
                     features_dict[feat + f'_{ch}'] = arr
@@ -106,7 +106,7 @@ def _compute_features_with_get(
             if vals.ndim == 1: # features with only one channel
                 arr = []
                 for entry_idx in range(len(dataset)):
-                    arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
+                    arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
                 arr = np.concatenate(arr)
                 features_dict[feat] = arr
                 tensor_idx += 1
@@ -114,7 +114,7 @@ def _compute_features_with_get(
                 for ch in range(vals.shape[1]):
                     arr = []
                     for entry_idx in range(len(dataset)):
-                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx]) 
+                        arr.append(dataset.get(entry_idx).edge_attr[:, tensor_idx])
                     tensor_idx += 1
                     arr = np.concatenate(arr)
                     features_dict[feat + f'_{ch}'] = arr
@@ -130,7 +130,7 @@ def _check_inherited_params(
 
     for param in inherited_params:
         assert dataset_test_vars[param] == dataset_train_vars[param]
-    
+
 class TestDataSet(unittest.TestCase):
     def setUp(self):
         self.hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5"
@@ -160,7 +160,7 @@ class TestDataSet(unittest.TestCase):
             subset=None,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
-            target=targets.IRMSD 
+            target=targets.IRMSD
         )
 
         dataset_grid = GridDataset(
@@ -174,7 +174,7 @@ class TestDataSet(unittest.TestCase):
         assert dataset_graph[0] is not None
         assert len(dataset_grid) == 4
         assert dataset_grid[0] is not None
-    
+
     def test_regression_griddataset(self):
         dataset = GridDataset(
             hdf5_path = self.hdf5_path,
@@ -204,9 +204,9 @@ class TestDataSet(unittest.TestCase):
 
         # 1 entry with class value
         assert dataset[0].y.shape == (1,)
-    
+
     def test_inherit_info_training_griddataset(self):
-        
+
         dataset_train = GridDataset(
             hdf5_path = self.hdf5_path,
             features = [Efeat.VDW, Efeat.ELEC],
@@ -215,18 +215,18 @@ class TestDataSet(unittest.TestCase):
             task = targets.CLASSIF,
             classes = None
         )
-        
+
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
             train = False,
             dataset_train = dataset_train
         )
-        
-        # features, features_dict, target, target_transform, task, and classes 
+
+        # features, features_dict, target, target_transform, task, and classes
         # in the test should be inherited from the train
         inherited_param = ["features", "features_dict", "target", "target_transform", "task", "classes"]
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
-        
+
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
             train = False,
@@ -237,8 +237,8 @@ class TestDataSet(unittest.TestCase):
             task = targets.REGRESS,
             classes = None
         )
-        
-        # features, features_dict, target, target_transform, task, and classes 
+
+        # features, features_dict, target, target_transform, task, and classes
         # in the test should be inherited from the train
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
 
@@ -268,13 +268,13 @@ class TestDataSet(unittest.TestCase):
 
         with h5py.File("tests/data/hdf5/test.hdf5", 'r') as hdf5:
             original_ids = list(hdf5.keys())
-        
+
         save_hdf5_keys("tests/data/hdf5/test.hdf5", original_ids[:n], "tests/data/hdf5/test_resized.hdf5")
 
         with h5py.File("tests/data/hdf5/test_resized.hdf5", 'r') as hdf5:
             new_ids = list(hdf5.keys())
             assert all(isinstance(hdf5.get(key, getlink=True), h5py.ExternalLink) for key in hdf5.keys())
-  
+
         assert len(new_ids) == n
         for new_id in new_ids:
             assert new_id in original_ids
@@ -284,13 +284,13 @@ class TestDataSet(unittest.TestCase):
 
         with h5py.File("tests/data/hdf5/test.hdf5", 'r') as hdf5:
             original_ids = list(hdf5.keys())
-        
+
         save_hdf5_keys("tests/data/hdf5/test.hdf5", original_ids[:n], "tests/data/hdf5/test_resized.hdf5", hardcopy = True)
 
         with h5py.File("tests/data/hdf5/test_resized.hdf5", 'r') as hdf5:
             new_ids = list(hdf5.keys())
             assert all(isinstance(hdf5.get(key, getlink=True), h5py.HardLink) for key in hdf5.keys())
-  
+
         assert len(new_ids) == n
         for new_id in new_ids:
             assert new_id in original_ids
@@ -343,9 +343,9 @@ class TestDataSet(unittest.TestCase):
         n = 0
         for hdf5 in hdf5_paths:
             with h5py.File(hdf5, 'r') as hdf5_r:
-                n += len(hdf5_r.keys())      
+                n += len(hdf5_r.keys())
         assert len(dataset) == n, f"total data points got was {len(dataset)}"
-    
+
     def test_hdf5_to_pandas_graphdataset(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
@@ -358,7 +358,7 @@ class TestDataSet(unittest.TestCase):
         dataset.hdf5_to_pandas()
         cols = list(dataset.df.columns)
         cols.sort()
-        
+
         # assert dataset and df shapes
         assert dataset.df.shape[0] == len(dataset)
         assert dataset.df.shape[1] == 5
@@ -416,7 +416,7 @@ class TestDataSet(unittest.TestCase):
                 # edge_attr contains stacked edges (doubled) so we test on mean and std
                 assert np.float32(round(values.mean(), 2)) == np.float32(round(np.concatenate(dataset.df[feat].values).mean(), 2))
                 assert np.float32(round(values.std(), 2)) == np.float32(round(np.concatenate(dataset.df[feat].values).std(), 2))
-        
+
         # assert dataset and df shapes in subset case
         with h5py.File(hdf5_path, 'r') as f:
             keys = list(f.keys())
@@ -454,7 +454,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_logic_train_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        
+
         # without specifying features_transform in training set
         dataset_train = GraphDataset(
             hdf5_path = hdf5_path,
@@ -500,21 +500,21 @@ class TestDataSet(unittest.TestCase):
         # define a features_transform dict for only transformations,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse) and a case with transform equals to None (sasa)
-        
+
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'bsa': {'transform': lambda t: np.log(t+10)},
                         'electrostatic': {'transform': lambda t: np.sqrt(t+50)},
                         'sasa': {'transform': None},
                         'hse': {'transform': lambda t: np.log(t+10)}
                         }
-        
+
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
             features_transform = features_transform,
             target = 'binary',
         )
-        
+
         # dataset with no transformations applied
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
@@ -536,7 +536,7 @@ class TestDataSet(unittest.TestCase):
                 if feat in transf_feat_key:
                     orig_feat = feat
                     break
-            
+
             if orig_feat and (orig_feat in features_transform) and (orig_feat not in checked_features):
                 checked_features.append(orig_feat)
                 transform = features_transform.get(orig_feat, {}).get('transform')
@@ -585,14 +585,14 @@ class TestDataSet(unittest.TestCase):
         # define a features_transform dict for only transformations for `all` features
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'all': {'transform': lambda t: np.log(t+10)}}
-        
+
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
             features_transform = features_transform,
             target = 'binary',
         )
-        
+
         # dataset with no transformations applied
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
@@ -614,7 +614,7 @@ class TestDataSet(unittest.TestCase):
                 if feat in transf_feat_key:
                     orig_feat = feat
                     break
-            
+
             if orig_feat and (orig_feat not in checked_features):
                 checked_features.append(orig_feat)
                 arr, _, _ = _compute_features_manually(hdf5_path, features_transform, orig_feat)
@@ -637,7 +637,7 @@ class TestDataSet(unittest.TestCase):
                         assert not np.allclose(np.nanstd(transf_features_dict.get(orig_feat + f'_{i}')), np.nanstd(features_dict.get(orig_feat + f'_{i}')))
 
         assert (sorted(checked_features) == sorted(features)) and (len(checked_features) == len(features))
-              
+
     def test_only_standardize_graphdataset(self): # pylint: disable=too-many-locals
         # define a features_transform dict for only standardization,
         # including node (bsa) and edge features (electrostatic),
@@ -649,13 +649,13 @@ class TestDataSet(unittest.TestCase):
             'hse': {'standardize': True},
             'electrostatic': {'standardize': True},
             'sasa': {'standardize': False}}
-        
+
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
             features_transform = features_transform,
             target = 'binary'
         )
-        
+
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
             target = 'binary'
@@ -676,7 +676,7 @@ class TestDataSet(unittest.TestCase):
                 if feat in transf_feat_key:
                     orig_feat = feat
                     break
-            
+
             if orig_feat and (orig_feat in features_transform) and (orig_feat not in checked_features):
                 checked_features.append(orig_feat)
                 standardize = features_transform.get(orig_feat, {}).get('standardize')
@@ -725,14 +725,14 @@ class TestDataSet(unittest.TestCase):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {
             'all': {'standardize': True}}
-        
+
         # dataset that has the standardization applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
             features_transform = features_transform,
             target = 'binary'
         )
-        
+
         # dataset with no standardization applied
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
@@ -754,7 +754,7 @@ class TestDataSet(unittest.TestCase):
                 if feat in transf_feat_key:
                     orig_feat = feat
                     break
-            
+
             if orig_feat and (orig_feat not in checked_features):
                 checked_features.append(orig_feat)
                 arr, mean, dev = _compute_features_manually(hdf5_path, features_transform, orig_feat)
@@ -784,21 +784,21 @@ class TestDataSet(unittest.TestCase):
         # define a features_transform dict for both transformations and standardization,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse)
-        
+
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'bsa': {'transform': lambda t: np.log(t+10), 'standardize': True},
                         'electrostatic': {'transform': lambda t: np.sqrt(t+50), 'standardize': True},
                         'sasa': {'transform': None, 'standardize': False},
                         'hse': {'transform': lambda t: np.log(t+10), 'standardize': False}
                         }
-        
+
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
             features_transform = features_transform,
             target = 'binary'
         )
-        
+
         # dataset with no transformations applied
         dataset = GraphDataset(
             hdf5_path = hdf5_path,
@@ -820,7 +820,7 @@ class TestDataSet(unittest.TestCase):
                 if feat in transf_feat_key:
                     orig_feat = feat
                     break
-            
+
             if orig_feat and (orig_feat in features_transform) and (orig_feat not in checked_features):
                 checked_features.append(orig_feat)
                 transform = features_transform.get(orig_feat, {}).get('transform')
@@ -872,7 +872,7 @@ class TestDataSet(unittest.TestCase):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}}
         other_feature_transform = {'all': {'transform': None, 'standardize': False}}
-        
+
         dataset_train = GraphDataset(
             hdf5_path = hdf5_path,
             features_transform = features_transform,
@@ -885,7 +885,7 @@ class TestDataSet(unittest.TestCase):
             dataset_train = dataset_train,
             target = 'binary'
         )
-        
+
         # features_transform in the test should be the same as in the train
         assert dataset_train.features_transform == dataset_test.features_transform
         assert dataset_train.means == dataset_test.means
@@ -901,7 +901,7 @@ class TestDataSet(unittest.TestCase):
             features_transform = other_feature_transform,
             target = 'binary'
         )
-        
+
         # features_transform setted in the testset should be ignored
         assert dataset_train.features_transform == dataset_test.features_transform
         assert dataset_train.means == dataset_test.means
@@ -910,7 +910,7 @@ class TestDataSet(unittest.TestCase):
     def test_inherit_info_training_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         feature_transform = {'all': {'transform': None, 'standardize': True}}
-        
+
         dataset_train = GraphDataset(
             hdf5_path = hdf5_path,
             node_features = ['bsa', 'hb_acceptors', 'hb_donors'],
@@ -921,49 +921,49 @@ class TestDataSet(unittest.TestCase):
             task = 'classif',
             classes = None
         )
-        
+
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             train = False,
             dataset_train = dataset_train,
         )
-        
-        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
+
+        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes
         # in the test should be inherited from the train
         inherited_param = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
-        
+
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             train = False,
             dataset_train = dataset_train,
             node_features = "all",
             edge_features = "all",
-            features_transform = None,  
+            features_transform = None,
             target = 'ba',
             target_transform = True,
             task = "regress",
             classes = None
         )
-        
-        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes 
+
+        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes
         # in the test should be inherited from the train
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
 
-    def test_incompatible_dataset_train_type(self): 
+    def test_incompatible_dataset_train_type(self):
         dataset_train = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
             target = targets.BINARY
         )
-        
+
         # Raise error when val dataset don't have the same data type as train dataset.
         with pytest.raises(TypeError):
             GridDataset(
                 hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
                 train = False,
                 dataset_train = dataset_train
-            )  
+            )
 
 
 if __name__ == "__main__":

@@ -187,7 +187,7 @@ def test_gnn(): # pylint: disable=too-many-locals
         )
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=model_path) 
+            trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=model_path)
 
             Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model=model_path)
 

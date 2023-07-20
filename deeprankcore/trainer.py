@@ -170,7 +170,7 @@ class Trainer():
                 raise ValueError("No target set. Make sure the pretrained model explicitly defines the target to train against.")
 
             self.pretrained_model_path = pretrained_model
-            self.classes_to_index = self.dataset_test.classes_to_index 
+            self.classes_to_index = self.dataset_test.classes_to_index
 
             self._load_params()
             self._load_pretrained_model()
@@ -244,7 +244,7 @@ class Trainer():
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
         """Check train_dataset type, train parameter and dataset_train parameter settings."""
-        
+
         # dataset_train is None when pretrained_model is set
         if dataset_train is None:
             # only check the test dataset
@@ -254,17 +254,17 @@ class Trainer():
             # Make sure train dataset has valid type
             if not isinstance(dataset_train, GraphDataset) and not isinstance(dataset_train, GridDataset):
                 raise TypeError(f"""train dataset is not the right type {type(dataset_train)}
-                                Make sure it's either GraphDataset or GridDataset""") 
-            
+                                Make sure it's either GraphDataset or GridDataset""")
+
             if dataset_val is not None:
                 self._check_dataset_value(dataset_train, dataset_val, type_dataset = "valid")
-                    
+
             if dataset_test is not None:
                 self._check_dataset_value(dataset_train, dataset_test, type_dataset = "test")
-    
+
     def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
         """Check valid/test dataset settings."""
-        
+
         # Check train parameter in valid/test is set as False.
         if dataset_check.train is not False:
             raise ValueError(f"""{type_dataset} dataset has train parameter {dataset_check.train}
@@ -417,7 +417,7 @@ class Trainer():
 
         """
         Set the loss function.
-        
+
         Args:
             lossfunction (optional): Make sure to use a loss function that is appropriate for
                 your task (classification or regression). All loss functions
@@ -437,11 +437,11 @@ class Trainer():
 
         def _invalid_loss():
             if override_invalid:
-                _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' +
                             'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
                             'This will likely cause other errors or exceptions down the line.')
             else:
-                invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' +
                                     'If you want to use this loss function anyway, set override_invalid to True.')
                 _log.error(invalid_loss_error)
                 raise ValueError(invalid_loss_error)
@@ -492,7 +492,7 @@ class Trainer():
         shuffle: bool = True,
         earlystop_patience: Optional[int] = None,
         earlystop_maxgap: Optional[float] = None,
-        min_epoch: int = 10, 
+        min_epoch: int = 10,
         validate: bool = False,
         num_workers: int = 0,
         best_model: bool = True,
@@ -518,7 +518,7 @@ class Trainer():
                         Defaults to False.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
                         Defaults to 0.
-            best_model (bool, optional): 
+            best_model (bool, optional):
                         If True, the best model (in terms of validation loss) is selected for later testing or saving.
                         If False, the last model tried is selected.
                         Defaults to True.
@@ -577,10 +577,10 @@ class Trainer():
 
         train_losses = []
         valid_losses = []
-        
+
         if earlystop_patience or earlystop_maxgap:
             early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, min_epoch=min_epoch, trace_func=_log.info)
-        else: 
+        else:
             early_stopping = None
 
         with self._output_exporters:
@@ -793,11 +793,11 @@ class Trainer():
                 # target = torch.tensor(
                 #     [[0,1] if x == [1] else [1,0] for x in target]
                 # ).float()
-                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
+                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' +
                                 'For further details see: https://github.com/DeepRank/deeprank-core/issues/318')
-            
+
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
-                raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' + 
+                raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' +
                                 f'Supported loss functions for classification: {losses.classification_tested}.\n\t' +
                                 'Implementation of other loss functions requires adaptation of Trainer._format_output.')
 
@@ -904,7 +904,7 @@ class Trainer():
             "cuda": self.cuda,
             "ngpu": self.ngpu
         }
-        
+
         return state
 
 
@@ -915,7 +915,7 @@ def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Option
 
     Args:
         dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): Input dataset to be split into training and validation data.
-        splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+        splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
             Defaults to None.
     """
 
