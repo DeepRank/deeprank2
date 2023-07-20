@@ -19,7 +19,7 @@ def base_test(model_path, trainer: Trainer, lossfunction = None, override = Fals
     if lossfunction:
         trainer.set_lossfunction(lossfunction = lossfunction, override_invalid=override)
 
-    # check correct passing to/picking up from pretrained model 
+    # check correct passing to/picking up from pretrained model
     with warnings.catch_warnings(record=UserWarning):
         trainer.train(nepoch=2, best_model=False, filename=model_path)
 
@@ -27,7 +27,7 @@ def base_test(model_path, trainer: Trainer, lossfunction = None, override = Fals
             neuralnet = NaiveNetwork,
             dataset_test=trainer.dataset_train,
             pretrained_model=model_path)
-        
+
         return trainer_pretrained
 
 
@@ -43,8 +43,8 @@ class TestLosses(unittest.TestCase):
 
     # Classification tasks
     def test_classif_default(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BINARY)
+        dataset = GraphDataset(hdf5_path,
+            target = targets.BINARY)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -57,7 +57,7 @@ class TestLosses(unittest.TestCase):
 
     def test_classif_all(self):
         dataset = GraphDataset(hdf5_path,
-            target=targets.BINARY)
+            target = targets.BINARY)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -69,11 +69,11 @@ class TestLosses(unittest.TestCase):
             trainer_pretrained = base_test(self.save_path, trainer, lossfunction)
             assert isinstance(trainer.lossfunction, lossfunction)
             assert isinstance(trainer_pretrained.lossfunction, lossfunction)
-        
+
 
     def test_classif_weighted(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BINARY)
+        dataset = GraphDataset(hdf5_path,
+            target = targets.BINARY)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -88,7 +88,7 @@ class TestLosses(unittest.TestCase):
 
 
     # def test_classif_invalid_weighted(self):
-    #     dataset = GraphDataset(hdf5_path, 
+    #     dataset = GraphDataset(hdf5_path,
     #         target=targets.BINARY)
     #     trainer = Trainer(
     #         neuralnet = NaiveNetwork,
@@ -103,8 +103,8 @@ class TestLosses(unittest.TestCase):
 
 
     def test_classif_invalid_lossfunction(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BINARY)
+        dataset = GraphDataset(hdf5_path,
+            target = targets.BINARY)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -116,8 +116,8 @@ class TestLosses(unittest.TestCase):
 
 
     def test_classif_invalid_lossfunction_override(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BINARY)
+        dataset = GraphDataset(hdf5_path,
+            target = targets.BINARY)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -131,7 +131,7 @@ class TestLosses(unittest.TestCase):
     # Regression tasks
     def test_regress_default(self):
         dataset = GraphDataset(hdf5_path,
-            target=targets.BA)
+            target = targets.BA)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -143,8 +143,8 @@ class TestLosses(unittest.TestCase):
 
 
     def test_regress_all(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BA)
+        dataset = GraphDataset(hdf5_path,
+            target = targets.BA)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -158,8 +158,8 @@ class TestLosses(unittest.TestCase):
 
 
     def test_regress_invalid_lossfunction(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BA)
+        dataset = GraphDataset(hdf5_path,
+            target = targets.BA)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -171,8 +171,8 @@ class TestLosses(unittest.TestCase):
 
 
     def test_regress_invalid_lossfunction_override(self):
-        dataset = GraphDataset(hdf5_path, 
-            target=targets.BA)
+        dataset = GraphDataset(hdf5_path,
+            target = targets.BA)
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,

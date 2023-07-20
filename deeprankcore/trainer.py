@@ -170,7 +170,7 @@ class Trainer():
                 raise ValueError("No target set. Make sure the pretrained model explicitly defines the target to train against.")
 
             self.pretrained_model_path = pretrained_model
-            self.classes_to_index = self.dataset_test.classes_to_index 
+            self.classes_to_index = self.dataset_test.classes_to_index
 
             self._load_params()
             self._load_pretrained_model()
@@ -236,66 +236,43 @@ class Trainer():
         self.task = dataset.task
 
     def _load_model(self):
-        """
-        Loads the neural network model.
-        """
+        """Loads the neural network model."""
 
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
         self.set_lossfunction()
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
+        """Check train_dataset type, train parameter and dataset_train parameter settings."""
 
+        # dataset_train is None when pretrained_model is set
         if dataset_train is None:
             # only check the test dataset
             if dataset_test is None:
                 raise ValueError("Please provide at least a train or test dataset")
-
-            if not isinstance(dataset_test, GraphDataset) and not isinstance(dataset_test, GridDataset):
-                raise TypeError(f"""test dataset is not the right type {type(dataset_test)}
+        else:
+            # Make sure train dataset has valid type
+            if not isinstance(dataset_train, GraphDataset) and not isinstance(dataset_train, GridDataset):
+                raise TypeError(f"""train dataset is not the right type {type(dataset_train)}
                                 Make sure it's either GraphDataset or GridDataset""")
-            return
 
-        # Compare the datasets to each other
-        for dataset_other_name, dataset_other in [("validation", dataset_val),
-                                                  ("testing", dataset_test)]:
-            if dataset_other is not None:
+            if dataset_val is not None:
+                self._check_dataset_value(dataset_train, dataset_val, type_dataset = "valid")
 
-                if dataset_other.target != dataset_train.target:
-                    raise ValueError(f"training dataset has target {dataset_train.target} while "
-                                     f"{dataset_other_name} dataset has target {dataset_other.target}")
+            if dataset_test is not None:
+                self._check_dataset_value(dataset_train, dataset_test, type_dataset = "test")
 
-                if dataset_other.task != dataset_other.task:
-                    raise ValueError(f"training dataset has task {dataset_train.task} while "
-                                     f"{dataset_other_name} dataset has task {dataset_other.task}")
+    def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
+        """Check valid/test dataset settings."""
 
-                if dataset_other.classes != dataset_other.classes:
-                    raise ValueError(f"training dataset has classes {dataset_train.classes} while "
-                                     f"{dataset_other_name} dataset has classes {dataset_other.classes}")
-
-                if isinstance(dataset_train, GraphDataset) and isinstance(dataset_other, GraphDataset):
-
-                    if dataset_other.node_features != dataset_train.node_features:
-                        raise ValueError(f"training dataset has node_features {dataset_train.node_features} while "
-                                         f"{dataset_other_name} dataset has node_features {dataset_other.node_features}")
-
-                    if dataset_other.edge_features != dataset_train.edge_features:
-                        raise ValueError(f"training dataset has edge_features {dataset_train.edge_features} while "
-                                         f"{dataset_other_name} dataset has edge_features {dataset_other.edge_features}")
-
-                    if dataset_other.clustering_method != dataset_other.clustering_method:
-                        raise ValueError(f"training dataset has clustering method {dataset_train.clustering_method} while "
-                                         f"{dataset_other_name} dataset has clustering method {dataset_other.clustering_method}")
-
-                elif isinstance(dataset_train, GridDataset) and isinstance(dataset_other, GridDataset):
-
-                    if dataset_other.features != dataset_train.features:
-                        raise ValueError(f"training dataset has features {dataset_train.features} while "
-                                         f"{dataset_other_name} dataset has features {dataset_other.features}")
-
-                else:
-                    raise TypeError(f"Training and {dataset_other_name} datasets are not the same type.\n"
-                                     "Make sure to use only graph or only grid datasets")
+        # Check train parameter in valid/test is set as False.
+        if dataset_check.train is not False:
+            raise ValueError(f"""{type_dataset} dataset has train parameter {dataset_check.train}
+                        Make sure to set it as False""")
+        # Check dataset_train parameter in valid/test is equivalent to train which passed to Trainer.
+        if dataset_check.dataset_train != dataset_train:
+            raise ValueError(f"""{type_dataset} dataset has different dataset_train parameter compared to the one given in Trainer.
+                        Make sure to assign equivalent dataset_train in Trainer""")
 
     def _load_pretrained_model(self):
         """
@@ -440,7 +417,7 @@ class Trainer():
 
         """
         Set the loss function.
-        
+
         Args:
             lossfunction (optional): Make sure to use a loss function that is appropriate for
                 your task (classification or regression). All loss functions
@@ -460,11 +437,11 @@ class Trainer():
 
         def _invalid_loss():
             if override_invalid:
-                _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' +
                             'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
                             'This will likely cause other errors or exceptions down the line.')
             else:
-                invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' + 
+                invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' +
                                     'If you want to use this loss function anyway, set override_invalid to True.')
                 _log.error(invalid_loss_error)
                 raise ValueError(invalid_loss_error)
@@ -515,7 +492,7 @@ class Trainer():
         shuffle: bool = True,
         earlystop_patience: Optional[int] = None,
         earlystop_maxgap: Optional[float] = None,
-        min_epoch: int = 10, 
+        min_epoch: int = 10,
         validate: bool = False,
         num_workers: int = 0,
         best_model: bool = True,
@@ -541,7 +518,7 @@ class Trainer():
                         Defaults to False.
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
                         Defaults to 0.
-            best_model (bool, optional): 
+            best_model (bool, optional):
                         If True, the best model (in terms of validation loss) is selected for later testing or saving.
                         If False, the last model tried is selected.
                         Defaults to True.
@@ -600,10 +577,10 @@ class Trainer():
 
         train_losses = []
         valid_losses = []
-        
+
         if earlystop_patience or earlystop_maxgap:
             early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, min_epoch=min_epoch, trace_func=_log.info)
-        else: 
+        else:
             early_stopping = None
 
         with self._output_exporters:
@@ -816,11 +793,11 @@ class Trainer():
                 # target = torch.tensor(
                 #     [[0,1] if x == [1] else [1,0] for x in target]
                 # ).float()
-                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' + 
+                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' +
                                 'For further details see: https://github.com/DeepRank/deeprank-core/issues/318')
-            
+
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
-                raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' + 
+                raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' +
                                 f'Supported loss functions for classification: {losses.classification_tested}.\n\t' +
                                 'Implementation of other loss functions requires adaptation of Trainer._format_output.')
 
@@ -927,7 +904,7 @@ class Trainer():
             "cuda": self.cuda,
             "ngpu": self.ngpu
         }
-        
+
         return state
 
 
@@ -938,7 +915,7 @@ def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Option
 
     Args:
         dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): Input dataset to be split into training and validation data.
-        splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation. 
+        splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
             Defaults to None.
     """
 

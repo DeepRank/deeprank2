@@ -1,6 +1,6 @@
 ## Introduction
 
-The two tutorial notebooks in this section can be run to learn how to use DeepRank-Core. 
+The two tutorial notebooks in this section can be run to learn how to use DeepRank-Core.
 - The [data generation tutorial](tutorials/data_generation_ppi.ipynb) will demonstrate how to create *.hdf5-formatted input training data from rar *.pdb-formatted data using DeepRank-Core.
 - The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank-Core.
 
@@ -30,5 +30,5 @@ On the left an example of a pMHC structure is shown, rendered using [ProteinView
 ## Running the notebooks
 
 The tutorial notebooks can be run:
-- from inside your IDE, if it has that functionality (e.g., VS Code), 
+- from inside your IDE, if it has that functionality (e.g., VS Code),
 - on JupyterLab by navigating to the tutorials directory in your terminal and running `jupyter-lab`.
