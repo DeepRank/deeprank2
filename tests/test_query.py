@@ -496,4 +496,3 @@ def test_variant_query_multiple_chains():
     q._radius = 7.0  # pylint: disable = protected-access
     graph = q.build(conservation)
     assert 'B' not in graph.get_all_chains()
-
