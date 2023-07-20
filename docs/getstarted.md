@@ -171,6 +171,9 @@ edge_features = ["distance"]
 target = "binary"
 
 # Creating GraphDataset objects
+train_ids = [<ids>]
+valid_ids = [<ids>]
+test_ids = [<ids>]
 dataset_train = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = train_ids,
@@ -209,7 +212,7 @@ features_transform = {
     'electrostatic': {'transform': lambda t: np.sqrt(t), 'standardize': True},
     'hse': {'transform': lambda t: np.log(t+1), 'standardize': False}
 }
-
+train_ids = [<ids>]
 dataset_train = GraphDataset(
     hdf5_path = hdf5_path,
     subset = train_ids, 
@@ -226,7 +229,7 @@ An `all` key can be set for indicating to apply the same `standardize` and `tran
 features_transform = {'all':
     {'transform': lambda t: np.log(t+1), 'standardize': True}
 }
-
+train_ids = [<ids>]
 dataset_train = GraphDataset(
     hdf5_path = hdf5_path,
     subset = train_ids, 
@@ -243,7 +246,9 @@ If `standardize` functionality is used, validation and testing sets need to know
 features_transform = {'all':
     {'transform': lambda t: np.log(t+1), 'standardize': True}
 }
-
+train_ids = [<ids>]
+valid_ids = [<ids>]
+test_ids = [<ids>]
 # `train` defaults to `True`, and `dataset_train` defaults to `None`
 dataset_train = GraphDataset(
     hdf5_path = hdf5_path,
@@ -278,6 +283,9 @@ features = ["bsa", "res_depth", "hse", "info_content", "pssm", "distance"]
 target = "binary"
 
 # Creating GridDataset objects
+train_ids = [<ids>]
+valid_ids = [<ids>]
+test_ids = [<ids>]
 dataset_train = GridDataset(
     hdf5_path = hdf5_paths,
     subset = train_ids, 
