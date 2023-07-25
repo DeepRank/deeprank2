@@ -1,7 +1,7 @@
 ## Introduction
 
 The tutorial notebooks in this folder can be run to learn how to use DeepRank-Core.
-- There are two tutorial notebooks for data generation, one for Protein-Protein Interfaces (PPIs) data ([data_generation_ppi.ipynb](tutorials/data_generation_ppi.ipynb)), and another for missense variants data ([data_generation_variant.ipynb](tutorials/data_generation_variant.ipynb)). Both tutorials demonstrate how to create *.hdf5-formatted input training data from rar *.pdb-formatted data using DeepRank-Core.
+- There are two tutorial notebooks for data generation, one for Protein-Protein Interfaces (PPIs) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_ppi.ipynb)), and another for missense variants data ([data_generation_variant.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_variant.ipynb)). Both tutorials demonstrate how to create *.hdf5-formatted input training data from rar *.pdb-formatted data using DeepRank-Core.
 - The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank-Core.
 
 ### Use cases
@@ -10,7 +10,7 @@ The tutorial notebooks in this folder can be run to learn how to use DeepRank-Co
 
 <img style="margin-right: 1.5rem" align="left" src="images/pmhc_pdb_example.png" width="250"/>
 
-The example dataset that we provide contains PDB files, each representing the structures of a [Major Histocompatibility Complex (MHC) protein](https://en.wikipedia.org/wiki/Major_histocompatibility_complex) with a peptide in its binding pocket, which may or may not bind to form a peptide-MHC (pMHC) complex. We are interested in predicting the binding affinity (BA) of potential pMHC complexes, which play a key role in T-cell immunity.
+The example PPIs dataset that we provide contains PDB files, each representing the structures of a [Major Histocompatibility Complex (MHC) protein](https://en.wikipedia.org/wiki/Major_histocompatibility_complex) with a peptide in its binding pocket, which may or may not bind to form a peptide-MHC (pMHC) complex. We are interested in predicting the binding affinity (BA) of potential pMHC complexes, which play a key role in T-cell immunity.
 
 PDB models used in this tutorial have been generated with [PANDORA](https://github.com/X-lab-3D/PANDORA), an anchor restrained modeling pipeline for generating peptide-MHC structures. While target data, (i.e., the BA values) for such pMHC complexes, have been retrieved from [MHCFlurry 2.0](https://data.mendeley.com/datasets/zx3kjzc3yx).
 
@@ -18,7 +18,7 @@ On the left an example of a pMHC structure is shown, rendered using [ProteinView
 
 #### Missense variants
 
-The example dataset that we provide contains PDB files, each representing protein structures containing one or multiple missense variants, which derive from alterations in the coding regions of the DNA. For each missense variant, we are interested in predicting whether the phenotypic outcome is pathogenic or neutral.
+The example missense variants dataset that we provide contains PDB files, each representing protein structures containing one or multiple missense variants, which derive from alterations in the coding regions of the DNA. For each missense variant, we are interested in predicting whether the phenotypic outcome is pathogenic or neutral.
 
 PDB models and target data used in this tutorial have been retrieved from [Ramakrishnan et al.](https://doi.org/10.3389/fmolb.2023.1204157).
 
