@@ -37,7 +37,7 @@ DeeprankCore extensive documentation can be found [here](https://deeprankcore.rt
   - [Installation](#installation)
     - [Dependencies](#dependencies)
     - [Deeprank-Core Package](#deeprank-core-package)
-  - [Test installation](#test-installation)
+    - [Test installation](#test-installation)
     - [Contributing](#contributing)
   - [Quick start](#quick-start)
     - [Data generation](#data-generation)
@@ -89,7 +89,7 @@ cd deeprank-core
 pip install -e ./
 ```
 
-## Test installation
+### Test installation
 
 If you have installed the package from a cloned repository (second option above), you can check that all components were installed correctly, using pytest.
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
@@ -102,7 +102,7 @@ If you would like to contribute to the package in any way, please see [our guide
 
 ## Quick start
 The following section serves as a first guide to start using the package, using Protein-Protein Interfaces (PPIs) queries as example.
-You can also learn to use the software by following the [tutorial notebooks](tutorials), which contain guided tutorials for PPIs, missense variants, and the training pipeline.
+You can also learn to use the software by following the [tutorial notebooks](https://github.com/DeepRank/deeprank-core/tree/main/tutorials), which contain guided tutorials for PPIs, missense variants, and the training pipeline.
 For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
 
 ### Data generation
