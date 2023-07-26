@@ -13,20 +13,19 @@
 
 ![alt-text](./deeprankcore.png)
 
+DeepRank-Core is an open-source Deep Learning (DL) framework for data mining 3D representations of both Protein-Protein Interfaces (PPIs) and individual proteins' variants using Graph Neural Networks (GNNs) or Convolutional Neural Networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-DeeprankCore is a Deep Learning (DL) framework for data mining Protein-Protein Interactions (PPIs) using either Graph Neural Networks (GNNs) or Convolutional Neural Networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
-
-DeeprankCore contains useful APIs for pre-processing PPI data, computing features and targets, as well as training and testing GNN and CNN models.
+DeepRank-Core allows to transform and store 3D representations of both PPIs and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training Neural Networks for whatever specific pattern of interest for the user. DeepRank-Core also offers a pre-implemented training pipeline which can use either Convolutional Neural Networks (CNNs) or Graph Neural Networks (GNNs), as well as handy output exporters for evaluating performances. 
 
 Main features:
-- Predefined atom-level and residue-level PPI feature types
+- Predefined atom-level and residue-level feature types
   - e.g. atomic density, vdw energy, residue contacts, PSSM, etc.
-- Predefined target type
+- Predefined target types
   - e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
 - Flexible definition of both new features and targets
-- Graphs and grids feature mapping
+- Graphs and grids features mapping
 - Efficient data storage in HDF5 format
-- Support both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
+- Support for both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
 DeeprankCore extensive documentation can be found [here](https://deeprankcore.rtfd.io/).
 
@@ -38,7 +37,8 @@ DeeprankCore extensive documentation can be found [here](https://deeprankcore.rt
   - [Installation](#installation)
     - [Dependencies](#dependencies)
     - [Deeprank-Core Package](#deeprank-core-package)
-  - [Documentation](#documentation)
+  - [Test installation](#test-installation)
+    - [Contributing](#contributing)
   - [Quick start](#quick-start)
     - [Data generation](#data-generation)
     - [Datasets](#datasets)
@@ -102,20 +102,20 @@ If you would like to contribute to the package in any way, please see [our guide
 
 
 ## Quick start
-The following section serves as a first guide to start using the package.
-You can also learn to use the software by following the [tutorial notebooks](tutorials).
+The following section serves as a first guide to start using the package, using Protein-Protein Interfaces (PPIs) queries as example.
+You can also learn to use the software by following the [tutorial notebooks](tutorials), which contain guided tutorials for PPIs, missense variants, and the training pipeline.
 For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
 
 ### Data generation
 
-For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed:
-- In a `ProteinProteinInterfaceResidueQuery` each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` each node represents one atom within the amino acid residues.
+For each protein-protein complex(or protein structure containing a missense variant), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
+- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
+- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
 
 A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structural complex
-- the ids of the two chains composing the complex, and
-- the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
+- a `.pdb` file, representing the single protein (containing the variant/s) or the protein-protein structure
+- the ids of the chains composing the structure, and
+- optionally, the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -164,7 +164,7 @@ queries.add(ProteinProteinInterfaceResidueQuery(
 
 The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
-The queries can then be processed into 3D-graphs only or both 3D-graphs and 3D-grids, depending on which kind of network will be used later for training.
+The queries can then be processed into 3D-graphs only or both graphs and 3D-grids, depending on which kind of network will be used later for training.
 
 ```python
 from deeprankcore.features import components, conservation, contact, exposure, irc, surfacearea
