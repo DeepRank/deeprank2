@@ -6,16 +6,16 @@
 Deeprank-Core |version| documentation
 ========================================
 
-Deeprank-Core is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using Graph Neural Networks. 
+DeepRank-Core is an open-source deep learning (DL) framework for data mining 3D representations of both protein-protein interfaces (PPIs) and individual proteins' variants using graph neural networks (GNNs) or convolutional neural networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-Deeprank-Core contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN models.
+DeepRank-Core allows to transform and store 3D representations of both PPIs and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training neural networks for whatever specific pattern of interest for the user. DeepRank-Core also offers a pre-implemented training pipeline which can use either CNNs or GNNs, as well as handy output exporters for evaluating performances. 
 
 Main features:
 
-* Predefined atom-level and residue-level PPI feature types (e.g. atomic density, vdw energy, residue contacts, PSSM, etc.)
-* Predefined target type (e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.)
+* Predefined atom-level and residue-level feature types (e.g. atomic density, vdw energy, residue contacts, PSSM, etc.)
+* Predefined target types (e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.)
 * Flexible definition of both new features and targets
-* Graphs feature mapping
+* Graphs and grids features mapping
 * Efficient data storage in HDF5 format
 * Support both classification and regression (based on `PyTorch`_ and `PyTorch Geometric`_)
 
