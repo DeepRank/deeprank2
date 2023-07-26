@@ -13,9 +13,9 @@
 
 ![alt-text](./deeprankcore.png)
 
-DeepRank-Core is an open-source Deep Learning (DL) framework for data mining 3D representations of both Protein-Protein Interfaces (PPIs) and individual proteins' variants using Graph Neural Networks (GNNs) or Convolutional Neural Networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
+DeepRank-Core is an open-source deep learning (DL) framework for data mining 3D representations of both protein-protein interfaces (PPIs) and individual proteins' variants using graph neural networks (GNNs) or convolutional neural networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-DeepRank-Core allows to transform and store 3D representations of both PPIs and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training Neural Networks for whatever specific pattern of interest for the user. DeepRank-Core also offers a pre-implemented training pipeline which can use either Convolutional Neural Networks (CNNs) or Graph Neural Networks (GNNs), as well as handy output exporters for evaluating performances. 
+DeepRank-Core allows to transform and store 3D representations of both PPIs and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training neural networks for whatever specific pattern of interest for the user. DeepRank-Core also offers a pre-implemented training pipeline which can use either CNNs or GNNs, as well as handy output exporters for evaluating performances. 
 
 Main features:
 - Predefined atom-level and residue-level feature types
@@ -100,7 +100,6 @@ Then run `pytest tests/test_integration.py` for the quick test or just `pytest` 
 ### Contributing
 If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
 
-
 ## Quick start
 The following section serves as a first guide to start using the package, using Protein-Protein Interfaces (PPIs) queries as example.
 You can also learn to use the software by following the [tutorial notebooks](tutorials), which contain guided tutorials for PPIs, missense variants, and the training pipeline.
@@ -115,7 +114,7 @@ For each protein-protein complex(or protein structure containing a missense vari
 A query takes as inputs:
 - a `.pdb` file, representing the single protein (containing the variant/s) or the protein-protein structure
 - the ids of the chains composing the structure, and
-- optionally, the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
+- optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -164,7 +163,7 @@ queries.add(ProteinProteinInterfaceResidueQuery(
 
 The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
-The queries can then be processed into 3D-graphs only or both graphs and 3D-grids, depending on which kind of network will be used later for training.
+The queries can then be processed into graphs only or both graphs and 3D grids, depending on which kind of network will be used later for training.
 
 ```python
 from deeprankcore.features import components, conservation, contact, exposure, irc, surfacearea
