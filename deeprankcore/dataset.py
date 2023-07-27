@@ -712,7 +712,9 @@ class GraphDataset(DeeprankDataset):
         with h5py.File(fname, 'r') as f5:
             grp = f5[entry_name]
 
+            all_option = False
             if (self.features_transform) and ('all' in self.features_transform):
+                all_option = True
                 transform = self.features_transform.get('all', {}).get('transform')
                 standard = self.features_transform.get('all', {}).get('standardize')
             else:
@@ -722,6 +724,10 @@ class GraphDataset(DeeprankDataset):
             if len(self.node_features) > 0:
                 node_data = ()
                 for feat in self.node_features:
+                    if (all_option is not True):
+                        transform = False
+                        standard = False
+                    
                     if feat[0] != '_':  # ignore metafeatures
                         vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                         
@@ -764,6 +770,10 @@ class GraphDataset(DeeprankDataset):
             if len(self.edge_features) > 0:
                 edge_data = ()
                 for feat in self.edge_features:
+                    if (all_option is not True):
+                        transform = False
+                        standard = False
+                        
                     if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         
@@ -771,11 +781,11 @@ class GraphDataset(DeeprankDataset):
                         if (self.features_transform is not None) and (feat in self.features_transform):
                             transform = self.features_transform.get(feat, {}).get('transform')
                             standard = self.features_transform.get(feat, {}).get('standardize')
-
+                            
                         # apply transformation
                         if transform:
                             vals = transform(vals)
-
+                                
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
                             if standard: 
