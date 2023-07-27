@@ -150,7 +150,6 @@ class DeeprankDataset(Dataset):
                     _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
                         f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}./n" +
                         f"Overwriting {param} parameter with the one used in the training phase.")
-                
                 setattr(self, param, dataset_train_vars[param])
 
     def _create_index_entries(self):
