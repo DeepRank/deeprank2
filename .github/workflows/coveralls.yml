@@ -2,20 +2,41 @@ name: coveralls
 
 on:
   push:
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
+      - "**.cff"
+      - "**.png"
     branches:
-    - main
+      - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
+      - "**.cff"
+      - "**.png"
 
 jobs:
   build:
+    if: github.event.pull_request.draft == false
     name: Coveralls
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest']
+        os: ["ubuntu-latest"]
         python-version: [3.9]
 
     steps:
@@ -26,6 +47,6 @@ jobs:
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.github_token }}
-          COVERALLS_FLAG_NAME: python-${{ matrix.version }}
+          COVERALLS_FLAG_NAME: python-${{ matrix.os }}
         run: |
           coveralls --service=github
