@@ -4,6 +4,7 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 import h5py
+import pytest
 import numpy as np
 from torch_geometric.loader import DataLoader
 import warnings
@@ -533,24 +534,23 @@ class TestDataSet(unittest.TestCase):
         assert (sorted(checked_features) == sorted(list(features_transform.keys()))) and (len(checked_features) == len(features_transform.keys()))
 
     def test_only_transform_all_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', r'invalid value encountered in log')
-            # define a features_transform dict for only transformations for `all` features
-            hdf5_path = "tests/data/hdf5/train.hdf5"
-            features_transform = {'all': {'transform': lambda t: np.log(t+10)}}
-            
-            # dataset that has the transformations applied using features_transform dict
-            transf_dataset = GraphDataset(
-                hdf5_path = hdf5_path,
-                target = 'binary',
-                features_transform = features_transform
-            )
-            
-            # dataset with no transformations applied
-            dataset = GraphDataset(
-                hdf5_path = hdf5_path,
-                target = 'binary',
-            )
+        # define a features_transform dict for only transformations for `all` features
+        
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        features_transform = {'all': {'transform': lambda t: np.log(t+65)}}
+        
+        # dataset that has the transformations applied using features_transform dict
+        transf_dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            features_transform = features_transform
+        )
+        
+        # dataset with no transformations applied
+        dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+        )
 
         # transformed features
         transf_features_dict = _compute_features_with_get(hdf5_path, transf_dataset)
@@ -859,6 +859,19 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.features_transform == dataset_test.features_transform
         assert dataset_train.means == dataset_test.means
         assert dataset_train.devs == dataset_test.devs
+
+    def test_invalid_value_features_transform(self):
+        
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}} # pylint: disable=unnecessary-lambda
+        with pytest.raises(ValueError):
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', r'invalid value encountered in log')
+                GraphDataset(
+                    hdf5_path = hdf5_path,
+                    target = 'binary',
+                    features_transform = features_transform
+                )
 
 
 if __name__ == "__main__":

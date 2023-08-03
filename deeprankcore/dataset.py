@@ -244,13 +244,17 @@ class DeeprankDataset(Dataset):
                 df_dict['id'] = entry_names
 
                 transform = False
+                all_option = False
                 if self.features_transform:
                     if 'all' in self.features_transform:
+                        all_option = True
                         transform = self.features_transform.get('all', {}).get('transform')
 
                 for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
                         #get transformation type
+                        if (all_option is not True):
+                            transform = False
                         if self.features_transform:
                             if feat in self.features_transform:
                                 transform = self.features_transform.get(feat, {}).get('transform')
@@ -260,7 +264,12 @@ class DeeprankDataset(Dataset):
                                 df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
                                 #apply transformation for each channel in this feature
                                 if transform:
-                                    df_dict[feat + '_' + str(i)] = [transform(row) for row in df_dict[feat + '_' + str(i)]]
+                                    for row in df_dict[feat + '_' + str(i)]:
+                                        if(np.isnan(transform(row)).any()):
+                                            raise ValueError(f"NaN value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")
+                                        elif(np.isneginf(transform(row)).any() or np.isposinf(transform(row)).any()):
+                                            raise ValueError(f"Infinte value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")
+                                        df_dict[feat + '_' + str(i)] = transform(row)
                         else:
                             df_dict[feat] = [
                                 f[entry_name][feat_type][feat][:]
@@ -268,7 +277,12 @@ class DeeprankDataset(Dataset):
                                 else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
                             #apply transformation
                             if transform:
-                                df_dict[feat]=[transform(row) for row in df_dict[feat]]
+                                for row in df_dict[feat]:
+                                    if(np.isnan(transform(row)).any()):
+                                        raise ValueError(f"NaN value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")
+                                    elif(np.isneginf(transform(row)).any() or np.isposinf(transform(row)).any()):
+                                        raise ValueError(f"Infinte value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")    
+                                    df_dict[feat] = transform(row)
                 
                 df = pd.DataFrame(data=df_dict)
 
@@ -739,6 +753,11 @@ class GraphDataset(DeeprankDataset):
                         # apply transformation
                         if transform:
                             vals = transform(vals)
+                            #check if contains invalid values
+                            if(np.isnan(vals).any()):
+                                raise ValueError(f"NaN value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")
+                            elif(np.isneginf(vals).any() or np.isposinf(vals).any()):
+                                raise ValueError(f"Infinte value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")
 
                         if vals.ndim == 1: # features with only one channel
                             vals = vals.reshape(-1, 1)   
@@ -785,6 +804,11 @@ class GraphDataset(DeeprankDataset):
                         # apply transformation
                         if transform:
                             vals = transform(vals)
+                            #check if contains invalid values
+                            if(np.isnan(vals).any()):
+                                raise ValueError(f"NaN value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")
+                            elif(np.isneginf(vals).any() or np.isposinf(vals).any()):
+                                raise ValueError(f"Infinte value occurs when applying {self.features_transform} for feature {feat}. Please set an appropriate features_transform function.")
                                 
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
