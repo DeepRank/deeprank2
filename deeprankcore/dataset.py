@@ -286,14 +286,7 @@ class DeeprankDataset(Dataset):
                                 df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
                                 #apply transformation for each channel in this feature
                                 if transform:
-                                    for row in df_dict[feat + '_' + str(i)]:
-                                        if(np.isnan(transform(row)).any()):
-                                            raise ValueError(f"NaN value occurs when applying {self.features_transform} for feature {feat}."
-                                                            "Please set an appropriate features_transform function.")
-                                        if(np.isneginf(transform(row)).any() or np.isposinf(transform(row)).any()):
-                                            raise ValueError(f"Infinte value occurs when applying {self.features_transform} for feature {feat}."
-                                                            "Please set an appropriate features_transform function.")
-                                        df_dict[feat + '_' + str(i)] = transform(row)
+                                    df_dict[feat + '_' + str(i)] = [transform(row) for row in df_dict[feat + '_' + str(i)]]
                         else:
                             df_dict[feat] = [
                                 f[entry_name][feat_type][feat][:]
@@ -301,15 +294,8 @@ class DeeprankDataset(Dataset):
                                 else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
                             #apply transformation
                             if transform:
-                                for row in df_dict[feat]:
-                                    if(np.isnan(transform(row)).any()):
-                                        raise ValueError(f"NaN value occurs when applying {self.features_transform} for feature {feat}."
-                                                        "Please set an appropriate features_transform function.")
-                                    if(np.isneginf(transform(row)).any() or np.isposinf(transform(row)).any()):
-                                        raise ValueError(f"Infinte value occurs when applying {self.features_transform} for feature {feat}."
-                                                        "Please set an appropriate features_transform function.")    
-                                    df_dict[feat] = transform(row)
-                
+                                df_dict[feat]=[transform(row) for row in df_dict[feat]]
+        
                 df = pd.DataFrame(data=df_dict)
 
             df_final = pd.concat([df_final, df])
@@ -823,7 +809,11 @@ class GraphDataset(DeeprankDataset):
 
                         # apply transformation
                         if transform:
-                            vals = transform(vals)
+                            with warnings.catch_warnings(record=True) as w:
+                                vals = transform(vals)
+                                if (len(w)):
+                                    raise ValueError(f"Invalid value occurs when applying {self.features_transform} for feature {feat}."
+                                                    "Please set an appropriate features_transform function.")
 
                         if vals.ndim == 1: # features with only one channel
                             vals = vals.reshape(-1, 1)   
@@ -869,7 +859,11 @@ class GraphDataset(DeeprankDataset):
                             
                         # apply transformation
                         if transform:
-                            vals = transform(vals)
+                            with warnings.catch_warnings(record=True) as w:
+                                vals = transform(vals)
+                                if (len(w)):
+                                    raise ValueError(f"Invalid value occurs when applying {self.features_transform} for feature {feat}."
+                                                    "Please set an appropriate features_transform function.")
                                 
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)

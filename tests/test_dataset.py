@@ -913,14 +913,17 @@ class TestDataSet(unittest.TestCase):
         
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}}
+        
+        transf_dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            features_transform = features_transform
+        )
         with pytest.raises(ValueError):
             with warnings.catch_warnings():
-                warnings.filterwarnings('ignore', r'invalid value encountered in log')
-                GraphDataset(
-                    hdf5_path = hdf5_path,
-                    target = 'binary',
-                    features_transform = features_transform
-                )
+                warnings.filterwarnings('ignore', r'divide by zero encountered in divide')
+                _compute_features_with_get(hdf5_path, transf_dataset)     
+
     def test_inherit_info_training_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         feature_transform = {'all': {'transform': None, 'standardize': True}}
