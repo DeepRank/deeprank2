@@ -7,7 +7,6 @@ from typing import List, Union
 import h5py
 import pytest
 import numpy as np
-import pytest
 from torch_geometric.loader import DataLoader
 import warnings
 
@@ -913,7 +912,7 @@ class TestDataSet(unittest.TestCase):
     def test_invalid_value_features_transform(self):
         
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}} # pylint: disable=unnecessary-lambda
+        features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}}
         with pytest.raises(ValueError):
             with warnings.catch_warnings():
                 warnings.filterwarnings('ignore', r'invalid value encountered in log')
