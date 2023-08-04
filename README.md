@@ -13,7 +13,7 @@
 
 ![alt-text](./deeprankcore.png)
 
-DeepRank-Core is an open-source deep learning (DL) framework for data mining 3D representations of both protein-protein interfaces (PPIs) and individual proteins' variants using graph neural networks (GNNs) or convolutional neural networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
+DeepRank-Core is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
 DeepRank-Core allows to transform and store 3D representations of both PPIs and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training neural networks for whatever specific pattern of interest for the user. DeepRank-Core also offers a pre-implemented training pipeline which can use either CNNs or GNNs, as well as handy output exporters for evaluating performances. 
 
