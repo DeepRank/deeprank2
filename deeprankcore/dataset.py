@@ -272,7 +272,7 @@ class DeeprankDataset(Dataset):
                         all_option = True
                         transform = self.features_transform.get('all', {}).get('transform')
 
-                for feat_type in self.features_dict: # pylint: disable=too-many-nested-blocks
+                for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
                         #get transformation type
                         if (all_option is not True):
@@ -811,7 +811,7 @@ class GraphDataset(DeeprankDataset):
                         if transform:
                             with warnings.catch_warnings(record=True) as w:
                                 vals = transform(vals)
-                                if (len(w)):
+                                if (len(w) > 0):
                                     raise ValueError(f"Invalid value occurs when applying {self.features_transform} for feature {feat}."
                                                     "Please set an appropriate features_transform function.")
 
@@ -861,7 +861,7 @@ class GraphDataset(DeeprankDataset):
                         if transform:
                             with warnings.catch_warnings(record=True) as w:
                                 vals = transform(vals)
-                                if (len(w)):
+                                if (len(w) > 0):
                                     raise ValueError(f"Invalid value occurs when applying {self.features_transform} for feature {feat}."
                                                     "Please set an appropriate features_transform function.")
                                 
