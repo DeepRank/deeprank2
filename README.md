@@ -1,4 +1,4 @@
-# DeeprankCore
+# DeepRank-Core
 
 | Badges | |
 |:----:|----|
@@ -19,24 +19,25 @@ DeepRank-Core allows for transformation of (pdb formatted) molecular data into 3
 
 Main features:
 - Predefined atom-level and residue-level feature types
-  - e.g. atomic density, vdw energy, residue contacts, PSSM, etc.
+  - e.g. atom/residue type, charge, size, potential energy
+  - All features' documentation is available [here](https://deeprankcore.readthedocs.io/en/latest/features.html)
 - Predefined target types
-  - e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
+  - binary class, CAPRI categories, DockQ, RMSD, and FNAT
 - Flexible definition of both new features and targets
-- Graphs and grids features mapping
+- Features generation for both graphs and grids
 - Efficient data storage in HDF5 format
 - Support for both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
-DeeprankCore extensive documentation can be found [here](https://deeprankcore.rtfd.io/).
+DeepRank-Core extensive documentation can be found [here](https://deeprankcore.rtfd.io/).
 
 ## Table of contents
 
-- [DeeprankCore](#deeprankcore)
+- [DeepRank-Core](#deeprank-core)
   - [Overview](#overview)
   - [Table of contents](#table-of-contents)
   - [Installation](#installation)
     - [Dependencies](#dependencies)
-    - [Deeprank-Core Package](#deeprank-core-package)
+    - [DeepRank-Core Package](#deeprank-core-package)
     - [Test installation](#test-installation)
     - [Contributing](#contributing)
   - [Quick start](#quick-start)
@@ -73,7 +74,7 @@ Before installing deeprankcore you need to install some dependencies. We advise 
   * if this gives an error, run `sudo apt-get install gcc`.
 * For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
 
-### Deeprank-Core Package
+### DeepRank-Core Package
 
 Once the dependencies are installed, you can install the latest stable release of deeprankcore using the PyPi package manager:
 
@@ -107,12 +108,12 @@ For more details, see the [extended documentation](https://deeprankcore.rtfd.io/
 
 ### Data generation
 
-For each protein-protein complex(or protein structure containing a missense variant), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
+For each protein-protein complex (or protein structure containing a missense variant), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
 - In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
 - In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
 
 A query takes as inputs:
-- a `.pdb` file, representing the single protein (containing the variant/s) or the protein-protein structure
+- a `.pdb` file, representing the protein-protein structure
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 

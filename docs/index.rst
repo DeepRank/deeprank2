@@ -3,19 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Deeprank-Core |version| documentation
+DeepRank-Core |version| documentation
 ========================================
 
-DeepRank-Core is an open-source deep learning (DL) framework for data mining 3D representations of both protein-protein interfaces (PPIs) and individual proteins' variants using graph neural networks (GNNs) or convolutional neural networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
+DeepRank-Core is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-DeepRank-Core allows to transform and store 3D representations of both PPIs and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training neural networks for whatever specific pattern of interest for the user. DeepRank-Core also offers a pre-implemented training pipeline which can use either CNNs or GNNs, as well as handy output exporters for evaluating performances. 
+DeepRank-Core allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank-Core also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
 
 Main features:
 
-* Predefined atom-level and residue-level feature types (e.g. atomic density, vdw energy, residue contacts, PSSM, etc.)
-* Predefined target types (e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.)
+* Predefined atom-level and residue-level feature types (e.g. atom/residue type, charge, size, potential energy, all features' documentation is available [here](https://deeprankcore.readthedocs.io/en/latest/features.html))
+* Predefined target types (binary class, CAPRI categories, DockQ, RMSD, and FNAT)
 * Flexible definition of both new features and targets
-* Graphs and grids features mapping
+* Features generation for both graphs and grids
 * Efficient data storage in HDF5 format
 * Support both classification and regression (based on `PyTorch`_ and `PyTorch Geometric`_)
 
@@ -34,10 +34,10 @@ Getting started
    getstarted
 
 :doc:`installation`
-    Get Deeprank-Core installed on your computer.
+    Get DeepRank-Core installed on your computer.
 
 :doc:`getstarted`
-    Understand how to use Deeprank-Core and how it can help you.
+    Understand how to use DeepRank-Core and how it can help you.
 
 Notes
 ===========
@@ -61,7 +61,7 @@ Package reference
    reference/deeprankcore
 
 :doc:`reference/deeprankcore`
-    This section documents the Deeprank-Core API.
+    This section documents the DeepRank-Core API.
 
 
 Indices and tables

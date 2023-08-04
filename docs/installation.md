@@ -23,7 +23,7 @@ Before installing deeprankcore you need to install some dependencies. We advise 
   * if this gives an error, run `sudo apt-get install gcc`.
 * For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
 
-## Deeprank-Core Package
+## DeeprRank-Core Package
 
 Once the dependencies installed, you can install the latest release of deeprankcore using the PyPi package manager:
 

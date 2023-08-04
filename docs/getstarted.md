@@ -1,16 +1,17 @@
 # Get started
 
-The following section serves as a first guide to start using the package, using Protein-Protein Interfaces (PPIs) queries as example.
-You can also learn to use the software by following the [tutorial notebooks][tutorials](https://github.com/DeepRank/deeprank-core/tree/main/tutorials), which contain guided tutorials for PPIs, missense variants, and the training pipeline.
+The following section serves as a first guide to start using the package, using Protein-Protein Interface (PPI) queries as example.
+For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank-core/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
+For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
 
 ## Data generation
 
-For each protein-protein complex(or protein structure containing a missense variant), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
+For each protein-protein complex (or protein structure containing a missense variant), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
 - In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
 - In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
 
 A query takes as inputs:
-- a `.pdb` file, representing the single protein (containing the variant/s) or the protein-protein structure
+- a `.pdb` file, representing the protein-protein structure
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
