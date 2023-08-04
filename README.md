@@ -101,8 +101,8 @@ Then run `pytest tests/test_integration.py` for the quick test or just `pytest` 
 If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
 
 ## Quick start
-The following section serves as a first guide to start using the package, using Protein-Protein Interfaces (PPIs) queries as example.
-You can also learn to use the software by following the [tutorial notebooks](https://github.com/DeepRank/deeprank-core/tree/main/tutorials), which contain guided tutorials for PPIs, missense variants, and the training pipeline.
+The following section serves as a first guide to start using the package, using Protein-Protein Interface (PPI) queries as example.
+For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank-core/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
 For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
 
 ### Data generation
