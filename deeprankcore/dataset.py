@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import os
 import re
@@ -476,12 +477,10 @@ class GridDataset(DeeprankDataset):
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.default_vars = {
-            "features": "all",
-            "target": None,
-            "target_transform": False,
-            "task": None,
-            "classes": None
-            }
+            k: v.default
+            for k, v in inspect.signature(self.__init__).parameters.items()
+            if v.default is not inspect.Parameter.empty
+        }
         self.train = train
         self.dataset_train = dataset_train
         self.features = features
@@ -716,14 +715,10 @@ class GraphDataset(DeeprankDataset):
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.default_vars = {
-            "node_features": "all",
-            "edge_features": "all",
-            "features_transform": None,
-            "target": None,
-            "target_transform": False,
-            "task": None,
-            "classes": None
-            }
+            k: v.default
+            for k, v in inspect.signature(self.__init__).parameters.items()
+            if v.default is not inspect.Parameter.empty
+        }
         self.train = train
         self.dataset_train = dataset_train
         self.node_features = node_features
