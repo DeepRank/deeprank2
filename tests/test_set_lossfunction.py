@@ -131,7 +131,7 @@ class TestLosses(unittest.TestCase):
     # Regression tasks
     def test_regress_default(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -144,7 +144,7 @@ class TestLosses(unittest.TestCase):
 
     def test_regress_all(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -159,7 +159,7 @@ class TestLosses(unittest.TestCase):
 
     def test_regress_invalid_lossfunction(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -172,7 +172,7 @@ class TestLosses(unittest.TestCase):
 
     def test_regress_invalid_lossfunction_override(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
