@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import os
 import re
@@ -146,10 +147,11 @@ class DeeprankDataset(Dataset):
 
         for param in inherited_params:
             if (self_vars[param] != dataset_train_vars[param]):
+                if (self_vars[param] != self.default_vars[param]):
+                    _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
+                        f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}./n" +
+                        f"Overwriting {param} parameter with the one used in the training phase.")
                 setattr(self, param, dataset_train_vars[param])
-                _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
-                    f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}" +
-                    f"Overwriting {param} parameter with the one used in the training phase.")
 
     def _create_index_entries(self):
         """Creates the indexing of each molecule in the dataset.
@@ -474,18 +476,16 @@ class GridDataset(DeeprankDataset):
         """
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
+        self.default_vars = {
+            k: v.default
+            for k, v in inspect.signature(self.__init__).parameters.items()
+            if v.default is not inspect.Parameter.empty
+        }
         self.train = train
         self.dataset_train = dataset_train
         self.features = features
         self.target_transform = target_transform
         self._check_features()
-        self.features_dict = {}
-        self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
-        if self.target is not None:
-            if isinstance(self.target, str):
-                self.features_dict[targets.VALUES] = [self.target]
-            else:
-                self.features_dict[targets.VALUES] = self.target
 
         if not train:
             if not isinstance(dataset_train, GridDataset):
@@ -493,12 +493,20 @@ class GridDataset(DeeprankDataset):
                                 Please provide a valid training GridDataset.""")
             
             #check inherited parameter with the ones in the training set
-            inherited_params = ["features", "features_dict", "target", "target_transform", "task", "classes"]
+            inherited_params = ["features", "target", "target_transform", "task", "classes"]
             self._check_inherited_params(inherited_params, dataset_train)
             
         elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.
             dataset_train will be ignored since the current dataset will be considered as training set.""")
+
+        self.features_dict = {}
+        self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
+        if self.target is not None:
+            if isinstance(self.target, str):
+                self.features_dict[targets.VALUES] = [self.target]
+            else:
+                self.features_dict[targets.VALUES] = self.target
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -542,6 +550,7 @@ class GridDataset(DeeprankDataset):
         missing_features = []
         if self.features == "all":
             self.features = sorted(hdf5_all_feature_names)
+            self.default_vars["features"] = self.features
         else:
             if not isinstance(self.features, list):
                 if self.features is None:
@@ -705,6 +714,11 @@ class GraphDataset(DeeprankDataset):
 
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
+        self.default_vars = {
+            k: v.default
+            for k, v in inspect.signature(self.__init__).parameters.items()
+            if v.default is not inspect.Parameter.empty
+        }
         self.train = train
         self.dataset_train = dataset_train
         self.node_features = node_features
@@ -713,6 +727,20 @@ class GraphDataset(DeeprankDataset):
         self.target_transform = target_transform
         self.features_transform = features_transform
         self._check_features()
+
+        if not train:
+            if not isinstance(dataset_train, GraphDataset):
+                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
+                                Please provide a valid training GraphDataset.""")
+            
+            #check inherited parameter with the ones in the training set
+            inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
+            self._check_inherited_params(inherited_params, dataset_train)
+            
+        elif train and dataset_train:
+            _log.warning("""dataset_train has been set but train flag was set to True.
+            dataset_train will be ignored since the current dataset will be considered as training set.""")
+
         self.features_dict = {}
         self.features_dict[Nfeat.NODE] = self.node_features
         self.features_dict[Efeat.EDGE] = self.edge_features
@@ -722,19 +750,6 @@ class GraphDataset(DeeprankDataset):
             else:
                 self.features_dict[targets.VALUES] = self.target
 
-        if not train:
-            if not isinstance(dataset_train, GraphDataset):
-                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
-                                Please provide a valid training GraphDataset.""")
-            
-            #check inherited parameter with the ones in the training set
-            inherited_params = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
-            self._check_inherited_params(inherited_params, dataset_train)
-            
-        elif train and dataset_train:
-            _log.warning("""dataset_train has been set but train flag was set to True.
-            dataset_train will be ignored since the current dataset will be considered as training set.""")
-                 
         standardize = False
         if self.features_transform:
             standardize = any(self.features_transform[key].get("standardize") for key, _ in self.features_transform.items())
@@ -928,6 +943,7 @@ class GraphDataset(DeeprankDataset):
         missing_node_features = []
         if self.node_features == "all":
             self.node_features = self.available_node_features
+            self.default_vars["node_features"] = self.node_features
         else:
             if not isinstance(self.node_features, list):
                 if self.node_features is None:
@@ -943,6 +959,7 @@ class GraphDataset(DeeprankDataset):
         missing_edge_features = []
         if self.edge_features == "all":
             self.edge_features = self.available_edge_features
+            self.default_vars["edge_features"] = self.edge_features
         else:
             if not isinstance(self.edge_features, list):
                 if self.edge_features is None:
