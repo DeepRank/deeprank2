@@ -265,20 +265,13 @@ class DeeprankDataset(Dataset):
                 df_dict = {}
                 df_dict['id'] = entry_names
 
-                transform = False
-                all_option = False
-                if self.features_transform:
-                    if 'all' in self.features_transform:
-                        all_option = True
-                        transform = self.features_transform.get('all', {}).get('transform')
-
                 for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
-                        #get transformation type
-                        if (all_option is not True):
-                            transform = False
+                        # reset transform for each feature
+                        transform = None
                         if self.features_transform:
-                            if feat in self.features_transform:
+                            transform = self.features_transform.get('all', {}).get('transform')
+                            if (transform is None) and (feat in self.features_transform):
                                 transform = self.features_transform.get(feat, {}).get('transform')
                         #Check the number of channels the features have    
                         if f[entry_name][feat_type][feat][()].ndim == 2:
@@ -794,7 +787,6 @@ class GraphDataset(DeeprankDataset):
 
                     if feat[0] != '_':  # ignore metafeatures
                         vals = grp[f"{Nfeat.NODE}/{feat}"][()]
-                        
                         # get feat transformation and standardization
                         if (self.features_transform is not None):
                             transform = self.features_transform.get('all', {}).get('transform')
@@ -851,7 +843,6 @@ class GraphDataset(DeeprankDataset):
                         
                     if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
-
                         # get feat transformation and standardization
                         if (self.features_transform is not None):
                             transform = self.features_transform.get('all', {}).get('transform')
@@ -862,7 +853,7 @@ class GraphDataset(DeeprankDataset):
                             # if no standardization is set for all features, check if one is set for the current feature
                             if (standard is None) and (feat in self.features_transform):
                                 standard = self.features_transform.get(feat, {}).get('standardize')
-                            
+                                
                         # apply transformation
                         if transform:
                             with warnings.catch_warnings(record=True) as w:
