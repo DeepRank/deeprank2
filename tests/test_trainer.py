@@ -533,7 +533,8 @@ class TestTrainer(unittest.TestCase):
         dataset_train_other = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             edge_features = [Efeat.SAMECHAIN, Efeat.COVALENT],
-            target = 'BA'
+            target = 'BA',
+            task='regress'
         )
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",

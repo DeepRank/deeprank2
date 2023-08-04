@@ -315,6 +315,7 @@ class TestDataSet(unittest.TestCase):
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
             target = 'BA', # continuous values --> regression
+            task = targets.REGRESS,
             target_transform = True
         )
 
