@@ -1,7 +1,9 @@
 ## Introduction
 
 The tutorial notebooks in this folder can be run to learn how to use DeepRank-Core.
-- There are two tutorial notebooks for data generation, one for Protein-Protein Interfaces (PPIs) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_ppi.ipynb)), and another for missense variants data ([data_generation_variant.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_variant.ipynb)). Both tutorials demonstrate how to create *.hdf5-formatted input training data from rar *.pdb-formatted data using DeepRank-Core.
+- There are two tutorial notebooks for data generation, which demonstrate how to create *.hdf5-formatted input training data from raw *.pdb-formatted data using DeepRank-Core.
+  - protein-protein interface (PPI) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_ppi.ipynb));
+  - missense variants data ([data_generation_variant.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_variant.ipynb)). 
 - The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank-Core.
 
 ### Use cases
