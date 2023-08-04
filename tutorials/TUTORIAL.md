@@ -20,7 +20,7 @@ On the left an example of a pMHC structure is shown, rendered using [ProteinView
 
 #### Missense variants
 
-The example missense variants dataset that we provide contains PDB files, each representing protein structures containing one or multiple missense variants, which derive from alterations in the coding regions of the DNA. For each missense variant, we are interested in predicting whether the phenotypic outcome is pathogenic or neutral.
+The example missense variants dataset that we provide contains 58 PDB files, each representing protein structures containing one or multiple missense variants, which derive from alterations in the coding regions of the DNA. For each missense variant, we are interested in predicting whether the phenotypic outcome is pathogenic or neutral.
 
 PDB models and target data used in this tutorial have been retrieved from [Ramakrishnan et al.](https://doi.org/10.3389/fmolb.2023.1204157).
 
