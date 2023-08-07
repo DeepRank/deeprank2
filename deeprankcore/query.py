@@ -4,6 +4,7 @@ import os
 import pickle
 import pkgutil
 import tempfile
+import warnings
 from functools import partial
 from glob import glob
 from multiprocessing import Pool
@@ -34,15 +35,20 @@ from deeprankcore.utils.parsing.pssm import parse_pssm
 _log = logging.getLogger(__name__)
 
 
-def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
-    """Checks whether information stored in PSSM file matches the PDB file.
+def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbosity: int = 0):
+    """Checks whether information stored in pssm file matches the corresponding pdb file.
 
     Args:
         pdb_path (str): Path to the PDB file.
         pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
+        suppress (bool): Suppress errors and throw warnings instead.
+        verbosity (int): Level of verbosity of error/warning. Defaults to 0.
+            0 (low): Only state file name where error occurred;
+            1 (medium): Also state number of incorrect and missing residues;
+            2 (high): Also list the incorrect residues 
 
     Raises:
-        ValueError: Raised if info between PDB and PSSM doesn't match or if no pssms were provided
+        ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
     """
 
     if not pssm_paths:
@@ -57,20 +63,40 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str]):
 
     # load ground truth from pdb file
     pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
-    pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth}
+    pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth if res[0] in pssm_paths}
 
-    error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
+    wrong_list = []
+    missing_list = []
+
     for residue in pdb_truth:
         try: 
             if pdb_truth[residue] != pssm_data[residue]:
-                raise ValueError(error_message)
+                wrong_list.append(residue)
         except KeyError:
-            raise ValueError(error_message) #pylint: disable = raise-missing-from
+            missing_list.append(residue)
+
+    if len(wrong_list) + len(missing_list) > 0:
+        error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
+        if verbosity:
+            if len(wrong_list) > 0:
+                error_message = error_message + f'\n\t{len(wrong_list)} entries are incorrect.'
+                if verbosity == 2:
+                    error_message = error_message[-1] + f':\n\t{missing_list}'
+            if len(missing_list) > 0:
+                error_message = error_message + f'\n\t{len(missing_list)} entries are missing.'
+                if verbosity == 2:
+                    error_message = error_message[-1] + f':\n\t{missing_list}'
+    
+        if not suppress:
+            raise ValueError(error_message)
+        
+        warnings.warn(error_message)
+        _log.warning(error_message)
 
 
 class Query:
 
-    def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None):
+    def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None, suppress_pssm_errors: bool = False):
         """Represents one entity of interest, like a single residue variant or a protein-protein interface.
 
         :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
@@ -79,9 +105,12 @@ class Query:
         Args:
             model_id (str): The ID of the model to load, usually a .PDB accession code.
             targets (Optional[Dict[str, Union[float, int]]], optional): Target values associated with the query. Defaults to None.
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
+                Defaults to False.
         """
 
         self._model_id = model_id
+        self._suppress = suppress_pssm_errors
 
         if targets is None:
             self._targets = {}
@@ -126,7 +155,7 @@ class Query:
 
         # read the pssm
         if load_pssms:
-            _check_pssm(pdb_path, pssm_paths)
+            _check_pssm(pdb_path, pssm_paths, suppress = self._suppress)
             for chain in structure.chains:
                 if chain.id in pssm_paths:
                     pssm_path = pssm_paths[chain.id]
@@ -188,16 +217,15 @@ class QueryCollection:
         if verbose:
             _log.info(f'Adding query with ID {query_id}.')
 
-        query_id_base = query_id.split("_")[0]
-        if query_id_base not in self.ids_count:
-            self.ids_count[query_id_base] = 1
+        if query_id not in self.ids_count:
+            self.ids_count[query_id] = 1
         else:
-            self.ids_count[query_id_base] += 1
-            new_id = query.model_id.split("_")[0] + "_" + str(self.ids_count[query_id_base])
+            self.ids_count[query_id] += 1
+            new_id = query.model_id + "_" + str(self.ids_count[query_id])
             query.model_id = new_id
             
             if warn_duplicate:
-                _log.warning(f'Query with ID {query_id_base} has already been added to the collection. Renaming it as {query.get_query_id()}')
+                _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
@@ -228,8 +256,8 @@ class QueryCollection:
         self,
         prefix: str,
         feature_names: List[str],
-        grid_settings: Union[GridSettings, None],
-        grid_map_method: Union[MapMethod, None],
+        grid_settings: Optional[GridSettings],
+        grid_map_method: Optional[MapMethod],
         grid_augmentation_count: int,
         query: Query
     ):
@@ -295,6 +323,8 @@ class QueryCollection:
         # set defaults
         if prefix is None:
             prefix = "processed-queries"
+        elif prefix.endswith('.hdf5'):
+            prefix = prefix[:-5]
         if cpu_count is None:
             cpu_count = os.cpu_count()  # returns the number of CPUs in the system
         else:
@@ -356,6 +386,7 @@ class SingleResidueVariantResidueQuery(Query):
         radius: float = 10.0,
         distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
+        suppress_pssm_errors: bool = False,
     ):
         """
         Creates a residue graph from a single residue variant in a .PDB file.
@@ -372,6 +403,8 @@ class SingleResidueVariantResidueQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
                 Defaults to 4.5.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
+                Defaults to False.
         """
 
         self._pdb_path = pdb_path
@@ -379,7 +412,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets)
+        Query.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -472,6 +505,7 @@ class SingleResidueVariantAtomicQuery(Query):
         radius: float = 10.0,
         distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
+        suppress_pssm_errors: bool = False,
     ):
         """
         Creates an atomic graph for a single residue variant in a .PDB file.
@@ -488,6 +522,8 @@ class SingleResidueVariantAtomicQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
                 Defaults to 4.5.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
+                Defaults to False.
         """
 
         self._pdb_path = pdb_path
@@ -495,7 +531,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets)
+        Query.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -551,11 +587,11 @@ class SingleResidueVariantAtomicQuery(Query):
         # This should include the model, chain, residue and atom
         return str(atom)
 
-    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+    def build(self, feature_modules: Union[ModuleType, List[ModuleType]], include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the .PDB structure.
 
         Args:
-            feature_modules (List[ModuleType]): Each must implement the :py:func:`add_features` function.
+            feature_modules (Union[ModuleType, List[ModuleType]]): Each must implement the :py:func:`add_features` function.
             include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
@@ -567,6 +603,7 @@ class SingleResidueVariantAtomicQuery(Query):
             load_pssms = conservation in feature_modules
         else:
             load_pssms = conservation == feature_modules
+            feature_modules = [feature_modules]
         structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
 
         # find the variant residue
@@ -645,13 +682,14 @@ def _load_ppi_atoms(pdb_path: str,
     return contact_atoms
 
 
-def _load_ppi_pssms(pssm_paths: Union[Dict[str, str], None],
-                    chain_id1: str, chain_id2: str,
+def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
+                    chains: List[str],
                     structure: PDBStructure,
-                    pdb_path):
+                    pdb_path,
+                    suppress_error):
 
-    _check_pssm(pdb_path, pssm_paths)
-    for chain_id in [chain_id1, chain_id2]:
+    _check_pssm(pdb_path, pssm_paths, suppress_error, verbosity = 0)
+    for chain_id in chains:
         if chain_id in pssm_paths:
 
             chain = structure.get_chain(chain_id)
@@ -672,6 +710,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         pssm_paths: Optional[Dict[str, str]] = None,
         distance_cutoff: Optional[float] = 5.5,
         targets: Optional[Dict[str, float]] = None,
+        suppress_pssm_errors: bool = False,
     ):
         """
         A query that builds atom-based graphs, using the residues at a protein-protein interface.
@@ -684,11 +723,13 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between two interacting atoms of the two proteins.
                 Defaults to 5.5.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
+                Defaults to False.
         """
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets)
+        Query.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._pdb_path = pdb_path
 
@@ -745,8 +786,9 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
             _load_ppi_pssms(self._pssm_paths,
-                            self._chain_id1, self._chain_id2,
-                            structure, self._pdb_path)
+                            [self._chain_id1, self._chain_id2],
+                            structure, self._pdb_path,
+                            suppress_error=self._suppress)
 
         # add the features
         for feature_module in feature_modules:
@@ -766,6 +808,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         pssm_paths: Optional[Dict[str, str]] = None,
         distance_cutoff: Optional[float] = 10,
         targets: Optional[Dict[str, float]] = None,
+        suppress_pssm_errors: bool = False,
     ):
         """
         A query that builds residue-based graphs, using the residues at a protein-protein interface.
@@ -778,11 +821,13 @@ class ProteinProteinInterfaceResidueQuery(Query):
             distance_cutoff (Optional[float], optional): Max distance in Ångström between two interacting residues of the two proteins.
                 Defaults to 10.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
+            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
+                Defaults to False.
         """
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets)
+        Query.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._pdb_path = pdb_path
 
@@ -846,8 +891,9 @@ class ProteinProteinInterfaceResidueQuery(Query):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
             _load_ppi_pssms(self._pssm_paths,
-                            self._chain_id1, self._chain_id2,
-                            structure, self._pdb_path)
+                            [self._chain_id1, self._chain_id2],
+                            structure, self._pdb_path,
+                            suppress_error=self._suppress)
 
         # add the features
         for feature_module in feature_modules:

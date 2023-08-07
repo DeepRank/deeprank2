@@ -32,7 +32,7 @@ def _wrap_in_graph(edge: Edge):
 
 
 def _get_contact( # pylint: disable=too-many-arguments
-        pdb_id: str, 
+        pdb_id: str,
         residue_num1: int,
         atom_name1: str,
         residue_num2: int,
@@ -40,7 +40,7 @@ def _get_contact( # pylint: disable=too-many-arguments
         residue_level: bool = False,
         chains: Tuple[str,str] = None,
     ) -> Edge:
-    
+
     pdb_path = f"tests/data/pdb/{pdb_id}/{pdb_id}.pdb"
 
     pdb = pdb2sql(pdb_path)
@@ -56,18 +56,18 @@ def _get_contact( # pylint: disable=too-many-arguments
 
     if not residue_level:
         contact = AtomicContact(
-            _get_atom(chains[0], residue_num1, atom_name1), 
+            _get_atom(chains[0], residue_num1, atom_name1),
             _get_atom(chains[1], residue_num2, atom_name2)
         )
     else:
         contact = ResidueContact(
-            chains[0].residues[residue_num1], 
+            chains[0].residues[residue_num1],
             chains[1].residues[residue_num2]
         )
 
     edge_obj = Edge(contact)
     add_features(pdb_path, _wrap_in_graph(edge_obj))
-    
+
     assert not np.isnan(edge_obj.features[Efeat.VDW]), 'isnan vdw'
     assert not np.isnan(edge_obj.features[Efeat.ELEC]), 'isnan electrostatic'
     assert not np.isnan(edge_obj.features[Efeat.DISTANCE]), 'isnan distance'
@@ -99,7 +99,7 @@ def test_13_pair():
     assert edge_13.features[Efeat.VDW] == 0.0, 'nonzero vdw energy for 1-3 pair'
     assert edge_13.features[Efeat.ELEC] == 0.0, 'nonzero electrostatic energy for 1-3 pair'
     assert edge_13.features[Efeat.COVALENT] == 0.0, '1-3 pair recognized as covalent'
-    
+
 
 def test_very_close_opposing_chains():
     """ChainA THR 118 O - ChainB ARG 30 NH1 (3.55 A). Should have non-zero energy despite close contact, because opposing chains.
@@ -144,7 +144,7 @@ def test_vanderwaals_negative():
     edge_far = _get_contact('101M', 0, "N", 27, "CB")
     assert edge_far.features[Efeat.VDW] < 0.0
 
-    
+
 def test_vanderwaals_morenegative():
     """MET 0 N - PHE 138 CG, intermediate distance (12.69 A). Should have more negative vanderwaals energy than the far interaction.
     """
@@ -193,7 +193,7 @@ def test_attractive_electrostatic_far():
         far_attracting_edge.features[Efeat.ELEC]
         > close_attracting_edge.features[Efeat.ELEC]
     ), 'far electrostatic <= close electrostatic'
-   
+
 
 def test_repulsive_electrostatic():
     """GLU 109 OE2 - GLU 105 OE1 (9.64 A). Should have repulsive electrostatic energy.

@@ -11,8 +11,8 @@ from deeprankcore.domain import edgestorage as Efeat
 from deeprankcore.domain import nodestorage as Nfeat
 from deeprankcore.domain import targetstorage as targets
 from deeprankcore.domain.aminoacidlist import (alanine, arginine, asparagine,
-                                               glutamate, glycine, leucine,
-                                               lysine, phenylalanine)
+                                               cysteine, glutamate, glycine,
+                                               leucine, lysine, phenylalanine)
 from deeprankcore.features import (components, conservation, contact,
                                    surfacearea)
 from deeprankcore.query import (ProteinProteinInterfaceAtomicQuery,
@@ -305,7 +305,7 @@ def test_augmentation():
         },
         targets={targets.BINARY: 0},
     ))
-    
+
     qc.add(ProteinProteinInterfaceAtomicQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
@@ -316,7 +316,7 @@ def test_augmentation():
         },
         targets={targets.BINARY: 0},
     ))
-    
+
     qc.add(SingleResidueVariantResidueQuery(
         "tests/data/pdb/101M/101M.pdb",
         "A",
@@ -368,19 +368,7 @@ def test_augmentation():
 
 
 def test_incorrect_pssm_order():
-    with pytest.raises(ValueError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
-                "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
-            },
-        ).build(conservation)
-    
-    # should not raise error conservation module is not used
-    _ = ProteinProteinInterfaceResidueQuery(
+    q = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
@@ -388,109 +376,123 @@ def test_incorrect_pssm_order():
             "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
             "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
         },
-    ).build(components)
+    )
+
+    # check that error is thrown for incorrect pssm
+    with pytest.raises(ValueError):
+        _ = q.build(conservation)
+
+    # no error if conservation module is not used
+    _ = q.build(components)
+
+    # check that error suppression works
+    with pytest.warns(UserWarning):
+        q._suppress = True  # pylint: disable = protected-access
+        _ = q.build(conservation)
 
 
 def test_incomplete_pssm():
-    with pytest.raises(ValueError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
-                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-            },
-        ).build(conservation)
-
-    # no error if conservation module is not used
-    _ = ProteinProteinInterfaceResidueQuery(
+    q = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
         {
-            "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
-            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
         },
-    ).build(components)
+    )
+
+    with pytest.raises(ValueError):
+        _ = q.build(conservation)
+
+    # no error if conservation module is not used
+    _ = q.build(components)
+
+    # check that error suppression works
+    with pytest.warns(UserWarning):
+        q._suppress = True  # pylint: disable = protected-access
+        _ = q.build(conservation)
 
 
 def test_no_pssm_provided():
-    with pytest.raises(ValueError):
-        # pssm_paths is empty dictionary
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {},
-        ).build(conservation)
-        
-        # pssm_paths not provided 
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-        ).build(conservation)
-
-    # no error if conservation module is not used
     # pssm_paths is empty dictionary
-    _ = ProteinProteinInterfaceResidueQuery(
+    q_empty_dict = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
         {},
-    ).build(components)
-    
-    # pssm_paths not provided 
-    _ = ProteinProteinInterfaceResidueQuery(
+    )
+
+    # pssm_paths not provided
+    q_not_provided = ProteinProteinInterfaceResidueQuery(
         "tests/data/pdb/3C8P/3C8P.pdb",
         "A",
         "B",
-    ).build(components)
+    )
+
+    with pytest.raises(ValueError):
+        _ = q_empty_dict.build(conservation)
+        _ = q_not_provided.build(conservation)
+
+    # no error if conservation module is not used
+    _ = q_empty_dict.build(components)
+    _ = q_not_provided.build(components)
 
 
 def test_incorrect_pssm_provided():
     # non-existing file
+    q_non_existing = ProteinProteinInterfaceResidueQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+            "B": "tests/data/pssm/3C8P_incorrect/dummy_non_existing_file.pssm",
+        },
+    )
+
+    # missing file
+    q_missing = ProteinProteinInterfaceResidueQuery(
+        "tests/data/pdb/3C8P/3C8P.pdb",
+        "A",
+        "B",
+        {
+            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+        },
+    )
+
     with pytest.raises(FileNotFoundError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "A": "tests/data/pssm/3C8P_incorrect/dummy_non_existing_file.pssm",
-                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-            },
-        ).build(conservation)
+        _ = q_non_existing.build(conservation)
+        _ = q_missing.build(conservation)
 
-    # missing file
-    with pytest.raises(ValueError):
-        _ = ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
-                "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-            },
-        ).build(conservation)
-    
     # no error if conservation module is not used
-    # non-existing file
-    _ = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
-            "A": "tests/data/pssm/3C8P_incorrect/dummy_non_existing_file.pssm",
-            "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-        },
-    ).build(components)
+    _ = q_non_existing.build(components)
+    _ = q_missing.build(components)
 
-    # missing file
-    _ = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
-            "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
-        },
-    ).build(components)
+
+def test_variant_query_multiple_chains():
+    q = SingleResidueVariantAtomicQuery(
+        pdb_path = "tests/data/pdb/2g98/pdb2g98.pdb",
+        chain_id = "A",
+        residue_number = 14,
+        insertion_code = None,
+        wildtype_amino_acid = arginine,
+        variant_amino_acid = cysteine,
+        pssm_paths = {"A": "tests/data/pssm/2g98/2g98.A.pdb.pssm"},
+        targets = {targets.BINARY: 1},
+        radius = 10.0,
+        distance_cutoff = 4.5,
+        )
+
+    # at radius 10, chain B is included in graph
+    # no error without conservation module
+    graph = q.build(components)
+    assert 'B' in graph.get_all_chains()
+    # if we rebuild the graph with conservation module it should fail
+    with pytest.raises(FileNotFoundError):
+        _ = q.build(conservation)
+
+    # at radius 7, chain B is not included in graph
+    q._radius = 7.0  # pylint: disable = protected-access
+    graph = q.build(conservation)
+    assert 'B' not in graph.get_all_chains()

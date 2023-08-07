@@ -72,6 +72,6 @@ def add_features( # pylint: disable=unused-argument
             hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
 
             if hse_key in hse:
-                node.features[Nfeat.HSE] = hse[hse_key]
+                node.features[Nfeat.HSE] = np.array(hse[hse_key], dtype=np.float64)
             else:
-                node.features[Nfeat.HSE] = np.array((0, 0, 0))
+                node.features[Nfeat.HSE] = np.array((0, 0, 0), dtype=np.float64)

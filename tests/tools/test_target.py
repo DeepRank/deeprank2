@@ -32,7 +32,7 @@ class TestTools(unittest.TestCase):
             os.remove(target_path)
             os.remove(graph_path)
 
-   
+
     def test_compute_targets(self):
         compute_targets("tests/data/pdb/1ATN/1ATN_1w.pdb", "tests/data/ref/1ATN/1ATN.pdb")
 
