@@ -17,21 +17,24 @@ def add_features(
     for node in graph.nodes:
         chain, resSeq = node.id._chain._id, node.id._number
         
-        N = t.tensor([row[2:] for row in backbones[chain] if row[:2] == [resSeq, "N"]][0])
+        N = [row[2:] for row in backbones[chain] if row[:2] == [resSeq, "N"]]
+        N = t.tensor(N[0]) if len(N) == 1 else None
         N_plus1 = [row[2:] for row in backbones[chain] if row[:2] == [resSeq+1, "N"]]
         N_plus1 = t.tensor(N_plus1[0]) if len(N_plus1) == 1 else None
 
-        Ca = t.tensor([row[2:] for row in backbones[chain] if row[:2] == [resSeq, "CA"]][0])
+        Ca = [row[2:] for row in backbones[chain] if row[:2] == [resSeq, "CA"]]
+        Ca = t.tensor(Ca[0]) if len(Ca) == 1 else None
         Ca_plus1 = [row[2:] for row in backbones[chain] if row[:2] == [resSeq+1, "CA"]]
         Ca_plus1 = t.tensor(Ca_plus1[0]) if len(Ca_plus1) == 1 else None
 
-        C = t.tensor([row[2:] for row in backbones[chain] if row[:2] == [resSeq, "C"]][0])
+        C = [row[2:] for row in backbones[chain] if row[:2] == [resSeq, "C"]]
+        C = t.tensor(C[0]) if len(C) == 1 else None
         C_minus1 = [row[2:] for row in backbones[chain] if row[:2] == [resSeq-1, "C"]]
         C_minus1 = t.tensor(C_minus1[0]) if len(C_minus1) == 1 else None
 
-        psy = dihedral((N, Ca, C, N_plus1)) if N_plus1 is not None else 0
-        omega = dihedral((Ca, C, N_plus1, Ca_plus1)) if N_plus1 is not None else 0
-        phi = dihedral((C_minus1, N, Ca, C)) if C_minus1 is not None else 0
+        psy = dihedral((N, Ca, C, N_plus1)) if None not in (N, Ca, C, N_plus1) else 0
+        omega = dihedral((Ca, C, N_plus1, Ca_plus1)) if None not in (Ca, C, N_plus1, Ca_plus1) else 0
+        phi = dihedral((C_minus1, N, Ca, C)) if None not in (C_minus1, N, Ca, C) else 0
 
         torsion_angle = [phi, psy, omega]
         node.features[Nfeat.TORSIONANGLE] = torsion_angle
