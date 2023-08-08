@@ -81,14 +81,14 @@ def test_cnn(): # pylint: disable=too-many-locals
 
         dataset_val = GridDataset(
             hdf5_path = hdf5_paths,
-            features = features,
-            target = targets.BINARY
+            train = False,
+            dataset_train = dataset_train,
         )
 
         dataset_test = GridDataset(
             hdf5_path = hdf5_paths,
-            features = features,
-            target = targets.BINARY
+            train = False,
+            dataset_train = dataset_train,
         )
 
         output_exporters = [HDF5OutputExporter(output_directory)]
@@ -102,8 +102,7 @@ def test_cnn(): # pylint: disable=too-many-locals
         )
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, batch_size=64, validate=True, save_best_model=None)
-            trainer.save_model(model_path)
+            trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=model_path)
 
             Trainer(CnnClassification, dataset_train, dataset_val, dataset_test, pretrained_model=model_path)
 
@@ -159,24 +158,22 @@ def test_gnn(): # pylint: disable=too-many-locals
             hdf5_path = hdf5_paths,
             node_features = node_features,
             edge_features = edge_features,
-            target = targets.BINARY,
             clustering_method = "mcl",
+            target = targets.BINARY
         )
 
         dataset_val = GraphDataset(
             hdf5_path = hdf5_paths,
-            node_features = node_features,
-            edge_features = edge_features,
-            target = targets.BINARY,
-            clustering_method = "mcl",
+            train = False,
+            dataset_train = dataset_train,
+            clustering_method = "mcl"
         )
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_paths,
-            node_features = node_features,
-            edge_features = edge_features,
-            target = targets.BINARY,
-            clustering_method = "mcl",
+            train = False,
+            dataset_train = dataset_train,
+            clustering_method = "mcl"
         )
 
         output_exporters = [HDF5OutputExporter(output_directory)]
@@ -190,8 +187,7 @@ def test_gnn(): # pylint: disable=too-many-locals
         )
 
         with warnings.catch_warnings(record=UserWarning):
-            trainer.train(nepoch=3, batch_size=64, validate=True, save_best_model=None) 
-            trainer.save_model(model_path)
+            trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=model_path)
 
             Trainer(GINet, dataset_train, dataset_val, dataset_test, pretrained_model=model_path)
 

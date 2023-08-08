@@ -87,4 +87,3 @@ def test_surrounding_residues():
     assert len(close_residues) > 0, "no close residues found"
     assert len(close_residues) < len(all_residues), "all residues were picked"
     assert residue in close_residues, "the centering residue wasn't included"
-    

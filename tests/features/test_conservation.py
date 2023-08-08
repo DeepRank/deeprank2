@@ -37,7 +37,7 @@ def test_conservation_atom():
 
 
 def test_no_pssm_file_error():
-    pdb_path = "tests/data/pdb/1crn/1CRN.pdb"
+    pdb_path = "tests/data/pdb/1CRN/1CRN.pdb"
     graph, variant = build_testgraph(pdb_path, 10, 'residue', 17, alanine)
     with pytest.raises(FileNotFoundError):
         add_features(pdb_path, graph, variant)

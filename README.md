@@ -6,7 +6,7 @@
 | **package** |  [![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade) |
 | **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprankcore/badge/?version=latest)](https://deeprankcore.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
 | **tests** | [![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions) ![Linting status](https://github.com/DeepRank/deeprank-core/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main) |
-| **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)  |
+| **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)  |
 
 
 ## Overview
@@ -37,7 +37,7 @@ Deeprank-Core extensive documentation can be found [here](https://deeprankcore.r
     - [Deeprank-Core Package](#deeprank-core-package)
   - [Documentation](#documentation)
   - [Quick start](#quick-start)
-    - [Data mapping](#data-mapping)
+    - [Data generation](#data-generation)
     - [Datasets](#datasets)
       - [GraphDataset](#graphdataset)
       - [GridDataset](#griddataset)
@@ -49,56 +49,69 @@ Deeprank-Core extensive documentation can be found [here](https://deeprankcore.r
 
 ### Dependencies
 
-Before installing deeprankcore you need to install:
+Before installing deeprankcore you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed.
 
- * [reduce](https://github.com/rlabduke/reduce): follow the instructions in the README of the reduce repository.
-    * **How to build it without sudo privileges on a Linux machine**. After having run `make` in the reduce/ root directory, go to reduce/reduce_src/Makefile and modify `/usr/local/` to a folder in your home directory, such as `/home/user_name/apps`. Note that such a folder needs to be added to the PATH in the `.bashrc` file. Then run `make install` from reduce/. 
- * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
- * [dssp](https://swift.cmbi.umcn.nl/gv/dssp/): `sudo apt-get install dssp`
-    * See [DSSP docs](https://ssbio.readthedocs.io/en/latest/instructions/dssp.html) for installing it on Mac OSX
- * [pytorch](https://pytorch.org/get-started/locally/): 
-   * CPU only: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 cpuonly -c pytorch`
-   * if using GPU: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia`
- * [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
- * [Dependencies for pytorch geometric from wheels](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html#installation-from-wheels): `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-${TORCH}+${CUDA}.html`. 
-    - Here, `${TORCH}` and `${CUDA}` should be replaced by the pytorch and CUDA versions installed. You can find these using:
-      - `python -c "import torch; print(torch.__version__)"` and
-      - `python -c "import torch; print(torch.version.cuda)"`
-    - For example: `https://data.pyg.org/whl/torch-2.0.0+cpu.html`
- * Only if you have a MacOS with M1 chip, additional steps are needed:
-    * `conda install pytables`
-    * See [this](https://stackoverflow.com/questions/30145751/python3-cant-find-and-import-pyqt5) solution to install PyQt5 or run `conda install pyqt`
+* [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
+* [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/):
+  * on ubuntu 22.04 or newer: `sudo apt-get install dssp`.
+    * If the package cannot be located, first run `sudo apt-get update`.
+  * on older versions of ubuntu or on mac, or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
+* [PyTorch](https://pytorch.org/):
+  * CPU only: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 cpuonly -c pytorch`
+  * if using GPU: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia`
+* [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
+* [Dependencies for pytorch geometric from wheels](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html#installation-from-wheels): `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-${TORCH}+${CUDA}.html`.
+  - Here, `${TORCH}` and `${CUDA}` should be replaced by the pytorch and CUDA versions installed. You can find these using:
+    - `python -c "import torch; print(torch.__version__)"` and
+    - `python -c "import torch; print(torch.version.cuda)"`
+      - if this returns `None`, use `cpu` instead
+  - For example: `https://data.pyg.org/whl/torch-2.0.0+cpu.html`
+* Check if gcc is installed: `gcc --version`.
+  * if this gives an error, run `sudo apt-get install gcc`.
+* For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
 
 ### Deeprank-Core Package
 
-Once the dependencies installed, you can install the latest release of deeprankcore using the PyPi package manager:
+Once the dependencies are installed, you can install the latest stable release of deeprankcore using the PyPi package manager:
 
-```
+```bash
 pip install deeprankcore
 ```
 
-You can get all the new developments by cloning the repo and installing the code with
+Alternatively, get all the new developments by cloning the repo and installing the code with
 
-```
+```bash
 git clone https://github.com/DeepRank/deeprank-core
 cd deeprank-core
 pip install -e ./
 ```
 
-## Documentation
+## Test installation
 
-More extensive and detailed documentation can be found [here](https://deeprankcore.rtfd.io/).
+If you have installed the package from a cloned repository (second option above), you can check that all components were installed correctly, using pytest.
+The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
+
+First, install [pytest](https://docs.pytest.org/): `pip install pytest`.
+Then run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
+
+### Contributing
+If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
+
 
 ## Quick start
+The following section serves as a first guide to start using the package.
+You can also learn to use the software by following the [tutorial notebooks](tutorials).
+For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
 
-### Data mapping
+### Data generation
 
 For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed:
-- In a `ProteinProteinInterfaceResidueQuery` each node represents one amino acid residue
+- In a `ProteinProteinInterfaceResidueQuery` each node represents one amino acid residue.
 - In a `ProteinProteinInterfaceAtomicQuery` each node represents one atom within the amino acid residues.
+
 A query takes as inputs:
 - a `.pdb` file, representing the protein-protein structural complex
-- the ids of the two chains composing the complex, and 
+- the ids of the two chains composing the complex, and
 - the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
@@ -148,7 +161,7 @@ queries.add(ProteinProteinInterfaceResidueQuery(
 
 The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
-The queries can then be processed into 3D-graphs only or both 3D-graphs and 3D-grids, depending on which kind of network will be used later for training. 
+The queries can then be processed into 3D-graphs only or both 3D-graphs and 3D-grids, depending on which kind of network will be used later for training.
 
 ```python
 from deeprankcore.features import components, conservation, contact, exposure, irc, surfacearea
@@ -175,11 +188,11 @@ hdf5_paths = queries.process(
 
 ### Datasets
 
-Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the hdf5 file/s), then the `DeeprankDataset` objects can be defined.
+Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the HDF5 file/s), then the `DeeprankDataset` objects can be defined.
 
 #### GraphDataset
 
-For training GNNs the user can create a GraphDataset instance:
+For training GNNs the user can create a `GraphDataset` instance:
 
 ```python
 from deeprankcore.dataset import GraphDataset
@@ -187,67 +200,69 @@ from deeprankcore.dataset import GraphDataset
 node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
 edge_features = ["distance"]
 target = "binary"
+train_ids = [<ids>]
+valid_ids = [<ids>]
+test_ids = [<ids>]
 
 # Creating GraphDataset objects
 dataset_train = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = train_ids, 
+    subset = train_ids,
     node_features = node_features,
     edge_features = edge_features,
     target = target
 )
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = valid_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target
-
+    subset = valid_ids,
+    train = False,
+    dataset_train = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
-    subset = test_ids, 
-    node_features = node_features,
-    edge_features = edge_features,
-    target = target
+    subset = test_ids,
+    train = False,
+    dataset_train = dataset_train
 )
 ```
 
 #### GridDataset
 
-For training CNNs the user can create a GridDataset instance:
+For training CNNs the user can create a `GridDataset` instance:
 
 ```python
 from deeprankcore.dataset import GridDataset
 
 features = ["bsa", "res_depth", "hse", "info_content", "pssm", "distance"]
 target = "binary"
+train_ids = [<ids>]
+valid_ids = [<ids>]
+test_ids = [<ids>]
 
 # Creating GraphDataset objects
 dataset_train = GridDataset(
     hdf5_path = hdf5_paths,
-    subset = train_ids, 
+    subset = train_ids,
     features = features,
     target = target
 )
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
-    subset = valid_ids, 
-    features = features,
-    target = target
-
+    subset = valid_ids,
+    train = False,
+    dataset_train = dataset_train,
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
-    subset = test_ids, 
-    features = features,
-    target = target
+    subset = test_ids,
+    train = False,
+    dataset_train = dataset_train,
 )
 ```
 
 ### Training
 
-Let's define a Trainer instance, using for example of the already existing GINet. Because GINet is a GNN, it requires a dataset instance of type `GraphDataset`.
+Let's define a `Trainer` instance, using for example of the already existing `GINet`. Because `GINet` is a GNN, it requires a dataset instance of type `GraphDataset`.
 
 ```python
 from deeprankcore.trainer import Trainer
@@ -276,7 +291,7 @@ trainer = Trainer(
 )
 ```
 
-By default, the Trainer class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
+By default, the `Trainer` class creates the folder `./output` for storing predictions information collected later on during training and testing. `HDF5OutputExporter` is the exporter used by default, but the user can specify any other implemented exporter or implement a custom one.
 
 Optimizer (`torch.optim.Adam` by default) and loss function can be defined by using dedicated functions:
 
@@ -287,12 +302,15 @@ trainer.configure_optimizers(torch.optim.Adamax, lr = 0.001, weight_decay = 1e-0
 
 ```
 
-Then the Trainer can be trained and tested, and the model can be saved:
+Then the `Trainer` can be trained and tested; the best model in terms of validation loss is saved by default, and the user can modify so or indicate where to save it using the `train()` method parameter `filename`.
 
 ```python
-trainer.train(nepoch = 50, batch_size = 64, validate = True)
+trainer.train(
+    nepoch = 50,
+    batch_size = 64,
+    validate = True,
+    filename = "<my_folder/model.pth.tar>")
 trainer.test()
-trainer.save_model(filename = "<output_model_path.pth.tar>")
 
 ```
 
@@ -307,4 +325,4 @@ After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can 
 - Pull Requests
   - When creating a pull request, please use the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
 - Software release
-  - Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings. 
+  - Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings.

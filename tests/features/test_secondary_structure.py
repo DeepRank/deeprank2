@@ -15,9 +15,9 @@ def test_secondary_structure_residue():
     add_features(pdb_path, graph)
 
     # Create a list of node information (residue number, chain ID, and secondary structure features)
-    node_info_list = [[node.id.number, 
-                       node.id.chain.id, 
-                       node.features[Nfeat.SECSTRUCT]] 
+    node_info_list = [[node.id.number,
+                       node.id.chain.id,
+                       node.features[Nfeat.SECSTRUCT]]
                             for node in graph.nodes]
     print(node_info_list)
 
@@ -55,11 +55,11 @@ def test_secondary_structure_atom():
     pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
     graph = build_testgraph(pdb_path, 4.5, 'atom')
     add_features(pdb_path, graph)
-    
+
     # Create a list of node information (residue number, chain ID, and secondary structure features)
-    node_info_list = [[node.id.residue.number, 
-                       node.id.residue.chain.id, 
-                       node.features[Nfeat.SECSTRUCT]] 
+    node_info_list = [[node.id.residue.number,
+                       node.id.residue.chain.id,
+                       node.features[Nfeat.SECSTRUCT]]
                             for node in graph.nodes]
 
     # check entire DSSP file
@@ -68,7 +68,7 @@ def test_secondary_structure_atom():
         dssp_lines = [line.rstrip() for line in file]
 
     for node in node_info_list:
-        dssp_line = [line for line in dssp_lines 
+        dssp_line = [line for line in dssp_lines
                         if (line[5:10] == str(node[0]).rjust(5) and line[11] == node[1])][0]
         dssp_code = dssp_line[16]
         if dssp_code in [' ', 'S', 'T']:
