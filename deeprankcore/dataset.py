@@ -860,8 +860,9 @@ class GraphDataset(DeeprankDataset):
                             with warnings.catch_warnings(record=True) as w:
                                 vals = transform(vals)
                                 if (len(w) > 0):
-                                    raise ValueError(f"Invalid value occurs when applying {transform} for feature {feat}."
-                                                    f"Please change the transformation function for {feat}.")
+                                    raise ValueError(f"Invalid value occurs in {entry_name}, file {fname},"
+                                                     f"when applying {transform} for feature {feat}."
+                                                     f"Please change the transformation function for {feat}.")
                                 
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
