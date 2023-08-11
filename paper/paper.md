@@ -96,7 +96,7 @@ The project is expected to have an impact across structural bioinformatics domai
 
 # Acknowledgements
 
-This work was supported by the [Netherlands eScience Center](https://www.esciencecenter.nl/), Amsterdam, and [SURF](https://www.surf.nl/en) infrastructure, and was developed in collaboration with the [Department of Medical BioSciences](https://www.radboudumc.nl/en/research/departments/medical-biosciences) at RadboudUMC, Nijmegen.
+This work was supported by the [Netherlands eScience Center](https://www.esciencecenter.nl/) under grant number NLESC.OEC.2021.008, and [SURF](https://www.surf.nl/en) infrastructure, and was developed in collaboration with the [Department of Medical BioSciences](https://www.radboudumc.nl/en/research/departments/medical-biosciences) at RadboudUMC.
 
 [comment]: <> (TODO: Acknowledgement of any financial support (already asked Pablo, waiting for an answer).)
 
