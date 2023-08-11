@@ -1,14 +1,14 @@
 import os
 import unittest
+import warnings
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import List, Union
 
 import h5py
-import pytest
 import numpy as np
+import pytest
 from torch_geometric.loader import DataLoader
-import warnings
 
 from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprankcore.domain import edgestorage as Efeat
@@ -586,7 +586,7 @@ class TestDataSet(unittest.TestCase):
         # define a features_transform dict for only transformations for `all` features
         
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {'all': {'transform': lambda t: np.log(t+65)}}
+        features_transform = {'all': {'transform': lambda t: np.log(abs(t)+.01)}}
         
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
