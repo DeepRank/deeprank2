@@ -1,29 +1,29 @@
-deeprankcore package
+deeprank2 package
 ====================
 
 Submodules
 ----------
 
-deeprankcore.query
+deeprank2.query
 ---------------------------
 
-.. automodule:: deeprankcore.query
+.. automodule:: deeprank2.query
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.dataset
+deeprank2.dataset
 ---------------------------
 
-.. automodule:: deeprankcore.dataset
+.. automodule:: deeprank2.dataset
    :members:
    :undoc-members:
    :show-inheritance:
 
-deeprankcore.trainer
+deeprank2.trainer
 ---------------------------
 
-.. automodule:: deeprankcore.trainer
+.. automodule:: deeprank2.trainer
    :members:
    :undoc-members:
    :show-inheritance:
