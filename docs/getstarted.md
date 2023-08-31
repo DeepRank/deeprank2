@@ -1,8 +1,8 @@
 # Get started
 
 The following section serves as a first guide to start using the package, using Protein-Protein Interface (PPI) queries as example.
-For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank-core/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
-For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
+For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
+For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ## Data generation
 

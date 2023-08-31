@@ -1,6 +1,6 @@
 ## Introduction
 
-The tutorial notebooks in this folder can be run to learn how to use DeepRank-Core.
+The tutorial notebooks in this folder can be run to learn how to use DeepRank2.
 - There are two tutorial notebooks for data generation, which demonstrate how to create *.hdf5-formatted input training data from raw *.pdb-formatted data using DeepRank2.
   - protein-protein interface (PPI) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_ppi.ipynb));
   - missense variants data ([data_generation_variant.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_variant.ipynb)). 
