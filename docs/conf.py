@@ -13,17 +13,20 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import configparser
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
 import os
 import sys
 
-from setuptools.config import read_configuration
-
-CONFIG = read_configuration('./../setup.cfg')
-
+config = configparser.ConfigParser()
+config.read('./../setup.cfg')
+CONFIG = {}
+for section in config.sections():
+    CONFIG[section] = {}
+    for option in config.options(section):
+        CONFIG[section][option] = config.get(section, option)
 
 autodoc_mock_imports = [
     'numpy',
@@ -80,7 +83,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'recommonmark'
+    'myst_parser'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -96,7 +99,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'deeprank2'
-author = ''  # TODO: Fill author of documentation
+author = 'Sven van der Burg, Giulia Crocioni, Dani Bodor'
 copyright = f"2022, {author}"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -113,7 +116,7 @@ release = version
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

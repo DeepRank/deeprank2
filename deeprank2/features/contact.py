@@ -4,18 +4,18 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial import distance_matrix
+
+from deeprank2.domain import edgestorage as Efeat
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.pair import AtomicContact, ResidueContact
 from deeprank2.molstruct.variant import SingleResidueVariant
 from deeprank2.utils.graph import Graph
-from scipy.spatial import distance_matrix
-
-from deeprank2.domain import edgestorage as Efeat
 from deeprank2.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 
-# for cutoff distances, see: https://github.com/DeepRank/deeprank-core/issues/357#issuecomment-1461813723
+# for cutoff distances, see: https://github.com/DeepRank/deeprank2/issues/357#issuecomment-1461813723
 covalent_cutoff = 2.1
 cutoff_13 = 3.6
 cutoff_14 = 4.2
