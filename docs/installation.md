@@ -23,7 +23,7 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
   * if this gives an error, run `sudo apt-get install gcc`.
 * For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
 
-## Deeprank-Core Package
+## DeepRank2 Package
 
 Once the dependencies installed, you can install the latest release of deeprank2 using the PyPi package manager:
 

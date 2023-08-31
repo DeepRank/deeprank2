@@ -7,18 +7,18 @@ import h5py
 import numpy as np
 import torch
 import torch.nn.functional as F
+from torch import nn
+from torch_geometric.loader import DataLoader
+from tqdm import tqdm
+
 from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.domain import losstypes as losses
+from deeprank2.domain import targetstorage as targets
 from deeprank2.utils.community_pooling import (community_detection,
                                                community_pooling)
 from deeprank2.utils.earlystopping import EarlyStopping
 from deeprank2.utils.exporters import (HDF5OutputExporter, OutputExporter,
                                        OutputExporterCollection)
-from torch import nn
-from torch_geometric.loader import DataLoader
-from tqdm import tqdm
-
-from deeprank2.domain import losstypes as losses
-from deeprank2.domain import targetstorage as targets
 
 _log = logging.getLogger(__name__)
 
@@ -794,7 +794,7 @@ class Trainer():
                 #     [[0,1] if x == [1] else [1,0] for x in target]
                 # ).float()
                 raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' +
-                                'For further details see: https://github.com/DeepRank/deeprank-core/issues/318')
+                                'For further details see: https://github.com/DeepRank/deeprank2/issues/318')
 
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
                 raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' +

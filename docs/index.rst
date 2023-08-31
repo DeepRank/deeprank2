@@ -1,14 +1,9 @@
-.. DeepRank-GNN documentation master file, created by
-   sphinx-quickstart on Wed May 12 11:56:41 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Deeprank-Core |version| documentation
+DeepRank2 |version| documentation
 ========================================
 
-Deeprank-Core is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using Graph Neural Networks. 
+DeepRank2 is a deep learning framework for data mining Protein-Protein Interactions (PPIs) using Graph Neural Networks. 
 
-Deeprank-Core contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN models.
+DeepRank2 contains useful APIs for pre-processing PPIs data, computing features and targets, as well as training and testing GNN models.
 
 Main features:
 
@@ -34,10 +29,10 @@ Getting started
    getstarted
 
 :doc:`installation`
-    Get Deeprank-Core installed on your computer.
+    Get DeepRank2 installed on your computer.
 
 :doc:`getstarted`
-    Understand how to use Deeprank-Core and how it can help you.
+    Understand how to use DeepRank2 and how it can help you.
 
 Notes
 ===========
@@ -58,10 +53,10 @@ Package reference
    :caption: API
    :hidden:
 
-   reference/deeprank2
+   reference/deeprankcore
 
-:doc:`reference/deeprank2`
-    This section documents the Deeprank-Core API.
+:doc:`reference/deeprankcore`
+    This section documents the DeepRank2 API.
 
 
 Indices and tables
