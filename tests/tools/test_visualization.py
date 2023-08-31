@@ -3,10 +3,9 @@ import warnings
 
 import h5py
 import numpy as np
-
-from deeprankcore.tools.visualization.embedding import manifold_embedding
-from deeprankcore.tools.visualization.plotting import (hdf5_to_networkx,
-                                                       plotly_2d, plotly_3d)
+from deeprank2.tools.visualization.embedding import manifold_embedding
+from deeprank2.tools.visualization.plotting import (hdf5_to_networkx,
+                                                    plotly_2d, plotly_3d)
 
 
 class TestGraph(unittest.TestCase):
