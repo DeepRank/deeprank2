@@ -6,18 +6,18 @@ from random import randrange
 import h5py
 import numpy as np
 import pytest
+from deeprank2.molstruct.pair import ResidueContact
+from deeprank2.molstruct.residue import get_residue_center
+from deeprank2.utils.buildgraph import get_structure
+from deeprank2.utils.graph import Edge, Graph, Node
+from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 from pdb2sql import pdb2sql
 from pdb2sql.transform import get_rot_axis_angle
 
-from deeprankcore.domain import edgestorage as Efeat
-from deeprankcore.domain import gridstorage
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.domain import targetstorage as Target
-from deeprankcore.molstruct.pair import ResidueContact
-from deeprankcore.molstruct.residue import get_residue_center
-from deeprankcore.utils.buildgraph import get_structure
-from deeprankcore.utils.graph import Edge, Graph, Node
-from deeprankcore.utils.grid import Augmentation, GridSettings, MapMethod
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.domain import gridstorage
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain import targetstorage as Target
 
 entry_id = "test"
 node_feature_narray = "node_feat1"

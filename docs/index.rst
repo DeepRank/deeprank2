@@ -58,9 +58,9 @@ Package reference
    :caption: API
    :hidden:
 
-   reference/deeprankcore
+   reference/deeprank2
 
-:doc:`reference/deeprankcore`
+:doc:`reference/deeprank2`
     This section documents the Deeprank-Core API.
 
 

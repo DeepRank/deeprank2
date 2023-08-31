@@ -9,7 +9,7 @@
 * refactor: move preprocess function to `QueryDataset` class and rename by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/252
 * refactor: save preprocessed data into one .hdf5 file as default by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/250
 * refactor: clean up `GraphDataset` and `Trainer` class by @DaniBodor in https://github.com/DeepRank/deeprank-core/pull/255
-* refactor: reorganize deeprankcore.utils.metrics module by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/262
+* refactor: reorganize deeprank2.utils.metrics module by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/262
 * refactor: fix `transform_sigmoid` logic and move it to `GraphDataset` class by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/288
 * refactor: add grid dataset class and make the trainer class work with it. by @cbaakman in https://github.com/DeepRank/deeprank-core/pull/294
 * refactor: update deprecated dataloader import by @DaniBodor in https://github.com/DeepRank/deeprank-core/pull/310
@@ -36,7 +36,7 @@
 * feat: use dictionary for flexibly transforming and standardizing features by @joyceljy in https://github.com/DeepRank/deeprank-core/pull/418
 
 #### Fix
-* fix: list all submodules imported from deeprankcore.features using pkgutil by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/263
+* fix: list all submodules imported from deeprank2.features using pkgutil by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/263
 * fix: let `classes` argument be also categorical by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/286
 * fix: makes sure that the `map_feature` function can handle single value features. by @cbaakman in https://github.com/DeepRank/deeprank-core/pull/289
 * fix: raise exception for invalid optimizer by @DaniBodor in https://github.com/DeepRank/deeprank-core/pull/307
@@ -79,7 +79,7 @@
 * perf: accelerate indexing of HDF5 files by @joyceljy in https://github.com/DeepRank/deeprank-core/pull/362
 
 #### Style
-* style: restructure deeprankcore package and subpackages by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/240
+* style: restructure deeprank2 package and subpackages by @gcroci2 in https://github.com/DeepRank/deeprank-core/pull/240
 * style: reorganize features/contact.py by @DaniBodor in https://github.com/DeepRank/deeprank-core/pull/260
 * style: add .vscode settings.json by @DaniBodor in https://github.com/DeepRank/deeprank-core/pull/404
 
@@ -170,7 +170,7 @@ Released on June 28, 2022
 * HDF5Dataset class now is used in the UX #83
 * IndexError running `NeuralNet.train()` has been fixed #89
 * pip installation has been fixed
-* Repository has been renamed deeprank-core, and the package deeprankcore #101
+* Repository has been renamed deeprank-core, and the package deeprank2 #101
 * The zero-division like error from TensorboardBinaryClassificationExporter has been fixed #112
 * h5xplorer is installed through `setup.cfg` file #121
 * Sphinx docs have been fixed #108

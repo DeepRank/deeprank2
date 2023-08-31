@@ -95,7 +95,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = 'deeprankcore'
+project = 'deeprank2'
 author = ''  # TODO: Fill author of documentation
 copyright = f"2022, {author}"
 
@@ -173,7 +173,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'deeprankcore'
+htmlhelp_basename = 'deeprank2'
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {

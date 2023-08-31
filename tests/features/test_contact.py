@@ -2,16 +2,16 @@ from typing import Tuple
 from uuid import uuid4
 
 import numpy as np
+from deeprank2.features.contact import (add_features, covalent_cutoff,
+                                        cutoff_13, cutoff_14)
+from deeprank2.molstruct.atom import Atom
+from deeprank2.molstruct.pair import AtomicContact, ResidueContact
+from deeprank2.molstruct.structure import Chain
+from deeprank2.utils.buildgraph import get_structure
+from deeprank2.utils.graph import Edge, Graph
 from pdb2sql import pdb2sql
 
-from deeprankcore.domain import edgestorage as Efeat
-from deeprankcore.features.contact import (add_features, covalent_cutoff,
-                                           cutoff_13, cutoff_14)
-from deeprankcore.molstruct.atom import Atom
-from deeprankcore.molstruct.pair import AtomicContact, ResidueContact
-from deeprankcore.molstruct.structure import Chain
-from deeprankcore.utils.buildgraph import get_structure
-from deeprankcore.utils.graph import Edge, Graph
+from deeprank2.domain import edgestorage as Efeat
 
 
 def _get_atom(chain: Chain, residue_number: int, atom_name: str) -> Atom:

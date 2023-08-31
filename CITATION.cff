@@ -3,7 +3,7 @@
 
 cff-version: 1.2.0
 doi: 10.5281/zenodo.6772110
-title: DeeprankCore
+title: Deeprank2
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -44,7 +44,7 @@ authors:
     affiliation: Radboud University Medical Center
     orcid: 'https://orcid.org/0000-0002-2613-538X'
 abstract: >-
-  deeprankcore allows ranking of protein-protein
+  deeprank2 allows ranking of protein-protein
   interface using a graph representation of the
   contact residues or atoms. Graphs of such
   interfaces are used to train graph neural networks
