@@ -21,7 +21,7 @@ import os
 import sys
 
 config = configparser.ConfigParser()
-config.read('setup.cfg')
+config.read('./../setup.cfg')
 CONFIG = {}
 for section in config.sections():
     CONFIG[section] = {}
