@@ -8,8 +8,8 @@
 *__pycache__*
 
 # distribution
-deeprankcore.egg-info
-deeprank-core.egg-info
+deeprank2.egg-info
+deeprank2.egg-info
 build/*
 dist/*
 

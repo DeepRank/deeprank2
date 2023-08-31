@@ -1,26 +1,26 @@
-# DeepRank-Core
+# Deeprank2
 
 | Badges | |
 |:----:|----|
 | **fairness** |  [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403) |
-| **package** |  [![PyPI version](https://badge.fury.io/py/deeprankcore.svg)](https://badge.fury.io/py/deeprankcore) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank-core?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank-core&utm_campaign=Badge_Grade) |
-| **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprankcore/badge/?version=latest)](https://deeprankcore.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
-| **tests** | [![Build Status](https://github.com/DeepRank/deeprank-core/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank-core/actions) ![Linting status](https://github.com/DeepRank/deeprank-core/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank-core/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank-core?branch=main) |
+| **package** |  [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank2?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank2&utm_campaign=Badge_Grade) |
+| **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
+| **tests** | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) |
 | **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)  |
 
 
 ## Overview
 
-![alt-text](./deeprankcore.png)
+![alt-text](./deeprank2.png)
 
 DeepRank-Core is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-DeepRank-Core allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank-Core also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
+DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
 
 Main features:
 - Predefined atom-level and residue-level feature types
   - e.g. atom/residue type, charge, size, potential energy
-  - All features' documentation is available [here](https://deeprankcore.readthedocs.io/en/latest/features.html)
+  - All features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html)
 - Predefined target types
   - binary class, CAPRI categories, DockQ, RMSD, and FNAT
 - Flexible definition of both new features and targets
@@ -28,16 +28,16 @@ Main features:
 - Efficient data storage in HDF5 format
 - Support for both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
-DeepRank-Core extensive documentation can be found [here](https://deeprankcore.rtfd.io/).
+DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/).
 
 ## Table of contents
 
-- [DeepRank-Core](#deeprank-core)
+- [Deeprank2](#deeprank2)
   - [Overview](#overview)
   - [Table of contents](#table-of-contents)
   - [Installation](#installation)
     - [Dependencies](#dependencies)
-    - [DeepRank-Core Package](#deeprank-core-package)
+    - [Deeprank2 Package](#deeprank2-package)
     - [Test installation](#test-installation)
     - [Contributing](#contributing)
   - [Quick start](#quick-start)
@@ -53,7 +53,7 @@ DeepRank-Core extensive documentation can be found [here](https://deeprankcore.r
 
 ### Dependencies
 
-Before installing deeprankcore you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed.
+Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed.
 
 * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
 * [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/):
@@ -74,19 +74,19 @@ Before installing deeprankcore you need to install some dependencies. We advise 
   * if this gives an error, run `sudo apt-get install gcc`.
 * For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
 
-### DeepRank-Core Package
+### Deeprank2 Package
 
-Once the dependencies are installed, you can install the latest stable release of deeprankcore using the PyPi package manager:
+Once the dependencies are installed, you can install the latest stable release of deeprank2 using the PyPi package manager:
 
 ```bash
-pip install deeprankcore
+pip install deeprank2
 ```
 
 Alternatively, get all the new developments by cloning the repo and installing the code with
 
 ```bash
-git clone https://github.com/DeepRank/deeprank-core
-cd deeprank-core
+git clone https://github.com/DeepRank/deeprank2
+cd deeprank2
 pip install -e ./
 ```
 
@@ -103,8 +103,8 @@ If you would like to contribute to the package in any way, please see [our guide
 
 ## Quick start
 The following section serves as a first guide to start using the package, using Protein-Protein Interface (PPI) queries as example.
-For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank-core/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
-For more details, see the [extended documentation](https://deeprankcore.rtfd.io/).
+For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
+For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ### Data generation
 
@@ -118,7 +118,7 @@ A query takes as inputs:
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
-from deeprankcore.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
 
 queries = QueryCollection()
 
@@ -167,8 +167,8 @@ The user is free to implement a custom query class. Each implementation requires
 The queries can then be processed into graphs only or both graphs and 3D grids, depending on which kind of network will be used later for training.
 
 ```python
-from deeprankcore.features import components, conservation, contact, exposure, irc, surfacearea
-from deeprankcore.utils.grid import GridSettings, MapMethod
+from deeprank2.features import components, conservation, contact, exposure, irc, surfacearea
+from deeprank2.utils.grid import GridSettings, MapMethod
 
 feature_modules = [components, conservation, contact, exposure, irc, surfacearea]
 
@@ -198,7 +198,7 @@ Data can be split in sets implementing custom splits according to the specific a
 For training GNNs the user can create a `GraphDataset` instance:
 
 ```python
-from deeprankcore.dataset import GraphDataset
+from deeprank2.dataset import GraphDataset
 
 node_features = ["bsa", "res_depth", "hse", "info_content", "pssm"]
 edge_features = ["distance"]
@@ -234,7 +234,7 @@ dataset_test = GraphDataset(
 For training CNNs the user can create a `GridDataset` instance:
 
 ```python
-from deeprankcore.dataset import GridDataset
+from deeprank2.dataset import GridDataset
 
 features = ["bsa", "res_depth", "hse", "info_content", "pssm", "distance"]
 target = "binary"
@@ -268,8 +268,8 @@ dataset_test = GridDataset(
 Let's define a `Trainer` instance, using for example of the already existing `GINet`. Because `GINet` is a GNN, it requires a dataset instance of type `GraphDataset`.
 
 ```python
-from deeprankcore.trainer import Trainer
-from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.trainer import Trainer
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
 
 trainer = Trainer(
     NaiveNetwork,
@@ -283,8 +283,8 @@ trainer = Trainer(
 The same can be done using a CNN, for example `CnnClassification`. Here a dataset instance of type `GridDataset` is required.
 
 ```python
-from deeprankcore.trainer import Trainer
-from deeprankcore.neuralnets.cnn.model3d import CnnClassification
+from deeprank2.trainer import Trainer
+from deeprank2.neuralnets.cnn.model3d import CnnClassification
 
 trainer = Trainer(
     CnnClassification,
@@ -319,7 +319,7 @@ trainer.test()
 
 ## h5x support
 
-After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprankcore/h5x/h5x.py` to explorer the connection graph used by deeprankcore. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly`.
+After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprank2/h5x/h5x.py` to explorer the connection graph used by deeprank2. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly`.
 
 ## Package development
 

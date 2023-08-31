@@ -4,13 +4,13 @@ import unittest
 import warnings
 
 import pytest
+from deeprank2.dataset import GraphDataset
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.trainer import Trainer
 from torch import nn
 
-from deeprankcore.dataset import GraphDataset
-from deeprankcore.domain import losstypes as losses
-from deeprankcore.domain import targetstorage as targets
-from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
-from deeprankcore.trainer import Trainer
+from deeprank2.domain import losstypes as losses
+from deeprank2.domain import targetstorage as targets
 
 hdf5_path = 'tests/data/hdf5/test.hdf5'
 

@@ -1,7 +1,7 @@
 import numpy as np
+from deeprank2.features.surfacearea import add_features
 
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.features.surfacearea import add_features
+from deeprank2.domain import nodestorage as Nfeat
 
 from . import build_testgraph
 

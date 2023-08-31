@@ -2,10 +2,10 @@ import unittest
 
 import numpy as np
 import torch
+from deeprank2.utils.community_pooling import (community_detection,
+                                               community_detection_per_batch,
+                                               community_pooling)
 from torch_geometric.data import Batch, Data
-
-from deeprankcore.utils.community_pooling import (
-    community_detection, community_detection_per_batch, community_pooling)
 
 
 class TestCommunity(unittest.TestCase):

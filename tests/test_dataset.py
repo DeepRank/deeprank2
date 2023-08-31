@@ -7,12 +7,12 @@ from typing import List, Union
 import h5py
 import numpy as np
 import pytest
+from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from torch_geometric.loader import DataLoader
 
-from deeprankcore.dataset import GraphDataset, GridDataset, save_hdf5_keys
-from deeprankcore.domain import edgestorage as Efeat
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.domain import targetstorage as targets
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain import targetstorage as targets
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 

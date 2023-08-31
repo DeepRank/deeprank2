@@ -1,18 +1,13 @@
-.. DeepRank-GNN documentation master file, created by
-   sphinx-quickstart on Wed May 12 11:56:41 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-DeepRank-Core |version| documentation
+DeepRank2 |version| documentation
 ========================================
 
-DeepRank-Core is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
+DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-DeepRank-Core allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank-Core also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
+DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank-Core also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
 
 Main features:
 
-* Predefined atom-level and residue-level feature types (e.g. atom/residue type, charge, size, potential energy, all features' documentation is available [here](https://deeprankcore.readthedocs.io/en/latest/features.html))
+* Predefined atom-level and residue-level feature types (e.g. atom/residue type, charge, size, potential energy, all features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html))
 * Predefined target types (binary class, CAPRI categories, DockQ, RMSD, and FNAT)
 * Flexible definition of both new features and targets
 * Features generation for both graphs and grids
@@ -34,10 +29,10 @@ Getting started
    getstarted
 
 :doc:`installation`
-    Get DeepRank-Core installed on your computer.
+    Get DeepRank2 installed on your computer.
 
 :doc:`getstarted`
-    Understand how to use DeepRank-Core and how it can help you.
+    Understand how to use DeepRank2 and how it can help you.
 
 Notes
 ===========
@@ -58,10 +53,10 @@ Package reference
    :caption: API
    :hidden:
 
-   reference/deeprankcore
+   reference/deeprank2
 
-:doc:`reference/deeprankcore`
-    This section documents the DeepRank-Core API.
+:doc:`reference/deeprank2`
+    This section documents the DeepRank2 API.
 
 
 Indices and tables

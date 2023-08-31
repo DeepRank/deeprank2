@@ -1,7 +1,6 @@
 import numpy as np
-
-from deeprankcore.domain.aminoacidlist import (amino_acids, cysteine, lysine,
-                                               pyrrolysine, selenocysteine)
+from deeprank2.domain.aminoacidlist import (amino_acids, cysteine, lysine,
+                                            pyrrolysine, selenocysteine)
 
 # Exceptions selenocysteine and pyrrolysine are due to them having the same index as their canonical counterpart.
 # This is not an issue while selenocysteine and pyrrolysine are not part of amino_acids.

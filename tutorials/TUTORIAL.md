@@ -1,10 +1,10 @@
 ## Introduction
 
 The tutorial notebooks in this folder can be run to learn how to use DeepRank-Core.
-- There are two tutorial notebooks for data generation, which demonstrate how to create *.hdf5-formatted input training data from raw *.pdb-formatted data using DeepRank-Core.
-  - protein-protein interface (PPI) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_ppi.ipynb));
-  - missense variants data ([data_generation_variant.ipynb](https://github.com/DeepRank/deeprank-core/blob/main/tutorials/data_generation_variant.ipynb)). 
-- The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank-Core.
+- There are two tutorial notebooks for data generation, which demonstrate how to create *.hdf5-formatted input training data from raw *.pdb-formatted data using DeepRank2.
+  - protein-protein interface (PPI) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_ppi.ipynb));
+  - missense variants data ([data_generation_variant.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_variant.ipynb)). 
+- The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank2.
 
 ### Use cases
 
@@ -26,13 +26,13 @@ PDB models and target data used in this tutorial have been retrieved from [Ramak
 
 ## Setup
 
-1. Follow [these instructions](https://github.com/DeepRank/deeprank-core#dependencies) to install the necessary package dependencies.
-   - We recommend installing `deeprankcore` and all its dependencies into a [conda](https://docs.conda.io/en/latest/) environment.
+1. Follow [these instructions](https://github.com/DeepRank/deeprank2#dependencies) to install the necessary package dependencies.
+   - We recommend installing `deeprank2` and all its dependencies into a [conda](https://docs.conda.io/en/latest/) environment.
 2. Once the dependencies are installed, you can install the tutorials' version of the package:
-   - Clone the [deeprank-core repository](https://github.com/DeepRank/deeprank-core).
+   - Clone the [deeprank2 repository](https://github.com/DeepRank/deeprank2).
    - From within the repository, run `pip install ".[tutorials]"`
 3. To test whether the package has been succesfully installed:
-   - Navigate to your deeprankcore folder.
+   - Navigate to your deeprank2 folder.
    - Run `pytest tests`. All tests should pass at this point.
 
 

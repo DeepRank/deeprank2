@@ -5,22 +5,20 @@ from tempfile import mkdtemp, mkstemp
 import h5py
 import numpy as np
 import pytest
+from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.domain.aminoacidlist import (alanine, arginine, asparagine,
+                                            cysteine, glutamate, glycine,
+                                            leucine, lysine, phenylalanine)
+from deeprank2.query import (ProteinProteinInterfaceAtomicQuery,
+                             ProteinProteinInterfaceResidueQuery,
+                             QueryCollection, SingleResidueVariantAtomicQuery,
+                             SingleResidueVariantResidueQuery)
+from deeprank2.utils.grid import GridSettings, MapMethod
 
-from deeprankcore.dataset import GraphDataset, GridDataset
-from deeprankcore.domain import edgestorage as Efeat
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.domain import targetstorage as targets
-from deeprankcore.domain.aminoacidlist import (alanine, arginine, asparagine,
-                                               cysteine, glutamate, glycine,
-                                               leucine, lysine, phenylalanine)
-from deeprankcore.features import (components, conservation, contact,
-                                   surfacearea)
-from deeprankcore.query import (ProteinProteinInterfaceAtomicQuery,
-                                ProteinProteinInterfaceResidueQuery,
-                                QueryCollection,
-                                SingleResidueVariantAtomicQuery,
-                                SingleResidueVariantResidueQuery)
-from deeprankcore.utils.grid import GridSettings, MapMethod
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain import targetstorage as targets
+from deeprank2.features import components, conservation, contact, surfacearea
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
