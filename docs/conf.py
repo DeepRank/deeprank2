@@ -20,9 +20,9 @@
 import os
 import sys
 
-from setuptools.config import read_configuration
+from setuptools.config import setupcfg
 
-CONFIG = read_configuration('./../setup.cfg')
+CONFIG = setupcfg('./../setup.cfg')
 
 
 autodoc_mock_imports = [
@@ -80,7 +80,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'recommonmark'
+    'myst_parser'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
