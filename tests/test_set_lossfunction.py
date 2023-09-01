@@ -4,13 +4,13 @@ import unittest
 import warnings
 
 import pytest
+from deeprank2.dataset import GraphDataset
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.trainer import Trainer
 from torch import nn
 
-from deeprankcore.dataset import GraphDataset
-from deeprankcore.domain import losstypes as losses
-from deeprankcore.domain import targetstorage as targets
-from deeprankcore.neuralnets.gnn.naive_gnn import NaiveNetwork
-from deeprankcore.trainer import Trainer
+from deeprank2.domain import losstypes as losses
+from deeprank2.domain import targetstorage as targets
 
 hdf5_path = 'tests/data/hdf5/test.hdf5'
 
@@ -131,7 +131,8 @@ class TestLosses(unittest.TestCase):
     # Regression tasks
     def test_regress_default(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA',
+            task = 'regress')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -144,7 +145,7 @@ class TestLosses(unittest.TestCase):
 
     def test_regress_all(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA', task = 'regress')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -159,7 +160,7 @@ class TestLosses(unittest.TestCase):
 
     def test_regress_invalid_lossfunction(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA', task = 'regress')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,
@@ -172,7 +173,7 @@ class TestLosses(unittest.TestCase):
 
     def test_regress_invalid_lossfunction_override(self):
         dataset = GraphDataset(hdf5_path,
-            target = targets.BA)
+            target = 'BA', task = 'regress')
         trainer = Trainer(
             neuralnet = NaiveNetwork,
             dataset_train = dataset,

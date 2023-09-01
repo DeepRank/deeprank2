@@ -1,7 +1,7 @@
-deeprankcore
+deeprank2
 ============
 
 .. toctree::
    :maxdepth: 4
 
-   deeprankcore
+   deeprank2
