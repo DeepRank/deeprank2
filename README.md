@@ -13,13 +13,16 @@
 
 ![alt-text](./deeprank2.png)
 
-DeepRank2 is an open-source Deep Learning (DL) framework that offers researchers unified and user-friendly APIs to accelerate development of software solutions allowing biologically relevant predictions to gain knowledge on protein 3D structures for a wide variety of purposes such as drug design, immunotherapy, or designing novel proteins. DeepRank2 allows to transform and store 3D representations of both Protein-Protein Interfaces (PPIs) and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training Neural Networks for whatever specific pattern of interest for the user. DeepRank-Core is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
+DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank) and [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN).
+
+DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
 
 Main features:
-- Predefined atom-level and residue-level PPI and Variant feature types
-  - e.g. atomic density, vdw energy, residue contacts, PSSM, etc.
-- Predefined target type
-  - e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
+- Predefined atom-level and residue-level feature types
+  - e.g. atom/residue type, charge, size, potential energy
+  - All features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html)
+- Predefined target types
+  - binary class, CAPRI categories, DockQ, RMSD, and FNAT
 - Flexible definition of both new features and targets
 - Features generation for both graphs and grids
 - Efficient data storage in HDF5 format
