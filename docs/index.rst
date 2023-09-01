@@ -1,9 +1,9 @@
 DeepRank2 |version| documentation
 ========================================
 
-DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: `DeepRank`_ and `DeepRank-GNN_`.
+DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: `DeepRank`_ and `DeepRank-GNN`_.
 
-DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either `convolutional neural networks`_` (for grids) or `graph neural networks`_ (for graphs), as well as output exporters for evaluating performances. 
+DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either `convolutional neural networks`_ (for grids) or `graph neural networks`_ (for graphs), as well as output exporters for evaluating performances. 
 
 Main features:
 
