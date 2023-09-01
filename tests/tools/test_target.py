@@ -3,7 +3,7 @@ import shutil
 import tempfile
 import unittest
 
-from deeprankcore.tools.target import add_target, compute_targets
+from deeprank2.tools.target import add_target, compute_targets
 
 
 class TestTools(unittest.TestCase):

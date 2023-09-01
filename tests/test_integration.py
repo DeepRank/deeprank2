@@ -4,19 +4,19 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 import h5py
+from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.neuralnets.cnn.model3d import CnnClassification
+from deeprank2.neuralnets.gnn.ginet import GINet
+from deeprank2.query import (ProteinProteinInterfaceResidueQuery,
+                             QueryCollection)
+from deeprank2.tools.target import compute_targets
+from deeprank2.trainer import Trainer
+from deeprank2.utils.exporters import HDF5OutputExporter
+from deeprank2.utils.grid import GridSettings, MapMethod
 
-from deeprankcore.dataset import GraphDataset, GridDataset
-from deeprankcore.domain import edgestorage as Efeat
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.domain import targetstorage as targets
-from deeprankcore.neuralnets.cnn.model3d import CnnClassification
-from deeprankcore.neuralnets.gnn.ginet import GINet
-from deeprankcore.query import (ProteinProteinInterfaceResidueQuery,
-                                QueryCollection)
-from deeprankcore.tools.target import compute_targets
-from deeprankcore.trainer import Trainer
-from deeprankcore.utils.exporters import HDF5OutputExporter
-from deeprankcore.utils.grid import GridSettings, MapMethod
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain import targetstorage as targets
 
 pdb_path = str("tests/data/pdb/3C8P/3C8P.pdb")
 ref_path = str("tests/data/ref/3C8P/3C8P.pdb")

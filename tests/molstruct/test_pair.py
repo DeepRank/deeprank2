@@ -1,4 +1,4 @@
-from deeprankcore.molstruct.pair import Pair
+from deeprank2.molstruct.pair import Pair
 
 
 def test_order_independency():

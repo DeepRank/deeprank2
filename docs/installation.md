@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-Before installing deeprankcore you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed. 
+Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed. 
 
 * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
 * [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/): 
@@ -23,19 +23,19 @@ Before installing deeprankcore you need to install some dependencies. We advise 
   * if this gives an error, run `sudo apt-get install gcc`.
 * For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
 
-## Deeprank-Core Package
+## DeepRank2 Package
 
-Once the dependencies installed, you can install the latest release of deeprankcore using the PyPi package manager:
+Once the dependencies installed, you can install the latest release of deeprank2 using the PyPi package manager:
 
 ```bash
-pip install deeprankcore
+pip install deeprank2
 ```
 
 Alternatively, get all the new developments by cloning the repo and installing the code with
 
 ```bash
-git clone https://github.com/DeepRank/deeprank-core
-cd deeprank-core
+git clone https://github.com/DeepRank/deeprank2
+cd deeprank2
 pip install -e ./
 ```
 

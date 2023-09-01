@@ -7,10 +7,10 @@ from unittest.mock import patch
 
 import h5py
 import pandas as pd
-
-from deeprankcore.utils.exporters import (
-    HDF5OutputExporter, OutputExporterCollection, ScatterPlotExporter,
-    TensorboardBinaryClassificationExporter)
+from deeprank2.utils.exporters import (HDF5OutputExporter,
+                                       OutputExporterCollection,
+                                       ScatterPlotExporter,
+                                       TensorboardBinaryClassificationExporter)
 
 logging.getLogger(__name__)
 

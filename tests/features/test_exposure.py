@@ -1,8 +1,8 @@
 import numpy as np
+from deeprank2.features.exposure import add_features
+from deeprank2.utils.graph import Graph
 
-from deeprankcore.domain import nodestorage as Nfeat
-from deeprankcore.features.exposure import add_features
-from deeprankcore.utils.graph import Graph
+from deeprank2.domain import nodestorage as Nfeat
 
 from . import build_testgraph
 
