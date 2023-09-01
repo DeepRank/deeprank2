@@ -1,15 +1,19 @@
 # Get started
 
+The following section serves as a first guide to start using the package, using Protein-Protein Interface (PPI) queries as example.
+For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
+For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
+
 ## Data generation
 
-For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed:
-- In a `ProteinProteinInterfaceResidueQuery` each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` each node represents one atom within the amino acid residues.
+For each protein-protein complex (or protein structure containing a missense variant), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
+- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
+- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
 
 A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structural complex
-- the ids of the two chains composing the complex, and
-- the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
+- a `.pdb` file, representing the protein-protein structure
+- the ids of the chains composing the structure, and
+- optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -58,7 +62,7 @@ queries.add(ProteinProteinInterfaceResidueQuery(
 
 The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
-The queries can then be processed into 3D-graphs only or both 3D-graphs and 3D-grids, depending on which kind of network will be used later for training.
+The queries can then be processed into graphs only or both graphs and 3D grids, depending on which kind of network will be used later for training.
 
 ```python
 from deeprank2.features import components, conservation, contact, exposure, irc, surfacearea

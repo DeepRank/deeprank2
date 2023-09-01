@@ -13,22 +13,22 @@
 
 ![alt-text](./deeprank2.png)
 
+DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank) and [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-Deeprank2 is a Deep Learning (DL) framework for data mining Protein-Protein Interactions (PPIs) using either Graph Neural Networks (GNNs) or Convolutional Neural Networks (CNNs). It is an improved and unified version of the previously developed [deeprank](https://github.com/DeepRank/deeprank) and [Deeprank-GNN](https://github.com/DeepRank/Deeprank-GNN).
-
-Deeprank2 contains useful APIs for pre-processing PPI data, computing features and targets, as well as training and testing GNN and CNN models.
+DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
 
 Main features:
-- Predefined atom-level and residue-level PPI feature types
-  - e.g. atomic density, vdw energy, residue contacts, PSSM, etc.
-- Predefined target type
-  - e.g. binary class, CAPRI categories, DockQ, RMSD, FNAT, etc.
+- Predefined atom-level and residue-level feature types
+  - e.g. atom/residue type, charge, size, potential energy
+  - All features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html)
+- Predefined target types
+  - binary class, CAPRI categories, DockQ, RMSD, and FNAT
 - Flexible definition of both new features and targets
-- Graphs and grids feature mapping
+- Features generation for both graphs and grids
 - Efficient data storage in HDF5 format
-- Support both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
+- Support for both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
-Deeprank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/).
+DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/).
 
 ## Table of contents
 
@@ -38,7 +38,7 @@ Deeprank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
   - [Installation](#installation)
     - [Dependencies](#dependencies)
     - [Deeprank2 Package](#deeprank2-package)
-  - [Test installation](#test-installation)
+    - [Test installation](#test-installation)
     - [Contributing](#contributing)
   - [Quick start](#quick-start)
     - [Data generation](#data-generation)
@@ -90,7 +90,7 @@ cd deeprank2
 pip install -e ./
 ```
 
-## Test installation
+### Test installation
 
 If you have installed the package from a cloned repository (second option above), you can check that all components were installed correctly, using pytest.
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
@@ -101,22 +101,21 @@ Then run `pytest tests/test_integration.py` for the quick test or just `pytest` 
 ### Contributing
 If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
 
-
 ## Quick start
-The following section serves as a first guide to start using the package.
-You can also learn to use the software by following the [tutorial notebooks](tutorials).
+The following section serves as a first guide to start using the package, using Protein-Protein Interface (PPI) queries as example.
+For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
 For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ### Data generation
 
-For each protein-protein complex, a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist, based on the molecular resolution needed:
-- In a `ProteinProteinInterfaceResidueQuery` each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` each node represents one atom within the amino acid residues.
+For each protein-protein complex (or protein structure containing a missense variant), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
+- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
+- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
 
 A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structural complex
-- the ids of the two chains composing the complex, and
-- the correspondent Position-Specific Scoring Matrices (PSSMs), in the form of `.pssm` files.
+- a `.pdb` file, representing the protein-protein structure
+- the ids of the chains composing the structure, and
+- optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -165,7 +164,7 @@ queries.add(ProteinProteinInterfaceResidueQuery(
 
 The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
-The queries can then be processed into 3D-graphs only or both 3D-graphs and 3D-grids, depending on which kind of network will be used later for training.
+The queries can then be processed into graphs only or both graphs and 3D grids, depending on which kind of network will be used later for training.
 
 ```python
 from deeprank2.features import components, conservation, contact, exposure, irc, surfacearea
