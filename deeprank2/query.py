@@ -45,7 +45,7 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
         verbosity (int): Level of verbosity of error/warning. Defaults to 0.
             0 (low): Only state file name where error occurred;
             1 (medium): Also state number of incorrect and missing residues;
-            2 (high): Also list the incorrect residues 
+            2 (high): Also list the incorrect residues
 
     Raises:
         ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
@@ -69,7 +69,7 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
     missing_list = []
 
     for residue in pdb_truth:
-        try: 
+        try:
             if pdb_truth[residue] != pssm_data[residue]:
                 wrong_list.append(residue)
         except KeyError:
@@ -86,20 +86,20 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
                 error_message = error_message + f'\n\t{len(missing_list)} entries are missing.'
                 if verbosity == 2:
                     error_message = error_message[-1] + f':\n\t{missing_list}'
-    
+
         if not suppress:
             raise ValueError(error_message)
-        
+
         warnings.warn(error_message)
         _log.warning(error_message)
 
 
-class Query:
+class DeepRankQuery:
 
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None, suppress_pssm_errors: bool = False):
         """Represents one entity of interest, like a single residue variant or a protein-protein interface.
 
-        :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
+        :class:`DeepRankQuery` objects are used to generate graphs from structures, and they should be created before any model is loaded.
         They can have target values associated with them, which will be stored with the resulting graph.
 
         Args:
@@ -181,7 +181,7 @@ class Query:
 
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
-    
+
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
         raise NotImplementedError("Must be defined in child classes.")
     def get_query_id(self) -> str:
@@ -192,7 +192,7 @@ class QueryCollection:
     """
     Represents the collection of data queries.
         Queries can be saved as a dictionary to easily navigate through their data.
-    
+
     """
 
     def __init__(self):
@@ -201,13 +201,13 @@ class QueryCollection:
         self.cpu_count = None
         self.ids_count = {}
 
-    def add(self, query: Query, verbose: bool = False, warn_duplicate: bool = True):
+    def add(self, query: DeepRankQuery, verbose: bool = False, warn_duplicate: bool = True):
         """
         Adds a new query to the collection.
 
         Args:
-            query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
-                :class:`SingleResidueVariantAtomicQuery`.    
+            query(:class:`DeepRankQuery`): Must be a :class:`DeepRankQuery` object, either :class:`ProteinProteinInterfaceResidueQuery` or
+                :class:`SingleResidueVariantAtomicQuery`.
             verbose(bool, optional): For logging query IDs added, defaults to False.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified.
 
@@ -223,30 +223,30 @@ class QueryCollection:
             self.ids_count[query_id] += 1
             new_id = query.model_id + "_" + str(self.ids_count[query_id])
             query.model_id = new_id
-            
+
             if warn_duplicate:
-                _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+                _log.warning(f'DeepRankQuery with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
     def export_dict(self, dataset_path: str):
         """Exports the colection of all queries to a dictionary file.
-        
+
         Args:
             dataset_path (str): The path where to save the list of queries.
         """
         with open(dataset_path, "wb") as pkl_file:
-            pickle.dump(self, pkl_file)    
-            
+            pickle.dump(self, pkl_file)
+
     @property
-    def queries(self) -> List[Query]:
+    def queries(self) -> List[DeepRankQuery]:
         "The list of queries added to the collection."
         return self._queries
 
-    def __contains__(self, query: Query) -> bool:
+    def __contains__(self, query: DeepRankQuery) -> bool:
         return query in self._queries
 
-    def __iter__(self) -> Iterator[Query]:
+    def __iter__(self) -> Iterator[DeepRankQuery]:
         return iter(self._queries)
 
     def __len__(self) -> int:
@@ -259,7 +259,7 @@ class QueryCollection:
         grid_settings: Optional[GridSettings],
         grid_map_method: Optional[MapMethod],
         grid_augmentation_count: int,
-        query: Query
+        query: DeepRankQuery
     ):
 
         try:
@@ -290,7 +290,7 @@ class QueryCollection:
             return None
 
     def process( # pylint: disable=too-many-arguments, too-many-locals, dangerous-default-value
-        self, 
+        self,
         prefix: Optional[str] = None,
         feature_modules: Union[ModuleType, List[ModuleType], str, List[str]] = [components, contact],
         cpu_count: Optional[int] = None,
@@ -303,8 +303,8 @@ class QueryCollection:
         Args:
             prefix (Optional[str], optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
             feature_modules (Union[ModuleType, List[ModuleType], str, List[str]], optional): Features' module or list of features' modules
-                used to generate features (given as string or as an imported module). Each module must implement the :py:func:`add_features` function, 
-                and features' modules can be found (or should be placed in case of a custom made feature) in `deeprank2.features` folder. 
+                used to generate features (given as string or as an imported module). Each module must implement the :py:func:`add_features` function,
+                and features' modules can be found (or should be placed in case of a custom made feature) in `deeprank2.features` folder.
                 If set to 'all', all available modules in `deeprank2.features` are used to generate the features.
                 Defaults to only the basic feature modules `deeprank2.features.components` and `deeprank2.features.contact`.
             cpu_count (Optional[int], optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
@@ -315,7 +315,7 @@ class QueryCollection:
                 Defaults to None.
             grid_augmentation_count (int, optional): Number of grid data augmentations. May not be negative be zero or a positive number.
                 Defaults to 0.
-        
+
         Returns:
             List[str]: The list of paths of the generated HDF5 files.
         """
@@ -339,7 +339,7 @@ class QueryCollection:
         if feature_modules == 'all':
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprank2.features.__path__)]
         elif isinstance(feature_modules, list):
-            feature_names = [os.path.basename(m.__file__)[:-3] if isinstance(m,ModuleType) 
+            feature_names = [os.path.basename(m.__file__)[:-3] if isinstance(m,ModuleType)
                              else m.replace('.py','') for m in feature_modules]
         elif isinstance(feature_modules, ModuleType):
             feature_names = [os.path.basename(feature_modules.__file__)[:-3]]
@@ -372,7 +372,7 @@ class QueryCollection:
         return output_paths
 
 
-class SingleResidueVariantResidueQuery(Query):
+class SingleResidueVariantResidueQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -412,7 +412,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -445,7 +445,7 @@ class SingleResidueVariantResidueQuery(Query):
             include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
         # load .PDB structure
@@ -491,7 +491,7 @@ class SingleResidueVariantResidueQuery(Query):
         return graph
 
 
-class SingleResidueVariantAtomicQuery(Query):
+class SingleResidueVariantAtomicQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -518,7 +518,7 @@ class SingleResidueVariantAtomicQuery(Query):
             wildtype_amino_acid (:class:`AminoAcid`): The wildtype amino acid.
             variant_amino_acid (:class:`AminoAcid`): The variant amino acid.
             pssm_paths (Optional[Dict(str,str)], optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
-            radius (float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0. 
+            radius (float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0.
             distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
                 Defaults to 4.5.
             targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
@@ -531,7 +531,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -595,7 +595,7 @@ class SingleResidueVariantAtomicQuery(Query):
             include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
         # load .PDB structure
@@ -700,7 +700,7 @@ def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
                 chain.pssm = parse_pssm(f, chain)
 
 
-class ProteinProteinInterfaceAtomicQuery(Query):
+class ProteinProteinInterfaceAtomicQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -729,7 +729,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._pdb_path = pdb_path
 
@@ -763,7 +763,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
         contact_atoms = _load_ppi_atoms(self._pdb_path,
@@ -798,7 +798,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         return graph
 
 
-class ProteinProteinInterfaceResidueQuery(Query):
+class ProteinProteinInterfaceResidueQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -827,7 +827,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._pdb_path = pdb_path
 
@@ -861,7 +861,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets. 
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
         contact_atoms = _load_ppi_atoms(self._pdb_path,
