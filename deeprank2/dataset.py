@@ -267,16 +267,13 @@ class DeeprankDataset(Dataset):
                 df_dict = {}
                 df_dict['id'] = entry_names
 
-                transform = False
-                if self.features_transform:
-                    if 'all' in self.features_transform:
-                        transform = self.features_transform.get('all', {}).get('transform')
-
                 for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
-                        #get transformation type
+                        # reset transform for each feature
+                        transform = None
                         if self.features_transform:
-                            if feat in self.features_transform:
+                            transform = self.features_transform.get('all', {}).get('transform')
+                            if (transform is None) and (feat in self.features_transform):
                                 transform = self.features_transform.get(feat, {}).get('transform')
                         #Check the number of channels the features have    
                         if f[entry_name][feat_type][feat][()].ndim == 2:
@@ -293,7 +290,7 @@ class DeeprankDataset(Dataset):
                             #apply transformation
                             if transform:
                                 df_dict[feat]=[transform(row) for row in df_dict[feat]]
-                
+        
                 df = pd.DataFrame(data=df_dict)
 
             df_final = pd.concat([df_final, df])
@@ -794,27 +791,36 @@ class GraphDataset(DeeprankDataset):
         with h5py.File(fname, 'r') as f5:
             grp = f5[entry_name]
 
-            if (self.features_transform) and ('all' in self.features_transform):
-                transform = self.features_transform.get('all', {}).get('transform')
-                standard = self.features_transform.get('all', {}).get('standardize')
-            else:
-                transform = False
-                standard = False
             # node features
             if len(self.node_features) > 0:
                 node_data = ()
                 for feat in self.node_features:
+                    
+                    # resetting transformation and standardization for each feature
+                    transform = None
+                    standard = None
+
                     if feat[0] != '_':  # ignore metafeatures
                         vals = grp[f"{Nfeat.NODE}/{feat}"][()]
-                        
                         # get feat transformation and standardization
-                        if (self.features_transform is not None) and (feat in self.features_transform):
-                            transform = self.features_transform.get(feat, {}).get('transform')
-                            standard = self.features_transform.get(feat, {}).get('standardize')
+                        if (self.features_transform is not None):
+                            transform = self.features_transform.get('all', {}).get('transform')
+                            standard = self.features_transform.get('all', {}).get('standardize')
+                            # if no transformation is set for all features, check if one is set for the current feature
+                            if (transform is None) and (feat in self.features_transform):
+                                transform = self.features_transform.get(feat, {}).get('transform')
+                            # if no standardization is set for all features, check if one is set for the current feature
+                            if (standard is None) and (feat in self.features_transform):
+                                standard = self.features_transform.get(feat, {}).get('standardize')
 
                         # apply transformation
                         if transform:
-                            vals = transform(vals)
+                            with warnings.catch_warnings(record=True) as w:
+                                vals = transform(vals)
+                                if (len(w) > 0):
+                                    raise ValueError(f"Invalid value occurs in {entry_name}, file {fname},"
+                                                     f"when applying {transform} for feature {feat}."
+                                                     f"Please change the transformation function for {feat}.")
 
                         if vals.ndim == 1: # features with only one channel
                             vals = vals.reshape(-1, 1)   
@@ -846,18 +852,33 @@ class GraphDataset(DeeprankDataset):
             if len(self.edge_features) > 0:
                 edge_data = ()
                 for feat in self.edge_features:
+
+                    # resetting transformation and standardization for each feature
+                    transform = None
+                    standard = None
+                        
                     if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
-                        
                         # get feat transformation and standardization
-                        if (self.features_transform is not None) and (feat in self.features_transform):
-                            transform = self.features_transform.get(feat, {}).get('transform')
-                            standard = self.features_transform.get(feat, {}).get('standardize')
-
+                        if (self.features_transform is not None):
+                            transform = self.features_transform.get('all', {}).get('transform')
+                            standard = self.features_transform.get('all', {}).get('standardize')
+                            # if no transformation is set for all features, check if one is set for the current feature
+                            if (transform is None) and (feat in self.features_transform):
+                                transform = self.features_transform.get(feat, {}).get('transform')
+                            # if no standardization is set for all features, check if one is set for the current feature
+                            if (standard is None) and (feat in self.features_transform):
+                                standard = self.features_transform.get(feat, {}).get('standardize')
+                                
                         # apply transformation
                         if transform:
-                            vals = transform(vals)
-
+                            with warnings.catch_warnings(record=True) as w:
+                                vals = transform(vals)
+                                if (len(w) > 0):
+                                    raise ValueError(f"Invalid value occurs in {entry_name}, file {fname},"
+                                                     f"when applying {transform} for feature {feat}."
+                                                     f"Please change the transformation function for {feat}.")
+                                
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
                             if standard: 
