@@ -141,7 +141,8 @@ def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str 
         matrix = nx.to_scipy_sparse_array(g)
 
         # run MCL with default parameters
-        result = mc.run_mcl(matrix)
+
+        result = mc.run_mcl(matrix.toarray())
 
         clusters = mc.get_clusters(result)  # get clusters
 
