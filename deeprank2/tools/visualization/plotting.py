@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import networkx
 import numpy as np
 import plotly.graph_objs as go
-from deeprank2.tools.visualization.embedding import manifold_embedding
 
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.tools.visualization.embedding import manifold_embedding
 
 _log = logging.getLogger(__name__)
 
@@ -123,7 +123,7 @@ def plotly_2d( # noqa
     elif method == "mcl":
         matrix = networkx.to_scipy_sparse_matrix(gtmp)
         # run MCL with default parameters
-        result = markov_clustering.run_mcl(matrix)
+        result = markov_clustering.run_mcl(matrix.toarray())
         mcl_clust = markov_clustering.get_clusters(result)  # get clusters
         cluster = {}
         node_key = list(graph.nodes.keys())
