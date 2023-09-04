@@ -14,7 +14,7 @@ authors:
     corresponding: true
     affiliation: 1
     equal-contrib: true
-  - name: Dani Bodor
+  - name: Dani L. Bodor
     orcid: 0000-0003-2109-2349
     affiliation: 1
     equal-contrib: true
@@ -53,7 +53,12 @@ bibliography: paper.bib
 # Summary
 [comment]: <> (CHECK FOR AUTHORS: Do the summary describe the high-level functionality and purpose of the software for a diverse, non-specialist audience?)
 
-We present DeepRank2, an open-source deep learning (DL) framework that offers researchers unified and user-friendly APIs to accelerate development of software solutions allowing biologically relevant predictions to gain knowledge on protein 3D structures for a wide variety of purposes, such as drug design, immunotherapy, or designing novel proteins. DeepRank2 allows to transform and store 3D representations of both protein-protein interfaces (PPIs) and individual proteins' variants into grids or graphs containing structural and physico-chemical information, which can then be used for training neural networks for whatever specific pattern of interest for the user. DeepRank2 also offers a pre-implemented training pipeline which can use either convolutional neural networks (CNNs) or graph neural networks (GNNs), as well as handy output exporters for evaluating performances. The entire framework flowchart is visualized in \autoref{fig:flowchart}. DeepRank2 software aims at unifying previously developed DL frameworks for data mining PPIs (DeepRank [@renaud_deeprank_2021], DeepRank-GNN [@reau_deeprank-gnn_2022]), and proteins' variants (DeepRank-Mut [@]). The package follows the community-endorsed FAIR principles for Research Software, provides user-friendly APIs, publicily available [documentation](https://deeprank2.readthedocs.io/en/latest/) and in depth [tutorials](https://github.com/DeepRank/deeprank2/blob/main/tutorials/TUTORIAL.md). Additionally, the software allows for much greater flexibility, allowing users to easily tailor the framework to specific patterns of interest and features, and select the pipeline's steps that best suits their requirements.
+We present DeepRank2, a deep learning (DL) framework geared towards making predictions on 3D protein structures for variety of biologically relevant applications. Our software can be used for predicting structural properties in drug design, immunotherapy, or designing novel proteins, among other fields. DeepRank2 allows for transformation and storage of 3D representations of both protein-protein interfaces (PPIs) and protein single residue variants (SRVs) into either graphs or volumetric grids containing structural and physico-chemical information. These can be used for training neural networks for a variety of patterns of interest, using either our pre-implemented training pipeline for graph neural networks (GNNs) and convolutional neural networks (CNNs) or external pipelines. The package is fully open source, follows the community-endorsed FAIR principles for research software, provides user-friendly APIs, publicily available [documentation](https://deeprank2.readthedocs.io/en/latest/), and in depth [tutorials](https://github.com/DeepRank/deeprank2/blob/main/tutorials/TUTORIAL.md).
+
+[comment]: <> (saving below sentences in case they are useful down the line)
+[comment]: <> (The entire framework flowchart is visualized in \autoref{fig:flowchart}. DeepRank2 software aims at unifying previously developed DL frameworks for data mining PPIs (DeepRank [@renaud_deeprank_2021], DeepRank-GNN [@reau_deeprank-gnn_2022]), and proteins' variants (DeepRank-Mut [@]). )
+[comment]: <> (Additionally, the software allows for much greater flexibility, allowing users to easily tailor the framework to specific patterns of interest and features, and select the pipeline's steps that best suits their requirements.)
+
 
 [comment]: <> (CHECK FOR AUTHORS: Do the authors clearly state what problems the software is designed to solve and who the target audience is?)
 [comment]: <> (CHECK FOR AUTHORS: Do the authors describe how this software compares to other commonly-used packages?)
