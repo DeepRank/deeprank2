@@ -1,5 +1,6 @@
 import os
 import unittest
+import warnings
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import List, Union
@@ -314,7 +315,8 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
-            target = targets.BA, # continuous values --> regression
+            target = 'BA', # continuous values --> regression
+            task = targets.REGRESS,
             target_transform = True
         )
 
@@ -503,7 +505,7 @@ class TestDataSet(unittest.TestCase):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'bsa': {'transform': lambda t: np.log(t+10)},
-                        'electrostatic': {'transform': lambda t: np.sqrt(t+50)},
+                        'electrostatic': {'transform': lambda t:np.cbrt(t)}, # pylint: disable=unnecessary-lambda
                         'sasa': {'transform': None},
                         'hse': {'transform': lambda t: np.log(t+10)}
                         }
@@ -583,9 +585,10 @@ class TestDataSet(unittest.TestCase):
 
     def test_only_transform_all_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
         # define a features_transform dict for only transformations for `all` features
+        
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {'all': {'transform': lambda t: np.log(t+10)}}
-
+        features_transform = {'all': {'transform': lambda t: np.log(abs(t)+.01)}}
+        
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
@@ -787,7 +790,7 @@ class TestDataSet(unittest.TestCase):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'bsa': {'transform': lambda t: np.log(t+10), 'standardize': True},
-                        'electrostatic': {'transform': lambda t: np.sqrt(t+50), 'standardize': True},
+                        'electrostatic': {'transform': lambda t:np.cbrt(t), 'standardize': True}, # pylint: disable=unnecessary-lambda
                         'sasa': {'transform': None, 'standardize': False},
                         'hse': {'transform': lambda t: np.log(t+10), 'standardize': False}
                         }
@@ -870,7 +873,7 @@ class TestDataSet(unittest.TestCase):
     def test_features_transform_logic_graphdataset(self):
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}}
+        features_transform = {'all': {'transform': lambda t:np.cbrt(t), 'standardize': True}} # pylint: disable=unnecessary-lambda
         other_feature_transform = {'all': {'transform': None, 'standardize': False}}
 
         dataset_train = GraphDataset(
@@ -907,6 +910,21 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.means == dataset_test.means
         assert dataset_train.devs == dataset_test.devs
 
+    def test_invalid_value_features_transform(self):
+        
+        hdf5_path = "tests/data/hdf5/train.hdf5"
+        features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}}
+        
+        transf_dataset = GraphDataset(
+            hdf5_path = hdf5_path,
+            target = 'binary',
+            features_transform = features_transform
+        )
+        with pytest.raises(ValueError):
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', r'divide by zero encountered in divide')
+                _compute_features_with_get(hdf5_path, transf_dataset)     
+
     def test_inherit_info_training_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         feature_transform = {'all': {'transform': None, 'standardize': True}}
@@ -940,7 +958,7 @@ class TestDataSet(unittest.TestCase):
             node_features = "all",
             edge_features = "all",
             features_transform = None,
-            target = 'ba',
+            target = 'BA',
             target_transform = True,
             task = "regress",
             classes = None

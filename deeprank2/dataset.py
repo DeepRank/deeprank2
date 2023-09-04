@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import os
 import re
@@ -98,7 +99,7 @@ class DeeprankDataset(Dataset):
 
     def _check_task_and_classes(self, task: str, classes: Optional[str] = None):
 
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ, targets.BA]:
+        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]:
             self.task = targets.REGRESS
 
         elif self.target in [targets.BINARY, targets.CAPRI]:
@@ -146,10 +147,11 @@ class DeeprankDataset(Dataset):
 
         for param in inherited_params:
             if (self_vars[param] != dataset_train_vars[param]):
+                if (self_vars[param] != self.default_vars[param]):
+                    _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
+                        f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}./n" +
+                        f"Overwriting {param} parameter with the one used in the training phase.")
                 setattr(self, param, dataset_train_vars[param])
-                _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
-                    f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}" +
-                    f"Overwriting {param} parameter with the one used in the training phase.")
 
     def _create_index_entries(self):
         """Creates the indexing of each molecule in the dataset.
@@ -265,16 +267,13 @@ class DeeprankDataset(Dataset):
                 df_dict = {}
                 df_dict['id'] = entry_names
 
-                transform = False
-                if self.features_transform:
-                    if 'all' in self.features_transform:
-                        transform = self.features_transform.get('all', {}).get('transform')
-
                 for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
-                        #get transformation type
+                        # reset transform for each feature
+                        transform = None
                         if self.features_transform:
-                            if feat in self.features_transform:
+                            transform = self.features_transform.get('all', {}).get('transform')
+                            if (transform is None) and (feat in self.features_transform):
                                 transform = self.features_transform.get(feat, {}).get('transform')
                         #Check the number of channels the features have
                         if f[entry_name][feat_type][feat][()].ndim == 2:
@@ -291,6 +290,7 @@ class DeeprankDataset(Dataset):
                             #apply transformation
                             if transform:
                                 df_dict[feat]=[transform(row) for row in df_dict[feat]]
+
 
                 df = pd.DataFrame(data=df_dict)
 
@@ -443,6 +443,10 @@ class GridDataset(DeeprankDataset):
                 Defaults to "all".
             target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA. It can also be
                 a custom-defined target given to the Query class as input (see: `deeprank2.query`); in this case,
+                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Defaults to "all".
+            target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq. It can also be
+                a custom-defined target given to the Query class as input (see: `deeprank2.query`); in this case,
                 the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical.
                 If the latter is your case, please convert the categorical classes into
@@ -457,9 +461,11 @@ class GridDataset(DeeprankDataset):
                 Note that the you can filter on a different target than the one selected as the dataset target.
                 Defaults to None.
             task (Optional[str], optional): 'regress' for regression or 'classif' for classification. Required if target not in
-                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
+                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', or 'dockq'], otherwise this setting is ignored.
                 Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
+                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', or 'dockq'.
                 Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
                 Defaults to None.
             classes (Optional[Union[List[str], List[int], List[float]], optional]): Define the dataset target classes in classification mode.
@@ -474,18 +480,16 @@ class GridDataset(DeeprankDataset):
         """
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
+        self.default_vars = {
+            k: v.default
+            for k, v in inspect.signature(self.__init__).parameters.items()
+            if v.default is not inspect.Parameter.empty
+        }
         self.train = train
         self.dataset_train = dataset_train
         self.features = features
         self.target_transform = target_transform
         self._check_features()
-        self.features_dict = {}
-        self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
-        if self.target is not None:
-            if isinstance(self.target, str):
-                self.features_dict[targets.VALUES] = [self.target]
-            else:
-                self.features_dict[targets.VALUES] = self.target
 
         if not train:
             if not isinstance(dataset_train, GridDataset):
@@ -493,12 +497,20 @@ class GridDataset(DeeprankDataset):
                                 Please provide a valid training GridDataset.""")
 
             #check inherited parameter with the ones in the training set
-            inherited_params = ["features", "features_dict", "target", "target_transform", "task", "classes"]
+            inherited_params = ["features", "target", "target_transform", "task", "classes"]
             self._check_inherited_params(inherited_params, dataset_train)
 
         elif train and dataset_train:
             _log.warning("""dataset_train has been set but train flag was set to True.
             dataset_train will be ignored since the current dataset will be considered as training set.""")
+
+        self.features_dict = {}
+        self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
+        if self.target is not None:
+            if isinstance(self.target, str):
+                self.features_dict[targets.VALUES] = [self.target]
+            else:
+                self.features_dict[targets.VALUES] = self.target
 
     def _check_features(self):
         """Checks if the required features exist"""
@@ -542,6 +554,7 @@ class GridDataset(DeeprankDataset):
         missing_features = []
         if self.features == "all":
             self.features = sorted(hdf5_all_feature_names)
+            self.default_vars["features"] = self.features
         else:
             if not isinstance(self.features, list):
                 if self.features is None:
@@ -675,6 +688,8 @@ class GraphDataset(DeeprankDataset):
                 that make use of clustering methods. Defaults to None.
             target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, dockq, and BA.
                 It can also be a custom-defined target given to the Query class as input (see: `deeprank2.query`);
+            target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq.
+                It can also be a custom-defined target given to the Query class as input (see: `deeprank2.query`);
                 in this case, the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical.
                 If the latter is your case, please convert the categorical classes into
@@ -689,9 +704,11 @@ class GraphDataset(DeeprankDataset):
                 Note that the you can filter on a different target than the one selected as the dataset target.
                 Defaults to None.
             task (Optional[str], optional): 'regress' for regression or 'classif' for classification. Required if target not in
-                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', 'dockq', or 'BA'], otherwise this setting is ignored.
+                ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', or 'dockq'], otherwise this setting is ignored.
                 Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', 'dockq' or 'BA'.
+                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', or 'dockq'.
                 Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
                 Defaults to None.
             classes (Optional[Union[List[str], List[int], List[float]]], optional): Define the dataset target classes in classification mode.
@@ -705,6 +722,11 @@ class GraphDataset(DeeprankDataset):
 
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
+        self.default_vars = {
+            k: v.default
+            for k, v in inspect.signature(self.__init__).parameters.items()
+            if v.default is not inspect.Parameter.empty
+        }
         self.train = train
         self.dataset_train = dataset_train
         self.node_features = node_features
@@ -713,6 +735,21 @@ class GraphDataset(DeeprankDataset):
         self.target_transform = target_transform
         self.features_transform = features_transform
         self._check_features()
+
+        if not train:
+            if not isinstance(dataset_train, GraphDataset):
+                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
+                                Please provide a valid training GraphDataset.""")
+
+            #check inherited parameter with the ones in the training set
+            inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
+            self._check_inherited_params(inherited_params, dataset_train)
+
+        elif train and dataset_train:
+            _log.warning("""dataset_train has been set but train flag was set to True.
+            dataset_train will be ignored since the current dataset will be considered as training set.""")
+
+
         self.features_dict = {}
         self.features_dict[Nfeat.NODE] = self.node_features
         self.features_dict[Efeat.EDGE] = self.edge_features
@@ -721,19 +758,6 @@ class GraphDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = [self.target]
             else:
                 self.features_dict[targets.VALUES] = self.target
-
-        if not train:
-            if not isinstance(dataset_train, GraphDataset):
-                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
-                                Please provide a valid training GraphDataset.""")
-
-            #check inherited parameter with the ones in the training set
-            inherited_params = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
-            self._check_inherited_params(inherited_params, dataset_train)
-
-        elif train and dataset_train:
-            _log.warning("""dataset_train has been set but train flag was set to True.
-            dataset_train will be ignored since the current dataset will be considered as training set.""")
 
         standardize = False
         if self.features_transform:
@@ -779,27 +803,37 @@ class GraphDataset(DeeprankDataset):
         with h5py.File(fname, 'r') as f5:
             grp = f5[entry_name]
 
-            if (self.features_transform) and ('all' in self.features_transform):
-                transform = self.features_transform.get('all', {}).get('transform')
-                standard = self.features_transform.get('all', {}).get('standardize')
-            else:
-                transform = False
-                standard = False
             # node features
             if len(self.node_features) > 0:
                 node_data = ()
                 for feat in self.node_features:
+
+                    # resetting transformation and standardization for each feature
+                    transform = None
+                    standard = None
+
                     if feat[0] != '_':  # ignore metafeatures
                         vals = grp[f"{Nfeat.NODE}/{feat}"][()]
 
                         # get feat transformation and standardization
-                        if (self.features_transform is not None) and (feat in self.features_transform):
-                            transform = self.features_transform.get(feat, {}).get('transform')
-                            standard = self.features_transform.get(feat, {}).get('standardize')
+                        if (self.features_transform is not None):
+                            transform = self.features_transform.get('all', {}).get('transform')
+                            standard = self.features_transform.get('all', {}).get('standardize')
+                            # if no transformation is set for all features, check if one is set for the current feature
+                            if (transform is None) and (feat in self.features_transform):
+                                transform = self.features_transform.get(feat, {}).get('transform')
+                            # if no standardization is set for all features, check if one is set for the current feature
+                            if (standard is None) and (feat in self.features_transform):
+                                standard = self.features_transform.get(feat, {}).get('standardize')
 
                         # apply transformation
                         if transform:
-                            vals = transform(vals)
+                            with warnings.catch_warnings(record=True) as w:
+                                vals = transform(vals)
+                                if (len(w) > 0):
+                                    raise ValueError(f"Invalid value occurs in {entry_name}, file {fname},"
+                                                     f"when applying {transform} for feature {feat}."
+                                                     f"Please change the transformation function for {feat}.")
 
                         if vals.ndim == 1: # features with only one channel
                             vals = vals.reshape(-1, 1)
@@ -831,17 +865,33 @@ class GraphDataset(DeeprankDataset):
             if len(self.edge_features) > 0:
                 edge_data = ()
                 for feat in self.edge_features:
+
+                    # resetting transformation and standardization for each feature
+                    transform = None
+                    standard = None
+
                     if feat[0] != '_':   # ignore metafeatures
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
 
                         # get feat transformation and standardization
-                        if (self.features_transform is not None) and (feat in self.features_transform):
-                            transform = self.features_transform.get(feat, {}).get('transform')
-                            standard = self.features_transform.get(feat, {}).get('standardize')
+                        if (self.features_transform is not None):
+                            transform = self.features_transform.get('all', {}).get('transform')
+                            standard = self.features_transform.get('all', {}).get('standardize')
+                            # if no transformation is set for all features, check if one is set for the current feature
+                            if (transform is None) and (feat in self.features_transform):
+                                transform = self.features_transform.get(feat, {}).get('transform')
+                            # if no standardization is set for all features, check if one is set for the current feature
+                            if (standard is None) and (feat in self.features_transform):
+                                standard = self.features_transform.get(feat, {}).get('standardize')
 
                         # apply transformation
                         if transform:
-                            vals = transform(vals)
+                            with warnings.catch_warnings(record=True) as w:
+                                vals = transform(vals)
+                                if (len(w) > 0):
+                                    raise ValueError(f"Invalid value occurs in {entry_name}, file {fname},"
+                                                     f"when applying {transform} for feature {feat}."
+                                                     f"Please change the transformation function for {feat}.")
 
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
@@ -928,6 +978,7 @@ class GraphDataset(DeeprankDataset):
         missing_node_features = []
         if self.node_features == "all":
             self.node_features = self.available_node_features
+            self.default_vars["node_features"] = self.node_features
         else:
             if not isinstance(self.node_features, list):
                 if self.node_features is None:
@@ -943,6 +994,7 @@ class GraphDataset(DeeprankDataset):
         missing_edge_features = []
         if self.edge_features == "all":
             self.edge_features = self.available_edge_features
+            self.default_vars["edge_features"] = self.edge_features
         else:
             if not isinstance(self.edge_features, list):
                 if self.edge_features is None:
