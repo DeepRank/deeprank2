@@ -222,7 +222,7 @@ def plotly_2d( # noqa
                 first_chain = graph.nodes[node][Nfeat.CHAINID]
             if graph.nodes[node][Nfeat.CHAINID] != first_chain: # This is not very pythonic, but somehow I'm stuck on how to do this without enumerating
                 index = 1
-        
+
         pos = graph.nodes[node]["pos2d"]
 
         node_trace[index]["x"] += (pos[0],)

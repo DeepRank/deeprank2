@@ -1,4 +1,4 @@
-# Example of network that doesn't require clusters.  
+# Example of network that doesn't require clusters.
 
 import torch
 from torch.nn import Linear, Module, ReLU, Sequential

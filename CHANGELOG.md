@@ -116,7 +116,7 @@ Released on Oct 24, 2022
 * `index` parameter of NeuralNet is now called `subset` #159
 * `percent` parameter of NeuralNet is now called `val_size`, and the logic behing it has been improved #183
 * Aligned the package to PyTorch high-level frameworks #172
-  * NeuralNet is now called Trainer 
+  * NeuralNet is now called Trainer
 * Clearer features names #145
 * Changed definitions in storage.py #150
 * `MAX_COVALENT_DISTANCE` is now 2.1 instead of 3 #205
