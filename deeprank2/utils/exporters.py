@@ -18,7 +18,7 @@ class OutputExporter:
     """The class implements a general exporter to be called when a neural network generates outputs."""
 
     def __init__(self, directory_path: str = None):
-        
+
         if directory_path is None:
             directory_path = "./output"
         self._directory_path = directory_path
@@ -153,7 +153,7 @@ class ScatterPlotExporter(OutputExporter):
     """
 
     def __init__(self, directory_path: str, epoch_interval: int = 1):
-        """ 
+        """
         Args:
             directory_path (str): Where to store the plots.
             epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
@@ -265,7 +265,7 @@ class HDF5OutputExporter(OutputExporter):
     def process( # pylint: disable=too-many-arguments
         self,
         pass_name: str,
-        epoch_number: int, 
+        epoch_number: int,
         entry_names: List[str],
         output_values: List[Any],
         target_values: List[Any],

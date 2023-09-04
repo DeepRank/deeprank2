@@ -87,7 +87,7 @@ def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[f
 
     """
     Compute targets and outputs them as a dictionary.
-    For classification: 
+    For classification:
        - binary (scalar value is expected to be either 0 or 1)
        - capri_classes (scalar integer values are expected)
     For regression:

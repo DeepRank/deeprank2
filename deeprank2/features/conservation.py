@@ -31,7 +31,7 @@ def add_features( # pylint: disable=unused-argument
         node.features[Nfeat.PSSM] = profile
         node.features[Nfeat.INFOCONTENT] = pssm_row.information_content
 
-        if single_amino_acid_variant is not None:            
+        if single_amino_acid_variant is not None:
             if residue == single_amino_acid_variant.residue:
                 # only the variant residue can have a variant and wildtype amino acid
                 conservation_wildtype = pssm_row.get_conservation(single_amino_acid_variant.wildtype_amino_acid)

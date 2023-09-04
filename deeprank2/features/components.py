@@ -23,12 +23,12 @@ def add_features( # pylint: disable=unused-argument
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
-            
+
             node.features[Nfeat.ATOMTYPE] = atom.element.onehot
             node.features[Nfeat.PDBOCCUPANCY] = atom.occupancy
             node.features[Nfeat.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}") 
+            raise TypeError(f"Unexpected node type: {type(node.id)}")
 
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
         node.features[Nfeat.RESCHARGE] = residue.amino_acid.charge

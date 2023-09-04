@@ -31,7 +31,7 @@ class AminoAcid:
         polarity: Polarity,
         size: int,
         mass: float,
-        pI: float, 
+        pI: float,
         hydrogen_bond_donors: int,
         hydrogen_bond_acceptors: int,
         index: int,
