@@ -6,4 +6,8 @@
     },
     "python.linting.prospectorEnabled": true,
     "notebook.lineNumbers": "on",
+    "files.trimTrailingWhitespace": true,
+    "[markdown]": {
+        "files.trimTrailingWhitespace": false
+    },
 }
