@@ -18,7 +18,7 @@ ignore-patterns:
 
 pyroma:
   run: true
-  # pyroma gives errors in the setup.py file, 
+  # pyroma gives errors in the setup.py file,
   # thus we disable here these errors.
   # This should not be happening, because
   # prospector should be ignoring the setup.py

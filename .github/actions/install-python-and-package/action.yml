@@ -64,4 +64,3 @@ runs:
       run: python3 -m pip install .[${{ inputs.extras-require }}]
       env:
         CONDA_PREFIX: /usr/share/miniconda
-        
