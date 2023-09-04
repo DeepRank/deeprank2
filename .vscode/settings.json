@@ -2,8 +2,14 @@
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
-        }
+        },
+        "files.trimTrailingWhitespace": true,
     },
+
     "python.linting.prospectorEnabled": true,
     "notebook.lineNumbers": "on",
+
+    "[*.yml]": {
+        "files.trimTrailingWhitespace": true,
+    },
 }
