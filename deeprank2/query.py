@@ -466,6 +466,7 @@ class SingleResidueVariantQuery(DeepRankQuery):
             load_pssms = conservation in feature_modules
         else:
             load_pssms = conservation == feature_modules
+            feature_modules = [feature_modules]
         structure: PDBStructure = self._load_structure(include_hydrogens, load_pssms)
 
         # find the variant residue
@@ -483,12 +484,28 @@ class SingleResidueVariantQuery(DeepRankQuery):
                 f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}"
             )
         variant = SingleResidueVariant(variant_residue, self.variant_amino_acid)
+        residues = get_surrounding_residues(structure, variant_residue, self.radius)
 
         # build the graph
-        residues = list(get_surrounding_residues(structure, variant_residue, self.radius))
-        graph = build_residue_graph(
-            residues, self.get_query_id(), self.distance_cutoff
-        )
+        if self.resolution == 'residue':
+            graph = build_residue_graph(residues, self.get_query_id(), self.distance_cutoff)
+
+        elif self.resolution == 'atomic':
+            residues.append(variant_residue)
+            atoms = set([])  # why make this a set? I think each atom is unique anyway, given that it has a Residue property
+            for residue in residues:
+                if residue.amino_acid is not None:
+                    for atom in residue.atoms:
+                        atoms.add(atom)
+            atoms = list(atoms)
+
+            graph = build_atomic_graph(atoms, self.get_query_id(), self.distance_cutoff)
+
+
+        else:
+            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
+
+        graph.center = get_residue_center(variant_residue)
 
         # add data to the graph
         self._set_graph_targets(graph)
@@ -496,71 +513,6 @@ class SingleResidueVariantQuery(DeepRankQuery):
         for feature_module in feature_modules:
             feature_module.add_features(self.pdb_path, graph, variant)
 
-        graph.center = get_residue_center(variant_residue)
-        return graph
-
-
-class SingleResidueVariantAtomicQuery(DeepRankQuery):
-
-    def build(self, feature_modules: Union[ModuleType, List[ModuleType]], include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the .PDB structure.
-
-        Args:
-            feature_modules (Union[ModuleType, List[ModuleType]]): Each must implement the :py:func:`add_features` function.
-            include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
-
-        Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
-        """
-
-        # load .PDB structure
-        if isinstance(feature_modules, List):
-            load_pssms = conservation in feature_modules
-        else:
-            load_pssms = conservation == feature_modules
-            feature_modules = [feature_modules]
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
-
-        # find the variant residue
-        variant_residue = None
-        for residue in structure.get_chain(self._chain_id).residues:
-            if (
-                residue.number == self._residue_number
-                and residue.insertion_code == self._insertion_code
-            ):
-                variant_residue = residue
-                break
-
-        if variant_residue is None:
-            raise ValueError(
-                f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
-            )
-
-        # define the variant
-        variant = SingleResidueVariant(variant_residue, self._variant_amino_acid)
-
-        # get the residues and atoms involved
-        residues = get_surrounding_residues(structure, variant_residue, self._radius)
-        residues.add(variant_residue)
-        atoms = set([])
-        for residue in residues:
-            if residue.amino_acid is not None:
-                for atom in residue.atoms:
-                    atoms.add(atom)
-        atoms = list(atoms)
-
-        # build the graph
-        graph = build_atomic_graph(
-            atoms, self.get_query_id(), self._distance_cutoff
-        )
-
-        # add data to the graph
-        self._set_graph_targets(graph)
-
-        for feature_module in feature_modules:
-            feature_module.add_features(self._pdb_path, graph, variant)
-
-        graph.center = get_residue_center(variant_residue)
         return graph
 
 

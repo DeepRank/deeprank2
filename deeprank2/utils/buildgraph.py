@@ -318,4 +318,4 @@ def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Res
 
             close_residues.add(structure_atom.residue)
 
-    return close_residues
+    return list(close_residues)
