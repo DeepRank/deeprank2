@@ -282,7 +282,7 @@ class Grid:
         method: MapMethod,
     ):
         """Maps point feature data at a given position to the grid, using the given method.
-        
+
         The feature_value should either be a single number or a one-dimensional array.
         """
 

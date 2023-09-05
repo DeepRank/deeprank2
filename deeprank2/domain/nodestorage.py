@@ -13,7 +13,7 @@ PDBOCCUPANCY = "pdb_occupancy"
 
 ## residue core features
 RESTYPE = "res_type" # AminoAcid object; former FEATURENAME_AMINOACID
-RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned) 
+RESCHARGE = "res_charge" # float(<0); former FEATURENAME_CHARGE (was not assigned)
 POLARITY = "polarity" #  Polarity object; former FEATURENAME_POLARITY
 RESSIZE = "res_size" # int; former FEATURENAME_SIZE
 RESMASS = "res_mass"
@@ -39,7 +39,7 @@ DIFFCONSERVATION = "diff_conservation" # int; former FEATURENAME_PSSMDIFFERENCE 
 
 ## protein context features
 RESDEPTH = "res_depth" # float; former FEATURENAME_RESIDUEDEPTH
-HSE = "hse" # list[3xfloat]; former FEATURENAME_HALFSPHEREEXPOSURE 
+HSE = "hse" # list[3xfloat]; former FEATURENAME_HALFSPHEREEXPOSURE
 SASA = "sasa" # float; former FEATURENAME_SASA
 BSA = "bsa" # float; former FEATURENAME_BURIEDSURFACEAREA
 SECSTRUCT = "sec_struct" #secondary structure

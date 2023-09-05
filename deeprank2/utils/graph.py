@@ -308,7 +308,7 @@ class Graph:
                     targets_group[target_name][()] = target_data
 
         return hdf5_path
-    
+
     def get_all_chains(self) -> List[str]:
         if isinstance(self.nodes[0].id, Residue):
             chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
@@ -358,7 +358,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     residues: List[Residue], graph_id: str, edge_distance_cutoff: float
 ) -> Graph:
     """Builds a graph, using the residues as nodes.
-    
+
     The edge distance cutoff is in Ångströms.
     It's the shortest interatomic distance between two residues.
     """

@@ -170,7 +170,7 @@ def community_pooling(cluster, data):
         pooled features tensor
 
     Examples:
-    
+
         >>> import torch
         >>> from torch_geometric.data import Data, Batch
         >>> edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5],

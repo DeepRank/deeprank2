@@ -43,7 +43,7 @@ class Residue:
         return hash((self._number, self._insertion_code))
 
     def get_pssm(self) -> PssmRow:
-        """ 
+        """
         If the residue's chain has pssm info linked to it,
         then return the part that belongs to this residue.
         """
@@ -95,8 +95,8 @@ class Residue:
 
 
 def get_residue_center(residue: Residue) -> np.ndarray:
-    """Chooses a center position for a residue. 
-    
+    """Chooses a center position for a residue.
+
     Based on the atoms it has:
     1. find beta carbon, if present
     2. find alpha carbon, if present

@@ -122,7 +122,7 @@ def get_structure(pdb, id_: str):
         pdb (pdb2sql object): The pdb structure that we're investigating.
         id (str): Unique id for the pdb structure.
 
-    Returns: 
+    Returns:
         PDBStructure: The structure object, giving access to chains, residues, atoms.
     """
 
@@ -226,7 +226,7 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
         chain_id2 (str): Second protein chain identifier.
         distance_cutoff (float): Max distance between two interacting residues.
 
-    Returns: 
+    Returns:
         List[Pair]: The pairs of contacting residues.
     """
 
@@ -296,7 +296,7 @@ def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Res
         residue (:class:`Residue`): The residue in the structure.
         radius (float): Max distance in Ångström between atoms of the residue and the other residues.
 
-    Returns: 
+    Returns:
         (a set of deeprank residues): The surrounding residues.
     """
 
