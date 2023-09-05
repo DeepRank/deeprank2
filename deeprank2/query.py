@@ -11,6 +11,7 @@ from multiprocessing import Pool
 from random import randrange
 from types import ModuleType
 from typing import Dict, Iterator, List, Optional, Union
+from dataclasses import dataclass, field, fields, MISSING
 
 import h5py
 import numpy as np
@@ -93,29 +94,37 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
         warnings.warn(error_message)
         _log.warning(error_message)
 
-
+@dataclass(repr=False, kw_only=True)
 class DeepRankQuery:
+    """Represents one entity of interest, like a single residue variant or a protein-protein interface.
 
-    def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None, suppress_pssm_errors: bool = False):
-        """Represents one entity of interest, like a single residue variant or a protein-protein interface.
+    :class:`DeepRankQuery` objects are used to generate graphs from structures, and they should be created before any model is loaded.
+    They can have target values associated with them, which will be stored with the resulting graph.
 
-        :class:`DeepRankQuery` objects are used to generate graphs from structures, and they should be created before any model is loaded.
-        They can have target values associated with them, which will be stored with the resulting graph.
+    Args:
+        model_id (str): The ID of the model to load, usually a .PDB accession code.
+        targets (Optional[Dict[str, Union[float, int]]], optional): Target values associated with the query. Defaults to None.
+        suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
+            Defaults to False.
+    """
 
-        Args:
-            model_id (str): The ID of the model to load, usually a .PDB accession code.
-            targets (Optional[Dict[str, Union[float, int]]], optional): Target values associated with the query. Defaults to None.
-            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-                Defaults to False.
-        """
+    model_id: str
+    resolution: str
+    pdb_path: str
+    chain_ids: List[str] | str
+    pssm_paths: Dict[str, str] = field(default_factory=dict)
+    distance_cutoff: float = 4.5
+    targets: Dict[str, float] = field(default_factory=dict)
+    suppress_pssm_errors: bool = False
 
-        self._model_id = model_id
-        self._suppress = suppress_pssm_errors
+    def __post_init__(self):
+        if not isinstance(self.chain_ids, list):
+            self.chain_ids = [self.chain_ids]
+        for f in fields(self):
+            value = getattr(self, f.name)
+            if value is None and f.default_factory is not MISSING:
+                setattr(self, f.name, f.default_factory())
 
-        if targets is None:
-            self._targets = {}
-        else:
-            self._targets = targets
 
     def _set_graph_targets(self, graph: Graph):
         "Simply copies target data from query to graph."
@@ -378,12 +387,12 @@ class SingleResidueVariantResidueQuery(DeepRankQuery):
         self,
         pdb_path: str,
         chain_id: str,
-        residue_number: int,
-        insertion_code: str,
-        wildtype_amino_acid: AminoAcid,
-        variant_amino_acid: AminoAcid,
+        residue_number: int,  # specific to variants
+        insertion_code: str,  # specific to variants
+        wildtype_amino_acid: AminoAcid,  # specific to variants
+        variant_amino_acid: AminoAcid,  # specific to variants
         pssm_paths: Optional[Dict[str, str]] = None,
-        radius: float = 10.0,
+        radius: float = 10.0,  # specific to variants
         distance_cutoff: Optional[float] = 4.5,
         targets: Optional[Dict[str, float]] = None,
         suppress_pssm_errors: bool = False,
