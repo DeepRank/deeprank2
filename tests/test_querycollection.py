@@ -11,7 +11,8 @@ from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain.aminoacidlist import alanine, phenylalanine
 from deeprank2.features import components, contact, surfacearea
-from deeprank2.query import (ProteinProteinInterfaceResidueQuery, Query,
+from deeprank2.query import (DeepRankQuery,
+                             ProteinProteinInterfaceResidueQuery,
                              QueryCollection, SingleResidueVariantResidueQuery)
 from deeprank2.tools.target import compute_ppi_scores
 
@@ -126,7 +127,7 @@ def test_querycollection_process():
         assert isinstance(collection.queries, list)
         assert len(collection.queries) == n_queries
         for query in collection.queries:
-            assert issubclass(type(query), Query)
+            assert issubclass(type(query), DeepRankQuery)
 
         rmtree(output_directory)
 

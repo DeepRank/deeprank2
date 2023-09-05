@@ -93,12 +93,12 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
         _log.warning(error_message)
 
 
-class Query:
+class DeepRankQuery:
 
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None, suppress_pssm_errors: bool = False):
         """Represents one entity of interest, like a single-residue variant or a protein-protein interface.
 
-        :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
+        :class:`DeepRankQuery` objects are used to generate graphs from structures, and they should be created before any model is loaded.
         They can have target values associated with them, which will be stored with the resulting graph.
 
         Args:
@@ -200,12 +200,12 @@ class QueryCollection:
         self.cpu_count = None
         self.ids_count = {}
 
-    def add(self, query: Query, verbose: bool = False, warn_duplicate: bool = True):
+    def add(self, query: DeepRankQuery, verbose: bool = False, warn_duplicate: bool = True):
         """
         Adds a new query to the collection.
 
         Args:
-            query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
+            query(:class:`DeepRankQuery`): Must be a :class:`DeepRankQuery` object, either :class:`ProteinProteinInterfaceResidueQuery` or
                 :class:`SingleResidueVariantAtomicQuery`.
             verbose(bool, optional): For logging query IDs added, defaults to False.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified.
@@ -224,7 +224,7 @@ class QueryCollection:
             query.model_id = new_id
 
             if warn_duplicate:
-                _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+                _log.warning(f'DeepRankQuery with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
@@ -238,14 +238,14 @@ class QueryCollection:
             pickle.dump(self, pkl_file)
 
     @property
-    def queries(self) -> List[Query]:
+    def queries(self) -> List[DeepRankQuery]:
         "The list of queries added to the collection."
         return self._queries
 
-    def __contains__(self, query: Query) -> bool:
+    def __contains__(self, query: DeepRankQuery) -> bool:
         return query in self._queries
 
-    def __iter__(self) -> Iterator[Query]:
+    def __iter__(self) -> Iterator[DeepRankQuery]:
         return iter(self._queries)
 
     def __len__(self) -> int:
@@ -258,7 +258,7 @@ class QueryCollection:
         grid_settings: Optional[GridSettings],
         grid_map_method: Optional[MapMethod],
         grid_augmentation_count: int,
-        query: Query
+        query: DeepRankQuery
     ):
 
         try:
@@ -283,7 +283,7 @@ class QueryCollection:
             return None
 
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
-            _log.warning(f'\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),'
+            _log.warning(f'\nGraph/DeepRankQuery with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),'
             ' and it has not been written to the hdf5 file. More details below:')
             _log.exception(e)
             return None
@@ -371,7 +371,7 @@ class QueryCollection:
         return output_paths
 
 
-class SingleResidueVariantResidueQuery(Query):
+class SingleResidueVariantResidueQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -411,7 +411,7 @@ class SingleResidueVariantResidueQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -490,7 +490,7 @@ class SingleResidueVariantResidueQuery(Query):
         return graph
 
 
-class SingleResidueVariantAtomicQuery(Query):
+class SingleResidueVariantAtomicQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -530,7 +530,7 @@ class SingleResidueVariantAtomicQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._chain_id = chain_id
         self._residue_number = residue_number
@@ -699,7 +699,7 @@ def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
                 chain.pssm = parse_pssm(f, chain)
 
 
-class ProteinProteinInterfaceAtomicQuery(Query):
+class ProteinProteinInterfaceAtomicQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -728,7 +728,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._pdb_path = pdb_path
 
@@ -797,7 +797,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         return graph
 
 
-class ProteinProteinInterfaceResidueQuery(Query):
+class ProteinProteinInterfaceResidueQuery(DeepRankQuery):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -826,7 +826,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
 
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
-        Query.__init__(self, model_id, targets, suppress_pssm_errors)
+        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
 
         self._pdb_path = pdb_path
 
