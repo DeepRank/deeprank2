@@ -15,7 +15,7 @@
 
 DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue missense variants. This package is an improved and unified version of two previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank) and [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
+DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
 
 Main features:
 - Predefined atom-level and residue-level feature types
@@ -70,7 +70,7 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
   * if this gives an error or shows a version lower than 4:
     * on ubuntu 22.04 or newer: `sudo apt-get install dssp`.
       * If the package cannot be located, first run `sudo apt-get update`.
-    * on older versions of ubuntu or on mac, or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
+    * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
 * Check if gcc is installed: `gcc --version`.
   * if this gives an error, run `sudo apt-get install gcc`.
 
