@@ -7,7 +7,7 @@ from typing import List, Union
 import h5py
 import pytest
 from deeprank2.domain.aminoacidlist import alanine, phenylalanine
-from deeprank2.query import (ProteinProteinInterfaceResidueQuery, Query,
+from deeprank2.query import (ProteinProteinInterfaceResidueQuery, DeepRankQuery,
                              QueryCollection, SingleResidueVariantResidueQuery)
 from deeprank2.tools.target import compute_targets
 
@@ -126,7 +126,7 @@ def test_querycollection_process():
         assert isinstance(collection.queries, list)
         assert len(collection.queries) == n_queries
         for query in collection.queries:
-            assert issubclass(type(query), Query)
+            assert issubclass(type(query), DeepRankQuery)
 
         rmtree(output_directory)
 
