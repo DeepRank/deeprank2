@@ -24,10 +24,10 @@ class EarlyStopping:
                 Defaults to None.
             min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
                 Defaults to 10.
-            verbose (bool, optional): If True, prints a message for each validation loss improvement. 
+            verbose (bool, optional): If True, prints a message for each validation loss improvement.
                 Defaults to True.
             trace_func (Callable, optional): Function used for recording EarlyStopping status.
-                Defaults to print.            
+                Defaults to print.
         """
 
         self.patience = patience
@@ -44,12 +44,12 @@ class EarlyStopping:
 
     def __call__(self, epoch, val_loss, train_loss=None):
         score = -val_loss
-        
+
         # initialize
         if self.best_score is None:
             self.best_score = score
             self.val_loss_min = val_loss
-        
+
         # check patience
         elif score < self.best_score + self.delta:
             self.counter += 1
@@ -68,11 +68,11 @@ class EarlyStopping:
                 self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).')
             self.best_score = score
             self.counter = 0
-        
+
         if score >= self.best_score:
             self.best_score = score
             self.val_loss_min = val_loss
-        
+
         # check maxgap
         if self.maxgap and epoch > self.min_epoch:
             if train_loss is None:
@@ -82,7 +82,7 @@ class EarlyStopping:
                 self.trace_func(f'EarlyStopping activated at epoch # {epoch} due to overfitting. ' +
                                 f'The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})')
                 self.early_stop = True
-                
+
 
 
 

@@ -585,10 +585,10 @@ class TestDataSet(unittest.TestCase):
 
     def test_only_transform_all_graphdataset(self):# noqa: MC0001, pylint: disable=too-many-locals
         # define a features_transform dict for only transformations for `all` features
-        
+
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'all': {'transform': lambda t: np.log(abs(t)+.01)}}
-        
+
         # dataset that has the transformations applied using features_transform dict
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
@@ -911,10 +911,10 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.devs == dataset_test.devs
 
     def test_invalid_value_features_transform(self):
-        
+
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {'all': {'transform': lambda t: np.log(t+10), 'standardize': True}}
-        
+
         transf_dataset = GraphDataset(
             hdf5_path = hdf5_path,
             target = 'binary',
@@ -923,7 +923,7 @@ class TestDataSet(unittest.TestCase):
         with pytest.raises(ValueError):
             with warnings.catch_warnings():
                 warnings.filterwarnings('ignore', r'divide by zero encountered in divide')
-                _compute_features_with_get(hdf5_path, transf_dataset)     
+                _compute_features_with_get(hdf5_path, transf_dataset)
 
     def test_inherit_info_training_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"

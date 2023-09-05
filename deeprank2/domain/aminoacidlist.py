@@ -4,7 +4,7 @@ from deeprank2.molstruct.aminoacid import AminoAcid, Polarity
 
 # All info below sourced from above websites in December 2022 and summarized in deeprank2/domain/aminoacid_summary.xlsx
 
-# Charge is calculated from summing all atoms in the residue (from ./deeprank2/domain/forcefield/protein-allhdg5-5_new.top). 
+# Charge is calculated from summing all atoms in the residue (from ./deeprank2/domain/forcefield/protein-allhdg5-5_new.top).
 # This results in the expected charge of 0 for all POLAR and NONPOLAR residues, +1 for POSITIVE residues and -1 for NEGATIVE residues.
 # Note that SER, THR, and TYR lead to a charge of ~1e-16. A rounding error is assumed in these cases and they are set to 0.
 
@@ -19,7 +19,7 @@ from deeprank2.molstruct.aminoacid import AminoAcid, Polarity
 # The other sources have some minor discrepancies compared to this and are commented inline.
 
 # Source for size:
-#   https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf 
+#   https://www.shimadzu.co.jp/aboutus/ms_r/archive/files/AminoAcidTable.pdf
 
 # Sources for mass and pI:
 #   1) https://www.sigmaaldrich.com/NL/en/technical-documents/technical-article/protein-biology/protein-structural-analysis/amino-acid-reference-chart
@@ -69,7 +69,7 @@ selenocysteine = AminoAcid(
     "U",
     charge = 0,
     polarity = Polarity.POLAR, # source 3: "special case"
-    size = 2, # source: https://en.wikipedia.org/wiki/Selenocysteine 
+    size = 2, # source: https://en.wikipedia.org/wiki/Selenocysteine
     mass = 150.0, # only from source 3
     pI = 5.47, # only from source 3
     hydrogen_bond_donors = 1, # unconfirmed
@@ -174,7 +174,7 @@ pyrrolysine = AminoAcid(
     "PYL",
     "O",
     charge = 0, # unconfirmed
-    polarity = Polarity.POLAR, # based on having both H-bond donors and acceptors 
+    polarity = Polarity.POLAR, # based on having both H-bond donors and acceptors
     size = 13, # source: https://en.wikipedia.org/wiki/Pyrrolysine
     mass = 255.32, # from source 3
     pI = 7.394, # rough estimate from https://rstudio-pubs-static.s3.amazonaws.com/846259_7a9236df54e6410a972621590ecdcfcb.html
@@ -353,9 +353,9 @@ amino_acids = [
     ]
 
 def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
-    
+
     # pylint: disable = raise-missing-from
-    try: 
+    try:
         if len(aa) == 1:
             aa: AminoAcid = [entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower()][0]
         elif len(aa) == 3:
@@ -367,7 +367,7 @@ def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
 
     if not output_type:
         return aa.name
-    if output_type == 3: 
+    if output_type == 3:
         return aa.three_letter_code
     if output_type == 1:
         return aa.one_letter_code

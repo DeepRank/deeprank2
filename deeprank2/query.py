@@ -211,7 +211,11 @@ class QueryCollection:
         Adds a new query to the collection.
 
         Args:
+<<<<<<< HEAD
             query(:class:`DeepRankQuery`): Must be a :class:`DeepRankQuery` object, either :class:`ProteinProteinInterfaceResidueQuery` or
+=======
+            query(:class:`Query`): Must be a :class:`Query` object, either :class:`ProteinProteinInterfaceResidueQuery` or
+>>>>>>> main
                 :class:`SingleResidueVariantAtomicQuery`.
             verbose(bool, optional): For logging query IDs added, defaults to False.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified.

@@ -21,7 +21,7 @@ cutoff_13 = 3.6
 cutoff_14 = 4.2
 
 def _get_nonbonded_energy( #pylint: disable=too-many-locals
-    atoms: List[Atom], 
+    atoms: List[Atom],
     distances: npt.NDArray[np.float64],
     ) -> Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Calculates all pairwise electrostatic (Coulomb) and Van der Waals (Lennard Jones) potential energies between all atoms in the structure.
@@ -30,8 +30,8 @@ def _get_nonbonded_energy( #pylint: disable=too-many-locals
     However, the potential tends to 0 at large distance.
 
     Args:
-        atoms (List[Atom]): list of all atoms in the structure 
-        distances (npt.NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure 
+        atoms (List[Atom]): list of all atoms in the structure
+        distances (npt.NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure
             in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
 
     Returns:
@@ -70,8 +70,8 @@ def _get_nonbonded_energy( #pylint: disable=too-many-locals
     E_vdw[pair_14] = E_vdw_14pairs[pair_14]
     E_vdw[pair_13] = 0
     E_elec[pair_13] = 0
-    
-    
+
+
     return E_elec, E_vdw
 
 
@@ -79,9 +79,9 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
     pdb_path: str, graph: Graph,
     single_amino_acid_variant: Optional[SingleResidueVariant] = None
     ):
-    
+
     # assign each atoms (from all edges) a unique index
-    all_atoms = set() 
+    all_atoms = set()
     if isinstance(graph.edges[0].id, AtomicContact):
         for edge in graph.edges:
             contact = edge.id
@@ -109,8 +109,8 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
     # assign features
     for edge in graph.edges:
         contact = edge.id
-        
-        if isinstance(contact, AtomicContact):    
+
+        if isinstance(contact, AtomicContact):
             ## find the indices
             atom1_index = atom_dict[contact.atom1]
             atom2_index = atom_dict[contact.atom2]
@@ -130,6 +130,6 @@ def add_features( # pylint: disable=unused-argument, too-many-locals
             edge.features[Efeat.DISTANCE] = np.min([[interatomic_distances[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
             edge.features[Efeat.ELEC] = np.sum([[interatomic_electrostatic_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
             edge.features[Efeat.VDW] = np.sum([[interatomic_vanderwaals_energy[a1, a2] for a1 in atom1_indices] for a2 in atom2_indices])
-        
+
         # Calculate irrespective of node type
         edge.features[Efeat.COVALENT] = float(edge.features[Efeat.DISTANCE] < covalent_cutoff and edge.features[Efeat.SAMECHAIN])

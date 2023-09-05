@@ -9,7 +9,7 @@ class VanderwaalsParam:
         self.sigma_main = sigma_main
         self.epsilon_14 = epsilon_14
         self.sigma_14 = sigma_14
-    
+
     def __str__(self) -> str:
         return f"{self.epsilon_main}, {self.sigma_main}, {self.epsilon_14}, {self.sigma_14}"
 
