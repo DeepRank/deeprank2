@@ -94,6 +94,9 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
         warnings.warn(error_message)
         _log.warning(error_message)
 
+
+# TODO: consider whether we want to use the built-in repr and eq, or define it ourselves
+# if built-in: consider which arguments to include in either.
 @dataclass(repr=False, kw_only=True)
 class DeepRankQuery:
     """Represents one entity of interest, like a single residue variant or a protein-protein interface.
@@ -399,24 +402,7 @@ class QueryCollection:
 
 @dataclass(kw_only=True)
 class SingleResidueVariantQuery(DeepRankQuery):
-    """
-    Creates a residue graph from a single residue variant in a .PDB file.
-
-    Args:
-        pdb_path (str): The path to the PDB file.
-        chain_id (str): The .PDB chain identifier of the variant residue.
-        variant_residue_number (int): The number of the variant residue.
-        insertion_code (str): The insertion code of the variant residue, set to None if not applicable.
-        wildtype_amino_acid (:class:`AminoAcid`): The wildtype amino acid.
-        variant_amino_acid (:class:`AminoAcid`): The variant amino acid.
-        pssm_paths (Optional[Dict(str,str)], optional): The paths to the PSSM files, per chain identifier. Defaults to None.
-        radius (float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0.
-        distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
-            Defaults to 4.5.
-        targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-        suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-            Defaults to False.
-    """
+    """A query that builds a single residue variant graph."""
 
     variant_residue_number: int
     insertion_code: str
@@ -441,7 +427,8 @@ class SingleResidueVariantQuery(DeepRankQuery):
     def get_query_id(self) -> str:
         """Returns the string representing the complete query ID."""
         return (
-            f"{self.resolution}-srv:{self.variant_chain_id}:{self.residue_id}:"
+            f"{self.resolution}-srv:"  # resolution and query type (srv for single residue variant)
+            + f"{self.variant_chain_id}:{self.residue_id}:"
             + f"{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
         )
 
