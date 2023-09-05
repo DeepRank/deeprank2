@@ -441,7 +441,7 @@ class GridDataset(DeeprankDataset):
                 Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
                 Defaults to "all".
             target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq. It can also be
-                a custom-defined target given to the Query class as input (see: `deeprank2.query`); in this case,
+                a custom-defined target given to the DeepRankQuery class as input (see: `deeprank2.query`); in this case,
                 the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical.
                 If the latter is your case, please convert the categorical classes into
@@ -680,7 +680,7 @@ class GraphDataset(DeeprankDataset):
                 :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to make them available to networks
                 that make use of clustering methods. Defaults to None.
             target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq.
-                It can also be a custom-defined target given to the Query class as input (see: `deeprank2.query`);
+                It can also be a custom-defined target given to the DeepRankQuery class as input (see: `deeprank2.query`);
                 in this case, the task parameter needs to be explicitly specified as well.
                 Only numerical target variables are supported, not categorical.
                 If the latter is your case, please convert the categorical classes into
