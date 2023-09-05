@@ -65,7 +65,7 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
     - `python -c "import torch; print(torch.__version__)"` and
     - `python -c "import torch; print(torch.version.cuda)"`
       - if this returns `None`, use `cpu` instead
-  - For example: `https://data.pyg.org/whl/torch-2.0.0+cpu.html`
+  - For example: `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.0.0+cpu.html`
 * Check if [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/) is installed: `dssp --version`
   * if this gives an error or shows a version lower than 4:
     * on ubuntu 22.04 or newer: `sudo apt-get install dssp`.
