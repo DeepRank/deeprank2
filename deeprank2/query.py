@@ -501,53 +501,45 @@ class SingleResidueVariantQuery(DeepRankQuery):
         return graph
 
 
-def _load_ppi_atoms(pdb_path: str,
-                    chain_id1: str, chain_id2: str,
-                    distance_cutoff: float,
-                    include_hydrogens: bool) -> List[Atom]:
+def _load_ppi_atoms(
+    pdb_path: str,
+    chain_ids: List[str],
+    distance_cutoff: float,
+    include_hydrogens: bool,
+) -> List[Atom]:
 
     # get the contact atoms
     if include_hydrogens:
-
         pdb_name = os.path.basename(pdb_path)
         hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
             prefix="hydrogenated-", suffix=pdb_name
         )
         os.close(hydrogen_pdb_file)
-
         add_hydrogens(pdb_path, hydrogen_pdb_path)
-
         try:
-            contact_atoms = get_contact_atoms(hydrogen_pdb_path,
-                                              chain_id1, chain_id2,
-                                              distance_cutoff)
+            contact_atoms = get_contact_atoms(hydrogen_pdb_path, chain_ids, distance_cutoff)
         finally:
             os.remove(hydrogen_pdb_path)
     else:
-        contact_atoms = get_contact_atoms(pdb_path,
-                                          chain_id1, chain_id2,
-                                          distance_cutoff)
+        contact_atoms = get_contact_atoms(pdb_path, chain_ids, distance_cutoff)
 
     if len(contact_atoms) == 0:
         raise ValueError("no contact atoms found")
 
     return contact_atoms
 
-
-def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
-                    chains: List[str],
-                    structure: PDBStructure,
-                    pdb_path,
-                    suppress_error):
-
+def _load_ppi_pssms(
+    pssm_paths: Optional[Dict[str, str]],
+    chain_ids: List[str],
+    structure: PDBStructure,
+    pdb_path: str,
+    suppress_error: bool,
+):
     _check_pssm(pdb_path, pssm_paths, suppress_error, verbosity = 0)
-    for chain_id in chains:
+    for chain_id in chain_ids:
         if chain_id in pssm_paths:
-
             chain = structure.get_chain(chain_id)
-
             pssm_path = pssm_paths[chain_id]
-
             with open(pssm_path, "rt", encoding="utf-8") as f:
                 chain.pssm = parse_pssm(f, chain)
 
@@ -586,7 +578,7 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
         """
 
         contact_atoms = _load_ppi_atoms(self.pdb_path,
-                                        self.chain_ids[0], self.chain_ids[1],
+                                        self.chain_ids,
                                         self.distance_cutoff,
                                         include_hydrogens)
 
