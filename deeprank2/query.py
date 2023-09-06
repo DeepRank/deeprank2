@@ -224,10 +224,8 @@ class DeepRankQuery:
 
 
 class QueryCollection:
-    """
-    Represents the collection of data queries.
+    """Represents the collection of data queries.
         Queries can be saved as a dictionary to easily navigate through their data.
-
     """
 
     def __init__(self):
@@ -241,8 +239,8 @@ class QueryCollection:
         Adds a new query to the collection.
 
         Args:
-            query(:class:`DeepRankQuery`): Must be a :class:`DeepRankQuery` object, either :class:`ProteinProteinInterfaceResidueQuery` or
-                :class:`SingleResidueVariantAtomicQuery`.
+            query(:class:`DeepRankQuery`): Must be a :class:`DeepRankQuery` object, either :class:`ProteinProteinInterfaceQuery` or
+                :class:`SingleResidueVariantQuery`.
             verbose(bool, optional): For logging query IDs added, defaults to False.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified.
 
