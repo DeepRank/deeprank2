@@ -4,13 +4,14 @@ import subprocess
 from typing import List, Union
 
 import numpy as np
+from pdb2sql import interface as get_interface
+from scipy.spatial import distance_matrix
+
 from deeprank2.domain.aminoacidlist import amino_acids
 from deeprank2.molstruct.atom import Atom, AtomicElement
 from deeprank2.molstruct.pair import Pair
 from deeprank2.molstruct.residue import Residue
 from deeprank2.molstruct.structure import Chain, PDBStructure
-from pdb2sql import interface as get_interface
-from scipy.spatial import distance_matrix
 
 _log = logging.getLogger(__name__)
 
@@ -165,22 +166,26 @@ def get_structure(pdb, id_: str) -> PDBStructure:
 
 def get_contact_atoms( # pylint: disable=too-many-locals
     pdb_path: str,
-    chain_id1: str,
-    chain_id2: str,
+    chain_ids: List[str],
     distance_cutoff: float
 ) -> List[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
     interface = get_interface(pdb_path)
     try:
-        atom_indexes = interface.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2)
-        rows = interface.get("x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
-                             rowID=atom_indexes[chain_id1] + atom_indexes[chain_id2])
+        atom_indexes = interface.get_contact_atoms(
+            cutoff=distance_cutoff,
+            chain1=chain_ids[0],
+            chain2=chain_ids[1]
+        )
+        rows = interface.get(
+            "x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
+            rowID=atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]]
+        )
     finally:
         interface._close()  # pylint: disable=protected-access
 
     pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
-
     structure = PDBStructure(f"contact_atoms_{pdb_name}")
 
     for row in rows:
