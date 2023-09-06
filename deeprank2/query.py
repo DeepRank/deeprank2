@@ -22,13 +22,8 @@ from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
-<<<<<<< HEAD
-from deeprank2.molstruct.residue import get_residue_center
-from deeprank2.molstruct.structure import Chain, PDBStructure
-=======
 from deeprank2.molstruct.residue import Residue, get_residue_center
-from deeprank2.molstruct.structure import PDBStructure
->>>>>>> 0409cb0 (merge SRV `build` methods)
+from deeprank2.molstruct.structure import Chain, PDBStructure
 from deeprank2.molstruct.variant import SingleResidueVariant
 from deeprank2.utils.buildgraph import (add_hydrogens, get_contact_atoms,
                                         get_structure,
@@ -492,7 +487,6 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
             graph = build_atomic_graph(atoms, self.get_query_id(), self.distance_cutoff)
             #TODO: check if this works with a set instead of a list
-
 
         else:
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
