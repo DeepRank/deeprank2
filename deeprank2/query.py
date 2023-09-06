@@ -5,22 +5,25 @@ import pickle
 import pkgutil
 import tempfile
 import warnings
+from dataclasses import MISSING, dataclass, field, fields
 from functools import partial
 from glob import glob
 from multiprocessing import Pool
 from random import randrange
 from types import ModuleType
 from typing import Dict, Iterator, List, Optional, Union
-from dataclasses import dataclass, field, fields, MISSING
 
 import h5py
 import numpy as np
 import pdb2sql
+
+import deeprank2.features
 from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
+from deeprank2.features import components, conservation, contact
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import get_residue_center, Residue
-from deeprank2.molstruct.structure import PDBStructure, Chain
+from deeprank2.molstruct.residue import Residue, get_residue_center
+from deeprank2.molstruct.structure import Chain, PDBStructure
 from deeprank2.molstruct.variant import SingleResidueVariant
 from deeprank2.utils.buildgraph import (add_hydrogens, get_contact_atoms,
                                         get_structure,
@@ -29,9 +32,6 @@ from deeprank2.utils.graph import (Graph, build_atomic_graph,
                                    build_residue_graph)
 from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 from deeprank2.utils.parsing.pssm import parse_pssm
-
-import deeprank2.features
-from deeprank2.features import components, conservation, contact
 
 _log = logging.getLogger(__name__)
 
@@ -235,8 +235,8 @@ class QueryCollection:
         Adds a new query to the collection.
 
         Args:
-            query(:class:`DeepRankQuery`): Must be a :class:`DeepRankQuery` object, either :class:`ProteinProteinInterfaceResidueQuery` or
-                :class:`SingleResidueVariantAtomicQuery`.
+            query(:class:`DeepRankQuery`): Must be a :class:`DeepRankQuery` object, either :class:`ProteinProteinInterfaceQuery` or
+                :class:`SingleResidueVariantQuery`.
             verbose(bool, optional): For logging query IDs added, defaults to False.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified.
 
