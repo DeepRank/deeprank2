@@ -20,7 +20,6 @@ import deeprank2.features
 from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
 from deeprank2.molstruct.aminoacid import AminoAcid
-from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.molstruct.structure import Chain, PDBStructure
 from deeprank2.utils.buildgraph import (get_contact_atoms, get_structure,
@@ -475,20 +474,6 @@ class SingleResidueVariantQuery(DeepRankQuery):
         return graph
 
 
-def _load_ppi_atoms(
-    pdb_path: str,
-    chain_ids: List[str],
-    distance_cutoff: float,
-) -> List[Atom]:
-
-    # get the contact atoms
-    contact_atoms = get_contact_atoms(pdb_path, chain_ids, distance_cutoff)
-
-    if len(contact_atoms) == 0:
-        raise ValueError("no contact atoms found")
-
-    return contact_atoms
-
 def _load_ppi_pssms(
     pssm_paths: Optional[Dict[str, str]],
     chain_ids: List[str],
@@ -543,10 +528,9 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
-        contact_atoms = _load_ppi_atoms(self.pdb_path,
-                                        self.chain_ids,
-                                        self.distance_cutoff,
-                                        )
+        contact_atoms = get_contact_atoms(self.pdb_path, self.chain_ids, self.distance_cutoff)
+        if len(contact_atoms) == 0:
+            raise ValueError("no contact atoms found")
 
         # build the graph
         if self.resolution == 'atomic':
