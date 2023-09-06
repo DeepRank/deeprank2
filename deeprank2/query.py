@@ -184,6 +184,17 @@ class DeepRankQuery:
 
         return structure
 
+    @staticmethod
+    def _get_atom_node_key(atom) -> str:
+        #TODO: check whether this method is still useful or just obsolete legacy code
+        """
+        Since pickle has problems serializing the graph when the nodes are atoms,
+        this function can be used to generate a unique key for the atom.
+        """
+
+        # This should include the model, chain, residue and atom
+        return str(atom)
+
     @property
     def model_id(self) -> str:
         """The ID of the model, usually a .PDB accession code."""
@@ -389,71 +400,36 @@ class QueryCollection:
 
         return output_paths
 
+@dataclass(kw_only=True)
+class SingleResidueVariantQuery(DeepRankQuery):
+    """A query that builds a single residue variant graph."""
 
-class SingleResidueVariantResidueQuery(DeepRankQuery):
+    variant_residue_number: int
+    insertion_code: str | None
+    wildtype_amino_acid: AminoAcid
+    variant_amino_acid: AminoAcid
+    radius: float = 10.0
 
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        pdb_path: str,
-        chain_id: str,
-        residue_number: int,
-        insertion_code: str,
-        wildtype_amino_acid: AminoAcid,
-        variant_amino_acid: AminoAcid,
-        pssm_paths: Optional[Dict[str, str]] = None,
-        radius: float = 10.0,
-        distance_cutoff: Optional[float] = 4.5,
-        targets: Optional[Dict[str, float]] = None,
-        suppress_pssm_errors: bool = False,
-    ):
-        """
-        Creates a residue graph from a single-residue variant in a .PDB file.
-
-        Args:
-            pdb_path (str): The path to the PDB file.
-            chain_id (str): The .PDB chain identifier of the variant residue.
-            residue_number (int): The number of the variant residue.
-            insertion_code (str): The insertion code of the variant residue, set to None if not applicable.
-            wildtype_amino_acid (:class:`AminoAcid`): The wildtype amino acid.
-            variant_amino_acid (:class:`AminoAcid`): The variant amino acid.
-            pssm_paths (Optional[Dict(str,str)], optional): The paths to the PSSM files, per chain identifier. Defaults to None.
-            radius (float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0.
-            distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
-                Defaults to 4.5.
-            targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-                Defaults to False.
-        """
-
-        self._pdb_path = pdb_path
-        self._pssm_paths = pssm_paths
-
-        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
-
-        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
-
-        self._chain_id = chain_id
-        self._residue_number = residue_number
-        self._insertion_code = insertion_code
-        self._wildtype_amino_acid = wildtype_amino_acid
-        self._variant_amino_acid = variant_amino_acid
-
-        self._radius = radius
-        self._distance_cutoff = distance_cutoff
+    def __post_init__(self):
+        super().__post_init__()  # calls __post_init__ of parents
+        if len(self.chain_ids) != 1:
+            # TODO: Consider throwing a warning instead of error and taking the first entry of the list anyway.
+            raise ValueError(f"SingleResidueVariantQuery must contain exactly 1 chain_id, but {len(self.chain_ids)} were given.")
+        self.variant_chain_id = self.chain_ids[0]
 
     @property
     def residue_id(self) -> str:
-        "String representation of the residue number and insertion code."
-
-        if self._insertion_code is not None:
-
-            return f"{self._residue_number}{self._insertion_code}"
-
-        return str(self._residue_number)
+        """String representation of the residue number and insertion code."""
+        if self.insertion_code is not None:
+            return f"{self.variant_residue_number}{self.insertion_code}"
+        return str(self.variant_residue_number)
 
     def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
-        return f"residue-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
+        """Returns the string representing the complete query ID."""
+        return (f"{self.resolution}-srv:"
+                + f"{self.variant_chain_id}:{self.residue_id}:"
+                + f"{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
+                )
 
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
         """Builds the graph from the .PDB structure.
