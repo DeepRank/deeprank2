@@ -432,7 +432,10 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
     def get_query_id(self) -> str:
         """Returns the string representing the complete query ID."""
-        return f"{self.resolution}-srv:{self.variant_chain_id}:{self.residue_id}:{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
+        return (f"{self.resolution}-srv:"
+                + f"{self.variant_chain_id}:{self.residue_id}:"
+                + f"{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
+                )
 
     def build(
         self,
