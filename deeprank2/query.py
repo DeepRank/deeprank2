@@ -22,7 +22,7 @@ from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import SingleResidueVariant
+from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.molstruct.structure import Chain, PDBStructure
 from deeprank2.utils.buildgraph import (add_hydrogens, get_contact_atoms,
                                         get_structure,
@@ -431,7 +431,12 @@ class SingleResidueVariantQuery(DeepRankQuery):
                 + f"{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
                 )
 
-    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+    def build(
+        self,
+        feature_modules: List[ModuleType] | ModuleType,
+        include_hydrogens: bool = False,
+    ) -> Graph:
+        #TODO: check how much of this is common with PPI and move it to parent class
         """Builds the graph from the .PDB structure.
 
         Args:
@@ -447,199 +452,52 @@ class SingleResidueVariantQuery(DeepRankQuery):
             load_pssms = conservation in feature_modules
         else:
             load_pssms = conservation == feature_modules
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
-
-        # find the variant residue
-        variant_residue = None
-        for residue in structure.get_chain(self._chain_id).residues:
-            if (
-                residue.number == self._residue_number
-                and residue.insertion_code == self._insertion_code
-            ):
-                variant_residue = residue
-                break
-
-        if variant_residue is None:
-            raise ValueError(
-                f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
-            )
-
-        # define the variant
-        variant = SingleResidueVariant(variant_residue, self._variant_amino_acid)
-
-        # select which residues will be the graph
-        residues = list(get_surrounding_residues(structure, residue, self._radius)) # pylint: disable=undefined-loop-variable
-
-        # build the graph
-        graph = build_residue_graph(
-            residues, self.get_query_id(), self._distance_cutoff
-        )
-
-        # add data to the graph
-        self._set_graph_targets(graph)
-
-        for feature_module in feature_modules:
-            feature_module.add_features(self._pdb_path, graph, variant)
-
-        graph.center = variant_residue.get_center()
-        return graph
-
-
-class SingleResidueVariantAtomicQuery(DeepRankQuery):
-
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        pdb_path: str,
-        chain_id: str,
-        residue_number: int,
-        insertion_code: str,
-        wildtype_amino_acid: AminoAcid,
-        variant_amino_acid: AminoAcid,
-        pssm_paths: Optional[Dict[str, str]] = None,
-        radius: float = 10.0,
-        distance_cutoff: Optional[float] = 4.5,
-        targets: Optional[Dict[str, float]] = None,
-        suppress_pssm_errors: bool = False,
-    ):
-        """
-        Creates an atomic graph for a single-residue variant in a .PDB file.
-
-        Args:
-            pdb_path (str): The path to the .PDB file.
-            chain_id (str): The .PDB chain identifier of the variant residue.
-            residue_number (int): The number of the variant residue.
-            insertion_code (str): The insertion code of the variant residue, set to None if not applicable.
-            wildtype_amino_acid (:class:`AminoAcid`): The wildtype amino acid.
-            variant_amino_acid (:class:`AminoAcid`): The variant amino acid.
-            pssm_paths (Optional[Dict(str,str)], optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
-            radius (float, optional): In Ångström, determines how many residues will be included in the graph. Defaults to 10.0.
-            distance_cutoff (Optional[float], optional): Max distance in Ångström between a pair of atoms to consider them as an external edge in the graph.
-                Defaults to 4.5.
-            targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-                Defaults to False.
-        """
-
-        self._pdb_path = pdb_path
-        self._pssm_paths = pssm_paths
-
-        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
-
-        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
-
-        self._chain_id = chain_id
-        self._residue_number = residue_number
-        self._insertion_code = insertion_code
-        self._wildtype_amino_acid = wildtype_amino_acid
-        self._variant_amino_acid = variant_amino_acid
-
-        self._radius = radius
-
-        self._distance_cutoff = distance_cutoff
-
-    @property
-    def residue_id(self) -> str:
-        "String representation of the residue number and insertion code."
-
-        if self._insertion_code is not None:
-            return f"{self._residue_number}{self._insertion_code}"
-
-        return str(self._residue_number)
-
-    def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
-        return f"atomic-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
-
-    def __eq__(self, other) -> bool:
-        return (
-            isinstance(self, type(other))
-            and self.model_id == other.model_id
-            and self._chain_id == other._chain_id
-            and self.residue_id == other.residue_id
-            and self._wildtype_amino_acid == other._wildtype_amino_acid
-            and self._variant_amino_acid == other._variant_amino_acid
-        )
-
-    def __hash__(self) -> hash:
-        return hash(
-            (
-                self.model_id,
-                self._chain_id,
-                self.residue_id,
-                self._wildtype_amino_acid,
-                self._variant_amino_acid,
-            )
-        )
-
-    @staticmethod
-    def _get_atom_node_key(atom) -> str:
-        """
-        Since pickle has problems serializing the graph when the nodes are atoms,
-        this function can be used to generate a unique key for the atom.
-        """
-
-        # This should include the model, chain, residue and atom
-        return str(atom)
-
-    def build(self, feature_modules: Union[ModuleType, List[ModuleType]], include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the .PDB structure.
-
-        Args:
-            feature_modules (Union[ModuleType, List[ModuleType]]): Each must implement the :py:func:`add_features` function.
-            include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
-
-        Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
-        """
-
-        # load .PDB structure
-        if isinstance(feature_modules, List):
-            load_pssms = conservation in feature_modules
-        else:
-            load_pssms = conservation == feature_modules
             feature_modules = [feature_modules]
-        structure = self._load_structure(self._pdb_path, self._pssm_paths, include_hydrogens, load_pssms)
+        structure: PDBStructure = self._load_structure(include_hydrogens, load_pssms)
 
-        # find the variant residue
+        # find the variant residue and its surroundings
         variant_residue = None
-        for residue in structure.get_chain(self._chain_id).residues:
+        for residue in structure.get_chain(self.variant_chain_id).residues:
+            residue: Residue
             if (
-                residue.number == self._residue_number
-                and residue.insertion_code == self._insertion_code
+                residue.number == self.variant_residue_number
+                and residue.insertion_code == self.insertion_code
             ):
                 variant_residue = residue
                 break
-
         if variant_residue is None:
             raise ValueError(
-                f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
+                f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}"
             )
-
-        # define the variant
-        variant = SingleResidueVariant(variant_residue, self._variant_amino_acid)
-
-        # get the residues and atoms involved
-        residues = get_surrounding_residues(structure, variant_residue, self._radius)
-        residues.add(variant_residue)
-        atoms = set([])
-        for residue in residues:
-            if residue.amino_acid is not None:
-                for atom in residue.atoms:
-                    atoms.add(atom)
-        atoms = list(atoms)
+        variant = SingleResidueVariant(variant_residue, self.variant_amino_acid)
+        residues = get_surrounding_residues(structure, variant_residue, self.radius)
 
         # build the graph
-        graph = build_atomic_graph(
-            atoms, self.get_query_id(), self._distance_cutoff
-        )
+        if self.resolution == 'residue':
+            graph = build_residue_graph(residues, self.get_query_id(), self.distance_cutoff)
+        elif self.resolution == 'atomic':
+            residues.append(variant_residue)
+            atoms = set([])
+            for residue in residues:
+                if residue.amino_acid is not None:
+                    for atom in residue.atoms:
+                        atoms.add(atom)
+            atoms = list(atoms)
+            #TODO: why was this a set at first? I think each atom is unique anyway, given that it has a Residue property
+
+            graph = build_atomic_graph(atoms, self.get_query_id(), self.distance_cutoff)
+            #TODO: check if this works with a set instead of a list
+
+
+        else:
+            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
+        graph.center = variant_residue.get_center()
 
         # add data to the graph
         self._set_graph_targets(graph)
-
         for feature_module in feature_modules:
-            feature_module.add_features(self._pdb_path, graph, variant)
+            feature_module.add_features(self.pdb_path, graph, variant)
 
-        graph.center = variant_residue.get_center()
         return graph
 
 
