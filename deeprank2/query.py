@@ -115,7 +115,7 @@ class DeepRankQuery:
     resolution: str
     chain_ids: List[str] | str
     pssm_paths: Dict[str, str] = field(default_factory=dict)
-    distance_cutoff: float = 4.5
+    distance_cutoff: float = None
     targets: Dict[str, float] = field(default_factory=dict)
     suppress_pssm_errors: bool = False
 
@@ -411,10 +411,14 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
     def __post_init__(self):
         super().__post_init__()  # calls __post_init__ of parents
+
         if len(self.chain_ids) != 1:
             # TODO: Consider throwing a warning instead of error and taking the first entry of the list anyway.
             raise ValueError(f"SingleResidueVariantQuery must contain exactly 1 chain_id, but {len(self.chain_ids)} were given.")
         self.variant_chain_id = self.chain_ids[0]
+
+        if not self.distance_cutoff:
+            self.distance_cutoff = 4.5
 
     @property
     def residue_id(self) -> str:
@@ -550,10 +554,17 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
 
     def __post_init__(self):
         super().__post_init__()
+
         if len(self.chain_ids) != 2:
             # TODO: Consider throwing a warning instead of error and using the first two entries of the list anyway.
             raise ValueError(f"SingleResidueVariantQuery must contain exactly 2 chain_ids, but {len(self.chain_ids)} were given.")
 
+        if not self.distance_cutoff:
+            #TODO: check if we truly need so many different defaults
+            if self.resolution == 'atomic':
+                self.distance_cutoff = 5.5
+            if self.resolution == 'residue':
+                self.distance_cutoff = 10
 
     def get_query_id(self) -> str:
         """Returns the string representing the complete query ID."""
