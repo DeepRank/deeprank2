@@ -23,7 +23,7 @@ from deeprank2.features import components, conservation, contact
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import SingleResidueVariant
-from deeprank2.molstruct.structure import PDBStructure
+from deeprank2.molstruct.structure import Chain, PDBStructure
 from deeprank2.utils.buildgraph import (add_hydrogens, get_contact_atoms,
                                         get_structure,
                                         get_surrounding_residues)
@@ -136,27 +136,27 @@ class DeepRankQuery:
                 setattr(self, f.name, f.default_factory())
 
     def _set_graph_targets(self, graph: Graph):
-        "Simply copies target data from query to graph."
-
-        for target_name, target_data in self._targets.items():
+        """Copy target data from query to graph."""
+        for target_name, target_data in self.targets.items():
             graph.targets[target_name] = target_data
 
     def _load_structure(
-        self, pdb_path: str, pssm_paths: Optional[Dict[str, str]],
+        self,
         include_hydrogens: bool,
         load_pssms: bool,
-    ):
-        "A helper function, to build the structure from .PDB and .PSSM files."
+    ) -> PDBStructure:
+        """Build PDBStructure objects from pdb and pssm data."""
 
         # make a copy of the pdb, with hydrogens
-        pdb_name = os.path.basename(pdb_path)
+        #TODO: I think this can move into the if include_hydrogens bracket
+        pdb_name = os.path.basename(self.pdb_path)
         hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
             prefix="hydrogenated-", suffix=pdb_name
         )
         os.close(hydrogen_pdb_file)
 
         if include_hydrogens:
-            add_hydrogens(pdb_path, hydrogen_pdb_path)
+            add_hydrogens(self.pdb_path, hydrogen_pdb_path)
 
             # read the .PDB copy
             try:
@@ -164,7 +164,7 @@ class DeepRankQuery:
             finally:
                 os.remove(hydrogen_pdb_path)
         else:
-            pdb = pdb2sql.pdb2sql(pdb_path)
+            pdb = pdb2sql.pdb2sql(self.pdb_path)
 
         try:
             structure = get_structure(pdb, self.model_id)
@@ -173,10 +173,11 @@ class DeepRankQuery:
 
         # read the pssm
         if load_pssms:
-            _check_pssm(pdb_path, pssm_paths, suppress = self._suppress)
+            _check_pssm(self.pdb_path, self.pssm_paths, suppress = self.suppress_pssm_errors)
             for chain in structure.chains:
-                if chain.id in pssm_paths:
-                    pssm_path = pssm_paths[chain.id]
+                chain: Chain
+                if chain.id in self.pssm_paths:
+                    pssm_path = self.pssm_paths[chain.id]
 
                     with open(pssm_path, "rt", encoding="utf-8") as f:
                         chain.pssm = parse_pssm(f, chain)
@@ -185,17 +186,16 @@ class DeepRankQuery:
 
     @property
     def model_id(self) -> str:
-        "The ID of the model, usually a .PDB accession code."
-        return self._model_id
-
+        """The ID of the model, usually a .PDB accession code."""
+        return self.model_id
     @model_id.setter
     def model_id(self, value):
-        self._model_id = value
+        self.model_id = value
 
     @property
     def targets(self) -> Dict[str, float]:
-        "The target values associated with the query."
-        return self._targets
+        """The target values associated with the query."""
+        return self.targets
 
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
@@ -258,7 +258,7 @@ class QueryCollection:
 
     @property
     def queries(self) -> List[DeepRankQuery]:
-        "The list of queries added to the collection."
+        """The list of queries added to the collection."""
         return self._queries
 
     def __contains__(self, query: DeepRankQuery) -> bool:
