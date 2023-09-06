@@ -34,6 +34,8 @@ from deeprank2.utils.parsing.pssm import parse_pssm
 
 _log = logging.getLogger(__name__)
 
+VALID_RESOLUTIONS = ['atomic', 'residue']
+
 
 def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbosity: int = 0):
     #TODO: make this an internal method of DeepRankQuery?
@@ -120,11 +122,10 @@ class DeepRankQuery:
     suppress_pssm_errors: bool = False
 
     def __post_init__(self):
-        self.model_id = os.path.splitext(os.path.basename(self.pdb_path))[0]
+        self._model_id = os.path.splitext(os.path.basename(self.pdb_path))[0]
 
-        accepted_resolutions = ['atomic', 'residue']
-        if self.resolution not in accepted_resolutions:
-            raise ValueError(f"Invalid resolution given ({self.resolution}). Must be one of {accepted_resolutions}")
+        if self.resolution not in VALID_RESOLUTIONS:
+            raise ValueError(f"Invalid resolution given ({self.resolution}). Must be one of {VALID_RESOLUTIONS}")
 
         if not isinstance(self.chain_ids, list):
             self.chain_ids = [self.chain_ids]
@@ -198,15 +199,10 @@ class DeepRankQuery:
     @property
     def model_id(self) -> str:
         """The ID of the model, usually a .PDB accession code."""
-        return self.model_id
+        return self._model_id
     @model_id.setter
-    def model_id(self, value):
-        self.model_id = value
-
-    @property
-    def targets(self) -> Dict[str, float]:
-        """The target values associated with the query."""
-        return self.targets
+    def model_id(self, value: str):
+        self._model_id = value
 
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
