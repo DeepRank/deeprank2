@@ -551,63 +551,30 @@ def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
             with open(pssm_path, "rt", encoding="utf-8") as f:
                 chain.pssm = parse_pssm(f, chain)
 
+@dataclass(kw_only=True)
+class ProteinProteinInterfaceQuery(DeepRankQuery):
+    """A query that builds a protein-protein interface graph."""
 
-class ProteinProteinInterfaceAtomicQuery(DeepRankQuery):
+    def __post_init__(self):
+        super().__post_init__()
+        if len(self.chain_ids) != 2:
+            # TODO: Consider throwing a warning instead of error and using the first two entries of the list anyway.
+            raise ValueError(f"SingleResidueVariantQuery must contain exactly 2 chain_ids, but {len(self.chain_ids)} were given.")
 
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        pdb_path: str,
-        chain_id1: str,
-        chain_id2: str,
-        pssm_paths: Optional[Dict[str, str]] = None,
-        distance_cutoff: Optional[float] = 5.5,
-        targets: Optional[Dict[str, float]] = None,
-        suppress_pssm_errors: bool = False,
-    ):
-        """
-        A query that builds atom-based graphs, using the residues at a protein-protein interface.
-
-        Args:
-            pdb_path (str): The path to the .PDB file.
-            chain_id1 (str): The .PDB chain identifier of the first protein of interest.
-            chain_id2 (str): The .PDB chain identifier of the second protein of interest.
-            pssm_paths (Optional[Dict(str,str)], optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
-            distance_cutoff (Optional[float], optional): Max distance in Ångström between two interacting atoms of the two proteins.
-                Defaults to 5.5.
-            targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-                Defaults to False.
-        """
-
-        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
-
-        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
-
-        self._pdb_path = pdb_path
-
-        self._chain_id1 = chain_id1
-        self._chain_id2 = chain_id2
-
-        self._pssm_paths = pssm_paths
-
-        self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
-        return f"atom-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
-
-    def __eq__(self, other) -> bool:
+        """Returns the string representing the complete query ID."""
         return (
-            isinstance(self, type(other))
-            and self.model_id == other.model_id
-            and {self._chain_id1, self._chain_id2}
-            == {other._chain_id1, other._chain_id2}
+            f"{self.resolution}-ppi:"  # resolution and query type (ppi for protein protein interface)
+            + f"{self.chain_ids[0]}-{self.chain_ids[1]}:{self.model_id}"
         )
 
-    def __hash__(self) -> hash:
-        return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
-
-    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+    def build(
+        self,
+        feature_modules: List[ModuleType] | ModuleType,
+        include_hydrogens: bool = False,
+    ) -> Graph:
+        #TODO: check how much of this is common with SRV and move it to parent class
         """Builds the graph from the .PDB structure.
 
         Args:
@@ -618,138 +585,40 @@ class ProteinProteinInterfaceAtomicQuery(DeepRankQuery):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
-        contact_atoms = _load_ppi_atoms(self._pdb_path,
-                                        self._chain_id1, self._chain_id2,
-                                        self._distance_cutoff,
+        contact_atoms = _load_ppi_atoms(self.pdb_path,
+                                        self.chain_ids[0], self.chain_ids[1],
+                                        self.distance_cutoff,
                                         include_hydrogens)
 
         # build the graph
-        graph = build_atomic_graph(
-            contact_atoms, self.get_query_id(), self._distance_cutoff
-        )
+        if self.resolution == 'atomic':
+            graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.distance_cutoff)
+        elif self.resolution == 'residue':
+            residues_selected = {atom.residue for atom in contact_atoms}
+            graph = build_residue_graph(list(residues_selected), self.get_query_id(), self.distance_cutoff)
+            #TODO: check whether this works with a set instead of a list
+        else:
+            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
+        graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
 
         # add data to the graph
         self._set_graph_targets(graph)
 
         # read the pssm
+        #TODO: unify with the way pssms are read for srv queries
         structure = contact_atoms[0].residue.chain.model
 
         if not isinstance(feature_modules, List):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
-            _load_ppi_pssms(self._pssm_paths,
-                            [self._chain_id1, self._chain_id2],
-                            structure, self._pdb_path,
-                            suppress_error=self._suppress)
+            _load_ppi_pssms(self.pssm_paths,
+                            [self.chain_ids[0], self.chain_ids[1]],
+                            structure, self.pdb_path,
+                            suppress_error=self.suppress_pssm_errors)
 
         # add the features
         for feature_module in feature_modules:
-            feature_module.add_features(self._pdb_path, graph)
+            feature_module.add_features(self.pdb_path, graph)
 
         graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
-        return graph
-
-
-class ProteinProteinInterfaceResidueQuery(DeepRankQuery):
-
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        pdb_path: str,
-        chain_id1: str,
-        chain_id2: str,
-        pssm_paths: Optional[Dict[str, str]] = None,
-        distance_cutoff: Optional[float] = 10,
-        targets: Optional[Dict[str, float]] = None,
-        suppress_pssm_errors: bool = False,
-    ):
-        """
-        A query that builds residue-based graphs, using the residues at a protein-protein interface.
-
-        Args:
-            pdb_path (str): The path to the .PDB file.
-            chain_id1 (str): The .PDB chain identifier of the first protein of interest.
-            chain_id2 (str): The .PDB chain identifier of the second protein of interest.
-            pssm_paths (Optional[Dict(str,str)], optional): The paths to the .PSSM files, per chain identifier. Defaults to None.
-            distance_cutoff (Optional[float], optional): Max distance in Ångström between two interacting residues of the two proteins.
-                Defaults to 10.
-            targets (Optional[Dict(str,float)], optional): Named target values associated with this query. Defaults to None.
-            suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-                Defaults to False.
-        """
-
-        model_id = os.path.splitext(os.path.basename(pdb_path))[0]
-
-        DeepRankQuery.__init__(self, model_id, targets, suppress_pssm_errors)
-
-        self._pdb_path = pdb_path
-
-        self._chain_id1 = chain_id1
-        self._chain_id2 = chain_id2
-
-        self._pssm_paths = pssm_paths
-
-        self._distance_cutoff = distance_cutoff
-
-    def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
-        return f"residue-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
-
-    def __eq__(self, other) -> bool:
-        return (
-            isinstance(self, type(other))
-            and self.model_id == other.model_id
-            and {self._chain_id1, self._chain_id2}
-            == {other._chain_id1, other._chain_id2}
-        )
-
-    def __hash__(self) -> hash:
-        return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
-
-    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
-        """Builds the graph from the .PDB structure.
-
-        Args:
-            feature_modules (List[ModuleType]): Each must implement the :py:func:`add_features` function.
-            include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
-
-        Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
-        """
-
-        contact_atoms = _load_ppi_atoms(self._pdb_path,
-                                        self._chain_id1, self._chain_id2,
-                                        self._distance_cutoff,
-                                        include_hydrogens)
-
-        atom_positions = []
-        residues_selected = set([])
-        for atom in contact_atoms:
-            atom_positions.append(atom.position)
-            residues_selected.add(atom.residue)
-        residues_selected = list(residues_selected)
-
-        # build the graph
-        graph = build_residue_graph(
-            residues_selected, self.get_query_id(), self._distance_cutoff
-        )
-
-        # add data to the graph
-        self._set_graph_targets(graph)
-
-        # read the pssm
-        structure = contact_atoms[0].residue.chain.model
-
-        if not isinstance(feature_modules, List):
-            feature_modules = [feature_modules]
-        if conservation in feature_modules:
-            _load_ppi_pssms(self._pssm_paths,
-                            [self._chain_id1, self._chain_id2],
-                            structure, self._pdb_path,
-                            suppress_error=self._suppress)
-
-        # add the features
-        for feature_module in feature_modules:
-            feature_module.add_features(self._pdb_path, graph)
-
-        graph.center = np.mean(atom_positions, axis=0)
         return graph
