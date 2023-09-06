@@ -115,7 +115,7 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
     _add_atom_to_residue(atom, residue)
 
 
-def get_structure(pdb, id_: str):
+def get_structure(pdb, id_: str) -> PDBStructure:
     """Builds a structure from rows in a pdb file.
 
     Args:
@@ -318,4 +318,4 @@ def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Res
 
             close_residues.add(structure_atom.residue)
 
-    return close_residues
+    return list(close_residues)
