@@ -3,7 +3,6 @@ import logging
 import os
 import pickle
 import pkgutil
-import tempfile
 import warnings
 from dataclasses import MISSING, dataclass, field, fields
 from functools import partial
@@ -24,8 +23,7 @@ from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.molstruct.structure import Chain, PDBStructure
-from deeprank2.utils.buildgraph import (add_hydrogens, get_contact_atoms,
-                                        get_structure,
+from deeprank2.utils.buildgraph import (get_contact_atoms, get_structure,
                                         get_surrounding_residues)
 from deeprank2.utils.graph import (Graph, build_atomic_graph,
                                    build_residue_graph)
@@ -141,32 +139,10 @@ class DeepRankQuery:
         for target_name, target_data in self.targets.items():
             graph.targets[target_name] = target_data
 
-    def _load_structure(
-        self,
-        include_hydrogens: bool,
-        load_pssms: bool,
-    ) -> PDBStructure:
+    def _load_structure(self, load_pssms: bool) -> PDBStructure:
         """Build PDBStructure objects from pdb and pssm data."""
 
-        # make a copy of the pdb, with hydrogens
-        #TODO: I think this can move into the if include_hydrogens bracket
-        pdb_name = os.path.basename(self.pdb_path)
-        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
-            prefix="hydrogenated-", suffix=pdb_name
-        )
-        os.close(hydrogen_pdb_file)
-
-        if include_hydrogens:
-            add_hydrogens(self.pdb_path, hydrogen_pdb_path)
-
-            # read the .PDB copy
-            try:
-                pdb = pdb2sql.pdb2sql(hydrogen_pdb_path)
-            finally:
-                os.remove(hydrogen_pdb_path)
-        else:
-            pdb = pdb2sql.pdb2sql(self.pdb_path)
-
+        pdb = pdb2sql.pdb2sql(self.pdb_path)
         try:
             structure = get_structure(pdb, self.model_id)
         finally:
@@ -207,7 +183,7 @@ class DeepRankQuery:
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
 
-    def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
+    def build(self, feature_modules: List[ModuleType]) -> Graph:
         raise NotImplementedError("Must be defined in child classes.")
     def get_query_id(self) -> str:
         raise NotImplementedError("Must be defined in child classes.")
@@ -434,14 +410,12 @@ class SingleResidueVariantQuery(DeepRankQuery):
     def build(
         self,
         feature_modules: List[ModuleType] | ModuleType,
-        include_hydrogens: bool = False,
     ) -> Graph:
         #TODO: check how much of this is common with PPI and move it to parent class
         """Builds the graph from the .PDB structure.
 
         Args:
             feature_modules (List[ModuleType]): Each must implement the :py:func:`add_features` function.
-            include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
@@ -453,7 +427,7 @@ class SingleResidueVariantQuery(DeepRankQuery):
         else:
             load_pssms = conservation == feature_modules
             feature_modules = [feature_modules]
-        structure: PDBStructure = self._load_structure(include_hydrogens, load_pssms)
+        structure: PDBStructure = self._load_structure(load_pssms)
 
         # find the variant residue and its surroundings
         variant_residue = None
@@ -505,23 +479,10 @@ def _load_ppi_atoms(
     pdb_path: str,
     chain_ids: List[str],
     distance_cutoff: float,
-    include_hydrogens: bool,
 ) -> List[Atom]:
 
     # get the contact atoms
-    if include_hydrogens:
-        pdb_name = os.path.basename(pdb_path)
-        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
-            prefix="hydrogenated-", suffix=pdb_name
-        )
-        os.close(hydrogen_pdb_file)
-        add_hydrogens(pdb_path, hydrogen_pdb_path)
-        try:
-            contact_atoms = get_contact_atoms(hydrogen_pdb_path, chain_ids, distance_cutoff)
-        finally:
-            os.remove(hydrogen_pdb_path)
-    else:
-        contact_atoms = get_contact_atoms(pdb_path, chain_ids, distance_cutoff)
+    contact_atoms = get_contact_atoms(pdb_path, chain_ids, distance_cutoff)
 
     if len(contact_atoms) == 0:
         raise ValueError("no contact atoms found")
@@ -571,14 +532,12 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
     def build(
         self,
         feature_modules: List[ModuleType] | ModuleType,
-        include_hydrogens: bool = False,
     ) -> Graph:
         #TODO: check how much of this is common with SRV and move it to parent class
         """Builds the graph from the .PDB structure.
 
         Args:
             feature_modules (List[ModuleType]): Each must implement the :py:func:`add_features` function.
-            include_hydrogens (bool, optional): Whether to include hydrogens in the :class:`Graph`. Defaults to False.
 
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
@@ -587,7 +546,7 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
         contact_atoms = _load_ppi_atoms(self.pdb_path,
                                         self.chain_ids,
                                         self.distance_cutoff,
-                                        include_hydrogens)
+                                        )
 
         # build the graph
         if self.resolution == 'atomic':

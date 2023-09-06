@@ -1,6 +1,5 @@
 import logging
 import os
-import subprocess
 from typing import List, Union
 
 import numpy as np
@@ -16,17 +15,7 @@ from deeprank2.molstruct.structure import Chain, PDBStructure
 _log = logging.getLogger(__name__)
 
 
-def add_hydrogens(input_pdb_path, output_pdb_path):
-    """This requires reduce: https://github.com/rlabduke/reduce."""
-
-    with open(output_pdb_path, "wt", encoding = "utf-8") as f:
-        p = subprocess.run(["reduce", input_pdb_path], stdout=subprocess.PIPE, check=True)
-        for line in p.stdout.decode().split("\n"):
-            f.write(line.replace("   new", "").replace("   std", "") + "\n")
-
-
 def _add_atom_to_residue(atom, residue):
-
     for other_atom in residue.atoms:
         if other_atom.name == atom.name:
             # Don't allow two atoms with the same name, pick the highest
