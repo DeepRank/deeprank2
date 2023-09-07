@@ -160,17 +160,6 @@ class DeepRankQuery:
 
         return structure
 
-    @staticmethod
-    def _get_atom_node_key(atom) -> str:
-        #TODO: check whether this method is still useful or just obsolete legacy code
-        """
-        Since pickle has problems serializing the graph when the nodes are atoms,
-        this function can be used to generate a unique key for the atom.
-        """
-
-        # This should include the model, chain, residue and atom
-        return str(atom)
-
     @property
     def model_id(self) -> str:
         """The ID of the model, usually a .PDB accession code."""
