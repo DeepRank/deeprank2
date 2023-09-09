@@ -42,3 +42,5 @@ docs/apidocs
 #other
 *_.ipynb
 Untitled*
+data_raw/
+data_processed/

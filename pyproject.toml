@@ -1,98 +1,16 @@
 [tool.poetry]
 name = "deeprank2"
-version = "2.0.0"
-description = "DeepRank2 is an open-source deep learning framework for data mining of protein-protein interfaces or single-residue missense variants."
-keywords = [
-    "graph neural network",
-    "convolutional neural network",
-    "protein-protein interfaces",
-    "missense variants",
-    "deep learning",
-    "pytorch"]
-authors = [
-    "Giulia Crocioni <g.crocioni@esciencecenter.nl>",
-    "Coos Baakman <coos.baakman@radboudumc.nl>",
-    "Dani Bodor <d.bodor@esciencecenter.nl>",
-    "Daniel Rademaker",
-    "Gayatri Ramakrishnan",
-    "Sven van der Burg",
-    "Li Xue",
-    "Daniil Lepikhov",
-    ]
-license = "Apache-2.0 license"
+version = "0.1.0"
+description = "asd"
+authors = ["gcroci2 <crocioni.giulia@gmail.com>"]
+license = "asd"
 readme = "README.md"
-repository = "https://github.com/DeepRank/deeprank2"
-classifiers = [
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
-    "Natural Language :: English",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10"
-]
-packages = [
-    { include = "deeprank2/" },
-    { include = "README.md" },
-    { include = "LICENSE" }
-]
-include = ["deeprank2", "deeprank2.*"]
-exclude = ["tests", "tests.*"]
 
 [tool.poetry.dependencies]
-python = ">= 3.10, < 3.12"
+python = "^3.11"
 numpy = ">= 1.21.5"
-scipy = ">= 1.11.2"
-h5py = ">= 3.6.0"
-networkx = ">= 2.6.3"
-matplotlib = ">= 3.5.1"
-pdb2sql = ">= 0.5.1"
-scikit-learn = ">= 1.0.2"
-chart-studio = ">= 1.1.0"
-biopython = ">= 1.81"
-python-louvain = ">= 0.16"
-markov-clustering = ">= 0.0.6.dev0"
-tqdm = ">= 4.63.0"
-freesasa = "== 2.1.0"
-tensorboard = ">= 0.9.0"
-protobuf = ">= 3.20.1"
-pylint = { version = "<= 2.15.3", optional = true }
-prospector = {version = "<= 1.7.7", optional = true}
-pyroma = {version = ">=2.4", optional = true}
 
-[tool.poetry.extras]
-dev = ["yapf"]
-doc = [
-    "myst-parser",
-    "sphinx",
-    "sphinx_rtd_theme"
-    ]
-test = [
-    "pytest",
-    "pylint",
-    "prospector",
-    "pyroma",
-    "bump2version",
-    "coverage",
-    "pycodestyle",
-    "pytest-cov",
-    "pytest-runner",
-    "coveralls"
-    ]
-publishing = [
-    "build",
-    "twine",
-    "wheel"
-    ]
-tutorials = [
-    "notebook",
-    "pytest",
-    "plotly",
-    "jupyterlab"
-    ]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/DeepRank/deeprank2/issues"
