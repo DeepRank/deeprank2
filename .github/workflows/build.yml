@@ -43,11 +43,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-python-and-package
         with:
-          extras-require: test
+          extras-require: test, publishing
       - name: Run unit tests
-        run: python3 -m pytest -v
-      - run: which pytest
+        run: pytest -v
         shell: bash {0}
       - name: Verify that we can build the package
-        run: python -m build
+        run: python3 -m build
   
