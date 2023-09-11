@@ -47,5 +47,5 @@ jobs:
           CONDA_PREFIX: /usr/share/miniconda
         run: pytest -v
       - name: Verify that we can build the package
-        run: poetry build
+        run: python -m build
   
