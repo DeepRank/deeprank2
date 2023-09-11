@@ -45,7 +45,7 @@ jobs:
       - name: Run unit tests
         env:
           CONDA_PREFIX: /usr/share/miniconda
-        run: |
-          python3 -m poetry run pytest -v
+        run: poetry run pytest -v
       - name: Verify that we can build the package
-        run: python3 -m poetry build
+        run: poetry build
+  

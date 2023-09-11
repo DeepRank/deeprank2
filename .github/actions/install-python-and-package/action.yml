@@ -28,7 +28,11 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
         cache: 'pip'
-
+    - name: Python info
+      shell: bash -e {0}
+      run: |
+        which python3
+        python3 --version
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
       with:
@@ -39,7 +43,8 @@ runs:
       shell: bash {0}
     - run: which python
       shell: bash {0}
-
+    - run: which python3
+      shell: bash {0}
     - name: Install dependencies
       shell: bash {0}
       env:
@@ -58,9 +63,8 @@ runs:
         # In the future, release h5xplorer on PyPI
         python3 -m pip install git+https://github.com/DeepRank/h5xplorer.git@master
         python3 -m pip install poetry
-
     - name: Install the package
       shell: bash {0}
-      run: python3 -m poetry install
+      run: poetry install --with test
       env:
         CONDA_PREFIX: /usr/share/miniconda
