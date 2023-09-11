@@ -56,4 +56,4 @@ runs:
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
     - name: Install the package
       shell: bash {0}
-      run: pip install .[${{ inputs.extras-require }}]
+      run: pip install .'[${{ inputs.extras-require }}]'
