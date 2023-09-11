@@ -34,66 +34,6 @@ _log = logging.getLogger(__name__)
 VALID_RESOLUTIONS = ['atomic', 'residue']
 
 
-def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbosity: int = 0):
-    #TODO: make this an internal method of DeepRankQuery?
-    """Checks whether information stored in pssm file matches the corresponding pdb file.
-
-    Args:
-        pdb_path (str): Path to the PDB file.
-        pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
-        suppress (bool): Suppress errors and throw warnings instead.
-        verbosity (int): Level of verbosity of error/warning. Defaults to 0.
-            0 (low): Only state file name where error occurred;
-            1 (medium): Also state number of incorrect and missing residues;
-            2 (high): Also list the incorrect residues
-
-    Raises:
-        ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
-    """
-
-    if not pssm_paths:
-        raise ValueError('No pssm paths provided for conservation feature module.')
-
-    pssm_data = {}
-    for chain in pssm_paths:
-        with open(pssm_paths[chain], encoding='utf-8') as f:
-            lines = f.readlines()[1:]
-        for line in lines:
-            pssm_data[chain + line.split()[0].zfill(4)] = convert_aa_nomenclature(line.split()[1], 3)
-
-    # load ground truth from pdb file
-    pdb_truth = pdb2sql.pdb2sql(pdb_path).get_residues()
-    pdb_truth = {res[0] + str(res[2]).zfill(4): res[1] for res in pdb_truth if res[0] in pssm_paths}
-
-    wrong_list = []
-    missing_list = []
-
-    for residue in pdb_truth:
-        try:
-            if pdb_truth[residue] != pssm_data[residue]:
-                wrong_list.append(residue)
-        except KeyError:
-            missing_list.append(residue)
-
-    if len(wrong_list) + len(missing_list) > 0:
-        error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
-        if verbosity:
-            if len(wrong_list) > 0:
-                error_message = error_message + f'\n\t{len(wrong_list)} entries are incorrect.'
-                if verbosity == 2:
-                    error_message = error_message[-1] + f':\n\t{missing_list}'
-            if len(missing_list) > 0:
-                error_message = error_message + f'\n\t{len(missing_list)} entries are missing.'
-                if verbosity == 2:
-                    error_message = error_message[-1] + f':\n\t{missing_list}'
-
-        if not suppress:
-            raise ValueError(error_message)
-
-        warnings.warn(error_message)
-        _log.warning(error_message)
-
-
 # TODO: consider whether we want to use the built-in repr and eq, or define it ourselves
 # if built-in: consider which arguments to include in either.
 @dataclass(repr=False, kw_only=True)
@@ -158,6 +98,64 @@ class DeepRankQuery:
                 pssm_path = self.pssm_paths[chain.id]
                 with open(pssm_path, "rt", encoding="utf-8") as f:
                     chain.pssm = parse_pssm(f, chain)
+
+    def _check_pssm(self, verbosity: int = 0):
+        """Checks whether information stored in pssm file matches the corresponding pdb file.
+
+        Args:
+            pdb_path (str): Path to the PDB file.
+            pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
+            suppress (bool): Suppress errors and throw warnings instead.
+            verbosity (int): Level of verbosity of error/warning. Defaults to 0.
+                0 (low): Only state file name where error occurred;
+                1 (medium): Also state number of incorrect and missing residues;
+                2 (high): Also list the incorrect residues
+
+        Raises:
+            ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
+        """
+        if not self.pssm_paths:
+            raise ValueError('No pssm paths provided for conservation feature module.')
+
+        # load residues from pssm and pdb files
+        pssm_file_residues = {}
+        for chain, pssm_path in self.pssm_paths.items():
+            with open(pssm_path, encoding='utf-8') as f:
+                lines = f.readlines()[1:]
+            for line in lines:
+                pssm_file_residues[chain + line.split()[0].zfill(4)] = convert_aa_nomenclature(line.split()[1], 3)
+        pdb_file_residues = {res[0] + str(res[2]).zfill(4): res[1]
+                                for res in pdb2sql.pdb2sql(self.pdb_path).get_residues()
+                                    if res[0] in self.pssm_paths}
+
+        # list errors
+        mismatches = []
+        missing_entries = []
+        for residue in pdb_file_residues:
+            try:
+                if pdb_file_residues[residue] != pssm_file_residues[residue]:
+                    mismatches.append(residue)
+            except KeyError:
+                missing_entries.append(residue)
+
+        # generate error message
+        if len(mismatches) + len(missing_entries) > 0:
+            error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(self.pdb_path)[1]}.'
+            if verbosity:
+                if len(mismatches) > 0:
+                    error_message = error_message + f'\n\t{len(mismatches)} entries are incorrect.'
+                    if verbosity == 2:
+                        error_message = error_message[-1] + f':\n\t{missing_entries}'
+                if len(missing_entries) > 0:
+                    error_message = error_message + f'\n\t{len(missing_entries)} entries are missing.'
+                    if verbosity == 2:
+                        error_message = error_message[-1] + f':\n\t{missing_entries}'
+
+            # raise exception (or warning)
+            if not self.suppress_pssm_errors:
+                raise ValueError(error_message)
+            warnings.warn(error_message)
+            _log.warning(error_message)
 
     @property
     def model_id(self) -> str:
