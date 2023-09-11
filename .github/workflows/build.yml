@@ -46,7 +46,5 @@ jobs:
           extras-require: test, publishing
       - name: Run unit tests
         run: pytest -v
-        shell: bash {0}
       - name: Verify that we can build the package
         run: python3 -m build
-  
