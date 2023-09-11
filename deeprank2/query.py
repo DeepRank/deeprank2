@@ -21,7 +21,7 @@ from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.residue import Residue, SingleResidueVariant
-from deeprank2.molstruct.structure import Chain, PDBStructure
+from deeprank2.molstruct.structure import PDBStructure
 from deeprank2.utils.buildgraph import (get_contact_atoms, get_structure,
                                         get_surrounding_residues)
 from deeprank2.utils.graph import (Graph, build_atomic_graph,
@@ -138,27 +138,26 @@ class DeepRankQuery:
         for target_name, target_data in self.targets.items():
             graph.targets[target_name] = target_data
 
-    def _load_structure(self, load_pssms: bool) -> PDBStructure:
+    def _load_structure(self, pssm_required: bool) -> PDBStructure:
         """Build PDBStructure objects from pdb and pssm data."""
-
         pdb = pdb2sql.pdb2sql(self.pdb_path)
         try:
             structure = get_structure(pdb, self.model_id)
         finally:
             pdb._close() # pylint: disable=protected-access
-
         # read the pssm
-        if load_pssms:
-            _check_pssm(self.pdb_path, self.pssm_paths, suppress = self.suppress_pssm_errors)
-            for chain in structure.chains:
-                chain: Chain
-                if chain.id in self.pssm_paths:
-                    pssm_path = self.pssm_paths[chain.id]
-
-                    with open(pssm_path, "rt", encoding="utf-8") as f:
-                        chain.pssm = parse_pssm(f, chain)
+        if pssm_required:
+            self._load_pssm_data(structure)
 
         return structure
+
+    def _load_pssm_data(self, structure: PDBStructure):
+        self._check_pssm()
+        for chain in structure.chains:
+            if chain.id in self.pssm_paths:
+                pssm_path = self.pssm_paths[chain.id]
+                with open(pssm_path, "rt", encoding="utf-8") as f:
+                    chain.pssm = parse_pssm(f, chain)
 
     @property
     def model_id(self) -> str:
@@ -411,11 +410,11 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
         # load .PDB structure
         if isinstance(feature_modules, List):
-            load_pssms = conservation in feature_modules
+            pssm_required = conservation in feature_modules
         else:
-            load_pssms = conservation == feature_modules
+            pssm_required = conservation == feature_modules
             feature_modules = [feature_modules]
-        structure: PDBStructure = self._load_structure(load_pssms)
+        structure: PDBStructure = self._load_structure(pssm_required)
 
         # find the variant residue and its surroundings
         variant_residue = None
@@ -462,21 +461,6 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
         return graph
 
-
-def _load_ppi_pssms(
-    pssm_paths: Optional[Dict[str, str]],
-    chain_ids: List[str],
-    structure: PDBStructure,
-    pdb_path: str,
-    suppress_error: bool,
-):
-    _check_pssm(pdb_path, pssm_paths, suppress_error, verbosity = 0)
-    for chain_id in chain_ids:
-        if chain_id in pssm_paths:
-            chain = structure.get_chain(chain_id)
-            pssm_path = pssm_paths[chain_id]
-            with open(pssm_path, "rt", encoding="utf-8") as f:
-                chain.pssm = parse_pssm(f, chain)
 
 @dataclass(kw_only=True)
 class ProteinProteinInterfaceQuery(DeepRankQuery):
@@ -542,10 +526,7 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
         if not isinstance(feature_modules, List):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
-            _load_ppi_pssms(self.pssm_paths,
-                            [self.chain_ids[0], self.chain_ids[1]],
-                            structure, self.pdb_path,
-                            suppress_error=self.suppress_pssm_errors)
+            self._load_pssm_data(structure)
 
         # add the features
         for feature_module in feature_modules:
