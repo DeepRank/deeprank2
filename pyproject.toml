@@ -86,6 +86,7 @@ pycodestyle = { version = ">= 2.11.0", optional = true}
 pytest-cov = { version = ">= 4.1.0", optional = true}
 pytest-runner = { version = ">= 6.0.0", optional = true}
 coveralls = { version = ">= 3.3.1", optional = true}
+build = { version = ">= 1.0.3", optional = true}
 
 # [tool.poetry.group.test]  # This part can be left out
 # optional = true
@@ -113,16 +114,14 @@ test = [
     "pytest-runner",
     "coveralls"
 ]
+publishing = [
+    "build"
+    ]
 # dev = ["yapf"]
 # doc = [
 #     "myst-parser",
 #     "sphinx",
 #     "sphinx_rtd_theme"
-#     ]
-# publishing = [
-#     "build",
-#     "twine",
-#     "wheel"
 #     ]
 # tutorials = [
 #     "notebook",
