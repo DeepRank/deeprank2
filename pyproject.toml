@@ -78,7 +78,8 @@ freesasa = ">= 2.1.0"
 tensorboard = ">= 0.9.0"
 protobuf = ">= 3.20.1"
 pytest = { version = ">= 7.4.0", optional = true}
-prospector = {extras = ["with_pyroma"], version = "^1.10.2", optional = true}
+prospector = {version = "^1.10.2", optional = true}
+pyroma = {version = ">=2.4", optional = true}
 pylint =  { version = "<= 2.15.3", optional = true}
 bump2version = { version = ">= 1.0.1", optional = true}
 coverage = { version = ">= 6.5.0", optional = true}
@@ -106,6 +107,7 @@ build = { version = ">= 1.0.3", optional = true}
 test = [
     "pytest",
     "prospector",
+    "pyroma",
     "pylint",
     "bump2version",
     "coverage",
