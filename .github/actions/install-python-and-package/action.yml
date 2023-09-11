@@ -62,4 +62,3 @@ runs:
       run: pip install .
     - run: conda list
       shell: bash {0}
-    - run: 
