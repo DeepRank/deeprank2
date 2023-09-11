@@ -43,16 +43,27 @@ name = "torch_add"
 url = "https://data.pyg.org/whl/torch-2.0.0+cpu.html"
 priority = "supplemental"
 
+[[tool.poetry.source]]
+name = "torch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "supplemental"
+
+[[tool.poetry.source]]
+name = "pyg_cpu"
+url = "https://data.pyg.org/whl/torch-2.0.0+cpu.html"
+priority = "supplemental"
+
 [tool.poetry.dependencies]
-# torch = "== 2.0.0"
-# torchvision = ">= 0.15.1"
-# torchaudio = ">= 2.0.1"
-# torch_geometric = "== 2.3.1"
-# torch_scatter = "== 2.1.1"
-# torch_sparse = "== 0.6.17"
-# torch_cluster = "== 1.6.1"
-# torch_spline_conv = "== 1.2.2"
+# torch = {version = "==2.0.0", source="torch_cpu", platform = "linux", python = ">=3.10 <3.12"}
+# torchvision = {version = "==0.15.1", source="torch_cpu", platform = "linux", python = ">=3.10 <3.12"}
+# torchaudio = {version = "==2.0.1", source="torch_cpu", platform = "linux", python = ">=3.10 <3.12"}
+# torch-scatter = {version = ">=2.1.1", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
+# torch-sparse = {version = ">=0.6.17", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
+# torch-geometric = {git = "https://github.com/pyg-team/pytorch_geometric.git", rev = "ff9fb3d", tag = "2.3.1", branch = "master"}
+# torch-cluster = {version = ">=1.6.1", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
+# torch-spline-conv = {version = ">=1.2.2", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
 python = ">= 3.10, < 3.12"
+tables = ">=3.8.0"
 numpy = ">= 1.21.5"
 scipy = ">= 1.11.2"
 h5py = ">= 3.6.0"

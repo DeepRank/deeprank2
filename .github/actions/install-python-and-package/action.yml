@@ -24,14 +24,6 @@ runs:
       with:
           access_token: ${{ github.token }}
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: ${{ inputs.python-version }}
-    - name: Python info
-      shell: bash -e {0}
-      run: |
-        which python3
-        python3 --version
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
       with:
@@ -49,7 +41,6 @@ runs:
       shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
-        CONDA_PREFIX: /usr/share/miniconda
       run: |
         # Install dependencies not handled by poetry 
         # Install dssp
@@ -60,10 +51,10 @@ runs:
         conda install pytorch==2.0.0 torchvision=0.15.0 torchaudio=2.0.0 cpuonly -c pytorch
         conda install pyg -c pyg
         # Install optional pyg dependencies
-        python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
+        pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # In the future, release h5xplorer on PyPI
-        python3 -m pip install git+https://github.com/DeepRank/h5xplorer.git@master
-        python3 -m pip install poetry
+        pip install git+https://github.com/DeepRank/h5xplorer.git@master
+        pip install poetry
     - run: conda list
       shell: bash {0}
     - name: Install the package
@@ -71,3 +62,5 @@ runs:
       run: poetry install --with test
       env:
         CONDA_PREFIX: /usr/share/miniconda
+    - run: conda list
+      shell: bash {0}
