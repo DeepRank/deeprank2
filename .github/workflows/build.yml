@@ -46,7 +46,7 @@ jobs:
         shell: which pytest
       
       - name: Run unit tests
-        run: python3 -m pytest -v
+        run: python3 -m pytest
       - name: Verify that we can build the package
         run: python -m build
   
