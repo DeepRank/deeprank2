@@ -27,7 +27,6 @@ runs:
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
-        cache: 'pip'
     - name: Python info
       shell: bash -e {0}
       run: |
@@ -40,10 +39,6 @@ runs:
         python-version: ${{ inputs.python-version }}
         conda-channels: anaconda
     - run: conda --version
-      shell: bash {0}
-    - run: which python
-      shell: bash {0}
-    - run: which python3
       shell: bash {0}
     - name: Install dependencies
       shell: bash {0}
@@ -63,6 +58,8 @@ runs:
         # In the future, release h5xplorer on PyPI
         python3 -m pip install git+https://github.com/DeepRank/h5xplorer.git@master
         python3 -m pip install poetry
+    - run: conda list
+      shell: bash {0}
     - name: Install the package
       shell: bash {0}
       run: poetry install --with test
