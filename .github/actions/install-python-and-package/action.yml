@@ -56,8 +56,8 @@ runs:
         # Install optional pyg dependencies
         python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # In the future, release h5xplorer on PyPI
-        pip install git+https://github.com/DeepRank/h5xplorer.git@master
-        pip install poetry
+        python3 -m pip install git+https://github.com/DeepRank/h5xplorer.git@master
+        python3 -m pip install poetry
 
     - name: Install the package
       shell: bash {0}

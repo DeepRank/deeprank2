@@ -46,6 +46,6 @@ jobs:
         env:
           CONDA_PREFIX: /usr/share/miniconda
         run: |
-          pytest -v
+          python3 -m poetry run pytest -v
       - name: Verify that we can build the package
-        run: python3 setup.py sdist bdist_wheel
+        run: python3 -m poetry build
