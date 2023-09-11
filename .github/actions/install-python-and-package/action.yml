@@ -6,8 +6,8 @@ inputs:
 
   python-version:
     required: false
-    description: "The Python version to use. Specify major and minor version, e.g. '3.9'."
-    default: "3.9"
+    description: "The Python version to use. Specify major and minor version, e.g. '3.10'."
+    default: "3.10"
 
   extras-require:
     required: false
@@ -28,7 +28,6 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
         cache: 'pip'
-        cache-dependency-path: setup.cfg
 
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
@@ -46,21 +45,18 @@ runs:
       env:
         CMAKE_INSTALL_PREFIX: .local
       run: |
-        python3 -m pip install --upgrade pip setuptools wheel
         # Install dssp
         sudo apt-get install -y dssp
         # Only way to install msms is through conda
         conda install -c bioconda msms
-        # Safest way to install PyTorch and PyTorch Geometric is through conda
-        conda install pytorch==2.0.0 torchvision=0.15.0 torchaudio=2.0.0 cpuonly -c pytorch
-        conda install pyg -c pyg
         # Install optional pyg dependencies
         python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # In the future, release h5xplorer on PyPI
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
+        pip install poetry
 
     - name: Install the package
       shell: bash {0}
-      run: python3 -m pip install .[${{ inputs.extras-require }}]
+      run: poetry install
       env:
         CONDA_PREFIX: /usr/share/miniconda
