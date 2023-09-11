@@ -42,9 +42,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-python-and-package
+      - name: Check pytest
+        run: which pytest
+      
       - name: Run unit tests
-        env:
-          CONDA_PREFIX: /usr/share/miniconda
         run: pytest -v
       - name: Verify that we can build the package
         run: python -m build
