@@ -56,12 +56,8 @@ runs:
 
     - name: Install the package
       shell: bash {0}
-      run: poetry install
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
-
-    - name: Install torch_geometric optional dependencies
-      shell: bash {0}
-      run: python3 -m pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
+      run: |
+        poetry install
+        python -m pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
       env:
         CONDA_PREFIX: /usr/share/miniconda
