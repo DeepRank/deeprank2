@@ -59,8 +59,7 @@ runs:
       shell: bash {0}
     - name: Install the package
       shell: bash {0}
-      run: poetry install --with test
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
+      run: pip install .
     - run: conda list
       shell: bash {0}
+    - run: 
