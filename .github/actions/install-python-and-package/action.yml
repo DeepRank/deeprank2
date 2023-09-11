@@ -40,17 +40,16 @@ runs:
     - run: which python
       shell: bash {0}
 
-    - name: Upgrade pip and install dependencies
+    - name: Install dependencies
       shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
       run: |
+        # Install dependencies not handled by poetry 
         # Install dssp
         sudo apt-get install -y dssp
         # Only way to install msms is through conda
         conda install -c bioconda msms
-        # Install optional pyg dependencies
-        python3 -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # In the future, release h5xplorer on PyPI
         pip install git+https://github.com/DeepRank/h5xplorer.git@master
         pip install poetry
@@ -58,5 +57,11 @@ runs:
     - name: Install the package
       shell: bash {0}
       run: poetry install
+      env:
+        CONDA_PREFIX: /usr/share/miniconda
+
+    - name: Install torch_geometric optional dependencies
+      shell: bash {0}
+      run: python3 -m pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
       env:
         CONDA_PREFIX: /usr/share/miniconda
