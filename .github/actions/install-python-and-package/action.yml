@@ -61,6 +61,20 @@ runs:
       run: |
         # Install dependencies not handled by setuptools 
         ## DSSP
+        git clone https://github.com/PDB-REDO/libcifpp.git --recurse-submodules
+        cd libcifpp
+        cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        cmake --install build
+        #######
+        git clone https://github.com/mhekkel/libmcfp.git
+        cd libmcfp
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build .
+        cmake --install .
+        #######
         git clone https://github.com/PDB-REDO/dssp.git
         cd dssp
         mkdir build
