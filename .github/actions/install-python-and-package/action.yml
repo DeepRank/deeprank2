@@ -37,38 +37,45 @@ runs:
       run: |
         which python3
         python3 --version
-    - name: Install dependencies
+    - name: Install dependencies on Linux
       shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
+      if: runner.os == 'Linux'
       run: |
         # Install dependencies not handled by setuptools 
         ## DSSP
         sudo apt-get install -y dssp
         ## MSMS
-        if [ "$RUNNER_OS" == "macOS" ]; then
-          cd /tmp/
-          wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL2.6.1/msms_i86Linux2_2.6.1.tar.gz
-          sudo mkdir /usr/local/lib/msms
-          cd /usr/local/lib/msms
-          sudo tar zxvf /tmp/msms_i86Linux2_2.6.1.tar.gz
-          sudo ln -s /usr/local/lib/msms/msms.i86Linux2.2.6.1 /usr/local/bin/msms
-          sudo ln -s /usr/local/lib/msms/pdb_to_xyzr* /usr/local/bin
-        else
-          conda install -c bioconda msms
-        fi
+        conda install -c bioconda msms
         ## PyTorch, PyG, PyG adds
         ### Installing for CPU only on the CI
         conda install pytorch torchvision torchaudio cpuonly -c pytorch
-        if [ "$RUNNER_OS" == "macOS" ]; then
-          pip install torch_geometric
-        else
-          conda install pyg -c pyg
+        conda install pyg -c pyg
+        pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
+    - name: Install dependencies on MacOS
+      shell: bash {0}
+      env:
+        CMAKE_INSTALL_PREFIX: .local
+      if: runner.os == 'macOS'
+      run: |
+        # Install dependencies not handled by setuptools 
+        ## DSSP
+        sudo apt-get install -y dssp
+        ## MSMS
+        cd /tmp/
+        wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL2.6.1/msms_i86Linux2_2.6.1.tar.gz
+        sudo mkdir /usr/local/lib/msms
+        cd /usr/local/lib/msms
+        sudo tar zxvf /tmp/msms_i86Linux2_2.6.1.tar.gz
+        sudo ln -s /usr/local/lib/msms/msms.i86Linux2.2.6.1 /usr/local/bin/msms
+        sudo ln -s /usr/local/lib/msms/pdb_to_xyzr* /usr/local/bin
+        ## PyTorch, PyG, PyG adds
+        ### Installing for CPU only on the CI
+        pip install torch_geometric
         pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # PyTables via conda only for MacOS
-        if [ "$RUNNER_OS" == "macOS" ]; then
-          conda install pytables
-        fi
+        conda install pytables
     - name: Install the package
       shell: bash {0}
       run: pip install .'[${{ inputs.extras-require }}]'
