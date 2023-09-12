@@ -72,6 +72,7 @@ runs:
         sudo ln -s /usr/local/lib/msms/pdb_to_xyzr* /usr/local/bin
         ## PyTorch, PyG, PyG adds
         ### Installing for CPU only on the CI
+        conda install pytorch torchvision torchaudio cpuonly -c pytorch
         pip install torch_geometric
         pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # PyTables via conda only for MacOS
