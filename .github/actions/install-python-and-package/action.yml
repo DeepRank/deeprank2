@@ -42,7 +42,7 @@ runs:
       env:
         CMAKE_INSTALL_PREFIX: .local
       run: |
-        # Install dependencies not handled by poetry 
+        # Install dependencies not handled by setuptools 
         # Install dssp
         sudo apt-get install -y dssp
         # Only way to install msms is through conda
