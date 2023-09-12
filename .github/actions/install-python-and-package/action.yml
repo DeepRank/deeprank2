@@ -61,7 +61,12 @@ runs:
       run: |
         # Install dependencies not handled by setuptools 
         ## DSSP
-        sudo apt-get install -y dssp
+        git clone https://github.com/PDB-REDO/dssp.git
+        cd dssp
+        mkdir build
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        cmake --install build
         ## MSMS
         cd /tmp/
         wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL2.6.1/msms_i86Linux2_2.6.1.tar.gz
