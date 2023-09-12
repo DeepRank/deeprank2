@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Polarity(Enum):
-    "a value to express a residue's polarity"
+    """One-hot encoding of the residue polarity."""
 
     NONPOLAR = 0
     POLAR = 1
@@ -15,13 +15,10 @@ class Polarity(Enum):
     def onehot(self):
         t = np.zeros(4)
         t[self.value] = 1.0
-
         return t
 
 
 class AminoAcid:
-    "a value to represent one of the amino acids"
-
     def __init__( # pylint: disable=too-many-arguments
         self,
         name: str,
@@ -36,7 +33,8 @@ class AminoAcid:
         hydrogen_bond_acceptors: int,
         index: int,
     ):
-        """
+        """Amino acid.
+
         Args:
             name (str): Full name of the amino acid.
             three_letter_code (str): Three-letter code of the amino acid (as in PDB).
@@ -112,24 +110,25 @@ class AminoAcid:
     def onehot(self) -> np.ndarray:
         if self._index is None:
             raise ValueError(
-                "amino acid {self._name} index is not set, thus no onehot can be computed"
+                f"Amino acid {self._name} index is not set, thus no onehot can be computed."
             )
         # 20 canonical amino acids
         # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
         a = np.zeros(20)
         a[self._index] = 1.0
-
         return a
 
     @property
     def index(self) -> int:
         return self._index
 
-    def __hash__(self):
+    def __hash__(self) -> hash:
         return hash(self.name)
 
-    def __eq__(self, other):
-        return isinstance(other, type(self)) and other.name == self.name
+    def __eq__(self, other) -> bool:
+        if isinstance(other, AminoAcid):
+            return other.name == self.name
+        return NotImplemented
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self._three_letter_code

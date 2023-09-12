@@ -1,12 +1,12 @@
 from enum import Enum
 
 import numpy as np
+
 from deeprank2.molstruct.residue import Residue
 
 
 class AtomicElement(Enum):
-    "value to represent the type of pdb atoms"
-
+    """One-hot encoding of the atomic element (or atom type)."""
     C = 1
     O = 2 # noqa: pycodestyle
     N = 3
@@ -22,8 +22,6 @@ class AtomicElement(Enum):
 
 
 class Atom:
-    """Represents a pdb atom."""
-
     def __init__( # pylint: disable=too-many-arguments
         self,
         residue: Residue,
@@ -32,7 +30,8 @@ class Atom:
         position: np.array,
         occupancy: float,
     ):
-        """
+        """One atom of a PDBStructure
+
         Args:
             residue (:class:`Residue`): The residue that this atom belongs to.
             name (str): Pdb atom name.
@@ -50,11 +49,10 @@ class Atom:
         self._occupancy = occupancy
 
     def __eq__(self, other) -> bool:
-        return (
-            isinstance(self, type(other))
-            and self._residue == other._residue
-            and self._name == other._name
-        )
+        if isinstance (other, Atom):
+            return (self._residue == other._residue
+                    and self._name == other._name)
+        return NotImplemented
 
     def __hash__(self) -> hash:
         return hash((tuple(self._position), self._element, self._name))
@@ -62,9 +60,8 @@ class Atom:
     def __repr__(self) -> str:
         return f"{self._residue} {self._name}"
 
-    def change_altloc(self, alternative_atom):
-        "replace the atom's location by another atom's location"
-
+    def change_altloc(self, alternative_atom: "Atom"):
+        """Replace the atom's location by another atom's location."""
         self._position = alternative_atom.position
         self._occupancy = alternative_atom.occupancy
 
@@ -85,5 +82,5 @@ class Atom:
         return self._position
 
     @property
-    def residue(self):
+    def residue(self) -> Residue:
         return self._residue

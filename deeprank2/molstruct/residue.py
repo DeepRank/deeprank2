@@ -1,14 +1,16 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
+
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.structure import Chain
 from deeprank2.utils.pssmdata import PssmRow
 
+if TYPE_CHECKING:
+    from deeprank2.molstruct.atom import Atom
+
 
 class Residue:
-    "represents a pdb residue"
-
     def __init__(
         self,
         chain: Chain,
@@ -16,7 +18,8 @@ class Residue:
         amino_acid: Optional[AminoAcid] = None,
         insertion_code: Optional[str] = None,
     ):
-        """
+        """One residue of a PDBStructure.
+
         Args:
             chain (:class:`Chain`): The chain that this residue belongs to.
             number (int): the residue number
@@ -32,26 +35,21 @@ class Residue:
         self._atoms = []
 
     def __eq__(self, other) -> bool:
-        return (
-            isinstance(self, type(other))
-            and self._chain == other._chain
-            and self._number == other._number
-            and self._insertion_code == other._insertion_code
-        )
+        if isinstance(other, Residue):
+            return (self._chain == other._chain
+                    and self._number == other._number
+                    and self._insertion_code == other._insertion_code
+            )
+        return NotImplemented
 
     def __hash__(self) -> hash:
         return hash((self._number, self._insertion_code))
 
     def get_pssm(self) -> PssmRow:
-        """
-        If the residue's chain has pssm info linked to it,
-        then return the part that belongs to this residue.
-        """
-
+        """Load pssm info linked to the residue."""
         pssm = self._chain.pssm
         if pssm is None:
             raise FileNotFoundError(f'No pssm file found for Chain {self._chain}.')
-
         return pssm[self]
 
     @property
@@ -59,7 +57,7 @@ class Residue:
         return self._number
 
     @property
-    def chain(self):
+    def chain(self) -> Chain:
         return self._chain
 
     @property
@@ -67,23 +65,21 @@ class Residue:
         return self._amino_acid
 
     @property
-    def atoms(self):
+    def atoms(self) -> list["Atom"]:
         return self._atoms
 
     @property
     def number_string(self) -> str:
-        "contains both the number and the insertion code (if any)"
-
+        """Contains both the number and the insertion code (if any)."""
         if self._insertion_code is not None:
             return f"{self._number}{self._insertion_code}"
-
         return str(self._number)
 
     @property
     def insertion_code(self) -> str:
         return self._insertion_code
 
-    def add_atom(self, atom):
+    def add_atom(self, atom: "Atom"):
         self._atoms.append(atom)
 
     def __repr__(self) -> str:
@@ -93,25 +89,23 @@ class Residue:
     def position(self) -> np.array:
         return np.mean([atom.position for atom in self._atoms], axis=0)
 
+    def get_center(self) -> np.ndarray:
+        """Find the center position of a `Residue`.
 
-def get_residue_center(residue: Residue) -> np.ndarray:
-    """Chooses a center position for a residue.
+        Center position is found as follows:
+        1. find beta carbon
+        2. if no beta carbon is found: find alpha carbon
+        3. if no alpha carbon is found: take the mean of the atom positions
+        """
+        betas = [atom for atom in self.atoms if atom.name == "CB"]
+        if len(betas) > 0:
+            return betas[0].position
 
-    Based on the atoms it has:
-    1. find beta carbon, if present
-    2. find alpha carbon, if present
-    3. else take the mean of the atom positions
-    """
+        alphas = [atom for atom in self.atoms if atom.name == "CA"]
+        if len(alphas) > 0:
+            return alphas[0].position
 
-    betas = [atom for atom in residue.atoms if atom.name == "CB"]
-    if len(betas) > 0:
-        return betas[0].position
+        if len(self.atoms) == 0:
+            raise ValueError(f"cannot get the center position from {self}, because it has no atoms")
 
-    alphas = [atom for atom in residue.atoms if atom.name == "CA"]
-    if len(alphas) > 0:
-        return alphas[0].position
-
-    if len(residue.atoms) == 0:
-        raise ValueError(f"cannot get the center position from {residue}, because it has no atoms")
-
-    return np.mean([atom.position for atom in residue.atoms], axis=0)
+        return np.mean([atom.position for atom in self.atoms], axis=0)
