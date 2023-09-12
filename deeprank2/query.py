@@ -174,6 +174,183 @@ class DeepRankQuery:
         raise NotImplementedError("Must be defined in child classes.")
 
 
+@dataclass(kw_only=True)
+class SingleResidueVariantQuery(DeepRankQuery):
+    """A query that builds a single residue variant graph."""
+
+    variant_residue_number: int
+    insertion_code: str | None
+    wildtype_amino_acid: AminoAcid
+    variant_amino_acid: AminoAcid
+    radius: float = 10.0
+
+    def __post_init__(self):
+        super().__post_init__()  # calls __post_init__ of parents
+
+        if len(self.chain_ids) != 1:
+            # TODO: Consider throwing a warning instead of error and taking the first entry of the list anyway.
+            raise ValueError(f"SingleResidueVariantQuery must contain exactly 1 chain_id, but {len(self.chain_ids)} were given.")
+        self.variant_chain_id = self.chain_ids[0]
+
+        if not self.distance_cutoff:
+            self.distance_cutoff = 4.5
+
+    @property
+    def residue_id(self) -> str:
+        """String representation of the residue number and insertion code."""
+        if self.insertion_code is not None:
+            return f"{self.variant_residue_number}{self.insertion_code}"
+        return str(self.variant_residue_number)
+
+    def get_query_id(self) -> str:
+        """Returns the string representing the complete query ID."""
+        return (f"{self.resolution}-srv:"
+                + f"{self.variant_chain_id}:{self.residue_id}:"
+                + f"{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
+                )
+
+    def build(
+        self,
+        feature_modules: list[ModuleType] | ModuleType,
+    ) -> Graph:
+        #TODO: check how much of this is common with PPI and move it to parent class
+        """Builds the graph from the .PDB structure.
+
+        Args:
+            feature_modules (list[ModuleType]): Each must implement the :py:func:`add_features` function.
+
+        Returns:
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
+        """
+
+        # load .PDB structure
+        if isinstance(feature_modules, list):
+            pssm_required = conservation in feature_modules
+        else:
+            pssm_required = conservation == feature_modules
+            feature_modules = [feature_modules]
+        structure: PDBStructure = self._load_structure(pssm_required)
+
+        # find the variant residue and its surroundings
+        variant_residue = None
+        for residue in structure.get_chain(self.variant_chain_id).residues:
+            residue: Residue
+            if (
+                residue.number == self.variant_residue_number
+                and residue.insertion_code == self.insertion_code
+            ):
+                variant_residue = residue
+                break
+        if variant_residue is None:
+            raise ValueError(
+                f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}"
+            )
+        variant = SingleResidueVariant(variant_residue, self.variant_amino_acid)
+        residues = get_surrounding_residues(structure, variant_residue, self.radius)
+
+        # build the graph
+        if self.resolution == 'residue':
+            graph = build_residue_graph(residues, self.get_query_id(), self.distance_cutoff)
+        elif self.resolution == 'atomic':
+            residues.append(variant_residue)
+            atoms = set([])
+            for residue in residues:
+                if residue.amino_acid is not None:
+                    for atom in residue.atoms:
+                        atoms.add(atom)
+            atoms = list(atoms)
+            #TODO: why was this a set at first? I think each atom is unique anyway, given that it has a Residue property
+
+            graph = build_atomic_graph(atoms, self.get_query_id(), self.distance_cutoff)
+            #TODO: check if this works with a set instead of a list
+
+
+        else:
+            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
+        graph.center = variant_residue.get_center()
+
+        # add data to the graph
+        self._set_graph_targets(graph)
+        for feature_module in feature_modules:
+            feature_module.add_features(self.pdb_path, graph, variant)
+
+        return graph
+
+
+@dataclass(kw_only=True)
+class ProteinProteinInterfaceQuery(DeepRankQuery):
+    """A query that builds a protein-protein interface graph."""
+
+    def __post_init__(self):
+        super().__post_init__()
+
+        if len(self.chain_ids) != 2:
+            # TODO: Consider throwing a warning instead of error and using the first two entries of the list anyway.
+            raise ValueError(f"SingleResidueVariantQuery must contain exactly 2 chain_ids, but {len(self.chain_ids)} were given.")
+
+        if not self.distance_cutoff:
+            #TODO: check if we truly need so many different defaults
+            if self.resolution == 'atomic':
+                self.distance_cutoff = 5.5
+            if self.resolution == 'residue':
+                self.distance_cutoff = 10
+
+    def get_query_id(self) -> str:
+        """Returns the string representing the complete query ID."""
+        return (
+            f"{self.resolution}-ppi:"  # resolution and query type (ppi for protein protein interface)
+            + f"{self.chain_ids[0]}-{self.chain_ids[1]}:{self.model_id}"
+        )
+
+    def build(
+        self,
+        feature_modules: list[ModuleType] | ModuleType,
+    ) -> Graph:
+        #TODO: check how much of this is common with SRV and move it to parent class
+        """Builds the graph from the .PDB structure.
+
+        Args:
+            feature_modules (list[ModuleType]): Each must implement the :py:func:`add_features` function.
+
+        Returns:
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
+        """
+
+        contact_atoms = get_contact_atoms(self.pdb_path, self.chain_ids, self.distance_cutoff)
+        if len(contact_atoms) == 0:
+            raise ValueError("no contact atoms found")
+
+        # build the graph
+        if self.resolution == 'atomic':
+            graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.distance_cutoff)
+        elif self.resolution == 'residue':
+            residues_selected = {atom.residue for atom in contact_atoms}
+            graph = build_residue_graph(list(residues_selected), self.get_query_id(), self.distance_cutoff)
+            #TODO: check whether this works with a set instead of a list
+        else:
+            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
+        graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
+
+        # add data to the graph
+        self._set_graph_targets(graph)
+
+        # read the pssm
+        #TODO: unify with the way pssms are read for srv queries
+        structure = contact_atoms[0].residue.chain.model
+
+        if not isinstance(feature_modules, list):
+            feature_modules = [feature_modules]
+        if conservation in feature_modules:
+            self._load_pssm_data(structure)
+
+        # add the features
+        for feature_module in feature_modules:
+            feature_module.add_features(self.pdb_path, graph)
+
+        graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
+        return graph
+
+
 class QueryCollection:
     """
     Represents the collection of data queries.
@@ -356,179 +533,3 @@ class QueryCollection:
             return glob(f"{prefix}.hdf5")
 
         return output_paths
-
-@dataclass(kw_only=True)
-class SingleResidueVariantQuery(DeepRankQuery):
-    """A query that builds a single residue variant graph."""
-
-    variant_residue_number: int
-    insertion_code: str | None
-    wildtype_amino_acid: AminoAcid
-    variant_amino_acid: AminoAcid
-    radius: float = 10.0
-
-    def __post_init__(self):
-        super().__post_init__()  # calls __post_init__ of parents
-
-        if len(self.chain_ids) != 1:
-            # TODO: Consider throwing a warning instead of error and taking the first entry of the list anyway.
-            raise ValueError(f"SingleResidueVariantQuery must contain exactly 1 chain_id, but {len(self.chain_ids)} were given.")
-        self.variant_chain_id = self.chain_ids[0]
-
-        if not self.distance_cutoff:
-            self.distance_cutoff = 4.5
-
-    @property
-    def residue_id(self) -> str:
-        """String representation of the residue number and insertion code."""
-        if self.insertion_code is not None:
-            return f"{self.variant_residue_number}{self.insertion_code}"
-        return str(self.variant_residue_number)
-
-    def get_query_id(self) -> str:
-        """Returns the string representing the complete query ID."""
-        return (f"{self.resolution}-srv:"
-                + f"{self.variant_chain_id}:{self.residue_id}:"
-                + f"{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
-                )
-
-    def build(
-        self,
-        feature_modules: list[ModuleType] | ModuleType,
-    ) -> Graph:
-        #TODO: check how much of this is common with PPI and move it to parent class
-        """Builds the graph from the .PDB structure.
-
-        Args:
-            feature_modules (list[ModuleType]): Each must implement the :py:func:`add_features` function.
-
-        Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
-        """
-
-        # load .PDB structure
-        if isinstance(feature_modules, list):
-            pssm_required = conservation in feature_modules
-        else:
-            pssm_required = conservation == feature_modules
-            feature_modules = [feature_modules]
-        structure: PDBStructure = self._load_structure(pssm_required)
-
-        # find the variant residue and its surroundings
-        variant_residue = None
-        for residue in structure.get_chain(self.variant_chain_id).residues:
-            residue: Residue
-            if (
-                residue.number == self.variant_residue_number
-                and residue.insertion_code == self.insertion_code
-            ):
-                variant_residue = residue
-                break
-        if variant_residue is None:
-            raise ValueError(
-                f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}"
-            )
-        variant = SingleResidueVariant(variant_residue, self.variant_amino_acid)
-        residues = get_surrounding_residues(structure, variant_residue, self.radius)
-
-        # build the graph
-        if self.resolution == 'residue':
-            graph = build_residue_graph(residues, self.get_query_id(), self.distance_cutoff)
-        elif self.resolution == 'atomic':
-            residues.append(variant_residue)
-            atoms = set([])
-            for residue in residues:
-                if residue.amino_acid is not None:
-                    for atom in residue.atoms:
-                        atoms.add(atom)
-            atoms = list(atoms)
-            #TODO: why was this a set at first? I think each atom is unique anyway, given that it has a Residue property
-
-            graph = build_atomic_graph(atoms, self.get_query_id(), self.distance_cutoff)
-            #TODO: check if this works with a set instead of a list
-
-
-        else:
-            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
-        graph.center = variant_residue.get_center()
-
-        # add data to the graph
-        self._set_graph_targets(graph)
-        for feature_module in feature_modules:
-            feature_module.add_features(self.pdb_path, graph, variant)
-
-        return graph
-
-
-@dataclass(kw_only=True)
-class ProteinProteinInterfaceQuery(DeepRankQuery):
-    """A query that builds a protein-protein interface graph."""
-
-    def __post_init__(self):
-        super().__post_init__()
-
-        if len(self.chain_ids) != 2:
-            # TODO: Consider throwing a warning instead of error and using the first two entries of the list anyway.
-            raise ValueError(f"SingleResidueVariantQuery must contain exactly 2 chain_ids, but {len(self.chain_ids)} were given.")
-
-        if not self.distance_cutoff:
-            #TODO: check if we truly need so many different defaults
-            if self.resolution == 'atomic':
-                self.distance_cutoff = 5.5
-            if self.resolution == 'residue':
-                self.distance_cutoff = 10
-
-    def get_query_id(self) -> str:
-        """Returns the string representing the complete query ID."""
-        return (
-            f"{self.resolution}-ppi:"  # resolution and query type (ppi for protein protein interface)
-            + f"{self.chain_ids[0]}-{self.chain_ids[1]}:{self.model_id}"
-        )
-
-    def build(
-        self,
-        feature_modules: list[ModuleType] | ModuleType,
-    ) -> Graph:
-        #TODO: check how much of this is common with SRV and move it to parent class
-        """Builds the graph from the .PDB structure.
-
-        Args:
-            feature_modules (list[ModuleType]): Each must implement the :py:func:`add_features` function.
-
-        Returns:
-            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
-        """
-
-        contact_atoms = get_contact_atoms(self.pdb_path, self.chain_ids, self.distance_cutoff)
-        if len(contact_atoms) == 0:
-            raise ValueError("no contact atoms found")
-
-        # build the graph
-        if self.resolution == 'atomic':
-            graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.distance_cutoff)
-        elif self.resolution == 'residue':
-            residues_selected = {atom.residue for atom in contact_atoms}
-            graph = build_residue_graph(list(residues_selected), self.get_query_id(), self.distance_cutoff)
-            #TODO: check whether this works with a set instead of a list
-        else:
-            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
-        graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
-
-        # add data to the graph
-        self._set_graph_targets(graph)
-
-        # read the pssm
-        #TODO: unify with the way pssms are read for srv queries
-        structure = contact_atoms[0].residue.chain.model
-
-        if not isinstance(feature_modules, list):
-            feature_modules = [feature_modules]
-        if conservation in feature_modules:
-            self._load_pssm_data(structure)
-
-        # add the features
-        for feature_module in feature_modules:
-            feature_module.add_features(self.pdb_path, graph)
-
-        graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
-        return graph
