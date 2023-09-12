@@ -60,8 +60,15 @@ runs:
         ## PyTorch, PyG, PyG adds
         ### Installing for CPU only on the CI
         conda install pytorch torchvision torchaudio cpuonly -c pytorch
-        conda install pyg -c pyg
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          pip install torch_geometric
+        else
+          conda install pyg -c pyg
         pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
+        # PyTables via conda only for MacOS
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          conda install pytables
+        fi
     - name: Install the package
       shell: bash {0}
       run: pip install .'[${{ inputs.extras-require }}]'
