@@ -373,15 +373,15 @@ def test_incorrect_pssm_order():
 
     # check that error is thrown for incorrect pssm
     with pytest.raises(ValueError):
-        _ = q.build(conservation)
+        _ = q.build([conservation])
 
     # no error if conservation module is not used
-    _ = q.build(components)
+    _ = q.build([components])
 
     # check that error suppression works
     with pytest.warns(UserWarning):
         q.suppress_pssm_errors = True
-        _ = q.build(conservation)
+        _ = q.build([conservation])
 
 
 def test_incomplete_pssm():
@@ -396,15 +396,15 @@ def test_incomplete_pssm():
     )
 
     with pytest.raises(ValueError):
-        _ = q.build(conservation)
+        _ = q.build([conservation])
 
     # no error if conservation module is not used
-    _ = q.build(components)
+    _ = q.build([components])
 
     # check that error suppression works
     with pytest.warns(UserWarning):
         q.suppress_pssm_errors = True
-        _ = q.build(conservation)
+        _ = q.build([conservation])
 
 
 def test_no_pssm_provided():
@@ -424,12 +424,12 @@ def test_no_pssm_provided():
     )
 
     with pytest.raises(ValueError):
-        _ = q_empty_dict.build(conservation)
-        _ = q_not_provided.build(conservation)
+        _ = q_empty_dict.build([conservation])
+        _ = q_not_provided.build([conservation])
 
     # no error if conservation module is not used
-    _ = q_empty_dict.build(components)
-    _ = q_not_provided.build(components)
+    _ = q_empty_dict.build([components])
+    _ = q_not_provided.build([components])
 
 
 def test_incorrect_pssm_provided():
@@ -455,12 +455,12 @@ def test_incorrect_pssm_provided():
     )
 
     with pytest.raises(FileNotFoundError):
-        _ = q_non_existing.build(conservation)
-        _ = q_missing.build(conservation)
+        _ = q_non_existing.build([conservation])
+        _ = q_missing.build([conservation])
 
     # no error if conservation module is not used
-    _ = q_non_existing.build(components)
-    _ = q_missing.build(components)
+    _ = q_non_existing.build([components])
+    _ = q_missing.build([components])
 
 
 def test_variant_query_multiple_chains():
@@ -480,13 +480,13 @@ def test_variant_query_multiple_chains():
 
     # at radius 10, chain B is included in graph
     # no error without conservation module
-    graph = q.build(components)
+    graph = q.build([components])
     assert 'B' in graph.get_all_chains()
     # if we rebuild the graph with conservation module it should fail
     with pytest.raises(FileNotFoundError):
-        _ = q.build(conservation)
+        _ = q.build([conservation])
 
     # at radius 7, chain B is not included in graph
     q.radius = 7.0
-    graph = q.build(conservation)
+    graph = q.build([conservation])
     assert 'B' not in graph.get_all_chains()
