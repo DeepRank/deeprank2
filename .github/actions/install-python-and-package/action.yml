@@ -46,7 +46,17 @@ runs:
         ## DSSP
         sudo apt-get install -y dssp
         ## MSMS
-        conda install -c bioconda msms
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          cd /tmp/
+          wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL2.6.1/msms_i86Linux2_2.6.1.tar.gz
+          sudo mkdir /usr/local/lib/msms
+          cd /usr/local/lib/msms
+          sudo tar zxvf /tmp/msms_i86Linux2_2.6.1.tar.gz
+          sudo ln -s /usr/local/lib/msms/msms.i86Linux2.2.6.1 /usr/local/bin/msms
+          sudo ln -s /usr/local/lib/msms/pdb_to_xyzr* /usr/local/bin
+        else
+          conda install -c bioconda msms
+        fi
         ## PyTorch, PyG, PyG adds
         ### Installing for CPU only on the CI
         conda install pytorch torchvision torchaudio cpuonly -c pytorch
