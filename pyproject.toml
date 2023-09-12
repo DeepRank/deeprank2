@@ -70,31 +70,11 @@ publishing = [
     "twine",
     "wheel",
 ]
-# feature dependency groups
 
 [project.urls]
 Documentation = "https://deeprank2.readthedocs.io/en/latest/?badge=latest"
 Repository = "https://github.com/DeepRank/deeprank2"
 Changelog = "https://github.com/DeepRank/deeprank2/blob/main/CHANGELOG.md"
-
-# [[tool.poetry.source]]
-# name = "torch_cpu"
-# url = "https://download.pytorch.org/whl/cpu"
-# priority = "supplemental"
-
-# [[tool.poetry.source]]
-# name = "pyg_cpu"
-# url = "https://data.pyg.org/whl/torch-2.0.0+cpu.html"
-# priority = "supplemental"
-
-# torch = {version = "==2.0.0", source="torch_cpu", platform = "linux", python = ">=3.10 <3.12"}
-# torchvision = {version = "==0.15.1", source="torch_cpu", platform = "linux", python = ">=3.10 <3.12"}
-# torchaudio = {version = "==2.0.1", source="torch_cpu", platform = "linux", python = ">=3.10 <3.12"}
-# torch-scatter = {version = ">=2.1.1", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
-# torch-sparse = {version = ">=0.6.17", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
-# torch-geometric = {git = "https://github.com/pyg-team/pytorch_geometric.git", rev = "ff9fb3d", tag = "2.3.1", branch = "master"}
-# torch-cluster = {version = ">=1.6.1", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
-# torch-spline-conv = {version = ">=1.2.2", source="pyg_cpu", platform = "linux", python = ">=3.10 <3.12"}
 
 [tool.coverage.run]
 branch = true
