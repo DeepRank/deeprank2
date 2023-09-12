@@ -45,8 +45,6 @@ runs:
         # Install dependencies not handled by poetry 
         # Install dssp
         sudo apt-get install -y dssp
-        # Only way to install msms is through conda
-        conda install -c bioconda msms
         # Safest way to install PyTorch and PyTorch Geometric is through conda
         conda install pytorch==2.0.0 torchvision=0.15.0 torchaudio=2.0.0 cpuonly -c pytorch
         conda install pyg -c pyg
