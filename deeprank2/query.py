@@ -79,7 +79,7 @@ class DeepRankQuery:
         for target_name, target_data in self.targets.items():
             graph.targets[target_name] = target_data
 
-    def _load_structure(self, pssm_required: bool) -> PDBStructure:
+    def _load_structure(self) -> PDBStructure:
         """Build PDBStructure objects from pdb and pssm data."""
         pdb = pdb2sql.pdb2sql(self.pdb_path)
         try:
@@ -87,7 +87,7 @@ class DeepRankQuery:
         finally:
             pdb._close() # pylint: disable=protected-access
         # read the pssm
-        if pssm_required:
+        if self._pssm_required:
             self._load_pssm_data(structure)
 
         return structure
@@ -169,7 +169,32 @@ class DeepRankQuery:
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
 
-    def build(self, feature_modules: list[ModuleType]) -> Graph:
+    def build(
+        self,
+        feature_modules: list[str],
+    ) -> Graph:
+        """Builds the graph from the .PDB structure.
+
+        Args:
+            feature_modules (list[str]): the feature modules used to build the graph.
+                These must be filenames existing inside `deeprank2.features` subpackage.
+
+        Returns:
+            :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
+        """
+
+        try:
+            feature_modules = [importlib.import_module('deeprank2.features.' + name) for name in feature_modules]
+        except TypeError:
+            if isinstance(feature_modules, ModuleType):
+                feature_modules = [feature_modules]
+            elif isinstance(feature_modules, str):
+                feature_modules = [importlib.import_module('deeprank2.features.' + feature_modules)]
+        self._pssm_required = conservation in feature_modules
+
+        return self._child_build(feature_modules)
+
+    def _child_build(self, feature_modules: list[ModuleType]):
         raise NotImplementedError("Must be defined in child classes.")
     def get_query_id(self) -> str:
         raise NotImplementedError("Must be defined in child classes.")
@@ -210,30 +235,25 @@ class SingleResidueVariantQuery(DeepRankQuery):
                 + f"{self.wildtype_amino_acid.name}->{self.variant_amino_acid.name}:{self.model_id}"
                 )
 
-    def build(
+    def _child_build(
         self,
-        feature_modules: list[ModuleType] | ModuleType,
+        feature_modules: list[ModuleType],
     ) -> Graph:
-        #TODO: check how much of this is common with PPI and move it to parent class
         """Builds the graph from the .PDB structure.
 
         Args:
-            feature_modules (list[ModuleType]): Each must implement the :py:func:`add_features` function.
+            feature_modules (list[str]): the feature modules used to build the graph.
+                These must be filenames existing inside `deeprank2.features` subpackage.
 
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
         # load .PDB structure
-        if isinstance(feature_modules, list):
-            pssm_required = conservation in feature_modules
-        else:
-            pssm_required = conservation == feature_modules
-            feature_modules = [feature_modules]
-        structure: PDBStructure = self._load_structure(pssm_required)
+        structure: PDBStructure = self._load_structure()
 
         # find the variant residue and its surroundings
-        variant_residue = None
+        variant_residue: Residue = None
         for residue in structure.get_chain(self.variant_chain_id).residues:
             residue: Residue
             if (
@@ -270,7 +290,7 @@ class SingleResidueVariantQuery(DeepRankQuery):
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
         graph.center = variant_residue.get_center()
 
-        # add data to the graph
+        # add target and feature data to the graph
         self._set_graph_targets(graph)
         for feature_module in feature_modules:
             feature_module.add_features(self.pdb_path, graph, variant)
@@ -303,9 +323,9 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
             + f"{self.chain_ids[0]}-{self.chain_ids[1]}:{self.model_id}"
         )
 
-    def build(
+    def _child_build(
         self,
-        feature_modules: list[ModuleType] | ModuleType,
+        feature_modules: list[ModuleType],
     ) -> Graph:
         #TODO: check how much of this is common with SRV and move it to parent class
         """Builds the graph from the .PDB structure.
@@ -317,7 +337,12 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
-        contact_atoms = get_contact_atoms(self.pdb_path, self.chain_ids, self.distance_cutoff)
+        # find the contact atoms
+        contact_atoms = get_contact_atoms(
+            self.pdb_path,
+            self.chain_ids,
+            self.distance_cutoff
+        )
         if len(contact_atoms) == 0:
             raise ValueError("no contact atoms found")
 
@@ -339,9 +364,7 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
         #TODO: unify with the way pssms are read for srv queries
         structure = contact_atoms[0].residue.chain.model
 
-        if not isinstance(feature_modules, list):
-            feature_modules = [feature_modules]
-        if conservation in feature_modules:
+        if self._pssm_required:
             self._load_pssm_data(structure)
 
         # add the features
@@ -424,8 +447,9 @@ class QueryCollection:
             # TODO: Maybe make exception catching optional, because I think it would be good to raise the error by default.
             output_path = f"{self._prefix}-{os.getpid()}.hdf5"
             #TODO: move the line below into generic build method so we can pass a list of strings here.
-            feature_modules = [importlib.import_module('deeprank2.features.' + name) for name in self._feature_modules]
-            graph = query.build(feature_modules)
+            # feature_modules = [importlib.import_module('deeprank2.features.' + name) for name in self._feature_modules]
+            # graph = query.build(feature_modules)
+            graph = query.build(self._feature_modules)
             graph.write_to_hdf5(output_path)
 
             if self._grid_settings is not None and self._grid_map_method is not None:
