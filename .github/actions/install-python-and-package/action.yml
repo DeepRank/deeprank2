@@ -51,7 +51,7 @@ runs:
         conda install pytorch==2.0.0 torchvision=0.15.0 torchaudio=2.0.0 cpuonly -c pytorch
         conda install pyg -c pyg
         # Install optional pyg dependencies
-        pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
+        pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
     - name: Install the package
       shell: bash {0}
       run: pip install .'[${{ inputs.extras-require }}]'
