@@ -10,7 +10,7 @@ from glob import glob
 from multiprocessing import Pool
 from random import randrange
 from types import ModuleType
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Iterator, Literal
 
 import h5py
 import numpy as np
@@ -45,17 +45,17 @@ class DeepRankQuery:
 
     Args:
         model_id (str): The ID of the model to load, usually a .PDB accession code.
-        targets (Optional[Dict[str, Union[float, int]]], optional): Target values associated with the query. Defaults to None.
+        targets (dict[str, float], optional): Target values associated with the query. Defaults to None.
         suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
             Defaults to False.
     """
 
     pdb_path: str
-    resolution: str
-    chain_ids: List[str] | str
-    pssm_paths: Dict[str, str] = field(default_factory=dict)
+    resolution: Literal['residue', 'atomic']
+    chain_ids: list[str] | str
+    pssm_paths: dict[str, str] = field(default_factory=dict)
     distance_cutoff: float = None
-    targets: Dict[str, float] = field(default_factory=dict)
+    targets: dict[str, float] = field(default_factory=dict)
     suppress_pssm_errors: bool = False
 
     def __post_init__(self):
@@ -100,12 +100,12 @@ class DeepRankQuery:
                 with open(pssm_path, "rt", encoding="utf-8") as f:
                     chain.pssm = parse_pssm(f, chain)
 
-    def _check_pssm(self, verbosity: int = 0):
+    def _check_pssm(self, verbosity: Literal[0,1,2] = 0):
         """Checks whether information stored in pssm file matches the corresponding pdb file.
 
         Args:
             pdb_path (str): Path to the PDB file.
-            pssm_paths (Dict[str, str]): The paths to the PSSM files, per chain identifier.
+            pssm_paths (dict[str, str]): The paths to the PSSM files, per chain identifier.
             suppress (bool): Suppress errors and throw warnings instead.
             verbosity (int): Level of verbosity of error/warning. Defaults to 0.
                 0 (low): Only state file name where error occurred;
@@ -169,7 +169,7 @@ class DeepRankQuery:
     def __repr__(self) -> str:
         return f"{type(self)}({self.get_query_id()})"
 
-    def build(self, feature_modules: List[ModuleType]) -> Graph:
+    def build(self, feature_modules: list[ModuleType]) -> Graph:
         raise NotImplementedError("Must be defined in child classes.")
     def get_query_id(self) -> str:
         raise NotImplementedError("Must be defined in child classes.")
@@ -226,7 +226,7 @@ class QueryCollection:
             pickle.dump(self, pkl_file)
 
     @property
-    def queries(self) -> List[DeepRankQuery]:
+    def queries(self) -> list[DeepRankQuery]:
         """The list of queries added to the collection."""
         return self._queries
 
@@ -242,9 +242,9 @@ class QueryCollection:
     def _process_one_query(  # pylint: disable=too-many-arguments
         self,
         prefix: str,
-        feature_names: List[str],
-        grid_settings: Optional[GridSettings],
-        grid_map_method: Optional[MapMethod],
+        feature_names: list[str],
+        grid_settings: GridSettings | None,
+        grid_map_method: MapMethod | None,
         grid_augmentation_count: int,
         query: DeepRankQuery
     ):
@@ -278,33 +278,33 @@ class QueryCollection:
 
     def process( # pylint: disable=too-many-arguments, too-many-locals, dangerous-default-value
         self,
-        prefix: Optional[str] = None,
-        feature_modules: Union[ModuleType, List[ModuleType], str, List[str]] = [components, contact],
-        cpu_count: Optional[int] = None,
+        prefix: str | None = None,
+        feature_modules: ModuleType | list[ModuleType] | str | list[str] | Literal['all'] = [components, contact],
+        cpu_count: int | None = None,
         combine_output: bool = True,
-        grid_settings: Optional[GridSettings] = None,
-        grid_map_method: Optional[MapMethod] = None,
+        grid_settings: GridSettings | None = None,
+        grid_map_method: MapMethod | None = None,
         grid_augmentation_count: int = 0
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Args:
-            prefix (Optional[str], optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
-            feature_modules (Union[ModuleType, List[ModuleType], str, List[str]], optional): Features' module or list of features' modules
+            prefix (str | None, optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
+            feature_modules (ModuleType | list[ModuleType] | str | list[str] | Literal['all'], optional): Features' module or list of features' modules
                 used to generate features (given as string or as an imported module). Each module must implement the :py:func:`add_features` function,
                 and features' modules can be found (or should be placed in case of a custom made feature) in `deeprank2.features` folder.
                 If set to 'all', all available modules in `deeprank2.features` are used to generate the features.
                 Defaults to only the basic feature modules `deeprank2.features.components` and `deeprank2.features.contact`.
-            cpu_count (Optional[int], optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
+            cpu_count (int | None, optional): How many processes to be run simultaneously. Defaults to None, which takes all available cpu cores.
             combine_output (bool, optional): For combining the HDF5 files generated by the processes. Defaults to True.
-            grid_settings (Optional[:class:`GridSettings`], optional): If valid together with `grid_map_method`, the grid data will be stored as well.
+            grid_settings (:class:`GridSettings` | None, optional): If valid together with `grid_map_method`, the grid data will be stored as well.
                 Defaults to None.
-            grid_map_method (Optional[:class:`MapMethod`], optional): If valid together with `grid_settings`, the grid data will be stored as well.
+            grid_map_method (:class:`MapMethod` | None, optional): If valid together with `grid_settings`, the grid data will be stored as well.
                 Defaults to None.
             grid_augmentation_count (int, optional): Number of grid data augmentations. May not be negative be zero or a positive number.
                 Defaults to 0.
 
         Returns:
-            List[str]: The list of paths of the generated HDF5 files.
+            list[str]: The list of paths of the generated HDF5 files.
         """
 
         # set defaults
@@ -395,20 +395,20 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
     def build(
         self,
-        feature_modules: List[ModuleType] | ModuleType,
+        feature_modules: list[ModuleType] | ModuleType,
     ) -> Graph:
         #TODO: check how much of this is common with PPI and move it to parent class
         """Builds the graph from the .PDB structure.
 
         Args:
-            feature_modules (List[ModuleType]): Each must implement the :py:func:`add_features` function.
+            feature_modules (list[ModuleType]): Each must implement the :py:func:`add_features` function.
 
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
         # load .PDB structure
-        if isinstance(feature_modules, List):
+        if isinstance(feature_modules, list):
             pssm_required = conservation in feature_modules
         else:
             pssm_required = conservation == feature_modules
@@ -488,13 +488,13 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
 
     def build(
         self,
-        feature_modules: List[ModuleType] | ModuleType,
+        feature_modules: list[ModuleType] | ModuleType,
     ) -> Graph:
         #TODO: check how much of this is common with SRV and move it to parent class
         """Builds the graph from the .PDB structure.
 
         Args:
-            feature_modules (List[ModuleType]): Each must implement the :py:func:`add_features` function.
+            feature_modules (list[ModuleType]): Each must implement the :py:func:`add_features` function.
 
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
@@ -522,7 +522,7 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
         #TODO: unify with the way pssms are read for srv queries
         structure = contact_atoms[0].residue.chain.model
 
-        if not isinstance(feature_modules, List):
+        if not isinstance(feature_modules, list):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
             self._load_pssm_data(structure)
