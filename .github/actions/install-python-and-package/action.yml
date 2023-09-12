@@ -43,14 +43,14 @@ runs:
         CMAKE_INSTALL_PREFIX: .local
       run: |
         # Install dependencies not handled by setuptools 
-        # Install dssp
+        ## DSSP
         sudo apt-get install -y dssp
-        # Only way to install msms is through conda
+        ## MSMS
         conda install -c bioconda msms
-        # Safest way to install PyTorch and PyTorch Geometric is through conda
-        conda install pytorch==2.0.0 torchvision=0.15.0 torchaudio=2.0.0 cpuonly -c pytorch
+        ## PyTorch, PyG, PyG adds
+        ### Installing for CPU only on the CI
+        conda install pytorch torchvision torchaudio cpuonly -c pytorch
         conda install pyg -c pyg
-        # Install optional pyg dependencies
         pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
     - name: Install the package
       shell: bash {0}
