@@ -11,6 +11,7 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
 * [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`
 * [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
 * [GCC](https://gcc.gnu.org/install/)
+* For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html)
 
 ## Deeprank2 Package
 
