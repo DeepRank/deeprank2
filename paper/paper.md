@@ -58,7 +58,7 @@ We present DeepRank2, a deep learning (DL) framework geared towards making predi
 [comment]: <> (CHECK FOR AUTHORS: Do the authors clearly state what problems the software is designed to solve and who the target audience is?)
 [comment]: <> (CHECK FOR AUTHORS: Do the authors describe how this software compares to other commonly-used packages?)
 
-![DeepRank2 framework overview. 3D coordinates of protein structures are extracted from PDB files and converted into graphs and grids, using either an atomic or a residual level, depending on the user’s requirements. The data are enriched with geometrical and physicochemical information and are stored into HDF5 files, and can then be used in the pre-implemented DL pipeline for training PyTorch networks and computing predictions.\label{fig:flowchart}](deeprank2.png)
+![DeepRank2 framework overview. 3D coordinates of protein structures are extracted from PDB files and converted into graphs and grids, using either an atomic or a residual level, depending on the user’s requirements. The data are enriched with geometrical and physicochemical information and are stored into HDF5 files, and can then be used in the pre-implemented DL pipeline for training PyTorch networks and computing predictions.\label{fig:flowchart}](deeprank2.png){ width=100% }
 
 # State of the field
 
