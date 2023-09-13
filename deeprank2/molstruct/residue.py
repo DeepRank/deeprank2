@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
 import numpy as np
@@ -65,7 +67,7 @@ class Residue:
         return self._amino_acid
 
     @property
-    def atoms(self) -> list["Atom"]:
+    def atoms(self) -> list[Atom]:
         return self._atoms
 
     @property
@@ -79,7 +81,7 @@ class Residue:
     def insertion_code(self) -> str:
         return self._insertion_code
 
-    def add_atom(self, atom: "Atom"):
+    def add_atom(self, atom: Atom):
         self._atoms.append(atom)
 
     def __repr__(self) -> str:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
 from deeprank2.utils.pssmdata import PssmRow
@@ -32,19 +34,19 @@ class PDBStructure:
     def has_chain(self, chain_id: str) -> bool:
         return chain_id in self._chains
 
-    def get_chain(self, chain_id: str) -> "Chain":
+    def get_chain(self, chain_id: str) -> Chain:
         return self._chains[chain_id]
 
-    def add_chain(self, chain: "Chain"):
+    def add_chain(self, chain: Chain):
         if chain.id in self._chains:
             raise ValueError(f"duplicate chain: {chain.id}")
         self._chains[chain.id] = chain
 
     @property
-    def chains(self) -> list["Chain"]:
+    def chains(self) -> list[Chain]:
         return list(self._chains.values())
 
-    def get_atoms(self) -> list["Atom"]:
+    def get_atoms(self) -> list[Atom]:
         """List all atoms in the structure."""
         atoms = []
         for chain in self._chains.values():
@@ -82,13 +84,13 @@ class Chain:
     def pssm(self, pssm: PssmRow):
         self._pssm = pssm
 
-    def add_residue(self, residue: "Residue"):
+    def add_residue(self, residue: Residue):
         self._residues[(residue.number, residue.insertion_code)] = residue
 
     def has_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> bool:
         return (residue_number, insertion_code) in self._residues
 
-    def get_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> "Residue":
+    def get_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> Residue:
         return self._residues[(residue_number, insertion_code)]
 
     @property
@@ -96,10 +98,10 @@ class Chain:
         return self._id
 
     @property
-    def residues(self) -> list["Residue"]:
+    def residues(self) -> list[Residue]:
         return list(self._residues.values())
 
-    def get_atoms(self) -> list["Atom"]:
+    def get_atoms(self) -> list[Atom]:
         """Shortcut to list all atoms in this chain."""
         atoms = []
         for residue in self.residues:

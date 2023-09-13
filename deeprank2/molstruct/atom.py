@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 import numpy as np
@@ -60,7 +62,7 @@ class Atom:
     def __repr__(self) -> str:
         return f"{self._residue} {self._name}"
 
-    def change_altloc(self, alternative_atom: "Atom"):
+    def change_altloc(self, alternative_atom: Atom):
         """Replace the atom's location by another atom's location."""
         self._position = alternative_atom.position
         self._occupancy = alternative_atom.occupancy
