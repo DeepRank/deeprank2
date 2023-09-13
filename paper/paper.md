@@ -50,9 +50,6 @@ bibliography: paper.bib
 
 ---
 
-[comment]: <> (TODO: check refs in the pdf)
-[comment]: <> (TODO: check figures in the pdf)
-
 # Summary
 [comment]: <> (CHECK FOR AUTHORS: Do the summary describe the high-level functionality and purpose of the software for a diverse, non-specialist audience?)
 
@@ -60,6 +57,8 @@ We present DeepRank2, a deep learning (DL) framework geared towards making predi
 
 [comment]: <> (CHECK FOR AUTHORS: Do the authors clearly state what problems the software is designed to solve and who the target audience is?)
 [comment]: <> (CHECK FOR AUTHORS: Do the authors describe how this software compares to other commonly-used packages?)
+
+![DeepRank2 framework overview. 3D coordinates of protein structures are extracted from PDB files and converted into graphs and grids, using either an atomic or a residual level, depending on the user’s requirements. The data are enriched with geometrical and physicochemical information and are stored into HDF5 files, and can then be used in the pre-implemented DL pipeline for training PyTorch networks and computing predictions.\label{fig:flowchart}](deeprank2.png)
 
 # State of the field
 
@@ -94,8 +93,6 @@ DeepRank2 also provides convenient pre-implemented modules for training simple [
 DeepRank2 embraces the best practices of open-source development by utilizing platforms like GitHub and Git, unit testing (as of August 2023 coverage is 83%), continuous integration, automatic documentation, and Findable, Accessible, Interoperable, and Reusable (FAIR) principles. Detailed [documentation](https://deeprank2.readthedocs.io/en/latest/?badge=latest) and [tutorials](https://github.com/DeepRank/deeprank2/blob/main/tutorials/TUTORIAL.md) for getting started with the package are publicly available. The project aims to create high-quality software that can be easily accessed, used, and contributed to by a wide range of researchers.
 
 This project is expected to have an impact across the all of structural bioinformatics, enabling advancements that rely on molecular complex analysis, such as structural biology, protein engineering, and rational drug design. The target community includes researchers working with molecular complexes data, such as computational biologists, immunologists, and structural bioinformatics scientists. The existing features, as well as the sustainable package formatting and its modular design make DeepRank2 an excellent framework to build upon. Taken together, DeepRank2 provides all the requirements to become the all-purpose DL tool that is currently lacking in the field of biomolecular interactions.
-
-![DeepRank2 framework overview. 3D coordinates of protein structures are extracted from PDB files and converted into graphs and grids, using either an atomic or a residual level, depending on the user’s requirements. The data are enriched with geometrical and physicochemical information and are stored into HDF5 files, and can then be used in the pre-implemented DL pipeline for training PyTorch networks and computing predictions.\label{fig:flowchart}](deeprank2.png)
 
 # Acknowledgements
 
