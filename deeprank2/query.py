@@ -21,8 +21,8 @@ from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.molstruct.structure import PDBStructure
-from deeprank2.molstruct.variant import SingleResidueVariant
 from deeprank2.utils.buildgraph import (add_hydrogens, get_contact_atoms,
                                         get_structure,
                                         get_surrounding_residues)

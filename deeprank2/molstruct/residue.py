@@ -111,3 +111,28 @@ class Residue:
             raise ValueError(f"cannot get the center position from {self}, because it has no atoms")
 
         return np.mean([atom.position for atom in self.atoms], axis=0)
+
+
+class SingleResidueVariant:
+    """A single residue mutation of a PDBStrcture."""
+
+    def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
+        """
+        Args:
+            residue (Residue): the `Residue` object from the PDBStructure that is mutated.
+            variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.
+        """
+        self._residue = residue
+        self._variant_amino_acid = variant_amino_acid
+
+    @property
+    def residue(self) -> Residue:
+        return self._residue
+
+    @property
+    def variant_amino_acid(self) -> AminoAcid:
+        return self._variant_amino_acid
+
+    @property
+    def wildtype_amino_acid(self) -> AminoAcid:
+        return self._residue.amino_acid
