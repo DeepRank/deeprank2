@@ -24,6 +24,8 @@ class AtomicElement(Enum):
 
 
 class Atom:
+    """One atom in a PDBStructure."""
+
     def __init__( # pylint: disable=too-many-arguments
         self,
         residue: Residue,
@@ -32,8 +34,7 @@ class Atom:
         position: np.array,
         occupancy: float,
     ):
-        """One atom of a PDBStructure
-
+        """
         Args:
             residue (:class:`Residue`): The residue that this atom belongs to.
             name (str): Pdb atom name.

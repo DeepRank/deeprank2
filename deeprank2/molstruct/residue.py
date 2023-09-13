@@ -13,6 +13,14 @@ if TYPE_CHECKING:
 
 
 class Residue:
+    """One protein residue in a `PDBStructure`.
+
+    A `Residue` is the basic building block of proteins and protein complex,
+    here represented by `PDBStructures`.
+    Each residue is of a certain `AminoAcid` type and consists of multiple
+    `Atom`s.
+    """
+
     def __init__(
         self,
         chain: Chain,
@@ -20,8 +28,7 @@ class Residue:
         amino_acid: Optional[AminoAcid] = None,
         insertion_code: Optional[str] = None,
     ):
-        """One residue of a PDBStructure.
-
+        """
         Args:
             chain (:class:`Chain`): The chain that this residue belongs to.
             number (int): the residue number

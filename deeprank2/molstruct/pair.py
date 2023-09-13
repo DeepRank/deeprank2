@@ -6,14 +6,14 @@ from deeprank2.molstruct.residue import Residue
 
 
 class Pair:
-    """A hashable, comparable object for any set of two inputs where order doesn't matter.
-
-    Args:
-        item1 (Any object): The pair's first object, must be convertable to string.
-        item2 (Any object): The pair's second object, must be convertable to string.
-    """
+    """A hashable, comparable object for any set of two inputs where order doesn't matter."""
 
     def __init__(self, item1: Any, item2: Any):
+        """
+        Args:
+            item1 (Any object): The pair's first object, must be convertable to string.
+            item2 (Any object): The pair's second object, must be convertable to string.
+        """
         self.item1 = item1
         self.item2 = item2
 
@@ -41,7 +41,7 @@ class Pair:
 
 
 class Contact(Pair, ABC):
-    pass
+    """Parent class to bind `ResidueContact` and `ResidueContact` objects."""
 
 
 class ResidueContact(Contact):
@@ -63,6 +63,7 @@ class ResidueContact(Contact):
 
 class AtomicContact(Contact):
     """A contact between two atoms from a structure."""
+
     def __init__(self, atom1: Atom, atom2: Atom):
         self._atom1 = atom1
         self._atom2 = atom2
