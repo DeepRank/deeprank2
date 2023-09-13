@@ -10,7 +10,7 @@ Users can add custom features by creating a new module and placing it in `deepra
 ```python
 from typing import Optional
 
-from deeprank2.molstruct.variant import SingleResidueVariant
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 

@@ -1,17 +1,17 @@
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
+from pdb2sql import pdb2sql
+
 from deeprank2.molstruct.aminoacid import AminoAcid
-from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.molstruct.structure import Chain, PDBStructure
-from deeprank2.molstruct.variant import SingleResidueVariant
 from deeprank2.utils.buildgraph import (get_residue_contact_pairs,
                                         get_structure,
                                         get_surrounding_residues)
 from deeprank2.utils.graph import (Graph, build_atomic_graph,
                                    build_residue_graph)
 from deeprank2.utils.parsing.pssm import parse_pssm
-from pdb2sql import pdb2sql
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
