@@ -52,7 +52,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
 
 ### Dependencies
 
-Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed. Follow the official documentation linked below:
+Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.10 installed. Follow the official documentation linked below:
 
 *  [MSMS](https://ssbio.readthedocs.io/en/latest/instructions/msms.html)
   *  [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users
