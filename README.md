@@ -55,7 +55,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
 Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.10 installed. Follow the official documentation linked below:
 
 *  [MSMS](https://ssbio.readthedocs.io/en/latest/instructions/msms.html)
-  *  [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users
+    *  [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users
 *  [PyTorch](https://pytorch.org/get-started/locally/)
     *  We support torch's CPU library as well as CUDA
 *  [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`
