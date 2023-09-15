@@ -42,10 +42,11 @@
         }
     ],
     "keywords": [
-        "Graph Neural Networks",
-        "Convolutional Neural Networks",
-        "Protein-Protein Interface",
-        "Deeprank"
+        "Graph neural networks",
+        "Convolutional neural networks",
+        "Protein-protein interface",
+        "Single-residue variant",
+        "DeepRank"
     ],
     "license": {
         "id": "Apache-2.0"

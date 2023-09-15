@@ -44,17 +44,15 @@ authors:
     affiliation: Radboud University Medical Center
     orcid: 'https://orcid.org/0000-0002-2613-538X'
 abstract: >-
-  deeprank2 allows ranking of protein-protein
-  interface using a graph representation of the
-  contact residues or atoms. Graphs of such
-  interfaces are used to train graph neural networks
-  for the prediction of the experimental validity of
-  the interface.
+  DeepRank2 is an open-source deep learning
+  framework for data mining of protein-protein interfaces
+  or single-residue variants.
 keywords:
-  - Graph Neural Networks
-  - Convolutional Neural Networks
-  - Protein-Protein Interface
-  - Deeprank
+  - Graph neural networks
+  - Convolutional neural networks
+  - Protein-protein interface
+  - Single-residue variant
+  - DeepRank
 license: Apache-2.0
 commit: 4e8823758ba03f824b4281f5689cb6a335ab2f6c
 version: "2.0.0"

@@ -97,7 +97,7 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
 class Query:
 
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None, suppress_pssm_errors: bool = False):
-        """Represents one entity of interest, like a single residue variant or a protein-protein interface.
+        """Represents one entity of interest, like a single-residue variant or a protein-protein interface.
 
         :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
         They can have target values associated with them, which will be stored with the resulting graph.
@@ -389,7 +389,7 @@ class SingleResidueVariantResidueQuery(Query):
         suppress_pssm_errors: bool = False,
     ):
         """
-        Creates a residue graph from a single residue variant in a .PDB file.
+        Creates a residue graph from a single-residue variant in a .PDB file.
 
         Args:
             pdb_path (str): The path to the PDB file.
@@ -508,7 +508,7 @@ class SingleResidueVariantAtomicQuery(Query):
         suppress_pssm_errors: bool = False,
     ):
         """
-        Creates an atomic graph for a single residue variant in a .PDB file.
+        Creates an atomic graph for a single-residue variant in a .PDB file.
 
         Args:
             pdb_path (str): The path to the .PDB file.
