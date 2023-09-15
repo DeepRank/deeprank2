@@ -2,12 +2,11 @@ import logging
 from typing import Optional
 
 import numpy as np
-from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue
-from deeprank2.molstruct.variant import SingleResidueVariant
-from deeprank2.utils.graph import Graph
 
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.molstruct.atom import Atom
+from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.utils.graph import Graph
 from deeprank2.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
@@ -23,12 +22,12 @@ def add_features( # pylint: disable=unused-argument
         elif isinstance(node.id, Atom):
             atom = node.id
             residue = atom.residue
-            
+
             node.features[Nfeat.ATOMTYPE] = atom.element.onehot
             node.features[Nfeat.PDBOCCUPANCY] = atom.occupancy
             node.features[Nfeat.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}") 
+            raise TypeError(f"Unexpected node type: {type(node.id)}")
 
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
         node.features[Nfeat.RESCHARGE] = residue.amino_acid.charge

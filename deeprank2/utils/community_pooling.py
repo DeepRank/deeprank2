@@ -74,7 +74,7 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
         elif method == "mcl":
             matrix = nx.to_scipy_sparse_array(subg)
             # run MCL with default parameters
-            result = mc.run_mcl(matrix)
+            result = mc.run_mcl(matrix.toarray())
             mc_clust = mc.get_clusters(result)  # get clusters
 
             index = np.zeros(subg.number_of_nodes()).astype("int")
@@ -141,7 +141,8 @@ def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str 
         matrix = nx.to_scipy_sparse_array(g)
 
         # run MCL with default parameters
-        result = mc.run_mcl(matrix)
+
+        result = mc.run_mcl(matrix.toarray())
 
         clusters = mc.get_clusters(result)  # get clusters
 
@@ -169,7 +170,7 @@ def community_pooling(cluster, data):
         pooled features tensor
 
     Examples:
-    
+
         >>> import torch
         >>> from torch_geometric.data import Data, Batch
         >>> edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5],

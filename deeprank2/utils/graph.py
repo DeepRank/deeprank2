@@ -5,15 +5,15 @@ from typing import Callable, List, Optional, Union
 import h5py
 import numpy as np
 import pdb2sql.transform
-from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.pair import AtomicContact, Contact, ResidueContact
-from deeprank2.molstruct.residue import Residue, get_residue_center
-from deeprank2.utils.grid import Augmentation, Grid, GridSettings, MapMethod
 from scipy.spatial import distance_matrix
 
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
+from deeprank2.molstruct.atom import Atom
+from deeprank2.molstruct.pair import AtomicContact, Contact, ResidueContact
+from deeprank2.molstruct.residue import Residue
+from deeprank2.utils.grid import Augmentation, Grid, GridSettings, MapMethod
 
 _log = logging.getLogger(__name__)
 
@@ -308,7 +308,7 @@ class Graph:
                     targets_group[target_name][()] = target_data
 
         return hdf5_path
-    
+
     def get_all_chains(self) -> List[str]:
         if isinstance(self.nodes[0].id, Residue):
             chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
@@ -358,7 +358,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     residues: List[Residue], graph_id: str, edge_distance_cutoff: float
 ) -> Graph:
     """Builds a graph, using the residues as nodes.
-    
+
     The edge distance cutoff is in Ångströms.
     It's the shortest interatomic distance between two residues.
     """
@@ -392,8 +392,8 @@ def build_residue_graph( # pylint: disable=too-many-locals
     graph = Graph(graph_id, edge_distance_cutoff)
     for residue1_index, residue2_index in residue_index_pairs:
 
-        residue1 = residues[residue1_index]
-        residue2 = residues[residue2_index]
+        residue1: Residue = residues[residue1_index]
+        residue2: Residue = residues[residue2_index]
 
         if residue1 != residue2:
 
@@ -403,8 +403,8 @@ def build_residue_graph( # pylint: disable=too-many-locals
             node2 = Node(residue2)
             edge = Edge(contact)
 
-            node1.features[Nfeat.POSITION] = get_residue_center(residue1)
-            node2.features[Nfeat.POSITION] = get_residue_center(residue2)
+            node1.features[Nfeat.POSITION] = residue1.get_center()
+            node2.features[Nfeat.POSITION] = residue2.get_center()
 
             # The same residue will be added  multiple times as a node,
             # but the Graph class fixes this.

@@ -15,7 +15,7 @@
 
 DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue variants (SRVs). This package is an improved and unified version of two previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank) and [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN).
 
-DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances. 
+DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
 
 Main features:
 - Predefined atom-level and residue-level feature types
@@ -56,10 +56,6 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
 Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed.
 
 * [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
-* [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/):
-  * on ubuntu 22.04 or newer: `sudo apt-get install dssp`.
-    * If the package cannot be located, first run `sudo apt-get update`.
-  * on older versions of ubuntu or on mac, or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
 * [PyTorch](https://pytorch.org/):
   * CPU only: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 cpuonly -c pytorch`
   * if using GPU: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia`
@@ -69,9 +65,15 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
     - `python -c "import torch; print(torch.__version__)"` and
     - `python -c "import torch; print(torch.version.cuda)"`
       - if this returns `None`, use `cpu` instead
-  - For example: `https://data.pyg.org/whl/torch-2.0.0+cpu.html`
+  - For example: `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.0.0+cpu.html`
+* Check if [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/) is installed: `dssp --version`
+  * if this gives an error or shows a version lower than 4:
+    * on ubuntu 22.04 or newer: `sudo apt-get install dssp`.
+      * If the package cannot be located, first run `sudo apt-get update`.
+    * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
 * Check if gcc is installed: `gcc --version`.
   * if this gives an error, run `sudo apt-get install gcc`.
+
 * For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
 
 ### Deeprank2 Package

@@ -6,11 +6,6 @@ from random import randrange
 import h5py
 import numpy as np
 import pytest
-from deeprank2.molstruct.pair import ResidueContact
-from deeprank2.molstruct.residue import get_residue_center
-from deeprank2.utils.buildgraph import get_structure
-from deeprank2.utils.graph import Edge, Graph, Node
-from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 from pdb2sql import pdb2sql
 from pdb2sql.transform import get_rot_axis_angle
 
@@ -18,6 +13,10 @@ from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import gridstorage
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as Target
+from deeprank2.molstruct.pair import ResidueContact
+from deeprank2.utils.buildgraph import get_structure
+from deeprank2.utils.graph import Edge, Graph, Node
+from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 
 entry_id = "test"
 node_feature_narray = "node_feat1"
@@ -58,8 +57,8 @@ def graph():
     node1.features[node_feature_singleton] = 0.0
 
     # set node positions, for the grid mapping
-    node0.features[Nfeat.POSITION] = get_residue_center(residue0)
-    node1.features[Nfeat.POSITION] = get_residue_center(residue1)
+    node0.features[Nfeat.POSITION] = residue0.get_center()
+    node1.features[Nfeat.POSITION] = residue1.get_center()
 
     # init the graph
     graph = Graph(structure.id)

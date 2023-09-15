@@ -1,17 +1,17 @@
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
+from pdb2sql import pdb2sql
+
 from deeprank2.molstruct.aminoacid import AminoAcid
-from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.molstruct.structure import Chain, PDBStructure
-from deeprank2.molstruct.variant import SingleResidueVariant
 from deeprank2.utils.buildgraph import (get_residue_contact_pairs,
                                         get_structure,
                                         get_surrounding_residues)
 from deeprank2.utils.graph import (Graph, build_atomic_graph,
                                    build_residue_graph)
 from deeprank2.utils.parsing.pssm import parse_pssm
-from pdb2sql import pdb2sql
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
@@ -24,9 +24,9 @@ def _get_residue(chain: Chain, number: int) -> Residue:
 
 
 def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noqa:MC0001
-    pdb_path: str, 
-    cutoff: float, 
-    detail: str, 
+    pdb_path: str,
+    cutoff: float,
+    detail: str,
     central_res: Optional[int] = None,
     variant: Optional[AminoAcid] = None,
     chain_ids: Optional[Union[str, Tuple[str, str]]] = None,
@@ -43,7 +43,7 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
             Defaults to None.
         variant (Optional[AminoAcid], optional): Amino acid to use as a variant amino acid.
             Defaults to None.
-        chain_ids (Optional[Union[str, Tuple[str, str]]], optional): Explicitly specify which chain(s) to use. 
+        chain_ids (Optional[Union[str, Tuple[str, str]]], optional): Explicitly specify which chain(s) to use.
             Defaults to None, which will use the first (two) chain(s) from the structure.
 
     Raises:
@@ -67,14 +67,14 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
         else:
             chains = [structure.get_chain(chain_id) for chain_id in chain_ids]
         for residue1, residue2 in get_residue_contact_pairs(
-            pdb_path, structure, 
-            chains[0], chains[1], 
+            pdb_path, structure,
+            chains[0], chains[1],
             cutoff
         ):
             if detail == 'residue':
                 nodes.add(residue1)
                 nodes.add(residue2)
-            
+
             elif detail == 'atom':
                 for atom in residue1.atoms:
                     nodes.add(atom)
