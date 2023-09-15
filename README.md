@@ -5,9 +5,9 @@
 | **fairness** |  [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403) |
 | **package** |  [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank2?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank2&utm_campaign=Badge_Grade) |
 | **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
-| **tests** | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) |
+| **tests** | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) ![Python](https://img.shields.io/badge/python-3.10-blue.svg)  ![Python](https://img.shields.io/badge/python-3.11-blue.svg) |
+| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) |
 | **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)  |
-
 
 ## Overview
 
@@ -46,35 +46,28 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
       - [GraphDataset](#graphdataset)
       - [GridDataset](#griddataset)
     - [Training](#training)
-  - [h5x support](#h5x-support)
   - [Package development](#package-development)
 
 ## Installation
 
+The package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows. 
+
 ### Dependencies
 
-Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.9 installed.
+Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.10 installed. The following dependency installation instructions are updated as of 14/09/2023, but in case of issues during installation always refer to the official documentation which is linked below:
 
-* [msms](https://ssbio.readthedocs.io/en/latest/instructions/msms.html): `conda install -c bioconda msms`. *For MacOS with M1 chip users*: you can follow [these instructions](https://ssbio.readthedocs.io/en/latest/instructions/msms.html).
-* [PyTorch](https://pytorch.org/):
-  * CPU only: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 cpuonly -c pytorch`
-  * if using GPU: `conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia`
-* [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html): `conda install pyg -c pyg`
-* [Dependencies for pytorch geometric from wheels](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html#installation-from-wheels): `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-${TORCH}+${CUDA}.html`.
-  - Here, `${TORCH}` and `${CUDA}` should be replaced by the pytorch and CUDA versions installed. You can find these using:
-    - `python -c "import torch; print(torch.__version__)"` and
-    - `python -c "import torch; print(torch.version.cuda)"`
-      - if this returns `None`, use `cpu` instead
-  - For example: `pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.0.0+cpu.html`
-* Check if [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/) is installed: `dssp --version`
-  * if this gives an error or shows a version lower than 4:
-    * on ubuntu 22.04 or newer: `sudo apt-get install dssp`.
-      * If the package cannot be located, first run `sudo apt-get update`.
-    * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
-* Check if gcc is installed: `gcc --version`.
-  * if this gives an error, run `sudo apt-get install gcc`.
-
-* For MacOS with M1 chip (otherwise ignore this): `conda install pytables`
+*  [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`.
+    * [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
+*  [PyTorch](https://pytorch.org/get-started/locally/)
+    * We support torch's CPU library as well as CUDA.
+*  [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
+*  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
+    * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
+      * on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
+      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
+*  [GCC](https://gcc.gnu.org/install/)
+    * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`.  
+*  For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
 
 ### Deeprank2 Package
 
@@ -84,26 +77,29 @@ Once the dependencies are installed, you can install the latest stable release o
 pip install deeprank2
 ```
 
-Alternatively, get all the new developments by cloning the repo and installing the code with
+Alternatively, get all the new developments by cloning the repo and installing the editable version of the package with:
 
 ```bash
 git clone https://github.com/DeepRank/deeprank2
 cd deeprank2
-pip install -e ./
+pip install -e .'[test]'
 ```
+
+The `test` extra is optional, and can be used to install test-related dependencies useful during the development.
 
 ### Test installation
 
 If you have installed the package from a cloned repository (second option above), you can check that all components were installed correctly, using pytest.
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
 
-First, install [pytest](https://docs.pytest.org/): `pip install pytest`.
-Then run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
+Run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
 
 ### Contributing
+
 If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
 
 ## Quick start
+
 The following section serves as a first guide to start using the package, using Protein-Protein Interface (PPI) queries as example.
 For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating variants data, and for the training pipeline.
 For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
@@ -318,10 +314,6 @@ trainer.train(
 trainer.test()
 
 ```
-
-## h5x support
-
-After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprank2/h5x/h5x.py` to explorer the connection graph used by deeprank2. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly`.
 
 ## Package development
 

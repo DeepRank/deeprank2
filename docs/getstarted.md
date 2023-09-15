@@ -412,7 +412,3 @@ fig.update_layout(
     title='Loss vs epochs'
 )
 ```
-
-## h5x support
-
-After installing  `h5xplorer`  (https://github.com/DeepRank/h5xplorer), you can execute the python file `deeprank2/h5x/h5x.py` to explorer the connection graph used by deeprank2. The context menu (right click on the name of the structure) allows to automatically plot the graphs using `plotly`.
