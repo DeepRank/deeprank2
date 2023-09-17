@@ -37,15 +37,15 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest']
-        python-version: ['3.9', '3.10']
+        python-version: ['3.10', '3.11']
 
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-python-and-package
+        with:
+          python-version: ${{ matrix.python-version }}
+          extras-require: test, publishing
       - name: Run unit tests
-        env:
-          CONDA_PREFIX: /usr/share/miniconda
-        run: |
-          pytest -v
+        run: pytest -v
       - name: Verify that we can build the package
-        run: python3 setup.py sdist bdist_wheel
+        run: python3 -m build
