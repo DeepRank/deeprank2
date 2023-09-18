@@ -156,14 +156,14 @@ def get_structure(pdb, id_: str) -> PDBStructure:
 def get_contact_atoms( # pylint: disable=too-many-locals
     pdb_path: str,
     chain_ids: List[str],
-    distance_cutoff: float
+    interaction_radius: float
 ) -> List[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
     interface = get_interface(pdb_path)
     try:
         atom_indexes = interface.get_contact_atoms(
-            cutoff=distance_cutoff,
+            cutoff=interaction_radius,
             chain1=chain_ids[0],
             chain2=chain_ids[1],
         )
@@ -209,16 +209,16 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     structure: PDBStructure,
     chain_id1: str,
     chain_id2: str,
-    distance_cutoff: float,
+    interaction_radius: float,
 ) -> List[Pair]:
-    """Get the residues that contact each other at a protein-protein interface.
+    """Find all residue pairs that may influence each other.
 
     Args:
         pdb_path (str): The path of the pdb file, that the structure was built from.
         structure (:class:`PDBStructure`): From which to take the residues.
         chain_id1 (str): First protein chain identifier.
         chain_id2 (str): Second protein chain identifier.
-        distance_cutoff (float): Max distance between two interacting residues.
+        interaction_radius (float): Maximum distance between residues to consider them as interacting.
 
     Returns:
         List[Pair]: The pairs of contacting residues.
@@ -228,7 +228,7 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     interface = get_interface(pdb_path)
     try:
         contact_residues = interface.get_contact_residues(
-            cutoff=distance_cutoff,
+            cutoff=interaction_radius,
             chain1=chain_id1,
             chain2=chain_id2,
             return_contact_pairs=True,

@@ -94,9 +94,8 @@ class Node:
 
 
 class Graph:
-    def __init__(self, id_: str, cutoff_distance: Optional[float] = None):
+    def __init__(self, id_: str):
         self.id = id_
-        self.cutoff_distance = cutoff_distance
 
         self._nodes = {}
         self._edges = {}
@@ -320,11 +319,11 @@ class Graph:
 
 
 def build_atomic_graph( # pylint: disable=too-many-locals
-    atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
+    atoms: List[Atom], graph_id: str, max_edge_distance: float
 ) -> Graph:
     """Builds a graph, using the atoms as nodes.
 
-    The edge distance cutoff is in Ångströms.
+    The max edge distance is in Ångströms.
     """
 
     positions = np.empty((len(atoms), 3))
@@ -332,9 +331,9 @@ def build_atomic_graph( # pylint: disable=too-many-locals
         positions[atom_index] = atom.position
 
     distances = distance_matrix(positions, positions, p=2)
-    neighbours = distances < edge_distance_cutoff
+    neighbours = distances < max_edge_distance
 
-    graph = Graph(graph_id, edge_distance_cutoff)
+    graph = Graph(graph_id)
     for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
         if atom1_index != atom2_index:
 
@@ -355,11 +354,11 @@ def build_atomic_graph( # pylint: disable=too-many-locals
 
 
 def build_residue_graph( # pylint: disable=too-many-locals
-    residues: List[Residue], graph_id: str, edge_distance_cutoff: float
+    residues: List[Residue], graph_id: str, max_edge_distance: float
 ) -> Graph:
     """Builds a graph, using the residues as nodes.
 
-    The edge distance cutoff is in Ångströms.
+    The max edge distance is in Ångströms.
     It's the shortest interatomic distance between two residues.
     """
 
@@ -381,7 +380,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     distances = distance_matrix(positions, positions, p=2)
 
     # determine which atoms are close enough
-    neighbours = distances < edge_distance_cutoff
+    neighbours = distances < max_edge_distance
 
     atom_index_pairs = np.transpose(np.nonzero(neighbours))
 
@@ -389,7 +388,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     residue_index_pairs = np.unique(atoms_residues[atom_index_pairs], axis=0)
 
     # build the graph
-    graph = Graph(graph_id, edge_distance_cutoff)
+    graph = Graph(graph_id)
     for residue1_index, residue2_index in residue_index_pairs:
 
         residue1: Residue = residues[residue1_index]
