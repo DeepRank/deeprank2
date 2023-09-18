@@ -1,4 +1,7 @@
-on: [push]
+name: Build JOSS PDF
+
+on:
+  workflow_dispatch:
 
 jobs:
   paper:
