@@ -64,7 +64,7 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
 *  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
     * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
       * on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
-      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed.
+      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed. Alternatively, follow [this](https://github.com/PDB-REDO/libcifpp/issues/49) thread. 
 *  [GCC](https://gcc.gnu.org/install/)
     * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`.  
 *  For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
