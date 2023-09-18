@@ -18,15 +18,8 @@ import configparser
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os
+import toml
 import sys
-
-config = configparser.ConfigParser()
-config.read('./../setup.cfg')
-CONFIG = {}
-for section in config.sections():
-    CONFIG[section] = {}
-    for option in config.options(section):
-        CONFIG[section][option] = config.get(section, option)
 
 autodoc_mock_imports = [
     'numpy',
@@ -107,7 +100,9 @@ copyright = f"2022, {author}"
 # built documents.
 #
 # The short X.Y version.
-version = CONFIG['metadata']['version']
+with open('./../pyproject.toml', 'r') as f:
+    toml_file = toml.load(f)
+    version = toml_file['project']['version']
 # The full version, including alpha/beta/rc tags.
 release = version
 
