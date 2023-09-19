@@ -80,5 +80,6 @@ Changelog = "https://github.com/DeepRank/deeprank2/blob/main/CHANGELOG.md"
 branch = true
 source = ["deeprank2"]
 
-[tool.setuptools]
-packages = ["deeprank2"]
+[tool.setuptools.packages.find]
+include = ["deeprank2*"]
+exclude = ["tests*"]
