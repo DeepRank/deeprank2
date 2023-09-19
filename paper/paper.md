@@ -80,7 +80,7 @@ These limitations create a growing demand for a generic and flexible DL framewor
 
 # Key features
 
-DeepRank2 allows to transform and store 3D representations of both PPIs and SRVs into 3D grids or graphs containing both geometric and physico-chemical information, and provides a DL pipeline which can be used for training pre-implemented neural networks for a given pattern of interest to the user.
+DeepRank2 allows to transform and store 3D representations of both PPIs and SRVs into 3D grids or graphs containing both geometric and physico-chemical information, and provides a DL pipeline which can be used for training pre-implemented neural networks for a given pattern of interest to the user. DeepRank2 is an improved and unified version of three previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank), [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN), and [DeepRank-Mut](https://github.com/DeepRank/DeepRank-Mut).
 
 As input, DeepRank2 takes [PDB-formatted](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) atomic structures, which is one of the standard and most widely used formats in the field of structural biology. These are mapped to graphs, where nodes can represent either residues or atoms, as chosen by the user, and edges represent the interactions between them. The user can configure two types of 3D structures as input for the featurization phase:
 -  PPIs, for mining interaction patterns within protein-protein complexes;
