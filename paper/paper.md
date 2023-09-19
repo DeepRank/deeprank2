@@ -96,6 +96,6 @@ This project is expected to have an impact across the all of structural bioinfor
 
 # Acknowledgements
 
-This work was supported by the [Netherlands eScience Center](https://www.esciencecenter.nl/) under grant number NLESC.OEC.2021.008, and [SURF](https://www.surf.nl/en) infrastructure, and was developed in collaboration with the [Department of Medical BioSciences](https://www.radboudumc.nl/en/research/departments/medical-biosciences) at RadboudUMC.
+This work was supported by the [Netherlands eScience Center](https://www.esciencecenter.nl/) under grant number NLESC.OEC.2021.008, and [SURF](https://www.surf.nl/en) infrastructure, and was developed in collaboration with the [Department of Medical BioSciences](https://www.radboudumc.nl/en/research/departments/medical-biosciences) at RadboudUMC. This work was also supported from NVIDIA Hardware Research Grant.
 
 # References
