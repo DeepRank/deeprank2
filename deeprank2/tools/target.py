@@ -83,22 +83,40 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
             print(f"no graph for {hdf5}")
 
 
-def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
+def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
 
     """
-    Compute targets and outputs them as a dictionary.
-    For classification:
-       - binary (scalar value is expected to be either 0 or 1)
-       - capri_classes (scalar integer values are expected)
+    Compute structure similarity scores and return them as a dictionary.
+    Such measures have been developed for evaluating the quality of the PPI models produced by
+    computational methods (docking models), and all of them compare the structural similarity
+    between the decoys (computationally generated structures) and the experimentally solved native
+    structures. To calculate these measures, the interface between the two interacting protein molecules
+    is defined as any pair of heavy atoms from the two molecules within 5Å of each other.
     For regression:
-       - irmsd
-       - lrmsd
-       - fnat
-       - dockq
+       - ligand root mean square deviation (lrmsd), float. It is calculated for the backbone of
+       the shorter chain (ligand) of the model after superposition of the longer chain (receptor).
+       The lower the better.
+       - interface rmsd (irmsd), float. The backbone atoms of the interface residues (atomic contact cutoff
+       of 10Å) is superposed on their equivalents in the predicted complex (model) to compute it.
+       The lower the better.
+       - fraction of native contacts (fnat), float. The fraction of native interfacial contacts preserved in
+       the interface of the predicted complex. The score is in the range [0, 1], corresponding to low and
+       high quality, respectively.
+       - dockq, float. It is a continuous quality measure for docking models that instead of classifying into different
+       quality groups, combines Fnat, LRMS, and iRMS to yield a score in the range [0, 1], corresponding to low and
+       high quality, respectively.
+    For classification:
+       - binary (bool). True if the irmsd is lower than 4.0, meaning that the decoy is considered high quality
+       docking model, otherwise False.
+       - capri_classes (int). The possible values are: 4 (incorrect), 3 (acceptable), 2 (medium), 1 (high quality).
+    See https://onlinelibrary.wiley.com/doi/abs/10.1002/prot.10393
+    for more details about capri_classes, lrmsd, irmsd, and fnat.
+    See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0161879
+    for more details about dockq.
 
     Args:
-        pdb_path (str): Path to the scored pdb structure.
-        reference_pdb_path (str): Path to the reference structure required to compute the different target.
+        pdb_path (str): Path to the decoy.
+        reference_pdb_path (str): Path to the reference (native) structure.
 
     Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class
     """
@@ -128,7 +146,7 @@ def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[f
     )
     scores[targets.BINARY] = scores[targets.IRMSD] < 4.0
 
-    scores[targets.CAPRI] = 5
+    scores[targets.CAPRI] = 4
     for thr, val in zip([6.0, 4.0, 2.0, 1.0], [4, 3, 2, 1]):
         if scores[targets.IRMSD] < thr:
             scores[targets.CAPRI] = val
