@@ -7,8 +7,8 @@ DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D re
 
 Main features:
 
-* Predefined atom-level and residue-level feature types (e.g. atom/residue type, charge, size, potential energy, all features' documentation is available `here`_)
-* Predefined target types (binary class, CAPRI categories, DockQ, RMSD, and FNAT)
+* Predefined atom-level and residue-level feature types (e.g. atom/residue type, charge, size, potential energy, all features' documentation is available under `Features`_ notes)
+* Predefined target types (binary class, CAPRI categories, DockQ, RMSD, and FNAT, detailed docking scores documentation is available under `Docking scores`_ notes)
 * Flexible definition of both new features and targets
 * Features generation for both graphs and grids
 * Efficient data storage in HDF5 format
@@ -18,7 +18,8 @@ Main features:
 .. _DeepRank-GNN: https://github.com/DeepRank/Deeprank-GNN
 .. _convolutional neural networks: https://en.wikipedia.org/wiki/Convolutional_neural_network
 .. _graph neural networks: https://en.wikipedia.org/wiki/Graph_neural_network
-.. _here: https://deeprank2.readthedocs.io/en/latest/features.html
+.. _Features: https://deeprank2.readthedocs.io/en/latest/features.html
+.. _Docking scores: https://deeprank2.readthedocs.io/en/latest/docking.html
 .. _PyTorch: https://pytorch.org/docs/stable/index.html
 .. _PyTorch Geometric: https://pytorch-geometric.readthedocs.io/en/latest/
 
