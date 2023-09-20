@@ -47,9 +47,13 @@ Notes
    :hidden:
 
    features
+   docking
 
 :doc:`features`
     Get a detailed overview about nodes' and edges' features implemented in the package.
+
+:doc:`docking`
+    Get a detailed overview about PPIs' docking metrics implemented in the package.
 
 Package reference
 ===========

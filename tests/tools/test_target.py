@@ -13,7 +13,6 @@ class TestTools(unittest.TestCase):
         self.pdb_path = "./tests/data/pdb/1ATN/"
         self.pssm_path = "./tests/data/pssm/1ATN/1ATN.A.pdb.pssm"
         self.ref = "./tests/data/ref/1ATN/"
-        self.h5_train_ref = "tests/data/train_ref/train_data.hdf5"
         self.h5_graphs = "tests/data/hdf5/1ATN_ppi.hdf5"
 
     def test_add_target(self):

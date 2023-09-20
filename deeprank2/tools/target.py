@@ -85,32 +85,12 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
 
 def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
 
-    """Compute structure similarity scores and return them as a dictionary.
+    """Compute structure similarity scores for the input docking model and return them as a dictionary.
 
-    These measures have been developed for evaluating the quality of the PPI models produced by
-    computational methods (docking models), and all of them compare the structural similarity
-    between the decoys (computationally generated structures) and the experimentally solved native
-    structures. To calculate these measures, the interface between the two interacting protein molecules
-    is defined as any pair of heavy atoms from the two molecules within 5Å of each other.
-
-    - lmrsd (ligand root mean square deviation) is a float value calculated for the backbone of
-        the shorter chain (ligand) of the model after superposition of the longer chain (receptor).
-        Lower scores represent better matching than higher scores.
-    - imrsd (interface rmsd) is a float value calculated for the backbone atoms of the interface residues
-        (atomic contact cutoff of 10Å) after superposition of their equivalents in the predicted complex (model)
-        Lower scores represent better matching than higher scores.
-    - fnat (fraction of native contacts) is the fraction of native interfacial contacts preserved in
-        the interface of the predicted complex. The score is a float in the range [0, 1], where higher values
-        respresent higher quality.
-    - dockq (docking model quality) is a continuous quality measure for docking models that instead of classifying into different
-        quality groups. It combines fnat, lmrs, and irms and yields a float score in the range [0, 1], where
-        higher values respresent higher quality.
-    - binary (bool): True if the irmsd is lower than 4.0, meaning that the decoy is considered high quality
-        docking model, otherwise False.
-    - capri classification (int). The possible values are: 1 (high quality, irmsd < 1.0), 2 (medium, irmsd < 2.0),
-        3 (acceptable, irms < 4.0), 4 (incorrect, irmsd >= 4.0)
-    See https://onlinelibrary.wiley.com/doi/abs/10.1002/prot.10393 for more details about capri_classes, lrmsd, irmsd, and fnat.
-    See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0161879 for more details about dockq.
+    The computed scores are: `lrmsd` (ligand root mean square deviation), `irmsd` (interface rmsd),
+    `fnat` (fraction of native contacts), `dockq` (docking model quality), `binary` (True - high quality,
+    False - low quality), `capri_class` (capri classification, 1 - high quality, 2 - medium, 3 - acceptable,
+    4 - incorrect). See https://deeprank2.readthedocs.io/en/latest/docking.html for more details about the scores.
 
     Args:
         pdb_path (str): Path to the decoy.
