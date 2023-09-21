@@ -3,7 +3,9 @@ import shutil
 import tempfile
 import unittest
 
-from deeprank2.tools.target import add_target, compute_targets
+from pdb2sql import StructureSimilarity
+
+from deeprank2.tools.target import add_target, compute_ppi_scores
 
 
 class TestTools(unittest.TestCase):
@@ -11,7 +13,6 @@ class TestTools(unittest.TestCase):
         self.pdb_path = "./tests/data/pdb/1ATN/"
         self.pssm_path = "./tests/data/pssm/1ATN/1ATN.A.pdb.pssm"
         self.ref = "./tests/data/ref/1ATN/"
-        self.h5_train_ref = "tests/data/train_ref/train_data.hdf5"
         self.h5_graphs = "tests/data/hdf5/1ATN_ppi.hdf5"
 
     def test_add_target(self):
@@ -33,10 +34,42 @@ class TestTools(unittest.TestCase):
             os.remove(graph_path)
 
 
-    def test_compute_targets(self):
-        compute_targets("tests/data/pdb/1ATN/1ATN_1w.pdb", "tests/data/ref/1ATN/1ATN.pdb")
+    def test_compute_ppi_scores(self):
+        scores = compute_ppi_scores(
+            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
+            os.path.join(self.ref, "1ATN.pdb"))
 
+        sim = StructureSimilarity(
+            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
+            os.path.join(self.ref, "1ATN.pdb"), enforce_residue_matching=False)
+        lrmsd = sim.compute_lrmsd_fast(method="svd")
+        irmsd = sim.compute_irmsd_fast(method="svd")
+        fnat = sim.compute_fnat_fast()
+        dockq = sim.compute_DockQScore(fnat, lrmsd, irmsd)
+        binary = irmsd < 4.0
+        capri = 4
+        for thr, val in zip([6.0, 4.0, 2.0, 1.0], [4, 3, 2, 1]):
+            if irmsd < thr:
+                capri = val
 
+        assert scores['irmsd'] == irmsd
+        assert scores['lrmsd'] == lrmsd
+        assert scores['fnat'] == fnat
+        assert scores['dockq'] == dockq
+        assert scores['binary'] == binary
+        assert scores['capri_class'] == capri
+
+    def test_compute_ppi_scores_same_struct(self):
+        scores = compute_ppi_scores(
+            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
+            os.path.join(self.pdb_path, "1ATN_1w.pdb"))
+
+        assert scores['irmsd'] == 0.0
+        assert scores['lrmsd'] == 0.0
+        assert scores['fnat'] == 1.0
+        assert scores['dockq'] == 1.0
+        assert scores['binary'] # True
+        assert scores['capri_class'] == 1
 
 
 if __name__ == "__main__":

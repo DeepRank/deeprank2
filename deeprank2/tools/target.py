@@ -83,24 +83,20 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
             print(f"no graph for {hdf5}")
 
 
-def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
+def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
 
-    """
-    Compute targets and outputs them as a dictionary.
-    For classification:
-       - binary (scalar value is expected to be either 0 or 1)
-       - capri_classes (scalar integer values are expected)
-    For regression:
-       - irmsd
-       - lrmsd
-       - fnat
-       - dockq
+    """Compute structure similarity scores for the input docking model and return them as a dictionary.
+
+    The computed scores are: `lrmsd` (ligand root mean square deviation), `irmsd` (interface rmsd),
+    `fnat` (fraction of native contacts), `dockq` (docking model quality), `binary` (True - high quality,
+    False - low quality), `capri_class` (capri classification, 1 - high quality, 2 - medium, 3 - acceptable,
+    4 - incorrect). See https://deeprank2.readthedocs.io/en/latest/docking.html for more details about the scores.
 
     Args:
-        pdb_path (str): Path to the scored pdb structure.
-        reference_pdb_path (str): Path to the reference structure required to compute the different target.
+        pdb_path (str): Path to the decoy.
+        reference_pdb_path (str): Path to the reference (native) structure.
 
-    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class
+    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.
     """
 
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
@@ -128,8 +124,8 @@ def compute_targets(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[f
     )
     scores[targets.BINARY] = scores[targets.IRMSD] < 4.0
 
-    scores[targets.CAPRI] = 5
-    for thr, val in zip([6.0, 4.0, 2.0, 1.0], [4, 3, 2, 1]):
+    scores[targets.CAPRI] = 4
+    for thr, val in zip([4.0, 2.0, 1.0], [3, 2, 1]):
         if scores[targets.IRMSD] < thr:
             scores[targets.CAPRI] = val
 

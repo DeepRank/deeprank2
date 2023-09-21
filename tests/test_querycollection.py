@@ -6,14 +6,14 @@ from typing import List, Union
 
 import h5py
 import pytest
-from deeprank2.domain.aminoacidlist import alanine, phenylalanine
-from deeprank2.query import (ProteinProteinInterfaceResidueQuery, Query,
-                             QueryCollection, SingleResidueVariantResidueQuery)
-from deeprank2.tools.target import compute_targets
 
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain.aminoacidlist import alanine, phenylalanine
 from deeprank2.features import components, contact, surfacearea
+from deeprank2.query import (ProteinProteinInterfaceResidueQuery, Query,
+                             QueryCollection, SingleResidueVariantResidueQuery)
+from deeprank2.tools.target import compute_ppi_scores
 
 
 def _querycollection_tester( # pylint: disable = too-many-locals, dangerous-default-value
@@ -242,7 +242,7 @@ def test_querycollection_duplicates_add():
 
     for pdb_path in pdb_paths:
         # Append data points
-        targets = compute_targets(pdb_path, ref_path)
+        targets = compute_ppi_scores(pdb_path, ref_path)
         queries.add(ProteinProteinInterfaceResidueQuery(
             pdb_path = pdb_path,
             chain_id1 = chain_id1,

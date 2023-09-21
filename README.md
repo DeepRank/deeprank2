@@ -23,6 +23,7 @@ Main features:
   - All features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html)
 - Predefined target types
   - binary class, CAPRI categories, DockQ, RMSD, and FNAT
+  - Detailed docking scores documentation is available [here](https://deeprank2.readthedocs.io/en/latest/docking.html)
 - Flexible definition of both new features and targets
 - Features generation for both graphs and grids
 - Efficient data storage in HDF5 format
