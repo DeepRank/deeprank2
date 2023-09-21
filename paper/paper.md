@@ -39,6 +39,7 @@ authors:
     affiliation: 2
   - name: João M. C. Teixeira
     orcid: 0000-0002-9113-0622
+    affiliation: 3
   - name: Li C. Xue
     orcid: 0000-0002-2613-538X
     affiliation: 2
@@ -47,6 +48,8 @@ affiliations:
    index: 1
  - name: Radboud University Medical Center, Nijmegen, The Netherlands
    index: 2
+ - name: Independent Researcher
+   index: 3
 date: 08 August 2023
 bibliography: paper.bib
 
