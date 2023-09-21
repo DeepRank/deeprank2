@@ -14,8 +14,7 @@ from deeprank2.domain.aminoacidlist import (alanine, arginine, asparagine,
                                             methionine, phenylalanine, proline,
                                             serine, threonine, tryptophan,
                                             tyrosine, valine)
-from deeprank2.features import (components, contact, exposure, irc,
-                                secondary_structure, surfacearea)
+from deeprank2.features import components, contact, exposure, irc, surfacearea
 from deeprank2.query import QueryCollection, SingleResidueVariantResidueQuery
 from deeprank2.utils.grid import GridSettings, MapMethod
 
