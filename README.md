@@ -32,7 +32,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
 
 ## Computational performances
 
-The data generation process is rather efficient within DeepRank2. As an example, we show the time required to process the tutorials' PDB files in DeepRank2. The experiments are done on Apple M1 Pro, using 1 CPU only. Measures are computed on 100 data points for PPIs, and 96 for SRVs. 
+The data generation process is rather efficient within DeepRank2. As an example, we show the time required to process the tutorials' PDB files in DeepRank2. Atomic resolution and `distance_cutoff` of 5.5 Å have been used for both PPIs and SRVs, and the SRVs `radius` was set to 10 Å. The experiments are done on Apple M1 Pro, using 1 CPU only. Measures are computed on 100 data points for PPIs, and 96 for SRVs. 
 
 |      | [Features modules](https://deeprank2.readthedocs.io/en/latest/features.html) used                       | Comments                                                                                                                                                                                                                                       |          Data processing speed **[seconds/structure]**        |    Memory **[megabyte/structure]**   |
 |------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------:|:--------------------------------:|
