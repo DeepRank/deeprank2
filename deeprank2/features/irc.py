@@ -3,14 +3,13 @@ from itertools import combinations_with_replacement as combinations
 from typing import Dict, List, Optional, Tuple
 
 import pdb2sql
+
+from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain.aminoacidlist import amino_acids
 from deeprank2.molstruct.aminoacid import Polarity
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue
-from deeprank2.molstruct.variant import SingleResidueVariant
+from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.utils.graph import Graph
-
-from deeprank2.domain import nodestorage as Nfeat
 
 _log = logging.getLogger(__name__)
 

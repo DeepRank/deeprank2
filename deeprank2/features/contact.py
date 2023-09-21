@@ -9,7 +9,7 @@ from scipy.spatial import distance_matrix
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.pair import AtomicContact, ResidueContact
-from deeprank2.molstruct.variant import SingleResidueVariant
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
 from deeprank2.utils.parsing import atomic_forcefield
 

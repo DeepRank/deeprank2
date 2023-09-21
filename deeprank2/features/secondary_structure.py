@@ -5,12 +5,11 @@ from typing import Dict, List, Optional
 import numpy as np
 from Bio.PDB import PDBParser
 from Bio.PDB.DSSP import DSSP
-from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue
-from deeprank2.molstruct.variant import SingleResidueVariant
-from deeprank2.utils.graph import Graph
 
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.molstruct.atom import Atom
+from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.utils.graph import Graph
 
 
 class DSSPError(Exception):
