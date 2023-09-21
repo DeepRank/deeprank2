@@ -46,7 +46,7 @@ authors:
 affiliations:
  - name: Netherlands eScience Center, Amsterdam, The Netherlands
    index: 1
- - name: Radboud University Medical Center, Nijmegen, The Netherlands
+ - name: Department of Medical BioSciences, Radboud University Medical Center, Nijmegen, The Netherlands
    index: 2
  - name: Independent Researcher
    index: 3
