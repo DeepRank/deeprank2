@@ -2,7 +2,6 @@ name: Build JOSS PDF
 
 on:
   workflow_dispatch:
-  push:
 
 jobs:
   paper:
