@@ -3,7 +3,7 @@
 The tutorial notebooks in this folder can be run to learn how to use DeepRank2.
 - There are two tutorial notebooks for data generation, which demonstrate how to create *.hdf5-formatted input training data from raw *.pdb-formatted data using DeepRank2.
   - protein-protein interface (PPI) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_ppi.ipynb));
-  - missense variants data ([data_generation_variant.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_variant.ipynb)). 
+  - single-residue variant (SRV) data ([data_generation_srv.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_srv.ipynb)). 
 - The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank2.
 
 ### Use cases
@@ -18,9 +18,9 @@ PDB models used in this tutorial have been generated with [PANDORA](https://gith
 
 On the left an example of a pMHC structure is shown, rendered using [ProteinViewer](https://marketplace.visualstudio.com/items?itemName=ArianJamasb.protein-viewer). The MHC protein is displayed in green, while the peptide is in orange.
 
-#### Missense variants
+#### SRVs
 
-The example missense variants dataset that we provide contains 58 PDB files, each representing protein structures containing one or multiple missense variants, which derive from alterations in the coding regions of the DNA. For each missense variant, we are interested in predicting whether the phenotypic outcome is pathogenic or neutral.
+The example SRVs dataset that we provide contains 58 PDB files, each representing protein structures containing one or multiple SRVs, which derive from alterations in the coding regions of the DNA. For each SRV, we are interested in predicting whether the phenotypic outcome is pathogenic or neutral.
 
 PDB models and target data used in this tutorial have been retrieved from [Ramakrishnan et al.](https://doi.org/10.3389/fmolb.2023.1204157).
 
