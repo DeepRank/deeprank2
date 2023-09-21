@@ -12,6 +12,7 @@ from deeprank2.features import (components, contact, exposure, irc,
 from deeprank2.query import ProteinProteinInterfaceAtomicQuery, QueryCollection
 from deeprank2.utils.grid import GridSettings, MapMethod
 
+#################### PARAMETERS ####################
 interface_distance_cutoff = 5.5  # max distance in Å between two interacting residues/atoms of two proteins
 grid_settings = GridSettings( # None if you don't want grids
 	# the number of points on the x, y, z edges of the cube
@@ -23,6 +24,7 @@ grid_map_method = MapMethod.GAUSSIAN # None if you don't want grids
 # grid_map_method = None
 feature_modules = [components, contact, exposure, irc, secondary_structure, surfacearea]
 cpu_count = 1
+####################################################
 
 data_path = os.path.join("data_raw", "ppi")
 processed_data_path = os.path.join("data_processed", "ppi")
@@ -40,12 +42,13 @@ def get_pdb_files_and_target_data(data_path):
 	bas = csv_data_indexed.measurement_value.values.tolist()
 	return pdb_files, bas
 
-pdb_files, bas = get_pdb_files_and_target_data(data_path)
-pdb_files = pdb_files[:10]
 
 if __name__=='__main__':
+
 	timings = []
 	count = 0
+	pdb_files, bas = get_pdb_files_and_target_data(data_path)
+
 	for i in range(len(pdb_files)):
 		queries = QueryCollection()
 		queries.add(
