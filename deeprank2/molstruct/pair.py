@@ -41,7 +41,7 @@ class Pair:
 
 
 class Contact(Pair, ABC):
-    """Parent class to bind `ResidueContact` and `ResidueContact` objects."""
+    """Parent class to bind `ResidueContact` and `AtomicContact` objects."""
 
 
 class ResidueContact(Contact):

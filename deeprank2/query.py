@@ -25,8 +25,7 @@ from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.molstruct.structure import PDBStructure
 from deeprank2.utils.buildgraph import (get_contact_atoms, get_structure,
                                         get_surrounding_residues)
-from deeprank2.utils.graph import (Graph, build_atomic_graph,
-                                   build_residue_graph)
+from deeprank2.utils.graph import Graph
 from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 from deeprank2.utils.parsing.pssm import parse_pssm
 
@@ -298,7 +297,7 @@ class SingleResidueVariantQuery(Query):
 
         # build the graph
         if self.resolution == 'residue':
-            graph = build_residue_graph(residues, self.get_query_id(), self.max_edge_length)
+            graph = Graph.build_graph(residues, self.get_query_id(), self.max_edge_length)
         elif self.resolution == 'atom':
             residues.append(variant_residue)
             atoms = set([])
@@ -308,7 +307,7 @@ class SingleResidueVariantQuery(Query):
                         atoms.add(atom)
             atoms = list(atoms)
 
-            graph = build_atomic_graph(atoms, self.get_query_id(), self.max_edge_length)
+            graph = Graph.build_graph(atoms, self.get_query_id(), self.max_edge_length)
 
         else:
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
@@ -367,10 +366,10 @@ class ProteinProteinInterfaceQuery(Query):
 
         # build the graph
         if self.resolution == 'atom':
-            graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.max_edge_length)
+            graph = Graph.build_graph(contact_atoms, self.get_query_id(), self.max_edge_length)
         elif self.resolution == 'residue':
             residues_selected = list({atom.residue for atom in contact_atoms})
-            graph = build_residue_graph(residues_selected, self.get_query_id(), self.max_edge_length)
+            graph = Graph.build_graph(residues_selected, self.get_query_id(), self.max_edge_length)
 
         graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
         structure = contact_atoms[0].residue.chain.model
