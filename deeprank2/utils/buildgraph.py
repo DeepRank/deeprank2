@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List, Union
+from typing import List
 
 import numpy as np
 from pdb2sql import interface as get_interface
@@ -282,7 +282,11 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     return residue_pairs
 
 
-def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Residue, radius: float):
+def get_surrounding_residues(
+    structure: Chain | PDBStructure,
+    residue: Residue,
+    radius: float,
+) -> list[Residue]:
     """Get the residues that lie within a radius around a residue.
 
     Args:

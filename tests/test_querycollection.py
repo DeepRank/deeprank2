@@ -263,7 +263,8 @@ def test_querycollection_duplicates_add():
         model_ids.append(query.model_id)
     model_ids.sort()
 
+    # pylint: disable=protected-access
     assert model_ids == ['1ATN_1w', '1ATN_1w_2', '1ATN_1w_3', '1ATN_2w', '1ATN_2w_2', '1ATN_3w']
-    assert queries.ids_count['residue-ppi:A-B:1ATN_1w'] == 3
-    assert queries.ids_count['residue-ppi:A-B:1ATN_2w'] == 2
-    assert queries.ids_count['residue-ppi:A-B:1ATN_3w'] == 1
+    assert queries._ids_count['residue-ppi:A-B:1ATN_1w'] == 3
+    assert queries._ids_count['residue-ppi:A-B:1ATN_2w'] == 2
+    assert queries._ids_count['residue-ppi:A-B:1ATN_3w'] == 1

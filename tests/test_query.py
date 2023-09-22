@@ -117,7 +117,7 @@ def test_interface_graph_residue():
 def test_interface_graph_atomic():
     query = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids=["A", "B"],
         pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
@@ -142,7 +142,7 @@ def test_interface_graph_atomic():
 def test_variant_graph_101M():
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/101M/101M.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=27,
         insertion_code=None,
@@ -175,7 +175,7 @@ def test_variant_graph_101M():
 def test_variant_graph_1A0Z():
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/1A0Z/1A0Z.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=125,
         insertion_code=None,
@@ -213,7 +213,7 @@ def test_variant_graph_1A0Z():
 def test_variant_graph_9API():
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/9api/9api.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=310,
         insertion_code=None,
@@ -300,7 +300,7 @@ def test_augmentation():
 
     qc.add(ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids=["A", "B"],
         pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
@@ -323,7 +323,7 @@ def test_augmentation():
 
     qc.add(SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/101M/101M.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=27,
         insertion_code=None,
@@ -373,15 +373,15 @@ def test_incorrect_pssm_order():
 
     # check that error is thrown for incorrect pssm
     with pytest.raises(ValueError):
-        _ = q.build([conservation])
+        _ = q.build(conservation)
 
     # no error if conservation module is not used
-    _ = q.build([components])
+    _ = q.build(components)
 
     # check that error suppression works
     with pytest.warns(UserWarning):
         q.suppress_pssm_errors = True
-        _ = q.build([conservation])
+        _ = q.build(conservation)
 
 
 def test_incomplete_pssm():
@@ -396,15 +396,15 @@ def test_incomplete_pssm():
     )
 
     with pytest.raises(ValueError):
-        _ = q.build([conservation])
+        _ = q.build(conservation)
 
     # no error if conservation module is not used
-    _ = q.build([components])
+    _ = q.build(components)
 
     # check that error suppression works
     with pytest.warns(UserWarning):
         q.suppress_pssm_errors = True
-        _ = q.build([conservation])
+        _ = q.build(conservation)
 
 
 def test_no_pssm_provided():
@@ -466,7 +466,7 @@ def test_incorrect_pssm_provided():
 def test_variant_query_multiple_chains():
     q = SingleResidueVariantQuery(
         pdb_path = "tests/data/pdb/2g98/pdb2g98.pdb",
-        resolution = "atomic",
+        resolution = "atom",
         chain_ids = "A",
         variant_residue_number = 14,
         insertion_code = None,
@@ -480,13 +480,13 @@ def test_variant_query_multiple_chains():
 
     # at radius 10, chain B is included in graph
     # no error without conservation module
-    graph = q.build([components])
+    graph = q.build(components)
     assert 'B' in graph.get_all_chains()
     # if we rebuild the graph with conservation module it should fail
     with pytest.raises(FileNotFoundError):
-        _ = q.build([conservation])
+        _ = q.build(conservation)
 
     # at radius 7, chain B is not included in graph
     q.radius = 7.0
-    graph = q.build([conservation])
+    graph = q.build(conservation)
     assert 'B' not in graph.get_all_chains()

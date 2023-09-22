@@ -32,27 +32,30 @@ from deeprank2.utils.parsing.pssm import parse_pssm
 
 _log = logging.getLogger(__name__)
 
-VALID_RESOLUTIONS = ['atomic', 'residue']
+VALID_RESOLUTIONS = ['atom', 'residue']
 
 
-# TODO: consider whether we want to use the built-in repr and eq, or define it ourselves
-# if built-in: consider which arguments to include in either.
 @dataclass(repr=False, kw_only=True)
 class DeepRankQuery:
-    """Represents one entity of interest, like a single residue variant or a protein-protein interface.
+    """Represents one entity of interest: a single residue variant (SRV) or a protein-protein interface (PPI).
 
     :class:`DeepRankQuery` objects are used to generate graphs from structures, and they should be created before any model is loaded.
     They can have target values associated with them, which will be stored with the resulting graph.
 
     Args:
-        model_id (str): The ID of the model to load, usually a .PDB accession code.
-        targets (dict[str, float], optional): Target values associated with the query. Defaults to None.
-        suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-            Defaults to False.
+        pdb_path (str): the path to the PDB file to query.
+        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
+        chain_ids (list[str] | str): the chain identifier(s) of the variant residue or interacting interfaces.
+            Note that this does not limit the structure to residues from this/these chain(s).
+        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
+        distance_cutoff (float): the maximum distance between two nodes to generate an edge connecting them.
+        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
+        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
+            match the .pdb files. If True, a warning is returned instead.
     """
 
     pdb_path: str
-    resolution: Literal['residue', 'atomic']
+    resolution: Literal['residue', 'atom']
     chain_ids: list[str] | str
     pssm_paths: dict[str, str] = field(default_factory=dict)
     distance_cutoff: float = None
@@ -183,20 +186,13 @@ class DeepRankQuery:
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
-        # TODO: Should this be an internal method, as it is only called upon by QueryCollection and not by user?
 
-        # TODO: I would prefer if  `_set_feature_modules` would return a list of `ModuleType` instead of `str`,
-        # but this leads to an exception in the pool function in `QueryCollection.process`, that I don't know how to solve.
-        # Tests are currently passing `ModuleType`s directly, which is clearer than passing strings
-        # and is the reason I am allowing both input types.
-
+        if not isinstance(feature_modules, list):
+            feature_modules = [feature_modules]
         feature_modules = [importlib.import_module('deeprank2.features.' + module)
                             if isinstance(module, str) else module
                                 for module in feature_modules]
         self._pssm_required = conservation in feature_modules
-
-        # TODO: my gut feeling is that the building can be unified further, but it is
-        # not trivial. I will leave it like this for now.
         graph = self._build_helper()
 
         # add target and feature data to the graph
@@ -214,7 +210,26 @@ class DeepRankQuery:
 
 @dataclass(kw_only=True)
 class SingleResidueVariantQuery(DeepRankQuery):
-    """A query that builds a single residue variant graph."""
+    """A query that builds a single residue variant graph.
+
+    Args (common for `DeepRankQuery`):
+        pdb_path (str): the path to the PDB file to query.
+        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
+        chain_ids (list[str] | str): the chain identifier of the variant residue (generally a single capital letter).
+            Note that this does not limit the structure to residues from this chain.
+        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
+        distance_cutoff (float): the maximum distance between two nodes to generate an edge connecting them.
+        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
+        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
+            match the .pdb files. If True, a warning is returned instead.
+    SRV specific Args:
+        variant_residue_number (int): the residue number of the variant residue.
+        insertion_code (str | None): the insertion code of the variant residue.
+        wildtype_amino_acid (AminoAcid): the amino acid at above position in the wildtype protein.
+        variant_amino_acid (AminoAcid): the amino acid at above position in the variant protein.
+        radius (float): all Residues within this radius (in Å) from the variant residue will
+            be included in the graph
+    """
 
     variant_residue_number: int
     insertion_code: str | None
@@ -226,8 +241,8 @@ class SingleResidueVariantQuery(DeepRankQuery):
         super().__post_init__()  # calls __post_init__ of parents
 
         if len(self.chain_ids) != 1:
-            # TODO: Consider throwing a warning instead of error and taking the first entry of the list anyway.
-            raise ValueError(f"SingleResidueVariantQuery must contain exactly 1 chain_id, but {len(self.chain_ids)} were given.")
+            raise ValueError("`chain_ids` must contain exactly 1 chain for `SingleResidueVariantQuery` objects, "
+                            + f"but {len(self.chain_ids)} were given.")
         self.variant_chain_id = self.chain_ids[0]
 
         if not self.distance_cutoff:
@@ -276,7 +291,7 @@ class SingleResidueVariantQuery(DeepRankQuery):
         # build the graph
         if self.resolution == 'residue':
             graph = build_residue_graph(residues, self.get_query_id(), self.distance_cutoff)
-        elif self.resolution == 'atomic':
+        elif self.resolution == 'atom':
             residues.append(variant_residue)
             atoms = set([])
             for residue in residues:
@@ -284,10 +299,8 @@ class SingleResidueVariantQuery(DeepRankQuery):
                     for atom in residue.atoms:
                         atoms.add(atom)
             atoms = list(atoms)
-            #TODO: why was this a set at first? I think each atom is unique anyway, given that it has a Residue property
 
             graph = build_atomic_graph(atoms, self.get_query_id(), self.distance_cutoff)
-            #TODO: check if this works with a set instead of a list
 
         else:
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
@@ -298,18 +311,29 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
 @dataclass(kw_only=True)
 class ProteinProteinInterfaceQuery(DeepRankQuery):
-    """A query that builds a protein-protein interface graph."""
+    """A query that builds a protein-protein interface graph.
+
+    Args:
+        pdb_path (str): the path to the PDB file to query.
+        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
+        chain_ids (list[str] | str): the chain identifiers of the interacting interfaces (generally a single capital letter each).
+            Note that this does not limit the structure to residues from these chains.
+        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
+        distance_cutoff (float): the maximum distance between two nodes to generate an edge connecting them.
+        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
+        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
+            match the .pdb files. If True, a warning is returned instead.
+    """
 
     def __post_init__(self):
         super().__post_init__()
 
         if len(self.chain_ids) != 2:
-            # TODO: Consider throwing a warning instead of error and using the first two entries of the list anyway.
-            raise ValueError(f"SingleResidueVariantQuery must contain exactly 2 chain_ids, but {len(self.chain_ids)} were given.")
+            raise ValueError("`chain_ids` must contain exactly 2 chains for `ProteinProteinInterfaceQuery` objects, "
+                            + f"but {len(self.chain_ids)} was/were given.")
 
         if not self.distance_cutoff:
-            #TODO: check if we truly need so many different defaults
-            if self.resolution == 'atomic':
+            if self.resolution == 'atom':
                 self.distance_cutoff = 5.5
             if self.resolution == 'residue':
                 self.distance_cutoff = 10
@@ -338,34 +362,47 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
             raise ValueError("no contact atoms found")
 
         # build the graph
-        if self.resolution == 'atomic':
+        if self.resolution == 'atom':
             graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.distance_cutoff)
         elif self.resolution == 'residue':
-            residues_selected = {atom.residue for atom in contact_atoms}
-            graph = build_residue_graph(list(residues_selected), self.get_query_id(), self.distance_cutoff)
-            #TODO: check whether this works with a set instead of a list
+            residues_selected = list({atom.residue for atom in contact_atoms})
+            graph = build_residue_graph(residues_selected, self.get_query_id(), self.distance_cutoff)
         else:
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
         graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
 
         structure = contact_atoms[0].residue.chain.model
-
         if self._pssm_required:
             self._load_pssm_data(structure)
 
-        graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
         return graph
 
 
 class QueryCollection:
-    """Represents the collection of data queries.
+    """Represents the collection of data queries that will be processed.
 
-        Queries can be saved as a dictionary to easily navigate through their data.
+    The class attributes are set either while adding queries to the collection (`_queries`
+    and `_ids_count`), or when processing the collection (other attributes).
+
+    Attributes:
+        _queries (list[:class:`Query`]): The `Query` objects in the collection.
+        _ids_count (dict[str, int]): The original `query_id` and the repeat number for this id.
+            This is used to rename the `query_id` to ensure that there are no duplicate ids.
+        _prefix, _cpu_count, _grid_settings, etc.: See docstring for `QueryCollection.process`.
+
+    Notes:
+        Queries can be saved as a dictionary to easily navigate through their data,
+        using `QueryCollection.export_dict()`.
     """
 
     def __init__(self):
-        self._queries = []
-        self._ids_count = {}
+        self._queries: list[Query] = []
+        self._ids_count: dict[str, int] = {}
+        self._prefix: str | None = None
+        self._cpu_count: int | None = None
+        self._grid_settings: GridSettings | None = None
+        self._grid_map_method: MapMethod | None = None
+        self._grid_augmentation_count: int = 0
 
     def add(
         self,
@@ -380,6 +417,7 @@ class QueryCollection:
             verbose(bool): For logging query IDs added. Defaults to `False`.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified. Defaults to `True`.
         """
+
         query_id = query.get_query_id()
         if verbose:
             _log.info(f'Adding query with ID {query_id}.')
@@ -401,6 +439,7 @@ class QueryCollection:
         Args:
             dataset_path (str): The path where to save the list of queries.
         """
+
         with open(dataset_path, "wb") as pkl_file:
             pickle.dump(self, pkl_file)
 
@@ -408,11 +447,6 @@ class QueryCollection:
     def queries(self) -> list[DeepRankQuery]:
         """The list of queries added to the collection."""
         return self._queries
-
-    @property
-    def ids_count(self) -> list[DeepRankQuery]:
-        """The list of queries added to the collection."""
-        return self._ids_count
 
     def __contains__(self, query: DeepRankQuery) -> bool:
         return query in self._queries
@@ -425,8 +459,8 @@ class QueryCollection:
 
     def _process_one_query(self, query: DeepRankQuery):
         """Only one process may access an hdf5 file at a time"""
+
         try:
-            # TODO: Maybe make exception catching optional, because I think it would be good to raise the error by default.
             output_path = f"{self._prefix}-{os.getpid()}.hdf5"
             graph = query.build(self._feature_modules)
             graph.write_to_hdf5(output_path)
@@ -457,8 +491,8 @@ class QueryCollection:
         """Render queries into graphs (and optionally grids).
 
         Args:
-            prefix (str None, optional): Prefix for naming the output files. Defaults to "processed-queries".
-            feature_modules (list[ModuleType] | list[str] | Literal ['all'], optional): feature module or list of feature modules
+            prefix (str | None, optional): Prefix for naming the output files. Defaults to "processed-queries".
+            feature_modules (list[ModuleType] | list[str] | Literal ['all'], optional): Feature module or list of feature modules
                 used to generate features (given as string or as an imported module).
                 Each module must implement the :py:func:`add_features` function, and all feature modules must exist inside `deeprank2.features` folder.
                 If set to 'all', all available modules in `deeprank2.features` are used to generate the features.
@@ -467,7 +501,7 @@ class QueryCollection:
                 the number of CPUs available to the system.
                 Defaults to None, which takes all available cpu cores.
             combine_output (bool, optional):
-                if `True` (default): all processes are combined into a single HDF5 file.
+                If `True` (default): all processes are combined into a single HDF5 file.
                 If `False`: separate HDF5 files are created for each process (i.e. for each CPU used).
             grid_settings (:class:`GridSettings` | None, optional): If valid together with `grid_map_method`, the grid data will be stored as well.
                 Defaults to None.
@@ -492,12 +526,11 @@ class QueryCollection:
         self._feature_modules = self._set_feature_modules(feature_modules)
         _log.info(f'\nSelected feature modules: {self._feature_modules}.')
 
-        #TODO: it would be nice if all of the below could be part of GridSettings object
         self._grid_settings = grid_settings
         self._grid_map_method = grid_map_method
 
         if grid_augmentation_count < 0:
-            raise ValueError(f"`grid_augmentation_count` may not be negative, but was given as {grid_augmentation_count}")
+            raise ValueError(f"`grid_augmentation_count` cannot be negative, but was given as {grid_augmentation_count}")
         self._grid_augmentation_count = grid_augmentation_count
 
         _log.info(f'Creating pool function to process {len(self)} queries...')
@@ -527,6 +560,7 @@ class QueryCollection:
         Raises:
             TypeError: if an invalid input type is passed.
         """
+
         if feature_modules == 'all':
             return [modname for _, modname, _ in pkgutil.iter_modules(deeprank2.features.__path__)]
         if isinstance(feature_modules, ModuleType):
