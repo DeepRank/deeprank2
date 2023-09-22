@@ -46,6 +46,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
       - [GraphDataset](#graphdataset)
       - [GridDataset](#griddataset)
     - [Training](#training)
+  - [Computational performances](#computational-performances)
   - [Package development](#package-development)
 
 ## Installation
@@ -312,6 +313,16 @@ trainer.train(
 trainer.test()
 
 ```
+
+## Computational performances
+
+We measured the efficiency of data generation in DeepRank2 using the tutorials' [PDB files](https://zenodo.org/record/8187806) (~100 data points per data set), averaging the results run on Apple M1 Pro, using a single CPU.
+Parameter settings were: atomic resolution, `distance_cutoff` of 5.5 Å, radius (for SRV only) of 10 Å. The [features modules](https://deeprank2.readthedocs.io/en/latest/features.html) used were `components`, `contact`, `exposure`, `irc`, `secondary_structure`, `surfacearea`, for a total of 33 features for PPIs and 26 for SRVs (the latter do not use `irc` features).
+
+|      |         Data processing speed <br />[seconds/structure]        |                Memory <br />[megabyte/structure]               |
+|------|:--------------------------------------------------------:|:--------------------------------------------------------:|
+| PPIs | graph only: **2.99** (std 0.23) <br />graph+grid: **11.35** (std 1.30) | graph only: **0.54** (std 0.07) <br />graph+grid: **16.09** (std 0.44) |
+| SRVs | graph only: **2.20** (std 0.08)  <br />graph+grid: **2.85** (std 0.10) | graph only: **0.05** (std 0.01) <br />graph+grid: **17.52** (std 0.59) |
 
 ## Package development
 
