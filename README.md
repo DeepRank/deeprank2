@@ -318,7 +318,9 @@ trainer.test()
 
 ## Computational performances
 
-The data generation process is rather efficient within DeepRank2. As an example, we show the time required to process the tutorials' PDB files available at [this](https://zenodo.org/record/8187806) Zenodo address. Atomic resolution and `distance_cutoff` of 5.5 Å have been used for both PPIs and SRVs, and the SRVs `radius` was set to 10 Å. The experiments are done on Apple M1 Pro, using 1 CPU only. Measures are computed on 100 data points for PPIs, and 96 for SRVs. 
+We measured the efficiency of data generation in DeepRank2 using the tutorials' [PDB files](https://zenodo.org/record/8187806) (+/- 100 data points per data set).
+Below results were obtained as an average of X runs, on Apple M1 Pro, using a single CPU.
+Parameter settings as follows: resolution: atomic; `distance_cutoff`:5.5 Å; radius (for SRV only): 10 Å. 
 
 |      | [Features modules](https://deeprank2.readthedocs.io/en/latest/features.html) used                       | Comments                                                                                                                                                                                                                                       |          Data processing speed **[seconds/structure]**        |    Memory **[megabyte/structure]**   |
 |------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------:|:--------------------------------:|
