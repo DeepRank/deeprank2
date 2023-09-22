@@ -52,25 +52,24 @@ def add_features( # pylint: disable=unused-argument
         signal.alarm(0)
     except TimeoutError as e:
         raise TimeoutError('Bio.PDB.ResidueDepth.get_surface timed out.') from e
-    else:
-        hse = HSExposureCA(bio_model)
 
-        # These can only be calculated per residue, not per atom.
-        # So for atomic graphs, every atom gets its residue's value.
-        for node in graph.nodes:
-            if isinstance(node.id, Residue):
-                residue = node.id
-            elif isinstance(node.id, Atom):
-                atom = node.id
-                residue = atom.residue
-            else:
-                raise TypeError(f"Unexpected node type: {type(node.id)}")
+    # These can only be calculated per residue, not per atom.
+    # So for atomic graphs, every atom gets its residue's value.
+    hse = HSExposureCA(bio_model)
+    for node in graph.nodes:
+        if isinstance(node.id, Residue):
+            residue = node.id
+        elif isinstance(node.id, Atom):
+            atom = node.id
+            residue = atom.residue
+        else:
+            raise TypeError(f"Unexpected node type: {type(node.id)}")
 
-            bio_residue = bio_model[residue.chain.id][residue.number]
-            node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)
-            hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
+        bio_residue = bio_model[residue.chain.id][residue.number]
+        node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)
+        hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
 
-            if hse_key in hse:
-                node.features[Nfeat.HSE] = np.array(hse[hse_key], dtype=np.float64)
-            else:
-                node.features[Nfeat.HSE] = np.array((0, 0, 0), dtype=np.float64)
+        if hse_key in hse:
+            node.features[Nfeat.HSE] = np.array(hse[hse_key], dtype=np.float64)
+        else:
+            node.features[Nfeat.HSE] = np.array((0, 0, 0), dtype=np.float64)
