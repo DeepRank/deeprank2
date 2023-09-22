@@ -12,9 +12,11 @@ from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 from deeprank2.domain.aminoacidlist import (alanine, arginine, asparagine,
-                                            cysteine, glutamate, glycine,
-                                            leucine, lysine, phenylalanine)
+                                            aspartate, cysteine, glutamate,
+                                            glycine, leucine, lysine,
+                                            phenylalanine)
 from deeprank2.features import components, conservation, contact, surfacearea
+from deeprank2.molstruct.residue import Residue
 from deeprank2.query import (ProteinProteinInterfaceQuery, QueryCollection,
                              SingleResidueVariantQuery)
 from deeprank2.utils.graph import Graph
@@ -171,6 +173,45 @@ def test_variant_graph_101M():
         ],
     )
 
+def test_variant_in_atomic_graph():
+    query = SingleResidueVariantQuery(
+        pdb_path="tests/data/pdb/101M/101M.pdb",
+        resolution="atom",
+        chain_ids="A",
+        variant_residue_number=27,
+        insertion_code=None,
+        wildtype_amino_acid=aspartate,
+        variant_amino_acid=phenylalanine,
+        pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+        targets={targets.BINARY: 0},
+        radius=5.0,
+        distance_cutoff=5.0,
+    )
+
+    g = query.build([components])
+
+    variant_residue = Residue(
+        chain = '101M ' + query.chain_ids[0],
+        number = query.variant_residue_number,
+        amino_acid = query.wildtype_amino_acid,
+        insertion_code = query.insertion_code,
+    )
+    all_residues = list(set(node.id.residue for node in g.nodes))
+    print (variant_residue)
+    # print (type(variant_residue), type(all_residues[0]))
+    # for res in all_residues:
+    #     print (res)
+    print (all_residues[4])
+    # assert variant_residue in all_residues
+
+    another_residue = Residue(
+        chain='101M A',
+        number=27,
+        amino_acid=phenylalanine,
+        insertion_code=None,
+    )
+
+    assert variant_residue == another_residue
 
 def test_variant_graph_1A0Z():
     query = SingleResidueVariantQuery(

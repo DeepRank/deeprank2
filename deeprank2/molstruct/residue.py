@@ -92,7 +92,7 @@ class Residue:
         self._atoms.append(atom)
 
     def __repr__(self) -> str:
-        return f"{self._chain} {self.number_string}"
+        return f"Residue({self._chain} - {self.number_string} - {self.amino_acid})"
 
     @property
     def position(self) -> np.array:
