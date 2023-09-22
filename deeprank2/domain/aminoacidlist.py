@@ -353,8 +353,6 @@ amino_acids = [
     ]
 
 def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
-
-    # pylint: disable = raise-missing-from
     try:
         if len(aa) == 1:
             aa: AminoAcid = [entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower()][0]
@@ -362,8 +360,8 @@ def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
             aa: AminoAcid = [entry for entry in amino_acids if entry.three_letter_code.lower() == aa.lower()][0]
         else:
             aa: AminoAcid = [entry for entry in amino_acids if entry.name.lower() == aa.lower()][0]
-    except IndexError:
-        raise ValueError(f'{aa} is not a valid amino acid.')
+    except IndexError as e:
+        raise ValueError(f'{aa} is not a valid amino acid.') from e
 
     if not output_type:
         return aa.name

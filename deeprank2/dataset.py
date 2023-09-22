@@ -346,14 +346,14 @@ class DeeprankDataset(Dataset):
 
             for row, feat in enumerate(features_df):
                 if isinstance(self.df[feat].values[0], np.ndarray):
-                    if(log):
+                    if log:
                         log_data = np.log(np.concatenate(self.df[feat].values))
                         log_data[log_data == -np.inf] = 0
                         axs[row].hist(log_data, bins=bins)
                     else:
                         axs[row].hist(np.concatenate(self.df[feat].values), bins=bins)
                 else:
-                    if(log):
+                    if log:
                         log_data = np.log(self.df[feat].values)
                         log_data[log_data == -np.inf] = 0
                         axs[row].hist(log_data, bins=bins)
@@ -366,14 +366,14 @@ class DeeprankDataset(Dataset):
             fig = plt.figure(figsize=figsize)
             ax = fig.add_subplot(111)
             if isinstance(self.df[features_df[0]].values[0], np.ndarray):
-                if(log):
+                if log:
                     log_data = np.log(np.concatenate(self.df[features_df[0]].values))
                     log_data[log_data == -np.inf] = 0
                     ax.hist(log_data, bins=bins)
                 else:
                     ax.hist(np.concatenate(self.df[features_df[0]].values), bins=bins)
             else:
-                if(log):
+                if log:
                     log_data = np.log(self.df[features_df[0]].values)
                     log_data[log_data == -np.inf] = 0
                     ax.hist(log_data, bins=bins)
