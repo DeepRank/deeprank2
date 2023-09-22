@@ -1,3 +1,4 @@
+# This script can be used for performance testing of the DeepRank2 package, using the PPI query classes.
 import glob
 import os
 import time
