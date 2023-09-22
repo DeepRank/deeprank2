@@ -15,7 +15,8 @@ from deeprank2.domain.aminoacidlist import (alanine, arginine, asparagine,
                                             methionine, phenylalanine, proline,
                                             serine, threonine, tryptophan,
                                             tyrosine, valine)
-from deeprank2.features import components, contact, exposure, irc, surfacearea
+from deeprank2.features import (components, contact, exposure, irc,
+                                secondary_structure, surfacearea)
 from deeprank2.query import QueryCollection, SingleResidueVariantResidueQuery
 from deeprank2.utils.grid import GridSettings, MapMethod
 
@@ -39,7 +40,7 @@ grid_settings = GridSettings( # None if you don't want grids
 grid_map_method = MapMethod.GAUSSIAN # None if you don't want grids
 # grid_settings = None
 # grid_map_method = None
-feature_modules = [components, contact, exposure, irc, surfacearea]
+feature_modules = [components, contact, exposure, irc, surfacearea, secondary_structure]
 cpu_count = 1
 ####################################################
 
@@ -51,17 +52,19 @@ if not os.path.exists(os.path.join(processed_data_path, "atomic")):
 
 def get_pdb_files_and_target_data(data_path):
     csv_data = pd.read_csv(os.path.join(data_path, "srv_target_values.csv"))
-    pdb_files = glob.glob(os.path.join(data_path, "pdb", '*.ent'))
+    # before running this script change .ent to .pdb
+    pdb_files = glob.glob(os.path.join(data_path, "pdb", '*.pdb'))
     pdb_files.sort()
-    pdb_file_names = [os.path.basename(pdb_file) for pdb_file in pdb_files]
-    csv_data_indexed = csv_data.set_index('pdb_file')
-    csv_data_indexed = csv_data_indexed.loc[pdb_file_names]
+    pdb_id = [os.path.basename(pdb_file).split('.')[0] for pdb_file in pdb_files]
+    csv_data['pdb_id'] = csv_data['pdb_file'].apply(lambda x: x.split('.')[0])
+    csv_data_indexed = csv_data.set_index('pdb_id')
+    csv_data_indexed = csv_data_indexed.loc[pdb_id]
     res_numbers = csv_data_indexed.res_number.values.tolist()
     res_wildtypes = csv_data_indexed.res_wildtype.values.tolist()
     res_variants = csv_data_indexed.res_variant.values.tolist()
     targets = csv_data_indexed.target.values.tolist()
     pdb_names = csv_data_indexed.index.values.tolist()
-    pdb_files = [data_path + "/pdb/" + pdb_name for pdb_name in pdb_names]
+    pdb_files = [data_path + "/pdb/" + pdb_name + ".pdb" for pdb_name in pdb_names]
     return pdb_files, res_numbers, res_wildtypes, res_variants, targets
 
 
@@ -70,7 +73,6 @@ if __name__=='__main__':
     timings = []
     count = 0
     pdb_files, res_numbers, res_wildtypes, res_variants, targets = get_pdb_files_and_target_data(data_path)
-    pdb_files = pdb_files[:10]
 
     for i, pdb_file in enumerate(pdb_files):
         queries = QueryCollection()
