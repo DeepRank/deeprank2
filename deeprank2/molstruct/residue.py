@@ -97,7 +97,7 @@ class Residue:
 
     @property
     def position(self) -> np.array:
-        return np.mean([atom.position for atom in self._atoms], axis=0)
+        return self.get_center()
 
     def get_center(self) -> NDArray:
         """Find the center position of a `Residue`.
