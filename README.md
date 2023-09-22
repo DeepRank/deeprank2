@@ -30,20 +30,10 @@ Main features:
 
 DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/).
 
-## Computational performances
-
-The data generation process is rather efficient within DeepRank2. As an example, we show the time required to process the tutorials' PDB files in DeepRank2. Atomic resolution and `distance_cutoff` of 5.5 Å have been used for both PPIs and SRVs, and the SRVs `radius` was set to 10 Å. The experiments are done on Apple M1 Pro, using 1 CPU only. Measures are computed on 100 data points for PPIs, and 96 for SRVs. 
-
-|      | [Features modules](https://deeprank2.readthedocs.io/en/latest/features.html) used                       | Comments                                                                                                                                                                                                                                       |          Data processing speed **[seconds/structure]**        |    Memory **[megabyte/structure]**   |
-|------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------:|:--------------------------------:|
-| PPIs | `components`, `contact`, `exposure`, `irc`, `secondary_structure`, `surfacearea`, 33 features in total. | `conservation` feature module was not used because PSSM files were not available for the data.                                                                                                                                                 | graph only: **3.58** (std 0.27) graph + grid: **12.92** (std 1.39) | graph only: **0.54** (std 0.07) graph + grid: **16.09** (std 0.44) |
-| SRVs | `components`, `contact`, `exposure`, `irc`, `surfacearea`, 25 features in total.                        | Same as above for `conservation`. `secondary_structure` feature module was not used because DSSP [Bio.PDB.DSSP module](https://biopython.org/docs/1.75/api/Bio.PDB.DSSP.html#module-Bio.PDB.DSSP) cannot handle the SRVs files' format (.ent). | graph only: **1.74** (std 0.34)  graph + grid: **2.26** (std 0.57) | graph only: **50.27** (std 6.53) graph + grid: **8.14** (std 8.12) |
-
 ## Table of contents
 
 - [Deeprank2](#deeprank2)
   - [Overview](#overview)
-  - [Computational performances](#computational-performances)
   - [Table of contents](#table-of-contents)
   - [Installation](#installation)
     - [Dependencies](#dependencies)
@@ -56,6 +46,7 @@ The data generation process is rather efficient within DeepRank2. As an example,
       - [GraphDataset](#graphdataset)
       - [GridDataset](#griddataset)
     - [Training](#training)
+  - [Computational performances](#computational-performances)
   - [Package development](#package-development)
 
 ## Installation
@@ -324,6 +315,15 @@ trainer.train(
 trainer.test()
 
 ```
+
+## Computational performances
+
+The data generation process is rather efficient within DeepRank2. As an example, we show the time required to process the tutorials' PDB files in DeepRank2. Atomic resolution and `distance_cutoff` of 5.5 Å have been used for both PPIs and SRVs, and the SRVs `radius` was set to 10 Å. The experiments are done on Apple M1 Pro, using 1 CPU only. Measures are computed on 100 data points for PPIs, and 96 for SRVs. 
+
+|      | [Features modules](https://deeprank2.readthedocs.io/en/latest/features.html) used                       | Comments                                                                                                                                                                                                                                       |          Data processing speed **[seconds/structure]**        |    Memory **[megabyte/structure]**   |
+|------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------:|:--------------------------------:|
+| PPIs | `components`, `contact`, `exposure`, `irc`, `secondary_structure`, `surfacearea`, 33 features in total. | `conservation` feature module was not used because PSSM files were not available for the data.                                                                                                                                                 | graph only: **3.58** (std 0.27) graph + grid: **12.92** (std 1.39) | graph only: **0.54** (std 0.07) graph + grid: **16.09** (std 0.44) |
+| SRVs | `components`, `contact`, `exposure`, `irc`, `surfacearea`, 25 features in total.                        | Same as above for `conservation`. `secondary_structure` feature module was not used because DSSP [Bio.PDB.DSSP module](https://biopython.org/docs/1.75/api/Bio.PDB.DSSP.html#module-Bio.PDB.DSSP) cannot handle the SRVs files' format (.ent). | graph only: **1.74** (std 0.34)  graph + grid: **2.26** (std 0.57) | graph only: **50.27** (std 6.53) graph + grid: **8.14** (std 8.12) |
 
 ## Package development
 
