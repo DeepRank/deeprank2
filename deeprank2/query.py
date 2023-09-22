@@ -32,27 +32,31 @@ from deeprank2.utils.parsing.pssm import parse_pssm
 
 _log = logging.getLogger(__name__)
 
-VALID_RESOLUTIONS = ['atomic', 'residue']
+VALID_RESOLUTIONS = ['atom', 'residue']
 
 
 # TODO: consider whether we want to use the built-in repr and eq, or define it ourselves
 # if built-in: consider which arguments to include in either.
 @dataclass(repr=False, kw_only=True)
 class DeepRankQuery:
-    """Represents one entity of interest, like a single residue variant or a protein-protein interface.
+    """Represents one entity of interest: a single residue variant (SRV) or a protein-protein interface (PPI).
 
     :class:`DeepRankQuery` objects are used to generate graphs from structures, and they should be created before any model is loaded.
     They can have target values associated with them, which will be stored with the resulting graph.
 
     Args:
-        model_id (str): The ID of the model to load, usually a .PDB accession code.
-        targets (dict[str, float], optional): Target values associated with the query. Defaults to None.
-        suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
-            Defaults to False.
+        pdb_path (str): the path to the PDB file to query.
+        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
+        chain_ids (list[str] | str): the chain identifier(s) in the pdb file (generally a single capital letter).
+        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
+        distance_cutoff (float): the maximum distance between two nodes to generate an edge connecting them.
+        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
+        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
+            match the .pdb files. If True, a warning is returned instead.
     """
 
     pdb_path: str
-    resolution: Literal['residue', 'atomic']
+    resolution: Literal['residue', 'atom']
     chain_ids: list[str] | str
     pssm_paths: dict[str, str] = field(default_factory=dict)
     distance_cutoff: float = None
@@ -215,7 +219,25 @@ class DeepRankQuery:
 
 @dataclass(kw_only=True)
 class SingleResidueVariantQuery(DeepRankQuery):
-    """A query that builds a single residue variant graph."""
+    """A query that builds a single residue variant graph.
+
+    Args (common for `DeepRankQuery`):
+        pdb_path (str): the path to the PDB file to query.
+        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
+        chain_ids (list[str] | str): the chain identifier(s) in the pdb file (generally a single capital letter).
+        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
+        distance_cutoff (float): the maximum distance between two nodes to generate an edge connecting them.
+        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
+        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
+            match the .pdb files. If True, a warning is returned instead.
+    SRV specific Args:
+        variant_residue_number (int): the residue number of the variant residue.
+        insertion_code (str | None): the insertion code of the variant residue.
+        wildtype_amino_acid (AminoAcid): the amino acid at above position in the wildtype protein.
+        variant_amino_acid (AminoAcid): the amino acid at above position in the variant protein.
+        radius (float): all Residues within this radius (in Å) from the variant residue will
+            be included in the graph
+    """
 
     variant_residue_number: int
     insertion_code: str | None
@@ -277,7 +299,7 @@ class SingleResidueVariantQuery(DeepRankQuery):
         # build the graph
         if self.resolution == 'residue':
             graph = build_residue_graph(residues, self.get_query_id(), self.distance_cutoff)
-        elif self.resolution == 'atomic':
+        elif self.resolution == 'atom':
             residues.append(variant_residue)
             atoms = set([])
             for residue in residues:
@@ -285,10 +307,8 @@ class SingleResidueVariantQuery(DeepRankQuery):
                     for atom in residue.atoms:
                         atoms.add(atom)
             atoms = list(atoms)
-            #TODO: why was this a set at first? I think each atom is unique anyway, given that it has a Residue property
 
             graph = build_atomic_graph(atoms, self.get_query_id(), self.distance_cutoff)
-            #TODO: check if this works with a set instead of a list
 
         else:
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
@@ -299,7 +319,18 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
 @dataclass(kw_only=True)
 class ProteinProteinInterfaceQuery(DeepRankQuery):
-    """A query that builds a protein-protein interface graph."""
+    """A query that builds a protein-protein interface graph.
+
+    Args:
+        pdb_path (str): the path to the PDB file to query.
+        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
+        chain_ids (list[str] | str): the chain identifier(s) in the pdb file (generally a single capital letter).
+        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
+        distance_cutoff (float): the maximum distance between two nodes to generate an edge connecting them.
+        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
+        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
+            match the .pdb files. If True, a warning is returned instead.
+    """
 
     def __post_init__(self):
         super().__post_init__()
@@ -309,8 +340,7 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
             raise ValueError(f"SingleResidueVariantQuery must contain exactly 2 chain_ids, but {len(self.chain_ids)} were given.")
 
         if not self.distance_cutoff:
-            #TODO: check if we truly need so many different defaults
-            if self.resolution == 'atomic':
+            if self.resolution == 'atom':
                 self.distance_cutoff = 5.5
             if self.resolution == 'residue':
                 self.distance_cutoff = 10
@@ -339,12 +369,11 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
             raise ValueError("no contact atoms found")
 
         # build the graph
-        if self.resolution == 'atomic':
+        if self.resolution == 'atom':
             graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.distance_cutoff)
         elif self.resolution == 'residue':
             residues_selected = {atom.residue for atom in contact_atoms}
             graph = build_residue_graph(list(residues_selected), self.get_query_id(), self.distance_cutoff)
-            #TODO: check whether this works with a set instead of a list
         else:
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
         graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
@@ -361,7 +390,8 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
 class QueryCollection:
     """Represents the collection of data queries.
 
-        Queries can be saved as a dictionary to easily navigate through their data.
+        Queries can be saved as a dictionary to easily navigate through their data,
+        using `QueryCollection.export_dict()`.
     """
 
     def __init__(self):
@@ -381,6 +411,7 @@ class QueryCollection:
             verbose(bool): For logging query IDs added. Defaults to `False`.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified. Defaults to `True`.
         """
+
         query_id = query.get_query_id()
         if verbose:
             _log.info(f'Adding query with ID {query_id}.')
@@ -402,17 +433,20 @@ class QueryCollection:
         Args:
             dataset_path (str): The path where to save the list of queries.
         """
+
         with open(dataset_path, "wb") as pkl_file:
             pickle.dump(self, pkl_file)
 
     @property
     def queries(self) -> list[DeepRankQuery]:
         """The list of queries added to the collection."""
+
         return self._queries
 
     @property
     def ids_count(self) -> list[DeepRankQuery]:
         """The list of queries added to the collection."""
+
         return self._ids_count
 
     def __contains__(self, query: DeepRankQuery) -> bool:
@@ -426,6 +460,7 @@ class QueryCollection:
 
     def _process_one_query(self, query: DeepRankQuery):
         """Only one process may access an hdf5 file at a time"""
+
         try:
             # TODO: Maybe make exception catching optional, because I think it would be good to raise the error by default.
             output_path = f"{self._prefix}-{os.getpid()}.hdf5"
@@ -458,7 +493,7 @@ class QueryCollection:
         """Render queries into graphs (and optionally grids).
 
         Args:
-            prefix (str None, optional): Prefix for naming the output files. Defaults to "processed-queries".
+            prefix (str None, optional): prefix for naming the output files. Defaults to "processed-queries".
             feature_modules (list[ModuleType] | list[str] | Literal ['all'], optional): feature module or list of feature modules
                 used to generate features (given as string or as an imported module).
                 Each module must implement the :py:func:`add_features` function, and all feature modules must exist inside `deeprank2.features` folder.
@@ -528,6 +563,7 @@ class QueryCollection:
         Raises:
             TypeError: if an invalid input type is passed.
         """
+
         if feature_modules == 'all':
             return [modname for _, modname, _ in pkgutil.iter_modules(deeprank2.features.__path__)]
         if isinstance(feature_modules, ModuleType):

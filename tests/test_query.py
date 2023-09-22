@@ -117,7 +117,7 @@ def test_interface_graph_residue():
 def test_interface_graph_atomic():
     query = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids=["A", "B"],
         pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
@@ -142,7 +142,7 @@ def test_interface_graph_atomic():
 def test_variant_graph_101M():
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/101M/101M.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=27,
         insertion_code=None,
@@ -175,7 +175,7 @@ def test_variant_graph_101M():
 def test_variant_graph_1A0Z():
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/1A0Z/1A0Z.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=125,
         insertion_code=None,
@@ -213,7 +213,7 @@ def test_variant_graph_1A0Z():
 def test_variant_graph_9API():
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/9api/9api.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=310,
         insertion_code=None,
@@ -300,7 +300,7 @@ def test_augmentation():
 
     qc.add(ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids=["A", "B"],
         pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
@@ -323,7 +323,7 @@ def test_augmentation():
 
     qc.add(SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/101M/101M.pdb",
-        resolution="atomic",
+        resolution="atom",
         chain_ids="A",
         variant_residue_number=27,
         insertion_code=None,
@@ -466,7 +466,7 @@ def test_incorrect_pssm_provided():
 def test_variant_query_multiple_chains():
     q = SingleResidueVariantQuery(
         pdb_path = "tests/data/pdb/2g98/pdb2g98.pdb",
-        resolution = "atomic",
+        resolution = "atom",
         chain_ids = "A",
         variant_residue_number = 14,
         insertion_code = None,

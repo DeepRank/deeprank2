@@ -109,7 +109,7 @@ For each protein-protein complex (or protein structure containing a missense var
 
 A `DeepRankQuery` takes as inputs:
 - a `.pdb` file, representing the protein-protein structure,
-- the resolution (`"residue"` or `"atomic"`), i.e. whether each node should represent an amino acid residue or an atom,
+- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
