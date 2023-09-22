@@ -2,7 +2,8 @@ import logging
 import os
 
 import numpy as np
-from pdb2sql import interface as get_interface
+from pdb2sql import interface as pdb2sql_interface
+from pdb2sql import pdb2sql as pdb2sql_object
 from scipy.spatial import distance_matrix
 
 from deeprank2.domain.aminoacidlist import amino_acids_by_code
@@ -14,20 +15,20 @@ from deeprank2.molstruct.structure import Chain, PDBStructure
 _log = logging.getLogger(__name__)
 
 
-def _add_atom_to_residue(atom, residue):
+def _add_atom_to_residue(atom: Atom, residue: Residue):
+    """Adds an `Atom` to a `Residue` if not already there.
+
+    If no matching atom is found, add the current atom to the residue.
+    If there's another atom with the same name, choose the one with the highest occupancy.
+    """
+
     for other_atom in residue.atoms:
         if other_atom.name == atom.name:
-            # Don't allow two atoms with the same name, pick the highest
-            # occupancy
             if other_atom.occupancy < atom.occupancy:
                 other_atom.change_altloc(atom)
                 return
-
-    # not there yet, add it
     residue.add_atom(atom)
 
-
-_elements_by_name = {element.name: element for element in AtomicElement}
 
 def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-many-arguments, too-many-locals
                                 x: float, y: float, z: float,
@@ -38,7 +39,6 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
                                 residue_number: int,
                                 residue_name: str,
                                 insertion_code: str):
-
     """
     This is a subroutine, to be used in other methods for converting pdb2sql atomic data into a
     deeprank structure object. It should be called for one atom.
@@ -62,55 +62,34 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
     if altloc is not None and altloc != "" and altloc != "A":
         return
 
-    # We use None to indicate that the residue has no insertion code.
-    if insertion_code == "":
-        insertion_code = None
-
-    # The amino acid is only valid when we deal with protein residues.
-    if residue_name in amino_acids_by_code:
-        amino_acid = amino_acids_by_code[residue_name]
-    else:
-        amino_acid = None
-
-    # Turn the x,y,z into a vector:
+    insertion_code = None if insertion_code == "" else insertion_code
+    amino_acid = amino_acids_by_code[residue_name] if residue_name in amino_acids_by_code else None
     atom_position = np.array([x, y, z])
 
-    # Init chain.
     if not structure.has_chain(chain_id):
+        structure.add_chain(Chain(structure, chain_id))
+    chain = structure.get_chain(chain_id)
 
-        chain = Chain(structure, chain_id)
-        structure.add_chain(chain)
-    else:
-        chain = structure.get_chain(chain_id)
-
-    # Init residue.
     if not chain.has_residue(residue_number, insertion_code):
+        chain.add_residue(Residue(chain, residue_number, amino_acid, insertion_code))
+    residue = chain.get_residue(residue_number, insertion_code)
 
-        residue = Residue(chain, residue_number, amino_acid, insertion_code)
-        chain.add_residue(residue)
-    else:
-        residue = chain.get_residue(residue_number, insertion_code)
-
-    # Init atom.
     atom = Atom(
-        residue, atom_name, _elements_by_name[element_name], atom_position, occupancy
+        residue, atom_name, AtomicElement[element_name], atom_position, occupancy
     )
     _add_atom_to_residue(atom, residue)
 
 
-def get_structure(pdb, id_: str) -> PDBStructure:
+def get_structure(pdb: pdb2sql_object, id_: str) -> PDBStructure:
     """Builds a structure from rows in a pdb file.
 
     Args:
         pdb (pdb2sql object): The pdb structure that we're investigating.
-        id (str): Unique id for the pdb structure.
+        id_ (str): Unique id for the pdb structure.
 
     Returns:
         PDBStructure: The structure object, giving access to chains, residues, atoms.
     """
-
-    # We need these intermediary dicts to keep track of which residues and
-    # chains have already been created.
     structure = PDBStructure(id_)
 
     # Iterate over the atom output from pdb2sql
@@ -153,7 +132,7 @@ def get_contact_atoms( # pylint: disable=too-many-locals
 ) -> list[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
-    interface = get_interface(pdb_path)
+    interface = pdb2sql_interface(pdb_path)
     try:
         atom_indexes = interface.get_contact_atoms(
             cutoff=influence_radius,
@@ -218,7 +197,7 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     """
 
     # Find out which residues are pairs
-    interface = get_interface(pdb_path)
+    interface = pdb2sql_interface(pdb_path)
     try:
         contact_residues = interface.get_contact_residues(
             cutoff=influence_radius,
@@ -283,30 +262,23 @@ def get_surrounding_residues(
     """Get the residues that lie within a radius around a residue.
 
     Args:
-        structure (Union[:class:`Chain`, :class:`PDBStructure`]): The structure to take residues from.
+        structure (:class:`Chain` | :class:`PDBStructure`): The structure to take residues from.
         residue (:class:`Residue`): The residue in the structure.
         radius (float): Max distance in Ångström between atoms of the residue and the other residues.
 
     Returns:
-        (a set of deeprank residues): The surrounding residues.
+        list[:class:`Residue`]: The surrounding residues.
     """
 
     structure_atoms = structure.get_atoms()
-    residue_atoms = residue.atoms
-
     structure_atom_positions = [atom.position for atom in structure_atoms]
-    residue_atom_positions = [atom.position for atom in residue_atoms]
+    residue_atom_positions = [atom.position for atom in residue.atoms]
+    pairwise_distances = distance_matrix(structure_atom_positions, residue_atom_positions, p=2)
 
-    distances = distance_matrix(structure_atom_positions, residue_atom_positions, p=2)
-
-    close_residues = set([])
-
+    surrounding_residues = set([])
     for structure_atom_index, structure_atom in enumerate(structure_atoms):
-
-        shortest_distance = np.min(distances[structure_atom_index, :])
-
+        shortest_distance = np.min(pairwise_distances[structure_atom_index, :])
         if shortest_distance < radius:
+            surrounding_residues.add(structure_atom.residue)
 
-            close_residues.add(structure_atom.residue)
-
-    return list(close_residues)
+    return list(surrounding_residues)
