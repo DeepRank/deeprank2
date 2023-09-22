@@ -1,6 +1,6 @@
 from typing import TextIO
 
-from deeprank2.domain.aminoacidlist import amino_acids
+from deeprank2.domain.aminoacidlist import amino_acids, amino_acids_by_letter
 from deeprank2.molstruct.residue import Residue
 from deeprank2.molstruct.structure import Chain
 from deeprank2.utils.pssmdata import PssmRow, PssmTable
@@ -17,7 +17,6 @@ def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
         PssmTable: The position-specific scoring table, parsed from the pssm file.
     """
 
-    amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids}
     conservation_rows = {}
 
     # Read the pssm header.

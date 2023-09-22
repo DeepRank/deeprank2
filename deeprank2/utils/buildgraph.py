@@ -5,7 +5,7 @@ import numpy as np
 from pdb2sql import interface as get_interface
 from scipy.spatial import distance_matrix
 
-from deeprank2.domain.aminoacidlist import amino_acids
+from deeprank2.domain.aminoacidlist import amino_acids_by_code
 from deeprank2.molstruct.atom import Atom, AtomicElement
 from deeprank2.molstruct.pair import Pair
 from deeprank2.molstruct.residue import Residue
@@ -27,13 +27,7 @@ def _add_atom_to_residue(atom, residue):
     residue.add_atom(atom)
 
 
-_amino_acids_by_code = {
-    amino_acid.three_letter_code: amino_acid for amino_acid in amino_acids
-}
-
-
 _elements_by_name = {element.name: element for element in AtomicElement}
-
 
 def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-many-arguments, too-many-locals
                                 x: float, y: float, z: float,
@@ -73,8 +67,8 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
         insertion_code = None
 
     # The amino acid is only valid when we deal with protein residues.
-    if residue_name in _amino_acids_by_code:
-        amino_acid = _amino_acids_by_code[residue_name]
+    if residue_name in amino_acids_by_code:
+        amino_acid = amino_acids_by_code[residue_name]
     else:
         amino_acid = None
 

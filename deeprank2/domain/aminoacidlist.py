@@ -350,6 +350,10 @@ amino_acids = [
     # pyrrolysine,
     ]
 
+amino_acids_by_code = {amino_acid.three_letter_code: amino_acid for amino_acid in amino_acids}
+amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids}
+amino_acids_by_name = {amino_acid.name: amino_acid for amino_acid in amino_acids}
+
 def convert_aa_nomenclature(aa: str, output_type: int | None = None):
     try:
         if len(aa) == 1:
