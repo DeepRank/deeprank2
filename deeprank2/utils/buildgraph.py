@@ -30,57 +30,57 @@ def _add_atom_to_residue(atom: Atom, residue: Residue):
     residue.add_atom(atom)
 
 
-def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-many-arguments, too-many-locals
-                                x: float, y: float, z: float,
-                                atom_name: str,
-                                altloc: str, occupancy: float,
-                                element_name: str,
-                                chain_id: str,
-                                residue_number: int,
-                                residue_name: str,
-                                insertion_code: str):
-    """
-    This is a subroutine, to be used in other methods for converting pdb2sql atomic data into a
-    deeprank structure object. It should be called for one atom.
+def _add_atom_data_to_structure(
+    structure: PDBStructure,
+    pdb_obj: pdb2sql_object,
+    **kwargs
+):
+    """This subroutine retrieves pdb2sql atomic data for `PDBStructure` objects as defined in DeepRank2.
+
+    This function should be called for one atom at a time.
 
     Args:
-        structure (:class:`PDBStructure`): Where this atom should be added to.
-        x (float): x-coordinate of atom.
-        y (float): y-coordinate of atom.
-        z (float): z-coordinate of atom.
-        atom_name (str): Name of atom: 'CA', 'C', 'N', 'O', 'CB', etc.
-        altloc (str): Pdb alternative location id for this atom (can be empty): 'A', 'B', 'C', etc.
-        occupancy (float): Pdb occupancy of this atom, ranging from 0.0 to 1.0. Should be used with altloc.
-        element_name (str): Pdb element symbol of this atom: 'C', 'O', 'H', 'N', 'S'.
-        chain_id (str): Pdb chain identifier: 'A', 'B', 'C', etc.
-        residue_number (int): Pdb residue number, a positive integer.
-        residue_name (str): Pdb residue name: "ALA", "CYS", "ASP", etc.
-        insertion_code (str): Pdb residue insertion code (can be empty) : '', 'A', 'B', 'C', etc.
+        structure (:class:`PDBStructure`): The structure to which this atom should be added to.
+        pdb (pdb2sql_object): The `pdb2sql` object to retrieve the data from.
+        kwargs: as required by the get function for the `pdb2sql` object.
     """
 
-    # Make sure not to take the same atom twice.
-    if altloc is not None and altloc != "" and altloc != "A":
-        return
+    pdb2sql_columns = "x,y,z,name,altLoc,occ,element,chainID,resSeq,resName,iCode"
+    data_keys = pdb2sql_columns.split(sep=',')
+    for data_values in pdb_obj.get(pdb2sql_columns, **kwargs):
+        atom_data = dict(zip(data_keys, data_values))
 
-    insertion_code = None if insertion_code == "" else insertion_code
-    amino_acid = amino_acids_by_code[residue_name] if residue_name in amino_acids_by_code else None
-    atom_position = np.array([x, y, z])
+        # exit function if this atom is already part of the structure
+        if atom_data["altLoc"] not in (None, "", "A"):
+            return
 
-    if not structure.has_chain(chain_id):
-        structure.add_chain(Chain(structure, chain_id))
-    chain = structure.get_chain(chain_id)
+        atom_data["iCode"] = None if atom_data["iCode"] == "" else atom_data["iCode"]
 
-    if not chain.has_residue(residue_number, insertion_code):
-        chain.add_residue(Residue(chain, residue_number, amino_acid, insertion_code))
-    residue = chain.get_residue(residue_number, insertion_code)
+        try:
+            atom_data["aa"] = amino_acids_by_code[atom_data["resName"]]
+        except KeyError:
+            atom_data["aa"] = None
+        atom_data["coordinates"] = np.array(data_values[:3])
 
-    atom = Atom(
-        residue, atom_name, AtomicElement[element_name], atom_position, occupancy
-    )
-    _add_atom_to_residue(atom, residue)
+        if not structure.has_chain(atom_data["chainID"]):
+            structure.add_chain(Chain(structure, atom_data["chainID"]))
+        chain = structure.get_chain(atom_data["chainID"])
+
+        if not chain.has_residue(atom_data["resSeq"], atom_data["iCode"]):
+            chain.add_residue(Residue(chain, atom_data["resSeq"], atom_data["aa"], atom_data["iCode"]))
+        residue = chain.get_residue(atom_data["resSeq"], atom_data["iCode"])
+
+        atom = Atom(
+            residue,
+            atom_data["name"],
+            AtomicElement[atom_data["element"]],
+            atom_data["coordinates"],
+            atom_data["occ"],
+        )
+        _add_atom_to_residue(atom, residue)
 
 
-def get_structure(pdb: pdb2sql_object, id_: str) -> PDBStructure:
+def get_structure(pdb_obj: pdb2sql_object, id_: str) -> PDBStructure:
     """Builds a structure from rows in a pdb file.
 
     Args:
@@ -91,41 +91,11 @@ def get_structure(pdb: pdb2sql_object, id_: str) -> PDBStructure:
         PDBStructure: The structure object, giving access to chains, residues, atoms.
     """
     structure = PDBStructure(id_)
-
-    # Iterate over the atom output from pdb2sql
-    for row in pdb.get(
-        "x,y,z,rowID,name,altLoc,occ,element,chainID,resSeq,resName,iCode", model=0
-    ):
-
-        (
-            x,
-            y,
-            z,
-            _,
-            atom_name,
-            altloc,
-            occupancy,
-            element_name,
-            chain_id,
-            residue_number,
-            residue_name,
-            insertion_code,
-        ) = row
-
-        _add_atom_data_to_structure(structure,
-                                    x, y, z,
-                                    atom_name,
-                                    altloc, occupancy,
-                                    element_name,
-                                    chain_id,
-                                    residue_number,
-                                    residue_name,
-                                    insertion_code)
-
+    _add_atom_data_to_structure(structure, pdb_obj, model=0)
     return structure
 
 
-def get_contact_atoms( # pylint: disable=too-many-locals
+def get_contact_atoms(
     pdb_path: str,
     chain_ids: list[str],
     influence_radius: float
@@ -133,46 +103,19 @@ def get_contact_atoms( # pylint: disable=too-many-locals
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
     interface = pdb2sql_interface(pdb_path)
+    pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
+    structure = PDBStructure(f"contact_atoms_{pdb_name}")
+
     try:
         atom_indexes = interface.get_contact_atoms(
             cutoff=influence_radius,
             chain1=chain_ids[0],
             chain2=chain_ids[1],
         )
-        rows = interface.get(
-            "x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
-            rowID=atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]]
-        )
+        pdb_rowID = atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]]
+        _add_atom_data_to_structure(structure, interface, rowID=pdb_rowID)
     finally:
         interface._close()  # pylint: disable=protected-access
-
-    pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
-    structure = PDBStructure(f"contact_atoms_{pdb_name}")
-
-    for row in rows:
-        (
-            x,
-            y,
-            z,
-            atom_name,
-            element_name,
-            altloc,
-            occupancy,
-            chain_id,
-            residue_number,
-            residue_name,
-            insertion_code
-        ) = row
-
-        _add_atom_data_to_structure(structure,
-                                    x, y, z,
-                                    atom_name,
-                                    altloc, occupancy,
-                                    element_name,
-                                    chain_id,
-                                    residue_number,
-                                    residue_name,
-                                    insertion_code)
 
     return structure.get_atoms()
 
