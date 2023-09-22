@@ -1,16 +1,23 @@
 import numpy as np
 import pytest
-from deeprank2.domain.aminoacidlist import alanine
-from deeprank2.features.conservation import add_features
 
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain.aminoacidlist import alanine
+from deeprank2.features.conservation import add_features
 
 from . import build_testgraph
 
 
 def test_conservation_residue():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, variant = build_testgraph(pdb_path, 10, 'residue', 25, alanine)
+    graph, variant = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        interaction_radius=10,
+        max_edge_distance=10,
+        central_res=25,
+        variant=alanine,
+    )
     add_features(pdb_path, graph, variant)
 
     for feature_name in (
@@ -24,7 +31,14 @@ def test_conservation_residue():
 
 def test_conservation_atom():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, variant = build_testgraph(pdb_path, 10, 'atom', 25, alanine)
+    graph, variant = build_testgraph(
+        pdb_path=pdb_path,
+        detail='atom',
+        interaction_radius=10,
+        max_edge_distance=10,
+        central_res=25,
+        variant=alanine,
+    )
     add_features(pdb_path, graph, variant)
 
     for feature_name in (
@@ -38,6 +52,14 @@ def test_conservation_atom():
 
 def test_no_pssm_file_error():
     pdb_path = "tests/data/pdb/1CRN/1CRN.pdb"
-    graph, variant = build_testgraph(pdb_path, 10, 'residue', 17, alanine)
+    graph, variant = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        interaction_radius=10,
+        max_edge_distance=10,
+        central_res=17,
+        variant=alanine,
+    )
+
     with pytest.raises(FileNotFoundError):
         add_features(pdb_path, graph, variant)

@@ -123,7 +123,8 @@ def test_interface_graph_atomic():
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
             "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
         },
-        distance_cutoff=4.5,
+        interaction_radius=4.5,
+        max_edge_distance=4.5,
     )
 
     g = query.build([surfacearea, components, conservation, contact])
@@ -150,8 +151,8 @@ def test_variant_graph_101M():
         variant_amino_acid=phenylalanine,
         pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
-        radius=5.0,
-        distance_cutoff=5.0,
+        interaction_radius=5.0,
+        max_edge_distance=5.0,
     )
 
     g = query.build([surfacearea, components, conservation, contact])
@@ -188,8 +189,8 @@ def test_variant_graph_1A0Z():
             "D": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
         },
         targets={targets.BINARY: 1},
-        distance_cutoff=5.0,
-        radius=5.0,
+        interaction_radius=5.0,
+        max_edge_distance=5.0,
     )
 
     g = query.build([surfacearea, components, conservation, contact])
@@ -224,8 +225,8 @@ def test_variant_graph_9API():
             "B": "tests/data/pssm/9api/9api.B.pdb.pssm",
         },
         targets={targets.BINARY: 0},
-        distance_cutoff=5.0,
-        radius=5.0,
+        interaction_radius=5.0,
+        max_edge_distance=5.0,
     )
 
     g = query.build([surfacearea, components, conservation, contact])
@@ -331,7 +332,7 @@ def test_augmentation():
         variant_amino_acid=phenylalanine,
         pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
-        radius=3.0,
+        interaction_radius=3.0,
     ))
 
     augmentation_count = 3
@@ -474,8 +475,8 @@ def test_variant_query_multiple_chains():
         variant_amino_acid = cysteine,
         pssm_paths = {"A": "tests/data/pssm/2g98/2g98.A.pdb.pssm"},
         targets = {targets.BINARY: 1},
-        radius = 10.0,
-        distance_cutoff = 4.5,
+        interaction_radius = 10.0,
+        max_edge_distance = 4.5,
     )
 
     # at radius 10, chain B is included in graph
@@ -487,6 +488,6 @@ def test_variant_query_multiple_chains():
         _ = q.build(conservation)
 
     # at radius 7, chain B is not included in graph
-    q.radius = 7.0
+    q.interaction_radius = 7.0
     graph = q.build(conservation)
     assert 'B' not in graph.get_all_chains()

@@ -1,8 +1,8 @@
 import numpy as np
-from deeprank2.features.irc import add_features
-from deeprank2.utils.graph import Graph
 
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.features.irc import add_features
+from deeprank2.utils.graph import Graph
 
 from . import build_testgraph
 
@@ -25,15 +25,23 @@ def _run_assertions(graph: Graph):
 
 def test_irc_residue():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-    graph = build_testgraph(pdb_path, 8.5, 'residue')
-
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        interaction_radius=8.5,
+        max_edge_distance=8.5,
+    )
     add_features(pdb_path, graph)
     _run_assertions(graph)
 
 
 def test_irc_atom():
     pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
-    graph = build_testgraph(pdb_path, 4.5, 'atom')
-
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        interaction_radius=4.5,
+        max_edge_distance=4.5,
+    )
     add_features(pdb_path, graph)
     _run_assertions(graph)

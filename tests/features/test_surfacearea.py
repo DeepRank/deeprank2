@@ -1,7 +1,7 @@
 import numpy as np
-from deeprank2.features.surfacearea import add_features
 
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.features.surfacearea import add_features
 
 from . import build_testgraph
 
@@ -28,7 +28,12 @@ def _find_atom_node(graph, chain_id, residue_number, atom_name):
 
 def test_bsa_residue():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-    graph = build_testgraph(pdb_path, 8.5, 'residue')
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        interaction_radius=8.5,
+        max_edge_distance=8.5,
+    )
     add_features(pdb_path, graph)
 
     # chain B ASP 93, at interface
@@ -38,7 +43,12 @@ def test_bsa_residue():
 
 def test_bsa_atom():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-    graph = build_testgraph(pdb_path, 4.5, 'atom')
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='atom',
+        interaction_radius=4.5,
+        max_edge_distance=4.5,
+    )
     add_features(pdb_path, graph)
 
     # chain B ASP 93, at interface
@@ -48,7 +58,13 @@ def test_bsa_atom():
 
 def test_sasa_residue():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, _ = build_testgraph(pdb_path, 10, 'residue', 108)
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        interaction_radius=10,
+        max_edge_distance=10,
+        central_res=108,
+    )
     add_features(pdb_path, graph)
 
     # check for NaN
@@ -67,7 +83,13 @@ def test_sasa_residue():
 
 def test_sasa_atom():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, _ = build_testgraph(pdb_path, 10, 'atom', 108)
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='atom',
+        interaction_radius=10,
+        max_edge_distance=10,
+        central_res=108,
+    )
     add_features(pdb_path, graph)
 
     # check for NaN
