@@ -8,22 +8,22 @@ Features implemented in the code-base are defined in `deeprank2.feature` subpack
 Users can add custom features by creating a new module and placing it in `deeprank2.feature` subpackage. One requirement for any feature module is to implement an `add_features` function, as shown below. This will be used in `deeprank2.models.query` to add the features to the nodes or edges of the graph.
 
 ```python
-from typing import Optional
 
 from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 
 def add_features(
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: SingleResidueVariant | None = None
+):
     pass
 ```
 
-The following is a brief description of the features already implemented in the code-base, for each features' module. 
+The following is a brief description of the features already implemented in the code-base, for each features' module.
 
-## Default node features 
+## Default node features
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
 ### Core properties of atoms and residues: `deeprank2.features.components`
@@ -34,12 +34,12 @@ These features are only used in atomic graphs.
 
 - `atom_type`: One-hot encoding of the atomic element. Options are: C, O, N, S, P, H.
 - `atom_charge`: Atomic charge in Coulomb (float). Taken from `deeprank2.domain.forcefield.patch.top`.
-- `pdb_occupancy`: Proportion of structures where the atom was detected at this position (float). In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprank2. 
+- `pdb_occupancy`: Proportion of structures where the atom was detected at this position (float). In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprank2.
 
 #### Residue properties:
 - `res_type`: One-hot encoding of the amino acid residue (size 20).
 - `polarity`: One-hot encoding of the polarity of the amino acid (options: NONPOLAR, POLAR, NEGATIVE, POSITIVE). Note that sources vary on the polarity for few of the amino acids; see detailed information in `deeprank2.domain.aminoacidlist.py`.
-- `res_size`: The number of non-hydrogen atoms in the side chain (int). 
+- `res_size`: The number of non-hydrogen atoms in the side chain (int).
 - `res_mass`: The (average) residue mass in Da (float).
 - `res_charge`: The charge of the residue (in fully protonated state) in Coulomb (int). Charge is calculated from summing all atoms in the residue, which results in a charge of 0 for all polar and nonpolar residues, +1 for positive residues and -1 for negative residues.
 - `res_pI`: The isolectric point, i.e. the pH at which the molecule has no net electric charge (float).
@@ -55,10 +55,10 @@ These features are only used in SingleResidueVariant queries.
 ### Conservation features: `deeprank2.features.conservation`
 These features relate to the conservation state of individual residues.
 
-- `pssm`: [Position-specific scoring matrix](https://en.wikipedia.org/wiki/Position_weight_matrix) (also known as position weight matrix, PWM) values relative to the residue, is a score of the conservation of the amino acid along all 20 amino acids. 
+- `pssm`: [Position-specific scoring matrix](https://en.wikipedia.org/wiki/Position_weight_matrix) (also known as position weight matrix, PWM) values relative to the residue, is a score of the conservation of the amino acid along all 20 amino acids.
 - `info_content`: Information content is the difference between the given PSSM for an amino acid and a uniform distribution (float).
 - `conservation` (only used in SingleResidueVariant queries): Conservation of the wild type amino acid (float). *More details required.*
-- `diff_conservation` (only used in SingleResidueVariant queries): Subtraction of wildtype conservation from the variant conservation (float). 
+- `diff_conservation` (only used in SingleResidueVariant queries): Subtraction of wildtype conservation from the variant conservation (float).
 
 ### Protein context features:
 
@@ -85,14 +85,14 @@ These features are only calculated for ProteinProteinInterface queries.
 - `irc_nonpolar_nonpolar`, `irc_nonpolar_polar`, `irc_nonpolar_negative`, `irc_nonpolar_positive`, `irc_polar_polar`, `irc_polar_negative`, `irc_polar_positive`, `irc_negative_negative`, `irc_positive_positive`, `irc_negative_positive`: As above, but for specific residue polarity pairings.
 
 
-## Default edge features 
+## Default edge features
 
 ### Contact features: `deeprank2.features.contact`
 These features relate to relationships between individual nodes.
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
 #### Distance:
-- `distance`: Interatomic distance between atoms in Å, computed from the xyz atomic coordinates taken from the .pdb file (float). For residue graphs, the the minimum distance between any atom of each residues is used. 
+- `distance`: Interatomic distance between atoms in Å, computed from the xyz atomic coordinates taken from the .pdb file (float). For residue graphs, the the minimum distance between any atom of each residues is used.
 
 #### Structure:
 These features relate to the structural relationship between nodes.
@@ -101,7 +101,7 @@ These features relate to the structural relationship between nodes.
 - `covalent`: Boolean indicating whether nodes are covalently bound (1) or not (0). Note that covalency is not directly assessed, but any edge with a maximum distance of 2.1 Å is considered covalent.
 
 #### Nonbond energies:
-These features measure nonbond energy potentials between nodes. 
+These features measure nonbond energy potentials between nodes.
 For residue graphs, the pairwise sum of potentials for all atoms from each residue is used. Note that no distance cutoff is used and the radius of influence is assumed to be infinite, although the potentials tends to 0 at large distance. Also edges are only assigned within a given cutoff radius when graphs are created.
 Nonbond energies are set to 0 for any atom pairs (on the same chain) that are within a cutoff radius of 3.6 Å, as these are assumed to be covalent neighbors or linked by no more than 2 covalent bonds (i.e. 1-3 pairs).
 

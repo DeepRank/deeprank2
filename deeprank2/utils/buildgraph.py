@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import List
 
 import numpy as np
 from pdb2sql import interface as get_interface
@@ -155,9 +154,9 @@ def get_structure(pdb, id_: str) -> PDBStructure:
 
 def get_contact_atoms( # pylint: disable=too-many-locals
     pdb_path: str,
-    chain_ids: List[str],
+    chain_ids: list[str],
     interaction_radius: float
-) -> List[Atom]:
+) -> list[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
     interface = get_interface(pdb_path)
@@ -210,7 +209,7 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     chain_id1: str,
     chain_id2: str,
     interaction_radius: float,
-) -> List[Pair]:
+) -> list[Pair]:
     """Find all residue pairs that may influence each other.
 
     Args:
@@ -221,7 +220,7 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
         interaction_radius (float): Maximum distance between residues to consider them as interacting.
 
     Returns:
-        List[Pair]: The pairs of contacting residues.
+        list[Pair]: The pairs of contacting residues.
     """
 
     # Find out which residues are pairs

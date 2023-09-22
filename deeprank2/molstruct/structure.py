@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from deeprank2.utils.pssmdata import PssmRow
 
@@ -18,7 +18,7 @@ class PDBStructure:
     particular `AminoAcid` type and in turn consists of a number of `Atom`s.
     """
 
-    def __init__(self, id_: Optional[str] = None):
+    def __init__(self, id_: str | None = None):
         """
         Args:
             id_ (str, optional): An unique identifier for this structure, can be the pdb accession code.
@@ -72,7 +72,7 @@ class Chain:
     In other words: each `Chain` in a `PDBStructure` is a separate molecule.
     """
 
-    def __init__(self, model: PDBStructure, id_: Optional[str]):
+    def __init__(self, model: PDBStructure, id_: str | None):
         """One chain of a PDBStructure.
 
             Args:
@@ -99,10 +99,10 @@ class Chain:
     def add_residue(self, residue: Residue):
         self._residues[(residue.number, residue.insertion_code)] = residue
 
-    def has_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> bool:
+    def has_residue(self, residue_number: int, insertion_code: str | None = None) -> bool:
         return (residue_number, insertion_code) in self._residues
 
-    def get_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> Residue:
+    def get_residue(self, residue_number: int, insertion_code: str | None = None) -> Residue:
         return self._residues[(residue_number, insertion_code)]
 
     @property

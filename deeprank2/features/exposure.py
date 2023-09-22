@@ -2,7 +2,6 @@ import logging
 import signal
 import sys
 import warnings
-from typing import Optional
 
 import numpy as np
 from Bio.PDB.Atom import PDBConstructionWarning
@@ -34,9 +33,10 @@ def space_if_none(value):
 
 
 def add_features( # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: SingleResidueVariant | None = None,
+):
 
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)

@@ -1,7 +1,6 @@
 import os
 import shutil
 from tempfile import mkdtemp, mkstemp
-from typing import List
 
 import h5py
 import numpy as np
@@ -23,8 +22,8 @@ from deeprank2.utils.grid import GridSettings, MapMethod
 
 def _check_graph_makes_sense(
     g: Graph,
-    node_feature_names: List[str],
-    edge_feature_names: List[str],
+    node_feature_names: list[str],
+    edge_feature_names: list[str],
 ):
 
     assert len(g.nodes) > 0, "no nodes"

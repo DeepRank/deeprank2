@@ -1,6 +1,5 @@
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import numpy as np
 from Bio.PDB import PDBParser
@@ -31,7 +30,7 @@ class SecondarySctructure(Enum):
         return t
 
 
-def _get_records(lines: List[str]):
+def _get_records(lines: list[str]):
     seen = set()
     seen_add = seen.add
     return [x.split()[0] for x in lines if not (x in seen or seen_add(x))]
@@ -82,7 +81,7 @@ def _classify_secstructure(subtype: str):
     return None
 
 
-def _get_secstructure(pdb_path: str) -> Dict:
+def _get_secstructure(pdb_path: str) -> dict:
     """Process the DSSP output to extract secondary structure information.
 
     Args:
@@ -124,8 +123,8 @@ def _get_secstructure(pdb_path: str) -> Dict:
 def add_features( # pylint: disable=unused-argument
     pdb_path: str,
     graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    single_amino_acid_variant: SingleResidueVariant | None = None,
+):
 
     sec_structure_features = _get_secstructure(pdb_path)
 

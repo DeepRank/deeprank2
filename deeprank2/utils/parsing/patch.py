@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Any, Dict
+from typing import Any
 
 
 class PatchActionType(Enum):
@@ -15,7 +15,7 @@ class PatchSelection:
 
 
 class PatchAction:
-    def __init__(self, type_: str, selection: PatchSelection, kwargs: Dict[str, Any]):
+    def __init__(self, type_: str, selection: PatchSelection, kwargs: dict[str, Any]):
         self.type = type_
         self.selection = selection
         self.kwargs = kwargs

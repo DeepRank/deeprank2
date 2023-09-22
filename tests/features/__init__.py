@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Optional, Tuple, Union
+from typing import Literal
 
 from pdb2sql import pdb2sql
 
@@ -28,10 +28,10 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
     detail: Literal['atomic', 'residue'],
     interaction_radius: float,
     max_edge_distance: float,
-    central_res: Optional[int] = None,
-    variant: Optional[AminoAcid] = None,
-    chain_ids: Optional[Union[str, Tuple[str, str]]] = None,
-    ) -> Tuple[Graph, Union[SingleResidueVariant, None]]:
+    central_res: int | None = None,
+    variant: AminoAcid |None = None,
+    chain_ids: str | tuple[str, str] | None = None,
+) -> tuple[Graph, SingleResidueVariant | None]:
 
     """ Creates a Graph object for feature tests.
 
@@ -40,12 +40,12 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
         detail (Literal['atomic', 'residue']): Level of detail.
         interaction_radius (float): max distance to include in graph.
         max_edge_distance (float): max distance to create an edge.
-        central_res (Optional[int], optional): Residue to center a single-chain graph around.
+        central_res (int | None, optional): Residue to center a single-chain graph around.
             Use None to create a 2-chain graph, or any value for a single-chain graph
             Defaults to None.
-        variant (Optional[AminoAcid], optional): Amino acid to use as a variant amino acid.
+        variant (AminoAcid | None, optional): Amino acid to use as a variant amino acid.
             Defaults to None.
-        chain_ids (Optional[Union[str, Tuple[str, str]]], optional): Explicitly specify which chain(s) to use.
+        chain_ids (str | tuple[str, str] | None, optional): Explicitly specify which chain(s) to use.
             Defaults to None, which will use the first (two) chain(s) from the structure.
 
     Raises:

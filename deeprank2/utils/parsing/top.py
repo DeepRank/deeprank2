@@ -1,12 +1,16 @@
 import logging
 import re
-from typing import Any, Dict
+from typing import Any
 
 logging.getLogger(__name__)
 
 class TopRowObject:
-    def __init__(self, residue_name: str,
-                 atom_name: str, kwargs: Dict[str, Any]):
+    def __init__(
+        self,
+        residue_name: str,
+        atom_name: str,
+        kwargs: dict[str, Any],
+    ):
         self.residue_name = residue_name
         self.atom_name = atom_name
         self.kwargs = kwargs
