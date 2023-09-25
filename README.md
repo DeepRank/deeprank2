@@ -326,9 +326,4 @@ Parameter settings were: atomic resolution, `distance_cutoff` of 5.5 Å, radius 
 
 ## Package development
 
-- Branching
-  - When creating a new branch, please use the following convention: `<issue_number>_<description>_<author_name>`.
-- Pull Requests
-  - When creating a pull request, please use the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
-- Software release
-  - Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings.
+If you're looking for developer documentation, go [here](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md).

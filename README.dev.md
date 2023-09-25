@@ -1,0 +1,77 @@
+# `deeprank2` developer documentation
+
+If you're looking for user documentation, go [here](README.md).
+
+## Code editor
+
+We use [Visual Studio Code (VS Code)](https://code.visualstudio.com/) as code editor.
+The VS Code settings for this project can be found in [.vscode](.vscode).
+The settings will be automatically loaded and applied when you open the project with VS Code.
+See [the guide](https://code.visualstudio.com/docs/getstarted/settings) for more info about workspace settings of VS Code.
+
+## Package setup
+
+After having followed the [installation instructions](https://github.com/DeepRank/deeprank2#installation) and installed all the dependencies of the package, the repository can be cloned and its editable version can be installed:
+
+```bash
+git clone https://github.com/DeepRank/deeprank2
+cd deeprank2
+pip install -e .'[test]'
+```
+
+## Running the tests
+
+You can check that all components were installed correctly, using pytest.
+The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
+
+Run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
+
+## Test coverage
+
+In addition to just running the tests to see if they pass, they can be used for coverage statistics, i.e. to determine how much of the package's code is actually executed during tests. In an activated conda environment with the development tools installed, inside the package directory, run:
+
+```bash
+coverage run -m pytest
+```
+
+This runs tests and stores the result in a `.coverage` file. To see the results on the command line, run:
+
+```bash
+coverage report
+```
+
+`coverage` can also generate output in HTML and other formats; see `coverage help` for more information.
+
+## Linting
+
+We use [prospector](https://pypi.org/project/prospector/) with pyroma for linting. For running it locally, use `prospector` or `prospector <filepath_or_folderpath>` for specific files/folders.
+
+## Versioning
+
+Bumping the version across all files is done before creating a new package release, running `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings.
+
+## Branching workflow
+
+We use a [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)-inspired branching workflow for development. DeepRank2's repository is based on two main branches with infinite lifetime:
+- `main` — this branch contains production (stable) code. All development code is merged into `main` in sometime.
+- `dev` — this branch contains pre-production code. When the features are finished then they are merged into `dev`.
+During the development cycle, three main supporting branches are used:
+- Feature branches - Branches that branch off from `dev` and must merge into `dev`: used to develop new features for the upcoming releases. 
+- Hotfix branches - Branches that branch off from `main` and must merge into `main` and `dev`: necessary to act immediately upon an undesired status of `main`.
+- Release branches - Branches that branch off from `dev` and must merge into `main` and `dev`: support preparation of a new production release. They allow many minor bug to be fixed and preparation of meta-data for a release.
+
+### Development conventions 
+
+- Branching
+  - When creating a new branch, please use the following convention: `<issue_number>_<description>_<author_name>`.
+  - Always branch from `dev` branch, unless there is the need to fix an undesired status of `main`. See above for more details about the branching workflow adopted. 
+- Pull Requests
+  - When creating a pull request, please use the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
+
+## Making a release 
+
+1. Branch from `dev` and prepare the branch for the release (e.g., removing the unnecessary dev files such as the current one, fix minor bugs if necessary).
+2. [Bump the version](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#versioning). 
+3. Verify that the information in `CITATION.cff` is correct, and that `.zenodo.json` contains equivalent data.
+4. Merge the release branch into `main` (and `dev`), and [run the tests](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#running-the-tests).
+5. Go to https://github.com/DeepRank/deeprank2/releases and draft a new release; create a new tag for the release, generate release notes automatically and adjust them, and finally publish the release as latest. This will trigger [a GitHub action](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.   
