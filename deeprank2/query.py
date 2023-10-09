@@ -72,6 +72,12 @@ class DeepRankQuery:
         if not isinstance(self.chain_ids, list):
             self.chain_ids = [self.chain_ids]
 
+        if not self.distance_cutoff:
+            if self.resolution == 'atom':
+                self.distance_cutoff = 5.5
+            if self.resolution == 'residue':
+                self.distance_cutoff = 10
+
         # convert None to empty type (e.g. list, dict) for arguments where this is expected
         for f in fields(self):
             value = getattr(self, f.name)
@@ -245,9 +251,6 @@ class SingleResidueVariantQuery(DeepRankQuery):
                             + f"but {len(self.chain_ids)} were given.")
         self.variant_chain_id = self.chain_ids[0]
 
-        if not self.distance_cutoff:
-            self.distance_cutoff = 4.5
-
     @property
     def residue_id(self) -> str:
         """String representation of the residue number and insertion code."""
@@ -331,12 +334,6 @@ class ProteinProteinInterfaceQuery(DeepRankQuery):
         if len(self.chain_ids) != 2:
             raise ValueError("`chain_ids` must contain exactly 2 chains for `ProteinProteinInterfaceQuery` objects, "
                             + f"but {len(self.chain_ids)} was/were given.")
-
-        if not self.distance_cutoff:
-            if self.resolution == 'atom':
-                self.distance_cutoff = 5.5
-            if self.resolution == 'residue':
-                self.distance_cutoff = 10
 
     def get_query_id(self) -> str:
         """Returns the string representing the complete query ID."""
