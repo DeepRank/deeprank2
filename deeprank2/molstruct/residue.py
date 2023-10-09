@@ -48,6 +48,7 @@ class Residue:
             return (self._chain == other._chain
                     and self._number == other._number
                     and self._insertion_code == other._insertion_code
+                    # and self._amino_acid == other._amino_acid
             )
         return NotImplemented
 
@@ -92,7 +93,7 @@ class Residue:
         self._atoms.append(atom)
 
     def __repr__(self) -> str:
-        return f"Residue({self._chain} - {self.number_string} - {self.amino_acid})"
+        return f"Residue({self.chain} - {self.number_string} - {self.amino_acid})"
 
     @property
     def position(self) -> np.array:
