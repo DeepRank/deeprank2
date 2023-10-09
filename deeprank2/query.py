@@ -36,10 +36,10 @@ VALID_RESOLUTIONS = ['atom', 'residue']
 
 
 @dataclass(repr=False, kw_only=True)
-class DeepRankQuery:
+class Query:
     """Represents one entity of interest: a single residue variant (SRV) or a protein-protein interface (PPI).
 
-    :class:`DeepRankQuery` objects are used to generate graphs from structures, and they should be created before any model is loaded.
+    :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
     They can have target values associated with them, which will be stored with the resulting graph.
 
     Args:
@@ -215,10 +215,10 @@ class DeepRankQuery:
 
 
 @dataclass(kw_only=True)
-class SingleResidueVariantQuery(DeepRankQuery):
+class SingleResidueVariantQuery(Query):
     """A query that builds a single residue variant graph.
 
-    Args (common for `DeepRankQuery`):
+    Args (common for `Query`):
         pdb_path (str): the path to the PDB file to query.
         resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
         chain_ids (list[str] | str): the chain identifier of the variant residue (generally a single capital letter).
@@ -313,7 +313,7 @@ class SingleResidueVariantQuery(DeepRankQuery):
 
 
 @dataclass(kw_only=True)
-class ProteinProteinInterfaceQuery(DeepRankQuery):
+class ProteinProteinInterfaceQuery(Query):
     """A query that builds a protein-protein interface graph.
 
     Args:
@@ -403,14 +403,14 @@ class QueryCollection:
 
     def add(
         self,
-        query: DeepRankQuery,
+        query: Query,
         verbose: bool = False,
         warn_duplicate: bool = True,
     ):
         """Add a new query to the collection.
 
         Args:
-            query(:class:`DeepRankQuery`): The `DeepRankQuery` to add to the collection.
+            query(:class:`Query`): The `Query` to add to the collection.
             verbose(bool): For logging query IDs added. Defaults to `False`.
             warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified. Defaults to `True`.
         """
@@ -426,7 +426,7 @@ class QueryCollection:
             new_id = query.model_id + "_" + str(self._ids_count[query_id])
             query.model_id = new_id
             if warn_duplicate:
-                _log.warning(f'DeepRankQuery with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+                _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
 
         self._queries.append(query)
 
@@ -441,20 +441,20 @@ class QueryCollection:
             pickle.dump(self, pkl_file)
 
     @property
-    def queries(self) -> list[DeepRankQuery]:
+    def queries(self) -> list[Query]:
         """The list of queries added to the collection."""
         return self._queries
 
-    def __contains__(self, query: DeepRankQuery) -> bool:
+    def __contains__(self, query: Query) -> bool:
         return query in self._queries
 
-    def __iter__(self) -> Iterator[DeepRankQuery]:
+    def __iter__(self) -> Iterator[Query]:
         return iter(self._queries)
 
     def __len__(self) -> int:
         return len(self._queries)
 
-    def _process_one_query(self, query: DeepRankQuery):
+    def _process_one_query(self, query: Query):
         """Only one process may access an hdf5 file at a time"""
 
         try:
@@ -471,7 +471,7 @@ class QueryCollection:
                     graph.write_as_grid_to_hdf5(output_path, self._grid_settings, self._grid_map_method, augmentation)
 
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
-            _log.warning(f'\nGraph/DeepRankQuery with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),'
+            _log.warning(f'\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),'
             ' and it has not been written to the hdf5 file. More details below:')
             _log.exception(e)
 

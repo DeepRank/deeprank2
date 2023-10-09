@@ -6,9 +6,9 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ## Data generation
 
-For each protein-protein complex (or protein structure containing a missense variant), a `DeepRankQuery` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `DeepRankQuery` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
+For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-A `DeepRankQuery` takes as inputs:
+A `Query` takes as inputs:
 - a `.pdb` file, representing the protein-protein structure,
 - the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
