@@ -59,9 +59,9 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
 
 *  [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`.
     * [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
-*  [PyTorch](https://pytorch.org/get-started/locally/)
+*  [PyTorch](https://pytorch.org/get-started/locally/): `pip install torch`
     * We support torch's CPU library as well as CUDA.
-*  [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
+*  [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `pip install torch_geometric torch_scatter torch_sparse torch_cluster torch_spline_conv`
 *  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
     * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
       * on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
