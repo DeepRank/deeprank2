@@ -9,7 +9,11 @@ import warnings
 import h5py
 import pytest
 import torch
+
 from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification, CnnRegression
 from deeprank2.neuralnets.gnn.foutnet import FoutNet
 from deeprank2.neuralnets.gnn.ginet import GINet
@@ -18,10 +22,6 @@ from deeprank2.neuralnets.gnn.sgat import SGAT
 from deeprank2.trainer import Trainer, _divide_dataset
 from deeprank2.utils.exporters import (HDF5OutputExporter, ScatterPlotExporter,
                                        TensorboardBinaryClassificationExporter)
-
-from deeprank2.domain import edgestorage as Efeat
-from deeprank2.domain import nodestorage as Nfeat
-from deeprank2.domain import targetstorage as targets
 
 _log = logging.getLogger(__name__)
 
@@ -383,6 +383,31 @@ class TestTrainer(unittest.TestCase):
                     pretrained_model = self.save_path
                 )
 
+    def test_no_training_no_pretrained(self):
+        dataset_train = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            clustering_method = "mcl",
+            target = targets.BINARY,
+        )
+        dataset_val = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train = False,
+            dataset_train = dataset_train
+        )
+        dataset_test = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train = False,
+            dataset_train = dataset_train
+        )
+        trainer = Trainer(
+            neuralnet = GINet,
+            dataset_train = dataset_train,
+            dataset_val = dataset_val,
+            dataset_test = dataset_test
+        )
+        with pytest.raises(ValueError):
+            trainer.test()
+
     def test_no_valid_provided(self):
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
@@ -396,6 +421,26 @@ class TestTrainer(unittest.TestCase):
         trainer.train(batch_size = 1, best_model=False, filename=None)
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
+
+    def test_no_test_provided(self):
+        dataset_train = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            clustering_method = "mcl",
+            target = targets.BINARY,
+        )
+        dataset_val = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train = False,
+            dataset_train = dataset_train
+        )
+        trainer = Trainer(
+            neuralnet = GINet,
+            dataset_train = dataset_train,
+            dataset_val = dataset_val,
+        )
+        trainer.train(batch_size = 1, best_model=False, filename=None)
+        with pytest.raises(ValueError):
+            trainer.test()
 
     def test_no_valid_full_train(self):
         dataset = GraphDataset(
