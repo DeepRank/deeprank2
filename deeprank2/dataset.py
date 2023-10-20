@@ -30,6 +30,8 @@ class DeeprankDataset(Dataset):
     def __init__(self, # pylint: disable=too-many-arguments
                  hdf5_path: Union[str, List[str]],
                  subset: Optional[List[str]],
+                 train: bool,
+                 train_data: Optional[Union[str, GridDataset, GraphDataset]],
                  target: Optional[str],
                  task: Optional[str],
                  classes: Optional[Union[List[str], List[int], List[float]]],
@@ -54,11 +56,11 @@ class DeeprankDataset(Dataset):
         else:
             raise TypeError(f"hdf5_path: unexpected type: {type(hdf5_path)}")
 
-        self.use_tqdm = use_tqdm
-
+        self.train = train
+        self.train_data = train_data
         self.target = target
         self.subset = subset
-
+        self.use_tqdm = use_tqdm
         self.target_filter = target_filter
 
         if check_integrity:
@@ -412,7 +414,7 @@ class GridDataset(DeeprankDataset):
         hdf5_path: Union[str, list],
         subset: Optional[List[str]] = None,
         train: bool = True,
-        dataset_train: Optional[GridDataset] = None,
+        train_data: Optional[Union[str, GridDataset]] = None,
         features: Optional[Union[List[str], str]] = "all",
         target: Optional[str] = None,
         target_transform: Optional[bool] = False,
@@ -429,16 +431,16 @@ class GridDataset(DeeprankDataset):
             hdf5_path (Union[str,list]): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a List. Defaults to None.
             subset (Optional[List[str]], optional): List of keys from .HDF5 file to include. Defaults to None (meaning include all).
             train (bool, optional): Boolean flag to determine if the instance represents the training set.
-                If False, a dataset_train of the same class must be provided as well.
-                The latter will be used to scale the validation/testing set according to its features values and to match the datasets' parameters.
+                It needs to be set to False only if the instance represents the validation or testing set.
                 Defaults to True.
-            dataset_train (class:`GridDataset`, optional): If `train` is True, assign here the training set.
-                If `train` is False and `dataset_train` is assigned,
-                the parameters `features`, `target`, `traget_transform`, `task`, and `classes` will be inherited from `dataset_train`.
+            train_data (Optional[Union[str, class:`GridDataset`]], optional)): data to inherit information from the training dataset or the pre-trained model.
+                It is considered only if `train` is False. In the latter case, `train_data` needs to be a dataset of the same class or
+                the path of a DeepRank2 pre-trained model. If set, the parameters `features`, `target`, `traget_transform`, `task`, and `classes`
+                will be inherited from `train_data`.
                 Defaults to None.
             features (Optional[Union[List[str], str]], optional): Consider all pre-computed features ("all") or some defined node features
                 (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprank2.domain.gridstorage`.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to "all".
             target (Optional[str], optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq. It can also be
                 a custom-defined target given to the Query class as input (see: `deeprank2.query`); in this case,
@@ -446,11 +448,11 @@ class GridDataset(DeeprankDataset):
                 Only numerical target variables are supported, not categorical.
                 If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             target_transform (Optional[bool], optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to False.
             target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target.
@@ -459,10 +461,10 @@ class GridDataset(DeeprankDataset):
                 ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', or 'dockq'], otherwise this setting is ignored.
                 Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', or 'dockq'.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             classes (Optional[Union[List[str], List[int], List[float]], optional]): Define the dataset target classes in classification mode.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             tqdm (Optional[bool], optional): Show progress bar.
                 Defaults to True.
@@ -471,31 +473,30 @@ class GridDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.default_vars = {
             k: v.default
             for k, v in inspect.signature(self.__init__).parameters.items()
             if v.default is not inspect.Parameter.empty
         }
-        self.train = train
-        self.dataset_train = dataset_train
+
         self.features = features
         self.target_transform = target_transform
         self._check_features()
 
         if not train:
-            if not isinstance(dataset_train, GridDataset):
-                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
+            if not isinstance(train_data, GridDataset):
+                raise TypeError(f"""The train dataset provided is type: {type(train_data)}
                                 Please provide a valid training GridDataset.""")
 
             #check inherited parameter with the ones in the training set
             inherited_params = ["features", "target", "target_transform", "task", "classes"]
-            self._check_inherited_params(inherited_params, dataset_train)
+            self._check_inherited_params(inherited_params, train_data)
 
-        elif train and dataset_train:
-            _log.warning("""dataset_train has been set but train flag was set to True.
-            dataset_train will be ignored since the current dataset will be considered as training set.""")
+        elif train and train_data:
+            _log.warning("""`train_data` has been set but train flag was set to True.
+            `train_data` will be ignored since the current dataset will be considered as training set.""")
 
         self.features_dict = {}
         self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
@@ -622,7 +623,7 @@ class GraphDataset(DeeprankDataset):
         hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]] = None,
         train: bool = True,
-        dataset_train: Optional[GraphDataset] = None,
+        train_data: Optional[Union[str, GraphDataset]] = None,
         node_features: Optional[Union[List[str], str]] = "all",
         edge_features: Optional[Union[List[str], str]] = "all",
         features_transform: Optional[dict] = None,
@@ -644,23 +645,23 @@ class GraphDataset(DeeprankDataset):
             subset (Optional[List[str]], optional): List of keys from .HDF5 file to include.
                 Defaults to None (meaning include all).
             train (bool, optional): Boolean flag to determine if the instance represents the training set.
-                If False, a dataset_train of the same class must be provided as well.
-                The latter will be used to scale the validation/testing set according to its features values and to match the datasets' parameters.
+                It needs to be set to False only if the instance represents the validation or testing set.
                 Defaults to True.
-            dataset_train (class:`GraphDataset`, optional): If `train` is True, assign here the training set.
-                If `train` is False and `dataset_train` is assigned,
-                the parameters `node_features`, `edge_features`, `features_transform`, `target`,
-                `target_transform`, `task` and `classes` will be inherited from `dataset_train`.
+            train_data (Optional[Union[str, class:`GraphDataset`]], optional)): data to inherit information from the training dataset or the pre-trained model.
+                It is considered only if `train` is False. In the latter case, `train_data` needs to be a dataset of the same class or
+                the path of a DeepRank2 pre-trained model. If set, the parameters `node_features`, `edge_features`, `features_transform`, `target`, `target_transform`,
+                `task`, and `classes` will be inherited from `train_data`. If standardization was performed in the training dataset/step, also the attributes
+                `means` and `devs` will be inherited from `train_data`, and they will be used to scale the validation/testing set.
                 Defaults to None.
             node_features (Optional[Union[List[str], str], optional): Consider all pre-computed node features ("all") or
                 some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
                 The complete list can be found in `deeprank2.domain.nodestorage`.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to "all".
             edge_features (Optional[Union[List[str], str], optional): Consider all pre-computed edge features ("all") or
                 some defined edge features (provide a list, example: ["dist", "coulomb"]).
                 The complete list can be found in `deeprank2.domain.edgestorage`.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to "all".
             features_transform (Optional[dict], optional): Dictionary to indicate the transformations to apply to each feature in the dictionary, being the
                 transformations lambda functions and/or standardization.
@@ -668,7 +669,7 @@ class GraphDataset(DeeprankDataset):
                 An `all` key can be set in the dictionary for indicating to apply the same `standardize` and `transform` to all the features.
                 Example: `features_transform = {'all': {'transform': lambda t:np.log(t+1), 'standardize': True}}`.
                 If both `all` and feature name/s are present, the latter have the priority over what indicated in `all`.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             clustering_method (Optional[str], optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
                 or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
@@ -685,11 +686,11 @@ class GraphDataset(DeeprankDataset):
                 Only numerical target variables are supported, not categorical.
                 If the latter is your case, please convert the categorical classes into
                 numerical class indices before defining the :class:`GraphDataset` instance.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             target_transform (Optional[bool], optional): Apply a log and then a sigmoid transformation to the target (for regression only).
                 This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to False.
             target_filter (Optional[Dict[str, str]], optional): Dictionary of type [target: cond] to filter the molecules.
                 Note that the you can filter on a different target than the one selected as the dataset target.
@@ -698,10 +699,10 @@ class GraphDataset(DeeprankDataset):
                 ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', or 'dockq'], otherwise this setting is ignored.
                 Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
                 Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', or 'dockq'.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             classes (Optional[Union[List[str], List[int], List[float]]], optional): Define the dataset target classes in classification mode.
-                Value will be ignored and inherited from `dataset_train` if `train` is set as False and `dataset_train` is assigned.
+                Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
             root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
@@ -709,15 +710,13 @@ class GraphDataset(DeeprankDataset):
                 Defaults to True.
         """
 
-        super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.default_vars = {
             k: v.default
             for k, v in inspect.signature(self.__init__).parameters.items()
             if v.default is not inspect.Parameter.empty
         }
-        self.train = train
-        self.dataset_train = dataset_train
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
@@ -726,17 +725,17 @@ class GraphDataset(DeeprankDataset):
         self._check_features()
 
         if not train:
-            if not isinstance(dataset_train, GraphDataset):
-                raise TypeError(f"""The train dataset provided is type: {type(dataset_train)}
+            if not isinstance(train_data, GraphDataset):
+                raise TypeError(f"""The train dataset provided is type: {type(train_data)}
                                 Please provide a valid training GraphDataset.""")
 
             #check inherited parameter with the ones in the training set
             inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
-            self._check_inherited_params(inherited_params, dataset_train)
+            self._check_inherited_params(inherited_params, train_data)
 
-        elif train and dataset_train:
-            _log.warning("""dataset_train has been set but train flag was set to True.
-            dataset_train will be ignored since the current dataset will be considered as training set.""")
+        elif train and train_data:
+            _log.warning("""`train_data` has been set but train flag was set to True.
+            `train_data` will be ignored since the current dataset will be considered as training set.""")
 
         self.features_dict = {}
         self.features_dict[Nfeat.NODE] = self.node_features
@@ -757,12 +756,12 @@ class GraphDataset(DeeprankDataset):
                     self.hdf5_to_pandas()
                 self._compute_mean_std()
         elif standardize and (not train):
-            if (dataset_train.means is None) or (dataset_train.devs is None):
-                if dataset_train.df is None:
-                    dataset_train.hdf5_to_pandas()
-                dataset_train._compute_mean_std()
-            self.means = dataset_train.means
-            self.devs = dataset_train.devs
+            if (train_data.means is None) or (train_data.devs is None):
+                if train_data.df is None:
+                    train_data.hdf5_to_pandas()
+                train_data._compute_mean_std()
+            self.means = train_data.means
+            self.devs = train_data.devs
 
     def get(self, idx: int) -> Data:
         """Gets one graph item from its unique index.
