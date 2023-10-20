@@ -189,13 +189,13 @@ dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
     train = False,
-    dataset_train = dataset_train
+    train_data = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
     train = False,
-    dataset_train = dataset_train
+    train_data = dataset_train
 )
 ```
 
@@ -266,13 +266,13 @@ dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
     train = False,
-    dataset_train = dataset_train # dataset_train means and stds will be used
+    train_data = dataset_train # dataset_train means and stds will be used
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
     train = False,
-    dataset_train = dataset_train # dataset_train means and stds will be used
+    train_data = dataset_train # dataset_train means and stds will be used
 )
 ```
 
@@ -300,13 +300,13 @@ dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
     train = False,
-    dataset_train = dataset_train
+    train_data = dataset_train
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
     train = False,
-    dataset_train = dataset_train
+    train_data = dataset_train
 )
 ```
 

@@ -8,9 +8,9 @@ from typing import List, Union
 import h5py
 import numpy as np
 import pytest
-from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from torch_geometric.loader import DataLoader
 
+from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
@@ -220,7 +220,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
 
         # features, features_dict, target, target_transform, task, and classes
@@ -231,7 +231,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
             train = False,
-            dataset_train = dataset_train,
+            train_data = dataset_train,
             features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
             target = targets.IRMSD,
             target_transform = True,
@@ -467,7 +467,7 @@ class TestDataSet(unittest.TestCase):
             hdf5_path = hdf5_path,
             target = 'binary',
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         # mean and devs should be None
         assert dataset_train.means == dataset_test.means
@@ -494,7 +494,7 @@ class TestDataSet(unittest.TestCase):
             GraphDataset(
                 hdf5_path = hdf5_path,
                 train = False,
-                dataset_train = dataset_train,
+                train_data = dataset_train,
                 target = 'binary',
             )
 
@@ -885,7 +885,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             train = False,
-            dataset_train = dataset_train,
+            train_data = dataset_train,
             target = 'binary'
         )
 
@@ -900,7 +900,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             train = False,
-            dataset_train = dataset_train,
+            train_data = dataset_train,
             features_transform = other_feature_transform,
             target = 'binary'
         )
@@ -943,7 +943,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             train = False,
-            dataset_train = dataset_train,
+            train_data = dataset_train,
         )
 
         # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes
@@ -954,7 +954,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             train = False,
-            dataset_train = dataset_train,
+            train_data = dataset_train,
             node_features = "all",
             edge_features = "all",
             features_transform = None,
@@ -980,7 +980,7 @@ class TestDataSet(unittest.TestCase):
             GridDataset(
                 hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
                 train = False,
-                dataset_train = dataset_train
+                train_data = dataset_train
             )
 
 

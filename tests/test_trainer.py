@@ -57,7 +57,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_val = GraphDataset(
             hdf5_path = val_hdf5_path,
             train = False,
-            dataset_train = dataset_train,
+            train_data = dataset_train,
             clustering_method = clustering_method,
             )
     else:
@@ -67,7 +67,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
         dataset_test = GraphDataset(
             hdf5_path = test_hdf5_path,
             train = False,
-            dataset_train = dataset_train,
+            train_data = dataset_train,
             clustering_method = clustering_method,
             )
     else:
@@ -392,12 +392,12 @@ class TestTrainer(unittest.TestCase):
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         dataset_test = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         trainer = Trainer(
             neuralnet = GINet,
@@ -431,7 +431,7 @@ class TestTrainer(unittest.TestCase):
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         trainer = Trainer(
             neuralnet = GINet,
@@ -551,12 +551,12 @@ class TestTrainer(unittest.TestCase):
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = True,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         dataset_test = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = True,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         with pytest.raises(ValueError):
             Trainer(
@@ -582,12 +582,12 @@ class TestTrainer(unittest.TestCase):
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         dataset_test = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
         with pytest.raises(ValueError):
             Trainer(
@@ -672,7 +672,7 @@ class TestTrainer(unittest.TestCase):
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             train = False,
-            dataset_train = dataset_train
+            train_data = dataset_train
         )
 
         with pytest.raises(ValueError):
@@ -691,7 +691,7 @@ class TestTrainer(unittest.TestCase):
             dataset_val = GraphDataset(
                 hdf5_path = "tests/data/hdf5/test.hdf5",
                 train = False,
-                dataset_train = dataset_train
+                train_data = dataset_train
             )
 
             with pytest.raises(ValueError):

@@ -278,10 +278,10 @@ class Trainer():
         if dataset_check.train is not False:
             raise ValueError(f"""{type_dataset} dataset has train parameter {dataset_check.train}
                         Make sure to set it as False""")
-        # Check dataset_train parameter in valid/test is equivalent to train which passed to Trainer.
-        if dataset_check.dataset_train != dataset_train:
-            raise ValueError(f"""{type_dataset} dataset has different dataset_train parameter compared to the one given in Trainer.
-                        Make sure to assign equivalent dataset_train in Trainer""")
+        # Check train_data parameter in valid/test is equivalent to train which passed to Trainer.
+        if dataset_check.train_data != dataset_train:
+            raise ValueError(f"""{type_dataset} dataset has different train_data parameter compared to the one given in Trainer.
+                        Make sure to assign equivalent train_data in Trainer""")
 
     def _load_pretrained_model(self):
         """
