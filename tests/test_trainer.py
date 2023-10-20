@@ -483,7 +483,7 @@ class TestTrainer(unittest.TestCase):
                 dataset_test=dataset,
                 pretrained_model=self.save_path)
 
-        assert isinstance(trainer_pretrained.optimizer, optimizer)
+        assert str(type(trainer_pretrained.optimizer)) == "<class 'torch.optim.adamax.Adamax'>"
         assert trainer_pretrained.lr == lr
         assert trainer_pretrained.weight_decay == weight_decay
 
