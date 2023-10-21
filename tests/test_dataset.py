@@ -925,7 +925,7 @@ class TestDataSet(unittest.TestCase):
                 warnings.filterwarnings('ignore', r'divide by zero encountered in divide')
                 _compute_features_with_get(hdf5_path, transf_dataset)
 
-    def test_inherit_info_training_graphdataset(self):
+    def test_inherit_info_train_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         feature_transform = {'all': {'transform': None, 'standardize': True}}
 
@@ -981,6 +981,44 @@ class TestDataSet(unittest.TestCase):
                 hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
                 train = False,
                 train_data = dataset_train
+            )
+
+    def test_invalid_pretrained_model_path(self):
+
+        hdf5_graph = "tests/data/hdf5/train.hdf5"
+        with self.assertRaises(ValueError):
+            GraphDataset(
+                hdf5_path = hdf5_graph,
+                train = False,
+                train_data = hdf5_graph
+            )
+
+        hdf5_grid = "tests/data/hdf5/grid_data.hdf5"
+        with self.assertRaises(ValueError):
+            GridDataset(
+                hdf5_path = hdf5_grid,
+                train = False,
+                train_data = hdf5_grid
+            )
+
+    def test_invalid_pretrained_model_data_type(self):
+
+        hdf5_graph = "tests/data/hdf5/test.hdf5"
+        pretrained_grid_model = "tests/data/testing_grid_model.pth.tar"
+        with self.assertRaises(TypeError):
+            GraphDataset(
+                hdf5_path = hdf5_graph,
+                train = False,
+                train_data = pretrained_grid_model
+            )
+
+        hdf5_grid = "tests/data/hdf5/grid_data.hdf5"
+        pretrained_graph_model = "tests/data/testing_graph_model.pth.tar"
+        with self.assertRaises(TypeError):
+            GridDataset(
+                hdf5_path = hdf5_grid,
+                train = False,
+                train_data = pretrained_graph_model
             )
 
 
