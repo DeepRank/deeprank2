@@ -65,6 +65,7 @@ class Trainer():
                 over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
         """
+        self.data_type = None
         self.batch_size_train = None
         self.batch_size_test = None
         self.shuffle = None
@@ -534,6 +535,7 @@ class Trainer():
             filename (str, optional): Name of the file where to save the selected model. If not None, the model is saved to `filename`.
                 If None, the model is not saved. Defaults to 'model.pth.tar'.
         """
+        self.data_type = type(self.dataset_train)
         self.batch_size_train = batch_size
         self.shuffle = shuffle
 
@@ -869,6 +871,7 @@ class Trainer():
         else:
             state = torch.load(self.pretrained_model_path, pickle_module = dill, map_location=torch.device('cpu'))
 
+        self.data_type = state["data_type"]
         self.model_load_state_dict = state["model_state"]
         self.optimizer = state["optimizer"]
         self.opt_loaded_state_dict = state["optimizer_state"]
@@ -905,6 +908,7 @@ class Trainer():
             filename (str, optional): Name of the file. Defaults to None.
         """
         state = {
+            "data_type": self.data_type,
             "model_state": self.model.state_dict(),
             "optimizer": self.optimizer,
             "optimizer_state": self.optimizer.state_dict(),
