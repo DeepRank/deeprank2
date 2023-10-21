@@ -985,7 +985,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_invalid_pretrained_model_path(self):
 
-        hdf5_graph = "tests/data/hdf5/train.hdf5"
+        hdf5_graph = "tests/data/hdf5/test.hdf5"
         with self.assertRaises(ValueError):
             GraphDataset(
                 hdf5_path = hdf5_graph,
@@ -993,7 +993,7 @@ class TestDataSet(unittest.TestCase):
                 train_data = hdf5_graph
             )
 
-        hdf5_grid = "tests/data/hdf5/grid_data.hdf5"
+        hdf5_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
         with self.assertRaises(ValueError):
             GridDataset(
                 hdf5_path = hdf5_grid,
@@ -1004,7 +1004,7 @@ class TestDataSet(unittest.TestCase):
     def test_invalid_pretrained_model_data_type(self):
 
         hdf5_graph = "tests/data/hdf5/test.hdf5"
-        pretrained_grid_model = "tests/data/testing_grid_model.pth.tar"
+        pretrained_grid_model = "tests/data/pretrained/testing_grid_model.pth.tar"
         with self.assertRaises(TypeError):
             GraphDataset(
                 hdf5_path = hdf5_graph,
@@ -1012,8 +1012,8 @@ class TestDataSet(unittest.TestCase):
                 train_data = pretrained_grid_model
             )
 
-        hdf5_grid = "tests/data/hdf5/grid_data.hdf5"
-        pretrained_graph_model = "tests/data/testing_graph_model.pth.tar"
+        hdf5_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
+        pretrained_graph_model = "tests/data/pretrained/testing_graph_model.pth.tar"
         with self.assertRaises(TypeError):
             GridDataset(
                 hdf5_path = hdf5_grid,
