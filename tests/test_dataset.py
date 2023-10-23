@@ -5,7 +5,6 @@ from shutil import rmtree
 from tempfile import mkdtemp
 from typing import List, Union
 
-import dill
 import h5py
 import numpy as np
 import pytest
@@ -257,7 +256,7 @@ class TestDataSet(unittest.TestCase):
         # features, target, target_transform, task, and classes
         # in the test should be inherited from the pre-trained model
         inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
-        data = torch.load(pretrained_model, pickle_module = dill, map_location=torch.device('cpu'))
+        data = torch.load(pretrained_model, map_location=torch.device('cpu'))
 
         dataset_test_vars = vars(dataset_test)
         for param in inherited_params:
@@ -1018,7 +1017,7 @@ class TestDataSet(unittest.TestCase):
         # node_features, edge_features, feature_transform, target, target_transform, task, and classes
         # in the test should be inherited from the pre-trained model
         inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
-        data = torch.load(pretrained_model, pickle_module = dill, map_location=torch.device('cpu'))
+        data = torch.load(pretrained_model, map_location=torch.device('cpu'))
         if data["features_transform"]:
             for _, key in data["features_transform"].items():
                 if key['transform'] is None:

@@ -5,7 +5,6 @@ import re
 from time import time
 from typing import List, Optional, Tuple, Union
 
-import dill
 import h5py
 import numpy as np
 import torch
@@ -655,7 +654,7 @@ class Trainer():
 
         # Now that the training loop is over, save the model
         if filename:
-            torch.save(checkpoint_model, filename, pickle_module = dill)
+            torch.save(checkpoint_model, filename)
         self.opt_loaded_state_dict = checkpoint_model["optimizer_state"]
         self.model_load_state_dict = checkpoint_model["model_state"]
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
@@ -874,9 +873,9 @@ class Trainer():
         """
 
         if torch.cuda.is_available():
-            state = torch.load(self.pretrained_model_path, pickle_module = dill)
+            state = torch.load(self.pretrained_model_path)
         else:
-            state = torch.load(self.pretrained_model_path, pickle_module = dill, map_location=torch.device('cpu'))
+            state = torch.load(self.pretrained_model_path, map_location=torch.device('cpu'))
 
         self.data_type = state["data_type"]
         self.model_load_state_dict = state["model_state"]

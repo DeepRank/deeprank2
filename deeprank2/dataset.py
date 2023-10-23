@@ -10,7 +10,6 @@ import warnings
 from ast import literal_eval
 from typing import Dict, List, Optional, Tuple, Union
 
-import dill
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
@@ -493,9 +492,9 @@ class GridDataset(DeeprankDataset):
             if isinstance(train_data, str):
                 try:
                     if torch.cuda.is_available():
-                        data = torch.load(train_data, pickle_module = dill)
+                        data = torch.load(train_data)
                     else:
-                        data = torch.load(train_data, pickle_module = dill, map_location=torch.device('cpu'))
+                        data = torch.load(train_data, map_location=torch.device('cpu'))
                     if data["data_type"] is not GridDataset:
                         raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
                                                 to define a GridDataset-class validation/testing dataset. Please provide a valid DeepRank2
@@ -749,9 +748,9 @@ class GraphDataset(DeeprankDataset):
             if isinstance(train_data, str):
                 try:
                     if torch.cuda.is_available():
-                        data = torch.load(train_data, pickle_module = dill)
+                        data = torch.load(train_data)
                     else:
-                        data = torch.load(train_data, pickle_module = dill, map_location=torch.device('cpu'))
+                        data = torch.load(train_data, map_location=torch.device('cpu'))
                     if data["data_type"] is not GraphDataset:
                         raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
                                                 to define a GraphDataset-class validation/testing dataset. Please provide a valid DeepRank2
