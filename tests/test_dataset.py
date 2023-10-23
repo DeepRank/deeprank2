@@ -5,9 +5,11 @@ from shutil import rmtree
 from tempfile import mkdtemp
 from typing import List, Union
 
+import dill
 import h5py
 import numpy as np
 import pytest
+import torch
 from torch_geometric.loader import DataLoader
 
 from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
@@ -206,7 +208,7 @@ class TestDataSet(unittest.TestCase):
         # 1 entry with class value
         assert dataset[0].y.shape == (1,)
 
-    def test_inherit_info_training_griddataset(self):
+    def test_inherit_info_dataset_train_griddataset(self):
 
         dataset_train = GridDataset(
             hdf5_path = self.hdf5_path,
@@ -223,9 +225,9 @@ class TestDataSet(unittest.TestCase):
             train_data = dataset_train
         )
 
-        # features, features_dict, target, target_transform, task, and classes
+        # features, target, target_transform, task, and classes
         # in the test should be inherited from the train
-        inherited_param = ["features", "features_dict", "target", "target_transform", "task", "classes"]
+        inherited_param = ["features", "target", "target_transform", "task", "classes"]
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
 
         dataset_test = GridDataset(
@@ -242,6 +244,41 @@ class TestDataSet(unittest.TestCase):
         # features, features_dict, target, target_transform, task, and classes
         # in the test should be inherited from the train
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
+
+    def test_inherit_info_pretrained_model_griddataset(self):
+
+        pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
+        dataset_test = GridDataset(
+            hdf5_path = self.hdf5_path,
+            train = False,
+            train_data = pretrained_model
+        )
+
+        # features, target, target_transform, task, and classes
+        # in the test should be inherited from the pre-trained model
+        inherited_params = ["features", "target", "target_transform", "task", "classes"]
+        data = torch.load(pretrained_model, pickle_module = dill, map_location=torch.device('cpu'))
+
+        dataset_test_vars = vars(dataset_test)
+        for param in inherited_params:
+            assert dataset_test_vars[param] == data[param]
+
+        dataset_test = GridDataset(
+            hdf5_path = self.hdf5_path,
+            train = False,
+            train_data = pretrained_model,
+            features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
+            target = targets.IRMSD,
+            target_transform = True,
+            task = targets.REGRESS,
+            classes = None
+        )
+
+        # features, target, target_transform, task, and classes
+        # in the test should be inherited from the pre-trained model
+        dataset_test_vars = vars(dataset_test)
+        for param in inherited_params:
+            assert dataset_test_vars[param] == data[param]
 
     def test_filter_graphdataset(self):
         GraphDataset(
@@ -925,7 +962,7 @@ class TestDataSet(unittest.TestCase):
                 warnings.filterwarnings('ignore', r'divide by zero encountered in divide')
                 _compute_features_with_get(hdf5_path, transf_dataset)
 
-    def test_inherit_info_train_graphdataset(self):
+    def test_inherit_info_dataset_train_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         feature_transform = {'all': {'transform': None, 'standardize': True}}
 
@@ -946,9 +983,9 @@ class TestDataSet(unittest.TestCase):
             train_data = dataset_train,
         )
 
-        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes
+        # node_features, edge_features, feature_transform, target, target_transform, task, and classes
         # in the test should be inherited from the train
-        inherited_param = ["node_features", "edge_features", "features_dict", "features_transform", "target", "target_transform", "task", "classes"]
+        inherited_param = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
 
         dataset_test = GraphDataset(
@@ -967,6 +1004,54 @@ class TestDataSet(unittest.TestCase):
         # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes
         # in the test should be inherited from the train
         _check_inherited_params(inherited_param, dataset_train, dataset_test)
+
+    def test_inherit_info_pretrained_model_graphdataset(self):
+
+        hdf5_path = "tests/data/hdf5/test.hdf5"
+        pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            train = False,
+            train_data = pretrained_model
+        )
+
+        # node_features, edge_features, feature_transform, target, target_transform, task, and classes
+        # in the test should be inherited from the pre-trained model
+        inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
+        data = torch.load(pretrained_model, pickle_module = dill, map_location=torch.device('cpu'))
+
+        dataset_test_vars = vars(dataset_test)
+        for param in inherited_params:
+            if param == 'features_transform':
+                for item, key in data[param].items():
+                    assert key['transform'].__code__.co_code == dataset_test_vars[param][item]['transform'].__code__.co_code
+                    assert key['standardize'] == dataset_test_vars[param][item]['standardize']
+            else:
+                assert dataset_test_vars[param] == data[param]
+
+        dataset_test = GraphDataset(
+            hdf5_path = hdf5_path,
+            train = False,
+            train_data = pretrained_model,
+            node_features = "all",
+            edge_features = "all",
+            features_transform = None,
+            target = 'BA',
+            target_transform = True,
+            task = "regress",
+            classes = None
+        )
+
+        # node_features, edge_features, feature_transform, target, target_transform, task, and classes
+        # in the test should be inherited from the pre-trained model
+        dataset_test_vars = vars(dataset_test)
+        for param in inherited_params:
+            if param == 'features_transform':
+                for item, key in data[param].items():
+                    assert key['transform'].__code__.co_code == dataset_test_vars[param][item]['transform'].__code__.co_code
+                    assert key['standardize'] == dataset_test_vars[param][item]['standardize']
+            else:
+                assert dataset_test_vars[param] == data[param]
 
     def test_incompatible_dataset_train_type(self):
         dataset_train = GraphDataset(
