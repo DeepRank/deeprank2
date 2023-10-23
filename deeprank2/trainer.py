@@ -66,14 +66,8 @@ class Trainer():
                 over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
         """
-        self.data_type = None
-        self.batch_size_train = None
-        self.batch_size_test = None
-        self.shuffle = None
-
-        self._init_output_exporters(output_exporters)
-
         self.neuralnet = neuralnet
+        self.pretrained_model_path = pretrained_model
 
         self._init_datasets(dataset_train, dataset_val, dataset_test,
                             val_size, test_size)
@@ -122,7 +116,13 @@ class Trainer():
             _log.info(f"CUDA device name is {torch.cuda.get_device_name(0)}.")
             _log.info(f"Number of GPUs set to {self.ngpu}.")
 
-        self.pretrained_model_path = pretrained_model
+        self._init_output_exporters(output_exporters)
+
+        # other attributes not set in init
+        self.data_type = None
+        self.batch_size_train = None
+        self.batch_size_test = None
+        self.shuffle = None
         self.model_load_state_dict = None
 
         if self.pretrained_model_path is None:
@@ -131,8 +131,7 @@ class Trainer():
             if self.neuralnet is None:
                 raise ValueError("No neural network specified. Specifying a model framework is required if there is no pretrained model.")
 
-            self.classes = self.dataset_train.classes
-            self.classes_to_index = self.dataset_train.classes_to_index
+            self._init_from_dataset(self.dataset_train)
             self.optimizer = None
             self.class_weights = class_weights
             self.subset = self.dataset_train.subset
@@ -164,19 +163,17 @@ class Trainer():
                         "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
 
         else:
+            if self.neuralnet is None:
+                raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
+            if self.dataset_test is None:
+                raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
             if self.dataset_train is not None:
                 self.dataset_train = None
                 _log.warning("Pretrained model loaded: dataset_train will be ignored.")
             if self.dataset_val is not None:
                 self.dataset_val = None
                 _log.warning("Pretrained model loaded: dataset_val will be ignored.")
-            if self.neuralnet is None:
-                raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
-            if self.dataset_test is None:
-                raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
-
-            self.classes_to_index = self.dataset_test.classes_to_index
-
+            self._init_from_dataset(self.dataset_test)
             self._load_params()
             self._load_pretrained_model()
 
@@ -215,12 +212,6 @@ class Trainer():
             else:
                 _log.warning("Validation dataset was provided to Trainer; val_size parameter is ignored.")
 
-        # Copy settings from the dataset that we will use.
-        if self.dataset_train is not None:
-            self._init_from_dataset(self.dataset_train)
-        else:
-            self._init_from_dataset(self.dataset_test)
-
     def _init_from_dataset(self, dataset: Union[GraphDataset, GridDataset]):
 
         if isinstance(dataset, GraphDataset):
@@ -247,6 +238,7 @@ class Trainer():
         self.target_transform = dataset.target_transform
         self.task = dataset.task
         self.classes = dataset.classes
+        self.classes_to_index = dataset.classes_to_index
 
     def _load_model(self):
         """Loads the neural network model."""
