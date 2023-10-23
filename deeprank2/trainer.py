@@ -880,6 +880,7 @@ class Trainer():
         self.target_transform = state["target_transform"]
         self.task = state["task"]
         self.classes = state["classes"]
+        self.classes_to_index = state["classes_to_index"]
         self.class_weights = state["class_weights"]
         self.batch_size_train = state["batch_size_train"]
         self.batch_size_test = state["batch_size_test"]
@@ -917,6 +918,7 @@ class Trainer():
             "target_transform": self.target_transform,
             "task": self.task,
             "classes": self.classes,
+            "classes_to_index": self.classes_to_index,
             "class_weights": self.class_weights,
             "batch_size_train": self.batch_size_train,
             "batch_size_test": self.batch_size_test,

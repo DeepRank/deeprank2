@@ -484,7 +484,7 @@ class GridDataset(DeeprankDataset):
             for k, v in inspect.signature(self.__init__).parameters.items()
             if v.default is not inspect.Parameter.empty
         }
-
+        self.default_vars["classes_to_index"] = None
         self.features = features
         self.target_transform = target_transform
         self._check_features()
@@ -510,7 +510,7 @@ class GridDataset(DeeprankDataset):
                                 Please provide a valid training GridDataset or the path to a valid DeepRank2 pre-trained model.""")
 
             #check inherited parameter with the ones in the training set
-            inherited_params = ["features", "target", "target_transform", "task", "classes"]
+            inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
             self._check_inherited_params(inherited_params, data)
 
         elif train and train_data:
@@ -737,6 +737,7 @@ class GraphDataset(DeeprankDataset):
             for k, v in inspect.signature(self.__init__).parameters.items()
             if v.default is not inspect.Parameter.empty
         }
+        self.default_vars["classes_to_index"] = None
         self.node_features = node_features
         self.edge_features = edge_features
         self.clustering_method = clustering_method
@@ -769,7 +770,7 @@ class GraphDataset(DeeprankDataset):
                                 Please provide a valid training GraphDataset or the path to a valid DeepRank2 pre-trained model.""")
 
             #check inherited parameter with the ones in the training set
-            inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
+            inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
             self._check_inherited_params(inherited_params, data)
 
         elif train and train_data:
