@@ -137,25 +137,27 @@ class DeeprankDataset(Dataset):
     def _check_inherited_params(
         self,
         inherited_params: List[str],
-        dataset_train: Union[GraphDataset, GridDataset],
+        data: Union[dict, GraphDataset, GridDataset],
     ):
-        """"Check if the parameters for validation and/or testing are the same as in the training set.
+        """"Check if the parameters for validation and/or testing are the same as in the pre-trained model or training set provided.
 
         Args:
         inherited_params (List[str]): List of parameters that need to be checked for inheritance.
-        dataset_train (Union[class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited from `dataset_train`.
+        data (Union[dict, class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited
+        from the information contained in `data`.
         """
 
         self_vars = vars(self)
-        dataset_train_vars = vars(dataset_train)
+        if not isinstance(data, dict):
+            data = vars(data)
 
         for param in inherited_params:
-            if (self_vars[param] != dataset_train_vars[param]):
+            if (self_vars[param] != data[param]):
                 if (self_vars[param] != self.default_vars[param]):
                     _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
-                        f"which is not equivalent to the one in the training phase: {dataset_train_vars[param]}./n" +
+                        f"which is not equivalent to the one in the training phase: {data[param]}./n" +
                         f"Overwriting {param} parameter with the one used in the training phase.")
-                setattr(self, param, dataset_train_vars[param])
+                setattr(self, param, data[param])
 
     def _create_index_entries(self):
         """Creates the indexing of each molecule in the dataset.
@@ -491,23 +493,25 @@ class GridDataset(DeeprankDataset):
             if isinstance(train_data, str):
                 try:
                     if torch.cuda.is_available():
-                        state = torch.load(train_data, pickle_module = dill)
+                        data = torch.load(train_data, pickle_module = dill)
                     else:
-                        state = torch.load(train_data, pickle_module = dill, map_location=torch.device('cpu'))
-                    if state["data_type"] is not GridDataset:
-                        raise TypeError (f"""The pre-trained model has been trained with data of type {state["data_type"]}, but you are trying
+                        data = torch.load(train_data, pickle_module = dill, map_location=torch.device('cpu'))
+                    if data["data_type"] is not GridDataset:
+                        raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
                                                 to define a GridDataset-class validation/testing dataset. Please provide a valid DeepRank2
                                                 model trained with GridDataset-class type data, or define the dataset using the appropriate class.""")
                 except pickle.UnpicklingError as e:
                     raise ValueError("""The path provided to `train_data` is not a valid DeepRank2 pre-trained model.
                                             Please provide a valid path to a DeepRank2 pre-trained model.""") from e
             elif isinstance(train_data, GridDataset):
-                #check inherited parameter with the ones in the training set
-                inherited_params = ["features", "target", "target_transform", "task", "classes"]
-                self._check_inherited_params(inherited_params, train_data)
+                data = train_data
             else:
                 raise TypeError(f"""The train data provided is type: {type(train_data)}
                                 Please provide a valid training GridDataset or the path to a valid DeepRank2 pre-trained model.""")
+
+            #check inherited parameter with the ones in the training set
+            inherited_params = ["features", "target", "target_transform", "task", "classes"]
+            self._check_inherited_params(inherited_params, data)
 
         elif train and train_data:
             _log.warning("""`train_data` has been set but train flag was set to True.
@@ -744,25 +748,29 @@ class GraphDataset(DeeprankDataset):
             if isinstance(train_data, str):
                 try:
                     if torch.cuda.is_available():
-                        state = torch.load(train_data, pickle_module = dill)
+                        data = torch.load(train_data, pickle_module = dill)
                     else:
-                        state = torch.load(train_data, pickle_module = dill, map_location=torch.device('cpu'))
-                    if state["data_type"] is not GraphDataset:
-                        raise TypeError (f"""The pre-trained model has been trained with data of type {state["data_type"]}, but you are trying
+                        data = torch.load(train_data, pickle_module = dill, map_location=torch.device('cpu'))
+                    if data["data_type"] is not GraphDataset:
+                        raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
                                                 to define a GraphDataset-class validation/testing dataset. Please provide a valid DeepRank2
                                                 model trained with GraphDataset-class type data, or define the dataset using the appropriate class.""")
+                    train_means = data["means"]
+                    train_devs = data["devs"]
                 except pickle.UnpicklingError as e:
                     raise ValueError("""The path provided to `train_data` is not a valid DeepRank2 pre-trained model.
                                             Please provide a valid path to a DeepRank2 pre-trained model.""") from e
             elif isinstance(train_data, GraphDataset):
-                #check inherited parameter with the ones in the training set
-                inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
-                self._check_inherited_params(inherited_params, train_data)
                 train_means = train_data.means
                 train_devs = train_data.devs
+                data = train_data
             else:
                 raise TypeError(f"""The train data provided is type: {type(train_data)}
                                 Please provide a valid training GraphDataset or the path to a valid DeepRank2 pre-trained model.""")
+
+            #check inherited parameter with the ones in the training set
+            inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
+            self._check_inherited_params(inherited_params, data)
 
         elif train and train_data:
             _log.warning("""`train_data` has been set but train flag was set to True.
