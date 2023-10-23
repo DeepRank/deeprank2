@@ -1,5 +1,7 @@
 import copy
+import inspect
 import logging
+import re
 from time import time
 from typing import List, Optional, Tuple, Union
 
@@ -164,8 +166,10 @@ class Trainer():
 
         else:
             if self.dataset_train is not None:
+                self.dataset_train = None
                 _log.warning("Pretrained model loaded: dataset_train will be ignored.")
             if self.dataset_val is not None:
+                self.dataset_val = None
                 _log.warning("Pretrained model loaded: dataset_val will be ignored.")
             if self.neuralnet is None:
                 raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
@@ -535,6 +539,9 @@ class Trainer():
             filename (str, optional): Name of the file where to save the selected model. If not None, the model is saved to `filename`.
                 If None, the model is not saved. Defaults to 'model.pth.tar'.
         """
+        if self.dataset_train is None:
+            raise ValueError("No training dataset provided.")
+
         self.data_type = type(self.dataset_train)
         self.batch_size_train = batch_size
         self.shuffle = shuffle
@@ -908,6 +915,16 @@ class Trainer():
         Args:
             filename (str, optional): Name of the file. Defaults to None.
         """
+        features_transform_to_save = copy.deepcopy(self.features_transform)
+        # prepare transform dictionary for being saved
+        if features_transform_to_save:
+            for _, key in features_transform_to_save.items():
+                if key['transform'] is None:
+                    continue
+                str_expr = inspect.getsource(key['transform'])
+                match = re.search(r'\'transform\':.*(lambda.*).*,.*\'standardize\'.*', str_expr).group(1)
+                key['transform'] = match
+
         state = {
             "data_type": self.data_type,
             "model_state": self.model.state_dict(),
@@ -933,7 +950,7 @@ class Trainer():
             "node_features": self.node_features,
             "edge_features": self.edge_features,
             "features": self.features,
-            "features_transform": self.features_transform,
+            "features_transform": features_transform_to_save,
             "means": self.means,
             "devs": self.devs,
             "cuda": self.cuda,

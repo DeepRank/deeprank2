@@ -509,7 +509,7 @@ class GridDataset(DeeprankDataset):
                 raise TypeError(f"""The train data provided is type: {type(train_data)}
                                 Please provide a valid training GridDataset or the path to a valid DeepRank2 pre-trained model.""")
 
-            #check inherited parameter with the ones in the training set
+            #match parameters with the ones in the training set
             inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
             self._check_inherited_params(inherited_params, data)
 
@@ -758,6 +758,12 @@ class GraphDataset(DeeprankDataset):
                                                 model trained with GraphDataset-class type data, or define the dataset using the appropriate class.""")
                     train_means = data["means"]
                     train_devs = data["devs"]
+                    # convert strings in 'transform' key to lambda functions
+                    if data["features_transform"]:
+                        for _, key in data["features_transform"].items():
+                            if key['transform'] is None:
+                                continue
+                            key['transform'] = eval(key['transform'])
                 except pickle.UnpicklingError as e:
                     raise ValueError("""The path provided to `train_data` is not a valid DeepRank2 pre-trained model.
                                             Please provide a valid path to a DeepRank2 pre-trained model.""") from e
@@ -769,7 +775,7 @@ class GraphDataset(DeeprankDataset):
                 raise TypeError(f"""The train data provided is type: {type(train_data)}
                                 Please provide a valid training GraphDataset or the path to a valid DeepRank2 pre-trained model.""")
 
-            #check inherited parameter with the ones in the training set
+            #match parameters with the ones in the training set
             inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
             self._check_inherited_params(inherited_params, data)
 
