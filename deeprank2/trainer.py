@@ -748,6 +748,9 @@ class Trainer():
                 loss_ = loss_func(pred, y)
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
+            else:
+                target_vals = ['None'] * pred.shape[0]
+                eval_loss = 'None'
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
@@ -764,7 +767,7 @@ class Trainer():
         if count_predictions > 0:
             eval_loss = sum_of_losses / count_predictions
         else:
-            eval_loss = 0.0
+            eval_loss = 'None'
 
         self._output_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals, eval_loss)
