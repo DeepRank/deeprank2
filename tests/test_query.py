@@ -5,20 +5,20 @@ from tempfile import mkdtemp, mkstemp
 import h5py
 import numpy as np
 import pytest
+
 from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain import targetstorage as targets
 from deeprank2.domain.aminoacidlist import (alanine, arginine, asparagine,
                                             cysteine, glutamate, glycine,
                                             leucine, lysine, phenylalanine)
+from deeprank2.features import components, conservation, contact, surfacearea
 from deeprank2.query import (ProteinProteinInterfaceAtomicQuery,
                              ProteinProteinInterfaceResidueQuery,
                              QueryCollection, SingleResidueVariantAtomicQuery,
                              SingleResidueVariantResidueQuery)
 from deeprank2.utils.grid import GridSettings, MapMethod
-
-from deeprank2.domain import edgestorage as Efeat
-from deeprank2.domain import nodestorage as Nfeat
-from deeprank2.domain import targetstorage as targets
-from deeprank2.features import components, conservation, contact, surfacearea
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
@@ -39,6 +39,7 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
     os.close(f)
 
     try:
+        g.targets[targets.BINARY] = 0
         g.write_to_hdf5(tmp_path)
 
         with h5py.File(tmp_path, "r") as f5:
@@ -68,8 +69,9 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
             count_edges_hdf5 = entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
 
-        dataset = GraphDataset(hdf5_path=tmp_path)
+        dataset = GraphDataset(hdf5_path=tmp_path, target=targets.BINARY)
         torch_data_entry = dataset[0]
+
         assert torch_data_entry is not None
 
         # expecting twice as many edges, because torch is directional
@@ -358,7 +360,7 @@ def test_augmentation():
 
         assert len(entry_names) == expected_entry_count, f"Found {len(entry_names)} entries, expected {expected_entry_count}"
 
-        dataset = GridDataset(hdf5_path)
+        dataset = GridDataset(hdf5_path, target = 'binary')
 
         assert len(dataset) == expected_entry_count, f"Found {len(dataset)} data points, expected {expected_entry_count}"
     finally:
