@@ -795,6 +795,55 @@ class TestTrainer(unittest.TestCase):
         output = pd.read_hdf("output_exporter.hdf5", key="testing")
         assert len(output) == len(dataset_test)
 
+    def test_test_method_pretrained_model_on_dataset_without_target(self):
+        # Graphs data
+        test_data_graph = "tests/data/hdf5/test_no_target.hdf5"
+        pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
+
+        dataset_test = GraphDataset(
+            hdf5_path = test_data_graph,
+            train = False,
+            train_data = pretrained_model_graph
+        )
+
+        trainer = Trainer(
+            neuralnet = NaiveNetwork,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_graph,
+            output_exporters = [HDF5OutputExporter("./")]
+            )
+
+        trainer.test()
+
+        output = pd.read_hdf("output_exporter.hdf5", key="testing")
+        assert len(output) == len(dataset_test)
+        assert output.target.unique().tolist()[0] == 'None'
+        assert output.loss.unique().tolist()[0] == 'None'
+
+        # Grids data
+        test_data_grid = "tests/data/hdf5/test_no_target.hdf5"
+        pretrained_model_grid = "tests/data/pretrained/testing_grid_model.pth.tar"
+
+        dataset_test = GridDataset(
+            hdf5_path = test_data_grid,
+            train = False,
+            train_data = pretrained_model_grid
+        )
+
+        trainer = Trainer(
+            neuralnet = CnnClassification,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_grid,
+            output_exporters = [HDF5OutputExporter("./")]
+            )
+
+        trainer.test()
+
+        output = pd.read_hdf("output_exporter.hdf5", key="testing")
+        assert len(output) == len(dataset_test)
+        assert output.target.unique().tolist()[0] == 'None'
+        assert output.loss.unique().tolist()[0] == 'None'
+
 
 if __name__ == "__main__":
     unittest.main()
