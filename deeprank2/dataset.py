@@ -7,7 +7,6 @@ import pickle
 import re
 import sys
 import warnings
-from ast import literal_eval
 from typing import Dict, List, Optional, Tuple, Union
 
 import h5py
@@ -229,7 +228,7 @@ class DeeprankDataset(Dataset):
                     for operator_string in [">", "<", "==", "<=", ">=", "!="]:
                         operation = operation.replace(operator_string, f"{target_value}" + operator_string)
 
-                    if not eval(operation):
+                    if not eval(operation): # pylint: disable=eval-used
                         return False
 
                 elif target_condition is not None:
@@ -413,7 +412,7 @@ GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
 class GridDataset(DeeprankDataset):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__( # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
         self,
         hdf5_path: Union[str, list],
         subset: Optional[List[str]] = None,
@@ -520,8 +519,8 @@ class GridDataset(DeeprankDataset):
 
             try:
                 fname, mol = self.index_entries[0]
-            except IndexError:
-                raise IndexError("No entries found in the dataset. Please check the dataset parameters.")
+            except IndexError as exc:
+                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from exc
             with h5py.File(fname, 'r') as f5:
                 grp = f5[mol]
                 possible_targets = grp[targets.VALUES].keys()
@@ -772,7 +771,7 @@ class GraphDataset(DeeprankDataset):
         self.features_transform = features_transform
         self._check_features()
 
-        if not train:
+        if not train: # pylint: disable=too-many-nested-blocks
             if isinstance(train_data, str):
                 try:
                     if torch.cuda.is_available():
@@ -790,7 +789,7 @@ class GraphDataset(DeeprankDataset):
                         for _, key in data["features_transform"].items():
                             if key['transform'] is None:
                                 continue
-                            key['transform'] = eval(key['transform'])
+                            key['transform'] = eval(key['transform']) # pylint: disable=eval-used
                 except pickle.UnpicklingError as e:
                     raise ValueError("""The path provided to `train_data` is not a valid DeepRank2 pre-trained model.
                                             Please provide a valid path to a DeepRank2 pre-trained model.""") from e
@@ -813,8 +812,8 @@ class GraphDataset(DeeprankDataset):
 
             try:
                 fname, mol = self.index_entries[0]
-            except IndexError:
-                raise IndexError("No entries found in the dataset. Please check the dataset parameters.")
+            except IndexError as exc:
+                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from exc
             with h5py.File(fname, 'r') as f5:
                 grp = f5[mol]
                 possible_targets = grp[targets.VALUES].keys()
