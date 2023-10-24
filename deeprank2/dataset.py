@@ -225,10 +225,11 @@ class DeeprankDataset(Dataset):
                 if isinstance(target_condition, str):
 
                     operation = target_condition
+                    target_value = entry_group[targets.VALUES][target_name][()]
                     for operator_string in [">", "<", "==", "<=", ">=", "!="]:
-                        operation = operation.replace(operator_string, "target_value" + operator_string)
+                        operation = operation.replace(operator_string, f"{target_value}" + operator_string)
 
-                    if not literal_eval(operation):
+                    if not eval(operation):
                         return False
 
                 elif target_condition is not None:
@@ -512,9 +513,22 @@ class GridDataset(DeeprankDataset):
             inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
             self._check_inherited_params(inherited_params, data)
 
-        elif train and train_data:
-            _log.warning("""`train_data` has been set but train flag was set to True.
-            `train_data` will be ignored since the current dataset will be considered as training set.""")
+        else:
+            if train_data:
+                _log.warning("""`train_data` has been set but train flag was set to True.
+                `train_data` will be ignored since the current dataset will be considered as training set.""")
+
+            try:
+                fname, mol = self.index_entries[0]
+            except IndexError:
+                raise IndexError("No entries found in the dataset. Please check the dataset parameters.")
+            with h5py.File(fname, 'r') as f5:
+                grp = f5[mol]
+                possible_targets = grp[targets.VALUES].keys()
+                if self.target is None:
+                    raise ValueError(f"Please set the target during training dataset definition; targets present in the file/s are {possible_targets}.")
+                if self.target not in possible_targets:
+                    raise ValueError(f"Target {self.target} not present in the file/s; targets present in the file/s are {possible_targets}.")
 
         self.features_dict = {}
         self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
@@ -792,9 +806,22 @@ class GraphDataset(DeeprankDataset):
             inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
             self._check_inherited_params(inherited_params, data)
 
-        elif train and train_data:
-            _log.warning("""`train_data` has been set but train flag was set to True.
-            `train_data` will be ignored since the current dataset will be considered as training set.""")
+        else:
+            if train_data:
+                _log.warning("""`train_data` has been set but train flag was set to True.
+                `train_data` will be ignored since the current dataset will be considered as training set.""")
+
+            try:
+                fname, mol = self.index_entries[0]
+            except IndexError:
+                raise IndexError("No entries found in the dataset. Please check the dataset parameters.")
+            with h5py.File(fname, 'r') as f5:
+                grp = f5[mol]
+                possible_targets = grp[targets.VALUES].keys()
+                if self.target is None:
+                    raise ValueError(f"Please set the target during training dataset definition; targets present in the file/s are {possible_targets}.")
+                if self.target not in possible_targets:
+                    raise ValueError(f"Target {self.target} not present in the file/s; targets present in the file/s are {possible_targets}.")
 
         self.features_dict = {}
         self.features_dict[Nfeat.NODE] = self.node_features
