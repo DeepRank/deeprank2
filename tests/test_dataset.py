@@ -1092,7 +1092,7 @@ class TestDataSet(unittest.TestCase):
             for _, key in data["features_transform"].items():
                 if key['transform'] is None:
                     continue
-                key['transform'] = eval(key['transform'])
+                key['transform'] = eval(key['transform']) # pylint: disable=eval-used
 
         dataset_test_vars = vars(dataset_test)
         for param in inherited_params:
