@@ -279,15 +279,76 @@ class TestDataSet(unittest.TestCase):
         for param in inherited_params:
             assert dataset_test_vars[param] == data[param]
 
+    def test_no_target_dataset_griddataset(self):
+        hdf5_no_target = "tests/data/hdf5/test_no_target.hdf5"
+        hdf5_target = "tests/data/hdf5/1ATN_ppi.hdf5"
+        pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
+
+        dataset = GridDataset(
+            hdf5_path = hdf5_no_target,
+            train = False,
+            train_data = pretrained_model
+        )
+
+        assert dataset.target is not None
+        assert dataset.get(0).y is None
+
+        # no target set, training mode
+        with self.assertRaises(ValueError):
+            dataset = GridDataset(
+                hdf5_path = hdf5_no_target,
+                train = True
+            )
+
+        # target set, but not present in the file
+        with self.assertRaises(ValueError):
+            dataset = GridDataset(
+                hdf5_path = hdf5_target,
+                train = True,
+                target = 'CAPRI'
+            )
+
+    def test_filter_griddataset(self):
+
+        # filtering out all values
+        with self.assertRaises(IndexError):
+            GridDataset(
+                hdf5_path=self.hdf5_path,
+                subset=None,
+                target=targets.IRMSD,
+                target_filter={targets.IRMSD: "<10"}
+            )
+        # filter our some values
+        dataset = GridDataset(
+            hdf5_path=self.hdf5_path,
+            subset=None,
+            target=targets.IRMSD,
+            target_filter={targets.IRMSD: ">15"}
+        )
+        assert len(dataset) == 3
+
     def test_filter_graphdataset(self):
-        GraphDataset(
+
+        # filtering out all values
+        with self.assertRaises(IndexError):
+            GraphDataset(
+                hdf5_path=self.hdf5_path,
+                subset=None,
+                node_features=node_feats,
+                edge_features=[Efeat.DISTANCE],
+                target=targets.IRMSD,
+                target_filter={targets.IRMSD: "<10"}
+            )
+        # filter our some values
+        dataset = GraphDataset(
             hdf5_path=self.hdf5_path,
             subset=None,
             node_features=node_feats,
             edge_features=[Efeat.DISTANCE],
             target=targets.IRMSD,
-            target_filter={targets.IRMSD: "<10"}
+            target_filter={targets.IRMSD: ">15"}
         )
+        assert len(dataset) == 3
 
     def test_multi_file_graphdataset(self):
         dataset = GraphDataset(
@@ -338,12 +399,21 @@ class TestDataSet(unittest.TestCase):
         n = 10
         subset = hdf5_keys[:n]
 
-        dataset = GraphDataset(
+        dataset_train = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
             subset = subset,
+            target = targets.BINARY
         )
 
-        assert n == len(dataset)
+        dataset_test = GraphDataset(
+            hdf5_path = "tests/data/hdf5/train.hdf5",
+            subset = subset,
+            train = False,
+            train_data = dataset_train
+        )
+
+        assert n == len(dataset_train)
+        assert n == len(dataset_test)
 
         hdf5.close()
 
@@ -1056,6 +1126,35 @@ class TestDataSet(unittest.TestCase):
                     assert key['standardize'] == dataset_test_vars[param][item]['standardize']
             else:
                 assert dataset_test_vars[param] == data[param]
+
+    def test_no_target_dataset_graphdataset(self):
+        hdf5_no_target = "tests/data/hdf5/test_no_target.hdf5"
+        hdf5_target = "tests/data/hdf5/test.hdf5"
+        pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
+
+        dataset = GraphDataset(
+            hdf5_path = hdf5_no_target,
+            train = False,
+            train_data = pretrained_model
+        )
+
+        assert dataset.target is not None
+        assert dataset.get(0).y is None
+
+        # no target set, training mode
+        with self.assertRaises(ValueError):
+            dataset = GraphDataset(
+                hdf5_path = hdf5_no_target,
+                train = True
+            )
+
+        # target set, but not present in the file
+        with self.assertRaises(ValueError):
+            dataset = GraphDataset(
+                hdf5_path = hdf5_target,
+                train = True,
+                target = 'CAPRI'
+            )
 
     def test_incompatible_dataset_train_type(self):
         dataset_train = GraphDataset(
