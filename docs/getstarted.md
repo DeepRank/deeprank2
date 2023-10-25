@@ -412,3 +412,68 @@ fig.update_layout(
     title='Loss vs epochs'
 )
 ```
+
+## Testing new data
+
+If new PDB files need to be tested with a pre-trained model, the first step would be to process and save them into HDF5 files. Let's suppose that the model has been trained with `ProteinProteinInterfaceResidueQuery` queries mapped to graphs:
+
+```python
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+
+queries = QueryCollection()
+
+# Append data points
+queries.add(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "<new_pdb_file1.pdb>",
+    chain_id1 = "A",
+    chain_id2 = "B"
+))
+queries.add(ProteinProteinInterfaceResidueQuery(
+    pdb_path = "<new_pdb_file2.pdb>",
+    chain_id1 = "A",
+    chain_id2 = "B"
+))
+
+hdf5_paths = queries.process(
+    "<output_folder>/<prefix_for_outputs>",
+    feature_modules = 'all')
+```
+
+Then, the GraphDataset instance representing the testing set can be defined. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. 
+
+```python
+from deeprank2.dataset import GraphDataset
+
+dataset_test = GraphDataset(
+    hdf5_path = "<output_folder>/<prefix_for_outputs>",
+    train = False,
+    train_data = "<pretrained_model_path>"
+)
+```
+
+Finally, the Trainer instance can be defined and the new data can be tested:
+
+```python
+from deeprank2.trainer import Trainer
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.utils.exporters import HDF5OutputExporter
+
+trainer = Trainer(
+    NaiveNetwork,
+    dataset_test = dataset_test, 
+    pretrained_model = "<pretrained_model_path>",
+    output_exporters = [HDF5OutputExporter("<output_folder_path>")]
+)
+
+trainer.test()
+```
+
+The results can then be read in a Pandas Dataframe and visualized: 
+
+```python
+import os
+import pandas as pd
+
+output = pd.read_hdf(os.path.join("<output_folder_path>", "output_exporter.hdf5"), key="testing")
+output.head()
+```
