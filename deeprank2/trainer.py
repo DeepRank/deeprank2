@@ -749,7 +749,7 @@ class Trainer():
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
             else:
-                target_vals = ['None'] * pred.shape[0]
+                target_vals += ['None'] * pred.shape[0]
                 eval_loss = 'None'
 
             # Get the outputs for export
