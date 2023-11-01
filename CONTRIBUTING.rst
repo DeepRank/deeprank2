@@ -38,7 +38,7 @@ You want to make some kind of change to the code base
 #. make sure the existing tests still work by running ``python setup.py test``;
 #. add your own tests (if necessary);
 #. update or expand the documentation;
-#. `push <http://rogerdudler.github.io/git-guide/>`_ your feature branch to (your fork of) the pyCHAMP repository on GitHub;
+#. `push <http://rogerdudler.github.io/git-guide/>`_ your feature branch to (your fork of) the DeepRank2 repository on GitHub;
 #. create the pull request, e.g. following the instructions `here <https://help.github.com/articles/creating-a-pull-request/>`__.
 
 In case you feel like you've made a valuable contribution, but you don't know how to write or run tests for it, or how to generate the documentation: don't let this discourage you from making the pull request; we can help you! Just go ahead and submit the pull request, but keep in mind that you might be asked to append additional commits to your pull request.
