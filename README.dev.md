@@ -75,3 +75,9 @@ During the development cycle, three main supporting branches are used:
 3. Verify that the information in `CITATION.cff` is correct, and that `.zenodo.json` contains equivalent data.
 4. Merge the release branch into `main` (and `dev`), and [run the tests](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#running-the-tests).
 5. Go to https://github.com/DeepRank/deeprank2/releases and draft a new release; create a new tag for the release, generate release notes automatically and adjust them, and finally publish the release as latest. This will trigger [a GitHub action](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.   
+
+## UML
+
+Code-base class diagrams updated on 02/11/2023, generated with https://www.gituml.com:
+- [Data processing classes and functions](https://gituml-media.s3.ap-southeast-2.amazonaws.com/production_diagram_2026.svg?AWSAccessKeyId=AKIA5BNPSF2PVKDZ4QNO&Signature=1AfRXogJj5JwWqIehv8vzdUC5So%3D&Expires=1698939357)
+- [ML pipeline classes and functions](https://gituml-media.s3.ap-southeast-2.amazonaws.com/production_diagram_2025.svg?AWSAccessKeyId=AKIA5BNPSF2PVKDZ4QNO&Signature=eeYNfbm8yYfYfkVgRJyRhv9D1zs%3D&Expires=1698939046)
