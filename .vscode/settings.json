@@ -1,14 +1,25 @@
 {
+    "editor.rulers": [
+        80,
+        100
+      ],
+    // python
     "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.codeActionsOnSave": {
-            "source.organizeImports": true
+            "source.fixAll.ruff": true,
+            "source.organizeImports.ruff": true,
         },
+        "linting.prospectorEnabled": false,
         "files.trimTrailingWhitespace": true,
+        "defaultInterpreterPath": "",
+        "python.languageServer": "Pylance",
     },
-
-    "python.linting.prospectorEnabled": true,
+    // python docstring
+    "autoDocstring.docstringFormat": "google",
     "notebook.lineNumbers": "on",
-
+    "notebook.diff.ignoreMetadata": true,
     "[*.yml]": {
         "files.trimTrailingWhitespace": true,
     },
