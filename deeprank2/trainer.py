@@ -1,8 +1,10 @@
 import copy
 import logging
 from time import time
-from typing import List, Optional, Tuple, Union
-
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 import h5py
 import numpy as np
 import torch
@@ -10,13 +12,17 @@ import torch.nn.functional as F
 from torch import nn
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
-
-from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.dataset import GraphDataset
+from deeprank2.dataset import GridDataset
 from deeprank2.domain import losstypes as losses
 from deeprank2.domain import targetstorage as targets
-from deeprank2.utils.community_pooling import community_detection, community_pooling
+from deeprank2.utils.community_pooling import community_detection
+from deeprank2.utils.community_pooling import community_pooling
 from deeprank2.utils.earlystopping import EarlyStopping
-from deeprank2.utils.exporters import HDF5OutputExporter, OutputExporter, OutputExporterCollection
+from deeprank2.utils.exporters import HDF5OutputExporter
+from deeprank2.utils.exporters import OutputExporter
+from deeprank2.utils.exporters import OutputExporterCollection
+
 
 _log = logging.getLogger(__name__)
 
@@ -237,14 +243,12 @@ class Trainer:
 
     def _load_model(self):
         """Loads the neural network model."""
-
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
         self.set_lossfunction()
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
         """Check train_dataset type, train parameter and dataset_train parameter settings."""
-
         # dataset_train is None when pretrained_model is set
         if dataset_train is None:
             # only check the test dataset
@@ -266,7 +270,6 @@ class Trainer:
 
     def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
         """Check valid/test dataset settings."""
-
         # Check train parameter in valid/test is set as False.
         if dataset_check.train is not False:
             raise ValueError(
@@ -284,7 +287,6 @@ class Trainer:
         """
         Loads pretrained model
         """
-
         self.test_loader = DataLoader(self.dataset_test, pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
         self._put_model_to_device(self.dataset_test)
@@ -338,7 +340,6 @@ class Trainer:
         Raises:
             ValueError: Incorrect output shape
         """
-
         # regression mode
         if self.task == targets.REGRESS:
             self.output_shape = 1
@@ -393,7 +394,6 @@ class Trainer:
             weight_decay (float, optional): Weight decay (L2 penalty).
                 Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
         """
-
         self.lr = lr
         self.weight_decay = weight_decay
 
@@ -424,7 +424,6 @@ class Trainer:
                 invalid for the task do no longer automaticallt raise an exception.
                 Defaults to False.
         """
-
         default_regression_loss = nn.MSELoss
         default_classification_loss = nn.CrossEntropyLoss
 
@@ -648,7 +647,6 @@ class Trainer:
         Returns:
             Running loss.
         """
-
         sum_of_losses = 0
         count_predictions = 0
         target_vals = []
@@ -706,7 +704,6 @@ class Trainer:
         Returns:
             Running loss.
         """
-
         # Sets the module in evaluation mode
         self.model.eval()
         loss_func = self.lossfunction
@@ -767,7 +764,6 @@ class Trainer:
         """
         Format the network output depending on the task (classification/regression).
         """
-
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
@@ -827,7 +823,6 @@ class Trainer:
         """
         Loads the parameters of a pretrained model
         """
-
         state = torch.load(self.pretrained_model_path)
 
         self.target = state["target"]
@@ -898,7 +893,6 @@ def _divide_dataset(
         splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
             Defaults to None.
     """
-
     if splitsize is None:
         splitsize = 0.25
     full_size = len(dataset)

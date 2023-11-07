@@ -3,17 +3,19 @@ import unittest
 import warnings
 from shutil import rmtree
 from tempfile import mkdtemp
-from typing import List, Union
-
+from typing import List
+from typing import Union
 import h5py
 import numpy as np
 import pytest
-from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from torch_geometric.loader import DataLoader
-
+from deeprank2.dataset import GraphDataset
+from deeprank2.dataset import GridDataset
+from deeprank2.dataset import save_hdf5_keys
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
+
 
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 

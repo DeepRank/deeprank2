@@ -1,9 +1,8 @@
 import numpy as np
-from deeprank2.domain.aminoacidlist import glycine, serine
-from deeprank2.features.components import add_features
-
 from deeprank2.domain import nodestorage as Nfeat
-
+from deeprank2.domain.aminoacidlist import glycine
+from deeprank2.domain.aminoacidlist import serine
+from deeprank2.features.components import add_features
 from . import build_testgraph
 
 

@@ -1,17 +1,19 @@
 import logging
 import warnings
-from typing import List, Optional, Tuple
-
+from typing import List
+from typing import Optional
+from typing import Tuple
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial import distance_matrix
-
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.pair import AtomicContact, ResidueContact
+from deeprank2.molstruct.pair import AtomicContact
+from deeprank2.molstruct.pair import ResidueContact
 from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
 from deeprank2.utils.parsing import atomic_forcefield
+
 
 _log = logging.getLogger(__name__)
 
@@ -39,7 +41,6 @@ def _get_nonbonded_energy(  # pylint: disable=too-many-locals
         Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]: matrices in same format as `distances` containing
             all pairwise electrostatic potential energies and all pairwise Van der Waals potential energies
     """
-
     # ELECTROSTATIC POTENTIAL
     EPSILON0 = 1.0
     COULOMB_CONSTANT = 332.0636

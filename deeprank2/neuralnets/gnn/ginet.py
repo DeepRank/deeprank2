@@ -1,10 +1,12 @@
 import torch
 import torch.nn.functional as F
-from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
 from torch import nn
 from torch_geometric.nn import max_pool_x
 from torch_geometric.nn.inits import uniform
-from torch_scatter import scatter_mean, scatter_sum
+from torch_scatter import scatter_mean
+from torch_scatter import scatter_sum
+from deeprank2.utils.community_pooling import community_pooling
+from deeprank2.utils.community_pooling import get_preloaded_cluster
 
 
 class GINetConvLayer(torch.nn.Module):

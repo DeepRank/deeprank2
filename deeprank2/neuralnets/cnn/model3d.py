@@ -1,9 +1,9 @@
 from typing import Tuple
-
 import torch
 import torch.nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+
 
 ######################################################################
 #

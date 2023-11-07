@@ -2,14 +2,19 @@ import logging
 import os
 import random
 from math import sqrt
-from typing import Any, Dict, List, Optional, Tuple
-
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 import pandas as pd
 from matplotlib import pyplot
 from sklearn.metrics import roc_auc_score
-from torch import argmax, tensor
+from torch import argmax
+from torch import tensor
 from torch.nn.functional import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
+
 
 _log = logging.getLogger(__name__)
 
@@ -26,11 +31,11 @@ class OutputExporter:
             os.makedirs(self._directory_path)
 
     def __enter__(self):
-        "overridable"
+        "Overridable"
         return self
 
     def __exit__(self, exception_type, exception, traceback):
-        "overridable"
+        "Overridable"
         pass  # pylint: disable=unnecessary-pass
 
     def process(
@@ -42,13 +47,13 @@ class OutputExporter:
         target_values: List[Any],
         loss: float,
     ):
-        "the entry_names, output_values, target_values MUST have the same length"
+        "The entry_names, output_values, target_values MUST have the same length"
         pass  # pylint: disable=unnecessary-pass
 
     def is_compatible_with(  # pylint: disable=unused-argument
         self, output_data_shape: int, target_data_shape: Optional[int] = None
     ) -> bool:
-        "true if this exporter can work with the given data shapes"
+        "True if this exporter can work with the given data shapes"
         return True
 
 
@@ -114,8 +119,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         target_values: List[Any],
         loss: float,
     ):
-        "write to tensorboard"
-
+        "Write to tensorboard"
         ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
         self._writer.add_scalar(f"{pass_name} cross entropy loss", ce_loss, epoch_number)
 
@@ -160,7 +164,6 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
 
     def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
         """For regression, target data is needed and output data must be a list of two-dimensional values."""
-
         return output_data_shape == 2 and target_data_shape == 1
 
 
@@ -230,7 +233,6 @@ class ScatterPlotExporter(OutputExporter):
         loss: float,
     ):
         """Make the plot, if the epoch matches with the interval."""
-
         if epoch_number % self._epoch_interval == 0:
             if epoch_number not in self._plot_data:
                 self._plot_data[epoch_number] = {}
@@ -242,7 +244,6 @@ class ScatterPlotExporter(OutputExporter):
 
     def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
         """For regression, target data is needed and output data must be a list of one-dimensional values."""
-
         return output_data_shape == 1 and target_data_shape == 1
 
 

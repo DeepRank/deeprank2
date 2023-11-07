@@ -2,15 +2,14 @@ import shutil
 import tempfile
 import unittest
 import warnings
-
 import pytest
-from deeprank2.dataset import GraphDataset
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
-from deeprank2.trainer import Trainer
 from torch import nn
-
+from deeprank2.dataset import GraphDataset
 from deeprank2.domain import losstypes as losses
 from deeprank2.domain import targetstorage as targets
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.trainer import Trainer
+
 
 hdf5_path = "tests/data/hdf5/test.hdf5"
 

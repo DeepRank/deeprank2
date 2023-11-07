@@ -1,10 +1,8 @@
 import numpy as np
 import pytest
+from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain.aminoacidlist import alanine
 from deeprank2.features.conservation import add_features
-
-from deeprank2.domain import nodestorage as Nfeat
-
 from . import build_testgraph
 
 

@@ -1,5 +1,6 @@
-from typing import Dict, List, Optional
-
+from typing import Dict
+from typing import List
+from typing import Optional
 from deeprank2.molstruct.aminoacid import AminoAcid
 
 
@@ -39,5 +40,4 @@ class PssmTable:
 
     def update(self, other):
         """Can be used to merge two non-overlapping scoring tables."""
-
         self._rows.update(other._rows)  # pylint: disable=protected-access

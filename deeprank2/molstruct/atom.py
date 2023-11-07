@@ -1,9 +1,6 @@
 from __future__ import annotations
-
 from enum import Enum
-
 import numpy as np
-
 from deeprank2.molstruct.residue import Residue
 
 

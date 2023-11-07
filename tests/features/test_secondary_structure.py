@@ -1,8 +1,8 @@
 import numpy as np
-from deeprank2.features.secondary_structure import SecondarySctructure, _classify_secstructure, add_features
-
 from deeprank2.domain import nodestorage as Nfeat
-
+from deeprank2.features.secondary_structure import SecondarySctructure
+from deeprank2.features.secondary_structure import _classify_secstructure
+from deeprank2.features.secondary_structure import add_features
 from . import build_testgraph
 
 

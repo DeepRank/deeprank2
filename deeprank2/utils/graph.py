@@ -1,19 +1,26 @@
 import logging
 import os
-from typing import Callable, List, Optional, Union
-
+from typing import Callable
+from typing import List
+from typing import Optional
+from typing import Union
 import h5py
 import numpy as np
 import pdb2sql.transform
 from scipy.spatial import distance_matrix
-
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.pair import AtomicContact, Contact, ResidueContact
+from deeprank2.molstruct.pair import AtomicContact
+from deeprank2.molstruct.pair import Contact
+from deeprank2.molstruct.pair import ResidueContact
 from deeprank2.molstruct.residue import Residue
-from deeprank2.utils.grid import Augmentation, Grid, GridSettings, MapMethod
+from deeprank2.utils.grid import Augmentation
+from deeprank2.utils.grid import Grid
+from deeprank2.utils.grid import GridSettings
+from deeprank2.utils.grid import MapMethod
+
 
 _log = logging.getLogger(__name__)
 
@@ -38,7 +45,6 @@ class Edge:
 
     def has_nan(self) -> bool:
         """Whether there are any NaN values in the edge's features."""
-
         for feature_data in self.features.values():
             if np.any(np.isnan(feature_data)):
                 return True
@@ -65,7 +71,6 @@ class Node:
 
     def has_nan(self) -> bool:
         """Whether there are any NaN values in the node's features."""
-
         for feature_data in self.features.values():
             if np.any(np.isnan(feature_data)):
                 return True
@@ -125,7 +130,6 @@ class Graph:
 
     def has_nan(self) -> bool:
         """Whether there are any NaN values in the graph's features."""
-
         for node in self._nodes.values():
             if node.has_nan():
                 return True
@@ -185,7 +189,6 @@ class Graph:
 
     def write_to_hdf5(self, hdf5_path: str):  # pylint: disable=too-many-locals
         """Write a featured graph to an hdf5 file, according to deeprank standards."""
-
         with h5py.File(hdf5_path, "a") as hdf5_file:
             # create groups to hold data
             graph_group = hdf5_file.require_group(self.id)
@@ -299,7 +302,6 @@ def build_atomic_graph(  # pylint: disable=too-many-locals
 
     The edge distance cutoff is in Ångströms.
     """
-
     positions = np.empty((len(atoms), 3))
     for atom_index, atom in enumerate(atoms):
         positions[atom_index] = atom.position
@@ -334,7 +336,6 @@ def build_residue_graph(  # pylint: disable=too-many-locals
     The edge distance cutoff is in Ångströms.
     It's the shortest interatomic distance between two residues.
     """
-
     # collect the set of atoms and remember which are on the same residue (by index)
     atoms = []
     atoms_residues = []

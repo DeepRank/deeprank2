@@ -1,15 +1,18 @@
 import logging
 from itertools import combinations_with_replacement as combinations
-from typing import Dict, List, Optional, Tuple
-
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 import pdb2sql
-
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain.aminoacidlist import amino_acids
 from deeprank2.molstruct.aminoacid import Polarity
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
+
 
 _log = logging.getLogger(__name__)
 
@@ -24,7 +27,6 @@ def _id_from_residue(residue: Tuple[str, int, str]) -> str:
     Returns:
         str: Output id in form of '<chain><residue_number>'. For example: 'A27'.
     """
-
     return residue[0] + str(residue[1])
 
 
@@ -54,7 +56,6 @@ def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str,
             keys: ids of residues in form returned by id_from_residue.
             items: _ContactDensity objects, containing all contact density information for the residue.
     """
-
     residue_contacts: Dict[str, _ContactDensity] = {}
 
     sql = pdb2sql.interface(pdb_path)

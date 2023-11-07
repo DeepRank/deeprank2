@@ -1,14 +1,15 @@
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
-
+from typing import Dict
+from typing import List
+from typing import Optional
 import numpy as np
 from Bio.PDB import PDBParser
 from Bio.PDB.DSSP import DSSP
-
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 
@@ -91,7 +92,6 @@ def _get_secstructure(pdb_path: str) -> Dict:
     Returns:
         dict: A dictionary containing secondary structure information for each chain and residue.
     """
-
     # Execute DSSP and read the output
     _check_pdb(pdb_path)
     p = PDBParser(QUIET=True)

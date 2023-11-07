@@ -2,21 +2,24 @@ import os
 import shutil
 import tempfile
 from random import randrange
-
 import h5py
 import numpy as np
 import pytest
 from pdb2sql import pdb2sql
 from pdb2sql.transform import get_rot_axis_angle
-
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import gridstorage
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as Target
 from deeprank2.molstruct.pair import ResidueContact
 from deeprank2.utils.buildgraph import get_structure
-from deeprank2.utils.graph import Edge, Graph, Node
-from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
+from deeprank2.utils.graph import Edge
+from deeprank2.utils.graph import Graph
+from deeprank2.utils.graph import Node
+from deeprank2.utils.grid import Augmentation
+from deeprank2.utils.grid import GridSettings
+from deeprank2.utils.grid import MapMethod
+
 
 entry_id = "test"
 node_feature_narray = "node_feat1"
@@ -30,7 +33,6 @@ target_value = 1.0
 @pytest.fixture
 def graph():
     """Build a simple graph of two nodes and one edge in between them."""
-
     # load the structure
     pdb = pdb2sql("tests/data/pdb/101M/101M.pdb")
     try:
@@ -72,7 +74,6 @@ def graph():
 
 def test_graph_write_to_hdf5(graph):
     """Test that the graph is correctly written to hdf5 file."""
-
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
 
@@ -112,7 +113,6 @@ def test_graph_write_to_hdf5(graph):
 
 def test_graph_write_as_grid_to_hdf5(graph):
     """Test that the graph is correctly written to hdf5 file as a grid."""
-
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
 
@@ -152,7 +152,6 @@ def test_graph_write_as_grid_to_hdf5(graph):
 
 def test_graph_augmented_write_as_grid_to_hdf5(graph):
     """Test that the graph is correctly written to hdf5 file as a grid."""
-
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
 

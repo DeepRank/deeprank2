@@ -1,6 +1,7 @@
 import re
 from enum import Enum
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
 
 class PatchActionType(Enum):

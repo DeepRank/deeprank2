@@ -1,6 +1,7 @@
 from typing import Optional
+from deeprank2.molstruct.aminoacid import AminoAcid
+from deeprank2.molstruct.aminoacid import Polarity
 
-from deeprank2.molstruct.aminoacid import AminoAcid, Polarity
 
 # All info below sourced from above websites in December 2022 and summarized in deeprank2/domain/aminoacid_summary.xlsx
 

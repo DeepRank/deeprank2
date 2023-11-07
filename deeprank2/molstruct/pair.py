@@ -1,6 +1,5 @@
 from abc import ABC
 from typing import Any
-
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import Residue
 

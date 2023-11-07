@@ -1,11 +1,11 @@
 import glob
 import os
-from typing import Dict, List, Union
-
+from typing import Dict
+from typing import List
+from typing import Union
 import h5py
 import numpy as np
 from pdb2sql import StructureSimilarity
-
 from deeprank2.domain import targetstorage as targets
 
 
@@ -27,7 +27,6 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
         1ATN_xxx-3 0
         1ATN_xxx-4 0
     """
-
     target_dict = {}
 
     labels = np.loadtxt(target_list, delimiter=sep, usecols=[0], dtype=str)
@@ -95,7 +94,6 @@ def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Unio
 
     Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.
     """
-
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
     sim = StructureSimilarity(pdb_path, reference_pdb_path, enforce_residue_matching=False)
 

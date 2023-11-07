@@ -1,12 +1,11 @@
 from __future__ import annotations
-
-from typing import TYPE_CHECKING, Optional
-
+from typing import TYPE_CHECKING
+from typing import Optional
 import numpy as np
-
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.structure import Chain
 from deeprank2.utils.pssmdata import PssmRow
+
 
 if TYPE_CHECKING:
     from deeprank2.molstruct.atom import Atom
@@ -36,7 +35,6 @@ class Residue:
                 Defaults to None.
             insertion_code (str, optional): The pdb insertion code, if any. Defaults to None.
         """
-
         self._chain = chain
         self._number = number
         self._amino_acid = amino_acid

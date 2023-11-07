@@ -1,8 +1,12 @@
 # Example of network that doesn't require clusters.
 
 import torch
-from torch.nn import Linear, Module, ReLU, Sequential
-from torch_scatter import scatter_mean, scatter_sum
+from torch.nn import Linear
+from torch.nn import Module
+from torch.nn import ReLU
+from torch.nn import Sequential
+from torch_scatter import scatter_mean
+from torch_scatter import scatter_sum
 
 
 class NaiveConvolutionalLayer(Module):

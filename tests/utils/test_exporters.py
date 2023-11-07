@@ -4,10 +4,13 @@ import shutil
 import unittest
 from tempfile import mkdtemp
 from unittest.mock import patch
-
 import h5py
 import pandas as pd
-from deeprank2.utils.exporters import HDF5OutputExporter, OutputExporterCollection, ScatterPlotExporter, TensorboardBinaryClassificationExporter
+from deeprank2.utils.exporters import HDF5OutputExporter
+from deeprank2.utils.exporters import OutputExporterCollection
+from deeprank2.utils.exporters import ScatterPlotExporter
+from deeprank2.utils.exporters import TensorboardBinaryClassificationExporter
+
 
 logging.getLogger(__name__)
 

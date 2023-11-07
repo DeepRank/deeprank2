@@ -3,36 +3,41 @@ import glob
 import os
 import time
 from os import listdir
-from os.path import isfile, join
-
+from os.path import isfile
+from os.path import join
 import numpy
 import pandas as pd
+from deeprank2.domain.aminoacidlist import alanine
+from deeprank2.domain.aminoacidlist import arginine
+from deeprank2.domain.aminoacidlist import asparagine
+from deeprank2.domain.aminoacidlist import aspartate
+from deeprank2.domain.aminoacidlist import cysteine
+from deeprank2.domain.aminoacidlist import glutamate
+from deeprank2.domain.aminoacidlist import glutamine
+from deeprank2.domain.aminoacidlist import glycine
+from deeprank2.domain.aminoacidlist import histidine
+from deeprank2.domain.aminoacidlist import isoleucine
+from deeprank2.domain.aminoacidlist import leucine
+from deeprank2.domain.aminoacidlist import lysine
+from deeprank2.domain.aminoacidlist import methionine
+from deeprank2.domain.aminoacidlist import phenylalanine
+from deeprank2.domain.aminoacidlist import proline
+from deeprank2.domain.aminoacidlist import serine
+from deeprank2.domain.aminoacidlist import threonine
+from deeprank2.domain.aminoacidlist import tryptophan
+from deeprank2.domain.aminoacidlist import tyrosine
+from deeprank2.domain.aminoacidlist import valine
+from deeprank2.features import components
+from deeprank2.features import contact
+from deeprank2.features import exposure
+from deeprank2.features import irc
+from deeprank2.features import secondary_structure
+from deeprank2.features import surfacearea
+from deeprank2.query import QueryCollection
+from deeprank2.query import SingleResidueVariantResidueQuery
+from deeprank2.utils.grid import GridSettings
+from deeprank2.utils.grid import MapMethod
 
-from deeprank2.domain.aminoacidlist import (
-    alanine,
-    arginine,
-    asparagine,
-    aspartate,
-    cysteine,
-    glutamate,
-    glutamine,
-    glycine,
-    histidine,
-    isoleucine,
-    leucine,
-    lysine,
-    methionine,
-    phenylalanine,
-    proline,
-    serine,
-    threonine,
-    tryptophan,
-    tyrosine,
-    valine,
-)
-from deeprank2.features import components, contact, exposure, irc, secondary_structure, surfacearea
-from deeprank2.query import QueryCollection, SingleResidueVariantResidueQuery
-from deeprank2.utils.grid import GridSettings, MapMethod
 
 aa_dict = {
     "ALA": alanine,

@@ -1,25 +1,35 @@
 import os
 import shutil
-from tempfile import mkdtemp, mkstemp
-
+from tempfile import mkdtemp
+from tempfile import mkstemp
 import h5py
 import numpy as np
 import pytest
-from deeprank2.dataset import GraphDataset, GridDataset
-from deeprank2.domain.aminoacidlist import alanine, arginine, asparagine, cysteine, glutamate, glycine, leucine, lysine, phenylalanine
-from deeprank2.query import (
-    ProteinProteinInterfaceAtomicQuery,
-    ProteinProteinInterfaceResidueQuery,
-    QueryCollection,
-    SingleResidueVariantAtomicQuery,
-    SingleResidueVariantResidueQuery,
-)
-from deeprank2.utils.grid import GridSettings, MapMethod
-
+from deeprank2.dataset import GraphDataset
+from deeprank2.dataset import GridDataset
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
-from deeprank2.features import components, conservation, contact, surfacearea
+from deeprank2.domain.aminoacidlist import alanine
+from deeprank2.domain.aminoacidlist import arginine
+from deeprank2.domain.aminoacidlist import asparagine
+from deeprank2.domain.aminoacidlist import cysteine
+from deeprank2.domain.aminoacidlist import glutamate
+from deeprank2.domain.aminoacidlist import glycine
+from deeprank2.domain.aminoacidlist import leucine
+from deeprank2.domain.aminoacidlist import lysine
+from deeprank2.domain.aminoacidlist import phenylalanine
+from deeprank2.features import components
+from deeprank2.features import conservation
+from deeprank2.features import contact
+from deeprank2.features import surfacearea
+from deeprank2.query import ProteinProteinInterfaceAtomicQuery
+from deeprank2.query import ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection
+from deeprank2.query import SingleResidueVariantAtomicQuery
+from deeprank2.query import SingleResidueVariantResidueQuery
+from deeprank2.utils.grid import GridSettings
+from deeprank2.utils.grid import MapMethod
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):

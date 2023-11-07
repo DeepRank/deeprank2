@@ -1,8 +1,8 @@
 from __future__ import annotations
-
-from typing import TYPE_CHECKING, Optional
-
+from typing import TYPE_CHECKING
+from typing import Optional
 from deeprank2.utils.pssmdata import PssmRow
+
 
 if TYPE_CHECKING:
     from deeprank2.molstruct.atom import Atom

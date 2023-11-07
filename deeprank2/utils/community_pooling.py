@@ -1,15 +1,17 @@
 import warnings
-
 import community
 import markov_clustering as mc
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import torch
-from torch_geometric.data import Batch, Data
+from torch_geometric.data import Batch
+from torch_geometric.data import Data
 from torch_geometric.nn.pool.consecutive import consecutive_cluster
-from torch_geometric.nn.pool.pool import pool_batch, pool_edge
-from torch_scatter import scatter_max, scatter_mean
+from torch_geometric.nn.pool.pool import pool_batch
+from torch_geometric.nn.pool.pool import pool_edge
+from torch_scatter import scatter_max
+from torch_scatter import scatter_mean
 
 
 def plot_graph(graph, cluster):
@@ -42,7 +44,6 @@ def community_detection_per_batch(  # pylint: disable=too-many-locals
     Returns:
         cluster Tensor
     """
-
     # make the networkX graph
     g = nx.Graph()
     g.add_nodes_from(range(num_nodes))
@@ -103,7 +104,6 @@ def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str 
         cluster Tensor
 
     Examples:
-
         >>> import torch
         >>> from torch_geometric.data import Data, Batch
         >>> edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5],
@@ -166,7 +166,6 @@ def community_pooling(cluster, data):
         pooled features tensor
 
     Examples:
-
         >>> import torch
         >>> from torch_geometric.data import Data, Batch
         >>> edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5],
@@ -180,7 +179,6 @@ def community_pooling(cluster, data):
         >>> cluster = community_detection(batch.edge_index, batch.num_nodes)
         >>> new_batch = community_pooling(cluster, batch)
     """
-
     # determine what the batches has as attributes
     has_internal_edges = hasattr(data, "internal_edge_index")
     has_pos2d = hasattr(data, "pos2d")

@@ -2,20 +2,22 @@ import os
 import warnings
 from shutil import rmtree
 from tempfile import mkdtemp
-
 import h5py
-
-from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.dataset import GraphDataset
+from deeprank2.dataset import GridDataset
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification
 from deeprank2.neuralnets.gnn.ginet import GINet
-from deeprank2.query import ProteinProteinInterfaceResidueQuery, QueryCollection
+from deeprank2.query import ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection
 from deeprank2.tools.target import compute_ppi_scores
 from deeprank2.trainer import Trainer
 from deeprank2.utils.exporters import HDF5OutputExporter
-from deeprank2.utils.grid import GridSettings, MapMethod
+from deeprank2.utils.grid import GridSettings
+from deeprank2.utils.grid import MapMethod
+
 
 pdb_path = str("tests/data/pdb/3C8P/3C8P.pdb")
 ref_path = str("tests/data/ref/3C8P/3C8P.pdb")
@@ -33,7 +35,6 @@ def test_cnn():  # pylint: disable=too-many-locals
 
     Then uses HDF5 generated files to train and test a CnnRegression network.
     """
-
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
     model_path = output_directory + "test.pth.tar"
@@ -101,7 +102,6 @@ def test_gnn():  # pylint: disable=too-many-locals
 
     Then uses HDF5 generated files to train and test a GINet network.
     """
-
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
     model_path = output_directory + "test.pth.tar"

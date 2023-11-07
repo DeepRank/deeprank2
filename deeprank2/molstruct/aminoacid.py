@@ -1,5 +1,4 @@
 from enum import Enum
-
 import numpy as np
 
 
@@ -49,7 +48,6 @@ class AminoAcid:
             hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
             index (int): The rank of the amino acid, used for computing one-hot encoding.
         """
-
         # amino acid nomenclature
         self._name = name
         self._three_letter_code = three_letter_code

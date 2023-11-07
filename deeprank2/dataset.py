@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import inspect
 import logging
 import os
@@ -7,8 +6,11 @@ import re
 import sys
 import warnings
 from ast import literal_eval
-from typing import Dict, List, Optional, Tuple, Union
-
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,11 +19,11 @@ import torch
 from torch_geometric.data.data import Data
 from torch_geometric.data.dataset import Dataset
 from tqdm import tqdm
-
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import gridstorage
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
+
 
 _log = logging.getLogger(__name__)
 
@@ -43,7 +45,6 @@ class DeeprankDataset(Dataset):
 
         More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
         """
-
         super().__init__(root_directory_path)
 
         if isinstance(hdf5_path, str):
@@ -139,7 +140,6 @@ class DeeprankDataset(Dataset):
         inherited_params (List[str]): List of parameters that need to be checked for inheritance.
         dataset_train (Union[class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited from `dataset_train`.
         """
-
         self_vars = vars(self)
         dataset_train_vars = vars(dataset_train)
 
@@ -205,7 +205,6 @@ class DeeprankDataset(Dataset):
         Raises:
             ValueError: If an unsuported condition is provided.
         """
-
         if self.target_filter is None:
             return True
 
@@ -246,7 +245,6 @@ class DeeprankDataset(Dataset):
             :class:`pd.DataFrame`: Pandas DataFrame containing the selected features as columns per all data points in
                 hdf5_path files.
         """
-
         df_final = pd.DataFrame()
 
         for fname in self.hdf5_paths:
@@ -505,7 +503,6 @@ class GridDataset(DeeprankDataset):
 
     def _check_features(self):
         """Checks if the required features exist"""
-
         hdf5_path = self.hdf5_paths[0]
 
         # read available features
@@ -573,7 +570,6 @@ class GridDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
         """
-
         file_path, entry_name = self.index_entries[idx]
         return self.load_one_grid(file_path, entry_name)
 
@@ -587,7 +583,6 @@ class GridDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
         """
-
         feature_data = []
         target_value = None
 
@@ -701,7 +696,6 @@ class GraphDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-
         super().__init__(hdf5_path, subset, target, task, classes, tqdm, root, target_filter, check_integrity)
 
         self.default_vars = {k: v.default for k, v in inspect.signature(self.__init__).parameters.items() if v.default is not inspect.Parameter.empty}
@@ -766,7 +760,6 @@ class GraphDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
-
         fname, mol = self.index_entries[idx]
         return self.load_one_graph(fname, mol)
 
@@ -780,7 +773,6 @@ class GraphDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
-
         with h5py.File(fname, "r") as f5:
             grp = f5[entry_name]
 

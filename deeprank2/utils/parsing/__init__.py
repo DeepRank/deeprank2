@@ -1,12 +1,14 @@
 import logging
 import os
-
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import Residue
-from deeprank2.utils.parsing.patch import PatchActionType, PatchParser
+from deeprank2.utils.parsing.patch import PatchActionType
+from deeprank2.utils.parsing.patch import PatchParser
 from deeprank2.utils.parsing.residue import ResidueClassParser
 from deeprank2.utils.parsing.top import TopParser
-from deeprank2.utils.parsing.vdwparam import ParamParser, VanderwaalsParam
+from deeprank2.utils.parsing.vdwparam import ParamParser
+from deeprank2.utils.parsing.vdwparam import VanderwaalsParam
+
 
 _log = logging.getLogger(__name__)
 
@@ -73,7 +75,6 @@ class AtomicForcefield:
             atom(Atom): the atom to get the charge for
         Returns(float): the charge of the given atom
         """
-
         atom_name = atom.name
         amino_acid_code = atom.residue.amino_acid.three_letter_code
 

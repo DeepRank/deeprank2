@@ -2,10 +2,9 @@ import os
 import shutil
 import tempfile
 import unittest
-
 from pdb2sql import StructureSimilarity
-
-from deeprank2.tools.target import add_target, compute_ppi_scores
+from deeprank2.tools.target import add_target
+from deeprank2.tools.target import compute_ppi_scores
 
 
 class TestTools(unittest.TestCase):

@@ -10,23 +10,35 @@ from glob import glob
 from multiprocessing import Pool
 from random import randrange
 from types import ModuleType
-from typing import Dict, Iterator, List, Optional, Union
-
+from typing import Dict
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Union
 import h5py
 import numpy as np
 import pdb2sql
-
 import deeprank2.features
 from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
-from deeprank2.features import components, conservation, contact
+from deeprank2.features import components
+from deeprank2.features import conservation
+from deeprank2.features import contact
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.molstruct.structure import PDBStructure
-from deeprank2.utils.buildgraph import add_hydrogens, get_contact_atoms, get_structure, get_surrounding_residues
-from deeprank2.utils.graph import Graph, build_atomic_graph, build_residue_graph
-from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
+from deeprank2.utils.buildgraph import add_hydrogens
+from deeprank2.utils.buildgraph import get_contact_atoms
+from deeprank2.utils.buildgraph import get_structure
+from deeprank2.utils.buildgraph import get_surrounding_residues
+from deeprank2.utils.graph import Graph
+from deeprank2.utils.graph import build_atomic_graph
+from deeprank2.utils.graph import build_residue_graph
+from deeprank2.utils.grid import Augmentation
+from deeprank2.utils.grid import GridSettings
+from deeprank2.utils.grid import MapMethod
 from deeprank2.utils.parsing.pssm import parse_pssm
+
 
 _log = logging.getLogger(__name__)
 
@@ -46,7 +58,6 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
     Raises:
         ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
     """
-
     if not pssm_paths:
         raise ValueError("No pssm paths provided for conservation feature module.")
 
@@ -103,7 +114,6 @@ class Query:
             suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
-
         self._model_id = model_id
         self._suppress = suppress_pssm_errors
 
@@ -114,7 +124,6 @@ class Query:
 
     def _set_graph_targets(self, graph: Graph):
         "Simply copies target data from query to graph."
-
         for target_name, target_data in self._targets.items():
             graph.targets[target_name] = target_data
 
@@ -126,7 +135,6 @@ class Query:
         load_pssms: bool,
     ):
         "A helper function, to build the structure from .PDB and .PSSM files."
-
         # make a copy of the pdb, with hydrogens
         pdb_name = os.path.basename(pdb_path)
         hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(prefix="hydrogenated-", suffix=pdb_name)
@@ -314,7 +322,6 @@ class QueryCollection:
         Returns:
             List[str]: The list of paths of the generated HDF5 files.
         """
-
         # set defaults
         if prefix is None:
             prefix = "processed-queries"
@@ -396,7 +403,6 @@ class SingleResidueVariantResidueQuery(Query):
             suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
-
         self._pdb_path = pdb_path
         self._pssm_paths = pssm_paths
 
@@ -416,7 +422,6 @@ class SingleResidueVariantResidueQuery(Query):
     @property
     def residue_id(self) -> str:
         "String representation of the residue number and insertion code."
-
         if self._insertion_code is not None:
             return f"{self._residue_number}{self._insertion_code}"
 
@@ -436,7 +441,6 @@ class SingleResidueVariantResidueQuery(Query):
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
-
         # load .PDB structure
         if isinstance(feature_modules, List):
             load_pssms = conservation in feature_modules
@@ -506,7 +510,6 @@ class SingleResidueVariantAtomicQuery(Query):
             suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
-
         self._pdb_path = pdb_path
         self._pssm_paths = pssm_paths
 
@@ -527,7 +530,6 @@ class SingleResidueVariantAtomicQuery(Query):
     @property
     def residue_id(self) -> str:
         "String representation of the residue number and insertion code."
-
         if self._insertion_code is not None:
             return f"{self._residue_number}{self._insertion_code}"
 
@@ -564,7 +566,6 @@ class SingleResidueVariantAtomicQuery(Query):
         Since pickle has problems serializing the graph when the nodes are atoms,
         this function can be used to generate a unique key for the atom.
         """
-
         # This should include the model, chain, residue and atom
         return str(atom)
 
@@ -578,7 +579,6 @@ class SingleResidueVariantAtomicQuery(Query):
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
-
         # load .PDB structure
         if isinstance(feature_modules, List):
             load_pssms = conservation in feature_modules
@@ -682,7 +682,6 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
-
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
         Query.__init__(self, model_id, targets, suppress_pssm_errors)
@@ -716,7 +715,6 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
-
         contact_atoms = _load_ppi_atoms(self._pdb_path, self._chain_id1, self._chain_id2, self._distance_cutoff, include_hydrogens)
 
         # build the graph
@@ -766,7 +764,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
             suppress_pssm_errors (bool, optional): Suppress error raised if .pssm files do not match .pdb files and throw warning instead.
                 Defaults to False.
         """
-
         model_id = os.path.splitext(os.path.basename(pdb_path))[0]
 
         Query.__init__(self, model_id, targets, suppress_pssm_errors)
@@ -800,7 +797,6 @@ class ProteinProteinInterfaceResidueQuery(Query):
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
-
         contact_atoms = _load_ppi_atoms(self._pdb_path, self._chain_id1, self._chain_id2, self._distance_cutoff, include_hydrogens)
 
         atom_positions = []

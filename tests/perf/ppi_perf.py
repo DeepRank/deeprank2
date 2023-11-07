@@ -3,14 +3,21 @@ import glob
 import os
 import time
 from os import listdir
-from os.path import isfile, join
-
+from os.path import isfile
+from os.path import join
 import numpy
 import pandas as pd
+from deeprank2.features import components
+from deeprank2.features import contact
+from deeprank2.features import exposure
+from deeprank2.features import irc
+from deeprank2.features import secondary_structure
+from deeprank2.features import surfacearea
+from deeprank2.query import ProteinProteinInterfaceAtomicQuery
+from deeprank2.query import QueryCollection
+from deeprank2.utils.grid import GridSettings
+from deeprank2.utils.grid import MapMethod
 
-from deeprank2.features import components, contact, exposure, irc, secondary_structure, surfacearea
-from deeprank2.query import ProteinProteinInterfaceAtomicQuery, QueryCollection
-from deeprank2.utils.grid import GridSettings, MapMethod
 
 #################### PARAMETERS ####################
 interface_distance_cutoff = 5.5  # max distance in Å between two interacting residues/atoms of two proteins

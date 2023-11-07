@@ -1,15 +1,15 @@
 import torch
 import torch.nn.functional as F
-from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
 from torch import nn
 from torch.nn import Parameter
 from torch_geometric.nn import max_pool_x
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean
+from deeprank2.utils.community_pooling import community_pooling
+from deeprank2.utils.community_pooling import get_preloaded_cluster
 
 
 class FoutLayer(torch.nn.Module):
-
     """
     This layer is described by eq. (1) of
     Protein Interface Predition using Graph Convolutional Network

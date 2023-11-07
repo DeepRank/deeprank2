@@ -1,16 +1,19 @@
 from typing import Tuple
 from uuid import uuid4
-
 import numpy as np
-from deeprank2.features.contact import add_features, covalent_cutoff, cutoff_13, cutoff_14
+from pdb2sql import pdb2sql
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.features.contact import add_features
+from deeprank2.features.contact import covalent_cutoff
+from deeprank2.features.contact import cutoff_13
+from deeprank2.features.contact import cutoff_14
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.pair import AtomicContact, ResidueContact
+from deeprank2.molstruct.pair import AtomicContact
+from deeprank2.molstruct.pair import ResidueContact
 from deeprank2.molstruct.structure import Chain
 from deeprank2.utils.buildgraph import get_structure
-from deeprank2.utils.graph import Edge, Graph
-from pdb2sql import pdb2sql
-
-from deeprank2.domain import edgestorage as Efeat
+from deeprank2.utils.graph import Edge
+from deeprank2.utils.graph import Graph
 
 
 def _get_atom(chain: Chain, residue_number: int, atom_name: str) -> Atom:
@@ -71,7 +74,6 @@ def _get_contact(  # pylint: disable=too-many-arguments
 
 def test_covalent_pair():
     """MET 0: N - CA, covalent pair (at 1.49 A distance). Should have 0 vanderwaals and electrostatic energies."""
-
     edge_covalent = _get_contact("101M", 0, "N", 0, "CA")
     assert edge_covalent.features[Efeat.DISTANCE] < covalent_cutoff
     assert edge_covalent.features[Efeat.VDW] == 0.0, "nonzero vdw energy for covalent pair"
@@ -81,7 +83,6 @@ def test_covalent_pair():
 
 def test_13_pair():
     """MET 0: N - CB, 1-3 pair (at 2.47 A distance). Should have 0 vanderwaals and electrostatic energies."""
-
     edge_13 = _get_contact("101M", 0, "N", 0, "CB")
     assert edge_13.features[Efeat.DISTANCE] < cutoff_13
     assert edge_13.features[Efeat.VDW] == 0.0, "nonzero vdw energy for 1-3 pair"
@@ -91,7 +92,6 @@ def test_13_pair():
 
 def test_very_close_opposing_chains():
     """ChainA THR 118 O - ChainB ARG 30 NH1 (3.55 A). Should have non-zero energy despite close contact, because opposing chains."""
-
     opposing_edge = _get_contact("1A0Z", 118, "O", 30, "NH1", chains=("A", "B"))
     assert opposing_edge.features[Efeat.DISTANCE] < cutoff_13
     assert opposing_edge.features[Efeat.ELEC] != 0.0
@@ -100,7 +100,6 @@ def test_very_close_opposing_chains():
 
 def test_14_pair():
     """MET 0: N - CG, 1-4 pair (at 4.12 A distance). Should have non-zero electrostatic energy and small non-zero vdw energy."""
-
     edge_14 = _get_contact("101M", 0, "CA", 0, "SD")
     assert edge_14.features[Efeat.DISTANCE] > cutoff_13
     assert edge_14.features[Efeat.DISTANCE] < cutoff_14
@@ -115,7 +114,6 @@ def test_14dist_opposing_chains():
     E_vdw for this pair if they were on the same chain: 0.018
     E_vdw for this pair on opposing chains: 0.146
     """
-
     opposing_edge = _get_contact("1A0Z", 114, "CA", 116, "CD2", chains=("A", "B"))
     assert opposing_edge.features[Efeat.DISTANCE] > cutoff_13
     assert opposing_edge.features[Efeat.DISTANCE] < cutoff_14
@@ -125,14 +123,12 @@ def test_14dist_opposing_chains():
 
 def test_vanderwaals_negative():
     """MET 0 N - ASP 27 CB, very far (29.54 A). Should have negative vanderwaals energy."""
-
     edge_far = _get_contact("101M", 0, "N", 27, "CB")
     assert edge_far.features[Efeat.VDW] < 0.0
 
 
 def test_vanderwaals_morenegative():
     """MET 0 N - PHE 138 CG, intermediate distance (12.69 A). Should have more negative vanderwaals energy than the far interaction."""
-
     edge_intermediate = _get_contact("101M", 0, "N", 138, "CG")
     edge_far = _get_contact("101M", 0, "N", 27, "CB")
     assert edge_intermediate.features[Efeat.VDW] < edge_far.features[Efeat.VDW]
@@ -140,7 +136,6 @@ def test_vanderwaals_morenegative():
 
 def test_edge_distance():
     """Check the edge distances."""
-
     edge_close = _get_contact("101M", 0, "N", 0, "CA")
     edge_intermediate = _get_contact("101M", 0, "N", 138, "CG")
     edge_far = _get_contact("101M", 0, "N", 27, "CB")
@@ -151,14 +146,12 @@ def test_edge_distance():
 
 def test_attractive_electrostatic_close():
     """ARG 139 CZ - GLU 136 OE2, very close (5.60 A). Should have attractive electrostatic energy."""
-
     close_attracting_edge = _get_contact("101M", 139, "CZ", 136, "OE2")
     assert close_attracting_edge.features[Efeat.ELEC] < 0.0
 
 
 def test_attractive_electrostatic_far():
     """ARG 139 CZ - ASP 20 OD2, far (24.26 A). Should have attractive more electrostatic energy than above."""
-
     far_attracting_edge = _get_contact("101M", 139, "CZ", 20, "OD2")
     close_attracting_edge = _get_contact("101M", 139, "CZ", 136, "OE2")
     assert far_attracting_edge.features[Efeat.ELEC] < 0.0, "far electrostatic > 0"
@@ -167,14 +160,12 @@ def test_attractive_electrostatic_far():
 
 def test_repulsive_electrostatic():
     """GLU 109 OE2 - GLU 105 OE1 (9.64 A). Should have repulsive electrostatic energy."""
-
     opposing_edge = _get_contact("101M", 109, "OE2", 105, "OE1")
     assert opposing_edge.features[Efeat.ELEC] > 0.0
 
 
 def test_residue_contact():
     """Check that we can calculate features for residue contacts."""
-
     res_edge = _get_contact("101M", 0, "", 1, "", residue_level=True)
     assert res_edge.features[Efeat.DISTANCE] > 0.0, "distance <= 0"
     assert res_edge.features[Efeat.DISTANCE] < 1e5, "distance > 1e5"

@@ -1,23 +1,25 @@
 import logging
 import os
 import subprocess
-from typing import List, Union
-
+from typing import List
+from typing import Union
 import numpy as np
-from deeprank2.domain.aminoacidlist import amino_acids
-from deeprank2.molstruct.atom import Atom, AtomicElement
-from deeprank2.molstruct.pair import Pair
-from deeprank2.molstruct.residue import Residue
-from deeprank2.molstruct.structure import Chain, PDBStructure
 from pdb2sql import interface as get_interface
 from scipy.spatial import distance_matrix
+from deeprank2.domain.aminoacidlist import amino_acids
+from deeprank2.molstruct.atom import Atom
+from deeprank2.molstruct.atom import AtomicElement
+from deeprank2.molstruct.pair import Pair
+from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.structure import Chain
+from deeprank2.molstruct.structure import PDBStructure
+
 
 _log = logging.getLogger(__name__)
 
 
 def add_hydrogens(input_pdb_path, output_pdb_path):
     """This requires reduce: https://github.com/rlabduke/reduce."""
-
     with open(output_pdb_path, "wt", encoding="utf-8") as f:
         p = subprocess.run(["reduce", input_pdb_path], stdout=subprocess.PIPE, check=True)
         for line in p.stdout.decode().split("\n"):
@@ -75,7 +77,6 @@ def _add_atom_data_to_structure(
         residue_name (str): Pdb residue name: "ALA", "CYS", "ASP", etc.
         insertion_code (str): Pdb residue insertion code (can be empty) : '', 'A', 'B', 'C', etc.
     """
-
     # Make sure not to take the same atom twice.
     if altloc is not None and altloc != "" and altloc != "A":
         return
@@ -122,7 +123,6 @@ def get_structure(pdb, id_: str):
     Returns:
         PDBStructure: The structure object, giving access to chains, residues, atoms.
     """
-
     # We need these intermediary dicts to keep track of which residues and
     # chains have already been created.
     structure = PDBStructure(id_)
@@ -153,7 +153,6 @@ def get_contact_atoms(  # pylint: disable=too-many-locals
     pdb_path: str, chain_id1: str, chain_id2: str, distance_cutoff: float
 ) -> List[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
-
     interface = get_interface(pdb_path)
     try:
         atom_indexes = interface.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2)
@@ -192,7 +191,6 @@ def get_residue_contact_pairs(  # pylint: disable=too-many-locals
     Returns:
         List[Pair]: The pairs of contacting residues.
     """
-
     # Find out which residues are pairs
     interface = get_interface(pdb_path)
     try:
@@ -247,7 +245,6 @@ def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Res
     Returns:
         (a set of deeprank residues): The surrounding residues.
     """
-
     structure_atoms = structure.get_atoms()
     residue_atoms = residue.atoms
 

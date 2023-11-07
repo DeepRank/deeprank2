@@ -3,13 +3,14 @@
 import itertools
 import logging
 from enum import Enum
-from typing import Dict, List, Union
-
+from typing import Dict
+from typing import List
+from typing import Union
 import h5py
 import numpy as np
 from scipy.signal import bspline
-
 from deeprank2.domain import gridstorage
+
 
 _log = logging.getLogger(__name__)
 
@@ -93,7 +94,6 @@ class Grid:
 
     def _set_mesh(self, center: np.ndarray, settings: GridSettings):
         """Builds the grid points."""
-
         half_size_x = settings.sizes[0] / 2
         half_size_y = settings.sizes[1] / 2
         half_size_z = settings.sizes[2] / 2
@@ -149,7 +149,6 @@ class Grid:
 
         This method may be called repeatedly to add on to existing grid point values.
         """
-
         if feature_name not in self._features:
             self._features[feature_name] = data
         else:
@@ -233,7 +232,6 @@ class Grid:
         Returns:
             np.ndarray: The mapped density.
         """
-
         distances = np.sqrt(np.square(self.xgrid - position[0]) + np.square(self.ygrid - position[1]) + np.square(self.zgrid - position[2]))
 
         density_data = np.zeros(distances.shape)
@@ -261,7 +259,6 @@ class Grid:
 
         The feature_value should either be a single number or a one-dimensional array.
         """
-
         # determine whether we're dealing with a single number of multiple numbers:
         index_names_values = []
         if isinstance(feature_value, float):
@@ -294,7 +291,6 @@ class Grid:
 
     def to_hdf5(self, hdf5_path: str):
         """Write the grid data to hdf5, according to deeprank standards."""
-
         with h5py.File(hdf5_path, "a") as hdf5_file:
             # create a group to hold everything
             grid_group = hdf5_file.require_group(self.id)

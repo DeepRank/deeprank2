@@ -1,4 +1,5 @@
-from typing import Callable, Optional
+from typing import Callable
+from typing import Optional
 
 
 class EarlyStopping:
@@ -29,7 +30,6 @@ class EarlyStopping:
             trace_func (Callable, optional): Function used for recording EarlyStopping status.
                 Defaults to print.
         """
-
         self.patience = patience
         self.delta = delta
         self.maxgap = maxgap

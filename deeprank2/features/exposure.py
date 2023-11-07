@@ -3,17 +3,18 @@ import signal
 import sys
 import warnings
 from typing import Optional
-
 import numpy as np
 from Bio.PDB.Atom import PDBConstructionWarning
 from Bio.PDB.HSExposure import HSExposureCA
 from Bio.PDB.PDBParser import PDBParser
-from Bio.PDB.ResidueDepth import get_surface, residue_depth
-
+from Bio.PDB.ResidueDepth import get_surface
+from Bio.PDB.ResidueDepth import residue_depth
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
+
 
 _log = logging.getLogger(__name__)
 

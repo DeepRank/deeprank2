@@ -1,13 +1,13 @@
 import logging
 from typing import Optional
-
 import freesasa
 import numpy as np
-
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
+
 
 # pylint: disable=c-extension-no-member
 
@@ -126,9 +126,9 @@ def add_bsa(graph: Graph):
 def add_features(  # pylint: disable=unused-argument
     pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None
 ):
-    """calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
-    BSA: the area of the protein, that only gets exposed in monomeric state"""
-
+    """Calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
+    BSA: the area of the protein, that only gets exposed in monomeric state
+    """
     # BSA
     add_bsa(graph)
 

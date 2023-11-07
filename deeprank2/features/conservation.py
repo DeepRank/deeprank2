@@ -1,11 +1,10 @@
 from typing import Optional
-
 import numpy as np
-
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain.aminoacidlist import amino_acids
 from deeprank2.molstruct.atom import Atom
-from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.molstruct.residue import Residue
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 

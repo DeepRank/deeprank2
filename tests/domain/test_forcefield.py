@@ -1,7 +1,7 @@
-from deeprank2.domain.aminoacidlist import arginine, glutamate
-from deeprank2.utils.buildgraph import get_structure
 from pdb2sql import pdb2sql
-
+from deeprank2.domain.aminoacidlist import arginine
+from deeprank2.domain.aminoacidlist import glutamate
+from deeprank2.utils.buildgraph import get_structure
 from deeprank2.utils.parsing import atomic_forcefield
 
 
