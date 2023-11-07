@@ -55,7 +55,7 @@ class TestOutputExporters(unittest.TestCase):
         targets = [0, 1, 1]
         loss = 0.1
 
-        def _check_scalar(name, scalar, timestep):  # pylint: disable=unused-argument
+        def _check_scalar(name, scalar, timestep):
             if name == f"{pass_name} cross entropy loss":
                 assert scalar < 1.0
             else:
@@ -79,7 +79,7 @@ class TestOutputExporters(unittest.TestCase):
 
         assert os.path.isfile(scatterplot_exporter.get_filename(epoch_number))
 
-    def test_hdf5_output(self):  # pylint: disable=too-many-locals
+    def test_hdf5_output(self):
         output_exporter = HDF5OutputExporter(self._work_dir)
         path_output_exporter = os.path.join(self._work_dir, "output_exporter.hdf5")
         entry_names = ["entry1", "entry2", "entry3"]

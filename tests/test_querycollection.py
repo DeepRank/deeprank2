@@ -21,7 +21,7 @@ from deeprank2.query import SingleResidueVariantQuery
 from deeprank2.tools.target import compute_ppi_scores
 
 
-def _querycollection_tester(  # pylint: disable=dangerous-default-value
+def _querycollection_tester(
     query_type: str,
     n_queries: int = 3,
     feature_modules: Union[ModuleType, List[ModuleType]] = [components, contact],
@@ -249,7 +249,6 @@ def test_querycollection_duplicates_add():
         model_ids.append(query.model_id)
     model_ids.sort()
 
-    # pylint: disable=protected-access
     assert model_ids == ["1ATN_1w", "1ATN_1w_2", "1ATN_1w_3", "1ATN_2w", "1ATN_2w_2", "1ATN_3w"]
     assert queries._ids_count["residue-ppi:A-B:1ATN_1w"] == 3
     assert queries._ids_count["residue-ppi:A-B:1ATN_2w"] == 2

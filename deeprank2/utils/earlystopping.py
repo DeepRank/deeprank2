@@ -3,7 +3,7 @@ from typing import Optional
 
 
 class EarlyStopping:
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         patience: int = 10,
         delta: float = 0,

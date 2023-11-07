@@ -28,7 +28,7 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer:
-    def __init__(  # pylint: disable=too-many-arguments # noqa: MC0001
+    def __init__(
         self,
         neuralnet=None,
         dataset_train: Optional[Union[GraphDataset, GridDataset]] = None,
@@ -189,7 +189,7 @@ class Trainer:
             self._output_exporters = OutputExporterCollection(HDF5OutputExporter("./output"))
 
     def _init_datasets(
-        self,  # pylint: disable=too-many-arguments
+        self,
         dataset_train: Union[GraphDataset, GridDataset],
         dataset_val: Optional[Union[GraphDataset, GridDataset]],
         dataset_test: Optional[Union[GraphDataset, GridDataset]],
@@ -405,7 +405,7 @@ class Trainer:
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise e
 
-    def set_lossfunction(self, lossfunction=None, override_invalid: bool = False):  # pylint: disable=too-many-locals # noqa: MC0001
+    def set_lossfunction(self, lossfunction=None, override_invalid: bool = False):
         """
         Set the loss function.
 
@@ -483,7 +483,7 @@ class Trainer:
             else:
                 self.lossfunction = lossfunction  # weights will be set in the train() method
 
-    def train(  # pylint: disable=too-many-arguments, too-many-branches, too-many-locals # noqa: MC0001
+    def train(
         self,
         nepoch: int = 1,
         batch_size: int = 32,
@@ -688,9 +688,7 @@ class Trainer:
 
         return epoch_loss
 
-    def _eval(  # pylint: disable=too-many-locals
-        self, loader: DataLoader, epoch_number: int, pass_name: str
-    ) -> float:
+    def _eval(self, loader: DataLoader, epoch_number: int, pass_name: str) -> float:
         """
         Evaluates the model.
 

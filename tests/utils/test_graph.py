@@ -38,8 +38,7 @@ def graph():
     try:
         structure = get_structure(pdb, entry_id)
     finally:
-        pdb._close()  # pylint: disable=protected-access
-
+        pdb._close()
     # build a contact from two residues
     residue0 = structure.chains[0].residues[0]
     residue1 = structure.chains[0].residues[1]

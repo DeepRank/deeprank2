@@ -6,7 +6,7 @@ __author__ = "Daniel-Tobias Rademaker"
 
 
 class GNNLayer(nn.Module):
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         nmb_edge_projection,
         nmb_hidden_attr,
@@ -105,7 +105,7 @@ class GNNLayer(nn.Module):
 
 
 class SuperGNN(nn.Module):
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         nmb_edge_attr,
         nmb_node_attr,
@@ -174,7 +174,7 @@ class SuperGNN(nn.Module):
 
 
 class AlignmentGNN(SuperGNN):
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         nmb_edge_attr,
         nmb_node_attr,

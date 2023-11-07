@@ -36,23 +36,21 @@ class OutputExporter:
 
     def __exit__(self, exception_type, exception, traceback):
         """Overridable."""
-        pass  # pylint: disable=unnecessary-pass
+        pass
 
     def process(
         self,
         pass_name: str,
-        epoch_number: int,  # pylint: disable=too-many-arguments
+        epoch_number: int,
         entry_names: List[str],
         output_values: List[Any],
         target_values: List[Any],
         loss: float,
     ):
         """The entry_names, output_values, target_values MUST have the same length."""
-        pass  # pylint: disable=unnecessary-pass
+        pass
 
-    def is_compatible_with(  # pylint: disable=unused-argument
-        self, output_data_shape: int, target_data_shape: Optional[int] = None
-    ) -> bool:
+    def is_compatible_with(self, output_data_shape: int, target_data_shape: Optional[int] = None) -> bool:
         """True if this exporter can work with the given data shapes."""
         return True
 
@@ -76,7 +74,7 @@ class OutputExporterCollection:
     def process(
         self,
         pass_name: str,
-        epoch_number: int,  # pylint: disable=too-many-arguments
+        epoch_number: int,
         entry_names: List[str],
         output_values: List[Any],
         target_values: List[Any],
@@ -113,7 +111,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
     def process(
         self,
         pass_name: str,
-        epoch_number: int,  # pylint: disable=too-many-arguments, too-many-locals
+        epoch_number: int,
         entry_names: List[str],
         output_values: List[Any],
         target_values: List[Any],
@@ -138,10 +136,10 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
             elif prediction_value <= 0.0 and target_value <= 0.0:
                 tn += 1
 
-            elif prediction_value > 0.0 and target_value <= 0.0:  # pylint: disable=chained-comparison
+            elif prediction_value > 0.0 and target_value <= 0.0:
                 fp += 1
 
-            elif prediction_value <= 0.0 and target_value > 0.0:  # pylint: disable=chained-comparison
+            elif prediction_value <= 0.0 and target_value > 0.0:
                 fn += 1
 
         mcc_numerator = tn * tp - fp * fn
@@ -223,7 +221,7 @@ class ScatterPlotExporter(OutputExporter):
     def process(
         self,
         pass_name: str,
-        epoch_number: int,  # pylint: disable=too-many-arguments
+        epoch_number: int,
         entry_names: List[str],
         output_values: List[Any],
         target_values: List[Any],
@@ -277,9 +275,7 @@ class HDF5OutputExporter(OutputExporter):
 
             self.df.to_hdf(os.path.join(self._directory_path, "output_exporter.hdf5"), key=self.phase, mode="a")
 
-    def process(  # pylint: disable=too-many-arguments
-        self, pass_name: str, epoch_number: int, entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float
-    ):
+    def process(self, pass_name: str, epoch_number: int, entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
         self.phase = pass_name
         pass_name = [pass_name] * len(output_values)
         loss = [loss] * len(output_values)

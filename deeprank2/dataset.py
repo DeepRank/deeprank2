@@ -30,7 +30,7 @@ _log = logging.getLogger(__name__)
 
 class DeeprankDataset(Dataset):
     def __init__(
-        self,  # pylint: disable=too-many-arguments
+        self,
         hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]],
         target: Optional[str],
@@ -236,9 +236,7 @@ class DeeprankDataset(Dataset):
         """
         return len(self.index_entries)
 
-    def hdf5_to_pandas(  # noqa: MC0001, pylint: disable=too-many-locals
-        self
-    ) -> pd.DataFrame:
+    def hdf5_to_pandas(self) -> pd.DataFrame:
         """Loads features data from the HDF5 files into a Pandas DataFrame in the attribute `df` of the class.
 
         Returns:
@@ -292,7 +290,7 @@ class DeeprankDataset(Dataset):
 
         return df_final
 
-    def save_hist(  # pylint: disable=too-many-arguments, too-many-branches, useless-suppression
+    def save_hist(
         self,
         features: Union[str, List[str]],
         fname: str = "features_hist.png",
@@ -403,7 +401,7 @@ GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
 class GridDataset(DeeprankDataset):
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         hdf5_path: Union[str, list],
         subset: Optional[List[str]] = None,
@@ -605,7 +603,7 @@ class GridDataset(DeeprankDataset):
 
 
 class GraphDataset(DeeprankDataset):
-    def __init__(  # noqa: MC0001, pylint: disable=too-many-arguments, too-many-locals
+    def __init__(
         self,
         hdf5_path: Union[str, List[str]],
         subset: Optional[List[str]] = None,
@@ -763,7 +761,7 @@ class GraphDataset(DeeprankDataset):
         fname, mol = self.index_entries[idx]
         return self.load_one_graph(fname, mol)
 
-    def load_one_graph(self, fname: str, entry_name: str) -> Data:  # pylint: disable = too-many-locals # noqa: MC0001
+    def load_one_graph(self, fname: str, entry_name: str) -> Data:
         """Loads one graph.
 
         Args:
@@ -928,7 +926,7 @@ class GraphDataset(DeeprankDataset):
 
         return data
 
-    def _check_features(self):  # pylint: disable=too-many-branches
+    def _check_features(self):
         """Checks if the required features exist."""
         f = h5py.File(self.hdf5_paths[0], "r")
         mol_key = list(f.keys())[0]

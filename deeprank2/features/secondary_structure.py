@@ -97,7 +97,6 @@ def _get_secstructure(pdb_path: str) -> Dict:
     p = PDBParser(QUIET=True)
     model = p.get_structure(Path(pdb_path).stem, pdb_path)[0]
 
-    # pylint: disable=raise-missing-from
     try:
         dssp = DSSP(model, pdb_path, dssp="mkdssp")
     except Exception as e:  # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
@@ -123,9 +122,7 @@ def _get_secstructure(pdb_path: str) -> Dict:
     return sec_structure_dict
 
 
-def add_features(  # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None
-):
+def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
     sec_structure_features = _get_secstructure(pdb_path)
 
     for node in graph.nodes:
@@ -140,7 +137,6 @@ def add_features(  # pylint: disable=unused-argument
         chain_id = residue.chain.id
         res_num = residue.number
 
-        # pylint: disable=raise-missing-from
         try:
             node.features[Nfeat.SECSTRUCT] = _classify_secstructure(sec_structure_features[chain_id][res_num]).onehot
         except AttributeError:

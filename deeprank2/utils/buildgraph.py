@@ -36,7 +36,7 @@ _elements_by_name = {element.name: element for element in AtomicElement}
 
 
 def _add_atom_data_to_structure(
-    structure: PDBStructure,  # pylint: disable=too-many-arguments, too-many-locals
+    structure: PDBStructure,
     x: float,
     y: float,
     z: float,
@@ -137,9 +137,7 @@ def get_structure(pdb, id_: str) -> PDBStructure:
     return structure
 
 
-def get_contact_atoms(  # pylint: disable=too-many-locals
-    pdb_path: str, chain_ids: List[str], distance_cutoff: float
-) -> List[Atom]:
+def get_contact_atoms(pdb_path: str, chain_ids: List[str], distance_cutoff: float) -> List[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
     interface = get_interface(pdb_path)
     try:
@@ -150,7 +148,7 @@ def get_contact_atoms(  # pylint: disable=too-many-locals
         )
         rows = interface.get("x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode", rowID=atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]])
     finally:
-        interface._close()  # pylint: disable=protected-access
+        interface._close()
 
     pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
     structure = PDBStructure(f"contact_atoms_{pdb_name}")
@@ -163,7 +161,7 @@ def get_contact_atoms(  # pylint: disable=too-many-locals
     return structure.get_atoms()
 
 
-def get_residue_contact_pairs(  # pylint: disable=too-many-locals
+def get_residue_contact_pairs(
     pdb_path: str,
     structure: PDBStructure,
     chain_id1: str,
@@ -192,7 +190,7 @@ def get_residue_contact_pairs(  # pylint: disable=too-many-locals
             return_contact_pairs=True,
         )
     finally:
-        interface._close()  # pylint: disable=protected-access
+        interface._close()
 
     # Map to residue objects
     residue_pairs = set([])
@@ -209,7 +207,7 @@ def get_residue_contact_pairs(  # pylint: disable=too-many-locals
         else:
             raise ValueError(f"Not found: {pdb_path} {residue_chain_id1} {residue_number1} {residue_name1}")
 
-        for residue_chain_id2, residue_number2, residue_name2 in contact_residues[residue_key1]:  # pylint: disable=unnecessary-dict-index-lookup
+        for residue_chain_id2, residue_number2, residue_name2 in contact_residues[residue_key1]:
             chain2 = structure.get_chain(residue_chain_id2)
 
             residue2 = None

@@ -22,7 +22,7 @@ class AtomicElement(Enum):
 
 
 class Atom:
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         residue: Residue,
         name: str,

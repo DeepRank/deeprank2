@@ -13,7 +13,7 @@ def test_get_structure_complete():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()
 
     assert structure is not None
 
@@ -42,7 +42,7 @@ def test_get_structure_from_nmr_with_dna():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()
 
     assert structure is not None
     assert structure.chains[0].residues[0].amino_acid is None  # DNA
@@ -58,7 +58,7 @@ def test_residue_contact_pairs():
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()
 
     residue_pairs = get_residue_contact_pairs(pdb_path, structure, "A", "B", 8.5)
 
@@ -72,7 +72,7 @@ def test_surrounding_residues():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()
 
     all_residues = structure.get_chain("A").residues
 

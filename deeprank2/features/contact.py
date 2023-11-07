@@ -23,7 +23,7 @@ cutoff_13 = 3.6
 cutoff_14 = 4.2
 
 
-def _get_nonbonded_energy(  # pylint: disable=too-many-locals
+def _get_nonbonded_energy(
     atoms: List[Atom],
     distances: npt.NDArray[np.float64],
 ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
@@ -75,9 +75,7 @@ def _get_nonbonded_energy(  # pylint: disable=too-many-locals
     return E_elec, E_vdw
 
 
-def add_features(  # pylint: disable=unused-argument, too-many-locals
-    pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None
-):
+def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
     # assign each atoms (from all edges) a unique index
     all_atoms = set()
     if isinstance(graph.edges[0].id, AtomicContact):

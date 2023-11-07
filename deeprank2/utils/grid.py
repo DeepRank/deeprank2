@@ -188,9 +188,7 @@ class Grid:
 
         return value * bsp_data
 
-    def _get_mapped_feature_nearest_neighbour(  # pylint: disable=too-many-locals
-        self, position: np.ndarray, value: float
-    ) -> np.ndarray:
+    def _get_mapped_feature_nearest_neighbour(self, position: np.ndarray, value: float) -> np.ndarray:
         fx, _, _ = position
         distances_x = np.abs(self.xs - fx)
         distances_y = np.abs(self.ys - fx)

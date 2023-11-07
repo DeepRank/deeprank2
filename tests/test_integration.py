@@ -29,7 +29,7 @@ chain_id2 = "B"
 count_queries = 3
 
 
-def test_cnn():  # pylint: disable=too-many-locals
+def test_cnn():
     """
     Tests processing several PDB files into their features representation HDF5 file.
 
@@ -98,7 +98,7 @@ def test_cnn():  # pylint: disable=too-many-locals
         rmtree(output_directory)
 
 
-def test_gnn():  # pylint: disable=too-many-locals
+def test_gnn():
     """
     Tests processing several PDB files into their features representation HDF5 file.
 

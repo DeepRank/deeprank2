@@ -20,9 +20,7 @@ from deeprank2.domain import targetstorage as targets
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 
-def _compute_features_manually(  # noqa: MC0001, pylint: disable=too-many-locals
-    hdf5_path: str, features_transform: dict, feat: str
-):
+def _compute_features_manually(hdf5_path: str, features_transform: dict, feat: str):
     # This function returns the feature specified read from the hdf5 file,
     # after applying manually features_transform dict. It returns its mean
     # and its std after having applied eventual transformations.
@@ -394,7 +392,7 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
 
-    def test_logic_train_graphdataset(self):  # noqa: MC0001, pylint: disable=too-many-locals
+    def test_logic_train_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
         # without specifying features_transform in training set
@@ -422,7 +420,7 @@ class TestDataSet(unittest.TestCase):
                 target="binary",
             )
 
-    def test_only_transform_graphdataset(self):  # noqa: MC0001, pylint: disable=too-many-locals
+    def test_only_transform_graphdataset(self):
         # define a features_transform dict for only transformations,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse) and a case with transform equals to None (sasa)
@@ -430,7 +428,7 @@ class TestDataSet(unittest.TestCase):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {
             "bsa": {"transform": lambda t: np.log(t + 10)},
-            "electrostatic": {"transform": lambda t: np.cbrt(t)},  # pylint: disable=unnecessary-lambda
+            "electrostatic": {"transform": lambda t: np.cbrt(t)},
             "sasa": {"transform": None},
             "hse": {"transform": lambda t: np.log(t + 10)},
         }
@@ -502,7 +500,7 @@ class TestDataSet(unittest.TestCase):
 
         assert (sorted(checked_features) == sorted(list(features_transform.keys()))) and (len(checked_features) == len(features_transform.keys()))
 
-    def test_only_transform_all_graphdataset(self):  # noqa: MC0001, pylint: disable=too-many-locals
+    def test_only_transform_all_graphdataset(self):
         # define a features_transform dict for only transformations for `all` features
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
@@ -560,7 +558,7 @@ class TestDataSet(unittest.TestCase):
 
         assert (sorted(checked_features) == sorted(features)) and (len(checked_features) == len(features))
 
-    def test_only_standardize_graphdataset(self):  # pylint: disable=too-many-locals
+    def test_only_standardize_graphdataset(self):
         # define a features_transform dict for only standardization,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse) and a case with standardize False (sasa)
@@ -634,7 +632,7 @@ class TestDataSet(unittest.TestCase):
 
         assert (sorted(checked_features) == sorted(list(features_transform.keys()))) and (len(checked_features) == len(features_transform.keys()))
 
-    def test_only_standardize_all_graphdataset(self):  # pylint: disable=too-many-locals
+    def test_only_standardize_all_graphdataset(self):
         # define a features_transform dict for only standardization for `all` features
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {"all": {"standardize": True}}
@@ -686,7 +684,7 @@ class TestDataSet(unittest.TestCase):
 
         assert (sorted(checked_features) == sorted(features)) and (len(checked_features) == len(features))
 
-    def test_transform_standardize_graphdataset(self):  # noqa: MC0001, pylint: disable=too-many-locals
+    def test_transform_standardize_graphdataset(self):
         # define a features_transform dict for both transformations and standardization,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse)
@@ -694,7 +692,7 @@ class TestDataSet(unittest.TestCase):
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {
             "bsa": {"transform": lambda t: np.log(t + 10), "standardize": True},
-            "electrostatic": {"transform": lambda t: np.cbrt(t), "standardize": True},  # pylint: disable=unnecessary-lambda
+            "electrostatic": {"transform": lambda t: np.cbrt(t), "standardize": True},
             "sasa": {"transform": None, "standardize": False},
             "hse": {"transform": lambda t: np.log(t + 10), "standardize": False},
         }
@@ -766,7 +764,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_features_transform_logic_graphdataset(self):
         hdf5_path = "tests/data/hdf5/train.hdf5"
-        features_transform = {"all": {"transform": lambda t: np.cbrt(t), "standardize": True}}  # pylint: disable=unnecessary-lambda
+        features_transform = {"all": {"transform": lambda t: np.cbrt(t), "standardize": True}}
         other_feature_transform = {"all": {"transform": None, "standardize": False}}
 
         dataset_train = GraphDataset(hdf5_path=hdf5_path, features_transform=features_transform, target="binary")

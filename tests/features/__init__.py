@@ -25,7 +25,7 @@ def _get_residue(chain: Chain, number: int) -> Residue:
     raise ValueError(f"Not found: {number}")
 
 
-def build_testgraph(  # pylint: disable=too-many-locals, too-many-arguments # noqa:MC0001
+def build_testgraph(
     pdb_path: str,
     cutoff: float,
     detail: str,
@@ -58,9 +58,9 @@ def build_testgraph(  # pylint: disable=too-many-locals, too-many-arguments # no
     try:
         structure: PDBStructure = get_structure(pdb, Path(pdb_path).stem)
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()
 
-    if not central_res:  # pylint: disable=no-else-raise
+    if not central_res:
         nodes = set([])
         if not chain_ids:
             chains = (structure.chains[0].id, structure.chains[1].id)

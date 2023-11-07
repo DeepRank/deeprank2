@@ -63,7 +63,7 @@ class AtomicForcefield:
                 if action.type in [PatchActionType.MODIFY, PatchActionType.ADD] and residue_class == action.selection.residue_type and "TYPE" in action:
                     type_ = action["TYPE"]
 
-        if type_ is None:  # pylint: disable=no-else-return
+        if type_ is None:
             _log.warning(f"Atom {atom} is unknown to the forcefield; vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0)")
             return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
         else:
@@ -93,7 +93,7 @@ class AtomicForcefield:
                 if action.type in [PatchActionType.MODIFY, PatchActionType.ADD] and residue_class == action.selection.residue_type:
                     charge = float(action["CHARGE"])
 
-        if charge is None:  # pylint: disable=no-else-return
+        if charge is None:
             _log.warning(f"Atom {atom} is unknown to the forcefield; charge is set to 0.0")
             return 0.0
         else:

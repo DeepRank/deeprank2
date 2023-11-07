@@ -31,7 +31,7 @@ def _wrap_in_graph(edge: Edge):
     return g
 
 
-def _get_contact(  # pylint: disable=too-many-arguments
+def _get_contact(
     pdb_id: str,
     residue_num1: int,
     atom_name1: str,
@@ -46,7 +46,7 @@ def _get_contact(  # pylint: disable=too-many-arguments
     try:
         structure = get_structure(pdb, pdb_id)
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()
 
     if not chains:
         chains = [structure.chains[0], structure.chains[0]]

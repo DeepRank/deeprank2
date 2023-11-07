@@ -18,7 +18,7 @@ class Polarity(Enum):
 
 
 class AminoAcid:
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         name: str,
         three_letter_code: str,

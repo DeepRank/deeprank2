@@ -9,7 +9,7 @@ def test_add_pssm():
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()
 
     for chain in structure.chains:
         with open(f"tests/data/pssm/1ATN/1ATN.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:

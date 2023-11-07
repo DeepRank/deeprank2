@@ -143,7 +143,7 @@ class Graph:
     def _map_point_features(
         self,
         grid: Grid,
-        method: MapMethod,  # pylint: disable=too-many-arguments
+        method: MapMethod,
         feature_name: str,
         points: List[np.ndarray],
         values: List[Union[float, np.ndarray]],
@@ -187,7 +187,7 @@ class Graph:
         for feature_name, values in feature_values.items():
             self._map_point_features(grid, method, feature_name, points, values, augmentation)
 
-    def write_to_hdf5(self, hdf5_path: str):  # pylint: disable=too-many-locals
+    def write_to_hdf5(self, hdf5_path: str):
         """Write a featured graph to an hdf5 file, according to deeprank standards."""
         with h5py.File(hdf5_path, "a") as hdf5_file:
             # create groups to hold data
@@ -295,9 +295,7 @@ class Graph:
         return list(chains)
 
 
-def build_atomic_graph(  # pylint: disable=too-many-locals
-    atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
-) -> Graph:
+def build_atomic_graph(atoms: List[Atom], graph_id: str, edge_distance_cutoff: float) -> Graph:
     """Builds a graph, using the atoms as nodes.
 
     The edge distance cutoff is in Ångströms.
@@ -328,9 +326,7 @@ def build_atomic_graph(  # pylint: disable=too-many-locals
     return graph
 
 
-def build_residue_graph(  # pylint: disable=too-many-locals
-    residues: List[Residue], graph_id: str, edge_distance_cutoff: float
-) -> Graph:
+def build_residue_graph(residues: List[Residue], graph_id: str, edge_distance_cutoff: float) -> Graph:
     """Builds a graph, using the residues as nodes.
 
     The edge distance cutoff is in Ångströms.

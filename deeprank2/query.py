@@ -105,7 +105,7 @@ class Query:
         try:
             structure = get_structure(pdb, self.model_id)
         finally:
-            pdb._close()  # pylint: disable=protected-access
+            pdb._close()
         # read the pssm
         if self._pssm_required:
             self._load_pssm_data(structure)
@@ -471,7 +471,7 @@ class QueryCollection:
             )
             _log.exception(e)
 
-    def process(  # pylint: disable=too-many-arguments, too-many-locals, dangerous-default-value
+    def process(
         self,
         prefix: str = "processed-queries",
         feature_modules: list[ModuleType, str] | ModuleType | str | Literal["all"] = [components, contact],

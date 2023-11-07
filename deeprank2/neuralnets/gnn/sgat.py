@@ -81,7 +81,7 @@ class SGraphAttentionLayer(torch.nn.Module):
 
 
 class SGAT(torch.nn.Module):
-    def __init__(self, input_shape, output_shape=1, input_shape_edge=None):  # pylint: disable=unused-argument
+    def __init__(self, input_shape, output_shape=1, input_shape_edge=None):
         super().__init__()
 
         self.conv1 = SGraphAttentionLayer(input_shape, 16)

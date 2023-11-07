@@ -19,7 +19,7 @@ from deeprank2.utils.graph import Graph
 _log = logging.getLogger(__name__)
 
 
-def handle_sigint(sig, frame):  # pylint: disable=unused-argument
+def handle_sigint(sig, frame):
     print("SIGINT received, terminating.")
     sys.exit()
 
@@ -34,9 +34,7 @@ def space_if_none(value):
     return value
 
 
-def add_features(  # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None
-):
+def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)
 

@@ -31,7 +31,7 @@ _log = logging.getLogger(__name__)
 default_features = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 
-def _model_base_test(  # pylint: disable=too-many-arguments, too-many-locals
+def _model_base_test(
     save_path,
     model_class,
     train_hdf5_path,

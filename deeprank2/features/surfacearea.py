@@ -9,8 +9,6 @@ from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 
-# pylint: disable=c-extension-no-member
-
 freesasa.setVerbosity(freesasa.nowarnings)
 logging.getLogger(__name__)
 
@@ -109,13 +107,13 @@ def add_bsa(graph: Graph):
             residue = node.id
             chain_id = residue.chain.id
             area_key = "residue"
-            selection = ("residue, (resi %s) and (chain %s)" % (residue.number_string, residue.chain.id),)  # pylint: disable=consider-using-f-string
+            selection = ("residue, (resi %s) and (chain %s)" % (residue.number_string, residue.chain.id),)
 
         elif isinstance(node.id, Atom):
             atom = node.id
             chain_id = atom.residue.chain.id
             area_key = "atom"
-            selection = ("atom, (name %s) and (resi %s) and (chain %s)" % (atom.name, atom.residue.number_string, atom.residue.chain.id),)  # pylint: disable=consider-using-f-string
+            selection = ("atom, (name %s) and (resi %s) and (chain %s)" % (atom.name, atom.residue.number_string, atom.residue.chain.id),)
 
         area_monomer = freesasa.selectArea(selection, sasa_chain_structures[chain_id], sasa_chain_results[chain_id])[area_key]
         area_multimer = freesasa.selectArea(selection, sasa_complete_structure, sasa_complete_result)[area_key]
@@ -123,9 +121,7 @@ def add_bsa(graph: Graph):
         node.features[Nfeat.BSA] = area_monomer - area_multimer
 
 
-def add_features(  # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None
-):
+def add_features(pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None):
     """Calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA).
 
     BSA: the area of the protein, that only gets exposed in monomeric state.
