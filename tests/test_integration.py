@@ -10,7 +10,7 @@ from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification
 from deeprank2.neuralnets.gnn.ginet import GINet
-from deeprank2.query import ProteinProteinInterfaceResidueQuery
+from deeprank2.query import ProteinProteinInterfaceQuery
 from deeprank2.query import QueryCollection
 from deeprank2.tools.target import compute_ppi_scores
 from deeprank2.trainer import Trainer
@@ -41,15 +41,17 @@ def test_cnn():  # pylint: disable=too-many-locals
 
     prefix = os.path.join(hdf5_directory, "test-queries-process")
 
-    all_targets = compute_ppi_scores(pdb_path, ref_path)
-
     try:
         all_targets = compute_ppi_scores(pdb_path, ref_path)
 
         queries = QueryCollection()
         for _ in range(count_queries):
-            query = ProteinProteinInterfaceResidueQuery(
-                pdb_path, chain_id1, chain_id2, pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2}, targets=all_targets
+            query = ProteinProteinInterfaceQuery(
+                pdb_path=pdb_path,
+                resolution="residue",
+                chain_ids=[chain_id1, chain_id2],
+                pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
+                targets=all_targets,
             )
             queries.add(query)
 
@@ -113,8 +115,12 @@ def test_gnn():  # pylint: disable=too-many-locals
 
         queries = QueryCollection()
         for _ in range(count_queries):
-            query = ProteinProteinInterfaceResidueQuery(
-                pdb_path, chain_id1, chain_id2, pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2}, targets=all_targets
+            query = ProteinProteinInterfaceQuery(
+                pdb_path=pdb_path,
+                resolution="residue",
+                chain_ids=[chain_id1, chain_id2],
+                pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
+                targets=all_targets,
             )
             queries.add(query)
 

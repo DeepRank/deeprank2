@@ -10,7 +10,7 @@ def _get_structure(path) -> PDBStructure:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close()  # pylint: disable=protected-access
 
     assert structure is not None
 

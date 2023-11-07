@@ -2,6 +2,7 @@ import os
 import shutil
 from tempfile import mkdtemp
 from tempfile import mkstemp
+from typing import List
 import h5py
 import numpy as np
 import pytest
@@ -23,16 +24,19 @@ from deeprank2.features import components
 from deeprank2.features import conservation
 from deeprank2.features import contact
 from deeprank2.features import surfacearea
-from deeprank2.query import ProteinProteinInterfaceAtomicQuery
-from deeprank2.query import ProteinProteinInterfaceResidueQuery
+from deeprank2.query import ProteinProteinInterfaceQuery
 from deeprank2.query import QueryCollection
-from deeprank2.query import SingleResidueVariantAtomicQuery
-from deeprank2.query import SingleResidueVariantResidueQuery
+from deeprank2.query import SingleResidueVariantQuery
+from deeprank2.utils.graph import Graph
 from deeprank2.utils.grid import GridSettings
 from deeprank2.utils.grid import MapMethod
 
 
-def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
+def _check_graph_makes_sense(
+    g: Graph,
+    node_feature_names: List[str],
+    edge_feature_names: List[str],
+):
     assert len(g.nodes) > 0, "no nodes"
     assert Nfeat.POSITION in g.nodes[0].features
 
@@ -83,18 +87,17 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
 
 def test_interface_graph_residue():
-    query = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
+    query = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="residue",
+        chain_ids=["A", "B"],
+        pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
             "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
         },
     )
 
     g = query.build([surfacearea, components, conservation, contact])
-
     _check_graph_makes_sense(
         g,
         [
@@ -108,21 +111,18 @@ def test_interface_graph_residue():
 
 
 def test_interface_graph_atomic():
-    query = ProteinProteinInterfaceAtomicQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
+    query = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="atom",
+        chain_ids=["A", "B"],
+        pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
             "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
         },
         distance_cutoff=4.5,
     )
 
-    # using a small cutoff here, because atomic graphs are big
-
     g = query.build([surfacearea, components, conservation, contact])
-
     _check_graph_makes_sense(
         g,
         [
@@ -136,23 +136,21 @@ def test_interface_graph_atomic():
 
 
 def test_variant_graph_101M():
-    query = SingleResidueVariantAtomicQuery(
-        "tests/data/pdb/101M/101M.pdb",
-        "A",
-        27,
-        None,
-        asparagine,
-        phenylalanine,
-        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+    query = SingleResidueVariantQuery(
+        pdb_path="tests/data/pdb/101M/101M.pdb",
+        resolution="atom",
+        chain_ids="A",
+        variant_residue_number=27,
+        insertion_code=None,
+        wildtype_amino_acid=asparagine,
+        variant_amino_acid=phenylalanine,
+        pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
         radius=5.0,
         distance_cutoff=5.0,
     )
 
-    # using a small cutoff here, because atomic graphs are big
-
     g = query.build([surfacearea, components, conservation, contact])
-
     _check_graph_makes_sense(
         g,
         [
@@ -171,14 +169,15 @@ def test_variant_graph_101M():
 
 
 def test_variant_graph_1A0Z():
-    query = SingleResidueVariantAtomicQuery(
-        "tests/data/pdb/1A0Z/1A0Z.pdb",
-        "A",
-        125,
-        None,
-        leucine,
-        arginine,
-        {
+    query = SingleResidueVariantQuery(
+        pdb_path="tests/data/pdb/1A0Z/1A0Z.pdb",
+        resolution="atom",
+        chain_ids="A",
+        variant_residue_number=125,
+        insertion_code=None,
+        wildtype_amino_acid=leucine,
+        variant_amino_acid=arginine,
+        pssm_paths={
             "A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm",
             "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
             "C": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm",
@@ -189,10 +188,7 @@ def test_variant_graph_1A0Z():
         radius=5.0,
     )
 
-    # using a small cutoff here, because atomic graphs are big
-
     g = query.build([surfacearea, components, conservation, contact])
-
     _check_graph_makes_sense(
         g,
         [
@@ -211,14 +207,15 @@ def test_variant_graph_1A0Z():
 
 
 def test_variant_graph_9API():
-    query = SingleResidueVariantAtomicQuery(
-        "tests/data/pdb/9api/9api.pdb",
-        "A",
-        310,
-        None,
-        lysine,
-        glutamate,
-        {
+    query = SingleResidueVariantQuery(
+        pdb_path="tests/data/pdb/9api/9api.pdb",
+        resolution="atom",
+        chain_ids="A",
+        variant_residue_number=310,
+        insertion_code=None,
+        wildtype_amino_acid=lysine,
+        variant_amino_acid=glutamate,
+        pssm_paths={
             "A": "tests/data/pssm/9api/9api.A.pdb.pssm",
             "B": "tests/data/pssm/9api/9api.B.pdb.pssm",
         },
@@ -227,10 +224,7 @@ def test_variant_graph_9API():
         radius=5.0,
     )
 
-    # using a small cutoff here, because atomic graphs are big
-
     g = query.build([surfacearea, components, conservation, contact])
-
     _check_graph_makes_sense(
         g,
         [
@@ -249,19 +243,19 @@ def test_variant_graph_9API():
 
 
 def test_variant_residue_graph_101M():
-    query = SingleResidueVariantResidueQuery(
-        "tests/data/pdb/101M/101M.pdb",
-        "A",
-        25,
-        None,
-        glycine,
-        alanine,
-        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+    query = SingleResidueVariantQuery(
+        pdb_path="tests/data/pdb/101M/101M.pdb",
+        resolution="residue",
+        chain_ids="A",
+        variant_residue_number=25,
+        insertion_code=None,
+        wildtype_amino_acid=glycine,
+        variant_amino_acid=alanine,
+        pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
     )
 
     g = query.build([surfacearea, components, conservation, contact])
-
     _check_graph_makes_sense(
         g,
         [
@@ -277,10 +271,12 @@ def test_variant_residue_graph_101M():
 
 
 def test_res_ppi():
-    query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/3MRC/3MRC.pdb", "M", "P")
-
+    query = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3MRC/3MRC.pdb",
+        resolution="residue",
+        chain_ids=["M", "P"],
+    )
     g = query.build([surfacearea, contact])
-
     _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELEC])
 
 
@@ -288,11 +284,11 @@ def test_augmentation():
     qc = QueryCollection()
 
     qc.add(
-        ProteinProteinInterfaceResidueQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
+        ProteinProteinInterfaceQuery(
+            pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+            resolution="residue",
+            chain_ids=["A", "B"],
+            pssm_paths={
                 "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
                 "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
             },
@@ -301,11 +297,11 @@ def test_augmentation():
     )
 
     qc.add(
-        ProteinProteinInterfaceAtomicQuery(
-            "tests/data/pdb/3C8P/3C8P.pdb",
-            "A",
-            "B",
-            {
+        ProteinProteinInterfaceQuery(
+            pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+            resolution="atom",
+            chain_ids=["A", "B"],
+            pssm_paths={
                 "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
                 "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
             },
@@ -314,27 +310,29 @@ def test_augmentation():
     )
 
     qc.add(
-        SingleResidueVariantResidueQuery(
-            "tests/data/pdb/101M/101M.pdb",
-            "A",
-            25,
-            None,
-            glycine,
-            alanine,
-            {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+        SingleResidueVariantQuery(
+            pdb_path="tests/data/pdb/101M/101M.pdb",
+            resolution="residue",
+            chain_ids="A",
+            variant_residue_number=25,
+            insertion_code=None,
+            wildtype_amino_acid=glycine,
+            variant_amino_acid=alanine,
+            pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
             targets={targets.BINARY: 0},
         )
     )
 
     qc.add(
-        SingleResidueVariantAtomicQuery(
-            "tests/data/pdb/101M/101M.pdb",
-            "A",
-            27,
-            None,
-            asparagine,
-            phenylalanine,
-            {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+        SingleResidueVariantQuery(
+            pdb_path="tests/data/pdb/101M/101M.pdb",
+            resolution="atom",
+            chain_ids="A",
+            variant_residue_number=27,
+            insertion_code=None,
+            wildtype_amino_acid=asparagine,
+            variant_amino_acid=phenylalanine,
+            pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
             targets={targets.BINARY: 0},
             radius=3.0,
         )
@@ -342,7 +340,6 @@ def test_augmentation():
 
     augmentation_count = 3
     grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
-
     expected_entry_count = (augmentation_count + 1) * len(qc)
 
     tmp_dir = mkdtemp()
@@ -365,11 +362,11 @@ def test_augmentation():
 
 
 def test_incorrect_pssm_order():
-    q = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
+    q = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="residue",
+        chain_ids=["A", "B"],
+        pssm_paths={
             "A": "tests/data/pssm/3C8P_incorrect/3C8P.A.wrong_order.pdb.pssm",
             "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
         },
@@ -384,16 +381,16 @@ def test_incorrect_pssm_order():
 
     # check that error suppression works
     with pytest.warns(UserWarning):
-        q._suppress = True  # pylint: disable = protected-access
+        q.suppress_pssm_errors = True
         _ = q.build(conservation)
 
 
 def test_incomplete_pssm():
-    q = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
+    q = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="residue",
+        chain_ids=["A", "B"],
+        pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
             "B": "tests/data/pssm/3C8P_incorrect/3C8P.B.missing_res.pdb.pssm",
         },
@@ -407,71 +404,72 @@ def test_incomplete_pssm():
 
     # check that error suppression works
     with pytest.warns(UserWarning):
-        q._suppress = True  # pylint: disable = protected-access
+        q.suppress_pssm_errors = True
         _ = q.build(conservation)
 
 
 def test_no_pssm_provided():
     # pssm_paths is empty dictionary
-    q_empty_dict = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {},
+    q_empty_dict = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="residue",
+        chain_ids=["A", "B"],
+        pssm_paths={},
     )
 
     # pssm_paths not provided
-    q_not_provided = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
+    q_not_provided = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="residue",
+        chain_ids=["A", "B"],
     )
 
     with pytest.raises(ValueError):
-        _ = q_empty_dict.build(conservation)
-        _ = q_not_provided.build(conservation)
+        _ = q_empty_dict.build([conservation])
+        _ = q_not_provided.build([conservation])
 
     # no error if conservation module is not used
-    _ = q_empty_dict.build(components)
-    _ = q_not_provided.build(components)
+    _ = q_empty_dict.build([components])
+    _ = q_not_provided.build([components])
 
 
 def test_incorrect_pssm_provided():
     # non-existing file
-    q_non_existing = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
+    q_non_existing = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="residue",
+        chain_ids=["A", "B"],
+        pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
             "B": "tests/data/pssm/3C8P_incorrect/dummy_non_existing_file.pssm",
         },
     )
 
     # missing file
-    q_missing = ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
+    q_missing = ProteinProteinInterfaceQuery(
+        pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
+        resolution="residue",
+        chain_ids=["A", "B"],
+        pssm_paths={
             "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
         },
     )
 
     with pytest.raises(FileNotFoundError):
-        _ = q_non_existing.build(conservation)
-        _ = q_missing.build(conservation)
+        _ = q_non_existing.build([conservation])
+        _ = q_missing.build([conservation])
 
     # no error if conservation module is not used
-    _ = q_non_existing.build(components)
-    _ = q_missing.build(components)
+    _ = q_non_existing.build([components])
+    _ = q_missing.build([components])
 
 
 def test_variant_query_multiple_chains():
-    q = SingleResidueVariantAtomicQuery(
+    q = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/2g98/pdb2g98.pdb",
-        chain_id="A",
-        residue_number=14,
+        resolution="atom",
+        chain_ids="A",
+        variant_residue_number=14,
         insertion_code=None,
         wildtype_amino_acid=arginine,
         variant_amino_acid=cysteine,
@@ -490,6 +488,6 @@ def test_variant_query_multiple_chains():
         _ = q.build(conservation)
 
     # at radius 7, chain B is not included in graph
-    q._radius = 7.0  # pylint: disable = protected-access
+    q.radius = 7.0
     graph = q.build(conservation)
     assert "B" not in graph.get_all_chains()
