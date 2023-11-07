@@ -1,4 +1,5 @@
 import numpy as np
+
 from deeprank2.domain.aminoacidlist import (amino_acids, cysteine, lysine,
                                             pyrrolysine, selenocysteine)
 
@@ -16,10 +17,10 @@ def test_all_different_onehot():
             if other != amino_acid:
                 try:
                     assert not np.all(amino_acid.onehot == other.onehot)
-                except AssertionError:
+                except AssertionError as e:
                     if other in EXCEPTIONS[0] and amino_acid in EXCEPTIONS[0]:
                         assert np.all(amino_acid.onehot == other.onehot)
                     elif other in EXCEPTIONS[1] and amino_acid in EXCEPTIONS[1]:
                         assert np.all(amino_acid.onehot == other.onehot)
                     else:
-                        raise AssertionError(f"one-hot index {amino_acid.index} is occupied by both {amino_acid} and {other}")
+                        raise AssertionError(f"one-hot index {amino_acid.index} is occupied by both {amino_acid} and {other}") from e

@@ -8,9 +8,9 @@ from typing import List, Union
 import h5py
 import numpy as np
 import pytest
-from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from torch_geometric.loader import DataLoader
 
+from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
@@ -321,7 +321,7 @@ class TestDataSet(unittest.TestCase):
         )
 
         for i in range(len(dataset)):
-            assert(0 <= dataset.get(i).y <= 1)
+            assert (0 <= dataset.get(i).y <= 1)
 
     def test_invalid_target_transform_graphdataset(self):
 

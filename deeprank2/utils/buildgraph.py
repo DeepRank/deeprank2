@@ -1,31 +1,21 @@
 import logging
 import os
-import subprocess
-from typing import List, Union
+from typing import List
 
 import numpy as np
+from pdb2sql import interface as get_interface
+from scipy.spatial import distance_matrix
+
 from deeprank2.domain.aminoacidlist import amino_acids
 from deeprank2.molstruct.atom import Atom, AtomicElement
 from deeprank2.molstruct.pair import Pair
 from deeprank2.molstruct.residue import Residue
 from deeprank2.molstruct.structure import Chain, PDBStructure
-from pdb2sql import interface as get_interface
-from scipy.spatial import distance_matrix
 
 _log = logging.getLogger(__name__)
 
 
-def add_hydrogens(input_pdb_path, output_pdb_path):
-    """This requires reduce: https://github.com/rlabduke/reduce."""
-
-    with open(output_pdb_path, "wt", encoding = "utf-8") as f:
-        p = subprocess.run(["reduce", input_pdb_path], stdout=subprocess.PIPE, check=True)
-        for line in p.stdout.decode().split("\n"):
-            f.write(line.replace("   new", "").replace("   std", "") + "\n")
-
-
 def _add_atom_to_residue(atom, residue):
-
     for other_atom in residue.atoms:
         if other_atom.name == atom.name:
             # Don't allow two atoms with the same name, pick the highest
@@ -115,7 +105,7 @@ def _add_atom_data_to_structure(structure: PDBStructure,  # pylint: disable=too-
     _add_atom_to_residue(atom, residue)
 
 
-def get_structure(pdb, id_: str):
+def get_structure(pdb, id_: str) -> PDBStructure:
     """Builds a structure from rows in a pdb file.
 
     Args:
@@ -165,22 +155,26 @@ def get_structure(pdb, id_: str):
 
 def get_contact_atoms( # pylint: disable=too-many-locals
     pdb_path: str,
-    chain_id1: str,
-    chain_id2: str,
+    chain_ids: List[str],
     distance_cutoff: float
 ) -> List[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
 
     interface = get_interface(pdb_path)
     try:
-        atom_indexes = interface.get_contact_atoms(cutoff=distance_cutoff, chain1=chain_id1, chain2=chain_id2)
-        rows = interface.get("x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
-                             rowID=atom_indexes[chain_id1] + atom_indexes[chain_id2])
+        atom_indexes = interface.get_contact_atoms(
+            cutoff=distance_cutoff,
+            chain1=chain_ids[0],
+            chain2=chain_ids[1],
+        )
+        rows = interface.get(
+            "x,y,z,name,element,altLoc,occ,chainID,resSeq,resName,iCode",
+            rowID=atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]]
+        )
     finally:
         interface._close()  # pylint: disable=protected-access
 
     pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
-
     structure = PDBStructure(f"contact_atoms_{pdb_name}")
 
     for row in rows:
@@ -288,7 +282,11 @@ def get_residue_contact_pairs( # pylint: disable=too-many-locals
     return residue_pairs
 
 
-def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Residue, radius: float):
+def get_surrounding_residues(
+    structure: Chain | PDBStructure,
+    residue: Residue,
+    radius: float,
+) -> list[Residue]:
     """Get the residues that lie within a radius around a residue.
 
     Args:
@@ -318,4 +316,4 @@ def get_surrounding_residues(structure: Union[Chain, PDBStructure], residue: Res
 
             close_residues.add(structure_atom.residue)
 
-    return close_residues
+    return list(close_residues)
