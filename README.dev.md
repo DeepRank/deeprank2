@@ -44,7 +44,7 @@ coverage report
 
 ## Linting
 
-We use [prospector](https://pypi.org/project/prospector/) with pyroma for linting. For running it locally, use `prospector` or `prospector <filepath_or_folderpath>` for specific files/folders.
+We use [ruff](https://docs.astral.sh/ruff/) for linting, sorting imports and formatting code. The configurations of `ruff` are set in [pyproject.toml](pyproject.toml) file.
 
 ## Versioning
 
