@@ -55,9 +55,7 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
 
             for model, _ in target_dict.items():
                 if model not in f5:
-                    raise ValueError(
-                        f"{hdf5} does not contain an entry named {model}"
-                    )
+                    raise ValueError(f"{hdf5} does not contain an entry named {model}")
 
                 try:
                     model_gp = f5[model]
@@ -84,7 +82,6 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
 
 
 def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
-
     """Compute structure similarity scores for the input docking model and return them as a dictionary.
 
     The computed scores are: `lrmsd` (ligand root mean square deviation), `irmsd` (interface rmsd),
@@ -106,12 +103,8 @@ def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Unio
 
     # Input pre-computed zone files
     if os.path.exists(ref_name + ".lzone"):
-        scores[targets.LRMSD] = sim.compute_lrmsd_fast(
-            method="svd", lzone=ref_name + ".lzone"
-        )
-        scores[targets.IRMSD] = sim.compute_irmsd_fast(
-            method="svd", izone=ref_name + ".izone"
-        )
+        scores[targets.LRMSD] = sim.compute_lrmsd_fast(method="svd", lzone=ref_name + ".lzone")
+        scores[targets.IRMSD] = sim.compute_irmsd_fast(method="svd", izone=ref_name + ".izone")
 
     # Compute zone files
     else:
@@ -119,9 +112,7 @@ def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Unio
         scores[targets.IRMSD] = sim.compute_irmsd_fast(method="svd")
 
     scores[targets.FNAT] = sim.compute_fnat_fast()
-    scores[targets.DOCKQ] = sim.compute_DockQScore(
-        scores[targets.FNAT], scores[targets.LRMSD], scores[targets.IRMSD]
-    )
+    scores[targets.DOCKQ] = sim.compute_DockQScore(scores[targets.FNAT], scores[targets.LRMSD], scores[targets.IRMSD])
     scores[targets.BINARY] = scores[targets.IRMSD] < 4.0
 
     scores[targets.CAPRI] = 4

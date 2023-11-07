@@ -7,30 +7,23 @@ from torch_scatter import scatter_mean, scatter_sum
 
 class GINetConvLayer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
-
         super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
 
         self.fc = nn.Linear(self.in_channels, self.out_channels, bias=bias)
-        self.fc_edge_attr = nn.Linear(
-            number_edge_features, number_edge_features, bias=bias
-        )
-        self.fc_attention = nn.Linear(
-            2 * self.out_channels + number_edge_features, 1, bias=bias
-        )
+        self.fc_edge_attr = nn.Linear(number_edge_features, number_edge_features, bias=bias)
+        self.fc_attention = nn.Linear(2 * self.out_channels + number_edge_features, 1, bias=bias)
         self.reset_parameters()
 
     def reset_parameters(self):
-
         size = self.in_channels
         uniform(size, self.fc.weight)
         uniform(size, self.fc_attention.weight)
         uniform(size, self.fc_edge_attr.weight)
 
     def forward(self, x, edge_index, edge_attr):
-
         row, col = edge_index
         num_node = len(x)
         edge_attr = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
@@ -85,14 +78,10 @@ class GINet(torch.nn.Module):
 
         # INTERNAL INTERACTION GRAPH
         # first conv block
-        data_ext.x = act(
-            self.conv1_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr)
-        )
+        data_ext.x = act(self.conv1_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr))
 
         # second conv block
-        data_ext.x = act(
-            self.conv2_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr)
-        )
+        data_ext.x = act(self.conv2_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr))
 
         # FC
         x = scatter_mean(data.x, data.batch, dim=0)

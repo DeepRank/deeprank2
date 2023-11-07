@@ -1,19 +1,17 @@
 import h5py
 import numpy as np
-from deeprank2.query import (ProteinProteinInterfaceAtomicQuery,
-                             ProteinProteinInterfaceResidueQuery)
+from deeprank2.query import ProteinProteinInterfaceAtomicQuery, ProteinProteinInterfaceResidueQuery
 from deeprank2.utils.grid import Grid, GridSettings, MapMethod
 
 
 def test_residue_grid_orientation():
-
     coord_error_margin = 1.0  # Angstrom
 
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]
 
     # Extract data from original deeprank's preprocessed file.
-    with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", 'r') as data_file:
+    with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", "r") as data_file:
         grid_points_group = data_file["1AK4/grid_points"]
 
         target_xs = grid_points_group["x"][()]
@@ -28,8 +26,7 @@ def test_residue_grid_orientation():
     chain_id2 = "D"
     distance_cutoff = 8.5
 
-    query = ProteinProteinInterfaceResidueQuery(pdb_path, chain_id1, chain_id2,
-                                                distance_cutoff=distance_cutoff)
+    query = ProteinProteinInterfaceResidueQuery(pdb_path, chain_id1, chain_id2, distance_cutoff=distance_cutoff)
 
     graph = query.build([])
 
@@ -54,14 +51,13 @@ def test_residue_grid_orientation():
 
 
 def test_atomic_grid_orientation():
-
     coord_error_margin = 1.0  # Angstrom
 
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]
 
     # Extract data from original deeprank's preprocessed file.
-    with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", 'r') as data_file:
+    with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", "r") as data_file:
         grid_points_group = data_file["1AK4/grid_points"]
 
         target_xs = grid_points_group["x"][()]
@@ -76,8 +72,7 @@ def test_atomic_grid_orientation():
     chain_id2 = "D"
     distance_cutoff = 8.5
 
-    query = ProteinProteinInterfaceAtomicQuery(pdb_path, chain_id1, chain_id2,
-                                               distance_cutoff=distance_cutoff)
+    query = ProteinProteinInterfaceAtomicQuery(pdb_path, chain_id1, chain_id2, distance_cutoff=distance_cutoff)
 
     graph = query.build([])
 

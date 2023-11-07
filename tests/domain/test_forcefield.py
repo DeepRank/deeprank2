@@ -6,12 +6,11 @@ from deeprank2.utils.parsing import atomic_forcefield
 
 
 def test_atomic_forcefield():
-
     pdb = pdb2sql("tests/data/pdb/101M/101M.pdb")
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close() # pylint: disable=protected-access
+        pdb._close()  # pylint: disable=protected-access
 
     # The arginine C-zeta should get a positive charge
     arg = [r for r in structure.get_chain("A").residues if r.amino_acid == arginine][0]

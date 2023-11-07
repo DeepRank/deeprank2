@@ -6,13 +6,14 @@ import h5py
 import numpy as np
 import pytest
 from deeprank2.dataset import GraphDataset, GridDataset
-from deeprank2.domain.aminoacidlist import (alanine, arginine, asparagine,
-                                            cysteine, glutamate, glycine,
-                                            leucine, lysine, phenylalanine)
-from deeprank2.query import (ProteinProteinInterfaceAtomicQuery,
-                             ProteinProteinInterfaceResidueQuery,
-                             QueryCollection, SingleResidueVariantAtomicQuery,
-                             SingleResidueVariantResidueQuery)
+from deeprank2.domain.aminoacidlist import alanine, arginine, asparagine, cysteine, glutamate, glycine, leucine, lysine, phenylalanine
+from deeprank2.query import (
+    ProteinProteinInterfaceAtomicQuery,
+    ProteinProteinInterfaceResidueQuery,
+    QueryCollection,
+    SingleResidueVariantAtomicQuery,
+    SingleResidueVariantResidueQuery,
+)
 from deeprank2.utils.grid import GridSettings, MapMethod
 
 from deeprank2.domain import edgestorage as Efeat
@@ -22,7 +23,6 @@ from deeprank2.features import components, conservation, contact, surfacearea
 
 
 def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
-
     assert len(g.nodes) > 0, "no nodes"
     assert Nfeat.POSITION in g.nodes[0].features
 
@@ -44,26 +44,16 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
         with h5py.File(tmp_path, "r") as f5:
             entry_group = f5[list(f5.keys())[0]]
             for feature_name in node_feature_names:
-                assert (
-                    entry_group[f"{Nfeat.NODE}/{feature_name}"][()].size > 0
-                ), f"no {feature_name} feature"
+                assert entry_group[f"{Nfeat.NODE}/{feature_name}"][()].size > 0, f"no {feature_name} feature"
 
-                assert (
-                    len(
-                        np.nonzero(
-                            entry_group[f"{Nfeat.NODE}/{feature_name}"][()]
-                        )
-                    )
-                    > 0
-                ), f"{feature_name}: all zero"
+                assert len(np.nonzero(entry_group[f"{Nfeat.NODE}/{feature_name}"][()])) > 0, f"{feature_name}: all zero"
 
             assert entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"][()].shape[1] == 2, "wrong edge index shape"
             assert entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0] > 0, "no edge indices"
 
             for feature_name in edge_feature_names:
                 assert (
-                    entry_group[f"{Efeat.EDGE}/{feature_name}"][()].shape[0]
-                    == entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
+                    entry_group[f"{Efeat.EDGE}/{feature_name}"][()].shape[0] == entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
                 ), f"not enough edge {feature_name} feature values"
 
             count_edges_hdf5 = entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
@@ -74,14 +64,10 @@ def _check_graph_makes_sense(g, node_feature_names, edge_feature_names):
 
         # expecting twice as many edges, because torch is directional
         count_edges_torch = torch_data_entry.edge_index.shape[1]
-        assert (
-            count_edges_torch == 2 * count_edges_hdf5
-        ), f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
+        assert count_edges_torch == 2 * count_edges_hdf5, f"got {count_edges_torch} edges in output data, hdf5 has {count_edges_hdf5}"
 
         count_edge_features_torch = torch_data_entry.edge_attr.shape[0]
-        assert (
-            count_edge_features_torch == count_edges_torch
-        ), f"got {count_edge_features_torch} edge feature sets, but {count_edges_torch} edge indices"
+        assert count_edge_features_torch == count_edges_torch, f"got {count_edge_features_torch} edge feature sets, but {count_edges_torch} edge indices"
     finally:
         os.remove(tmp_path)
 
@@ -281,9 +267,7 @@ def test_variant_residue_graph_101M():
 
 
 def test_res_ppi():
-
-    query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/3MRC/3MRC.pdb",
-                                                "M", "P")
+    query = ProteinProteinInterfaceResidueQuery("tests/data/pdb/3MRC/3MRC.pdb", "M", "P")
 
     g = query.build([surfacearea, contact])
 
@@ -293,50 +277,58 @@ def test_res_ppi():
 def test_augmentation():
     qc = QueryCollection()
 
-    qc.add(ProteinProteinInterfaceResidueQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
-            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
-            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
-        },
-        targets={targets.BINARY: 0},
-    ))
+    qc.add(
+        ProteinProteinInterfaceResidueQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+            {
+                "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+                "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+            },
+            targets={targets.BINARY: 0},
+        )
+    )
 
-    qc.add(ProteinProteinInterfaceAtomicQuery(
-        "tests/data/pdb/3C8P/3C8P.pdb",
-        "A",
-        "B",
-        {
-            "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
-            "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
-        },
-        targets={targets.BINARY: 0},
-    ))
+    qc.add(
+        ProteinProteinInterfaceAtomicQuery(
+            "tests/data/pdb/3C8P/3C8P.pdb",
+            "A",
+            "B",
+            {
+                "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
+                "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
+            },
+            targets={targets.BINARY: 0},
+        )
+    )
 
-    qc.add(SingleResidueVariantResidueQuery(
-        "tests/data/pdb/101M/101M.pdb",
-        "A",
-        25,
-        None,
-        glycine,
-        alanine,
-        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
-        targets={targets.BINARY: 0},
-    ))
+    qc.add(
+        SingleResidueVariantResidueQuery(
+            "tests/data/pdb/101M/101M.pdb",
+            "A",
+            25,
+            None,
+            glycine,
+            alanine,
+            {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+            targets={targets.BINARY: 0},
+        )
+    )
 
-    qc.add(SingleResidueVariantAtomicQuery(
-        "tests/data/pdb/101M/101M.pdb",
-        "A",
-        27,
-        None,
-        asparagine,
-        phenylalanine,
-        {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
-        targets={targets.BINARY: 0},
-        radius=3.0,
-    ))
+    qc.add(
+        SingleResidueVariantAtomicQuery(
+            "tests/data/pdb/101M/101M.pdb",
+            "A",
+            27,
+            None,
+            asparagine,
+            phenylalanine,
+            {"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
+            targets={targets.BINARY: 0},
+            radius=3.0,
+        )
+    )
 
     augmentation_count = 3
     grid_settings = GridSettings([20, 20, 20], [20.0, 20.0, 20.0])
@@ -345,15 +337,12 @@ def test_augmentation():
 
     tmp_dir = mkdtemp()
     try:
-        qc.process(f"{tmp_dir}/qc",
-                   grid_settings=grid_settings,
-                   grid_map_method=MapMethod.GAUSSIAN,
-                   grid_augmentation_count=augmentation_count)
+        qc.process(f"{tmp_dir}/qc", grid_settings=grid_settings, grid_map_method=MapMethod.GAUSSIAN, grid_augmentation_count=augmentation_count)
 
         hdf5_path = f"{tmp_dir}/qc.hdf5"
         assert os.path.isfile(hdf5_path)
 
-        with h5py.File(hdf5_path, 'r') as f5:
+        with h5py.File(hdf5_path, "r") as f5:
             entry_names = list(f5.keys())
 
         assert len(entry_names) == expected_entry_count, f"Found {len(entry_names)} entries, expected {expected_entry_count}"
@@ -470,22 +459,22 @@ def test_incorrect_pssm_provided():
 
 def test_variant_query_multiple_chains():
     q = SingleResidueVariantAtomicQuery(
-        pdb_path = "tests/data/pdb/2g98/pdb2g98.pdb",
-        chain_id = "A",
-        residue_number = 14,
-        insertion_code = None,
-        wildtype_amino_acid = arginine,
-        variant_amino_acid = cysteine,
-        pssm_paths = {"A": "tests/data/pssm/2g98/2g98.A.pdb.pssm"},
-        targets = {targets.BINARY: 1},
-        radius = 10.0,
-        distance_cutoff = 4.5,
-        )
+        pdb_path="tests/data/pdb/2g98/pdb2g98.pdb",
+        chain_id="A",
+        residue_number=14,
+        insertion_code=None,
+        wildtype_amino_acid=arginine,
+        variant_amino_acid=cysteine,
+        pssm_paths={"A": "tests/data/pssm/2g98/2g98.A.pdb.pssm"},
+        targets={targets.BINARY: 1},
+        radius=10.0,
+        distance_cutoff=4.5,
+    )
 
     # at radius 10, chain B is included in graph
     # no error without conservation module
     graph = q.build(components)
-    assert 'B' in graph.get_all_chains()
+    assert "B" in graph.get_all_chains()
     # if we rebuild the graph with conservation module it should fail
     with pytest.raises(FileNotFoundError):
         _ = q.build(conservation)
@@ -493,4 +482,4 @@ def test_variant_query_multiple_chains():
     # at radius 7, chain B is not included in graph
     q._radius = 7.0  # pylint: disable = protected-access
     graph = q.build(conservation)
-    assert 'B' not in graph.get_all_chains()
+    assert "B" not in graph.get_all_chains()

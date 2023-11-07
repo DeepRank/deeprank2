@@ -24,7 +24,6 @@ from torch.autograd import Variable
 
 
 class CnnRegression(torch.nn.Module):
-
     def __init__(self, num_features: int, box_shape: Tuple[int]):
         super().__init__()
 
@@ -76,8 +75,8 @@ class CnnRegression(torch.nn.Module):
 # fc   layer   1: fc   | input  84  output  1  post None
 # ----------------------------------------------------------------------
 
-class CnnClassification(torch.nn.Module):
 
+class CnnClassification(torch.nn.Module):
     def __init__(self, num_features, box_shape):
         super().__init__()
 

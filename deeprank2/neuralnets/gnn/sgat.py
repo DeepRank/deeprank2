@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
-from deeprank2.utils.community_pooling import (community_pooling,
-                                               get_preloaded_cluster)
+from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
 from torch import nn
 from torch.nn import Parameter
 from torch_geometric.nn import max_pool_x
@@ -26,7 +25,6 @@ class SGraphAttentionLayer(torch.nn.Module):
     """
 
     def __init__(self, in_channels: int, out_channels: int, bias: bool = True, undirected=True):
-
         super().__init__()
 
         self.in_channels = in_channels
@@ -48,7 +46,6 @@ class SGraphAttentionLayer(torch.nn.Module):
         uniform(size, self.bias)
 
     def forward(self, x, edge_index, edge_attr):
-
         row, col = edge_index
         num_node = len(x)
         edge_attr = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
@@ -83,7 +80,7 @@ class SGraphAttentionLayer(torch.nn.Module):
 
 
 class SGAT(torch.nn.Module):
-    def __init__(self, input_shape, output_shape=1, input_shape_edge=None): # pylint: disable=unused-argument
+    def __init__(self, input_shape, output_shape=1, input_shape_edge=None):  # pylint: disable=unused-argument
         super().__init__()
 
         self.conv1 = SGraphAttentionLayer(input_shape, 16)
@@ -95,7 +92,6 @@ class SGAT(torch.nn.Module):
         self.clustering = "mcl"
 
     def forward(self, data):
-
         act = nn.Tanhshrink()
         act = F.relu
         # act = nn.LeakyReLU(0.25)

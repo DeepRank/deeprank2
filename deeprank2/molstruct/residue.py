@@ -45,10 +45,7 @@ class Residue:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Residue):
-            return (self._chain == other._chain
-                    and self._number == other._number
-                    and self._insertion_code == other._insertion_code
-            )
+            return self._chain == other._chain and self._number == other._number and self._insertion_code == other._insertion_code
         return NotImplemented
 
     def __hash__(self) -> hash:
@@ -58,7 +55,7 @@ class Residue:
         """Load pssm info linked to the residue."""
         pssm = self._chain.pssm
         if pssm is None:
-            raise FileNotFoundError(f'No pssm file found for Chain {self._chain}.')
+            raise FileNotFoundError(f"No pssm file found for Chain {self._chain}.")
         return pssm[self]
 
     @property

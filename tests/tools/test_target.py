@@ -33,15 +33,10 @@ class TestTools(unittest.TestCase):
             os.remove(target_path)
             os.remove(graph_path)
 
-
     def test_compute_ppi_scores(self):
-        scores = compute_ppi_scores(
-            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
-            os.path.join(self.ref, "1ATN.pdb"))
+        scores = compute_ppi_scores(os.path.join(self.pdb_path, "1ATN_1w.pdb"), os.path.join(self.ref, "1ATN.pdb"))
 
-        sim = StructureSimilarity(
-            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
-            os.path.join(self.ref, "1ATN.pdb"), enforce_residue_matching=False)
+        sim = StructureSimilarity(os.path.join(self.pdb_path, "1ATN_1w.pdb"), os.path.join(self.ref, "1ATN.pdb"), enforce_residue_matching=False)
         lrmsd = sim.compute_lrmsd_fast(method="svd")
         irmsd = sim.compute_irmsd_fast(method="svd")
         fnat = sim.compute_fnat_fast()
@@ -52,24 +47,22 @@ class TestTools(unittest.TestCase):
             if irmsd < thr:
                 capri = val
 
-        assert scores['irmsd'] == irmsd
-        assert scores['lrmsd'] == lrmsd
-        assert scores['fnat'] == fnat
-        assert scores['dockq'] == dockq
-        assert scores['binary'] == binary
-        assert scores['capri_class'] == capri
+        assert scores["irmsd"] == irmsd
+        assert scores["lrmsd"] == lrmsd
+        assert scores["fnat"] == fnat
+        assert scores["dockq"] == dockq
+        assert scores["binary"] == binary
+        assert scores["capri_class"] == capri
 
     def test_compute_ppi_scores_same_struct(self):
-        scores = compute_ppi_scores(
-            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
-            os.path.join(self.pdb_path, "1ATN_1w.pdb"))
+        scores = compute_ppi_scores(os.path.join(self.pdb_path, "1ATN_1w.pdb"), os.path.join(self.pdb_path, "1ATN_1w.pdb"))
 
-        assert scores['irmsd'] == 0.0
-        assert scores['lrmsd'] == 0.0
-        assert scores['fnat'] == 1.0
-        assert scores['dockq'] == 1.0
-        assert scores['binary'] # True
-        assert scores['capri_class'] == 1
+        assert scores["irmsd"] == 0.0
+        assert scores["lrmsd"] == 0.0
+        assert scores["fnat"] == 1.0
+        assert scores["dockq"] == 1.0
+        assert scores["binary"]  # True
+        assert scores["capri_class"] == 1
 
 
 if __name__ == "__main__":

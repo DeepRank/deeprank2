@@ -23,11 +23,8 @@ from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.molstruct.structure import PDBStructure
-from deeprank2.utils.buildgraph import (add_hydrogens, get_contact_atoms,
-                                        get_structure,
-                                        get_surrounding_residues)
-from deeprank2.utils.graph import (Graph, build_atomic_graph,
-                                   build_residue_graph)
+from deeprank2.utils.buildgraph import add_hydrogens, get_contact_atoms, get_structure, get_surrounding_residues
+from deeprank2.utils.graph import Graph, build_atomic_graph, build_residue_graph
 from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 from deeprank2.utils.parsing.pssm import parse_pssm
 
@@ -51,11 +48,11 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
     """
 
     if not pssm_paths:
-        raise ValueError('No pssm paths provided for conservation feature module.')
+        raise ValueError("No pssm paths provided for conservation feature module.")
 
     pssm_data = {}
     for chain in pssm_paths:
-        with open(pssm_paths[chain], encoding='utf-8') as f:
+        with open(pssm_paths[chain], encoding="utf-8") as f:
             lines = f.readlines()[1:]
         for line in lines:
             pssm_data[chain + line.split()[0].zfill(4)] = convert_aa_nomenclature(line.split()[1], 3)
@@ -75,16 +72,16 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
             missing_list.append(residue)
 
     if len(wrong_list) + len(missing_list) > 0:
-        error_message = f'Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}.'
+        error_message = f"Amino acids in PSSM files do not match pdb file for {os.path.split(pdb_path)[1]}."
         if verbosity:
             if len(wrong_list) > 0:
-                error_message = error_message + f'\n\t{len(wrong_list)} entries are incorrect.'
+                error_message = error_message + f"\n\t{len(wrong_list)} entries are incorrect."
                 if verbosity == 2:
-                    error_message = error_message[-1] + f':\n\t{missing_list}'
+                    error_message = error_message[-1] + f":\n\t{missing_list}"
             if len(missing_list) > 0:
-                error_message = error_message + f'\n\t{len(missing_list)} entries are missing.'
+                error_message = error_message + f"\n\t{len(missing_list)} entries are missing."
                 if verbosity == 2:
-                    error_message = error_message[-1] + f':\n\t{missing_list}'
+                    error_message = error_message[-1] + f":\n\t{missing_list}"
 
         if not suppress:
             raise ValueError(error_message)
@@ -94,7 +91,6 @@ def _check_pssm(pdb_path: str, pssm_paths: Dict[str, str], suppress: bool, verbo
 
 
 class Query:
-
     def __init__(self, model_id: str, targets: Optional[Dict[str, Union[float, int]]] = None, suppress_pssm_errors: bool = False):
         """Represents one entity of interest, like a single-residue variant or a protein-protein interface.
 
@@ -123,7 +119,9 @@ class Query:
             graph.targets[target_name] = target_data
 
     def _load_structure(
-        self, pdb_path: str, pssm_paths: Optional[Dict[str, str]],
+        self,
+        pdb_path: str,
+        pssm_paths: Optional[Dict[str, str]],
         include_hydrogens: bool,
         load_pssms: bool,
     ):
@@ -131,9 +129,7 @@ class Query:
 
         # make a copy of the pdb, with hydrogens
         pdb_name = os.path.basename(pdb_path)
-        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
-            prefix="hydrogenated-", suffix=pdb_name
-        )
+        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(prefix="hydrogenated-", suffix=pdb_name)
         os.close(hydrogen_pdb_file)
 
         if include_hydrogens:
@@ -150,11 +146,11 @@ class Query:
         try:
             structure = get_structure(pdb, self.model_id)
         finally:
-            pdb._close() # pylint: disable=protected-access
+            pdb._close()  # pylint: disable=protected-access
 
         # read the pssm
         if load_pssms:
-            _check_pssm(pdb_path, pssm_paths, suppress = self._suppress)
+            _check_pssm(pdb_path, pssm_paths, suppress=self._suppress)
             for chain in structure.chains:
                 if chain.id in pssm_paths:
                     pssm_path = pssm_paths[chain.id]
@@ -183,6 +179,7 @@ class Query:
 
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
         raise NotImplementedError("Must be defined in child classes.")
+
     def get_query_id(self) -> str:
         raise NotImplementedError("Must be defined in child classes.")
 
@@ -195,7 +192,6 @@ class QueryCollection:
     """
 
     def __init__(self):
-
         self._queries = []
         self.cpu_count = None
         self.ids_count = {}
@@ -214,7 +210,7 @@ class QueryCollection:
         query_id = query.get_query_id()
 
         if verbose:
-            _log.info(f'Adding query with ID {query_id}.')
+            _log.info(f"Adding query with ID {query_id}.")
 
         if query_id not in self.ids_count:
             self.ids_count[query_id] = 1
@@ -224,7 +220,7 @@ class QueryCollection:
             query.model_id = new_id
 
             if warn_duplicate:
-                _log.warning(f'Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}')
+                _log.warning(f"Query with ID {query_id} has already been added to the collection. Renaming it as {query.get_query_id()}")
 
         self._queries.append(query)
 
@@ -258,15 +254,13 @@ class QueryCollection:
         grid_settings: Optional[GridSettings],
         grid_map_method: Optional[MapMethod],
         grid_augmentation_count: int,
-        query: Query
+        query: Query,
     ):
-
         try:
             # because only one process may access an hdf5 file at a time:
             output_path = f"{prefix}-{os.getpid()}.hdf5"
 
-            feature_modules = [
-                importlib.import_module('deeprank2.features.' + name) for name in feature_names]
+            feature_modules = [importlib.import_module("deeprank2.features." + name) for name in feature_names]
 
             graph = query.build(feature_modules)
             graph.write_to_hdf5(output_path)
@@ -283,12 +277,14 @@ class QueryCollection:
             return None
 
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
-            _log.warning(f'\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),'
-            ' and it has not been written to the hdf5 file. More details below:')
+            _log.warning(
+                f"\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),"
+                " and it has not been written to the hdf5 file. More details below:"
+            )
             _log.exception(e)
             return None
 
-    def process( # pylint: disable=too-many-arguments, too-many-locals, dangerous-default-value
+    def process(  # pylint: disable=too-many-arguments, too-many-locals, dangerous-default-value
         self,
         prefix: Optional[str] = None,
         feature_modules: Union[ModuleType, List[ModuleType], str, List[str]] = [components, contact],
@@ -296,7 +292,7 @@ class QueryCollection:
         combine_output: bool = True,
         grid_settings: Optional[GridSettings] = None,
         grid_map_method: Optional[MapMethod] = None,
-        grid_augmentation_count: int = 0
+        grid_augmentation_count: int = 0,
     ) -> List[str]:
         """
         Args:
@@ -322,46 +318,42 @@ class QueryCollection:
         # set defaults
         if prefix is None:
             prefix = "processed-queries"
-        elif prefix.endswith('.hdf5'):
+        elif prefix.endswith(".hdf5"):
             prefix = prefix[:-5]
         if cpu_count is None:
             cpu_count = os.cpu_count()  # returns the number of CPUs in the system
         else:
             cpu_count_system = os.cpu_count()
             if cpu_count > cpu_count_system:
-                _log.warning(f'\nTried to set {cpu_count} CPUs, but only {cpu_count_system} are present in the system.')
+                _log.warning(f"\nTried to set {cpu_count} CPUs, but only {cpu_count_system} are present in the system.")
                 cpu_count = cpu_count_system
         self.cpu_count = cpu_count
-        _log.info(f'\nNumber of CPUs for processing the queries set to: {self.cpu_count}.')
+        _log.info(f"\nNumber of CPUs for processing the queries set to: {self.cpu_count}.")
 
-
-        if feature_modules == 'all':
+        if feature_modules == "all":
             feature_names = [modname for _, modname, _ in pkgutil.iter_modules(deeprank2.features.__path__)]
         elif isinstance(feature_modules, list):
-            feature_names = [os.path.basename(m.__file__)[:-3] if isinstance(m,ModuleType)
-                             else m.replace('.py','') for m in feature_modules]
+            feature_names = [os.path.basename(m.__file__)[:-3] if isinstance(m, ModuleType) else m.replace(".py", "") for m in feature_modules]
         elif isinstance(feature_modules, ModuleType):
             feature_names = [os.path.basename(feature_modules.__file__)[:-3]]
         elif isinstance(feature_modules, str):
-            feature_names = [feature_modules.replace('.py','')]
+            feature_names = [feature_modules.replace(".py", "")]
         else:
-            raise ValueError(f'Feature_modules has received an invalid input type: {type(feature_modules)}.')
-        _log.info(f'\nSelected feature modules: {feature_names}.')
+            raise ValueError(f"Feature_modules has received an invalid input type: {type(feature_modules)}.")
+        _log.info(f"\nSelected feature modules: {feature_names}.")
 
-        _log.info(f'Creating pool function to process {len(self.queries)} queries...')
-        pool_function = partial(self._process_one_query, prefix,
-                                feature_names,
-                                grid_settings, grid_map_method, grid_augmentation_count)
+        _log.info(f"Creating pool function to process {len(self.queries)} queries...")
+        pool_function = partial(self._process_one_query, prefix, feature_names, grid_settings, grid_map_method, grid_augmentation_count)
 
         with Pool(self.cpu_count) as pool:
-            _log.info('Starting pooling...\n')
+            _log.info("Starting pooling...\n")
             pool.map(pool_function, self.queries)
 
         output_paths = glob(f"{prefix}-*.hdf5")
 
         if combine_output:
             for output_path in output_paths:
-                with h5py.File(f"{prefix}.hdf5",'a') as f_dest, h5py.File(output_path,'r') as f_src:
+                with h5py.File(f"{prefix}.hdf5", "a") as f_dest, h5py.File(output_path, "r") as f_src:
                     for key, value in f_src.items():
                         _log.debug(f"copy {key} from {output_path} to {prefix}.hdf5")
                         f_src.copy(value, f_dest)
@@ -372,7 +364,6 @@ class QueryCollection:
 
 
 class SingleResidueVariantResidueQuery(Query):
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         pdb_path: str,
@@ -427,7 +418,6 @@ class SingleResidueVariantResidueQuery(Query):
         "String representation of the residue number and insertion code."
 
         if self._insertion_code is not None:
-
             return f"{self._residue_number}{self._insertion_code}"
 
         return str(self._residue_number)
@@ -457,28 +447,21 @@ class SingleResidueVariantResidueQuery(Query):
         # find the variant residue
         variant_residue = None
         for residue in structure.get_chain(self._chain_id).residues:
-            if (
-                residue.number == self._residue_number
-                and residue.insertion_code == self._insertion_code
-            ):
+            if residue.number == self._residue_number and residue.insertion_code == self._insertion_code:
                 variant_residue = residue
                 break
 
         if variant_residue is None:
-            raise ValueError(
-                f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
-            )
+            raise ValueError(f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}")
 
         # define the variant
         variant = SingleResidueVariant(variant_residue, self._variant_amino_acid)
 
         # select which residues will be the graph
-        residues = list(get_surrounding_residues(structure, residue, self._radius)) # pylint: disable=undefined-loop-variable
+        residues = list(get_surrounding_residues(structure, residue, self._radius))  # pylint: disable=undefined-loop-variable
 
         # build the graph
-        graph = build_residue_graph(
-            residues, self.get_query_id(), self._distance_cutoff
-        )
+        graph = build_residue_graph(residues, self.get_query_id(), self._distance_cutoff)
 
         # add data to the graph
         self._set_graph_targets(graph)
@@ -491,7 +474,6 @@ class SingleResidueVariantResidueQuery(Query):
 
 
 class SingleResidueVariantAtomicQuery(Query):
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         pdb_path: str,
@@ -608,17 +590,12 @@ class SingleResidueVariantAtomicQuery(Query):
         # find the variant residue
         variant_residue = None
         for residue in structure.get_chain(self._chain_id).residues:
-            if (
-                residue.number == self._residue_number
-                and residue.insertion_code == self._insertion_code
-            ):
+            if residue.number == self._residue_number and residue.insertion_code == self._insertion_code:
                 variant_residue = residue
                 break
 
         if variant_residue is None:
-            raise ValueError(
-                f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}"
-            )
+            raise ValueError(f"Residue not found in {self._pdb_path}: {self._chain_id} {self.residue_id}")
 
         # define the variant
         variant = SingleResidueVariant(variant_residue, self._variant_amino_acid)
@@ -634,9 +611,7 @@ class SingleResidueVariantAtomicQuery(Query):
         atoms = list(atoms)
 
         # build the graph
-        graph = build_atomic_graph(
-            atoms, self.get_query_id(), self._distance_cutoff
-        )
+        graph = build_atomic_graph(atoms, self.get_query_id(), self._distance_cutoff)
 
         # add data to the graph
         self._set_graph_targets(graph)
@@ -648,32 +623,21 @@ class SingleResidueVariantAtomicQuery(Query):
         return graph
 
 
-def _load_ppi_atoms(pdb_path: str,
-                    chain_id1: str, chain_id2: str,
-                    distance_cutoff: float,
-                    include_hydrogens: bool) -> List[Atom]:
-
+def _load_ppi_atoms(pdb_path: str, chain_id1: str, chain_id2: str, distance_cutoff: float, include_hydrogens: bool) -> List[Atom]:
     # get the contact atoms
     if include_hydrogens:
-
         pdb_name = os.path.basename(pdb_path)
-        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(
-            prefix="hydrogenated-", suffix=pdb_name
-        )
+        hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(prefix="hydrogenated-", suffix=pdb_name)
         os.close(hydrogen_pdb_file)
 
         add_hydrogens(pdb_path, hydrogen_pdb_path)
 
         try:
-            contact_atoms = get_contact_atoms(hydrogen_pdb_path,
-                                              chain_id1, chain_id2,
-                                              distance_cutoff)
+            contact_atoms = get_contact_atoms(hydrogen_pdb_path, chain_id1, chain_id2, distance_cutoff)
         finally:
             os.remove(hydrogen_pdb_path)
     else:
-        contact_atoms = get_contact_atoms(pdb_path,
-                                          chain_id1, chain_id2,
-                                          distance_cutoff)
+        contact_atoms = get_contact_atoms(pdb_path, chain_id1, chain_id2, distance_cutoff)
 
     if len(contact_atoms) == 0:
         raise ValueError("no contact atoms found")
@@ -681,16 +645,10 @@ def _load_ppi_atoms(pdb_path: str,
     return contact_atoms
 
 
-def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
-                    chains: List[str],
-                    structure: PDBStructure,
-                    pdb_path,
-                    suppress_error):
-
-    _check_pssm(pdb_path, pssm_paths, suppress_error, verbosity = 0)
+def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]], chains: List[str], structure: PDBStructure, pdb_path, suppress_error):
+    _check_pssm(pdb_path, pssm_paths, suppress_error, verbosity=0)
     for chain_id in chains:
         if chain_id in pssm_paths:
-
             chain = structure.get_chain(chain_id)
 
             pssm_path = pssm_paths[chain_id]
@@ -700,7 +658,6 @@ def _load_ppi_pssms(pssm_paths: Optional[Dict[str, str]],
 
 
 class ProteinProteinInterfaceAtomicQuery(Query):
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         pdb_path: str,
@@ -744,12 +701,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         return f"atom-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
-        return (
-            isinstance(self, type(other))
-            and self.model_id == other.model_id
-            and {self._chain_id1, self._chain_id2}
-            == {other._chain_id1, other._chain_id2}
-        )
+        return isinstance(self, type(other)) and self.model_id == other.model_id and {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
 
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
@@ -765,15 +717,10 @@ class ProteinProteinInterfaceAtomicQuery(Query):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
-        contact_atoms = _load_ppi_atoms(self._pdb_path,
-                                        self._chain_id1, self._chain_id2,
-                                        self._distance_cutoff,
-                                        include_hydrogens)
+        contact_atoms = _load_ppi_atoms(self._pdb_path, self._chain_id1, self._chain_id2, self._distance_cutoff, include_hydrogens)
 
         # build the graph
-        graph = build_atomic_graph(
-            contact_atoms, self.get_query_id(), self._distance_cutoff
-        )
+        graph = build_atomic_graph(contact_atoms, self.get_query_id(), self._distance_cutoff)
 
         # add data to the graph
         self._set_graph_targets(graph)
@@ -784,10 +731,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         if not isinstance(feature_modules, List):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
-            _load_ppi_pssms(self._pssm_paths,
-                            [self._chain_id1, self._chain_id2],
-                            structure, self._pdb_path,
-                            suppress_error=self._suppress)
+            _load_ppi_pssms(self._pssm_paths, [self._chain_id1, self._chain_id2], structure, self._pdb_path, suppress_error=self._suppress)
 
         # add the features
         for feature_module in feature_modules:
@@ -798,7 +742,6 @@ class ProteinProteinInterfaceAtomicQuery(Query):
 
 
 class ProteinProteinInterfaceResidueQuery(Query):
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         pdb_path: str,
@@ -842,12 +785,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         return f"residue-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
-        return (
-            isinstance(self, type(other))
-            and self.model_id == other.model_id
-            and {self._chain_id1, self._chain_id2}
-            == {other._chain_id1, other._chain_id2}
-        )
+        return isinstance(self, type(other)) and self.model_id == other.model_id and {self._chain_id1, self._chain_id2} == {other._chain_id1, other._chain_id2}
 
     def __hash__(self) -> hash:
         return hash((self.model_id, tuple(sorted([self._chain_id1, self._chain_id2]))))
@@ -863,10 +801,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
         """
 
-        contact_atoms = _load_ppi_atoms(self._pdb_path,
-                                        self._chain_id1, self._chain_id2,
-                                        self._distance_cutoff,
-                                        include_hydrogens)
+        contact_atoms = _load_ppi_atoms(self._pdb_path, self._chain_id1, self._chain_id2, self._distance_cutoff, include_hydrogens)
 
         atom_positions = []
         residues_selected = set([])
@@ -876,9 +811,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         residues_selected = list(residues_selected)
 
         # build the graph
-        graph = build_residue_graph(
-            residues_selected, self.get_query_id(), self._distance_cutoff
-        )
+        graph = build_residue_graph(residues_selected, self.get_query_id(), self._distance_cutoff)
 
         # add data to the graph
         self._set_graph_targets(graph)
@@ -889,10 +822,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         if not isinstance(feature_modules, List):
             feature_modules = [feature_modules]
         if conservation in feature_modules:
-            _load_ppi_pssms(self._pssm_paths,
-                            [self._chain_id1, self._chain_id2],
-                            structure, self._pdb_path,
-                            suppress_error=self._suppress)
+            _load_ppi_pssms(self._pssm_paths, [self._chain_id1, self._chain_id2], structure, self._pdb_path, suppress_error=self._suppress)
 
         # add the features
         for feature_module in feature_modules:

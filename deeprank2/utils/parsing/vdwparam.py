@@ -1,10 +1,5 @@
 class VanderwaalsParam:
-    def __init__(
-            self,
-            epsilon_main: float,
-            sigma_main: float,
-            epsilon_14: float,
-            sigma_14: float):
+    def __init__(self, epsilon_main: float, sigma_main: float, epsilon_14: float, sigma_14: float):
         self.epsilon_main = epsilon_main
         self.sigma_main = sigma_main
         self.epsilon_14 = epsilon_14

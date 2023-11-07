@@ -11,8 +11,7 @@ from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification
 from deeprank2.neuralnets.gnn.ginet import GINet
-from deeprank2.query import (ProteinProteinInterfaceResidueQuery,
-                             QueryCollection)
+from deeprank2.query import ProteinProteinInterfaceResidueQuery, QueryCollection
 from deeprank2.tools.target import compute_ppi_scores
 from deeprank2.trainer import Trainer
 from deeprank2.utils.exporters import HDF5OutputExporter
@@ -28,7 +27,7 @@ chain_id2 = "B"
 count_queries = 3
 
 
-def test_cnn(): # pylint: disable=too-many-locals
+def test_cnn():  # pylint: disable=too-many-locals
     """
     Tests processing several PDB files into their features representation HDF5 file.
 
@@ -37,7 +36,7 @@ def test_cnn(): # pylint: disable=too-many-locals
 
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
-    model_path = output_directory + 'test.pth.tar'
+    model_path = output_directory + "test.pth.tar"
 
     prefix = os.path.join(hdf5_directory, "test-queries-process")
 
@@ -49,17 +48,11 @@ def test_cnn(): # pylint: disable=too-many-locals
         queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
-                pdb_path,
-                chain_id1,
-                chain_id2,
-                pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
-                targets = all_targets
+                pdb_path, chain_id1, chain_id2, pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2}, targets=all_targets
             )
             queries.add(query)
 
-        hdf5_paths = queries.process(prefix = prefix,
-                                     grid_settings=GridSettings([20, 20, 20], [20.0, 20.0, 20.0]),
-                                     grid_map_method=MapMethod.GAUSSIAN)
+        hdf5_paths = queries.process(prefix=prefix, grid_settings=GridSettings([20, 20, 20], [20.0, 20.0, 20.0]), grid_map_method=MapMethod.GAUSSIAN)
         assert len(hdf5_paths) > 0
 
         graph_names = []
@@ -73,33 +66,23 @@ def test_cnn(): # pylint: disable=too-many-locals
 
         features = [Nfeat.RESTYPE, Efeat.DISTANCE]
 
-        dataset_train = GridDataset(
-            hdf5_path = hdf5_paths,
-            features = features,
-            target = targets.BINARY
-        )
+        dataset_train = GridDataset(hdf5_path=hdf5_paths, features=features, target=targets.BINARY)
 
         dataset_val = GridDataset(
-            hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            hdf5_path=hdf5_paths,
+            train=False,
+            dataset_train=dataset_train,
         )
 
         dataset_test = GridDataset(
-            hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            hdf5_path=hdf5_paths,
+            train=False,
+            dataset_train=dataset_train,
         )
 
         output_exporters = [HDF5OutputExporter(output_directory)]
 
-        trainer = Trainer(
-            CnnClassification,
-            dataset_train,
-            dataset_val,
-            dataset_test,
-            output_exporters=output_exporters
-        )
+        trainer = Trainer(CnnClassification, dataset_train, dataset_val, dataset_test, output_exporters=output_exporters)
 
         with warnings.catch_warnings(record=UserWarning):
             trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=model_path)
@@ -111,7 +94,8 @@ def test_cnn(): # pylint: disable=too-many-locals
         rmtree(hdf5_directory)
         rmtree(output_directory)
 
-def test_gnn(): # pylint: disable=too-many-locals
+
+def test_gnn():  # pylint: disable=too-many-locals
     """
     Tests processing several PDB files into their features representation HDF5 file.
 
@@ -120,7 +104,7 @@ def test_gnn(): # pylint: disable=too-many-locals
 
     hdf5_directory = mkdtemp()
     output_directory = mkdtemp()
-    model_path = output_directory + 'test.pth.tar'
+    model_path = output_directory + "test.pth.tar"
 
     prefix = os.path.join(hdf5_directory, "test-queries-process")
 
@@ -130,15 +114,11 @@ def test_gnn(): # pylint: disable=too-many-locals
         queries = QueryCollection()
         for _ in range(count_queries):
             query = ProteinProteinInterfaceResidueQuery(
-                pdb_path,
-                chain_id1,
-                chain_id2,
-                pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
-                targets = all_targets
+                pdb_path, chain_id1, chain_id2, pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2}, targets=all_targets
             )
             queries.add(query)
 
-        hdf5_paths = queries.process(prefix = prefix)
+        hdf5_paths = queries.process(prefix=prefix)
         assert len(hdf5_paths) > 0
 
         graph_names = []
@@ -153,38 +133,17 @@ def test_gnn(): # pylint: disable=too-many-locals
         node_features = [Nfeat.RESTYPE]
         edge_features = [Efeat.DISTANCE]
 
-
         dataset_train = GraphDataset(
-            hdf5_path = hdf5_paths,
-            node_features = node_features,
-            edge_features = edge_features,
-            clustering_method = "mcl",
-            target = targets.BINARY
+            hdf5_path=hdf5_paths, node_features=node_features, edge_features=edge_features, clustering_method="mcl", target=targets.BINARY
         )
 
-        dataset_val = GraphDataset(
-            hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
-            clustering_method = "mcl"
-        )
+        dataset_val = GraphDataset(hdf5_path=hdf5_paths, train=False, dataset_train=dataset_train, clustering_method="mcl")
 
-        dataset_test = GraphDataset(
-            hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
-            clustering_method = "mcl"
-        )
+        dataset_test = GraphDataset(hdf5_path=hdf5_paths, train=False, dataset_train=dataset_train, clustering_method="mcl")
 
         output_exporters = [HDF5OutputExporter(output_directory)]
 
-        trainer = Trainer(
-            GINet,
-            dataset_train,
-            dataset_val,
-            dataset_test,
-            output_exporters=output_exporters
-        )
+        trainer = Trainer(GINet, dataset_train, dataset_val, dataset_test, output_exporters=output_exporters)
 
         with warnings.catch_warnings(record=UserWarning):
             trainer.train(nepoch=3, batch_size=64, validate=True, best_model=False, filename=model_path)

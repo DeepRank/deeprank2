@@ -21,7 +21,7 @@ class Polarity(Enum):
 class AminoAcid:
     """An amino acid represents the type of `Residue` in a `PDBStructure`."""
 
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
         three_letter_code: str,
@@ -110,9 +110,7 @@ class AminoAcid:
     @property
     def onehot(self) -> np.ndarray:
         if self._index is None:
-            raise ValueError(
-                f"Amino acid {self._name} index is not set, thus no onehot can be computed."
-            )
+            raise ValueError(f"Amino acid {self._name} index is not set, thus no onehot can be computed.")
         # 20 canonical amino acids
         # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
         a = np.zeros(20)

@@ -23,9 +23,7 @@ class Edge:
         self.id = id_
         self.features = {}
 
-    def add_feature(
-        self, feature_name: str, feature_function: Callable[[Contact], float]
-    ):
+    def add_feature(self, feature_name: str, feature_function: Callable[[Contact], float]):
         feature_value = feature_function(self.id)
 
         self.features[feature_name] = feature_value
@@ -82,9 +80,7 @@ class Node:
 
         if len(feature_value.shape) != 1:
             shape_s = "x".join(feature_value.shape)
-            raise ValueError(
-                f"Expected a 1-dimensional array for feature {feature_name}, but got {shape_s}"
-            )
+            raise ValueError(f"Expected a 1-dimensional array for feature {feature_name}, but got {shape_s}")
 
         self.features[feature_name] = feature_value
 
@@ -140,18 +136,19 @@ class Graph:
 
         return False
 
-    def _map_point_features(self, grid: Grid, method: MapMethod,  # pylint: disable=too-many-arguments
-                            feature_name: str, points: List[np.ndarray],
-                            values: List[Union[float, np.ndarray]],
-                            augmentation: Optional[Augmentation] = None):
-
+    def _map_point_features(
+        self,
+        grid: Grid,
+        method: MapMethod,  # pylint: disable=too-many-arguments
+        feature_name: str,
+        points: List[np.ndarray],
+        values: List[Union[float, np.ndarray]],
+        augmentation: Optional[Augmentation] = None,
+    ):
         points = np.stack(points, axis=0)
 
         if augmentation is not None:
-            points = pdb2sql.transform.rot_xyz_around_axis(points,
-                                                           augmentation.axis,
-                                                           augmentation.angle,
-                                                           self.center)
+            points = pdb2sql.transform.rot_xyz_around_axis(points, augmentation.axis, augmentation.angle, self.center)
 
         for point_index in range(points.shape[0]):
             position = points[point_index]
@@ -160,12 +157,10 @@ class Graph:
             grid.map_feature(position, feature_name, value, method)
 
     def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Optional[Augmentation] = None):
-
         # order edge features by xyz point
         points = []
         feature_values = {}
         for edge in self._edges.values():
-
             points += [edge.position1, edge.position2]
 
             for feature_name, feature_value in edge.features.items():
@@ -179,7 +174,6 @@ class Graph:
         points = []
         feature_values = {}
         for node in self._nodes.values():
-
             points.append(node.position)
 
             for feature_name, feature_value in node.features.items():
@@ -189,11 +183,10 @@ class Graph:
         for feature_name, values in feature_values.items():
             self._map_point_features(grid, method, feature_name, points, values, augmentation)
 
-    def write_to_hdf5(self, hdf5_path: str): # pylint: disable=too-many-locals
+    def write_to_hdf5(self, hdf5_path: str):  # pylint: disable=too-many-locals
         """Write a featured graph to an hdf5 file, according to deeprank standards."""
 
         with h5py.File(hdf5_path, "a") as hdf5_file:
-
             # create groups to hold data
             graph_group = hdf5_file.require_group(self.id)
             node_features_group = graph_group.create_group(Nfeat.NODE)
@@ -210,14 +203,9 @@ class Graph:
             first_node_data = list(self._nodes.values())[0].features
             node_feature_names = list(first_node_data.keys())
             for node_feature_name in node_feature_names:
+                node_feature_data = [node.features[node_feature_name] for node in self._nodes.values()]
 
-                node_feature_data = [
-                    node.features[node_feature_name] for node in self._nodes.values()
-                ]
-
-                node_features_group.create_dataset(
-                    node_feature_name, data=node_feature_data
-                )
+                node_features_group.create_dataset(node_feature_name, data=node_feature_data)
 
             # identify edges
             edge_indices = []
@@ -229,7 +217,6 @@ class Graph:
             edge_feature_data = {name: [] for name in edge_feature_names}
 
             for edge_id, edge in self._edges.items():
-
                 id1, id2 = edge_id
                 node_index1 = node_key_list.index(id1)
                 node_index2 = node_key_list.index(id2)
@@ -238,21 +225,15 @@ class Graph:
                 edge_names.append(f"{id1}-{id2}")
 
                 for edge_feature_name in edge_feature_names:
-                    edge_feature_data[edge_feature_name].append(
-                        edge.features[edge_feature_name]
-                    )
+                    edge_feature_data[edge_feature_name].append(edge.features[edge_feature_name])
 
             # store edge names and indices
-            edge_feature_group.create_dataset(
-                Efeat.NAME, data=np.array(edge_names).astype("S")
-            )
+            edge_feature_group.create_dataset(Efeat.NAME, data=np.array(edge_names).astype("S"))
             edge_feature_group.create_dataset(Efeat.INDEX, data=edge_indices)
 
             # store edge features
             for edge_feature_name in edge_feature_names:
-                edge_feature_group.create_dataset(
-                    edge_feature_name, data=edge_feature_data[edge_feature_name]
-                )
+                edge_feature_group.create_dataset(edge_feature_name, data=edge_feature_data[edge_feature_name])
 
             # store target values
             score_group = graph_group.create_group(targets.VALUES)
@@ -261,12 +242,11 @@ class Graph:
 
     @staticmethod
     def _find_unused_augmentation_name(unaugmented_id: str, hdf5_path: str) -> str:
-
         prefix = f"{unaugmented_id}_"
 
         entry_names_taken = []
         if os.path.isfile(hdf5_path):
-            with h5py.File(hdf5_path, 'r') as hdf5_file:
+            with h5py.File(hdf5_path, "r") as hdf5_file:
                 for entry_name in hdf5_file:
                     if entry_name.startswith(prefix):
                         entry_names_taken.append(entry_name)
@@ -279,13 +259,7 @@ class Graph:
 
         return chosen_name
 
-    def write_as_grid_to_hdf5(
-        self, hdf5_path: str,
-        settings: GridSettings,
-        method: MapMethod,
-        augmentation: Optional[Augmentation] = None
-    ) -> str:
-
+    def write_as_grid_to_hdf5(self, hdf5_path: str, settings: GridSettings, method: MapMethod, augmentation: Optional[Augmentation] = None) -> str:
         id_ = self.id
         if augmentation is not None:
             id_ = self._find_unused_augmentation_name(id_, hdf5_path)
@@ -296,8 +270,7 @@ class Graph:
         grid.to_hdf5(hdf5_path)
 
         # store target values
-        with h5py.File(hdf5_path, 'a') as hdf5_file:
-
+        with h5py.File(hdf5_path, "a") as hdf5_file:
             entry_group = hdf5_file[id_]
 
             targets_group = entry_group.require_group(targets.VALUES)
@@ -319,7 +292,7 @@ class Graph:
         return list(chains)
 
 
-def build_atomic_graph( # pylint: disable=too-many-locals
+def build_atomic_graph(  # pylint: disable=too-many-locals
     atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
 ) -> Graph:
     """Builds a graph, using the atoms as nodes.
@@ -337,7 +310,6 @@ def build_atomic_graph( # pylint: disable=too-many-locals
     graph = Graph(graph_id, edge_distance_cutoff)
     for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
         if atom1_index != atom2_index:
-
             atom1 = atoms[atom1_index]
             atom2 = atoms[atom2_index]
             contact = AtomicContact(atom1, atom2)
@@ -354,7 +326,7 @@ def build_atomic_graph( # pylint: disable=too-many-locals
     return graph
 
 
-def build_residue_graph( # pylint: disable=too-many-locals
+def build_residue_graph(  # pylint: disable=too-many-locals
     residues: List[Residue], graph_id: str, edge_distance_cutoff: float
 ) -> Graph:
     """Builds a graph, using the residues as nodes.
@@ -391,12 +363,10 @@ def build_residue_graph( # pylint: disable=too-many-locals
     # build the graph
     graph = Graph(graph_id, edge_distance_cutoff)
     for residue1_index, residue2_index in residue_index_pairs:
-
         residue1: Residue = residues[residue1_index]
         residue2: Residue = residues[residue2_index]
 
         if residue1 != residue2:
-
             contact = ResidueContact(residue1, residue2)
 
             node1 = Node(residue1)

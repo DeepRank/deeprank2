@@ -17,18 +17,14 @@ def _find_residue_node(graph, chain_id, residue_number):
 def _find_atom_node(graph, chain_id, residue_number, atom_name):
     for node in graph.nodes:
         atom = node.id
-        if (
-            atom.residue.chain.id == chain_id
-            and atom.residue.number == residue_number
-            and atom.name == atom_name
-        ):
+        if atom.residue.chain.id == chain_id and atom.residue.number == residue_number and atom.name == atom_name:
             return node
     raise ValueError(f"Not found: {chain_id} {residue_number} {atom_name}")
 
 
 def test_bsa_residue():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-    graph = build_testgraph(pdb_path, 8.5, 'residue')
+    graph = build_testgraph(pdb_path, 8.5, "residue")
     add_features(pdb_path, graph)
 
     # chain B ASP 93, at interface
@@ -38,7 +34,7 @@ def test_bsa_residue():
 
 def test_bsa_atom():
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
-    graph = build_testgraph(pdb_path, 4.5, 'atom')
+    graph = build_testgraph(pdb_path, 4.5, "atom")
     add_features(pdb_path, graph)
 
     # chain B ASP 93, at interface
@@ -48,13 +44,11 @@ def test_bsa_atom():
 
 def test_sasa_residue():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, _ = build_testgraph(pdb_path, 10, 'residue', 108)
+    graph, _ = build_testgraph(pdb_path, 10, "residue", 108)
     add_features(pdb_path, graph)
 
     # check for NaN
-    assert not any(
-        np.isnan(node.features[Nfeat.SASA]) for node in graph.nodes
-    )
+    assert not any(np.isnan(node.features[Nfeat.SASA]) for node in graph.nodes)
 
     # surface residues should have large area
     surface_residue_node = _find_residue_node(graph, "A", 105)
@@ -67,13 +61,11 @@ def test_sasa_residue():
 
 def test_sasa_atom():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, _ = build_testgraph(pdb_path, 10, 'atom', 108)
+    graph, _ = build_testgraph(pdb_path, 10, "atom", 108)
     add_features(pdb_path, graph)
 
     # check for NaN
-    assert not any(
-        np.isnan(node.features[Nfeat.SASA]) for node in graph.nodes
-    )
+    assert not any(np.isnan(node.features[Nfeat.SASA]) for node in graph.nodes)
 
     # surface atoms should have large area
     surface_atom_node = _find_atom_node(graph, "A", 105, "OE2")

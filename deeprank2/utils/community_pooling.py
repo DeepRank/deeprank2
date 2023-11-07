@@ -13,21 +13,19 @@ from torch_scatter import scatter_max, scatter_mean
 
 
 def plot_graph(graph, cluster):
-
     pos = nx.spring_layout(graph, iterations=200)
     nx.draw(graph, pos, node_color=cluster)
     plt.show()
 
 
 def get_preloaded_cluster(cluster, batch):
-
     nbatch = torch.max(batch) + 1
     for ib in range(1, nbatch):
         cluster[batch == ib] += torch.max(cluster[batch == ib - 1]) + 1
     return cluster
 
 
-def community_detection_per_batch( # pylint: disable=too-many-locals
+def community_detection_per_batch(  # pylint: disable=too-many-locals
     edge_index, batch, num_nodes: int, edge_attr=None, method: str = "mcl"
 ):
     """Detects clusters of nodes based on the edge attributes (distances).
@@ -60,7 +58,6 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
     cluster, ncluster = [], 0
 
     for ib in range(num_batch):
-
         index = torch.tensor(all_index)[batch == ib].tolist()
         subg = g.subgraph(index)
 
@@ -90,7 +87,7 @@ def community_detection_per_batch( # pylint: disable=too-many-locals
     return torch.tensor(cluster).to(device)
 
 
-def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"): # pylint: disable=too-many-locals
+def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str = "mcl"):  # pylint: disable=too-many-locals
     """Detects clusters of nodes based on the edge attributes (distances).
 
     Args:
@@ -137,7 +134,6 @@ def community_detection(edge_index, num_nodes: int, edge_attr=None, method: str 
 
     # detect the communities using MCL detection
     if method == "mcl":
-
         matrix = nx.to_scipy_sparse_array(g)
 
         # run MCL with default parameters
@@ -195,7 +191,9 @@ def community_pooling(cluster, data):
         warnings.warn(
             """Internal edges are not supported anymore.
             You should probably prepare the hdf5 file with
-            a more up to date version of this software.""", DeprecationWarning)
+            a more up to date version of this software.""",
+            DeprecationWarning,
+        )
 
     cluster, perm = consecutive_cluster(cluster)
     cluster = cluster.to(data.x.device)
@@ -218,9 +216,7 @@ def community_pooling(cluster, data):
     # pool batch
     if hasattr(data, "batch"):
         batch = None if data.batch is None else pool_batch(perm, data.batch)
-        data = Batch(
-            batch=batch, x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos
-        )
+        data = Batch(batch=batch, x=x, edge_index=edge_index, edge_attr=edge_attr, pos=pos)
 
         if has_cluster:
             data.cluster0 = c0

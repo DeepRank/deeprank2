@@ -18,7 +18,6 @@ class OutputExporter:
     """The class implements a general exporter to be called when a neural network generates outputs."""
 
     def __init__(self, directory_path: str = None):
-
         if directory_path is None:
             directory_path = "./output"
         self._directory_path = directory_path
@@ -32,17 +31,23 @@ class OutputExporter:
 
     def __exit__(self, exception_type, exception, traceback):
         "overridable"
-        pass # pylint: disable=unnecessary-pass
+        pass  # pylint: disable=unnecessary-pass
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
-        "the entry_names, output_values, target_values MUST have the same length"
-        pass # pylint: disable=unnecessary-pass
-
-    def is_compatible_with( # pylint: disable=unused-argument
+    def process(
         self,
-        output_data_shape: int,
-        target_data_shape: Optional[int] = None) -> bool:
+        pass_name: str,
+        epoch_number: int,  # pylint: disable=too-many-arguments
+        entry_names: List[str],
+        output_values: List[Any],
+        target_values: List[Any],
+        loss: float,
+    ):
+        "the entry_names, output_values, target_values MUST have the same length"
+        pass  # pylint: disable=unnecessary-pass
+
+    def is_compatible_with(  # pylint: disable=unused-argument
+        self, output_data_shape: int, target_data_shape: Optional[int] = None
+    ) -> bool:
         "true if this exporter can work with the given data shapes"
         return True
 
@@ -63,8 +68,15 @@ class OutputExporterCollection:
         for output_exporter in self._output_exporters:
             output_exporter.__exit__(exception_type, exception, traceback)
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
+    def process(
+        self,
+        pass_name: str,
+        epoch_number: int,  # pylint: disable=too-many-arguments
+        entry_names: List[str],
+        output_values: List[Any],
+        target_values: List[Any],
+        loss: float,
+    ):
         for output_exporter in self._output_exporters:
             output_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values, loss)
 
@@ -93,8 +105,15 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
     def __exit__(self, exception_type, exception, traceback):
         self._writer.__exit__(exception_type, exception, traceback)
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments, too-many-locals
-                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
+    def process(
+        self,
+        pass_name: str,
+        epoch_number: int,  # pylint: disable=too-many-arguments, too-many-locals
+        entry_names: List[str],
+        output_values: List[Any],
+        target_values: List[Any],
+        loss: float,
+    ):
         "write to tensorboard"
 
         ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
@@ -115,10 +134,10 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
             elif prediction_value <= 0.0 and target_value <= 0.0:
                 tn += 1
 
-            elif prediction_value > 0.0 and target_value <= 0.0: # pylint: disable=chained-comparison
+            elif prediction_value > 0.0 and target_value <= 0.0:  # pylint: disable=chained-comparison
                 fp += 1
 
-            elif prediction_value <= 0.0 and target_value > 0.0: # pylint: disable=chained-comparison
+            elif prediction_value <= 0.0 and target_value > 0.0:  # pylint: disable=chained-comparison
                 fn += 1
 
         mcc_numerator = tn * tp - fp * fn
@@ -174,7 +193,6 @@ class ScatterPlotExporter(OutputExporter):
 
     @staticmethod
     def _get_color(pass_name):
-
         pass_name = pass_name.lower().strip()
 
         if pass_name in ("train", "training"):
@@ -190,7 +208,6 @@ class ScatterPlotExporter(OutputExporter):
 
     @staticmethod
     def _plot(epoch_number: int, data: Dict[str, Tuple[List[float], List[float]]], png_path: str):
-
         pyplot.title(f"Epoch {epoch_number}")
 
         for pass_name, (truth_values, prediction_values) in data.items():
@@ -203,12 +220,18 @@ class ScatterPlotExporter(OutputExporter):
         pyplot.savefig(png_path)
         pyplot.close()
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float):
+    def process(
+        self,
+        pass_name: str,
+        epoch_number: int,  # pylint: disable=too-many-arguments
+        entry_names: List[str],
+        output_values: List[Any],
+        target_values: List[Any],
+        loss: float,
+    ):
         """Make the plot, if the epoch matches with the interval."""
 
         if epoch_number % self._epoch_interval == 0:
-
             if epoch_number not in self._plot_data:
                 self._plot_data[epoch_number] = {}
 
@@ -240,43 +263,31 @@ class HDF5OutputExporter(OutputExporter):
     """
 
     def __init__(self, directory_path: str):
-
         self.phase = None
         super().__init__(directory_path)
 
     def __enter__(self):
-
-        self.d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
+        self.d = {"phase": [], "epoch": [], "entry": [], "output": [], "target": [], "loss": []}
         self.df = pd.DataFrame(data=self.d)
 
         return self
 
     def __exit__(self, exception_type, exception, traceback):
-
         if self.phase is not None:
             if self.phase == "validation":
                 self.phase = "training"
 
-            self.df.to_hdf(
-                os.path.join(self._directory_path, 'output_exporter.hdf5'),
-                key=self.phase,
-                mode='a')
+            self.df.to_hdf(os.path.join(self._directory_path, "output_exporter.hdf5"), key=self.phase, mode="a")
 
-    def process( # pylint: disable=too-many-arguments
-        self,
-        pass_name: str,
-        epoch_number: int,
-        entry_names: List[str],
-        output_values: List[Any],
-        target_values: List[Any],
-        loss: float):
-
+    def process(  # pylint: disable=too-many-arguments
+        self, pass_name: str, epoch_number: int, entry_names: List[str], output_values: List[Any], target_values: List[Any], loss: float
+    ):
         self.phase = pass_name
         pass_name = [pass_name] * len(output_values)
         loss = [loss] * len(output_values)
         epoch_number = [epoch_number] * len(output_values)
 
-        d_epoch = {'phase': pass_name, 'epoch': epoch_number, 'entry': entry_names, 'output': output_values, 'target': target_values, 'loss': loss}
+        d_epoch = {"phase": pass_name, "epoch": epoch_number, "entry": entry_names, "output": output_values, "target": target_values, "loss": loss}
         df_epoch = pd.DataFrame(data=d_epoch)
 
         self.df = pd.concat([self.df, df_epoch])

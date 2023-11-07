@@ -28,8 +28,7 @@ class Pair:
     def __eq__(self, other) -> bool:
         """Compare the pairs as sets, so the order doesn't matter."""
         if isinstance(other, Pair):
-            return (self.item1 == other.item1 and self.item2 == other.item2
-                    or self.item1 == other.item2 and self.item2 == other.item1)
+            return self.item1 == other.item1 and self.item2 == other.item2 or self.item1 == other.item2 and self.item2 == other.item1
         return NotImplemented
 
     def __iter__(self):
@@ -37,7 +36,7 @@ class Pair:
         return iter([self.item1, self.item2])
 
     def __repr__(self) -> str:
-        return (str(self.item1) + str(self.item2))
+        return str(self.item1) + str(self.item2)
 
 
 class Contact(Pair, ABC):

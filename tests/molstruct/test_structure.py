@@ -1,4 +1,3 @@
-
 import pickle
 from multiprocessing.connection import _ForkingPickler
 
@@ -20,7 +19,6 @@ def _get_structure(path) -> PDBStructure:
 
 
 def test_serialization_pickle():
-
     structure = _get_structure("tests/data/pdb/101M/101M.pdb")
 
     s = pickle.dumps(structure)
@@ -34,7 +32,6 @@ def test_serialization_pickle():
 
 
 def test_serialization_fork():
-
     structure = _get_structure("tests/data/pdb/101M/101M.pdb")
 
     s = _ForkingPickler.dumps(structure)

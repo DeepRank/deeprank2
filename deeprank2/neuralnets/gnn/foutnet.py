@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
-from deeprank2.utils.community_pooling import (community_pooling,
-                                               get_preloaded_cluster)
+from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
 from torch import nn
 from torch.nn import Parameter
 from torch_geometric.nn import max_pool_x
@@ -24,7 +23,6 @@ class FoutLayer(torch.nn.Module):
     """
 
     def __init__(self, in_channels: int, out_channels: int, bias: bool = True):
-
         super().__init__()
 
         self.in_channels = in_channels
@@ -48,7 +46,6 @@ class FoutLayer(torch.nn.Module):
         uniform(size, self.bias)
 
     def forward(self, x, edge_index):
-
         num_node = len(x)
 
         # alpha = x * Wc
@@ -78,7 +75,7 @@ class FoutLayer(torch.nn.Module):
 
 
 class FoutNet(torch.nn.Module):
-    def __init__(self, input_shape, output_shape=1, input_shape_edge=None): # pylint: disable=unused-argument
+    def __init__(self, input_shape, output_shape=1, input_shape_edge=None):  # pylint: disable=unused-argument
         super().__init__()
 
         self.conv1 = FoutLayer(input_shape, 16)
@@ -90,7 +87,6 @@ class FoutNet(torch.nn.Module):
         self.clustering = "mcl"
 
     def forward(self, data):
-
         act = nn.Tanhshrink()
         act = F.relu
         # act = nn.LeakyReLU(0.25)

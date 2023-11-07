@@ -18,13 +18,13 @@ from deeprank2.utils.graph import Graph
 _log = logging.getLogger(__name__)
 
 
-def handle_sigint(sig, frame): # pylint: disable=unused-argument
-    print('SIGINT received, terminating.')
+def handle_sigint(sig, frame):  # pylint: disable=unused-argument
+    print("SIGINT received, terminating.")
     sys.exit()
 
 
 def handle_timeout(sig, frame):
-    raise TimeoutError('Timed out!')
+    raise TimeoutError("Timed out!")
 
 
 def space_if_none(value):
@@ -33,17 +33,15 @@ def space_if_none(value):
     return value
 
 
-def add_features( # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
-
+def add_features(  # pylint: disable=unused-argument
+    pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None
+):
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)
 
     with warnings.catch_warnings(record=PDBConstructionWarning):
         parser = PDBParser()
-        structure = parser.get_structure('_tmp', pdb_path)
+        structure = parser.get_structure("_tmp", pdb_path)
     bio_model = structure[0]
 
     try:
@@ -51,7 +49,7 @@ def add_features( # pylint: disable=unused-argument
         surface = get_surface(bio_model)
         signal.alarm(0)
     except TimeoutError as e:
-        raise TimeoutError('Bio.PDB.ResidueDepth.get_surface timed out.') from e
+        raise TimeoutError("Bio.PDB.ResidueDepth.get_surface timed out.") from e
     else:
         hse = HSExposureCA(bio_model)
 

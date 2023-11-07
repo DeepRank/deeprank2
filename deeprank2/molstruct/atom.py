@@ -9,8 +9,9 @@ from deeprank2.molstruct.residue import Residue
 
 class AtomicElement(Enum):
     """One-hot encoding of the atomic element (or atom type)."""
+
     C = 1
-    O = 2 # noqa: pycodestyle
+    O = 2  # noqa: pycodestyle
     N = 3
     S = 4
     P = 5
@@ -26,7 +27,7 @@ class AtomicElement(Enum):
 class Atom:
     """One atom in a PDBStructure."""
 
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         residue: Residue,
         name: str,
@@ -52,9 +53,8 @@ class Atom:
         self._occupancy = occupancy
 
     def __eq__(self, other) -> bool:
-        if isinstance (other, Atom):
-            return (self._residue == other._residue
-                    and self._name == other._name)
+        if isinstance(other, Atom):
+            return self._residue == other._residue and self._name == other._name
         return NotImplemented
 
     def __hash__(self) -> hash:

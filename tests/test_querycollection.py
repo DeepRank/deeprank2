@@ -11,12 +11,11 @@ from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain.aminoacidlist import alanine, phenylalanine
 from deeprank2.features import components, contact, surfacearea
-from deeprank2.query import (ProteinProteinInterfaceResidueQuery, Query,
-                             QueryCollection, SingleResidueVariantResidueQuery)
+from deeprank2.query import ProteinProteinInterfaceResidueQuery, Query, QueryCollection, SingleResidueVariantResidueQuery
 from deeprank2.tools.target import compute_ppi_scores
 
 
-def _querycollection_tester( # pylint: disable = too-many-locals, dangerous-default-value
+def _querycollection_tester(  # pylint: disable = too-many-locals, dangerous-default-value
     query_type: str,
     n_queries: int = 3,
     feature_modules: Union[ModuleType, List[ModuleType]] = [components, contact],
@@ -37,23 +36,29 @@ def _querycollection_tester( # pylint: disable = too-many-locals, dangerous-defa
             By default, the hdf5 files generated are combined into one, and then deleted.
     """
 
-    if query_type == 'ppi':
-        queries = [ProteinProteinInterfaceResidueQuery(
-                        str("tests/data/pdb/3C8P/3C8P.pdb"),
-                        "A",
-                        "B",
-                        pssm_paths={"A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm", "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm"},
-                    ) for _ in range(n_queries)]
-    elif query_type == 'var':
-        queries = [SingleResidueVariantResidueQuery(
-                        str("tests/data/pdb/101M/101M.pdb"),
-                        "A",
-                        None, # placeholder
-                        insertion_code= None,
-                        wildtype_amino_acid= alanine,
-                        variant_amino_acid= phenylalanine,
-                        pssm_paths={"A": str("tests/data/pssm/101M/101M.A.pdb.pssm")},
-                    ) for _ in range(n_queries)]
+    if query_type == "ppi":
+        queries = [
+            ProteinProteinInterfaceResidueQuery(
+                str("tests/data/pdb/3C8P/3C8P.pdb"),
+                "A",
+                "B",
+                pssm_paths={"A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm", "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm"},
+            )
+            for _ in range(n_queries)
+        ]
+    elif query_type == "var":
+        queries = [
+            SingleResidueVariantResidueQuery(
+                str("tests/data/pdb/101M/101M.pdb"),
+                "A",
+                None,  # placeholder
+                insertion_code=None,
+                wildtype_amino_acid=alanine,
+                variant_amino_acid=phenylalanine,
+                pssm_paths={"A": str("tests/data/pssm/101M/101M.A.pdb.pssm")},
+            )
+            for _ in range(n_queries)
+        ]
     else:
         raise ValueError("Please insert a valid type (either ppi or var).")
 
@@ -62,8 +67,8 @@ def _querycollection_tester( # pylint: disable = too-many-locals, dangerous-defa
     collection = QueryCollection()
 
     for idx in range(n_queries):
-        if query_type == 'var':
-            queries[idx]._residue_number = idx + 1 # pylint: disable=protected-access
+        if query_type == "var":
+            queries[idx]._residue_number = idx + 1  # pylint: disable=protected-access
             collection.add(queries[idx])
         else:
             collection.add(queries[idx], warn_duplicate=False)
@@ -92,7 +97,7 @@ def _assert_correct_modules(output_paths: str, features: Union[str, List[str]], 
         absent (str): feature that should be absent
     """
 
-    if isinstance(features,str):
+    if isinstance(features, str):
         features = [features]
 
     with h5py.File(output_paths[0], "r") as f5:
@@ -106,7 +111,7 @@ def _assert_correct_modules(output_paths: str, features: Union[str, List[str]], 
             except KeyError:
                 missing.append(feat)
             if missing:
-                raise KeyError(f'The following feature(s) were not created: {missing}.')
+                raise KeyError(f"The following feature(s) were not created: {missing}.")
 
         with pytest.raises(KeyError):
             _ = f5[list(f5.keys())[0]][f"{Nfeat.NODE}/{absent}"]
@@ -117,7 +122,7 @@ def test_querycollection_process():
     Tests processing method of QueryCollection class.
     """
 
-    for query_type in ['ppi', 'var']:
+    for query_type in ["ppi", "var"]:
         n_queries = 3
         n_queries = 3
 
@@ -136,8 +141,8 @@ def test_querycollection_process_single_feature_module():
     Tests processing for generating from a single feature module for following input types: ModuleType, List[ModuleType] str, List[str]
     """
 
-    for query_type in ['ppi', 'var']:
-        for testcase in [surfacearea, [surfacearea], 'surfacearea', ['surfacearea']]:
+    for query_type in ["ppi", "var"]:
+        for testcase in [surfacearea, [surfacearea], "surfacearea", ["surfacearea"]]:
             _, output_directory, output_paths = _querycollection_tester(query_type, feature_modules=testcase)
             _assert_correct_modules(output_paths, Nfeat.BSA, Nfeat.HSE)
             rmtree(output_directory)
@@ -150,11 +155,11 @@ def test_querycollection_process_all_features_modules():
 
     one_feature_from_each_module = [Nfeat.RESTYPE, Nfeat.PSSM, Efeat.DISTANCE, Nfeat.HSE, Nfeat.SECSTRUCT, Nfeat.BSA, Nfeat.IRCTOTAL]
 
-    _, output_directory, output_paths = _querycollection_tester('ppi', feature_modules='all')
-    _assert_correct_modules(output_paths, one_feature_from_each_module, 'dummy_feature')
+    _, output_directory, output_paths = _querycollection_tester("ppi", feature_modules="all")
+    _assert_correct_modules(output_paths, one_feature_from_each_module, "dummy_feature")
     rmtree(output_directory)
 
-    _, output_directory, output_paths = _querycollection_tester('var', feature_modules='all')
+    _, output_directory, output_paths = _querycollection_tester("var", feature_modules="all")
     _assert_correct_modules(output_paths, one_feature_from_each_module[:-1], Nfeat.IRCTOTAL)
     rmtree(output_directory)
 
@@ -164,8 +169,7 @@ def test_querycollection_process_default_features_modules():
     Tests processing for generating all features.
     """
 
-    for query_type in ['ppi', 'var']:
-
+    for query_type in ["ppi", "var"]:
         _, output_directory, output_paths = _querycollection_tester(query_type)
         _assert_correct_modules(output_paths, [Nfeat.RESTYPE, Efeat.DISTANCE], Nfeat.HSE)
         rmtree(output_directory)
@@ -176,23 +180,23 @@ def test_querycollection_process_combine_output_true():
     Tests processing for combining hdf5 files into one.
     """
 
-    for query_type in ['ppi', 'var']:
+    for query_type in ["ppi", "var"]:
         modules = [surfacearea, components]
 
         _, output_directory_t, output_paths_t = _querycollection_tester(query_type, feature_modules=modules)
 
-        _, output_directory_f, output_paths_f = _querycollection_tester(query_type, feature_modules=modules, combine_output = False, cpu_count=2)
+        _, output_directory_f, output_paths_f = _querycollection_tester(query_type, feature_modules=modules, combine_output=False, cpu_count=2)
 
         assert len(output_paths_t) == 1
 
         keys_t = {}
-        with h5py.File(output_paths_t[0],'r') as file_t:
+        with h5py.File(output_paths_t[0], "r") as file_t:
             for key, value in file_t.items():
                 keys_t[key] = value
 
         keys_f = {}
         for output_path in output_paths_f:
-            with h5py.File(output_path,'r') as file_f:
+            with h5py.File(output_path, "r") as file_f:
                 for key, value in file_f.items():
                     keys_f[key] = value
 
@@ -207,14 +211,12 @@ def test_querycollection_process_combine_output_false():
     Tests processing for keeping all generated hdf5 files .
     """
 
-    for query_type in ['ppi', 'var']:
-
+    for query_type in ["ppi", "var"]:
         cpu_count = 2
         combine_output = False
         modules = [surfacearea, components]
 
-        _, output_directory, output_paths = _querycollection_tester(query_type, feature_modules=modules,
-                                                                    cpu_count = cpu_count, combine_output = combine_output)
+        _, output_directory, output_paths = _querycollection_tester(query_type, feature_modules=modules, cpu_count=cpu_count, combine_output=combine_output)
 
         assert len(output_paths) == cpu_count
 
@@ -236,31 +238,27 @@ def test_querycollection_duplicates_add():
         "tests/data/pdb/1ATN/1ATN_1w.pdb",
         "tests/data/pdb/1ATN/1ATN_2w.pdb",
         "tests/data/pdb/1ATN/1ATN_2w.pdb",
-        "tests/data/pdb/1ATN/1ATN_3w.pdb"]
+        "tests/data/pdb/1ATN/1ATN_3w.pdb",
+    ]
 
     queries = QueryCollection()
 
     for pdb_path in pdb_paths:
         # Append data points
         targets = compute_ppi_scores(pdb_path, ref_path)
-        queries.add(ProteinProteinInterfaceResidueQuery(
-            pdb_path = pdb_path,
-            chain_id1 = chain_id1,
-            chain_id2 = chain_id2,
-            targets = targets,
-            pssm_paths = {
-                chain_id1: pssm_path1,
-                chain_id2: pssm_path2
-            }
-        ))
+        queries.add(
+            ProteinProteinInterfaceResidueQuery(
+                pdb_path=pdb_path, chain_id1=chain_id1, chain_id2=chain_id2, targets=targets, pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2}
+            )
+        )
 
-    #check id naming for all pdb files
+    # check id naming for all pdb files
     model_ids = []
     for query in queries.queries:
         model_ids.append(query.model_id)
     model_ids.sort()
 
-    assert model_ids == ['1ATN_1w', '1ATN_1w_2', '1ATN_1w_3', '1ATN_2w', '1ATN_2w_2', '1ATN_3w']
-    assert queries.ids_count['residue-ppi:A-B:1ATN_1w'] == 3
-    assert queries.ids_count['residue-ppi:A-B:1ATN_2w'] == 2
-    assert queries.ids_count['residue-ppi:A-B:1ATN_3w'] == 1
+    assert model_ids == ["1ATN_1w", "1ATN_1w_2", "1ATN_1w_3", "1ATN_2w", "1ATN_2w_2", "1ATN_3w"]
+    assert queries.ids_count["residue-ppi:A-B:1ATN_1w"] == 3
+    assert queries.ids_count["residue-ppi:A-B:1ATN_2w"] == 2
+    assert queries.ids_count["residue-ppi:A-B:1ATN_3w"] == 1

@@ -6,7 +6,6 @@ from torch_scatter import scatter_mean, scatter_sum
 
 
 class NaiveConvolutionalLayer(Module):
-
     def __init__(self, count_node_features, count_edge_features):
         super().__init__()
         message_size = 32
@@ -30,8 +29,8 @@ class NaiveConvolutionalLayer(Module):
         node_output = self._node_mlp(node_input)
         return node_output
 
-class NaiveNetwork(Module):
 
+class NaiveNetwork(Module):
     def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
         """
         Args:

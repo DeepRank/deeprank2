@@ -9,7 +9,7 @@ from . import build_testgraph
 
 def test_atom_features():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, _ = build_testgraph(pdb_path, 10, 'atom', 25)
+    graph, _ = build_testgraph(pdb_path, 10, "atom", 25)
 
     add_features(pdb_path, graph)
 
@@ -19,7 +19,7 @@ def test_atom_features():
 
 def test_aminoacid_features():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, variant = build_testgraph(pdb_path, 10, 'residue', 25, serine)
+    graph, variant = build_testgraph(pdb_path, 10, "residue", 25, serine)
     add_features(pdb_path, graph, variant)
 
     node = graph.nodes[25].id

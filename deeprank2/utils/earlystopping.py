@@ -2,7 +2,7 @@ from typing import Callable, Optional
 
 
 class EarlyStopping:
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         patience: int = 10,
         delta: float = 0,
@@ -55,17 +55,19 @@ class EarlyStopping:
             self.counter += 1
             if self.verbose:
                 if self.delta:
-                    extra_trace = f'more than {self.delta} '
+                    extra_trace = f"more than {self.delta} "
                 else:
-                    extra_trace = ''
-                self.trace_func(f'Validation loss did not decrease {extra_trace}({self.val_loss_min:.6f} --> {val_loss:.6f}). '+
-                                f'EarlyStopping counter: {self.counter} out of {self.patience}')
+                    extra_trace = ""
+                self.trace_func(
+                    f"Validation loss did not decrease {extra_trace}({self.val_loss_min:.6f} --> {val_loss:.6f}). "
+                    + f"EarlyStopping counter: {self.counter} out of {self.patience}"
+                )
             if self.counter >= self.patience:
-                self.trace_func(f'EarlyStopping activated at epoch # {epoch} because patience of {self.patience} has been reached.')
+                self.trace_func(f"EarlyStopping activated at epoch # {epoch} because patience of {self.patience} has been reached.")
                 self.early_stop = True
         else:
             if self.verbose:
-                self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).')
+                self.trace_func(f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).")
             self.best_score = score
             self.counter = 0
 
@@ -79,11 +81,11 @@ class EarlyStopping:
                 raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping.")
             gap = val_loss - train_loss
             if gap > self.maxgap:
-                self.trace_func(f'EarlyStopping activated at epoch # {epoch} due to overfitting. ' +
-                                f'The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})')
+                self.trace_func(
+                    f"EarlyStopping activated at epoch # {epoch} due to overfitting. "
+                    + f"The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})"
+                )
                 self.early_stop = True
-
-
 
 
 # This module is modified from https://github.com/Bjarten/early-stopping-pytorch, under the following license:

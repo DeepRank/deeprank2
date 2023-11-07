@@ -3,8 +3,9 @@ from torch import nn
 
 __author__ = "Daniel-Tobias Rademaker"
 
+
 class GNNLayer(nn.Module):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         nmb_edge_projection,
         nmb_hidden_attr,
@@ -54,9 +55,7 @@ class GNNLayer(nn.Module):
     # and node attributes in order to create a 'message vector'between those
     # nodes
     def edge_model(self, edge_attr, hidden_features_source, hidden_features_target):
-        cat = torch.cat(
-            [edge_attr, hidden_features_source, hidden_features_target], dim=1
-        )
+        cat = torch.cat([edge_attr, hidden_features_source, hidden_features_target], dim=1)
         output = self.edge_mlp(cat)
         return output
 
@@ -88,9 +87,7 @@ class GNNLayer(nn.Module):
         # It is possible to run input through the same same layer multiple
         # times
         for _ in range(steps):
-            node_pair_messages = self.edge_model(
-                edge_attr, h[row], h[col]
-            )  # get all atom-pair messages
+            node_pair_messages = self.edge_model(edge_attr, h[row], h[col])  # get all atom-pair messages
             # sum all messages per node to single message vector
             messages = self.sum_messages(edges, node_pair_messages, len(h))
             # Use the messages to update the node-attributes
@@ -107,7 +104,7 @@ class GNNLayer(nn.Module):
 
 
 class SuperGNN(nn.Module):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         nmb_edge_attr,
         nmb_node_attr,
@@ -164,9 +161,7 @@ class SuperGNN(nn.Module):
 
     # Runs data through layers and return output. Potentially, attention can
     # also be returned
-    def run_through_network(
-        self, edges, edge_attr, node_attr, with_output_attention=False
-    ):
+    def run_through_network(self, edges, edge_attr, node_attr, with_output_attention=False):
         edge_attr, node_attr = self.preprocess(edge_attr, node_attr)
         for layer in self.modlist:
             node_attr = layer.update_nodes(edges, edge_attr, node_attr)
@@ -178,7 +173,7 @@ class SuperGNN(nn.Module):
 
 
 class AlignmentGNN(SuperGNN):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         nmb_edge_attr,
         nmb_node_attr,

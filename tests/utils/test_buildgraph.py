@@ -1,8 +1,6 @@
 from deeprank2.domain.aminoacidlist import valine
 from deeprank2.molstruct.atom import AtomicElement
-from deeprank2.utils.buildgraph import (get_residue_contact_pairs,
-                                        get_structure,
-                                        get_surrounding_residues)
+from deeprank2.utils.buildgraph import get_residue_contact_pairs, get_structure, get_surrounding_residues
 from pdb2sql import pdb2sql
 
 
@@ -13,7 +11,7 @@ def test_get_structure_complete():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close() # pylint: disable=protected-access
+        pdb._close()  # pylint: disable=protected-access
 
     assert structure is not None
 
@@ -42,14 +40,13 @@ def test_get_structure_from_nmr_with_dna():
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close() # pylint: disable=protected-access
+        pdb._close()  # pylint: disable=protected-access
 
     assert structure is not None
     assert structure.chains[0].residues[0].amino_acid is None  # DNA
 
 
 def test_residue_contact_pairs():
-
     # get_residue_contact_pairs(pdb_path: str, structure: PDBStructure,
     # chain_id1: str, chain_id2: str, distance_cutoff: float)
 
@@ -59,7 +56,7 @@ def test_residue_contact_pairs():
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close() # pylint: disable=protected-access
+        pdb._close()  # pylint: disable=protected-access
 
     residue_pairs = get_residue_contact_pairs(pdb_path, structure, "A", "B", 8.5)
 
@@ -67,14 +64,13 @@ def test_residue_contact_pairs():
 
 
 def test_surrounding_residues():
-
     pdb_path = "tests/data/pdb/101M/101M.pdb"
 
     pdb = pdb2sql(pdb_path)
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close() # pylint: disable=protected-access
+        pdb._close()  # pylint: disable=protected-access
 
     all_residues = structure.get_chain("A").residues
 

@@ -75,9 +75,9 @@ class Chain:
     def __init__(self, model: PDBStructure, id_: Optional[str]):
         """One chain of a PDBStructure.
 
-            Args:
-            model (:class:`PDBStructure`): The model that this chain is part of.
-            id_ (str): The pdb identifier of this chain.
+        Args:
+        model (:class:`PDBStructure`): The model that this chain is part of.
+        id_ (str): The pdb identifier of this chain.
         """
         self._model = model
         self._id = id_
@@ -123,8 +123,7 @@ class Chain:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Chain):
-            return (self._model == other._model
-                    and self._id == other._id)
+            return self._model == other._model and self._id == other._id
         return NotImplemented
 
     def __hash__(self) -> hash:
