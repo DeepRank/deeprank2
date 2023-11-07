@@ -10,7 +10,8 @@ from deeprank2.utils.community_pooling import get_preloaded_cluster
 
 
 class SGraphAttentionLayer(torch.nn.Module):
-    r"""
+    r"""Self attention layer for graph.
+
     This is a new layer that is similar to the graph attention network but simpler
     z_i =  1 / Ni \\Sum_j a_ij * [x_i || x_j] * W + b_i
     || is the concatenation operator: [1,2,3] || [4,5,6] = [1,2,3,4,5,6]

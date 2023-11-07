@@ -70,7 +70,8 @@ class AtomicForcefield:
             return self._vanderwaals_parameters[type_]
 
     def get_charge(self, atom: Atom):
-        """
+        """Get the charge of an atom.
+
         Args:
             atom(Atom): the atom to get the charge for
         Returns(float): the charge of the given atom.

@@ -111,6 +111,7 @@ def test_14_pair():
 
 def test_14dist_opposing_chains():
     """ChainA PRO 114 CA - ChainB HIS 116 CD2 (3.62 A). Should have non-zero energy despite close contact, because opposing chains.
+
     E_vdw for this pair if they were on the same chain: 0.018
     E_vdw for this pair on opposing chains: 0.146.
     """

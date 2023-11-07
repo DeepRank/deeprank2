@@ -297,7 +297,7 @@ class Trainer:
         """Pre-clusters nodes of the graphs.
 
         Args:
-            dataset (:class:`GraphDataset`)
+            dataset (:class:`GraphDataset`): GraphDataset object.
         """
         for fname, mol in tqdm(dataset.index_entries):
             data = dataset.load_one_graph(fname, mol)
@@ -639,7 +639,7 @@ class Trainer:
         Runs a single epoch.
 
         Args:
-            epoch_number (int)
+            epoch_number (int): Number for this epoch, used for storing the outputs.
             pass_name (str): 'training', 'validation' or 'testing'
 
         Returns:

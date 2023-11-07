@@ -12,7 +12,8 @@ class EarlyStopping:
         verbose: bool = True,
         trace_func: Callable = print,
     ):
-        """
+        """Early stopping class to terminate training when validation loss doesn't improve.
+
         Terminate training if validation loss doesn't improve after a given patience
         or if a maximum gap between validation and training loss is reached.
 

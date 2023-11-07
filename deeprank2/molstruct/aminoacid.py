@@ -18,8 +18,6 @@ class Polarity(Enum):
 
 
 class AminoAcid:
-    """An amino acid represents the type of `Residue` in a `PDBStructure`."""
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
@@ -34,7 +32,8 @@ class AminoAcid:
         hydrogen_bond_acceptors: int,
         index: int,
     ):
-        """
+        """An amino acid represents the type of `Residue` in a `PDBStructure`.
+
         Args:
             name (str): Full name of the amino acid.
             three_letter_code (str): Three-letter code of the amino acid (as in PDB).

@@ -59,9 +59,7 @@ def _add_atom_data_to_structure(
     residue_name: str,
     insertion_code: str,
 ):
-    """
-    This is a subroutine, to be used in other methods for converting pdb2sql atomic data into a
-    deeprank structure object. It should be called for one atom.
+    """This is a subroutine, to be used in other methods for converting pdb2sql atomic data into a deeprank structure object. It should be called for one atom.
 
     Args:
         structure (:class:`PDBStructure`): Where this atom should be added to.
@@ -118,7 +116,7 @@ def get_structure(pdb, id_: str):
 
     Args:
         pdb (pdb2sql object): The pdb structure that we're investigating.
-        id (str): Unique id for the pdb structure.
+        id_ (str): Unique id for the pdb structure.
 
     Returns:
         PDBStructure: The structure object, giving access to chains, residues, atoms.

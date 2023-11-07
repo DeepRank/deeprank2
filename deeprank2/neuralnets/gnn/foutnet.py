@@ -10,7 +10,8 @@ from deeprank2.utils.community_pooling import get_preloaded_cluster
 
 
 class FoutLayer(torch.nn.Module):
-    """
+    """The Fout layer is a graph convolutional layer.
+
     This layer is described by eq. (1) of
     Protein Interface Predition using Graph Convolutional Network
     by Alex Fout et al. NIPS 2018.

@@ -123,7 +123,7 @@ class Query:
             self._targets = targets
 
     def _set_graph_targets(self, graph: Graph):
-        "Simply copies target data from query to graph."
+        """Simply copies target data from query to graph."""
         for target_name, target_data in self._targets.items():
             graph.targets[target_name] = target_data
 
@@ -134,7 +134,7 @@ class Query:
         include_hydrogens: bool,
         load_pssms: bool,
     ):
-        "A helper function, to build the structure from .PDB and .PSSM files."
+        """A helper function, to build the structure from .PDB and .PSSM files."""
         # make a copy of the pdb, with hydrogens
         pdb_name = os.path.basename(pdb_path)
         hydrogen_pdb_file, hydrogen_pdb_path = tempfile.mkstemp(prefix="hydrogenated-", suffix=pdb_name)
@@ -170,7 +170,7 @@ class Query:
 
     @property
     def model_id(self) -> str:
-        "The ID of the model, usually a .PDB accession code."
+        """The ID of the model, usually a .PDB accession code."""
         return self._model_id
 
     @model_id.setter
@@ -179,7 +179,7 @@ class Query:
 
     @property
     def targets(self) -> Dict[str, float]:
-        "The target values associated with the query."
+        """The target values associated with the query."""
         return self._targets
 
     def __repr__(self) -> str:
@@ -195,6 +195,7 @@ class Query:
 class QueryCollection:
     """
     Represents the collection of data queries.
+
         Queries can be saved as a dictionary to easily navigate through their data.
 
     """
@@ -243,7 +244,7 @@ class QueryCollection:
 
     @property
     def queries(self) -> List[Query]:
-        "The list of queries added to the collection."
+        """The list of queries added to the collection."""
         return self._queries
 
     def __contains__(self, query: Query) -> bool:
@@ -302,7 +303,8 @@ class QueryCollection:
         grid_map_method: Optional[MapMethod] = None,
         grid_augmentation_count: int = 0,
     ) -> List[str]:
-        """
+        """Method for processing the queries in parallel.
+
         Args:
             prefix (Optional[str], optional): Prefix for the output files. Defaults to None, which sets ./processed-queries- prefix.
             feature_modules (Union[ModuleType, List[ModuleType], str, List[str]], optional): Features' module or list of features' modules
@@ -421,14 +423,14 @@ class SingleResidueVariantResidueQuery(Query):
 
     @property
     def residue_id(self) -> str:
-        "String representation of the residue number and insertion code."
+        """String representation of the residue number and insertion code."""
         if self._insertion_code is not None:
             return f"{self._residue_number}{self._insertion_code}"
 
         return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
+        """Returns the string representing the complete query ID."""
         return f"residue-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
 
     def build(self, feature_modules: List[ModuleType], include_hydrogens: bool = False) -> Graph:
@@ -529,14 +531,14 @@ class SingleResidueVariantAtomicQuery(Query):
 
     @property
     def residue_id(self) -> str:
-        "String representation of the residue number and insertion code."
+        """String representation of the residue number and insertion code."""
         if self._insertion_code is not None:
             return f"{self._residue_number}{self._insertion_code}"
 
         return str(self._residue_number)
 
     def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
+        """Returns the string representing the complete query ID."""
         return f"atomic-graph:{self._chain_id}:{self.residue_id}:{self._wildtype_amino_acid.name}->{self._variant_amino_acid.name}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
@@ -562,7 +564,8 @@ class SingleResidueVariantAtomicQuery(Query):
 
     @staticmethod
     def _get_atom_node_key(atom) -> str:
-        """
+        """Returns a unique key for the atom.
+
         Since pickle has problems serializing the graph when the nodes are atoms,
         this function can be used to generate a unique key for the atom.
         """
@@ -696,7 +699,7 @@ class ProteinProteinInterfaceAtomicQuery(Query):
         self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
+        """Returns the string representing the complete query ID."""
         return f"atom-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:
@@ -778,7 +781,7 @@ class ProteinProteinInterfaceResidueQuery(Query):
         self._distance_cutoff = distance_cutoff
 
     def get_query_id(self) -> str:
-        "Returns the string representing the complete query ID."
+        """Returns the string representing the complete query ID."""
         return f"residue-ppi:{self._chain_id1}-{self._chain_id2}:{self.model_id}"
 
     def __eq__(self, other) -> bool:

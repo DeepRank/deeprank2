@@ -74,8 +74,9 @@ class GridSettings:
 
 
 class Grid:
-    """
-    An instance of this class holds everything that the grid is made of:
+    """An instance of this class holds everything that the grid is made of.
+
+    In particular:
     - coordinates of points
     - names of features
     - feature values on each point.

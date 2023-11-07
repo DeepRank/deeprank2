@@ -12,14 +12,6 @@ if TYPE_CHECKING:
 
 
 class Residue:
-    """One protein residue in a `PDBStructure`.
-
-    A `Residue` is the basic building block of proteins and protein complex,
-    here represented by `PDBStructures`.
-    Each residue is of a certain `AminoAcid` type and consists of multiple
-    `Atom`s.
-    """
-
     def __init__(
         self,
         chain: Chain,
@@ -27,7 +19,13 @@ class Residue:
         amino_acid: Optional[AminoAcid] = None,
         insertion_code: Optional[str] = None,
     ):
-        """
+        """One protein residue in a `PDBStructure`.
+
+        A `Residue` is the basic building block of proteins and protein complex,
+        here represented by `PDBStructures`.
+        Each residue is of a certain `AminoAcid` type and consists of multiple
+        `Atom`s.
+
         Args:
             chain (:class:`Chain`): The chain that this residue belongs to.
             number (int): the residue number
@@ -116,10 +114,9 @@ class Residue:
 
 
 class SingleResidueVariant:
-    """A single residue mutation of a PDBStrcture."""
-
     def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
-        """
+        """A single residue mutation of a PDBStrcture.
+
         Args:
             residue (Residue): the `Residue` object from the PDBStructure that is mutated.
             variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.

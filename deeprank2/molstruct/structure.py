@@ -10,16 +10,14 @@ if TYPE_CHECKING:
 
 
 class PDBStructure:
-    """A proitein or protein complex structure..
-
-    A `PDBStructure` can contain one or multiple `Chains`, i.e. separate
-    molecular entities (individual proteins).
-    One PDBStructure consists of a number of `Residue`s, each of which is of a
-    particular `AminoAcid` type and in turn consists of a number of `Atom`s.
-    """
-
     def __init__(self, id_: Optional[str] = None):
-        """
+        """A proitein or protein complex structure..
+
+        A `PDBStructure` can contain one or multiple `Chains`, i.e. separate
+        molecular entities (individual proteins).
+        One PDBStructure consists of a number of `Residue`s, each of which is of a
+        particular `AminoAcid` type and in turn consists of a number of `Atom`s.
+
         Args:
             id_ (str, optional): An unique identifier for this structure, can be the pdb accession code.
                 Defaults to None.

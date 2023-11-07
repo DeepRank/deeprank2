@@ -134,7 +134,7 @@ class DeeprankDataset(Dataset):
         inherited_params: List[str],
         dataset_train: Union[GraphDataset, GridDataset],
     ):
-        """ "Check if the parameters for validation and/or testing are the same as in the training set.
+        """Check if the parameters for validation and/or testing are the same as in the training set.
 
         Args:
         inherited_params (List[str]): List of parameters that need to be checked for inheritance.

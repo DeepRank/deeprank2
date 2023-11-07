@@ -8,7 +8,7 @@ class AtomicElement(Enum):
     """One-hot encoding of the atomic element (or atom type)."""
 
     C = 1
-    O = 2  # noqa: pycodestyle
+    O = 2  # noqa: E741
     N = 3
     S = 4
     P = 5
@@ -22,8 +22,6 @@ class AtomicElement(Enum):
 
 
 class Atom:
-    """One atom in a PDBStructure."""
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         residue: Residue,
@@ -32,7 +30,8 @@ class Atom:
         position: np.array,
         occupancy: float,
     ):
-        """
+        """One atom in a PDBStructure.
+
         Args:
             residue (:class:`Residue`): The residue that this atom belongs to.
             name (str): Pdb atom name.

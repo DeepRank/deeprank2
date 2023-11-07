@@ -31,11 +31,11 @@ class OutputExporter:
             os.makedirs(self._directory_path)
 
     def __enter__(self):
-        "Overridable."
+        """Overridable."""
         return self
 
     def __exit__(self, exception_type, exception, traceback):
-        "Overridable."
+        """Overridable."""
         pass  # pylint: disable=unnecessary-pass
 
     def process(
@@ -47,13 +47,13 @@ class OutputExporter:
         target_values: List[Any],
         loss: float,
     ):
-        "The entry_names, output_values, target_values MUST have the same length."
+        """The entry_names, output_values, target_values MUST have the same length."""
         pass  # pylint: disable=unnecessary-pass
 
     def is_compatible_with(  # pylint: disable=unused-argument
         self, output_data_shape: int, target_data_shape: Optional[int] = None
     ) -> bool:
-        "True if this exporter can work with the given data shapes."
+        """True if this exporter can work with the given data shapes."""
         return True
 
 
@@ -119,7 +119,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         target_values: List[Any],
         loss: float,
     ):
-        "Write to tensorboard."
+        """Write to tensorboard."""
         ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
         self._writer.add_scalar(f"{pass_name} cross entropy loss", ce_loss, epoch_number)
 
@@ -168,14 +168,11 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
 
 
 class ScatterPlotExporter(OutputExporter):
-    """An output exporter that can make scatter plots, containing every single data point.
-
-    On the X-axis: targets values
-    On the Y-axis: output values
-    """
-
     def __init__(self, directory_path: str, epoch_interval: int = 1):
-        """
+        """An output exporter that can make scatter plots, containing every single data point.
+
+        On the X-axis: targets values
+        On the Y-axis: output values
         Args:
             directory_path (str): Where to store the plots.
             epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.

@@ -34,6 +34,7 @@ def community_detection_per_batch(  # pylint: disable=too-many-locals
 
     Args:
         edge_index (Tensor): Edge index.
+        batch (Tensor): Batch.
         num_nodes (int): Number of nodes.
         edge_attr (Tensor, optional): Edge attributes. Defaults to None.
         method (str, optional): Method. Defaults to "mcl".

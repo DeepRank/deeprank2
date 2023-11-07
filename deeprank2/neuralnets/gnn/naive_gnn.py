@@ -36,7 +36,8 @@ class NaiveConvolutionalLayer(Module):
 
 class NaiveNetwork(Module):
     def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
-        """
+        """Naive network that doesn't require clusters.
+
         Args:
             input_shape (int): Number of node input features.
             output_shape (int): Number of output value per graph.
