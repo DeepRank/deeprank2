@@ -14,11 +14,11 @@ from deeprank2.utils.graph import Graph
 
 
 class DSSPError(Exception):
-    "Raised if DSSP fails to produce an output"
+    "Raised if DSSP fails to produce an output."
 
 
 class SecondarySctructure(Enum):
-    "a value to express a secondary a residue's secondary structure type"
+    "a value to express a secondary a residue's secondary structure type."
 
     HELIX = 0  # 'GHI'
     STRAND = 1  # 'BE'

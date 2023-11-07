@@ -73,7 +73,7 @@ class AtomicForcefield:
         """
         Args:
             atom(Atom): the atom to get the charge for
-        Returns(float): the charge of the given atom
+        Returns(float): the charge of the given atom.
         """
         atom_name = atom.name
         amino_acid_code = atom.residue.amino_acid.three_letter_code

@@ -78,7 +78,7 @@ class Grid:
     An instance of this class holds everything that the grid is made of:
     - coordinates of points
     - names of features
-    - feature values on each point
+    - feature values on each point.
     """
 
     def __init__(self, id_: str, center: List[float], settings: GridSettings):

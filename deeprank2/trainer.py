@@ -284,9 +284,7 @@ class Trainer:
             )
 
     def _load_pretrained_model(self):
-        """
-        Loads pretrained model
-        """
+        """Loads pretrained model."""
         self.test_loader = DataLoader(self.dataset_test, pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
         self._put_model_to_device(self.dataset_test)
@@ -296,7 +294,7 @@ class Trainer:
         self.model.load_state_dict(self.model_load_state_dict)
 
     def _precluster(self, dataset: GraphDataset):
-        """Pre-clusters nodes of the graphs
+        """Pre-clusters nodes of the graphs.
 
         Args:
             dataset (:class:`GraphDataset`)
@@ -332,7 +330,7 @@ class Trainer:
 
     def _put_model_to_device(self, dataset: Union[GraphDataset, GridDataset]):
         """
-        Puts the model on the available device
+        Puts the model on the available device.
 
         Args:
             dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): GraphDataset object.
@@ -638,7 +636,7 @@ class Trainer:
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float:
         """
-        Runs a single epoch
+        Runs a single epoch.
 
         Args:
             epoch_number (int)
@@ -694,7 +692,7 @@ class Trainer:
         self, loader: DataLoader, epoch_number: int, pass_name: str
     ) -> float:
         """
-        Evaluates the model
+        Evaluates the model.
 
         Args:
             loader (Dataloader): Data to evaluate on.
@@ -751,7 +749,7 @@ class Trainer:
     @staticmethod
     def _log_epoch_data(stage: str, loss: float, time: float):
         """
-        Prints the data of each epoch
+        Prints the data of each epoch.
 
         Args:
             stage (str): Train or valid.
@@ -761,9 +759,7 @@ class Trainer:
         _log.info(f"{stage} loss {loss} | time {time}")
 
     def _format_output(self, pred, target=None):
-        """
-        Format the network output depending on the task (classification/regression).
-        """
+        """Format the network output depending on the task (classification/regression)."""
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
@@ -820,9 +816,7 @@ class Trainer:
             self._eval(self.test_loader, self.epoch_saved_model, "testing")
 
     def _load_params(self):
-        """
-        Loads the parameters of a pretrained model
-        """
+        """Loads the parameters of a pretrained model."""
         state = torch.load(self.pretrained_model_path)
 
         self.target = state["target"]
@@ -886,7 +880,7 @@ class Trainer:
 def _divide_dataset(
     dataset: Union[GraphDataset, GridDataset], splitsize: Optional[Union[float, int]] = None
 ) -> Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
-    """Divides the dataset into a training set and an evaluation set
+    """Divides the dataset into a training set and an evaluation set.
 
     Args:
         dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): Input dataset to be split into training and validation data.

@@ -13,7 +13,7 @@ class FoutLayer(torch.nn.Module):
     """
     This layer is described by eq. (1) of
     Protein Interface Predition using Graph Convolutional Network
-    by Alex Fout et al. NIPS 2018
+    by Alex Fout et al. NIPS 2018.
 
     Args:
         in_channels (int): Size of each input sample.

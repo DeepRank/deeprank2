@@ -18,7 +18,7 @@ _log = logging.getLogger(__name__)
 
 
 def _id_from_residue(residue: Tuple[str, int, str]) -> str:
-    """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes
+    """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes.
 
     Args:
         residue (tuple): Input residue as rendered by pdb2sql: ( str(<chain>), int(<residue_number>), str(<three_letter_code> )

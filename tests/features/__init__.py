@@ -18,7 +18,7 @@ from deeprank2.utils.parsing.pssm import parse_pssm
 
 
 def _get_residue(chain: Chain, number: int) -> Residue:
-    """Get the Residue from its Chain and number"""
+    """Get the Residue from its Chain and number."""
     for residue in chain.residues:
         if residue.number == number:
             return residue

@@ -93,7 +93,7 @@ def _querycollection_tester(  # pylint: disable = too-many-locals, dangerous-def
 
 
 def _assert_correct_modules(output_paths: str, features: Union[str, List[str]], absent: str):
-    """Helper function to assert inclusion of correct features
+    """Helper function to assert inclusion of correct features.
 
     Args:
         output_paths (str): output_paths as returned from _querycollection_tester
@@ -121,9 +121,7 @@ def _assert_correct_modules(output_paths: str, features: Union[str, List[str]], 
 
 
 def test_querycollection_process():
-    """
-    Tests processing method of QueryCollection class.
-    """
+    """Tests processing method of QueryCollection class."""
     for query_type in ["ppi", "var"]:
         n_queries = 3
         n_queries = 3
@@ -139,9 +137,7 @@ def test_querycollection_process():
 
 
 def test_querycollection_process_single_feature_module():
-    """
-    Tests processing for generating from a single feature module for following input types: ModuleType, List[ModuleType] str, List[str]
-    """
+    """Tests processing for generating from a single feature module for following input types: ModuleType, List[ModuleType] str, List[str]."""
     for query_type in ["ppi", "var"]:
         for testcase in [surfacearea, [surfacearea], "surfacearea", ["surfacearea"]]:
             _, output_directory, output_paths = _querycollection_tester(query_type, feature_modules=testcase)
@@ -150,9 +146,7 @@ def test_querycollection_process_single_feature_module():
 
 
 def test_querycollection_process_all_features_modules():
-    """
-    Tests processing for generating all features.
-    """
+    """Tests processing for generating all features."""
     one_feature_from_each_module = [Nfeat.RESTYPE, Nfeat.PSSM, Efeat.DISTANCE, Nfeat.HSE, Nfeat.SECSTRUCT, Nfeat.BSA, Nfeat.IRCTOTAL]
 
     _, output_directory, output_paths = _querycollection_tester("ppi", feature_modules="all")
@@ -165,9 +159,7 @@ def test_querycollection_process_all_features_modules():
 
 
 def test_querycollection_process_default_features_modules():
-    """
-    Tests processing for generating all features.
-    """
+    """Tests processing for generating all features."""
     for query_type in ["ppi", "var"]:
         _, output_directory, output_paths = _querycollection_tester(query_type)
         _assert_correct_modules(output_paths, [Nfeat.RESTYPE, Efeat.DISTANCE], Nfeat.HSE)
@@ -175,9 +167,7 @@ def test_querycollection_process_default_features_modules():
 
 
 def test_querycollection_process_combine_output_true():
-    """
-    Tests processing for combining hdf5 files into one.
-    """
+    """Tests processing for combining hdf5 files into one."""
     for query_type in ["ppi", "var"]:
         modules = [surfacearea, components]
 
@@ -205,9 +195,7 @@ def test_querycollection_process_combine_output_true():
 
 
 def test_querycollection_process_combine_output_false():
-    """
-    Tests processing for keeping all generated hdf5 files .
-    """
+    """Tests processing for keeping all generated hdf5 files ."""
     for query_type in ["ppi", "var"]:
         cpu_count = 2
         combine_output = False
@@ -221,9 +209,7 @@ def test_querycollection_process_combine_output_false():
 
 
 def test_querycollection_duplicates_add():
-    """
-    Tests add method of QueryCollection class.
-    """
+    """Tests add method of QueryCollection class."""
     ref_path = "tests/data/ref/1ATN/1ATN.pdb"
     pssm_path1 = "tests/data/pssm/1ATN/1ATN.A.pdb.pssm"
     pssm_path2 = "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"

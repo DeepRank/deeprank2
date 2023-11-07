@@ -127,7 +127,7 @@ def add_features(  # pylint: disable=unused-argument
     pdb_path: str, graph: Graph, single_amino_acid_variant: Optional[SingleResidueVariant] = None
 ):
     """Calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
-    BSA: the area of the protein, that only gets exposed in monomeric state
+    BSA: the area of the protein, that only gets exposed in monomeric state.
     """
     # BSA
     add_bsa(graph)

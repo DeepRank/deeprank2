@@ -41,7 +41,7 @@ class Atom:
             occupancy (float): Pdb occupancy value.
                 This represents the proportion of structures where the atom is detected at a given position.
                 Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
-                Note that only the highest occupancy atom is used by deeprank2 (see tools.pdb._add_atom_to_residue)
+                Note that only the highest occupancy atom is used by deeprank2 (see tools.pdb._add_atom_to_residue).
         """
         self._residue = residue
         self._name = name

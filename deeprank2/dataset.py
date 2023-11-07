@@ -502,7 +502,7 @@ class GridDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = self.target
 
     def _check_features(self):
-        """Checks if the required features exist"""
+        """Checks if the required features exist."""
         hdf5_path = self.hdf5_paths[0]
 
         # read available features
@@ -929,7 +929,7 @@ class GraphDataset(DeeprankDataset):
         return data
 
     def _check_features(self):  # pylint: disable=too-many-branches
-        """Checks if the required features exist"""
+        """Checks if the required features exist."""
         f = h5py.File(self.hdf5_paths[0], "r")
         mol_key = list(f.keys())[0]
 
