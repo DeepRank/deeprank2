@@ -78,6 +78,7 @@ During the development cycle, three main supporting branches are used:
 
 ## UML
 
-Code-base class diagrams updated on 02/11/2023, generated with https://www.gituml.com:
-- ![Data processing classes and functions](./tests/utils/uml_data_processing.svg)
+Code-base class diagrams updated on 02/11/2023, generated with https://www.gituml.com (click on the image for zooming):
+- Data processing classes and functions
+  <img src="./tests/utils/uml_data_processing.svg" width="50">
 - [ML pipeline classes and functions]()
