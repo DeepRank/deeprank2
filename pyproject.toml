@@ -82,4 +82,11 @@ source = ["deeprank2"]
 
 [tool.setuptools.packages.find]
 include = ["deeprank2*"]
-exclude = ["tests*"]
+exclude = ["tests*", "*tests.*", "*tests"]
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.xlsx",
+    "*.param",
+    "*.top", 
+    "*residue-classes"]
