@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import h5py
 import pandas as pd
+
 from deeprank2.utils.exporters import (HDF5OutputExporter,
                                        OutputExporterCollection,
                                        ScatterPlotExporter,
@@ -95,7 +96,7 @@ class TestOutputExporters(unittest.TestCase):
 
         assert os.path.isfile(scatterplot_exporter.get_filename(epoch_number))
 
-    def test_hdf5_output(self):
+    def test_hdf5_output(self): # pylint: disable=too-many-locals
         output_exporter = HDF5OutputExporter(self._work_dir)
         path_output_exporter = os.path.join(self._work_dir, 'output_exporter.hdf5')
         entry_names = ["entry1", "entry2", "entry3"]
@@ -144,6 +145,9 @@ class TestOutputExporters(unittest.TestCase):
         # assert there are len(entry_names)*n_epoch rows
         assert df_test_1[df_test_1.phase == pass_name_1].shape[0] == len(entry_names)*n_epoch_1
         assert df_test_2[df_test_2.phase == pass_name_2].shape[0] == len(entry_names)*n_epoch_2
+        # assert there are 6 columns ('phase', 'epoch', 'entry', 'output', 'target', 'loss')
+        assert df_test_1[df_test_1.phase == pass_name_1].shape[1] == 6
+        assert df_test_2[df_test_2.phase == pass_name_2].shape[1] == 6
         # assert there are 6 columns ('phase', 'epoch', 'entry', 'output', 'target', 'loss')
         assert df_test_1[df_test_1.phase == pass_name_1].shape[1] == 6
         assert df_test_2[df_test_2.phase == pass_name_2].shape[1] == 6
