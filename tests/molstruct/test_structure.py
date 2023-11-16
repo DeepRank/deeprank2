@@ -46,4 +46,3 @@ def test_serialization_fork():
     assert loaded_structure.get_chain("A").get_residue(0) == structure.get_chain("A").get_residue(0)
     assert loaded_structure.get_chain("A").get_residue(0).amino_acid == structure.get_chain("A").get_residue(0).amino_acid
     assert loaded_structure.get_chain("A").get_residue(0).atoms[0] == structure.get_chain("A").get_residue(0).atoms[0]
-    assert loaded_structure.get_chain("A").get_residue(0).atoms[0] == structure.get_chain("A").get_residue(0).atoms[0]

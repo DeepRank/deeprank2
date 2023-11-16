@@ -8,10 +8,12 @@ from unittest.mock import patch
 import h5py
 import pandas as pd
 
-from deeprank2.utils.exporters import (HDF5OutputExporter,
-                                       OutputExporterCollection,
-                                       ScatterPlotExporter,
-                                       TensorboardBinaryClassificationExporter)
+from deeprank2.utils.exporters import (
+    HDF5OutputExporter,
+    OutputExporterCollection,
+    ScatterPlotExporter,
+    TensorboardBinaryClassificationExporter,
+)
 
 logging.getLogger(__name__)
 
@@ -145,9 +147,6 @@ class TestOutputExporters(unittest.TestCase):
         # assert there are len(entry_names)*n_epoch rows
         assert df_test_1[df_test_1.phase == pass_name_1].shape[0] == len(entry_names)*n_epoch_1
         assert df_test_2[df_test_2.phase == pass_name_2].shape[0] == len(entry_names)*n_epoch_2
-        # assert there are 6 columns ('phase', 'epoch', 'entry', 'output', 'target', 'loss')
-        assert df_test_1[df_test_1.phase == pass_name_1].shape[1] == 6
-        assert df_test_2[df_test_2.phase == pass_name_2].shape[1] == 6
         # assert there are 6 columns ('phase', 'epoch', 'entry', 'output', 'target', 'loss')
         assert df_test_1[df_test_1.phase == pass_name_1].shape[1] == 6
         assert df_test_2[df_test_2.phase == pass_name_2].shape[1] == 6
