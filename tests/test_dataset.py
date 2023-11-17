@@ -224,10 +224,7 @@ class TestDataSet(unittest.TestCase):
             train_data = dataset_train
         )
 
-        # features, target, target_transform, task, and classes
-        # in the test should be inherited from the train
-        inherited_param = ["features", "target", "target_transform", "task", "classes"]
-        _check_inherited_params(inherited_param, dataset_train, dataset_test)
+        _check_inherited_params(dataset_test.inherited_params, dataset_train, dataset_test)
 
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
@@ -240,9 +237,7 @@ class TestDataSet(unittest.TestCase):
             classes = None
         )
 
-        # features, features_dict, target, target_transform, task, and classes
-        # in the test should be inherited from the train
-        _check_inherited_params(inherited_param, dataset_train, dataset_test)
+        _check_inherited_params(dataset_test.inherited_params, dataset_train, dataset_test)
 
     def test_inherit_info_pretrained_model_griddataset(self):
 
@@ -253,13 +248,10 @@ class TestDataSet(unittest.TestCase):
             train_data = pretrained_model
         )
 
-        # features, target, target_transform, task, and classes
-        # in the test should be inherited from the pre-trained model
-        inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
         data = torch.load(pretrained_model, map_location=torch.device('cpu'))
 
         dataset_test_vars = vars(dataset_test)
-        for param in inherited_params:
+        for param in dataset_test.inherited_params:
             assert dataset_test_vars[param] == data[param]
 
         dataset_test = GridDataset(
@@ -276,7 +268,7 @@ class TestDataSet(unittest.TestCase):
         # features, target, target_transform, task, and classes
         # in the test should be inherited from the pre-trained model
         dataset_test_vars = vars(dataset_test)
-        for param in inherited_params:
+        for param in dataset_test.inherited_params:
             assert dataset_test_vars[param] == data[param]
 
     def test_no_target_dataset_griddataset(self):
@@ -1052,10 +1044,7 @@ class TestDataSet(unittest.TestCase):
             train_data = dataset_train,
         )
 
-        # node_features, edge_features, feature_transform, target, target_transform, task, and classes
-        # in the test should be inherited from the train
-        inherited_param = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes"]
-        _check_inherited_params(inherited_param, dataset_train, dataset_test)
+        _check_inherited_params(dataset_test.inherited_params, dataset_train, dataset_test)
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
@@ -1070,9 +1059,7 @@ class TestDataSet(unittest.TestCase):
             classes = None
         )
 
-        # node_features, edge_features, features_dict, feature_transform, target, target_transform, task, and classes
-        # in the test should be inherited from the train
-        _check_inherited_params(inherited_param, dataset_train, dataset_test)
+        _check_inherited_params(dataset_test.inherited_params, dataset_train, dataset_test)
 
     def test_inherit_info_pretrained_model_graphdataset(self):
 
@@ -1084,9 +1071,6 @@ class TestDataSet(unittest.TestCase):
             train_data = pretrained_model
         )
 
-        # node_features, edge_features, feature_transform, target, target_transform, task, and classes
-        # in the test should be inherited from the pre-trained model
-        inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
         data = torch.load(pretrained_model, map_location=torch.device('cpu'))
         if data["features_transform"]:
             for _, key in data["features_transform"].items():
@@ -1095,7 +1079,7 @@ class TestDataSet(unittest.TestCase):
                 key['transform'] = eval(key['transform']) # pylint: disable=eval-used
 
         dataset_test_vars = vars(dataset_test)
-        for param in inherited_params:
+        for param in dataset_test.inherited_params:
             if param == 'features_transform':
                 for item, key in data[param].items():
                     assert key['transform'].__code__.co_code == dataset_test_vars[param][item]['transform'].__code__.co_code
@@ -1119,7 +1103,7 @@ class TestDataSet(unittest.TestCase):
         # node_features, edge_features, feature_transform, target, target_transform, task, and classes
         # in the test should be inherited from the pre-trained model
         dataset_test_vars = vars(dataset_test)
-        for param in inherited_params:
+        for param in dataset_test.inherited_params:
             if param == 'features_transform':
                 for item, key in data[param].items():
                     assert key['transform'].__code__.co_code == dataset_test_vars[param][item]['transform'].__code__.co_code

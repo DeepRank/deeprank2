@@ -529,10 +529,11 @@ class GridDataset(DeeprankDataset):
         self._check_features()
 
         if not train:
-            inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
-            self._check_and_inherit_train(GridDataset, inherited_params)
+            self.inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
+            self._check_and_inherit_train(GridDataset, self.inherited_params)
 
         else:
+            self.inherited_params = None
             if train_data:
                 _log.warning("""`train_data` has been set but train flag was set to True.
                 `train_data` will be ignored since the current dataset will be considered as training set.""")
@@ -667,7 +668,7 @@ class GridDataset(DeeprankDataset):
                     if self.task == targets.REGRESS and self.target_transform is True:
                         y = torch.sigmoid(torch.log(y))
                     elif self.task is not targets.REGRESS and self.target_transform is True:
-                        raise ValueError(f"Task is set to {self.task}. Please set it to regress to transform the target with a sigmoid.")
+                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. Please change `task` to \"regress\" or set `target_transform` to `False`.")
                 else:
                     y = None
                     possible_targets = grp[targets.VALUES].keys()
@@ -792,10 +793,11 @@ class GraphDataset(DeeprankDataset):
         self._check_features()
 
         if not train: # pylint: disable=too-many-nested-blocks
-            inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
-            self._check_and_inherit_train(GraphDataset, inherited_params)
+            self.inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
+            self._check_and_inherit_train(GraphDataset, self.inherited_params)
 
         else:
+            self.inherited_params = None
             if train_data:
                 _log.warning("""`train_data` has been set but train flag was set to True.
                 `train_data` will be ignored since the current dataset will be considered as training set.""")
@@ -975,7 +977,7 @@ class GraphDataset(DeeprankDataset):
                     if self.task == targets.REGRESS and self.target_transform is True:
                         y = torch.sigmoid(torch.log(y))
                     elif self.task is not targets.REGRESS and self.target_transform is True:
-                        raise ValueError(f"Task is set to {self.task}. Please set it to regress to transform the target with a sigmoid.")
+                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. Please change `task` to \"regress\" or set `target_transform` to `False`.")
 
                 else:
                     y = None
