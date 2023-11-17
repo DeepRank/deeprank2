@@ -78,9 +78,48 @@ class DeeprankDataset(Dataset):
         self.df = None
         self.means = None
         self.devs = None
+        self.train_means = None
+        self.train_devs = None
 
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    def _check_and_inherit_train(self, data_type: Union[GridDataset, GraphDataset], inherited_params):
+        """Check if the pre-trained model or training set provided are valid for validation and/or testing, and inherit the parameters.
+        """
+        if isinstance(self.train_data, str):
+            try:
+                if torch.cuda.is_available():
+                    data = torch.load(self.train_data)
+                else:
+                    data = torch.load(self.train_data, map_location=torch.device('cpu'))
+                if data["data_type"] is not data_type:
+                    raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
+                                            to define a {data_type}-class validation/testing dataset. Please provide a valid DeepRank2
+                                            model trained with {data_type}-class type data, or define the dataset using the appropriate class.""")
+                if data_type is GraphDataset:
+                    self.train_means = data["means"]
+                    self.train_devs = data["devs"]
+                    # convert strings in 'transform' key to lambda functions
+                    if data["features_transform"]:
+                        for _, key in data["features_transform"].items():
+                            if key['transform'] is None:
+                                continue
+                            key['transform'] = eval(key['transform']) # pylint: disable=eval-used
+            except pickle.UnpicklingError as e:
+                raise ValueError("""The path provided to `train_data` is not a valid DeepRank2 pre-trained model.
+                                        Please provide a valid path to a DeepRank2 pre-trained model.""") from e
+        elif isinstance(self.train_data, data_type):
+            data = self.train_data
+            if data_type is GraphDataset:
+                self.train_means = self.train_data.means
+                self.train_devs = self.train_data.devs
+        else:
+            raise TypeError(f"""The train data provided is type: {type(self.train_data)}
+                            Please provide a valid training {data_type} or the path to a valid DeepRank2 pre-trained model.""")
+
+        #match parameters with the ones in the training set
+        self._check_inherited_params(inherited_params, data)
 
     def _check_hdf5_files(self):
         """Checks if the data contained in the .HDF5 file is valid."""
@@ -123,7 +162,7 @@ class DeeprankDataset(Dataset):
         if self.task == targets.CLASSIF:
             if classes is None:
                 self.classes = [0, 1]
-                _log.info(f'Target classes set up to: {self.classes}')
+                _log.info(f'Target classes set to: {self.classes}')
             else:
                 self.classes = classes
 
@@ -490,28 +529,8 @@ class GridDataset(DeeprankDataset):
         self._check_features()
 
         if not train:
-            if isinstance(train_data, str):
-                try:
-                    if torch.cuda.is_available():
-                        data = torch.load(train_data)
-                    else:
-                        data = torch.load(train_data, map_location=torch.device('cpu'))
-                    if data["data_type"] is not GridDataset:
-                        raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
-                                                to define a GridDataset-class validation/testing dataset. Please provide a valid DeepRank2
-                                                model trained with GridDataset-class type data, or define the dataset using the appropriate class.""")
-                except pickle.UnpicklingError as e:
-                    raise ValueError("""The path provided to `train_data` is not a valid DeepRank2 pre-trained model.
-                                            Please provide a valid path to a DeepRank2 pre-trained model.""") from e
-            elif isinstance(train_data, GridDataset):
-                data = train_data
-            else:
-                raise TypeError(f"""The train data provided is type: {type(train_data)}
-                                Please provide a valid training GridDataset or the path to a valid DeepRank2 pre-trained model.""")
-
-            #match parameters with the ones in the training set
             inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
-            self._check_inherited_params(inherited_params, data)
+            self._check_and_inherit_train(GridDataset, inherited_params)
 
         else:
             if train_data:
@@ -773,38 +792,8 @@ class GraphDataset(DeeprankDataset):
         self._check_features()
 
         if not train: # pylint: disable=too-many-nested-blocks
-            if isinstance(train_data, str):
-                try:
-                    if torch.cuda.is_available():
-                        data = torch.load(train_data)
-                    else:
-                        data = torch.load(train_data, map_location=torch.device('cpu'))
-                    if data["data_type"] is not GraphDataset:
-                        raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
-                                                to define a GraphDataset-class validation/testing dataset. Please provide a valid DeepRank2
-                                                model trained with GraphDataset-class type data, or define the dataset using the appropriate class.""")
-                    train_means = data["means"]
-                    train_devs = data["devs"]
-                    # convert strings in 'transform' key to lambda functions
-                    if data["features_transform"]:
-                        for _, key in data["features_transform"].items():
-                            if key['transform'] is None:
-                                continue
-                            key['transform'] = eval(key['transform']) # pylint: disable=eval-used
-                except pickle.UnpicklingError as e:
-                    raise ValueError("""The path provided to `train_data` is not a valid DeepRank2 pre-trained model.
-                                            Please provide a valid path to a DeepRank2 pre-trained model.""") from e
-            elif isinstance(train_data, GraphDataset):
-                train_means = train_data.means
-                train_devs = train_data.devs
-                data = train_data
-            else:
-                raise TypeError(f"""The train data provided is type: {type(train_data)}
-                                Please provide a valid training GraphDataset or the path to a valid DeepRank2 pre-trained model.""")
-
-            #match parameters with the ones in the training set
             inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
-            self._check_inherited_params(inherited_params, data)
+            self._check_and_inherit_train(GraphDataset, inherited_params)
 
         else:
             if train_data:
@@ -842,8 +831,8 @@ class GraphDataset(DeeprankDataset):
                     self.hdf5_to_pandas()
                 self._compute_mean_std()
         elif standardize and (not train):
-            self.means = train_means
-            self.devs = train_devs
+            self.means = self.train_means
+            self.devs = self.train_devs
 
     def get(self, idx: int) -> Data:
         """Gets one graph item from its unique index.
