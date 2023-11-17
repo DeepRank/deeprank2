@@ -1,7 +1,6 @@
 import copy
 import logging
 from time import time
-from typing import List, Optional, Tuple, Union
 
 import h5py
 import numpy as np
@@ -27,16 +26,16 @@ class Trainer():
     def __init__( # pylint: disable=too-many-arguments # noqa: MC0001
                 self,
                 neuralnet = None,
-                dataset_train: Optional[Union[GraphDataset, GridDataset]] = None,
-                dataset_val: Optional[Union[GraphDataset, GridDataset]] = None,
-                dataset_test: Optional[Union[GraphDataset, GridDataset]] = None,
-                val_size: Optional[Union[float, int]] = None,
-                test_size: Optional[Union[float, int]] = None,
+                dataset_train: GraphDataset | GridDataset | None = None,
+                dataset_val: GraphDataset | GridDataset | None = None,
+                dataset_test: GraphDataset | GridDataset | None = None,
+                val_size: float | int | None = None,
+                test_size: float | int | None = None,
                 class_weights: bool = False,
-                pretrained_model: Optional[str] = None,
+                pretrained_model: str | None = None,
                 cuda: bool = False,
                 ngpu: int = 0,
-                output_exporters: Optional[List[OutputExporter]] = None,
+                output_exporters: list[OutputExporter] | None = None,
             ):
         """Class from which the network is trained, evaluated and tested.
 
@@ -46,24 +45,25 @@ class Trainer():
                 in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
                 More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
                 Defaults to None.
-            dataset_train (Optional[Union[:class:`GraphDataset`, :class:`GridDataset`]], optional): Training set used during training.
+            dataset_train (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Training set used during training.
                 Can't be None if pretrained_model is also None. Defaults to None.
-            dataset_val (Optional[Union[:class:`GraphDataset`, :class:`GridDataset`]], optional): Evaluation set used during training.
+            dataset_val (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Evaluation set used during training.
                 If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
                 Defaults to None.
-            dataset_test (Optional[Union[:class:`GraphDataset`, :class:`GridDataset`]], optional): Independent evaluation set. Defaults to None.
-            val_size (Optional[Union[float,int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+            dataset_test (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Independent evaluation set. Defaults to None.
+            val_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
                 Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to None (in _divide_dataset function).
-            test_size (Optional[Union[float,int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
+            test_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
                 Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to None.
             class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
-            pretrained_model (Optional[str], optional): Path to pre-trained model. Defaults to None.
+            pretrained_model (str | None, optional): Path to pre-trained model. Defaults to None.
             cuda (bool, optional): Whether to use CUDA. Defaults to False.
             ngpu (int, optional): Number of GPU to be used. Defaults to 0.
-            output_exporters (Optional[List[OutputExporter]], optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
+            output_exporters (list[OutputExporter] | None, optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
                 over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
                 Defaults to None.
         """
+
         self.batch_size_train = None
         self.batch_size_test = None
         self.shuffle = None
@@ -175,19 +175,20 @@ class Trainer():
             self._load_params()
             self._load_pretrained_model()
 
-    def _init_output_exporters(self, output_exporters: Optional[List[OutputExporter]]):
-
+    def _init_output_exporters(self, output_exporters: list[OutputExporter] | None):
         if output_exporters is not None:
             self._output_exporters = OutputExporterCollection(*output_exporters)
         else:
             self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
 
-    def _init_datasets(self,  # pylint: disable=too-many-arguments
-                       dataset_train: Union[GraphDataset, GridDataset],
-                       dataset_val: Optional[Union[GraphDataset, GridDataset]],
-                       dataset_test: Optional[Union[GraphDataset, GridDataset]],
-                       val_size: Optional[Union[int, float]],
-                       test_size: Optional[Union[int, float]]):
+    def _init_datasets(  # pylint: disable=too-many-arguments
+        self,
+        dataset_train: GraphDataset | GridDataset,
+        dataset_val: GraphDataset | GridDataset | None,
+        dataset_test: GraphDataset | GridDataset | None,
+        val_size: int | float | None,
+        test_size: int | float | None,
+    ):
 
         self._check_dataset_equivalence(dataset_train, dataset_val, dataset_test)
 
@@ -216,7 +217,7 @@ class Trainer():
         else:
             self._init_from_dataset(self.dataset_test)
 
-    def _init_from_dataset(self, dataset: Union[GraphDataset, GridDataset]):
+    def _init_from_dataset(self, dataset: GraphDataset | GridDataset):
 
         if isinstance(dataset, GraphDataset):
             self.clustering_method = dataset.clustering_method
@@ -328,12 +329,12 @@ class Trainer():
 
             f5.close()
 
-    def _put_model_to_device(self, dataset: Union[GraphDataset, GridDataset]):
+    def _put_model_to_device(self, dataset: GraphDataset | GridDataset):
         """
         Puts the model on the available device
 
         Args:
-            dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): GraphDataset object.
+            dataset (:class:`GraphDataset` | :class:`GridDataset`): GraphDataset object.
 
         Raises:
             ValueError: Incorrect output shape
@@ -490,13 +491,13 @@ class Trainer():
         nepoch: int = 1,
         batch_size: int = 32,
         shuffle: bool = True,
-        earlystop_patience: Optional[int] = None,
-        earlystop_maxgap: Optional[float] = None,
+        earlystop_patience: int | None = None,
+        earlystop_maxgap: float | None = None,
         min_epoch: int = 10,
         validate: bool = False,
         num_workers: int = 0,
         best_model: bool = True,
-        filename: Optional[str] = 'model.pth.tar'
+        filename: str | None = 'model.pth.tar'
     ):
         """
         Performs the training of the model.
@@ -508,9 +509,9 @@ class Trainer():
                         Defaults to 32.
             shuffle (bool, optional): Whether to shuffle the training dataloaders data (train set and validation set).
                         Default: True.
-            earlystop_patience (Optional[int], optional): Training ends if the model has run for this number of epochs without improving the validation loss.
+            earlystop_patience (int | None, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
                         Defaults to None.
-            earlystop_maxgap (Optional[float], optional): Training ends if the difference between validation and training loss exceeds this value.
+            earlystop_maxgap (float | None, optional): Training ends if the difference between validation and training loss exceeds this value.
                         Defaults to None.
             min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
                         Defaults to 10.
@@ -908,14 +909,16 @@ class Trainer():
         return state
 
 
-def _divide_dataset(dataset: Union[GraphDataset, GridDataset], splitsize: Optional[Union[float, int]] = None) -> \
-        Union[Tuple[GraphDataset, GraphDataset], Tuple[GridDataset, GridDataset]]:
+def _divide_dataset(
+    dataset: GraphDataset | GridDataset,
+    splitsize: float | int | None = None,
+) -> tuple[GraphDataset, GraphDataset] | tuple[GridDataset, GridDataset]:
 
     """Divides the dataset into a training set and an evaluation set
 
     Args:
-        dataset (Union[:class:`GraphDataset`, :class:`GridDataset`]): Input dataset to be split into training and validation data.
-        splitsize (Optional[Union[float, int]], optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+        dataset (:class:`GraphDataset` | :class:`GridDataset`): Input dataset to be split into training and validation data.
+        splitsize (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
             Defaults to None.
     """
 

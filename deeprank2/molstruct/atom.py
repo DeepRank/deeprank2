@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 
 import numpy as np
+from numpy.typing import NDArray
 
 from deeprank2.molstruct.residue import Residue
 
@@ -31,7 +32,7 @@ class Atom:
         residue: Residue,
         name: str,
         element: AtomicElement,
-        position: np.array,
+        position: NDArray,
         occupancy: float,
     ):
         """
@@ -81,7 +82,7 @@ class Atom:
         return self._occupancy
 
     @property
-    def position(self) -> np.array:
+    def position(self) -> NDArray:
         return self._position
 
     @property

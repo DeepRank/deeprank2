@@ -1,9 +1,9 @@
 import numpy as np
+
+from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.features.secondary_structure import (SecondarySctructure,
                                                     _classify_secstructure,
                                                     add_features)
-
-from deeprank2.domain import nodestorage as Nfeat
 
 from . import build_testgraph
 
@@ -11,7 +11,12 @@ from . import build_testgraph
 def test_secondary_structure_residue():
     test_case = '9api' # properly formatted pdb file
     pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
-    graph = build_testgraph(pdb_path, 10, 'residue')
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        influence_radius=10,
+        max_edge_length=10,
+    )
     add_features(pdb_path, graph)
 
     # Create a list of node information (residue number, chain ID, and secondary structure features)
@@ -53,7 +58,12 @@ def test_secondary_structure_residue():
 def test_secondary_structure_atom():
     test_case = '1ak4' # ATOM list
     pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
-    graph = build_testgraph(pdb_path, 4.5, 'atom')
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='atom',
+        influence_radius=4.5,
+        max_edge_length=4.5,
+    )
     add_features(pdb_path, graph)
 
     # Create a list of node information (residue number, chain ID, and secondary structure features)

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import numpy as np
 
@@ -12,9 +11,10 @@ from deeprank2.utils.parsing import atomic_forcefield
 _log = logging.getLogger(__name__)
 
 def add_features( # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: SingleResidueVariant | None = None,
+):
 
     for node in graph.nodes:
         if isinstance(node.id, Residue):

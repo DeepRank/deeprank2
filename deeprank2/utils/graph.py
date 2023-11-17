@@ -1,10 +1,11 @@
 import logging
 import os
-from typing import Callable, List, Optional, Union
+from typing import Callable
 
 import h5py
 import numpy as np
 import pdb2sql.transform
+from numpy.typing import NDArray
 from scipy.spatial import distance_matrix
 
 from deeprank2.domain import edgestorage as Efeat
@@ -49,7 +50,7 @@ class Edge:
 
 
 class Node:
-    def __init__(self, id_: Union[Atom, Residue]):
+    def __init__(self, id_: Atom | Residue):
         if isinstance(id_, Atom):
             self._type = "atom"
         elif isinstance(id_, Residue):
@@ -76,7 +77,7 @@ class Node:
     def add_feature(
         self,
         feature_name: str,
-        feature_function: Callable[[Union[Atom, Residue]], np.ndarray],
+        feature_function: Callable[[Atom | Residue], NDArray],
     ):
         feature_value = feature_function(self.id)
 
@@ -94,9 +95,8 @@ class Node:
 
 
 class Graph:
-    def __init__(self, id_: str, cutoff_distance: Optional[float] = None):
+    def __init__(self, id_: str):
         self.id = id_
-        self.cutoff_distance = cutoff_distance
 
         self._nodes = {}
         self._edges = {}
@@ -110,7 +110,7 @@ class Graph:
     def add_node(self, node: Node):
         self._nodes[node.id] = node
 
-    def get_node(self, id_: Union[Atom, Residue]) -> Node:
+    def get_node(self, id_: Atom | Residue) -> Node:
         return self._nodes[id_]
 
     def add_edge(self, edge: Edge):
@@ -120,11 +120,11 @@ class Graph:
         return self._edges[id_]
 
     @property
-    def nodes(self) -> List[Node]:
+    def nodes(self) -> list[Node]:
         return list(self._nodes.values())
 
     @property
-    def edges(self) -> List[Node]:
+    def edges(self) -> list[Node]:
         return list(self._edges.values())
 
     def has_nan(self) -> bool:
@@ -141,9 +141,9 @@ class Graph:
         return False
 
     def _map_point_features(self, grid: Grid, method: MapMethod,  # pylint: disable=too-many-arguments
-                            feature_name: str, points: List[np.ndarray],
-                            values: List[Union[float, np.ndarray]],
-                            augmentation: Optional[Augmentation] = None):
+                            feature_name: str, points: list[NDArray],
+                            values: list[float | NDArray],
+                            augmentation: Augmentation | None = None):
 
         points = np.stack(points, axis=0)
 
@@ -159,7 +159,7 @@ class Graph:
 
             grid.map_feature(position, feature_name, value, method)
 
-    def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Optional[Augmentation] = None):
+    def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Augmentation | None = None):
 
         # order edge features by xyz point
         points = []
@@ -283,7 +283,7 @@ class Graph:
         self, hdf5_path: str,
         settings: GridSettings,
         method: MapMethod,
-        augmentation: Optional[Augmentation] = None
+        augmentation: Augmentation | None = None
     ) -> str:
 
         id_ = self.id
@@ -309,7 +309,7 @@ class Graph:
 
         return hdf5_path
 
-    def get_all_chains(self) -> List[str]:
+    def get_all_chains(self) -> list[str]:
         if isinstance(self.nodes[0].id, Residue):
             chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
         elif isinstance(self.nodes[0].id, Atom):
@@ -320,11 +320,11 @@ class Graph:
 
 
 def build_atomic_graph( # pylint: disable=too-many-locals
-    atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
+    atoms: list[Atom], graph_id: str, max_edge_length: float
 ) -> Graph:
     """Builds a graph, using the atoms as nodes.
 
-    The edge distance cutoff is in Ångströms.
+    The max edge distance is in Ångströms.
     """
 
     positions = np.empty((len(atoms), 3))
@@ -332,9 +332,9 @@ def build_atomic_graph( # pylint: disable=too-many-locals
         positions[atom_index] = atom.position
 
     distances = distance_matrix(positions, positions, p=2)
-    neighbours = distances < edge_distance_cutoff
+    neighbours = distances < max_edge_length
 
-    graph = Graph(graph_id, edge_distance_cutoff)
+    graph = Graph(graph_id)
     for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
         if atom1_index != atom2_index:
 
@@ -355,11 +355,11 @@ def build_atomic_graph( # pylint: disable=too-many-locals
 
 
 def build_residue_graph( # pylint: disable=too-many-locals
-    residues: List[Residue], graph_id: str, edge_distance_cutoff: float
+    residues: list[Residue], graph_id: str, max_edge_length: float
 ) -> Graph:
     """Builds a graph, using the residues as nodes.
 
-    The edge distance cutoff is in Ångströms.
+    The max edge distance is in Ångströms.
     It's the shortest interatomic distance between two residues.
     """
 
@@ -381,7 +381,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     distances = distance_matrix(positions, positions, p=2)
 
     # determine which atoms are close enough
-    neighbours = distances < edge_distance_cutoff
+    neighbours = distances < max_edge_length
 
     atom_index_pairs = np.transpose(np.nonzero(neighbours))
 
@@ -389,7 +389,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     residue_index_pairs = np.unique(atoms_residues[atom_index_pairs], axis=0)
 
     # build the graph
-    graph = Graph(graph_id, edge_distance_cutoff)
+    graph = Graph(graph_id)
     for residue1_index, residue2_index in residue_index_pairs:
 
         residue1: Residue = residues[residue1_index]

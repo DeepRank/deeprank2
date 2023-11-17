@@ -3,7 +3,6 @@ from os.path import join
 from shutil import rmtree
 from tempfile import mkdtemp
 from types import ModuleType
-from typing import List, Union
 
 import h5py
 import pytest
@@ -20,7 +19,7 @@ from deeprank2.tools.target import compute_ppi_scores
 def _querycollection_tester( # pylint: disable=dangerous-default-value
     query_type: str,
     n_queries: int = 3,
-    feature_modules: Union[ModuleType, List[ModuleType]] = [components, contact],
+    feature_modules: ModuleType | list[ModuleType] = [components, contact],
     cpu_count: int = 1,
     combine_output: bool = True,
 ):
@@ -86,14 +85,14 @@ def _querycollection_tester( # pylint: disable=dangerous-default-value
 
 def _assert_correct_modules(
     output_paths: str,
-    features: str | List[str],
+    features: str | list[str],
     absent: str,
 ):
     """Helper function to assert inclusion of correct features
 
     Args:
         output_paths (str): output_paths as returned from _querycollection_tester
-        features (Union[str, List[str]]): feature(s) that should be present
+        features (str | list[str]]: feature(s) that should be present
         absent (str): feature that should be absent
     """
 
@@ -137,8 +136,9 @@ def test_querycollection_process():
 
 
 def test_querycollection_process_single_feature_module():
-    """
-    Tests processing for generating from a single feature module for following input types: ModuleType, List[ModuleType] str, List[str]
+    """Test processing for generating from a single feature module.
+
+    Tested for following input types: ModuleType, list[ModuleType] str, list[str]
     """
 
     for query_type in ['ppi', 'srv']:

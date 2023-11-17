@@ -1,28 +1,39 @@
 import numpy as np
-from deeprank2.domain.aminoacidlist import glycine, serine
-from deeprank2.features.components import add_features
 
 from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain.aminoacidlist import glycine, serine
+from deeprank2.features.components import add_features
 
 from . import build_testgraph
 
 
 def test_atom_features():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, _ = build_testgraph(pdb_path, 10, 'atom', 25)
-
+    graph, _ = build_testgraph(
+        pdb_path=pdb_path,
+        detail='atom',
+        influence_radius=10,
+        max_edge_length=10,
+        central_res=25,
+    )
     add_features(pdb_path, graph)
-
     assert not any(np.isnan(node.features[Nfeat.ATOMCHARGE]) for node in graph.nodes)
     assert not any(np.isnan(node.features[Nfeat.PDBOCCUPANCY]) for node in graph.nodes)
 
 
 def test_aminoacid_features():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
-    graph, variant = build_testgraph(pdb_path, 10, 'residue', 25, serine)
+    graph, variant = build_testgraph(
+        pdb_path=pdb_path,
+        detail='residue',
+        influence_radius=10,
+        max_edge_length=10,
+        central_res=25,
+        variant=serine,
+    )
     add_features(pdb_path, graph, variant)
-
     node = graph.nodes[25].id
+
     for node in graph.nodes:
         if node.id == variant.residue:  # GLY -> SER
             assert sum(node.features[Nfeat.RESTYPE]) == 1

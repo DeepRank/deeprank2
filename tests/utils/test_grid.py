@@ -24,7 +24,8 @@ def test_grid_orientation():
             pdb_path="tests/data/pdb/1ak4/1ak4.pdb",
             resolution=resolution,
             chain_ids=['C', 'D'],
-            distance_cutoff=8.5,
+            influence_radius=8.5,
+            max_edge_length=8.5,
         )
         graph = query.build([])
 

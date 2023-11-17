@@ -1,7 +1,9 @@
-from typing import Tuple
 from uuid import uuid4
 
 import numpy as np
+from pdb2sql import pdb2sql
+
+from deeprank2.domain import edgestorage as Efeat
 from deeprank2.features.contact import (add_features, covalent_cutoff,
                                         cutoff_13, cutoff_14)
 from deeprank2.molstruct.atom import Atom
@@ -9,9 +11,6 @@ from deeprank2.molstruct.pair import AtomicContact, ResidueContact
 from deeprank2.molstruct.structure import Chain
 from deeprank2.utils.buildgraph import get_structure
 from deeprank2.utils.graph import Edge, Graph
-from pdb2sql import pdb2sql
-
-from deeprank2.domain import edgestorage as Efeat
 
 
 def _get_atom(chain: Chain, residue_number: int, atom_name: str) -> Atom:
@@ -32,14 +31,14 @@ def _wrap_in_graph(edge: Edge):
 
 
 def _get_contact( # pylint: disable=too-many-arguments
-        pdb_id: str,
-        residue_num1: int,
-        atom_name1: str,
-        residue_num2: int,
-        atom_name2: str,
-        residue_level: bool = False,
-        chains: Tuple[str,str] = None,
-    ) -> Edge:
+    pdb_id: str,
+    residue_num1: int,
+    atom_name1: str,
+    residue_num2: int,
+    atom_name2: str,
+    residue_level: bool = False,
+    chains: tuple[str,str] = None,
+) -> Edge:
 
     pdb_path = f"tests/data/pdb/{pdb_id}/{pdb_id}.pdb"
 

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import freesasa
 import numpy as np
@@ -81,7 +80,7 @@ def add_bsa(graph: Graph):
 
     sasa_complete_result = freesasa.calc(sasa_complete_structure)
     sasa_chain_results = {chain_id: freesasa.calc(structure)
-                          for chain_id, structure in sasa_chain_structures.items()}
+                            for chain_id, structure in sasa_chain_structures.items()}
 
     for node in graph.nodes:
         if isinstance(node.id, Residue):
@@ -95,7 +94,7 @@ def add_bsa(graph: Graph):
             chain_id = atom.residue.chain.id
             area_key = "atom"
             selection = ("atom, (name %s) and (resi %s) and (chain %s)" % \
-                 (atom.name, atom.residue.number_string, atom.residue.chain.id),) # pylint: disable=consider-using-f-string
+                (atom.name, atom.residue.number_string, atom.residue.chain.id),) # pylint: disable=consider-using-f-string
 
         area_monomer = freesasa.selectArea(selection, sasa_chain_structures[chain_id], \
             sasa_chain_results[chain_id])[area_key]
@@ -105,9 +104,10 @@ def add_bsa(graph: Graph):
 
 
 def add_features( # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: SingleResidueVariant | None = None,
+):
 
     """calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA):
     BSA: the area of the protein, that only gets exposed in monomeric state"""

@@ -1,4 +1,3 @@
-from typing import Optional
 
 import numpy as np
 
@@ -10,9 +9,10 @@ from deeprank2.utils.graph import Graph
 
 
 def add_features( # pylint: disable=unused-argument
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: SingleResidueVariant | None = None,
+):
 
     profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.three_letter_code)
 

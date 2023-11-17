@@ -3,7 +3,6 @@ import unittest
 import warnings
 from shutil import rmtree
 from tempfile import mkdtemp
-from typing import List, Union
 
 import h5py
 import numpy as np
@@ -18,14 +17,17 @@ from deeprank2.domain import targetstorage as targets
 node_feats = [Nfeat.RESTYPE, Nfeat.POLARITY, Nfeat.BSA, Nfeat.RESDEPTH, Nfeat.HSE, Nfeat.INFOCONTENT, Nfeat.PSSM]
 
 def _compute_features_manually( # noqa: MC0001, pylint: disable=too-many-locals
-                       hdf5_path: str,
-                       features_transform: dict,
-                       feat: str
-    ):
-    # This function returns the feature specified read from the hdf5 file,
-    # after applying manually features_transform dict. It returns its mean
-    # and its std after having applied eventual transformations.
-    # Multi-channels features are returned as an array with multiple channels.
+    hdf5_path: str,
+    features_transform: dict,
+    feat: str
+):
+    """
+    This function returns the feature specified read from the hdf5 file,
+    after applying manually features_transform dict. It returns its mean
+    and its std after having applied eventual transformations.
+    Multi-channels features are returned as an array with multiple channels.
+    """
+
     with h5py.File(hdf5_path, 'r') as f:
         entry_names = [entry for entry, _ in f.items()]
 
@@ -122,9 +124,9 @@ def _compute_features_with_get(
     return features_dict
 
 def _check_inherited_params(
-    inherited_params: List[str],
-    dataset_train: Union[GraphDataset, GridDataset],
-    dataset_test: Union[GraphDataset, GridDataset],
+    inherited_params: list[str],
+    dataset_train: GraphDataset | GridDataset,
+    dataset_test: GraphDataset | GridDataset,
 ):
     dataset_train_vars = vars(dataset_train)
     dataset_test_vars = vars(dataset_test)
