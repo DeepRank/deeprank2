@@ -425,7 +425,7 @@ class GridDataset(DeeprankDataset):
         task: Optional[str] = None,
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         use_tqdm: Optional[bool] = True,
-        root: Optional[str] = "./",
+        root_directory_path: Optional[str] = "./",
         check_integrity: bool = True
     ):
         """Class to load the .HDF5 files data into grids.
@@ -471,12 +471,12 @@ class GridDataset(DeeprankDataset):
                 Defaults to None.
             use_tqdm (Optional[bool], optional): Show progress bar.
                 Defaults to True.
-            root (Optional[str], optional): Root directory where the dataset should be saved.
+            root_directory_path (Optional[str], optional): Root directory where the dataset should be saved.
                 Defaults to "./".
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root_directory_path, target_filter, check_integrity)
 
         self.default_vars = {
             k: v.default
@@ -679,7 +679,7 @@ class GraphDataset(DeeprankDataset):
         task: Optional[str] = None,
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
         use_tqdm: Optional[bool] = True,
-        root: Optional[str] = "./",
+        root_directory_path: Optional[str] = "./",
         check_integrity: bool = True,
     ):
         """Class to load the .HDF5 files data into graphs.
@@ -751,12 +751,12 @@ class GraphDataset(DeeprankDataset):
                 Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
             use_tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
-            root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
+            root_directory_path (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
 
-        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root_directory_path, target_filter, check_integrity)
 
         self.default_vars = {
             k: v.default
