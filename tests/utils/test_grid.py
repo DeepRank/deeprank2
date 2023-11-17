@@ -1,11 +1,14 @@
 import h5py
 import numpy as np
-from deeprank2.query import (ProteinProteinInterfaceAtomicQuery,
-                             ProteinProteinInterfaceResidueQuery)
+
+from deeprank2.query import (
+    ProteinProteinInterfaceAtomicQuery,
+    ProteinProteinInterfaceResidueQuery,
+)
 from deeprank2.utils.grid import Grid, GridSettings, MapMethod
 
 
-def test_residue_grid_orientation():
+def test_residue_grid_orientation(): # pylint: disable=too-many-locals
 
     coord_error_margin = 1.0  # Angstrom
 
@@ -53,7 +56,7 @@ def test_residue_grid_orientation():
     assert np.all(np.abs(grid.zs - target_zs) < coord_error_margin), f"\n{grid.zs} != \n{target_zs}"
 
 
-def test_atomic_grid_orientation():
+def test_atomic_grid_orientation(): # pylint: disable=too-many-locals
 
     coord_error_margin = 1.0  # Angstrom
 

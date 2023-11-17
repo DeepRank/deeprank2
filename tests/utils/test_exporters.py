@@ -7,10 +7,13 @@ from unittest.mock import patch
 
 import h5py
 import pandas as pd
-from deeprank2.utils.exporters import (HDF5OutputExporter,
-                                       OutputExporterCollection,
-                                       ScatterPlotExporter,
-                                       TensorboardBinaryClassificationExporter)
+
+from deeprank2.utils.exporters import (
+    HDF5OutputExporter,
+    OutputExporterCollection,
+    ScatterPlotExporter,
+    TensorboardBinaryClassificationExporter,
+)
 
 logging.getLogger(__name__)
 
@@ -95,7 +98,7 @@ class TestOutputExporters(unittest.TestCase):
 
         assert os.path.isfile(scatterplot_exporter.get_filename(epoch_number))
 
-    def test_hdf5_output(self):
+    def test_hdf5_output(self): # pylint: disable=too-many-locals
         output_exporter = HDF5OutputExporter(self._work_dir)
         path_output_exporter = os.path.join(self._work_dir, 'output_exporter.hdf5')
         entry_names = ["entry1", "entry2", "entry3"]
