@@ -236,14 +236,14 @@ class DeeprankDataset(Dataset):
             except Exception:
                 _log.exception(f"on {hdf5_path}")
 
-    def _filter_targets(self, entry_group: h5py.Group) -> bool:
+    def _filter_targets(self, grp: h5py.Group) -> bool:
         """Filters the entry according to a dictionary.
 
         The filter is based on the attribute self.target_filter that must be either
         of the form: { target_name : target_condition } or None.
 
         Args:
-            entry_group (:class:`h5py.Group`): The entry group in the .HDF5 file.
+            grp (:class:`h5py.Group`): The entry group in the .HDF5 file.
 
         Returns:
             bool: True if we keep the entry False otherwise.
@@ -257,7 +257,7 @@ class DeeprankDataset(Dataset):
 
         for target_name, target_condition in self.target_filter.items():
 
-            present_target_names = list(entry_group[targets.VALUES].keys())
+            present_target_names = list(grp[targets.VALUES].keys())
 
             if target_name in present_target_names:
 
@@ -265,7 +265,7 @@ class DeeprankDataset(Dataset):
                 if isinstance(target_condition, str):
 
                     operation = target_condition
-                    target_value = entry_group[targets.VALUES][target_name][()]
+                    target_value = grp[targets.VALUES][target_name][()]
                     for operator_string in [">", "<", "==", "<=", ">=", "!="]:
                         operation = operation.replace(operator_string, f"{target_value}" + operator_string)
 
@@ -276,7 +276,7 @@ class DeeprankDataset(Dataset):
                     raise ValueError("Conditions not supported", target_condition)
 
             else:
-                _log.warning(f"   :Filter {target_name} not found for entry {entry_group}\n"
+                _log.warning(f"   :Filter {target_name} not found for entry {grp}\n"
                              f"   :Filter options are: {present_target_names}")
         return True
 

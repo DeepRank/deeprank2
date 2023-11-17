@@ -298,9 +298,9 @@ class Graph:
         # store target values
         with h5py.File(hdf5_path, 'a') as hdf5_file:
 
-            entry_group = hdf5_file[id_]
+            grp = hdf5_file[id_]
 
-            targets_group = entry_group.require_group(targets.VALUES)
+            targets_group = grp.require_group(targets.VALUES)
             for target_name, target_data in self.targets.items():
                 if target_name not in targets_group:
                     targets_group.create_dataset(target_name, data=target_data)

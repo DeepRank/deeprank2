@@ -89,11 +89,11 @@ def test_graph_write_to_hdf5(graph):
 
         # check the contents of the hdf5 file
         with h5py.File(hdf5_path, "r") as f5:
-            entry_group = f5[entry_id]
+            grp = f5[entry_id]
 
             # nodes
-            assert Nfeat.NODE in entry_group
-            node_features_group = entry_group[Nfeat.NODE]
+            assert Nfeat.NODE in grp
+            node_features_group = grp[Nfeat.NODE]
             assert node_feature_narray in node_features_group
             assert len(np.nonzero(
                 node_features_group[node_feature_narray][()])) > 0
@@ -102,8 +102,8 @@ def test_graph_write_to_hdf5(graph):
                 2, )
 
             # edges
-            assert Efeat.EDGE in entry_group
-            edge_features_group = entry_group[Efeat.EDGE]
+            assert Efeat.EDGE in grp
+            edge_features_group = grp[Efeat.EDGE]
             assert edge_feature_narray in edge_features_group
             assert len(np.nonzero(
                 edge_features_group[edge_feature_narray][()])) > 0
@@ -112,7 +112,7 @@ def test_graph_write_to_hdf5(graph):
             assert len(np.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
 
             # target
-            assert entry_group[Target.VALUES][target_name][()] == target_value
+            assert grp[Target.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
@@ -138,11 +138,11 @@ def test_graph_write_as_grid_to_hdf5(graph):
 
         # check the contents of the hdf5 file
         with h5py.File(hdf5_path, "r") as f5:
-            entry_group = f5[entry_id]
+            grp = f5[entry_id]
 
             # mapped features
-            assert gridstorage.MAPPED_FEATURES in entry_group
-            mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
+            assert gridstorage.MAPPED_FEATURES in grp
+            mapped_group = grp[gridstorage.MAPPED_FEATURES]
             ## narray features
             for feature_name in [
                     f"{node_feature_narray}_000", f"{node_feature_narray}_001",
@@ -161,7 +161,7 @@ def test_graph_write_as_grid_to_hdf5(graph):
             assert np.all(data.shape == tuple(grid_settings.points_counts))
 
             # target
-            assert entry_group[Target.VALUES][target_name][()] == target_value
+            assert grp[Target.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
@@ -200,17 +200,17 @@ def test_graph_augmented_write_as_grid_to_hdf5(graph):
         with h5py.File(hdf5_path, "r") as f5:
             assert list(
                 f5.keys()) == [entry_id, f"{entry_id}_000", f"{entry_id}_001"]
-            entry_group = f5[entry_id]
-            mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
+            grp = f5[entry_id]
+            mapped_group = grp[gridstorage.MAPPED_FEATURES]
             # check that the feature value is preserved after augmentation
             unaugmented_data = mapped_group[node_feature_singleton][:]
 
             for aug_id in [f"{entry_id}_000", f"{entry_id}_001"]:
-                entry_group = f5[aug_id]
+                grp = f5[aug_id]
 
                 # mapped features
-                assert gridstorage.MAPPED_FEATURES in entry_group
-                mapped_group = entry_group[gridstorage.MAPPED_FEATURES]
+                assert gridstorage.MAPPED_FEATURES in grp
+                mapped_group = grp[gridstorage.MAPPED_FEATURES]
                 ## narray features
                 for feature_name in [
                         f"{node_feature_narray}_000",
@@ -237,7 +237,7 @@ def test_graph_augmented_write_as_grid_to_hdf5(graph):
                               np.sum(unaugmented_data)).item() < 0.2
 
                 # target
-                assert entry_group[Target.VALUES][target_name][(
+                assert grp[Target.VALUES][target_name][(
                 )] == target_value
 
     finally:
