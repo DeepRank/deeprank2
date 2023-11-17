@@ -2,9 +2,10 @@
 import pickle
 from multiprocessing.connection import _ForkingPickler
 
+from pdb2sql import pdb2sql
+
 from deeprank2.molstruct.structure import PDBStructure
 from deeprank2.utils.buildgraph import get_structure
-from pdb2sql import pdb2sql
 
 
 def _get_structure(path) -> PDBStructure:
@@ -12,7 +13,7 @@ def _get_structure(path) -> PDBStructure:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()
+        pdb._close()  # pylint: disable=protected-access
 
     assert structure is not None
 

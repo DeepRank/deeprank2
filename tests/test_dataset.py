@@ -427,7 +427,7 @@ class TestDataSet(unittest.TestCase):
         )
 
         for i in range(len(dataset)):
-            assert(0 <= dataset.get(i).y <= 1)
+            assert (0 <= dataset.get(i).y <= 1)
 
     def test_invalid_target_transform_graphdataset(self):
 

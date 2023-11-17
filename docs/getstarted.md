@@ -6,25 +6,24 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ## Data generation
 
-For each protein-protein complex (or protein structure containing a SRV), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
-- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
+For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structure
+A `Query` takes as inputs:
+- a `.pdb` file, representing the protein-protein structure,
+- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
-from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
 
 queries = QueryCollection()
 
 # Append data points
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -33,10 +32,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_2w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 1
     },
@@ -45,10 +44,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_3w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },

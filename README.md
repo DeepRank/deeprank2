@@ -51,7 +51,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
 
 ## Installation
 
-The package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows. 
+The package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows.
 
 ### Dependencies
 
@@ -66,9 +66,9 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
 *  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
     * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
       * on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
-      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed. Alternatively, follow [this](https://github.com/PDB-REDO/libcifpp/issues/49) thread. 
+      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed. Alternatively, follow [this](https://github.com/PDB-REDO/libcifpp/issues/49) thread.
 *  [GCC](https://gcc.gnu.org/install/)
-    * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`.  
+    * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`.
 *  For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
 
 ### Deeprank2 Package
@@ -106,25 +106,24 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ### Data generation
 
-For each protein-protein complex (or protein structure containing a SRV), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
-- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
+For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structure
+A `Query` takes as inputs:
+- a `.pdb` file, representing the protein-protein structure,
+- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
-from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
 
 queries = QueryCollection()
 
 # Append data points
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -133,10 +132,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_2w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 1
     },
@@ -145,10 +144,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_3w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
