@@ -49,9 +49,9 @@ class Query:
             Note that this does not limit the structure to residues from this/these chain(s).
         pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
         targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
-        interaction_radius (float | None): all residues within this radius from the variant residue or interacting interfaces
+        influence_radius (float | None): all residues within this radius from the variant residue or interacting interfaces
             will be included in the graph, irrespective of the chain they are on.
-        max_edge_distance (float | None): the maximum distance between two nodes to generate an edge connecting them.
+        max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
         suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
             match the .pdb files. If True, a warning is returned instead.
     """
@@ -61,8 +61,8 @@ class Query:
     chain_ids: list[str] | str
     pssm_paths: dict[str, str] = field(default_factory=dict)
     targets: dict[str, float] = field(default_factory=dict)
-    interaction_radius: float | None = None
-    max_edge_distance: float | None = None
+    influence_radius: float | None = None
+    max_edge_length: float | None = None
     suppress_pssm_errors: bool = False
 
     def __post_init__(self):
@@ -70,11 +70,11 @@ class Query:
         self.variant = None  # not used for PPI, overwritten for SRV
 
         if self.resolution == 'residue':
-            self.max_edge_distance = 10 if not self.max_edge_distance else self.max_edge_distance
-            self.interaction_radius = 10 if not self.interaction_radius else self.interaction_radius
+            self.max_edge_length = 10 if not self.max_edge_length else self.max_edge_length
+            self.influence_radius = 10 if not self.influence_radius else self.influence_radius
         elif self.resolution == 'atom':
-            self.max_edge_distance = 4.5 if not self.max_edge_distance else self.max_edge_distance
-            self.interaction_radius = 4.5 if not self.interaction_radius else self.interaction_radius
+            self.max_edge_length = 4.5 if not self.max_edge_length else self.max_edge_length
+            self.influence_radius = 4.5 if not self.influence_radius else self.influence_radius
         else:
             raise ValueError(f"Invalid resolution given ({self.resolution}). Must be one of {VALID_RESOLUTIONS}")
 
@@ -228,9 +228,9 @@ class SingleResidueVariantQuery(Query):
             Note that this does not limit the structure to residues from this chain.
         pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
         targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
-        interaction_radius (float | None): all residues within this radius from the variant residue
+        influence_radius (float | None): all residues within this radius from the variant residue
             will be included in the graph, irrespective of the chain they are on.
-        max_edge_distance (float | None): the maximum distance between two nodes to generate an edge connecting them.
+        max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
 
         suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
             match the .pdb files. If True, a warning is returned instead.
@@ -294,11 +294,11 @@ class SingleResidueVariantQuery(Query):
                 f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}"
             )
         self.variant = SingleResidueVariant(variant_residue, self.variant_amino_acid)
-        residues = get_surrounding_residues(structure, variant_residue, self.interaction_radius)
+        residues = get_surrounding_residues(structure, variant_residue, self.influence_radius)
 
         # build the graph
         if self.resolution == 'residue':
-            graph = build_residue_graph(residues, self.get_query_id(), self.max_edge_distance)
+            graph = build_residue_graph(residues, self.get_query_id(), self.max_edge_length)
         elif self.resolution == 'atom':
             residues.append(variant_residue)
             atoms = set([])
@@ -308,7 +308,7 @@ class SingleResidueVariantQuery(Query):
                         atoms.add(atom)
             atoms = list(atoms)
 
-            graph = build_atomic_graph(atoms, self.get_query_id(), self.max_edge_distance)
+            graph = build_atomic_graph(atoms, self.get_query_id(), self.max_edge_length)
 
         else:
             raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
@@ -328,9 +328,9 @@ class ProteinProteinInterfaceQuery(Query):
             Note that this does not limit the structure to residues from these chains.
         pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
         targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
-        interaction_radius (float | None): all residues within this radius from the interacting interfaces
+        influence_radius (float | None): all residues within this radius from the interacting interface
             will be included in the graph, irrespective of the chain they are on.
-        max_edge_distance (float | None): the maximum distance between two nodes to generate an edge connecting them.
+        max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
         suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
             match the .pdb files. If True, a warning is returned instead.
     """
@@ -360,17 +360,17 @@ class ProteinProteinInterfaceQuery(Query):
         contact_atoms = get_contact_atoms(
             self.pdb_path,
             self.chain_ids,
-            self.interaction_radius
+            self.influence_radius
         )
         if len(contact_atoms) == 0:
             raise ValueError("no contact atoms found")
 
         # build the graph
         if self.resolution == 'atom':
-            graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.max_edge_distance)
+            graph = build_atomic_graph(contact_atoms, self.get_query_id(), self.max_edge_length)
         elif self.resolution == 'residue':
             residues_selected = list({atom.residue for atom in contact_atoms})
-            graph = build_residue_graph(residues_selected, self.get_query_id(), self.max_edge_distance)
+            graph = build_residue_graph(residues_selected, self.get_query_id(), self.max_edge_length)
 
         graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
         structure = contact_atoms[0].residue.chain.model

@@ -14,8 +14,8 @@ def test_secondary_structure_residue():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='residue',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
     )
     add_features(pdb_path, graph)
 
@@ -61,8 +61,8 @@ def test_secondary_structure_atom():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='atom',
-        interaction_radius=4.5,
-        max_edge_distance=4.5,
+        influence_radius=4.5,
+        max_edge_length=4.5,
     )
     add_features(pdb_path, graph)
 

@@ -320,7 +320,7 @@ class Graph:
 
 
 def build_atomic_graph( # pylint: disable=too-many-locals
-    atoms: list[Atom], graph_id: str, max_edge_distance: float
+    atoms: list[Atom], graph_id: str, max_edge_length: float
 ) -> Graph:
     """Builds a graph, using the atoms as nodes.
 
@@ -332,7 +332,7 @@ def build_atomic_graph( # pylint: disable=too-many-locals
         positions[atom_index] = atom.position
 
     distances = distance_matrix(positions, positions, p=2)
-    neighbours = distances < max_edge_distance
+    neighbours = distances < max_edge_length
 
     graph = Graph(graph_id)
     for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
@@ -355,7 +355,7 @@ def build_atomic_graph( # pylint: disable=too-many-locals
 
 
 def build_residue_graph( # pylint: disable=too-many-locals
-    residues: list[Residue], graph_id: str, max_edge_distance: float
+    residues: list[Residue], graph_id: str, max_edge_length: float
 ) -> Graph:
     """Builds a graph, using the residues as nodes.
 
@@ -381,7 +381,7 @@ def build_residue_graph( # pylint: disable=too-many-locals
     distances = distance_matrix(positions, positions, p=2)
 
     # determine which atoms are close enough
-    neighbours = distances < max_edge_distance
+    neighbours = distances < max_edge_length
 
     atom_index_pairs = np.transpose(np.nonzero(neighbours))
 

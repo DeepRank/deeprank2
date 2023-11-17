@@ -12,8 +12,8 @@ def test_atom_features():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='atom',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
         central_res=25,
     )
     add_features(pdb_path, graph)
@@ -26,8 +26,8 @@ def test_aminoacid_features():
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
         detail='residue',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
         central_res=25,
         variant=serine,
     )

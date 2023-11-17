@@ -22,8 +22,8 @@ def test_exposure_residue():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='residue',
-        interaction_radius=8.5,
-        max_edge_distance=8.5,
+        influence_radius=8.5,
+        max_edge_length=8.5,
     )
     add_features(pdb_path, graph)
     _run_assertions(graph)
@@ -34,8 +34,8 @@ def test_exposure_atom():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='atom',
-        interaction_radius=4.5,
-        max_edge_distance=4.5,
+        influence_radius=4.5,
+        max_edge_length=4.5,
     )
     add_features(pdb_path, graph)
     _run_assertions(graph)

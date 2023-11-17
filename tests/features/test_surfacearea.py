@@ -31,8 +31,8 @@ def test_bsa_residue():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='residue',
-        interaction_radius=8.5,
-        max_edge_distance=8.5,
+        influence_radius=8.5,
+        max_edge_length=8.5,
     )
     add_features(pdb_path, graph)
 
@@ -46,8 +46,8 @@ def test_bsa_atom():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='atom',
-        interaction_radius=4.5,
-        max_edge_distance=4.5,
+        influence_radius=4.5,
+        max_edge_length=4.5,
     )
     add_features(pdb_path, graph)
 
@@ -61,8 +61,8 @@ def test_sasa_residue():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='residue',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
         central_res=108,
     )
     add_features(pdb_path, graph)
@@ -86,8 +86,8 @@ def test_sasa_atom():
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
         detail='atom',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
         central_res=108,
     )
     add_features(pdb_path, graph)

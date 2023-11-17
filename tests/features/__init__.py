@@ -26,8 +26,8 @@ def _get_residue(chain: Chain, number: int) -> Residue:
 def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noqa:MC0001
     pdb_path: str,
     detail: Literal['atomic', 'residue'],
-    interaction_radius: float,
-    max_edge_distance: float,
+    influence_radius: float,
+    max_edge_length: float,
     central_res: int | None = None,
     variant: AminoAcid |None = None,
     chain_ids: str | tuple[str, str] | None = None,
@@ -38,8 +38,8 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
     Args:
         pdb_path (str): Path of pdb file.
         detail (Literal['atomic', 'residue']): Level of detail.
-        interaction_radius (float): max distance to include in graph.
-        max_edge_distance (float): max distance to create an edge.
+        influence_radius (float): max distance to include in graph.
+        max_edge_length (float): max distance to create an edge.
         central_res (int | None, optional): Residue to center a single-chain graph around.
             Use None to create a 2-chain graph, or any value for a single-chain graph
             Defaults to None.
@@ -71,7 +71,7 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
         for residue1, residue2 in get_residue_contact_pairs(
             pdb_path, structure,
             chains[0], chains[1],
-            interaction_radius
+            influence_radius
         ):
             if detail == 'residue':
                 nodes.add(residue1)
@@ -84,9 +84,9 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
                     nodes.add(atom)
 
         if detail == 'residue':
-            return build_residue_graph(list(nodes), structure.id, max_edge_distance), None
+            return build_residue_graph(list(nodes), structure.id, max_edge_length), None
         if detail == 'atom':
-            return build_atomic_graph(list(nodes), structure.id, max_edge_distance), None
+            return build_atomic_graph(list(nodes), structure.id, max_edge_length), None
         raise TypeError('detail must be "atom" or "residue"')
 
     else:
@@ -95,7 +95,7 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
         else:
             chain = structure.get_chain(chain_ids)
         residue = _get_residue(chain, central_res)
-        surrounding_residues = list(get_surrounding_residues(structure, residue, interaction_radius))
+        surrounding_residues = list(get_surrounding_residues(structure, residue, influence_radius))
 
         try:
             with open(f"tests/data/pssm/{structure.id}/{structure.id}.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
@@ -104,8 +104,8 @@ def build_testgraph( # pylint: disable=too-many-locals, too-many-arguments # noq
             pass
 
         if detail == 'residue':
-            return build_residue_graph(surrounding_residues, structure.id, max_edge_distance), SingleResidueVariant(residue, variant)
+            return build_residue_graph(surrounding_residues, structure.id, max_edge_length), SingleResidueVariant(residue, variant)
         if detail == 'atom':
             atoms = set(atom for residue in surrounding_residues for atom in residue.atoms)
-            return build_atomic_graph(list(atoms), structure.id, max_edge_distance), SingleResidueVariant(residue, variant)
+            return build_atomic_graph(list(atoms), structure.id, max_edge_length), SingleResidueVariant(residue, variant)
         raise TypeError('detail must be "atom" or "residue"')

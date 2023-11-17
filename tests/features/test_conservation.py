@@ -13,8 +13,8 @@ def test_conservation_residue():
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
         detail='residue',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
         central_res=25,
         variant=alanine,
     )
@@ -34,8 +34,8 @@ def test_conservation_atom():
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
         detail='atom',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
         central_res=25,
         variant=alanine,
     )
@@ -55,8 +55,8 @@ def test_no_pssm_file_error():
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
         detail='residue',
-        interaction_radius=10,
-        max_edge_distance=10,
+        influence_radius=10,
+        max_edge_length=10,
         central_res=17,
         variant=alanine,
     )
