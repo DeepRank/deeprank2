@@ -424,7 +424,7 @@ class GridDataset(DeeprankDataset):
         target_filter: Optional[Dict[str, str]] = None,
         task: Optional[str] = None,
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
-        tqdm: Optional[bool] = True,
+        use_tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
         check_integrity: bool = True
     ):
@@ -469,14 +469,14 @@ class GridDataset(DeeprankDataset):
             classes (Optional[Union[List[str], List[int], List[float]], optional]): Define the dataset target classes in classification mode.
                 Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
-            tqdm (Optional[bool], optional): Show progress bar.
+            use_tqdm (Optional[bool], optional): Show progress bar.
                 Defaults to True.
             root (Optional[str], optional): Root directory where the dataset should be saved.
                 Defaults to "./".
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, tqdm, root, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root, target_filter, check_integrity)
 
         self.default_vars = {
             k: v.default
@@ -678,7 +678,7 @@ class GraphDataset(DeeprankDataset):
         target_filter: Optional[Dict[str, str]] = None,
         task: Optional[str] = None,
         classes: Optional[Union[List[str], List[int], List[float]]] = None,
-        tqdm: Optional[bool] = True,
+        use_tqdm: Optional[bool] = True,
         root: Optional[str] = "./",
         check_integrity: bool = True,
     ):
@@ -750,13 +750,13 @@ class GraphDataset(DeeprankDataset):
             classes (Optional[Union[List[str], List[int], List[float]]], optional): Define the dataset target classes in classification mode.
                 Value will be ignored and inherited from `train_data` if `train` is set as False and `train_data` is assigned.
                 Defaults to None.
-            tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
+            use_tqdm (Optional[bool], optional): Show progress bar. Defaults to True.
             root (Optional[str], optional): Root directory where the dataset should be saved. Defaults to "./".
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
 
-        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, tqdm, root, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root, target_filter, check_integrity)
 
         self.default_vars = {
             k: v.default
