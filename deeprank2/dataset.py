@@ -33,11 +33,12 @@ class DeeprankDataset(Dataset):
                  train: bool,
                  train_data: Optional[Union[str, GridDataset, GraphDataset]],
                  target: Optional[str],
+                 target_transform: Optional[bool],
+                 target_filter: Union[Dict[str, str], None],
                  task: Optional[str],
                  classes: Optional[Union[List[str], List[int], List[float]]],
                  use_tqdm: bool,
                  root_directory_path: str,
-                 target_filter: Union[Dict[str, str], None],
                  check_integrity: bool
     ):
         """Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
@@ -56,17 +57,18 @@ class DeeprankDataset(Dataset):
         else:
             raise TypeError(f"hdf5_path: unexpected type: {type(hdf5_path)}")
 
+        self.subset = subset
         self.train = train
         self.train_data = train_data
         self.target = target
-        self.subset = subset
-        self.use_tqdm = use_tqdm
+        self.target_transform = target_transform
         self.target_filter = target_filter
 
         if check_integrity:
             self._check_hdf5_files()
 
         self._check_task_and_classes(task, classes)
+        self.use_tqdm = use_tqdm
 
         # create the indexing system
         # alows to associate each mol to an index
@@ -476,8 +478,7 @@ class GridDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root_directory_path, target_filter, check_integrity)
-
+        super().__init__(hdf5_path, subset, train, train_data, target, target_transform, target_filter, task, classes, use_tqdm, root_directory_path, check_integrity)
         self.default_vars = {
             k: v.default
             for k, v in inspect.signature(self.__init__).parameters.items()
@@ -756,7 +757,7 @@ class GraphDataset(DeeprankDataset):
                 Defaults to True.
         """
 
-        super().__init__(hdf5_path, subset, train, train_data, target, task, classes, use_tqdm, root_directory_path, target_filter, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, target_transform, target_filter, task, classes, use_tqdm, root_directory_path, check_integrity)
 
         self.default_vars = {
             k: v.default
