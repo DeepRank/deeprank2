@@ -67,7 +67,7 @@ class Trainer():
                 Defaults to None.
         """
         self.neuralnet = neuralnet
-        self.pretrained_model_path = pretrained_model
+        self.pretrained_model = pretrained_model
 
         self._init_datasets(dataset_train, dataset_val, dataset_test,
                             val_size, test_size)
@@ -125,7 +125,7 @@ class Trainer():
         self.shuffle = None
         self.model_load_state_dict = None
 
-        if self.pretrained_model_path is None:
+        if self.pretrained_model is None:
             if self.dataset_train is None:
                 raise ValueError("No training data specified. Training data is required if there is no pretrained model.")
             if self.neuralnet is None:
@@ -834,7 +834,7 @@ class Trainer():
             num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
                         Defaults to 0.
         """
-        if (not self.pretrained_model_path) and (not self.model_load_state_dict):
+        if (not self.pretrained_model) and (not self.model_load_state_dict):
             raise ValueError(
                 """
                 No pretrained model provided and no training performed.
@@ -868,9 +868,9 @@ class Trainer():
         """
 
         if torch.cuda.is_available():
-            state = torch.load(self.pretrained_model_path)
+            state = torch.load(self.pretrained_model)
         else:
-            state = torch.load(self.pretrained_model_path, map_location=torch.device('cpu'))
+            state = torch.load(self.pretrained_model, map_location=torch.device('cpu'))
 
         self.data_type = state["data_type"]
         self.model_load_state_dict = state["model_state"]
