@@ -38,7 +38,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
   - [Table of contents](#table-of-contents)
   - [Installation](#installation)
     - [Dependencies](#dependencies)
-    - [Deeprank2 Package](#deeprank2-package)
+  - [Deeprank2 Package](#deeprank2-package)
     - [Test installation](#test-installation)
     - [Contributing](#contributing)
     - [Data generation](#data-generation)
@@ -46,6 +46,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
       - [GraphDataset](#graphdataset)
       - [GridDataset](#griddataset)
     - [Training](#training)
+    - [Run a pre-trained model on new data](#run-a-pre-trained-model-on-new-data)
   - [Computational performances](#computational-performances)
   - [Package development](#package-development)
 
@@ -71,7 +72,7 @@ Before installing deeprank2 you need to install some dependencies. We advise to 
     * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`.
 *  For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
 
-### Deeprank2 Package
+## Deeprank2 Package
 
 Once the dependencies are installed, you can install the latest stable release of deeprank2 using the PyPi package manager:
 
@@ -313,6 +314,41 @@ trainer.train(
 trainer.test()
 
 ```
+
+### Run a pre-trained model on new data
+
+If you want to analyze new PDB files using a pre-trained model, the first step is to process and save them into HDF5 files [as we have done above](#data-generation).
+
+Then, the `DeeprankDataset` instance for the newly processed data can be created. Do this by setting the `train` argument to `False` and specifying the path for the pre-trained model in `train_data`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. Let's suppose that the model has been trained with `GraphDataset` objects:
+
+```python
+from deeprank2.dataset import GraphDataset
+
+dataset_test = GraphDataset(
+    hdf5_path = "<output_folder>/<prefix_for_outputs>",
+    train = False,
+    train_data = "<pretrained_model_path>"
+)
+```
+
+Finally, the `Trainer` instance can be defined and the new data can be tested:
+
+```python
+from deeprank2.trainer import Trainer
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.utils.exporters import HDF5OutputExporter
+
+trainer = Trainer(
+    NaiveNetwork,
+    dataset_test = dataset_test, 
+    pretrained_model = "<pretrained_model_path>",
+    output_exporters = [HDF5OutputExporter("<output_folder_path>")]
+)
+
+trainer.test()
+```
+
+For more details about how to run a pre-trained model on new data, see the [docs](https://deeprank2.readthedocs.io/en/latest/getstarted.html#run-a-pre-trained-model-on-new-data).
 
 ## Computational performances
 
