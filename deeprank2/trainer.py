@@ -16,11 +16,13 @@ from tqdm import tqdm
 from deeprank2.dataset import GraphDataset, GridDataset
 from deeprank2.domain import losstypes as losses
 from deeprank2.domain import targetstorage as targets
-from deeprank2.utils.community_pooling import (community_detection,
-                                               community_pooling)
+from deeprank2.utils.community_pooling import community_detection, community_pooling
 from deeprank2.utils.earlystopping import EarlyStopping
-from deeprank2.utils.exporters import (HDF5OutputExporter, OutputExporter,
-                                       OutputExporterCollection)
+from deeprank2.utils.exporters import (
+    HDF5OutputExporter,
+    OutputExporter,
+    OutputExporterCollection,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -232,7 +234,7 @@ class Trainer():
             self.means = None
             self.devs = None
         else:
-            raise TypeError(type(dataset))
+            raise TypeError(f"Incorrect `dataset` type provided: {type(dataset)}. Please provide a `GridDataset` or `GraphDataset` object instead.")
 
         self.target = dataset.target
         self.target_transform = dataset.target_transform
