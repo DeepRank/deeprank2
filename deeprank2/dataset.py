@@ -87,7 +87,7 @@ class DeeprankDataset(Dataset):
     def _check_and_inherit_train(self, data_type: Union[GridDataset, GraphDataset], inherited_params):
         """Check if the pre-trained model or training set provided are valid for validation and/or testing, and inherit the parameters.
         """
-        if isinstance(self.train_data, str):
+        if isinstance(self.train_data, str): # pylint: disable=too-many-nested-blocks
             try:
                 if torch.cuda.is_available():
                     data = torch.load(self.train_data)
@@ -453,7 +453,7 @@ GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
 class GridDataset(DeeprankDataset):
-    def __init__( # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+    def __init__( # pylint: disable=too-many-arguments, too-many-locals
         self,
         hdf5_path: Union[str, list],
         subset: Optional[List[str]] = None,
@@ -517,7 +517,8 @@ class GridDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, train, train_data, target, target_transform, target_filter, task, classes, use_tqdm, root_directory_path, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, target_transform,
+                         target_filter, task, classes, use_tqdm, root_directory_path, check_integrity)
         self.default_vars = {
             k: v.default
             for k, v in inspect.signature(self.__init__).parameters.items()
@@ -668,7 +669,8 @@ class GridDataset(DeeprankDataset):
                     if self.task == targets.REGRESS and self.target_transform is True:
                         y = torch.sigmoid(torch.log(y))
                     elif self.task is not targets.REGRESS and self.target_transform is True:
-                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. Please change `task` to \"regress\" or set `target_transform` to `False`.")
+                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. \
+                                         Please change `task` to \"regress\" or set `target_transform` to `False`.")
                 else:
                     y = None
                     possible_targets = grp[targets.VALUES].keys()
@@ -777,7 +779,8 @@ class GraphDataset(DeeprankDataset):
                 Defaults to True.
         """
 
-        super().__init__(hdf5_path, subset, train, train_data, target, target_transform, target_filter, task, classes, use_tqdm, root_directory_path, check_integrity)
+        super().__init__(hdf5_path, subset, train, train_data, target, target_transform,
+                         target_filter, task, classes, use_tqdm, root_directory_path, check_integrity)
 
         self.default_vars = {
             k: v.default
@@ -792,8 +795,9 @@ class GraphDataset(DeeprankDataset):
         self.features_transform = features_transform
         self._check_features()
 
-        if not train: # pylint: disable=too-many-nested-blocks
-            self.inherited_params = ["node_features", "edge_features", "features_transform", "target", "target_transform", "task", "classes", "classes_to_index"]
+        if not train:
+            self.inherited_params = ["node_features", "edge_features", "features_transform", "target",
+                                     "target_transform", "task", "classes", "classes_to_index"]
             self._check_and_inherit_train(GraphDataset, self.inherited_params)
 
         else:
@@ -977,7 +981,8 @@ class GraphDataset(DeeprankDataset):
                     if self.task == targets.REGRESS and self.target_transform is True:
                         y = torch.sigmoid(torch.log(y))
                     elif self.task is not targets.REGRESS and self.target_transform is True:
-                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. Please change `task` to \"regress\" or set `target_transform` to `False`.")
+                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. \
+                                         Please change `task` to \"regress\" or set `target_transform` to `False`.")
 
                 else:
                     y = None
