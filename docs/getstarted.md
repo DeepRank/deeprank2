@@ -412,9 +412,9 @@ fig.update_layout(
 )
 ```
 
-## Testing new data
+## Run a pre-trained model on new data
 
-If new PDB files need to be tested with a pre-trained model, the first step would be to process and save them into HDF5 files. Let's suppose that the model has been trained with `ProteinProteinInterfaceResidueQuery` queries mapped to graphs:
+If you want to run a pre-trained model on new PDB files, the first step is to process and save them into HDF5 files. Let's suppose that the model has been trained with `ProteinProteinInterfaceResidueQuery` queries mapped to graphs:
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
@@ -438,7 +438,7 @@ hdf5_paths = queries.process(
     feature_modules = 'all')
 ```
 
-Then, the GraphDataset instance representing the testing set can be defined. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. 
+Then, the GraphDataset instance for the newly processed data can be created. Do this by setting the `train` argument to `False` and specifying the path for the pre-trained model in `train_data`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. 
 
 ```python
 from deeprank2.dataset import GraphDataset
@@ -450,7 +450,7 @@ dataset_test = GraphDataset(
 )
 ```
 
-Finally, the Trainer instance can be defined and the new data can be tested:
+Finally, the `Trainer` instance can be defined and the new data can be tested:
 
 ```python
 from deeprank2.trainer import Trainer
