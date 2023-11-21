@@ -1,9 +1,8 @@
 import logging
 import warnings
-from typing import List, Optional, Tuple
 
 import numpy as np
-import numpy.typing as npt
+from numpy.typing import NDArray
 from scipy.spatial import distance_matrix
 
 from deeprank2.domain import edgestorage as Efeat
@@ -21,21 +20,21 @@ cutoff_13 = 3.6
 cutoff_14 = 4.2
 
 def _get_nonbonded_energy( #pylint: disable=too-many-locals
-    atoms: List[Atom],
-    distances: npt.NDArray[np.float64],
-    ) -> Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    atoms: list[Atom],
+    distances: NDArray[np.float64],
+    ) -> tuple [NDArray[np.float64], NDArray[np.float64]]:
     """Calculates all pairwise electrostatic (Coulomb) and Van der Waals (Lennard Jones) potential energies between all atoms in the structure.
 
     Warning: there's no distance cutoff here. The radius of influence is assumed to infinite.
     However, the potential tends to 0 at large distance.
 
     Args:
-        atoms (List[Atom]): list of all atoms in the structure
-        distances (npt.NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure
+        atoms (list[Atom]): list of all atoms in the structure
+        distances (NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure
             in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
 
     Returns:
-        Tuple [npt.NDArray[np.float64], npt.NDArray[np.float64]]: matrices in same format as `distances` containing
+        Tuple [NDArray[np.float64], NDArray[np.float64]]: matrices in same format as `distances` containing
             all pairwise electrostatic potential energies and all pairwise Van der Waals potential energies
     """
 
@@ -76,9 +75,10 @@ def _get_nonbonded_energy( #pylint: disable=too-many-locals
 
 
 def add_features( # pylint: disable=unused-argument, too-many-locals
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: SingleResidueVariant | None = None,
+):
 
     # assign each atoms (from all edges) a unique index
     all_atoms = set()

@@ -1,6 +1,5 @@
 import glob
 import os
-from typing import Dict, List, Union
 
 import h5py
 import numpy as np
@@ -9,11 +8,16 @@ from pdb2sql import StructureSimilarity
 from deeprank2.domain import targetstorage as targets
 
 
-def add_target(graph_path: Union[str, List[str]], target_name: str, target_list: str, sep: str = " "):
+def add_target(
+    graph_path: str | list[str],
+    target_name: str,
+    target_list: str,
+    sep: str = " ",
+):
     """Add a target to all the graphs in hdf5 files.
 
     Args:
-        graph_path (Union[str, List(str)]): Either a directory containing all the hdf5 files,
+        graph_path (str | list(str)): Either a directory containing all the hdf5 files,
             or a single hdf5 filename
             or a list of hdf5 filenames.
         target_name (str): The name of the new target.
@@ -83,7 +87,7 @@ def add_target(graph_path: Union[str, List[str]], target_name: str, target_list:
             print(f"no graph for {hdf5}")
 
 
-def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> Dict[str, Union[float, int]]:
+def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> dict[str, float | int]:
 
     """Compute structure similarity scores for the input docking model and return them as a dictionary.
 

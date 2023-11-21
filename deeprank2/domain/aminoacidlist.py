@@ -1,5 +1,3 @@
-from typing import Optional
-
 from deeprank2.molstruct.aminoacid import AminoAcid, Polarity
 
 # All info below sourced from above websites in December 2022 and summarized in deeprank2/domain/aminoacid_summary.xlsx
@@ -352,7 +350,7 @@ amino_acids = [
     # pyrrolysine,
     ]
 
-def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
+def convert_aa_nomenclature(aa: str, output_type: int | None = None):
     try:
         if len(aa) == 1:
             aa: AminoAcid = [entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower()][0]

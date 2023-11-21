@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import torch
 import torch.nn
 import torch.nn.functional as F
@@ -25,7 +23,7 @@ from torch.autograd import Variable
 
 class CnnRegression(torch.nn.Module):
 
-    def __init__(self, num_features: int, box_shape: Tuple[int]):
+    def __init__(self, num_features: int, box_shape: tuple[int]):
         super().__init__()
 
         self.convlayer_000 = torch.nn.Conv3d(num_features, 4, kernel_size=2)
@@ -38,7 +36,7 @@ class CnnRegression(torch.nn.Module):
         self.fclayer_000 = torch.nn.Linear(size, 84)
         self.fclayer_001 = torch.nn.Linear(84, 1)
 
-    def _get_conv_output(self, num_features: int, shape: Tuple[int]):
+    def _get_conv_output(self, num_features: int, shape: tuple[int]):
         num_data_points = 2
         input_ = Variable(torch.rand(num_data_points, num_features, *shape))
         output = self._forward_features(input_)
