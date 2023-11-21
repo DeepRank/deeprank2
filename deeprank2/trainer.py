@@ -16,13 +16,11 @@ from tqdm import tqdm
 from deeprank2.dataset import GraphDataset, GridDataset
 from deeprank2.domain import losstypes as losses
 from deeprank2.domain import targetstorage as targets
-from deeprank2.utils.community_pooling import community_detection, community_pooling
+from deeprank2.utils.community_pooling import (community_detection,
+                                               community_pooling)
 from deeprank2.utils.earlystopping import EarlyStopping
-from deeprank2.utils.exporters import (
-    HDF5OutputExporter,
-    OutputExporter,
-    OutputExporterCollection,
-)
+from deeprank2.utils.exporters import (HDF5OutputExporter, OutputExporter,
+                                       OutputExporterCollection)
 
 _log = logging.getLogger(__name__)
 
@@ -654,7 +652,7 @@ class Trainer():
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def _epoch(self, epoch_number: int, pass_name: str) -> float:
+    def _epoch(self, epoch_number: int, pass_name: str) -> Optional[float]:
         """
         Runs a single epoch
 
@@ -702,7 +700,7 @@ class Trainer():
         if count_predictions > 0:
             epoch_loss = sum_of_losses / count_predictions
         else:
-            epoch_loss = 0.0
+            epoch_loss = None
 
         self._output_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals, epoch_loss)
@@ -715,7 +713,7 @@ class Trainer():
             loader: DataLoader,
             epoch_number: int,
             pass_name: str
-        ) -> float:
+        ) -> Optional[float]:
 
         """
         Evaluates the model
@@ -751,8 +749,8 @@ class Trainer():
                 count_predictions += pred.shape[0]
                 sum_of_losses += loss_.detach().item() * pred.shape[0]
             else:
-                target_vals += ['None'] * pred.shape[0]
-                eval_loss = 'None'
+                target_vals += [None] * pred.shape[0]
+                eval_loss = None
 
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
@@ -769,7 +767,7 @@ class Trainer():
         if count_predictions > 0:
             eval_loss = sum_of_losses / count_predictions
         else:
-            eval_loss = 'None'
+            eval_loss = None
 
         self._output_exporters.process(
             pass_name, epoch_number, entry_names, outputs, target_vals, eval_loss)

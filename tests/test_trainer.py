@@ -21,8 +21,11 @@ from deeprank2.neuralnets.gnn.ginet import GINet
 from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
 from deeprank2.neuralnets.gnn.sgat import SGAT
 from deeprank2.trainer import Trainer, _divide_dataset
-from deeprank2.utils.exporters import (HDF5OutputExporter, ScatterPlotExporter,
-                                       TensorboardBinaryClassificationExporter)
+from deeprank2.utils.exporters import (
+    HDF5OutputExporter,
+    ScatterPlotExporter,
+    TensorboardBinaryClassificationExporter,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -817,8 +820,8 @@ class TestTrainer(unittest.TestCase):
 
         output = pd.read_hdf("output_exporter.hdf5", key="testing")
         assert len(output) == len(dataset_test)
-        assert output.target.unique().tolist()[0] == 'None'
-        assert output.loss.unique().tolist()[0] == 'None'
+        assert output.target.unique().tolist()[0] is None
+        assert output.loss.unique().tolist()[0] is None
 
         # Grids data
         test_data_grid = "tests/data/hdf5/test_no_target.hdf5"
@@ -841,8 +844,8 @@ class TestTrainer(unittest.TestCase):
 
         output = pd.read_hdf("output_exporter.hdf5", key="testing")
         assert len(output) == len(dataset_test)
-        assert output.target.unique().tolist()[0] == 'None'
-        assert output.loss.unique().tolist()[0] == 'None'
+        assert output.target.unique().tolist()[0] is None
+        assert output.loss.unique().tolist()[0] is None
 
 
 if __name__ == "__main__":
