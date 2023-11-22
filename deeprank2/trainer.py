@@ -291,6 +291,7 @@ class Trainer():
         self._put_model_to_device(self.dataset_test)
 
         # load the model and the optimizer state
+        self.optimizer = self.optimizer(self.model.parameters(), lr=self.lr, weight_decay = self.weight_decay)
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
@@ -874,7 +875,7 @@ class Trainer():
 
         self.data_type = state["data_type"]
         self.model_load_state_dict = state["model_state"]
-        self.optimizer = state["optimizer"]
+        self.optimizer = type(state["optimizer"])
         self.opt_loaded_state_dict = state["optimizer_state"]
         self.lossfunction = state["lossfunction"]
         self.target = state["target"]
