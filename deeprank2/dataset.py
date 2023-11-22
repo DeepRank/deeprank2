@@ -569,9 +569,10 @@ class GridDataset(DeeprankDataset):
         with h5py.File(hdf5_path, "r") as f:
             mol_key = list(f.keys())[0]
             if isinstance(self.features, list):
-                self.features = list(set([GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name).group(1)
+                self.features = [GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name).group(1)
                                 if GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name) is not None
-                                else feature_name for feature_name in self.features])) # be sure to remove the dimension number suffix
+                                else feature_name for feature_name in self.features] # be sure to remove the dimension number suffix
+                self.features = list(set(self.features)) # remove duplicates
             available_features = list(f[f"{mol_key}/{gridstorage.MAPPED_FEATURES}"].keys())
             available_features = [key for key in available_features if key[0] != '_']  # ignore metafeatures
 
