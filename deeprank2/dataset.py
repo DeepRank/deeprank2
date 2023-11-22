@@ -527,13 +527,14 @@ class GridDataset(DeeprankDataset):
         self.default_vars["classes_to_index"] = None
         self.features = features
         self.target_transform = target_transform
-        self._check_features()
 
         if not train:
             self.inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
             self._check_and_inherit_train(GridDataset, self.inherited_params)
+            self._check_features()
 
         else:
+            self._check_features()
             self.inherited_params = None
             if train_data:
                 _log.warning("""`train_data` has been set but train flag was set to True.
@@ -565,25 +566,25 @@ class GridDataset(DeeprankDataset):
         hdf5_path = self.hdf5_paths[0]
 
         # read available features
-        with h5py.File(hdf5_path, "r") as hdf5_file:
-            entry_name = list(hdf5_file.keys())[0]
-
-            hdf5_all_feature_names = list(hdf5_file[f"{entry_name}/{gridstorage.MAPPED_FEATURES}"].keys())
+        with h5py.File(hdf5_path, "r") as f:
+            mol_key = list(f.keys())[0]
+            if isinstance(self.features, list):
+                self.features = list(set([GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name).group(1)
+                                if GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name) is not None
+                                else feature_name for feature_name in self.features])) # be sure to remove the dimension number suffix
+            available_features = list(f[f"{mol_key}/{gridstorage.MAPPED_FEATURES}"].keys())
+            available_features = [key for key in available_features if key[0] != '_']  # ignore metafeatures
 
             hdf5_matching_feature_names = []  # feature names that match with the requested list of names
             unpartial_feature_names = []  # feature names without their dimension number suffix
-
-            for feature_name in hdf5_all_feature_names:
-
-                if feature_name.startswith("_"):
-                    continue  # ignore metafeatures
+            for feature_name in available_features:
 
                 partial_feature_match = GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name)
                 if partial_feature_match is not None:  # there's a dimension number in the feature name
 
                     unpartial_feature_name = partial_feature_match.group(1)
 
-                    if self.features == "all" or isinstance(self.features, list) and unpartial_feature_name in self.features:
+                    if self.features == "all" or (isinstance(self.features, list) and unpartial_feature_name in self.features):
 
                         hdf5_matching_feature_names.append(feature_name)
 
@@ -591,7 +592,7 @@ class GridDataset(DeeprankDataset):
 
                 else:  # no numbers, it's a one-dimensional feature name
 
-                    if self.features == "all" or isinstance(self.features, list) and feature_name in self.features:
+                    if self.features == "all" or (isinstance(self.features, list) and feature_name in self.features):
 
                         hdf5_matching_feature_names.append(feature_name)
 
@@ -600,7 +601,7 @@ class GridDataset(DeeprankDataset):
         # check for the requested features
         missing_features = []
         if self.features == "all":
-            self.features = sorted(hdf5_all_feature_names)
+            self.features = sorted(available_features)
             self.default_vars["features"] = self.features
         else:
             if not isinstance(self.features, list):
@@ -618,11 +619,11 @@ class GridDataset(DeeprankDataset):
         # raise error if any features are missing
         if len(missing_features) > 0:
             raise ValueError(
-                f"Not all features could be found in the file {hdf5_path} under entry {entry_name}.\
+                f"Not all features could be found in the file {hdf5_path} under entry {mol_key}.\
                     \nMissing features are: {missing_features} \
                     \nCheck feature_modules passed to the preprocess function. \
                     \nProbably, the feature wasn't generated during the preprocessing step. \
-                    Available features: {hdf5_all_feature_names}")
+                    Available features: {available_features}")
 
     def get(self, idx: int) -> Data:
         """Gets one grid item from its unique index.
@@ -791,14 +792,15 @@ class GraphDataset(DeeprankDataset):
         self.clustering_method = clustering_method
         self.target_transform = target_transform
         self.features_transform = features_transform
-        self._check_features()
 
         if not train:
             self.inherited_params = ["node_features", "edge_features", "features_transform", "target",
                                      "target_transform", "task", "classes", "classes_to_index"]
             self._check_and_inherit_train(GraphDataset, self.inherited_params)
+            self._check_features()
 
         else:
+            self._check_features()
             self.inherited_params = None
             if train_data:
                 _log.warning("""`train_data` has been set but train flag was set to True.
