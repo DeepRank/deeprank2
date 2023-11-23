@@ -7,12 +7,10 @@ import numpy as np
 import pytest
 
 from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.domain import aminoacidlist as aa
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
-from deeprank2.domain.aminoacidlist import (alanine, arginine, asparagine,
-                                            cysteine, glutamate, glycine,
-                                            leucine, lysine, phenylalanine)
 from deeprank2.features import components, conservation, contact, surfacearea
 from deeprank2.query import (ProteinProteinInterfaceQuery, QueryCollection,
                              SingleResidueVariantQuery)
@@ -146,8 +144,8 @@ def test_variant_graph_101M():
         chain_ids="A",
         variant_residue_number=27,
         insertion_code=None,
-        wildtype_amino_acid=asparagine,
-        variant_amino_acid=phenylalanine,
+        wildtype_amino_acid=aa.asparagine,
+        variant_amino_acid=aa.phenylalanine,
         pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
         influence_radius=5.0,
@@ -179,8 +177,8 @@ def test_variant_graph_1A0Z():
         chain_ids="A",
         variant_residue_number=125,
         insertion_code=None,
-        wildtype_amino_acid=leucine,
-        variant_amino_acid=arginine,
+        wildtype_amino_acid=aa.leucine,
+        variant_amino_acid=aa.arginine,
         pssm_paths={
             "A": "tests/data/pssm/1A0Z/1A0Z.A.pdb.pssm",
             "B": "tests/data/pssm/1A0Z/1A0Z.B.pdb.pssm",
@@ -217,8 +215,8 @@ def test_variant_graph_9API():
         chain_ids="A",
         variant_residue_number=310,
         insertion_code=None,
-        wildtype_amino_acid=lysine,
-        variant_amino_acid=glutamate,
+        wildtype_amino_acid=aa.lysine,
+        variant_amino_acid=aa.glutamate,
         pssm_paths={
             "A": "tests/data/pssm/9api/9api.A.pdb.pssm",
             "B": "tests/data/pssm/9api/9api.B.pdb.pssm",
@@ -253,8 +251,8 @@ def test_variant_residue_graph_101M():
         chain_ids="A",
         variant_residue_number=25,
         insertion_code=None,
-        wildtype_amino_acid=glycine,
-        variant_amino_acid=alanine,
+        wildtype_amino_acid=aa.glycine,
+        variant_amino_acid=aa.alanine,
         pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
     )
@@ -315,8 +313,8 @@ def test_augmentation():
         chain_ids="A",
         variant_residue_number=25,
         insertion_code=None,
-        wildtype_amino_acid=glycine,
-        variant_amino_acid=alanine,
+        wildtype_amino_acid=aa.glycine,
+        variant_amino_acid=aa.alanine,
         pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
     ))
@@ -327,8 +325,8 @@ def test_augmentation():
         chain_ids="A",
         variant_residue_number=27,
         insertion_code=None,
-        wildtype_amino_acid=asparagine,
-        variant_amino_acid=phenylalanine,
+        wildtype_amino_acid=aa.asparagine,
+        variant_amino_acid=aa.phenylalanine,
         pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
         targets={targets.BINARY: 0},
         influence_radius=3.0,
@@ -470,8 +468,8 @@ def test_variant_query_multiple_chains():
         chain_ids = "A",
         variant_residue_number = 14,
         insertion_code = None,
-        wildtype_amino_acid = arginine,
-        variant_amino_acid = cysteine,
+        wildtype_amino_acid = aa.arginine,
+        variant_amino_acid = aa.cysteine,
         pssm_paths = {"A": "tests/data/pssm/2g98/2g98.A.pdb.pssm"},
         targets = {targets.BINARY: 1},
         influence_radius = 10.0,
