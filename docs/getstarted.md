@@ -414,20 +414,20 @@ fig.update_layout(
 
 ## Run a pre-trained model on new data
 
-If you want to run a pre-trained model on new PDB files, the first step is to process and save them into HDF5 files. Let's suppose that the model has been trained with `ProteinProteinInterfaceResidueQuery` queries mapped to graphs:
+If you want to run a pre-trained model on new PDB files, the first step is to process and save them into HDF5 files. Let's suppose that the model has been trained with `ProteinProteinInterfaceQuery` queries mapped to graphs:
 
 ```python
-from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
 
 queries = QueryCollection()
 
 # Append data points
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "<new_pdb_file1.pdb>",
     chain_id1 = "A",
     chain_id2 = "B"
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "<new_pdb_file2.pdb>",
     chain_id1 = "A",
     chain_id2 = "B"
