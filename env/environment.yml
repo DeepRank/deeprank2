@@ -1,0 +1,19 @@
+name: deeprank2
+channels:
+  - pytorch
+  - pyg
+  - bioconda
+  - defaults
+dependencies:
+  - pip==23.3.*
+  - python==3.10.*
+  - msms==2.6.1
+  - pytorch==2.1.1
+  - pytorch-mutex==1.0.*
+  - torchvision==0.16.1
+  - torchaudio==2.1.1
+  - cpuonly==2.0.*
+  - pyg==2.4.0
+  - notebook==7.0.6
+  - pip:
+    - --requirement requirements.txt
