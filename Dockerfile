@@ -3,8 +3,8 @@ FROM --platform=linux/x86_64 continuumio/miniconda3:23.10.0-1
 
 # Add files
 ADD ./tutorials /home/deeprank2/tutorials 
-ADD ./env/environment.yml /home
-ADD ./env/requirements.txt /home
+ADD ./env/environment.yml /home/deeprank2
+ADD ./env/requirements.txt /home/deeprank2
 
 # Install
 RUN \
@@ -17,8 +17,10 @@ RUN \
   mv mkdssp-4.4.0-linux-x64 /usr/local/bin/mkdssp && \
   chmod a+x /usr/local/bin/mkdssp && \
   ## Conda and pip deps
-  conda env create -f /home/environment.yml && \
+  conda env create -f /home/deeprank2/environment.yml && \
   ## Get the data for running the tutorials
+  if [ -d "/home/deeprank2/tutorials/data_raw" ]; then rm -Rf /home/deeprank2/tutorials/data_raw; fi && \
+  if [ -d "/home/deeprank2/tutorials/data_processed" ]; then rm -Rf /home/deeprank2/tutorials/data_processed; fi && \
   wget https://zenodo.org/records/8349335/files/data_raw.zip && \
   unzip data_raw.zip -d data_raw && \
   mv data_raw /home/deeprank2/tutorials
@@ -31,4 +33,4 @@ ENV PATH /opt/conda/envs/deeprank2/bin:$PATH
 WORKDIR /home/deeprank2
 
 # Define default command
-CMD ["bash"]
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--NotebookApp.token=''","--NotebookApp.password=''", "--allow-root"]
