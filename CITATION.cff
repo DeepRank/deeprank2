@@ -14,15 +14,15 @@ authors:
     email: g.crocioni@esciencecenter.nl
     affiliation: Netherlands eScience Center
     orcid: 'https://orcid.org/0000-0002-0823-0121'
-  - given-names: Coos
-    family-names: Baakman
-    affiliation: Radboud University Medical Center
-    orcid: 'https://orcid.org/0000-0003-4317-1566'
   - given-names: Dani
     family-names: Bodor
     email: d.bodor@esciencecenter.nl
     affiliation: Netherlands eScience Center
     orcid: 'https://orcid.org/0000-0003-2109-2349'
+  - given-names: Coos
+    family-names: Baakman
+    affiliation: Radboud University Medical Center
+    orcid: 'https://orcid.org/0000-0003-4317-1566'
   - given-names: Daniel
     family-names: Rademaker
     affiliation: Radboud University Medical Center
