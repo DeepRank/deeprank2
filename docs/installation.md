@@ -30,7 +30,7 @@ After running the tutorials, you may want to remove the (quite large) Docker ima
 
 ### Non-pythonic dependencies
 
-Instructions are up to date as of 14/09/2023.
+Instructions are up to date as of 27 Nov 2023.
 
 Before installing deeprank2 you need to install some dependencies:
 
@@ -43,7 +43,7 @@ Before installing deeprank2 you need to install some dependencies:
 
 ### Pythonic dependencies
 
-Instructions are up to date as of 14/09/2023.
+Instructions are up to date as of 27 Nov 2023.
 
 Then, you can use the YML file we provide for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of the package and all the other necessary conda and pip dependencies (CPU only, Python 3.10):
 

@@ -1,4 +1,4 @@
-# Deeprank2
+# DeepRank2
 
 | Badges | |
 |:----:|----|
@@ -33,7 +33,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
 
 ## Table of contents
 
-- [Deeprank2](#deeprank2)
+- [DeepRank2](#deeprank2)
   - [Overview](#overview)
   - [Table of contents](#table-of-contents)
   - [Installations](#installations)
@@ -84,9 +84,9 @@ After running the tutorials, you may want to remove the (quite large) Docker ima
 
 #### Non-pythonic dependencies
 
-Instructions are up to date as of 14/09/2023.
+Instructions are up to date as of 27 Nov 2023.
 
-Before installing deeprank2 you need to install some dependencies:
+Before installing DeepRank2 you need to install some dependencies:
 
 *  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
     * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
@@ -97,7 +97,7 @@ Before installing deeprank2 you need to install some dependencies:
 
 #### Pythonic dependencies
 
-Instructions are up to date as of 14/09/2023.
+Instructions are up to date as of 27 Nov 2023.
 
 Then, you can use the YML file we provide for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of the package and all the other necessary conda and pip dependencies (CPU only, Python 3.10):
 

@@ -32,7 +32,7 @@ PDB models and target data used in this tutorial have been retrieved from [Ramak
    - Clone the [deeprank2 repository](https://github.com/DeepRank/deeprank2).
    - From within the repository, run `pip install ".[tutorials]"`
 3. To test whether the package has been succesfully installed:
-   - Navigate to your deeprank2 folder.
+   - Navigate to your `deeprank2` folder.
    - Run `pytest tests`. All tests should pass at this point.
 
 
