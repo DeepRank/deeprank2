@@ -1,5 +1,5 @@
 # Pull base image
-FROM --platform=linux/x86_64 continuumio/miniconda3:23.10.0-1
+FROM --platform=linux/x86_64 condaforge/miniforge3:23.3.1-1
 
 # Add files
 ADD ./tutorials /home/deeprank2/tutorials 
@@ -17,7 +17,7 @@ RUN \
   mv mkdssp-4.4.0-linux-x64 /usr/local/bin/mkdssp && \
   chmod a+x /usr/local/bin/mkdssp && \
   ## Conda and pip deps
-  conda env create -f /home/deeprank2/environment.yml && \
+  mamba env create -f /home/deeprank2/environment.yml && \
   ## Get the data for running the tutorials
   if [ -d "/home/deeprank2/tutorials/data_raw" ]; then rm -Rf /home/deeprank2/tutorials/data_raw; fi && \
   if [ -d "/home/deeprank2/tutorials/data_processed" ]; then rm -Rf /home/deeprank2/tutorials/data_processed; fi && \
