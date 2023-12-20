@@ -1,5 +1,6 @@
 import copy
 import logging
+import warnings
 from time import time
 from typing import List, Optional, Tuple, Union
 
@@ -577,6 +578,7 @@ class Trainer():
 
         train_losses = []
         valid_losses = []
+        saved_model = False
 
         if earlystop_patience or earlystop_maxgap:
             early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, min_epoch=min_epoch, trace_func=_log.info)
@@ -609,6 +611,7 @@ class Trainer():
                     if best_model:
                         if min(valid_losses) == loss_:
                             checkpoint_model = self._save_model()
+                            saved_model = True
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
                     # check early stopping criteria (in validation case only)
@@ -626,14 +629,19 @@ class Trainer():
                                 "Training data is used both for learning and model selection, which will to overfitting." +
                                 "\n\tIt is preferable to use an independent training and validation data sets.")
                             checkpoint_model = self._save_model()
+                            saved_model = True
                             self.epoch_saved_model = epoch
                             _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
 
             # Save the last model
-            if best_model is False:
+            if best_model is False or not saved_model:
                 checkpoint_model = self._save_model()
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
+                if not saved_model:
+                    warnings.warn("A model has been saved but the validation and/or the training losses were NaN;" +
+                              "\n\ttry to increase the cutoff distance during the data processing or the number of data points " +
+                              "during the training.")
 
         # Now that the training loop is over, save the model
         if filename:
