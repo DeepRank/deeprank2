@@ -1,5 +1,6 @@
 import copy
 import logging
+import warnings
 from time import time
 from typing import List, Optional, Tuple, Union
 
@@ -638,8 +639,8 @@ class Trainer():
                 self.epoch_saved_model = epoch
                 _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
                 if not saved_model:
-                    _log.warning("A model has been saved but the validation and/or the training losses were NaN;" +
-                              "try to increase the cutoff distance during the data processing or the number of data points" +
+                    warnings.warn("A model has been saved but the validation and/or the training losses were NaN;" +
+                              "\n\ttry to increase the cutoff distance during the data processing or the number of data points " +
                               "during the training.")
 
         # Now that the training loop is over, save the model
