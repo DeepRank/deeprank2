@@ -216,13 +216,14 @@ def hdf5_files_for_nan(tmpdir_factory):
 
     queries = QueryCollection()
     for idx, pdb_path in enumerate(pdb_paths):
-        query = ProteinProteinInterfaceResidueQuery(
-            pdb_path,
-            chain_id1,
-            chain_id2,
-            # A very low cutoff distance helps for not making the network to learn
-            distance_cutoff=3,
-            targets = {targets.BINARY: targets_values[idx]}
+        query = ProteinProteinInterfaceQuery(
+            pdb_path=pdb_path,
+            resolution='residue',
+            chain_ids=[chain_id1,chain_id2],
+            targets = {targets.BINARY: targets_values[idx]},
+            # A very low radius and edge length helps for not making the network to learn
+            influence_radius=3,
+            max_edge_length=3
         )
         queries.add(query)
 
