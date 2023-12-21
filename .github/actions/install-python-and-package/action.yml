@@ -1,6 +1,6 @@
-name: "Install Python and deeprank2"
+name: "Install Python and DeepRank2"
 
-description: "Installs Python, updates pip and installs deeprank2 together with its dependencies."
+description: "Installs Python, updates pip and installs DeepRank2 together with its dependencies."
 
 inputs:
 
