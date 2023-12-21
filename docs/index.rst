@@ -58,6 +58,18 @@ Notes
 :doc:`docking`
     Get a detailed overview about PPIs' docking metrics implemented in the package.
 
+Package reference
+===========
+
+.. toctree::
+   :caption: API
+   :hidden:
+
+   reference/deeprank2
+
+:doc:`reference/deeprank2`
+    This section documents the DeepRank2 API.
+
 Indices and tables
 ==================
 
