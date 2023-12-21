@@ -3,7 +3,7 @@
 
 cff-version: 1.2.0
 doi: 10.5281/zenodo.8305000
-title: Deeprank2
+title: DeepRank2
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -55,5 +55,5 @@ keywords:
   - DeepRank
 license: Apache-2.0
 commit: 4e8823758ba03f824b4281f5689cb6a335ab2f6c
-version: "2.1.1"
-date-released: '2023-09-22'
+version: "2.1.2"
+date-released: '2023-12-23'
