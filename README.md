@@ -216,13 +216,11 @@ dataset_train = GraphDataset(
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
     train_data = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
     train_data = dataset_train
 )
 ```
@@ -250,13 +248,11 @@ dataset_train = GridDataset(
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
     train_data = dataset_train,
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
     train_data = dataset_train,
 )
 ```
@@ -319,14 +315,13 @@ trainer.test()
 
 If you want to analyze new PDB files using a pre-trained model, the first step is to process and save them into HDF5 files [as we have done above](#data-generation).
 
-Then, the `DeeprankDataset` instance for the newly processed data can be created. Do this by setting the `train` argument to `False` and specifying the path for the pre-trained model in `train_data`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. Let's suppose that the model has been trained with `GraphDataset` objects:
+Then, the `DeeprankDataset` instance for the newly processed data can be created. Do this by specifying the path for the pre-trained model in `train_data`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. Let's suppose that the model has been trained with `GraphDataset` objects:
 
 ```python
 from deeprank2.dataset import GraphDataset
 
 dataset_test = GraphDataset(
     hdf5_path = "<output_folder>/<prefix_for_outputs>",
-    train = False,
     train_data = "<pretrained_model_path>"
 )
 ```

@@ -187,13 +187,11 @@ dataset_train = GraphDataset(
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
     train_data = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
     train_data = dataset_train
 )
 ```
@@ -243,7 +241,7 @@ dataset_train = GraphDataset(
 )
 ```
 
-If `standardize` functionality is used, validation and testing sets need to know the interested features' means and standard deviations in order to use the same values for standardizing validation and testing features. This can be done using `train` and `dataset_train` parameters of the `GraphDataset` class. Example:
+If `standardize` functionality is used, validation and testing sets need to know the interested features' means and standard deviations in order to use the same values for standardizing validation and testing features. This can be done using `train_data` parameter of the `GraphDataset` class. Example:
 
 ```python
 features_transform = {'all':
@@ -252,7 +250,7 @@ features_transform = {'all':
 train_ids = [<ids>]
 valid_ids = [<ids>]
 test_ids = [<ids>]
-# `train` defaults to `True`, and `dataset_train` defaults to `None`
+# `train_data` defaults to `None`
 dataset_train = GraphDataset(
     hdf5_path = hdf5_path,
     subset = train_ids,
@@ -264,13 +262,11 @@ dataset_train = GraphDataset(
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
     train_data = dataset_train # dataset_train means and stds will be used
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
     train_data = dataset_train # dataset_train means and stds will be used
 )
 ```
@@ -298,13 +294,11 @@ dataset_train = GridDataset(
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
     train_data = dataset_train
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
     train_data = dataset_train
 )
 ```
@@ -438,14 +432,13 @@ hdf5_paths = queries.process(
     feature_modules = 'all')
 ```
 
-Then, the GraphDataset instance for the newly processed data can be created. Do this by setting the `train` argument to `False` and specifying the path for the pre-trained model in `train_data`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. 
+Then, the GraphDataset instance for the newly processed data can be created. Do this by specifying the path for the pre-trained model in `train_data`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. 
 
 ```python
 from deeprank2.dataset import GraphDataset
 
 dataset_test = GraphDataset(
     hdf5_path = "<output_folder>/<prefix_for_outputs>",
-    train = False,
     train_data = "<pretrained_model_path>"
 )
 ```
