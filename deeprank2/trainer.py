@@ -248,7 +248,7 @@ class Trainer():
         self.set_lossfunction()
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
-        """Check dataset_train type and train_data parameter settings."""
+        """Check dataset_train type and train_source parameter settings."""
 
         # dataset_train is None when pretrained_model is set
         if dataset_train is None:
@@ -270,14 +270,14 @@ class Trainer():
     def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
         """Check valid/test dataset settings."""
 
-        # Check train_data parameter in valid/test is set.
-        if dataset_check.train_data is None:
-            raise ValueError(f"""{type_dataset} dataset has train_data parameter set to None.
+        # Check train_source parameter in valid/test is set.
+        if dataset_check.train_source is None:
+            raise ValueError(f"""{type_dataset} dataset has train_source parameter set to None.
                         Make sure to set it as a valid training data source.""")
-        # Check train_data parameter in valid/test is equivalent to train which passed to Trainer.
-        if dataset_check.train_data != dataset_train:
-            raise ValueError(f"""{type_dataset} dataset has different train_data parameter compared to the one given in Trainer.
-                        Make sure to assign equivalent train_data in Trainer""")
+        # Check train_source parameter in valid/test is equivalent to train which passed to Trainer.
+        if dataset_check.train_source != dataset_train:
+            raise ValueError(f"""{type_dataset} dataset has different train_source parameter compared to the one given in Trainer.
+                        Make sure to assign equivalent train_source in Trainer""")
 
     def _load_pretrained_model(self):
         """

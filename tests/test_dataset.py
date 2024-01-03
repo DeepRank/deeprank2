@@ -222,14 +222,14 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train_data = dataset_train
+            train_source = dataset_train
         )
 
         _check_inherited_params(dataset_test.inherited_params, dataset_train, dataset_test)
 
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train_data = dataset_train,
+            train_source = dataset_train,
             features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
             target = targets.IRMSD,
             target_transform = True,
@@ -244,7 +244,7 @@ class TestDataSet(unittest.TestCase):
         pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train_data = pretrained_model
+            train_source = pretrained_model
         )
 
         data = torch.load(pretrained_model, map_location=torch.device('cpu'))
@@ -255,7 +255,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train_data = pretrained_model,
+            train_source = pretrained_model,
             features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
             target = targets.IRMSD,
             target_transform = True,
@@ -276,7 +276,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GridDataset(
             hdf5_path = hdf5_no_target,
-            train_data = pretrained_model
+            train_source = pretrained_model
         )
 
         assert dataset.target is not None
@@ -395,7 +395,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
             subset = subset,
-            train_data = dataset_train
+            train_source = dataset_train
         )
 
         assert n == len(dataset_train)
@@ -558,7 +558,7 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             target = 'binary',
-            train_data = dataset_train
+            train_source = dataset_train
         )
         # mean and devs should be None
         assert dataset_train.means == dataset_test.means
@@ -576,7 +576,7 @@ class TestDataSet(unittest.TestCase):
 
             GraphDataset(
                 hdf5_path = hdf5_path,
-                train_data = dataset_train,
+                train_source = dataset_train,
                 target = 'binary',
             )
 
@@ -966,7 +966,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train_data = dataset_train,
+            train_source = dataset_train,
             target = 'binary'
         )
 
@@ -980,7 +980,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train_data = dataset_train,
+            train_source = dataset_train,
             features_transform = other_feature_transform,
             target = 'binary'
         )
@@ -1022,14 +1022,14 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train_data = dataset_train,
+            train_source = dataset_train,
         )
 
         _check_inherited_params(dataset_test.inherited_params, dataset_train, dataset_test)
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train_data = dataset_train,
+            train_source = dataset_train,
             node_features = "all",
             edge_features = "all",
             features_transform = None,
@@ -1047,7 +1047,7 @@ class TestDataSet(unittest.TestCase):
         pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train_data = pretrained_model
+            train_source = pretrained_model
         )
 
         data = torch.load(pretrained_model, map_location=torch.device('cpu'))
@@ -1068,7 +1068,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train_data = pretrained_model,
+            train_source = pretrained_model,
             node_features = "all",
             edge_features = "all",
             features_transform = None,
@@ -1096,7 +1096,7 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GraphDataset(
             hdf5_path = hdf5_no_target,
-            train_data = pretrained_model
+            train_source = pretrained_model
         )
 
         assert dataset.target is not None
@@ -1126,7 +1126,7 @@ class TestDataSet(unittest.TestCase):
         with pytest.raises(TypeError):
             GridDataset(
                 hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
-                train_data = dataset_train
+                train_source = dataset_train
             )
 
     def test_invalid_pretrained_model_path(self):
@@ -1135,14 +1135,14 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             GraphDataset(
                 hdf5_path = hdf5_graph,
-                train_data = hdf5_graph
+                train_source = hdf5_graph
             )
 
         hdf5_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
         with self.assertRaises(ValueError):
             GridDataset(
                 hdf5_path = hdf5_grid,
-                train_data = hdf5_grid
+                train_source = hdf5_grid
             )
 
     def test_invalid_pretrained_model_data_type(self):
@@ -1152,7 +1152,7 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(TypeError):
             GraphDataset(
                 hdf5_path = hdf5_graph,
-                train_data = pretrained_grid_model
+                train_source = pretrained_grid_model
             )
 
         hdf5_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
@@ -1160,7 +1160,7 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(TypeError):
             GridDataset(
                 hdf5_path = hdf5_grid,
-                train_data = pretrained_graph_model
+                train_source = pretrained_graph_model
             )
 
 
