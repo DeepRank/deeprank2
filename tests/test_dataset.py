@@ -241,6 +241,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_inherit_info_pretrained_model_griddataset(self):
 
+        # Test the inheritance not giving in any parameters
         pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
@@ -253,6 +254,7 @@ class TestDataSet(unittest.TestCase):
         for param in dataset_test.inherited_params:
             assert dataset_test_vars[param] == data[param]
 
+        # Test that even when different parameters from the training data are given, the inheritance works
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
             train_source = pretrained_model,
@@ -263,8 +265,8 @@ class TestDataSet(unittest.TestCase):
             classes = None
         )
 
-        # features, target, target_transform, task, and classes
-        # in the test should be inherited from the pre-trained model
+        ## features, target, target_transform, task, and classes
+        ## in the test should be inherited from the pre-trained model
         dataset_test_vars = vars(dataset_test)
         for param in dataset_test.inherited_params:
             assert dataset_test_vars[param] == data[param]
