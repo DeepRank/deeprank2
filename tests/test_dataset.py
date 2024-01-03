@@ -222,7 +222,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train = False,
             train_data = dataset_train
         )
 
@@ -230,7 +229,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train = False,
             train_data = dataset_train,
             features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
             target = targets.IRMSD,
@@ -246,7 +244,6 @@ class TestDataSet(unittest.TestCase):
         pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train = False,
             train_data = pretrained_model
         )
 
@@ -258,7 +255,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GridDataset(
             hdf5_path = self.hdf5_path,
-            train = False,
             train_data = pretrained_model,
             features = [Efeat.DISTANCE, Efeat.COVALENT, Efeat.SAMECHAIN],
             target = targets.IRMSD,
@@ -280,7 +276,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GridDataset(
             hdf5_path = hdf5_no_target,
-            train = False,
             train_data = pretrained_model
         )
 
@@ -291,14 +286,12 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             dataset = GridDataset(
                 hdf5_path = hdf5_no_target,
-                train = True
             )
 
         # target set, but not present in the file
         with self.assertRaises(ValueError):
             dataset = GridDataset(
                 hdf5_path = hdf5_target,
-                train = True,
                 target = 'CAPRI'
             )
 
@@ -402,7 +395,6 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = "tests/data/hdf5/train.hdf5",
             subset = subset,
-            train = False,
             train_data = dataset_train
         )
 
@@ -566,7 +558,6 @@ class TestDataSet(unittest.TestCase):
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
             target = 'binary',
-            train = False,
             train_data = dataset_train
         )
         # mean and devs should be None
@@ -574,14 +565,6 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.devs == dataset_test.devs
         assert dataset_train.means is None
         assert dataset_train.devs is None
-
-        # raise error if dataset_train is not provided
-        with self.assertRaises(TypeError):
-            GraphDataset(
-                hdf5_path = hdf5_path,
-                target = 'binary',
-                train = False
-            )
 
         # raise error if dataset_train is of the wrong type
         with self.assertRaises(TypeError):
@@ -593,7 +576,6 @@ class TestDataSet(unittest.TestCase):
 
             GraphDataset(
                 hdf5_path = hdf5_path,
-                train = False,
                 train_data = dataset_train,
                 target = 'binary',
             )
@@ -984,7 +966,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train = False,
             train_data = dataset_train,
             target = 'binary'
         )
@@ -999,7 +980,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train = False,
             train_data = dataset_train,
             features_transform = other_feature_transform,
             target = 'binary'
@@ -1042,7 +1022,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train = False,
             train_data = dataset_train,
         )
 
@@ -1050,7 +1029,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train = False,
             train_data = dataset_train,
             node_features = "all",
             edge_features = "all",
@@ -1069,7 +1047,6 @@ class TestDataSet(unittest.TestCase):
         pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train = False,
             train_data = pretrained_model
         )
 
@@ -1091,7 +1068,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_path,
-            train = False,
             train_data = pretrained_model,
             node_features = "all",
             edge_features = "all",
@@ -1120,7 +1096,6 @@ class TestDataSet(unittest.TestCase):
 
         dataset = GraphDataset(
             hdf5_path = hdf5_no_target,
-            train = False,
             train_data = pretrained_model
         )
 
@@ -1130,15 +1105,13 @@ class TestDataSet(unittest.TestCase):
         # no target set, training mode
         with self.assertRaises(ValueError):
             dataset = GraphDataset(
-                hdf5_path = hdf5_no_target,
-                train = True
+                hdf5_path = hdf5_no_target
             )
 
         # target set, but not present in the file
         with self.assertRaises(ValueError):
             dataset = GraphDataset(
                 hdf5_path = hdf5_target,
-                train = True,
                 target = 'CAPRI'
             )
 
@@ -1153,7 +1126,6 @@ class TestDataSet(unittest.TestCase):
         with pytest.raises(TypeError):
             GridDataset(
                 hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5",
-                train = False,
                 train_data = dataset_train
             )
 
@@ -1163,7 +1135,6 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             GraphDataset(
                 hdf5_path = hdf5_graph,
-                train = False,
                 train_data = hdf5_graph
             )
 
@@ -1171,7 +1142,6 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             GridDataset(
                 hdf5_path = hdf5_grid,
-                train = False,
                 train_data = hdf5_grid
             )
 
@@ -1182,7 +1152,6 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(TypeError):
             GraphDataset(
                 hdf5_path = hdf5_graph,
-                train = False,
                 train_data = pretrained_grid_model
             )
 
@@ -1191,7 +1160,6 @@ class TestDataSet(unittest.TestCase):
         with self.assertRaises(TypeError):
             GridDataset(
                 hdf5_path = hdf5_grid,
-                train = False,
                 train_data = pretrained_graph_model
             )
 
