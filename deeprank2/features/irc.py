@@ -4,7 +4,7 @@ from itertools import combinations_with_replacement as combinations
 import pdb2sql
 
 from deeprank2.domain import nodestorage as Nfeat
-from deeprank2.domain.aminoacidlist import amino_acids
+from deeprank2.domain.aminoacidlist import amino_acids_by_code
 from deeprank2.molstruct.aminoacid import Polarity
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import Residue, SingleResidueVariant
@@ -67,7 +67,7 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
     for chain1_res, chain2_residues in pdb2sql_contacts.items():
         aa1_code = chain1_res[2]
         try:
-            aa1 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa1_code][0]
+            aa1 = amino_acids_by_code[aa1_code]
         except IndexError:
             continue  # skip keys that are not an amino acid
 
@@ -78,7 +78,7 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
         for chain2_res in chain2_residues:
             aa2_code = chain2_res[2]
             try:
-                aa2 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa2_code][0]
+                aa2 = amino_acids_by_code[aa2_code]
             except IndexError:
                 continue  # skip keys that are not an amino acid
 
