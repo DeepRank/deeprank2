@@ -243,8 +243,7 @@ def test_nan_loss_cases(validate, best_model, hdf5_files_for_nan):
     dataset_valid = GraphDataset(
         hdf5_path = hdf5_files_for_nan,
         subset = [mols[0]],
-        dataset_train=dataset_train,
-        train=False
+        train_source=dataset_train
         )
 
     trainer = Trainer(
