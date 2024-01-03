@@ -7,9 +7,14 @@ import unittest
 import warnings
 
 import h5py
+import pandas as pd
 import pytest
 import torch
+
 from deeprank2.dataset import GraphDataset, GridDataset
+from deeprank2.domain import edgestorage as Efeat
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification, CnnRegression
 from deeprank2.neuralnets.gnn.foutnet import FoutNet
 from deeprank2.neuralnets.gnn.ginet import GINet
@@ -18,10 +23,6 @@ from deeprank2.neuralnets.gnn.sgat import SGAT
 from deeprank2.trainer import Trainer, _divide_dataset
 from deeprank2.utils.exporters import (HDF5OutputExporter, ScatterPlotExporter,
                                        TensorboardBinaryClassificationExporter)
-
-from deeprank2.domain import edgestorage as Efeat
-from deeprank2.domain import nodestorage as Nfeat
-from deeprank2.domain import targetstorage as targets
 
 _log = logging.getLogger(__name__)
 
@@ -56,8 +57,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     if val_hdf5_path is not None:
         dataset_val = GraphDataset(
             hdf5_path = val_hdf5_path,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
             clustering_method = clustering_method,
             )
     else:
@@ -66,8 +66,7 @@ def _model_base_test( # pylint: disable=too-many-arguments, too-many-locals
     if test_hdf5_path is not None:
         dataset_test = GraphDataset(
             hdf5_path = test_hdf5_path,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
             clustering_method = clustering_method,
             )
     else:
@@ -383,6 +382,29 @@ class TestTrainer(unittest.TestCase):
                     pretrained_model = self.save_path
                 )
 
+    def test_no_training_no_pretrained(self):
+        dataset_train = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            clustering_method = "mcl",
+            target = targets.BINARY,
+        )
+        dataset_val = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train_source = dataset_train
+        )
+        dataset_test = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train_source = dataset_train
+        )
+        trainer = Trainer(
+            neuralnet = GINet,
+            dataset_train = dataset_train,
+            dataset_val = dataset_val,
+            dataset_test = dataset_test
+        )
+        with pytest.raises(ValueError):
+            trainer.test()
+
     def test_no_valid_provided(self):
         dataset = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
@@ -396,6 +418,25 @@ class TestTrainer(unittest.TestCase):
         trainer.train(batch_size = 1, best_model=False, filename=None)
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
+
+    def test_no_test_provided(self):
+        dataset_train = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            clustering_method = "mcl",
+            target = targets.BINARY,
+        )
+        dataset_val = GraphDataset(
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            train_source = dataset_train
+        )
+        trainer = Trainer(
+            neuralnet = GINet,
+            dataset_train = dataset_train,
+            dataset_val = dataset_val,
+        )
+        trainer.train(batch_size = 1, best_model=False, filename=None)
+        with pytest.raises(ValueError):
+            trainer.test()
 
     def test_no_valid_full_train(self):
         dataset = GraphDataset(
@@ -438,7 +479,7 @@ class TestTrainer(unittest.TestCase):
                 dataset_test=dataset,
                 pretrained_model=self.save_path)
 
-        assert isinstance(trainer_pretrained.optimizer, optimizer)
+        assert str(type(trainer_pretrained.optimizer)) == "<class 'torch.optim.adamax.Adamax'>"
         assert trainer_pretrained.lr == lr
         assert trainer_pretrained.weight_decay == weight_decay
 
@@ -497,37 +538,14 @@ class TestTrainer(unittest.TestCase):
                 dataset_train = dataset_invalid_train,
             )
 
-        # Raise error when train parameter in dataset_val/test not set as False.
         dataset_train = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             edge_features = [Efeat.DISTANCE, Efeat.COVALENT],
             target = targets.BINARY
         )
-        dataset_val = GraphDataset(
-            hdf5_path = "tests/data/hdf5/test.hdf5",
-            train = True,
-            dataset_train = dataset_train
-        )
-        dataset_test = GraphDataset(
-            hdf5_path = "tests/data/hdf5/test.hdf5",
-            train = True,
-            dataset_train = dataset_train
-        )
-        with pytest.raises(ValueError):
-            Trainer(
-                neuralnet = GINet,
-                dataset_train = dataset_train,
-                dataset_val = dataset_val,
-            )
-        with pytest.raises(ValueError):
-            Trainer(
-                neuralnet = GINet,
-                dataset_train = dataset_train,
-                dataset_test = dataset_test,
-            )
 
-        # Raise error when dataset_train parameter in GraphDataset/GridDataset
-        # not equivalent to the dataset_train passed to Trainer.
+        # Raise error when train_source parameter in GraphDataset/GridDataset
+        # is not equivalent to the dataset_train passed to Trainer.
         dataset_train_other = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
             edge_features = [Efeat.SAMECHAIN, Efeat.COVALENT],
@@ -536,13 +554,11 @@ class TestTrainer(unittest.TestCase):
         )
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
-            train = False,
-            dataset_train = dataset_train
+            train_source = dataset_train
         )
         dataset_test = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
-            train = False,
-            dataset_train = dataset_train
+            train_source = dataset_train
         )
         with pytest.raises(ValueError):
             Trainer(
@@ -592,7 +608,7 @@ class TestTrainer(unittest.TestCase):
 
         for t in test_cases:
             dataset_train, dataset_val =_divide_dataset(
-                dataset = GraphDataset(hdf5_path = hdf5),
+                dataset = GraphDataset(hdf5_path = hdf5, target = targets.BINARY),
                 splitsize = t,
             )
             assert len(dataset_train) == n_train
@@ -622,12 +638,12 @@ class TestTrainer(unittest.TestCase):
 
     def test_invalid_cuda_ngpus(self):
         dataset_train = GraphDataset(
-            hdf5_path = "tests/data/hdf5/test.hdf5"
+            hdf5_path = "tests/data/hdf5/test.hdf5",
+            target = targets.BINARY
         )
         dataset_val = GraphDataset(
             hdf5_path = "tests/data/hdf5/test.hdf5",
-            train = False,
-            dataset_train = dataset_train
+            train_source = dataset_train
         )
 
         with pytest.raises(ValueError):
@@ -641,12 +657,12 @@ class TestTrainer(unittest.TestCase):
     def test_invalid_no_cuda_available(self):
         if not torch.cuda.is_available():
             dataset_train = GraphDataset(
-                hdf5_path = "tests/data/hdf5/test.hdf5"
+                hdf5_path = "tests/data/hdf5/test.hdf5",
+                target = targets.BINARY
             )
             dataset_val = GraphDataset(
                 hdf5_path = "tests/data/hdf5/test.hdf5",
-                train = False,
-                dataset_train = dataset_train
+                train_source = dataset_train
             )
 
             with pytest.raises(ValueError):
@@ -661,6 +677,132 @@ class TestTrainer(unittest.TestCase):
             warnings.warn('CUDA is available; test_invalid_no_cuda_available was skipped')
             _log.info('CUDA is available; test_invalid_no_cuda_available was skipped')
 
+    def test_train_method_no_train(self):
+
+        # Graphs data
+        test_data_graph = "tests/data/hdf5/test.hdf5"
+        pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
+
+        dataset_test = GraphDataset(
+            hdf5_path = test_data_graph,
+            train_source = pretrained_model_graph
+        )
+        trainer = Trainer(
+            neuralnet = NaiveNetwork,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_graph
+        )
+
+        with pytest.raises(ValueError):
+            trainer.train()
+
+        # Grids data
+        test_data_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
+        pretrained_model_grid = "tests/data/pretrained/testing_grid_model.pth.tar"
+
+        dataset_test = GridDataset(
+            hdf5_path = test_data_grid,
+            train_source = pretrained_model_grid
+        )
+        trainer = Trainer(
+            neuralnet = CnnClassification,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_grid
+        )
+
+        with pytest.raises(ValueError):
+            trainer.train()
+
+    def test_test_method_pretrained_model_on_dataset_with_target(self):
+
+        # Graphs data
+        test_data_graph = "tests/data/hdf5/test.hdf5"
+        pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
+
+        dataset_test = GraphDataset(
+            hdf5_path = test_data_graph,
+            train_source = pretrained_model_graph
+        )
+
+        trainer = Trainer(
+            neuralnet = NaiveNetwork,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_graph,
+            output_exporters = [HDF5OutputExporter("./")]
+            )
+
+        trainer.test()
+
+        output = pd.read_hdf("output_exporter.hdf5", key="testing")
+        assert len(output) == len(dataset_test)
+
+        # Grids data
+        test_data_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
+        pretrained_model_grid = "tests/data/pretrained/testing_grid_model.pth.tar"
+
+        dataset_test = GridDataset(
+            hdf5_path = test_data_grid,
+            train_source = pretrained_model_grid
+        )
+
+        trainer = Trainer(
+            neuralnet = CnnClassification,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_grid,
+            output_exporters = [HDF5OutputExporter("./")]
+            )
+
+        trainer.test()
+
+        output = pd.read_hdf("output_exporter.hdf5", key="testing")
+        assert len(output) == len(dataset_test)
+
+    def test_test_method_pretrained_model_on_dataset_without_target(self):
+        # Graphs data
+        test_data_graph = "tests/data/hdf5/test_no_target.hdf5"
+        pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
+
+        dataset_test = GraphDataset(
+            hdf5_path = test_data_graph,
+            train_source = pretrained_model_graph
+        )
+
+        trainer = Trainer(
+            neuralnet = NaiveNetwork,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_graph,
+            output_exporters = [HDF5OutputExporter("./")]
+            )
+
+        trainer.test()
+
+        output = pd.read_hdf("output_exporter.hdf5", key="testing")
+        assert len(output) == len(dataset_test)
+        assert output.target.unique().tolist()[0] is None
+        assert output.loss.unique().tolist()[0] is None
+
+        # Grids data
+        test_data_grid = "tests/data/hdf5/test_no_target.hdf5"
+        pretrained_model_grid = "tests/data/pretrained/testing_grid_model.pth.tar"
+
+        dataset_test = GridDataset(
+            hdf5_path = test_data_grid,
+            train_source = pretrained_model_grid
+        )
+
+        trainer = Trainer(
+            neuralnet = CnnClassification,
+            dataset_test = dataset_test,
+            pretrained_model = pretrained_model_grid,
+            output_exporters = [HDF5OutputExporter("./")]
+            )
+
+        trainer.test()
+
+        output = pd.read_hdf("output_exporter.hdf5", key="testing")
+        assert len(output) == len(dataset_test)
+        assert output.target.unique().tolist()[0] is None
+        assert output.loss.unique().tolist()[0] is None
 
 
 if __name__ == "__main__":

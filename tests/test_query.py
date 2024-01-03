@@ -40,37 +40,39 @@ def _check_graph_makes_sense(
     os.close(f)
 
     try:
+        g.targets[targets.BINARY] = 0
         g.write_to_hdf5(tmp_path)
 
         with h5py.File(tmp_path, "r") as f5:
-            entry_group = f5[list(f5.keys())[0]]
+            grp = f5[list(f5.keys())[0]]
             for feature_name in node_feature_names:
                 assert (
-                    entry_group[f"{Nfeat.NODE}/{feature_name}"][()].size > 0
+                    grp[f"{Nfeat.NODE}/{feature_name}"][()].size > 0
                 ), f"no {feature_name} feature"
 
                 assert (
                     len(
                         np.nonzero(
-                            entry_group[f"{Nfeat.NODE}/{feature_name}"][()]
+                            grp[f"{Nfeat.NODE}/{feature_name}"][()]
                         )
                     )
                     > 0
                 ), f"{feature_name}: all zero"
 
-            assert entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"][()].shape[1] == 2, "wrong edge index shape"
-            assert entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0] > 0, "no edge indices"
+            assert grp[f"{Efeat.EDGE}/{Efeat.INDEX}"][()].shape[1] == 2, "wrong edge index shape"
+            assert grp[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0] > 0, "no edge indices"
 
             for feature_name in edge_feature_names:
                 assert (
-                    entry_group[f"{Efeat.EDGE}/{feature_name}"][()].shape[0]
-                    == entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
+                    grp[f"{Efeat.EDGE}/{feature_name}"][()].shape[0]
+                    == grp[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
                 ), f"not enough edge {feature_name} feature values"
 
-            count_edges_hdf5 = entry_group[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
+            count_edges_hdf5 = grp[f"{Efeat.EDGE}/{Efeat.INDEX}"].shape[0]
 
-        dataset = GraphDataset(hdf5_path=tmp_path)
+        dataset = GraphDataset(hdf5_path=tmp_path, target=targets.BINARY)
         torch_data_entry = dataset[0]
+
         assert torch_data_entry is not None
 
         # expecting twice as many edges, because torch is directional
@@ -351,7 +353,7 @@ def test_augmentation():
 
         assert len(entry_names) == expected_entry_count, f"Found {len(entry_names)} entries, expected {expected_entry_count}"
 
-        dataset = GridDataset(hdf5_path)
+        dataset = GridDataset(hdf5_path, target = 'binary')
 
         assert len(dataset) == expected_entry_count, f"Found {len(dataset)} data points, expected {expected_entry_count}"
     finally:

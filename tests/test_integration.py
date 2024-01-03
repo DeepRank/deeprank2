@@ -82,14 +82,12 @@ def test_cnn(): # pylint: disable=too-many-locals
 
         dataset_val = GridDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
         )
 
         dataset_test = GridDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
         )
 
         output_exporters = [HDF5OutputExporter(output_directory)]
@@ -165,15 +163,13 @@ def test_gnn(): # pylint: disable=too-many-locals
 
         dataset_val = GraphDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
             clustering_method = "mcl"
         )
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
             clustering_method = "mcl"
         )
 
@@ -247,8 +243,7 @@ def test_nan_loss_cases(validate, best_model, hdf5_files_for_nan):
     dataset_valid = GraphDataset(
         hdf5_path = hdf5_files_for_nan,
         subset = [mols[0]],
-        dataset_train=dataset_train,
-        train=False
+        train_source=dataset_train
         )
 
     trainer = Trainer(
