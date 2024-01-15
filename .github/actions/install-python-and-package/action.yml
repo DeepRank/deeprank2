@@ -45,7 +45,7 @@ runs:
       run: |
         # Install dependencies not handled by setuptools 
         ## DSSP 
-        conda install sbl::dssp
+        conda install -c sbl dssp
         ## MSMS
         conda install -c bioconda msms
         ## PyTorch, PyG, PyG adds
@@ -61,7 +61,7 @@ runs:
       run: |
         # Install dependencies not handled by setuptools 
         ## DSSP 
-        conda install sbl::dssp
+        conda install -c sbl dssp
         ## MSMS
         cd /tmp/
         wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL2.6.1/msms_i86Linux2_2.6.1.tar.gz
