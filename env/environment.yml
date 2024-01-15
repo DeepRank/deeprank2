@@ -4,6 +4,7 @@ channels:
   - pyg
   - bioconda
   - defaults
+  - sbl
 dependencies:
   - pip==23.3.*
   - python==3.10.*
@@ -15,5 +16,6 @@ dependencies:
   - cpuonly==2.0.*
   - pyg==2.4.0
   - notebook==7.0.6
+  - dssp==4.2.2.1
   - pip:
     - --requirement requirements.txt
