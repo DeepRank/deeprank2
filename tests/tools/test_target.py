@@ -2,6 +2,7 @@ import os
 import shutil
 import tempfile
 import unittest
+import warnings
 
 from pdb2sql import StructureSimilarity
 
@@ -34,25 +35,27 @@ class TestTools(unittest.TestCase):
             os.remove(graph_path)
 
     def test_compute_ppi_scores(self):
-        scores = compute_ppi_scores(
-            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
-            os.path.join(self.ref, "1ATN.pdb"),
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
 
-        sim = StructureSimilarity(
-            os.path.join(self.pdb_path, "1ATN_1w.pdb"),
-            os.path.join(self.ref, "1ATN.pdb"),
-            enforce_residue_matching=False,
-        )
-        lrmsd = sim.compute_lrmsd_fast(method="svd")
-        irmsd = sim.compute_irmsd_fast(method="svd")
-        fnat = sim.compute_fnat_fast()
-        dockq = sim.compute_DockQScore(fnat, lrmsd, irmsd)
-        binary = irmsd < 4.0
-        capri = 4
-        for thr, val in zip([6.0, 4.0, 2.0, 1.0], [4, 3, 2, 1], strict=True):
-            if irmsd < thr:
-                capri = val
+            scores = compute_ppi_scores(
+                os.path.join(self.pdb_path, "1ATN_1w.pdb"),
+                os.path.join(self.ref, "1ATN.pdb"),
+            )
+            sim = StructureSimilarity(
+                os.path.join(self.pdb_path, "1ATN_1w.pdb"),
+                os.path.join(self.ref, "1ATN.pdb"),
+                enforce_residue_matching=False,
+            )
+            lrmsd = sim.compute_lrmsd_fast(method="svd")
+            irmsd = sim.compute_irmsd_fast(method="svd")
+            fnat = sim.compute_fnat_fast()
+            dockq = sim.compute_DockQScore(fnat, lrmsd, irmsd)
+            binary = irmsd < 4.0
+            capri = 4
+            for thr, val in zip([6.0, 4.0, 2.0, 1.0], [4, 3, 2, 1], strict=True):
+                if irmsd < thr:
+                    capri = val
 
         assert scores["irmsd"] == irmsd
         assert scores["lrmsd"] == lrmsd

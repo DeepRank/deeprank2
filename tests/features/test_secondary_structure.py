@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from deeprank2.domain import nodestorage as Nfeat
@@ -19,7 +21,9 @@ def test_secondary_structure_residue():
         influence_radius=10,
         max_edge_length=10,
     )
-    add_features(pdb_path, graph)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        add_features(pdb_path, graph)
 
     # Create a list of node information (residue number, chain ID, and secondary structure features)
     node_info_list = [[node.id.number, node.id.chain.id, node.features[Nfeat.SECSTRUCT]] for node in graph.nodes]

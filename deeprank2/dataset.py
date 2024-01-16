@@ -430,9 +430,11 @@ class DeeprankDataset(Dataset):
         else:
             raise ValueError("Please provide valid features names. They must be present in the current :class:`DeeprankDataset` children instance.")
 
-        fig.tight_layout()
-        fig.savefig(fname)
-        plt.close(fig)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            fig.tight_layout()
+            fig.savefig(fname)
+            plt.close(fig)
 
     def _compute_mean_std(self):
         means = {
