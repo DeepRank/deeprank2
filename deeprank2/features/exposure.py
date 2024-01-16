@@ -17,13 +17,13 @@ from deeprank2.utils.graph import Graph
 _log = logging.getLogger(__name__)
 
 
-def handle_sigint(sig, frame): # pylint: disable=unused-argument
-    print('SIGINT received, terminating.')
+def handle_sigint(sig, frame):  # noqa: ARG001 (unused argument)
+    print("SIGINT received, terminating.")
     sys.exit()
 
 
-def handle_timeout(sig, frame):
-    raise TimeoutError('Timed out!')
+def handle_timeout(sig, frame):  # noqa: ARG001 (unused argument)
+    raise TimeoutError("Timed out!")
 
 
 def space_if_none(value):
@@ -32,18 +32,17 @@ def space_if_none(value):
     return value
 
 
-def add_features( # pylint: disable=unused-argument
+def add_features(
     pdb_path: str,
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
 ):
-
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)
 
     with warnings.catch_warnings(record=PDBConstructionWarning):
         parser = PDBParser()
-        structure = parser.get_structure('_tmp', pdb_path)
+        structure = parser.get_structure("_tmp", pdb_path)
     bio_model = structure[0]
 
     try:
@@ -51,7 +50,7 @@ def add_features( # pylint: disable=unused-argument
         surface = get_surface(bio_model)
         signal.alarm(0)
     except TimeoutError as e:
-        raise TimeoutError('Bio.PDB.ResidueDepth.get_surface timed out.') from e
+        raise TimeoutError("Bio.PDB.ResidueDepth.get_surface timed out.") from e
 
     # These can only be calculated per residue, not per atom.
     # So for atomic graphs, every atom gets its residue's value.
@@ -67,7 +66,10 @@ def add_features( # pylint: disable=unused-argument
 
         bio_residue = bio_model[residue.chain.id][residue.number]
         node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)
-        hse_key = (residue.chain.id, (" ", residue.number, space_if_none(residue.insertion_code)))
+        hse_key = (
+            residue.chain.id,
+            (" ", residue.number, space_if_none(residue.insertion_code)),
+        )
 
         if hse_key in hse:
             node.features[Nfeat.HSE] = np.array(hse[hse_key], dtype=np.float64)

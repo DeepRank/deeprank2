@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Callable
+from typing import TYPE_CHECKING
 
 import h5py
 import numpy as np
 import pdb2sql.transform
-from numpy.typing import NDArray
 from scipy.spatial import distance_matrix
 
 from deeprank2.domain import edgestorage as Efeat
@@ -18,6 +17,11 @@ from deeprank2.molstruct.pair import AtomicContact, Contact, ResidueContact
 from deeprank2.molstruct.residue import Residue
 from deeprank2.utils.grid import Augmentation, Grid, GridSettings, MapMethod
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from numpy.typing import NDArray
+
 _log = logging.getLogger(__name__)
 
 
@@ -26,9 +30,7 @@ class Edge:
         self.id = id_
         self.features = {}
 
-    def add_feature(
-        self, feature_name: str, feature_function: Callable[[Contact], float]
-    ):
+    def add_feature(self, feature_name: str, feature_function: Callable[[Contact], float]):
         feature_value = feature_function(self.id)
 
         self.features[feature_name] = feature_value
@@ -43,12 +45,7 @@ class Edge:
 
     def has_nan(self) -> bool:
         """Whether there are any NaN values in the edge's features."""
-
-        for feature_data in self.features.values():
-            if np.any(np.isnan(feature_data)):
-                return True
-
-        return False
+        return any(np.any(np.isnan(feature_data)) for feature_data in self.features.values())
 
 
 class Node:
@@ -69,11 +66,7 @@ class Node:
 
     def has_nan(self) -> bool:
         """Whether there are any NaN values in the node's features."""
-
-        for feature_data in self.features.values():
-            if np.any(np.isnan(feature_data)):
-                return True
-        return False
+        return any(np.any(np.isnan(feature_data)) for feature_data in self.features.values())
 
     def add_feature(
         self,
@@ -84,9 +77,7 @@ class Node:
 
         if len(feature_value.shape) != 1:
             shape_s = "x".join(feature_value.shape)
-            raise ValueError(
-                f"Expected a 1-dimensional array for feature {feature_name}, but got {shape_s}"
-            )
+            raise ValueError(f"Expected a 1-dimensional array for feature {feature_name}, but got {shape_s}")
 
         self.features[feature_name] = feature_value
 
@@ -130,29 +121,29 @@ class Graph:
 
     def has_nan(self) -> bool:
         """Whether there are any NaN values in the graph's features."""
-
         for node in self._nodes.values():
             if node.has_nan():
                 return True
+        return any(edge.has_nan() for edge in self._edges.values())
 
-        for edge in self._edges.values():
-            if edge.has_nan():
-                return True
-
-        return False
-
-    def _map_point_features(self, grid: Grid, method: MapMethod,  # pylint: disable=too-many-arguments
-                            feature_name: str, points: list[NDArray],
-                            values: list[float | NDArray],
-                            augmentation: Augmentation | None = None):
-
+    def _map_point_features(
+        self,
+        grid: Grid,
+        method: MapMethod,
+        feature_name: str,
+        points: list[NDArray],
+        values: list[float | NDArray],
+        augmentation: Augmentation | None = None,
+    ):
         points = np.stack(points, axis=0)
 
         if augmentation is not None:
-            points = pdb2sql.transform.rot_xyz_around_axis(points,
-                                                           augmentation.axis,
-                                                           augmentation.angle,
-                                                           self.center)
+            points = pdb2sql.transform.rot_xyz_around_axis(
+                points,
+                augmentation.axis,
+                augmentation.angle,
+                self.center,
+            )
 
         for point_index in range(points.shape[0]):
             position = points[point_index]
@@ -160,41 +151,58 @@ class Graph:
 
             grid.map_feature(position, feature_name, value, method)
 
-    def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Augmentation | None = None):
-
+    def map_to_grid(
+        self,
+        grid: Grid,
+        method: MapMethod,
+        augmentation: Augmentation | None = None,
+    ):
         # order edge features by xyz point
         points = []
         feature_values = {}
         for edge in self._edges.values():
-
             points += [edge.position1, edge.position2]
 
             for feature_name, feature_value in edge.features.items():
-                feature_values[feature_name] = feature_values.get(feature_name, []) + [feature_value, feature_value]
+                feature_values[feature_name] = feature_values.get(feature_name, []) + [  # noqa: RUF005 (collection-literal-concatenation)
+                    feature_value,
+                    feature_value,
+                ]
 
         # map edge features to grid
         for feature_name, values in feature_values.items():
-            self._map_point_features(grid, method, feature_name, points, values, augmentation)
+            self._map_point_features(
+                grid,
+                method,
+                feature_name,
+                points,
+                values,
+                augmentation,
+            )
 
         # order node features by xyz point
         points = []
         feature_values = {}
         for node in self._nodes.values():
-
             points.append(node.position)
 
             for feature_name, feature_value in node.features.items():
-                feature_values[feature_name] = feature_values.get(feature_name, []) + [feature_value]
+                feature_values[feature_name] = feature_values.get(feature_name, []) + [feature_value]  # noqa: RUF005 (collection-literal-concatenation)
 
         # map node features to grid
         for feature_name, values in feature_values.items():
-            self._map_point_features(grid, method, feature_name, points, values, augmentation)
+            self._map_point_features(
+                grid,
+                method,
+                feature_name,
+                points,
+                values,
+                augmentation,
+            )
 
-    def write_to_hdf5(self, hdf5_path: str): # pylint: disable=too-many-locals
+    def write_to_hdf5(self, hdf5_path: str):
         """Write a featured graph to an hdf5 file, according to deeprank standards."""
-
         with h5py.File(hdf5_path, "a") as hdf5_file:
-
             # create groups to hold data
             graph_group = hdf5_file.require_group(self.id)
             node_features_group = graph_group.create_group(Nfeat.NODE)
@@ -208,29 +216,23 @@ class Graph:
 
             # store node features
             node_key_list = list(self._nodes.keys())
-            first_node_data = list(self._nodes.values())[0].features
+            first_node_data = next(iter(self._nodes.values())).features
             node_feature_names = list(first_node_data.keys())
             for node_feature_name in node_feature_names:
+                node_feature_data = [node.features[node_feature_name] for node in self._nodes.values()]
 
-                node_feature_data = [
-                    node.features[node_feature_name] for node in self._nodes.values()
-                ]
-
-                node_features_group.create_dataset(
-                    node_feature_name, data=node_feature_data
-                )
+                node_features_group.create_dataset(node_feature_name, data=node_feature_data)
 
             # identify edges
             edge_indices = []
             edge_names = []
 
-            first_edge_data = list(self._edges.values())[0].features
+            first_edge_data = next(iter(self._edges.values())).features
             edge_feature_names = list(first_edge_data.keys())
 
             edge_feature_data = {name: [] for name in edge_feature_names}
 
             for edge_id, edge in self._edges.items():
-
                 id1, id2 = edge_id
                 node_index1 = node_key_list.index(id1)
                 node_index2 = node_key_list.index(id2)
@@ -239,21 +241,15 @@ class Graph:
                 edge_names.append(f"{id1}-{id2}")
 
                 for edge_feature_name in edge_feature_names:
-                    edge_feature_data[edge_feature_name].append(
-                        edge.features[edge_feature_name]
-                    )
+                    edge_feature_data[edge_feature_name].append(edge.features[edge_feature_name])
 
             # store edge names and indices
-            edge_feature_group.create_dataset(
-                Efeat.NAME, data=np.array(edge_names).astype("S")
-            )
+            edge_feature_group.create_dataset(Efeat.NAME, data=np.array(edge_names).astype("S"))
             edge_feature_group.create_dataset(Efeat.INDEX, data=edge_indices)
 
             # store edge features
             for edge_feature_name in edge_feature_names:
-                edge_feature_group.create_dataset(
-                    edge_feature_name, data=edge_feature_data[edge_feature_name]
-                )
+                edge_feature_group.create_dataset(edge_feature_name, data=edge_feature_data[edge_feature_name])
 
             # store target values
             score_group = graph_group.create_group(targets.VALUES)
@@ -262,15 +258,11 @@ class Graph:
 
     @staticmethod
     def _find_unused_augmentation_name(unaugmented_id: str, hdf5_path: str) -> str:
-
         prefix = f"{unaugmented_id}_"
 
-        entry_names_taken = []
         if os.path.isfile(hdf5_path):
-            with h5py.File(hdf5_path, 'r') as hdf5_file:
-                for entry_name in hdf5_file:
-                    if entry_name.startswith(prefix):
-                        entry_names_taken.append(entry_name)
+            with h5py.File(hdf5_path, "r") as hdf5_file:
+                entry_names_taken = [entry_name for entry_name in hdf5_file if entry_name.startswith(prefix)]
 
         augmentation_count = 0
         chosen_name = f"{prefix}{augmentation_count:03}"
@@ -281,12 +273,12 @@ class Graph:
         return chosen_name
 
     def write_as_grid_to_hdf5(
-        self, hdf5_path: str,
+        self,
+        hdf5_path: str,
         settings: GridSettings,
         method: MapMethod,
-        augmentation: Augmentation | None = None
+        augmentation: Augmentation | None = None,
     ) -> str:
-
         id_ = self.id
         if augmentation is not None:
             id_ = self._find_unused_augmentation_name(id_, hdf5_path)
@@ -297,8 +289,7 @@ class Graph:
         grid.to_hdf5(hdf5_path)
 
         # store target values
-        with h5py.File(hdf5_path, 'a') as hdf5_file:
-
+        with h5py.File(hdf5_path, "a") as hdf5_file:
             grp = hdf5_file[id_]
 
             targets_group = grp.require_group(targets.VALUES)
@@ -312,16 +303,15 @@ class Graph:
 
     def get_all_chains(self) -> list[str]:
         if isinstance(self.nodes[0].id, Residue):
-            chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
+            chains = {str(res.chain).split()[1] for res in [node.id for node in self.nodes]}
         elif isinstance(self.nodes[0].id, Atom):
-            chains = set(str(res.chain).split()[1] for res in [node.id.residue for node in self.nodes])
+            chains = {str(res.chain).split()[1] for res in [node.id.residue for node in self.nodes]}
         else:
             return None
         return list(chains)
 
-
     @staticmethod
-    def build_graph(  # pylint: disable=too-many-locals
+    def build_graph(
         nodes: list[Atom] | list[Residue],
         graph_id: str,
         max_edge_length: float,
@@ -340,7 +330,6 @@ class Graph:
         Raises:
             TypeError: if `nodes` argument contains a mix of different types.
         """
-
         if all(isinstance(node, Atom) for node in nodes):
             atoms = nodes
             NodeContact = AtomicContact
@@ -370,7 +359,6 @@ class Graph:
 
         for index1, index2 in index_pairs:
             if index1 != index2:
-
                 node1 = Node(nodes[index1])
                 node2 = Node(nodes[index2])
                 contact = NodeContact(node1.id, node2.id)

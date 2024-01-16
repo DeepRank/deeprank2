@@ -3,24 +3,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from numpy.typing import NDArray
-
-from deeprank2.molstruct.aminoacid import AminoAcid
-from deeprank2.molstruct.structure import Chain
-from deeprank2.utils.pssmdata import PssmRow
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    from deeprank2.molstruct.aminoacid import AminoAcid
     from deeprank2.molstruct.atom import Atom
+    from deeprank2.molstruct.structure import Chain
+    from deeprank2.utils.pssmdata import PssmRow
 
 
 class Residue:
-    """One protein residue in a `PDBStructure`.
-
-    A `Residue` is the basic building block of proteins and protein complex,
-    here represented by `PDBStructures`.
-    Each residue is of a certain `AminoAcid` type and consists of multiple
-    `Atom`s.
-    """
+    """One protein residue in a `PDBStructure`."""
 
     def __init__(
         self,
@@ -29,7 +23,11 @@ class Residue:
         amino_acid: AminoAcid | None = None,
         insertion_code: str | None = None,
     ):
-        """
+        """One protein residue in a `PDBStructure`.
+
+        A `Residue` is the basic building block of proteins and protein complex, here represented by `PDBStructures`.
+        Each `Residue` is of a certain `AminoAcid` type and consists of multiple `Atom`s.
+
         Args:
             chain (:class:`Chain`): The chain that this residue belongs to.
             number (int): the residue number
@@ -37,7 +35,6 @@ class Residue:
                 Defaults to None.
             insertion_code (str, optional): The pdb insertion code, if any. Defaults to None.
         """
-
         self._chain = chain
         self._number = number
         self._amino_acid = amino_acid
@@ -46,10 +43,7 @@ class Residue:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Residue):
-            return (self._chain == other._chain
-                    and self._number == other._number
-                    and self._insertion_code == other._insertion_code
-            )
+            return self._chain == other._chain and self._number == other._number and self._insertion_code == other._insertion_code
         return NotImplemented
 
     def __hash__(self) -> hash:
@@ -59,7 +53,7 @@ class Residue:
         """Load pssm info linked to the residue."""
         pssm = self._chain.pssm
         if pssm is None:
-            raise FileNotFoundError(f'No pssm file found for Chain {self._chain}.')
+            raise FileNotFoundError(f"No pssm file found for Chain {self._chain}.")
         return pssm[self]
 
     @property
@@ -116,16 +110,15 @@ class Residue:
             return alphas[0].position
 
         if len(self.atoms) == 0:
-            raise ValueError(f"cannot get the center position from {self}, because it has no atoms")
+            raise ValueError(f"Cannot get the center position from {self}, because it has no atoms")
 
         return np.mean([atom.position for atom in self.atoms], axis=0)
 
 
 class SingleResidueVariant:
-    """A single residue mutation of a PDBStrcture."""
-
     def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
-        """
+        """A single residue mutation of a PDBStrcture.
+
         Args:
             residue (Residue): the `Residue` object from the PDBStructure that is mutated.
             variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.

@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from deeprank2.domain import nodestorage as Nfeat
@@ -8,12 +7,11 @@ from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 
-def add_features( # pylint: disable=unused-argument
-    pdb_path: str,
+def add_features(
+    pdb_path: str,  # noqa: ARG001 (unused argument)
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
 ):
-
     profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.three_letter_code)
 
     for node in graph.nodes:

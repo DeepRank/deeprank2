@@ -31,64 +31,54 @@ def add_target(
         1ATN_xxx-3 0
         1ATN_xxx-4 0
     """
-
     target_dict = {}
 
     labels = np.loadtxt(target_list, delimiter=sep, usecols=[0], dtype=str)
     values = np.loadtxt(target_list, delimiter=sep, usecols=[1])
-    for label, value in zip(labels, values):
+    for label, value in zip(labels, values, strict=True):
         target_dict[label] = value
 
-    # if a directory is provided
     if os.path.isdir(graph_path):
         graphs = glob.glob(f"{graph_path}/*.hdf5")
-
-    # if a single file is provided
     elif os.path.isfile(graph_path):
         graphs = [graph_path]
-
-    # if a list of file is provided
+    elif isinstance(graph_path, list):
+        graphs = graph_path
     else:
-        assert isinstance(graph_path, list)
-        assert os.path.isfile(graph_path[0])
+        raise TypeError("Incorrect input passed.")
 
     for hdf5 in graphs:
         print(hdf5)
+        if not os.path.isfile(hdf5):
+            raise FileNotFoundError(f"File {hdf5} not found.")
+
         try:
             f5 = h5py.File(hdf5, "a")
-
-            for model, _ in target_dict.items():
+            for model in target_dict:
                 if model not in f5:
-                    raise ValueError(
-                        f"{hdf5} does not contain an entry named {model}"
-                    )
-
+                    raise ValueError(f"{hdf5} does not contain an entry named {model}.")  # noqa: TRY301 (raise-within-try)
                 try:
                     model_gp = f5[model]
-
                     if targets.VALUES not in model_gp:
                         model_gp.create_group(targets.VALUES)
-
                     group = f5[f"{model}/{targets.VALUES}/"]
-
-                    if target_name in group.keys():
+                    if target_name in group:
                         # Delete the target if it already existed
                         del group[target_name]
-
                     # Create the target
                     group.create_dataset(target_name, data=target_dict[model])
-
-                except BaseException:
+                except BaseException:  # noqa: BLE001 (blind-except)
                     print(f"no graph for {model}")
-
             f5.close()
 
-        except BaseException:
+        except BaseException:  # noqa: BLE001 (blind-except)
             print(f"no graph for {hdf5}")
 
 
-def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> dict[str, float | int]:
-
+def compute_ppi_scores(
+    pdb_path: str,
+    reference_pdb_path: str,
+) -> dict[str, float | int]:
     """Compute structure similarity scores for the input docking model and return them as a dictionary.
 
     The computed scores are: `lrmsd` (ligand root mean square deviation), `irmsd` (interface rmsd),
@@ -102,20 +92,19 @@ def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> dict[str, floa
 
     Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.
     """
-
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
-    sim = StructureSimilarity(pdb_path, reference_pdb_path, enforce_residue_matching=False)
+    sim = StructureSimilarity(
+        pdb_path,
+        reference_pdb_path,
+        enforce_residue_matching=False,
+    )
 
     scores = {}
 
     # Input pre-computed zone files
     if os.path.exists(ref_name + ".lzone"):
-        scores[targets.LRMSD] = sim.compute_lrmsd_fast(
-            method="svd", lzone=ref_name + ".lzone"
-        )
-        scores[targets.IRMSD] = sim.compute_irmsd_fast(
-            method="svd", izone=ref_name + ".izone"
-        )
+        scores[targets.LRMSD] = sim.compute_lrmsd_fast(method="svd", lzone=ref_name + ".lzone")
+        scores[targets.IRMSD] = sim.compute_irmsd_fast(method="svd", izone=ref_name + ".izone")
 
     # Compute zone files
     else:
@@ -123,13 +112,11 @@ def compute_ppi_scores(pdb_path: str, reference_pdb_path: str) -> dict[str, floa
         scores[targets.IRMSD] = sim.compute_irmsd_fast(method="svd")
 
     scores[targets.FNAT] = sim.compute_fnat_fast()
-    scores[targets.DOCKQ] = sim.compute_DockQScore(
-        scores[targets.FNAT], scores[targets.LRMSD], scores[targets.IRMSD]
-    )
+    scores[targets.DOCKQ] = sim.compute_DockQScore(scores[targets.FNAT], scores[targets.LRMSD], scores[targets.IRMSD])
     scores[targets.BINARY] = scores[targets.IRMSD] < 4.0
 
     scores[targets.CAPRI] = 4
-    for thr, val in zip([4.0, 2.0, 1.0], [3, 2, 1]):
+    for thr, val in zip([4.0, 2.0, 1.0], [3, 2, 1], strict=True):
         if scores[targets.IRMSD] < thr:
             scores[targets.CAPRI] = val
 

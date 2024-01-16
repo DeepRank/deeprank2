@@ -12,7 +12,7 @@ def test_conservation_residue():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
-        detail='residue',
+        detail="residue",
         influence_radius=10,
         max_edge_length=10,
         central_res=25,
@@ -26,14 +26,14 @@ def test_conservation_residue():
         Nfeat.CONSERVATION,
         Nfeat.INFOCONTENT,
     ):
-        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f'all 0s found for {feature_name}'
+        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f"all 0s found for {feature_name}"
 
 
 def test_conservation_atom():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
-        detail='atom',
+        detail="atom",
         influence_radius=10,
         max_edge_length=10,
         central_res=25,
@@ -47,14 +47,14 @@ def test_conservation_atom():
         Nfeat.CONSERVATION,
         Nfeat.INFOCONTENT,
     ):
-        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f'all 0s found for {feature_name}'
+        assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f"all 0s found for {feature_name}"
 
 
 def test_no_pssm_file_error():
     pdb_path = "tests/data/pdb/1CRN/1CRN.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
-        detail='residue',
+        detail="residue",
         influence_radius=10,
         max_edge_length=10,
         central_res=17,

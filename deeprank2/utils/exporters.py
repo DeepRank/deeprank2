@@ -4,7 +4,7 @@ import random
 from math import sqrt
 
 import pandas as pd
-from matplotlib import pyplot
+from matplotlib import pyplot as plt
 from sklearn.metrics import roc_auc_score
 from torch import argmax, tensor
 from torch.nn.functional import cross_entropy
@@ -16,8 +16,7 @@ _log = logging.getLogger(__name__)
 class OutputExporter:
     """The class implements a general exporter to be called when a neural network generates outputs."""
 
-    def __init__(self, directory_path: str = None):
-
+    def __init__(self, directory_path: str | None = None):
         if directory_path is None:
             directory_path = "./output"
         self._directory_path = directory_path
@@ -26,24 +25,29 @@ class OutputExporter:
             os.makedirs(self._directory_path)
 
     def __enter__(self):
-        "overridable"
+        """Overridable."""
         return self
 
     def __exit__(self, exception_type, exception, traceback):
-        "overridable"
-        pass # pylint: disable=unnecessary-pass
+        """Overridable."""
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: list[str], output_values: list, target_values: list, loss: float):
-        "the entry_names, output_values, target_values MUST have the same length"
-        pass # pylint: disable=unnecessary-pass
-
-    def is_compatible_with( # pylint: disable=unused-argument
+    def process(
         self,
-        output_data_shape: int,
-        target_data_shape: int | None = None,
+        pass_name: str,
+        epoch_number: int,
+        entry_names: list[str],
+        output_values: list,
+        target_values: list,
+        loss: float,
+    ):
+        """The entry_names, output_values, target_values MUST have the same length."""
+
+    def is_compatible_with(
+        self,
+        output_data_shape: int,  # noqa: ARG002 (unused argument)
+        target_data_shape: int | None = None,  # noqa: ARG002 (unused argument)
     ) -> bool:
-        "true if this exporter can work with the given data shapes"
+        """True if this exporter can work with the given data shapes."""
         return True
 
 
@@ -63,10 +67,24 @@ class OutputExporterCollection:
         for output_exporter in self._output_exporters:
             output_exporter.__exit__(exception_type, exception, traceback)
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: list[str], output_values: list, target_values: list, loss: float):
+    def process(
+        self,
+        pass_name: str,
+        epoch_number: int,
+        entry_names: list[str],
+        output_values: list,
+        target_values: list,
+        loss: float,
+    ):
         for output_exporter in self._output_exporters:
-            output_exporter.process(pass_name, epoch_number, entry_names, output_values, target_values, loss)
+            output_exporter.process(
+                pass_name,
+                epoch_number,
+                entry_names,
+                output_values,
+                target_values,
+                loss,
+            )
 
     def __iter__(self):
         return iter(self._output_exporters)
@@ -93,12 +111,22 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
     def __exit__(self, exception_type, exception, traceback):
         self._writer.__exit__(exception_type, exception, traceback)
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments, too-many-locals
-                entry_names: list[str], output_values: list, target_values: list, loss: float):
-        "write to tensorboard"
-
+    def process(
+        self,
+        pass_name: str,
+        epoch_number: int,
+        entry_names: list[str],
+        output_values: list,
+        target_values: list,
+        loss: float,  # noqa: ARG002 (unused argument)
+    ):
+        """Write to tensorboard."""
         ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
-        self._writer.add_scalar(f"{pass_name} cross entropy loss", ce_loss, epoch_number)
+        self._writer.add_scalar(
+            f"{pass_name} cross entropy loss",
+            ce_loss,
+            epoch_number,
+        )
 
         probabilities = []
         fp, fn, tp, tn = 0, 0, 0, 0
@@ -115,10 +143,10 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
             elif prediction_value <= 0.0 and target_value <= 0.0:
                 tn += 1
 
-            elif prediction_value > 0.0 and target_value <= 0.0: # pylint: disable=chained-comparison
+            elif target_value <= 0.0 < prediction_value:
                 fp += 1
 
-            elif prediction_value <= 0.0 and target_value > 0.0: # pylint: disable=chained-comparison
+            elif prediction_value <= 0.0 < target_value:
                 fn += 1
 
         mcc_numerator = tn * tp - fp * fn
@@ -145,19 +173,16 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         target_data_shape: int | None = None,
     ) -> bool:
         """For regression, target data is needed and output data must be a list of two-dimensional values."""
-
         return output_data_shape == 2 and target_data_shape == 1
 
 
 class ScatterPlotExporter(OutputExporter):
-    """An output exporter that can make scatter plots, containing every single data point.
-
-    On the X-axis: targets values
-    On the Y-axis: output values
-    """
-
     def __init__(self, directory_path: str, epoch_interval: int = 1):
-        """
+        """An output exporter that can make scatter plots, containing every single data point.
+
+        On the X-axis: targets values
+        On the Y-axis: output values
+
         Args:
             directory_path (str): Where to store the plots.
             epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
@@ -178,41 +203,49 @@ class ScatterPlotExporter(OutputExporter):
 
     @staticmethod
     def _get_color(pass_name):
-
         pass_name = pass_name.lower().strip()
-
         if pass_name in ("train", "training"):
             return "blue"
-
         if pass_name in ("eval", "valid", "validation"):
             return "red"
-
         if pass_name == ("test", "testing"):
             return "green"
-
         return random.choice(["yellow", "cyan", "magenta"])
 
     @staticmethod
-    def _plot(epoch_number: int, data: dict[str, tuple[list[float], list[float]]], png_path: str):
-
-        pyplot.title(f"Epoch {epoch_number}")
+    def _plot(
+        epoch_number: int,
+        data: dict[str, tuple[list[float], list[float]]],
+        png_path: str,
+    ):
+        plt.title(f"Epoch {epoch_number}")
 
         for pass_name, (truth_values, prediction_values) in data.items():
-            pyplot.scatter(truth_values, prediction_values, color=ScatterPlotExporter._get_color(pass_name), label=pass_name)
+            plt.scatter(
+                truth_values,
+                prediction_values,
+                color=ScatterPlotExporter._get_color(pass_name),
+                label=pass_name,
+            )
 
-        pyplot.xlabel("truth")
-        pyplot.ylabel("prediction")
+        plt.xlabel("truth")
+        plt.ylabel("prediction")
 
-        pyplot.legend()
-        pyplot.savefig(png_path)
-        pyplot.close()
+        plt.legend()
+        plt.savefig(png_path)
+        plt.close()
 
-    def process(self, pass_name: str, epoch_number: int, # pylint: disable=too-many-arguments
-                entry_names: list[str], output_values: list, target_values: list, loss: float):
+    def process(
+        self,
+        pass_name: str,
+        epoch_number: int,
+        entry_names: list[str],  # noqa: ARG002 (unused argument)
+        output_values: list,
+        target_values: list,
+        loss: float,  # noqa: ARG002 (unused argument)
+    ):
         """Make the plot, if the epoch matches with the interval."""
-
         if epoch_number % self._epoch_interval == 0:
-
             if epoch_number not in self._plot_data:
                 self._plot_data[epoch_number] = {}
 
@@ -227,7 +260,6 @@ class ScatterPlotExporter(OutputExporter):
         target_data_shape: int | None = None,
     ) -> bool:
         """For regression, target data is needed and output data must be a list of one-dimensional values."""
-
         return output_data_shape == 1 and target_data_shape == 1
 
 
@@ -248,44 +280,56 @@ class HDF5OutputExporter(OutputExporter):
     """
 
     def __init__(self, directory_path: str):
-
         self.phase = None
         super().__init__(directory_path)
 
     def __enter__(self):
-
-        self.d = {'phase': [], 'epoch': [], 'entry': [], 'output': [], 'target': [], 'loss': []}
+        self.d = {
+            "phase": [],
+            "epoch": [],
+            "entry": [],
+            "output": [],
+            "target": [],
+            "loss": [],
+        }
         self.df = pd.DataFrame(data=self.d)
 
         return self
 
     def __exit__(self, exception_type, exception, traceback):
-
         if self.phase is not None:
             if self.phase == "validation":
                 self.phase = "training"
 
             self.df.to_hdf(
-                os.path.join(self._directory_path, 'output_exporter.hdf5'),
+                os.path.join(self._directory_path, "output_exporter.hdf5"),
                 key=self.phase,
-                mode='a')
+                mode="a",
+            )
 
-    def process( # pylint: disable=too-many-arguments
+    def process(
         self,
         pass_name: str,
         epoch_number: int,
         entry_names: list[str],
         output_values: list,
         target_values: list,
-        loss: float):
-
+        loss: float,
+    ):
         self.phase = pass_name
         pass_name = [pass_name] * len(output_values)
         loss = [loss] * len(output_values)
         epoch_number = [epoch_number] * len(output_values)
 
-        d_epoch = {'phase': pass_name, 'epoch': epoch_number, 'entry': entry_names, 'output': output_values, 'target': target_values, 'loss': loss}
+        d_epoch = {
+            "phase": pass_name,
+            "epoch": epoch_number,
+            "entry": entry_names,
+            "output": output_values,
+            "target": target_values,
+            "loss": loss,
+        }
         df_epoch = pd.DataFrame(data=d_epoch)
 
         self.df = pd.concat([self.df, df_epoch])
-        self.df.reset_index(drop=True, inplace=True)
+        self.df = self.df.reset_index(drop=True)

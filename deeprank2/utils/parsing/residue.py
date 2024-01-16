@@ -17,30 +17,21 @@ class ResidueClassCriterium:
         self.absent_atom_names = absent_atom_names
 
     def matches(self, amino_acid_name: str, atom_names: list[str]) -> bool:
-
         # check the amino acid name
-        if self.amino_acid_names != "all":
-            if not any(
-
-                    amino_acid_name == crit_amino_acid_name
-                    for crit_amino_acid_name in self.amino_acid_names
-
-            ):
-
-                return False
+        if self.amino_acid_names != "all" and not any(amino_acid_name == crit_amino_acid_name for crit_amino_acid_name in self.amino_acid_names):
+            return False
 
         # check the atom names that should be absent
         if any(atom_name in self.absent_atom_names for atom_name in atom_names):
-
             return False
 
         # check the atom names that should be present
         if not all(atom_name in atom_names for atom_name in self.present_atom_names):
-
             return False
 
         # all checks passed
         return True
+
 
 class ResidueClassParser:
     _RESIDUE_CLASS_PATTERN = re.compile(r"([A-Z]{3,4}) *\: *name *\= *(all|[A-Z]{3})")
@@ -52,16 +43,14 @@ class ResidueClassParser:
         for line in file_:
             match = ResidueClassParser._RESIDUE_CLASS_PATTERN.match(line)
             if not match:
-                raise ValueError(f"unparsable line: '{line}'")
+                raise ValueError(f"Unparsable line: '{line}'")
 
             class_name = match.group(1)
             amino_acid_names = ResidueClassParser._parse_amino_acids(match.group(2))
 
             present_atom_names = []
             absent_atom_names = []
-            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(
-                line[match.end() :]
-            ):
+            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(line[match.end() :]):  # noqa: B020 (loop-variable-overrides-iterator)
                 atom_names = [name.strip() for name in match.group(2).split(",")]
                 if match.group(1) == "present":
                     present_atom_names.extend(atom_names)
@@ -69,11 +58,7 @@ class ResidueClassParser:
                 elif match.group(1) == "absent":
                     absent_atom_names.extend(atom_names)
 
-            result.append(
-                ResidueClassCriterium(
-                    class_name, amino_acid_names, present_atom_names, absent_atom_names
-                )
-            )
+            result.append(ResidueClassCriterium(class_name, amino_acid_names, present_atom_names, absent_atom_names))
         return result
 
     @staticmethod

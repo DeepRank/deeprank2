@@ -22,7 +22,6 @@ from torch.autograd import Variable
 
 
 class CnnRegression(torch.nn.Module):
-
     def __init__(self, num_features: int, box_shape: tuple[int]):
         super().__init__()
 
@@ -47,14 +46,14 @@ class CnnRegression(torch.nn.Module):
         x = self.convlayer_001(x)
         x = F.relu(self.convlayer_002(x))
         x = self.convlayer_003(x)
-        return x
+        return x  # noqa:RET504 (unnecessary-assign)
 
     def forward(self, data):
         x = self._forward_features(data.x)
         x = x.view(x.size(0), -1)
         x = F.relu(self.fclayer_000(x))
         x = self.fclayer_001(x)
-        return x
+        return x  # noqa:RET504 (unnecessary-assign)
 
 
 ######################################################################
@@ -74,8 +73,8 @@ class CnnRegression(torch.nn.Module):
 # fc   layer   1: fc   | input  84  output  1  post None
 # ----------------------------------------------------------------------
 
-class CnnClassification(torch.nn.Module):
 
+class CnnClassification(torch.nn.Module):
     def __init__(self, num_features, box_shape):
         super().__init__()
 
@@ -99,11 +98,11 @@ class CnnClassification(torch.nn.Module):
         x = self.convlayer_001(x)
         x = F.relu(self.convlayer_002(x))
         x = self.convlayer_003(x)
-        return x
+        return x  # noqa:RET504 (unnecessary-assign)
 
     def forward(self, data):
         x = self._forward_features(data.x)
         x = x.view(x.size(0), -1)
         x = F.relu(self.fclayer_000(x))
         x = self.fclayer_001(x)
-        return x
+        return x  # noqa:RET504 (unnecessary-assign)

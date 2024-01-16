@@ -7,7 +7,7 @@ import pickle
 import re
 import sys
 import warnings
-from typing import Literal, Union
+from typing import Literal
 
 import h5py
 import matplotlib.pyplot as plt
@@ -23,28 +23,31 @@ from deeprank2.domain import gridstorage
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 
+# ruff: noqa: PYI051 (redundant-literal-union), the literal is a special case, while the str is generic
+
 _log = logging.getLogger(__name__)
 
 
 class DeeprankDataset(Dataset):
-    def __init__(self, # pylint: disable=too-many-arguments
-                 hdf5_path: str | list[str],
-                 subset: list[str] | None,
-                 train_source: str | GridDataset | GraphDataset | None,
-                 target: str | None,
-                 target_transform: bool | None,
-                 target_filter: dict[str, str] | None,
-                 task: str | None,
-                 classes: list[str] | list[int] | list[float] | None,
-                 use_tqdm: bool,
-                 root: str,
-                 check_integrity: bool
+    def __init__(
+        self,
+        hdf5_path: str | list[str],
+        subset: list[str] | None,
+        train_source: str | GridDataset | GraphDataset | None,
+        target: str | None,
+        target_transform: bool | None,
+        target_filter: dict[str, str] | None,
+        task: str | None,
+        classes: list[str] | list[int] | list[float] | None,
+        use_tqdm: bool,
+        root: str,
+        check_integrity: bool,
     ):
-        """Parent class of :class:`GridDataset` and :class:`GraphDataset` which inherits from :class:`torch_geometric.data.dataset.Dataset`.
+        """Parent class of :class:`GridDataset` and :class:`GraphDataset`.
 
+        This class inherits from :class:`torch_geometric.data.dataset.Dataset`.
         More detailed information about the parameters can be found in :class:`GridDataset` and :class:`GraphDataset`.
         """
-
         super().__init__(root)
 
         if isinstance(hdf5_path, str):
@@ -82,41 +85,47 @@ class DeeprankDataset(Dataset):
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def _check_and_inherit_train(self, data_type: Union[GridDataset, GraphDataset], inherited_params):
-        """Check if the pre-trained model or training set provided are valid for validation and/or testing, and inherit the parameters.
-        """
-        if isinstance(self.train_source, str): # pylint: disable=too-many-nested-blocks
+    def _check_and_inherit_train(
+        self,
+        data_type: GridDataset | GraphDataset,
+        inherited_params,
+    ):
+        """Check if the pre-trained model or training set provided are valid for validation and/or testing, and inherit the parameters."""
+        if isinstance(self.train_source, str):
             try:
                 if torch.cuda.is_available():
                     data = torch.load(self.train_source)
                 else:
-                    data = torch.load(self.train_source, map_location=torch.device('cpu'))
+                    data = torch.load(self.train_source, map_location=torch.device("cpu"))
                 if data["data_type"] is not data_type:
-                    raise TypeError (f"""The pre-trained model has been trained with data of type {data["data_type"]}, but you are trying
-                                            to define a {data_type}-class validation/testing dataset. Please provide a valid DeepRank2
-                                            model trained with {data_type}-class type data, or define the dataset using the appropriate class.""")
+                    raise TypeError(
+                        f"The pre-trained model has been trained with data of type {data['data_type']}, but you are trying \n\t"
+                        f"to define a {data_type}-class validation/testing dataset. Please provide a valid DeepRank2 \n\t"
+                        f"model trained with {data_type}-class type data, or define the dataset using the appropriate class."
+                    )
                 if data_type is GraphDataset:
                     self.train_means = data["means"]
                     self.train_devs = data["devs"]
                     # convert strings in 'transform' key to lambda functions
                     if data["features_transform"]:
-                        for _, key in data["features_transform"].items():
-                            if key['transform'] is None:
+                        for key in data["features_transform"].values():
+                            if key["transform"] is None:
                                 continue
-                            key['transform'] = eval(key['transform']) # pylint: disable=eval-used
+                            key["transform"] = eval(key["transform"])  # noqa: S307, PGH001 (suspicious-eval-usage)
             except pickle.UnpicklingError as e:
-                raise ValueError("""The path provided to `train_source` is not a valid DeepRank2 pre-trained model.
-                                        Please provide a valid path to a DeepRank2 pre-trained model.""") from e
+                raise ValueError("The path provided to `train_source` is not a valid DeepRank2 pre-trained model.") from e
         elif isinstance(self.train_source, data_type):
             data = self.train_source
             if data_type is GraphDataset:
                 self.train_means = self.train_source.means
                 self.train_devs = self.train_source.devs
         else:
-            raise TypeError(f"""The train data provided is type: {type(self.train_source)}
-                            Please provide a valid training {data_type} or the path to a valid DeepRank2 pre-trained model.""")
+            raise TypeError(
+                f"The train data provided is invalid: {type(self.train_source)}.\n\t"
+                f"Please provide a valid training {data_type} or the path to a valid DeepRank2 pre-trained model."
+            )
 
-        #match parameters with the ones in the training set
+        # match parameters with the ones in the training set
         self._check_inherited_params(inherited_params, data)
 
     def _check_hdf5_files(self):
@@ -130,7 +139,7 @@ class DeeprankDataset(Dataset):
                     if len(entry_names) == 0:
                         _log.info(f"    -> {hdf5_path} is empty ")
                         to_be_removed.append(hdf5_path)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001, PERF203 (blind-except, try-except-in-loop)
                 _log.error(e)
                 _log.info(f"    -> {hdf5_path} is corrupted ")
                 to_be_removed.append(hdf5_path)
@@ -139,7 +148,6 @@ class DeeprankDataset(Dataset):
             self.hdf5_paths.remove(hdf5_path)
 
     def _check_task_and_classes(self, task: str, classes: str | None = None):
-
         if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]:
             self.task = targets.REGRESS
 
@@ -150,23 +158,21 @@ class DeeprankDataset(Dataset):
             self.task = task
 
         if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
-            raise ValueError(
-                f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
+            raise ValueError(f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
 
         if task != self.task and task is not None:
-            warnings.warn(f"Target {self.target} expects {self.task}, but was set to task {task} by user.\n" +
-                f"User set task is ignored and {self.task} will be used.")
+            warnings.warn(
+                f"Target {self.target} expects {self.task}, but was set to task {task} by user.\nUser set task is ignored and {self.task} will be used."
+            )
 
         if self.task == targets.CLASSIF:
             if classes is None:
                 self.classes = [0, 1]
-                _log.info(f'Target classes set to: {self.classes}')
+                _log.info(f"Target classes set to: {self.classes}")
             else:
                 self.classes = classes
 
-            self.classes_to_index = {
-                class_: index for index, class_ in enumerate(self.classes)
-            }
+            self.classes_to_index = {class_: index for index, class_ in enumerate(self.classes)}
         else:
             self.classes = None
             self.classes_to_index = None
@@ -176,24 +182,25 @@ class DeeprankDataset(Dataset):
         inherited_params: list[str],
         data: dict | GraphDataset | GridDataset,
     ):
-        """"Check if the parameters for validation and/or testing are the same as in the pre-trained model or training set provided.
+        """Check if the parameters for validation and/or testing are the same as in the pre-trained model or training set provided.
 
         Args:
         inherited_params (List[str]): List of parameters that need to be checked for inheritance.
         data (Union[dict, class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited
         from the information contained in `data`.
         """
-
         self_vars = vars(self)
         if not isinstance(data, dict):
             data = vars(data)
 
         for param in inherited_params:
-            if (self_vars[param] != data[param]):
-                if (self_vars[param] != self.default_vars[param]):
-                    _log.warning(f"The {param} parameter set here is: {self_vars[param]}, " +
-                        f"which is not equivalent to the one in the training phase: {data[param]}./n" +
-                        f"Overwriting {param} parameter with the one used in the training phase.")
+            if self_vars[param] != data[param]:
+                if self_vars[param] != self.default_vars[param]:
+                    _log.warning(
+                        f"The {param} parameter set here is: {self_vars[param]}, "
+                        f"which is not equivalent to the one in the training phase: {data[param]}./n"
+                        f"Overwriting {param} parameter with the one used in the training phase."
+                    )
                 setattr(self, param, data[param])
 
     def _create_index_entries(self):
@@ -224,14 +231,13 @@ class DeeprankDataset(Dataset):
                     else:
                         entry_names = [entry_name for entry_name in self.subset if entry_name in list(hdf5_file.keys())]
 
-                    #skip self._filter_targets when target_filter is None, improve performance using list comprehension.
+                    # skip self._filter_targets when target_filter is None, improve performance using list comprehension.
                     if self.target_filter is None:
                         self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names]
                     else:
-                        self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names \
-                        if self._filter_targets(hdf5_file[entry_name])]
+                        self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names if self._filter_targets(hdf5_file[entry_name])]
 
-            except Exception:
+            except Exception:  # noqa: BLE001 (blind-except)
                 _log.exception(f"on {hdf5_path}")
 
     def _filter_targets(self, grp: h5py.Group) -> bool:
@@ -249,33 +255,28 @@ class DeeprankDataset(Dataset):
         Raises:
             ValueError: If an unsuported condition is provided.
         """
-
         if self.target_filter is None:
             return True
 
         for target_name, target_condition in self.target_filter.items():
-
             present_target_names = list(grp[targets.VALUES].keys())
 
             if target_name in present_target_names:
-
                 # If we have a given target_condition, see if it's met.
                 if isinstance(target_condition, str):
-
                     operation = target_condition
                     target_value = grp[targets.VALUES][target_name][()]
                     for operator_string in [">", "<", "==", "<=", ">=", "!="]:
                         operation = operation.replace(operator_string, f"{target_value}" + operator_string)
 
-                    if not eval(operation): # pylint: disable=eval-used
+                    if not eval(operation):  # noqa: S307, PGH001 (suspicious-eval-usage)
                         return False
 
                 elif target_condition is not None:
                     raise ValueError("Conditions not supported", target_condition)
 
             else:
-                _log.warning(f"   :Filter {target_name} not found for entry {grp}\n"
-                             f"   :Filter options are: {present_target_names}")
+                _log.warning(f"   :Filter {target_name} not found for entry {grp}\n   :Filter options are: {present_target_names}")
         return True
 
     def len(self) -> int:
@@ -286,8 +287,8 @@ class DeeprankDataset(Dataset):
         """
         return len(self.index_entries)
 
-    def hdf5_to_pandas( # noqa: MC0001, pylint: disable=too-many-locals
-        self
+    def hdf5_to_pandas(
+        self,
     ) -> pd.DataFrame:
         """Loads features data from the HDF5 files into a Pandas DataFrame in the attribute `df` of the class.
 
@@ -295,13 +296,11 @@ class DeeprankDataset(Dataset):
             :class:`pd.DataFrame`: Pandas DataFrame containing the selected features as columns per all data points in
                 hdf5_path files.
         """
-
         df_final = pd.DataFrame()
 
         for fname in self.hdf5_paths:
-            with h5py.File(fname, 'r') as f:
-
-                entry_name = list(f.keys())[0]
+            with h5py.File(fname, "r") as f:
+                entry_name = next(iter(f.keys()))
 
                 if self.subset is not None:
                     entry_names = [entry for entry, _ in f.items() if entry in self.subset]
@@ -309,48 +308,44 @@ class DeeprankDataset(Dataset):
                     entry_names = [entry for entry, _ in f.items()]
 
                 df_dict = {}
-                df_dict['id'] = entry_names
+                df_dict["id"] = entry_names
 
                 for feat_type in self.features_dict:
                     for feat in self.features_dict[feat_type]:
                         # reset transform for each feature
                         transform = None
                         if self.features_transform:
-                            transform = self.features_transform.get('all', {}).get('transform')
+                            transform = self.features_transform.get("all", {}).get("transform")
                             if (transform is None) and (feat in self.features_transform):
-                                transform = self.features_transform.get(feat, {}).get('transform')
-                        #Check the number of channels the features have
+                                transform = self.features_transform.get(feat, {}).get("transform")
+                        # Check the number of channels the features have
                         if f[entry_name][feat_type][feat][()].ndim == 2:
                             for i in range(f[entry_name][feat_type][feat][:].shape[1]):
-                                df_dict[feat + '_' + str(i)] = [f[entry_name][feat_type][feat][:][:,i] for entry_name in entry_names]
-                                #apply transformation for each channel in this feature
+                                df_dict[feat + "_" + str(i)] = [f[entry_name][feat_type][feat][:][:, i] for entry_name in entry_names]
+                                # apply transformation for each channel in this feature
                                 if transform:
-                                    df_dict[feat + '_' + str(i)] = [transform(row) for row in df_dict[feat + '_' + str(i)]]
+                                    df_dict[feat + "_" + str(i)] = [transform(row) for row in df_dict[feat + "_" + str(i)]]
                         else:
                             df_dict[feat] = [
-                                f[entry_name][feat_type][feat][:]
-                                if f[entry_name][feat_type][feat][()].ndim == 1
-                                else f[entry_name][feat_type][feat][()] for entry_name in entry_names]
-                            #apply transformation
+                                f[entry_name][feat_type][feat][:] if f[entry_name][feat_type][feat][()].ndim == 1 else f[entry_name][feat_type][feat][()]
+                                for entry_name in entry_names
+                            ]
+                            # apply transformation
                             if transform:
-                                df_dict[feat]=[transform(row) for row in df_dict[feat]]
+                                df_dict[feat] = [transform(row) for row in df_dict[feat]]
 
-                df = pd.DataFrame(data=df_dict)
+                df_temp = pd.DataFrame(data=df_dict)
+            df_concat = pd.concat([df_final, df_temp])
+        self.df = df_concat.reset_index(drop=True)
+        return self.df
 
-            df_final = pd.concat([df_final, df])
-
-        df_final.reset_index(drop=True, inplace=True)
-        self.df = df_final
-
-        return df_final
-
-    def save_hist( # pylint: disable=too-many-arguments, too-many-branches, useless-suppression
-            self,
-            features: str | list[str],
-            fname: str = 'features_hist.png',
-            bins: int | list[float] | str = 10,
-            figsize: tuple = (15, 15),
-            log: bool = False
+    def save_hist(
+        self,
+        features: str | list[str],
+        fname: str = "features_hist.png",
+        bins: int | list[float] | str = 10,
+        figsize: tuple = (15, 15),
+        log: bool = False,
     ):
         """After having generated a pd.DataFrame using hdf5_to_pandas method, histograms of the features can be saved in an image.
 
@@ -373,57 +368,64 @@ class DeeprankDataset(Dataset):
         if not isinstance(features, list):
             features = [features]
 
-        features_df = [col for feat in features for col in self.df.columns.values.tolist() if feat in col]
+        features_df = [col for feat in features for col in self.df.columns.to_numpy().tolist() if feat in col]
 
         means = [
-            round(np.concatenate(self.df[feat].values).mean(), 1) if isinstance(self.df[feat].values[0], np.ndarray) \
-            else round(self.df[feat].values.mean(), 1) \
-            for feat in features_df]
+            round(np.concatenate(self.df[feat].to_numpy()).mean(), 1)
+            if isinstance(self.df[feat].to_numpy()[0], np.ndarray)
+            else round(self.df[feat].to_numpy().mean(), 1)
+            for feat in features_df
+        ]
         devs = [
-            round(np.concatenate(self.df[feat].values).std(), 1) if isinstance(self.df[feat].values[0], np.ndarray) \
-            else round(self.df[feat].values.std(), 1) \
-            for feat in features_df]
+            round(np.concatenate(self.df[feat].to_numpy()).std(), 1)
+            if isinstance(self.df[feat].to_numpy()[0], np.ndarray)
+            else round(self.df[feat].to_numpy().std(), 1)
+            for feat in features_df
+        ]
 
         if len(features_df) > 1:
-
             fig, axs = plt.subplots(len(features_df), figsize=figsize)
 
             for row, feat in enumerate(features_df):
-                if isinstance(self.df[feat].values[0], np.ndarray):
+                if isinstance(self.df[feat].to_numpy()[0], np.ndarray):
                     if log:
-                        log_data = np.log(np.concatenate(self.df[feat].values))
+                        log_data = np.log(np.concatenate(self.df[feat].to_numpy()))
                         log_data[log_data == -np.inf] = 0
                         axs[row].hist(log_data, bins=bins)
                     else:
-                        axs[row].hist(np.concatenate(self.df[feat].values), bins=bins)
+                        axs[row].hist(np.concatenate(self.df[feat].to_numpy()), bins=bins)
+                elif log:
+                    log_data = np.log(self.df[feat].to_numpy())
+                    log_data[log_data == -np.inf] = 0
+                    axs[row].hist(log_data, bins=bins)
                 else:
-                    if log:
-                        log_data = np.log(self.df[feat].values)
-                        log_data[log_data == -np.inf] = 0
-                        axs[row].hist(log_data, bins=bins)
-                    else:
-                        axs[row].hist(self.df[feat].values, bins=bins)
-                axs[row].set(xlabel=f'{feat} (mean {means[row]}, std {devs[row]})', ylabel='Count')
+                    axs[row].hist(self.df[feat].to_numpy(), bins=bins)
+                axs[row].set(
+                    xlabel=f"{feat} (mean {means[row]}, std {devs[row]})",
+                    ylabel="Count",
+                )
             fig.tight_layout()
 
         elif len(features_df) == 1:
             fig = plt.figure(figsize=figsize)
             ax = fig.add_subplot(111)
-            if isinstance(self.df[features_df[0]].values[0], np.ndarray):
+            if isinstance(self.df[features_df[0]].to_numpy()[0], np.ndarray):
                 if log:
-                    log_data = np.log(np.concatenate(self.df[features_df[0]].values))
+                    log_data = np.log(np.concatenate(self.df[features_df[0]].to_numpy()))
                     log_data[log_data == -np.inf] = 0
                     ax.hist(log_data, bins=bins)
                 else:
-                    ax.hist(np.concatenate(self.df[features_df[0]].values), bins=bins)
+                    ax.hist(np.concatenate(self.df[features_df[0]].to_numpy()), bins=bins)
+            elif log:
+                log_data = np.log(self.df[features_df[0]].to_numpy())
+                log_data[log_data == -np.inf] = 0
+                ax.hist(log_data, bins=bins)
             else:
-                if log:
-                    log_data = np.log(self.df[features_df[0]].values)
-                    log_data[log_data == -np.inf] = 0
-                    ax.hist(log_data, bins=bins)
-                else:
-                    ax.hist(self.df[features_df[0]].values, bins=bins)
-            ax.set(xlabel=f'{features_df[0]} (mean {means[0]}, std {devs[0]})', ylabel='Count')
+                ax.hist(self.df[features_df[0]].values, bins=bins)
+            ax.set(
+                xlabel=f"{features_df[0]} (mean {means[0]}, std {devs[0]})",
+                ylabel="Count",
+            )
 
         else:
             raise ValueError("Please provide valid features names. They must be present in the current :class:`DeeprankDataset` children instance.")
@@ -433,13 +435,18 @@ class DeeprankDataset(Dataset):
         plt.close(fig)
 
     def _compute_mean_std(self):
-
-        means = {col: round(np.nanmean(np.concatenate(self.df[col].values)), 1) if isinstance(self.df[col].values[0], np.ndarray) \
-            else round(np.nanmean(self.df[col].values), 1) \
-            for col in self.df.columns[1:]}
-        devs = {col: round(np.nanstd(np.concatenate(self.df[col].values)), 1) if isinstance(self.df[col].values[0], np.ndarray) \
-            else round(np.nanstd(self.df[col].values), 1) \
-            for col in self.df.columns[1:]}
+        means = {
+            col: round(np.nanmean(np.concatenate(self.df[col].values)), 1)
+            if isinstance(self.df[col].to_numpy()[0], np.ndarray)
+            else round(np.nanmean(self.df[col].to_numpy()), 1)
+            for col in self.df.columns[1:]
+        }
+        devs = {
+            col: round(np.nanstd(np.concatenate(self.df[col].to_numpy())), 1)
+            if isinstance(self.df[col].to_numpy()[0], np.ndarray)
+            else round(np.nanstd(self.df[col].to_numpy()), 1)
+            for col in self.df.columns[1:]
+        }
         self.means = means
         self.devs = devs
 
@@ -451,7 +458,7 @@ GRID_PARTIAL_FEATURE_NAME_PATTERN = re.compile(r"^([a-zA-Z_]+)_([0-9]{3})$")
 
 
 class GridDataset(DeeprankDataset):
-    def __init__( # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(
         self,
         hdf5_path: str | list,
         subset: list[str] | None = None,
@@ -464,7 +471,7 @@ class GridDataset(DeeprankDataset):
         classes: list[str] | list[int] | list[float] | None = None,
         use_tqdm: bool = True,
         root: str = "./",
-        check_integrity: bool = True
+        check_integrity: bool = True,
     ):
         """Class to load the .HDF5 files data into grids.
 
@@ -511,19 +518,33 @@ class GridDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
-        super().__init__(hdf5_path, subset, train_source, target, target_transform,
-                         target_filter, task, classes, use_tqdm, root, check_integrity)
-        self.default_vars = {
-            k: v.default
-            for k, v in inspect.signature(self.__init__).parameters.items()
-            if v.default is not inspect.Parameter.empty
-        }
+        super().__init__(
+            hdf5_path,
+            subset,
+            train_source,
+            target,
+            target_transform,
+            target_filter,
+            task,
+            classes,
+            use_tqdm,
+            root,
+            check_integrity,
+        )
+        self.default_vars = {k: v.default for k, v in inspect.signature(self.__init__).parameters.items() if v.default is not inspect.Parameter.empty}
         self.default_vars["classes_to_index"] = None
         self.features = features
         self.target_transform = target_transform
 
         if train_source is not None:
-            self.inherited_params = ["features", "target", "target_transform", "task", "classes", "classes_to_index"]
+            self.inherited_params = [
+                "features",
+                "target",
+                "target_transform",
+                "task",
+                "classes",
+                "classes_to_index",
+            ]
             self._check_and_inherit_train(GridDataset, self.inherited_params)
             self._check_features()
 
@@ -533,9 +554,9 @@ class GridDataset(DeeprankDataset):
 
             try:
                 fname, mol = self.index_entries[0]
-            except IndexError as exc:
-                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from exc
-            with h5py.File(fname, 'r') as f5:
+            except IndexError as e:
+                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from e
+            with h5py.File(fname, "r") as f5:
                 grp = f5[mol]
                 possible_targets = grp[targets.VALUES].keys()
                 if self.target is None:
@@ -552,40 +573,37 @@ class GridDataset(DeeprankDataset):
                 self.features_dict[targets.VALUES] = self.target
 
     def _check_features(self):
-        """Checks if the required features exist"""
-
+        """Checks if the required features exist."""
         hdf5_path = self.hdf5_paths[0]
 
         # read available features
         with h5py.File(hdf5_path, "r") as f:
-            mol_key = list(f.keys())[0]
+            mol_key = next(iter(f.keys()))
             if isinstance(self.features, list):
-                self.features = [GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name).group(1)
-                                if GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name) is not None
-                                else feature_name for feature_name in self.features] # be sure to remove the dimension number suffix
-                self.features = list(set(self.features)) # remove duplicates
+                self.features = [
+                    GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name).group(1)
+                    if GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name) is not None
+                    else feature_name
+                    for feature_name in self.features
+                ]  # remove the dimension number suffix
+                self.features = list(set(self.features))  # remove duplicates
             available_features = list(f[f"{mol_key}/{gridstorage.MAPPED_FEATURES}"].keys())
-            available_features = [key for key in available_features if key[0] != '_']  # ignore metafeatures
+            available_features = [key for key in available_features if key[0] != "_"]  # ignore metafeatures
 
             hdf5_matching_feature_names = []  # feature names that match with the requested list of names
             unpartial_feature_names = []  # feature names without their dimension number suffix
             for feature_name in available_features:
-
                 partial_feature_match = GRID_PARTIAL_FEATURE_NAME_PATTERN.match(feature_name)
                 if partial_feature_match is not None:  # there's a dimension number in the feature name
-
                     unpartial_feature_name = partial_feature_match.group(1)
 
                     if self.features == "all" or (isinstance(self.features, list) and unpartial_feature_name in self.features):
-
                         hdf5_matching_feature_names.append(feature_name)
 
                     unpartial_feature_names.append(unpartial_feature_name)
 
                 else:  # no numbers, it's a one-dimensional feature name
-
                     if self.features == "all" or (isinstance(self.features, list) and feature_name in self.features):
-
                         hdf5_matching_feature_names.append(feature_name)
 
                     unpartial_feature_names.append(feature_name)
@@ -611,11 +629,12 @@ class GridDataset(DeeprankDataset):
         # raise error if any features are missing
         if len(missing_features) > 0:
             raise ValueError(
-                f"Not all features could be found in the file {hdf5_path} under entry {mol_key}.\
-                    \nMissing features are: {missing_features} \
-                    \nCheck feature_modules passed to the preprocess function. \
-                    \nProbably, the feature wasn't generated during the preprocessing step. \
-                    Available features: {available_features}")
+                f"Not all features could be found in the file {hdf5_path} under entry {mol_key}.\n\t"
+                f"Missing features are: {missing_features}.\n\t"
+                "Check feature_modules passed to the preprocess function.\n\t"
+                "Probably, the feature wasn't generated during the preprocessing step.\n\t"
+                f"Available features: {available_features}"
+            )
 
     def get(self, idx: int) -> Data:
         """Gets one grid item from its unique index.
@@ -626,7 +645,6 @@ class GridDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
         """
-
         file_path, entry_name = self.index_entries[idx]
         return self.load_one_grid(file_path, entry_name)
 
@@ -640,36 +658,34 @@ class GridDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
         """
-
-        feature_data = []
-
-        with h5py.File(hdf5_path, 'r') as hdf5_file:
+        with h5py.File(hdf5_path, "r") as hdf5_file:
             grp = hdf5_file[entry_name]
 
             mapped_features_group = grp[gridstorage.MAPPED_FEATURES]
-            for feature_name in self.features:
-                if feature_name[0] != '_':  # ignore metafeatures
-                    feature_data.append(mapped_features_group[feature_name][:])
-            x=torch.tensor(np.expand_dims(np.array(feature_data), axis=0), dtype=torch.float)
+
+            feature_data = [mapped_features_group[feature_name][:] for feature_name in self.features if feature_name[0] != "_"]
+            x = torch.tensor(np.expand_dims(np.array(feature_data), axis=0), dtype=torch.float)
 
             # target
             if self.target is None:
                 y = None
-            else:
-                if targets.VALUES in grp and self.target in grp[targets.VALUES]:
-                    y = torch.tensor([grp[targets.VALUES][self.target][()]], dtype=torch.float)
+            elif targets.VALUES in grp and self.target in grp[targets.VALUES]:
+                y = torch.tensor([grp[targets.VALUES][self.target][()]], dtype=torch.float)
 
-                    if self.task == targets.REGRESS and self.target_transform is True:
-                        y = torch.sigmoid(torch.log(y))
-                    elif self.task is not targets.REGRESS and self.target_transform is True:
-                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. \
-                                         Please change `task` to \"regress\" or set `target_transform` to `False`.")
-                else:
-                    y = None
-                    possible_targets = grp[targets.VALUES].keys()
-                    if self.train_source is None:
-                        raise ValueError(f"Target {self.target} missing in entry {entry_name} in file {hdf5_path}, possible targets are {possible_targets}." +
-                                        "\n Use the query class to add more target values to input data.")
+                if self.task == targets.REGRESS and self.target_transform is True:
+                    y = torch.sigmoid(torch.log(y))
+                elif self.task is not targets.REGRESS and self.target_transform is True:
+                    raise ValueError(
+                        f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
+                    )
+            else:
+                y = None
+                possible_targets = grp[targets.VALUES].keys()
+                if self.train_source is None:
+                    raise ValueError(
+                        f"Target {self.target} missing in entry {entry_name} in file {hdf5_path}, possible targets are {possible_targets}.\n\t"
+                        "Use the query class to add more target values to input data."
+                    )
 
         # Wrap up the data in this object, for the collate_fn to handle it properly:
         data = Data(x=x, y=y)
@@ -679,7 +695,7 @@ class GridDataset(DeeprankDataset):
 
 
 class GraphDataset(DeeprankDataset):
-    def __init__( # noqa: MC0001, pylint: disable=too-many-arguments, too-many-locals
+    def __init__(
         self,
         hdf5_path: str | list,
         subset: list[str] | None = None,
@@ -765,15 +781,21 @@ class GraphDataset(DeeprankDataset):
             check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
                 Defaults to True.
         """
+        super().__init__(
+            hdf5_path,
+            subset,
+            train_source,
+            target,
+            target_transform,
+            target_filter,
+            task,
+            classes,
+            use_tqdm,
+            root,
+            check_integrity,
+        )
 
-        super().__init__(hdf5_path, subset, train_source, target, target_transform,
-                         target_filter, task, classes, use_tqdm, root, check_integrity)
-
-        self.default_vars = {
-            k: v.default
-            for k, v in inspect.signature(self.__init__).parameters.items()
-            if v.default is not inspect.Parameter.empty
-        }
+        self.default_vars = {k: v.default for k, v in inspect.signature(self.__init__).parameters.items() if v.default is not inspect.Parameter.empty}
         self.default_vars["classes_to_index"] = None
         self.node_features = node_features
         self.edge_features = edge_features
@@ -782,8 +804,16 @@ class GraphDataset(DeeprankDataset):
         self.features_transform = features_transform
 
         if train_source is not None:
-            self.inherited_params = ["node_features", "edge_features", "features_transform", "target",
-                                     "target_transform", "task", "classes", "classes_to_index"]
+            self.inherited_params = [
+                "node_features",
+                "edge_features",
+                "features_transform",
+                "target",
+                "target_transform",
+                "task",
+                "classes",
+                "classes_to_index",
+            ]
             self._check_and_inherit_train(GraphDataset, self.inherited_params)
             self._check_features()
 
@@ -793,9 +823,9 @@ class GraphDataset(DeeprankDataset):
 
             try:
                 fname, mol = self.index_entries[0]
-            except IndexError as exc:
-                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from exc
-            with h5py.File(fname, 'r') as f5:
+            except IndexError as e:
+                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from e
+            with h5py.File(fname, "r") as f5:
                 grp = f5[mol]
                 possible_targets = grp[targets.VALUES].keys()
                 if self.target is None:
@@ -834,11 +864,10 @@ class GraphDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
-
         fname, mol = self.index_entries[idx]
         return self.load_one_graph(fname, mol)
 
-    def load_one_graph(self, fname: str, entry_name: str)  -> Data: # pylint: disable = too-many-locals # noqa: MC0001
+    def load_one_graph(self, fname: str, entry_name: str) -> Data:  # noqa: PLR0915 (too-many-statements)
         """Loads one graph.
 
         Args:
@@ -848,50 +877,48 @@ class GraphDataset(DeeprankDataset):
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
         """
-
-        with h5py.File(fname, 'r') as f5:
+        with h5py.File(fname, "r") as f5:
             grp = f5[entry_name]
 
             # node features
             if len(self.node_features) > 0:
                 node_data = ()
                 for feat in self.node_features:
-
                     # resetting transformation and standardization for each feature
                     transform = None
                     standard = None
 
-                    if feat[0] != '_':  # ignore metafeatures
+                    if feat[0] != "_":  # ignore metafeatures
                         vals = grp[f"{Nfeat.NODE}/{feat}"][()]
                         # get feat transformation and standardization
-                        if (self.features_transform is not None):
-                            transform = self.features_transform.get('all', {}).get('transform')
-                            standard = self.features_transform.get('all', {}).get('standardize')
+                        if self.features_transform is not None:
+                            transform = self.features_transform.get("all", {}).get("transform")
+                            standard = self.features_transform.get("all", {}).get("standardize")
                             # if no transformation is set for all features, check if one is set for the current feature
                             if (transform is None) and (feat in self.features_transform):
-                                transform = self.features_transform.get(feat, {}).get('transform')
+                                transform = self.features_transform.get(feat, {}).get("transform")
                             # if no standardization is set for all features, check if one is set for the current feature
                             if (standard is None) and (feat in self.features_transform):
-                                standard = self.features_transform.get(feat, {}).get('standardize')
+                                standard = self.features_transform.get(feat, {}).get("standardize")
 
                         # apply transformation
                         if transform:
                             with warnings.catch_warnings(record=True) as w:
                                 vals = transform(vals)
-                                if (len(w) > 0):
-                                    raise ValueError(f"Invalid value occurs in {entry_name}, file {fname},"
-                                                     f"when applying {transform} for feature {feat}."
-                                                     f"Please change the transformation function for {feat}.")
+                                if len(w) > 0:
+                                    raise ValueError(
+                                        f"Invalid value occurs in {entry_name}, file {fname},when applying {transform} for feature {feat}.\n\t"
+                                        f"Please change the transformation function for {feat}."
+                                    )
 
-                        if vals.ndim == 1: # features with only one channel
+                        if vals.ndim == 1:  # features with only one channel
                             vals = vals.reshape(-1, 1)
                             if standard:
-                                vals = (vals-self.means[feat])/self.devs[feat]
-                        else:
-                            if standard:
-                                reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
-                                reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
-                                vals = (vals - reshaped_mean)/reshaped_dev
+                                vals = (vals - self.means[feat]) / self.devs[feat]
+                        elif standard:
+                            reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
+                            reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
+                            vals = (vals - reshaped_mean) / reshaped_dev
                         node_data += (vals,)
                 x = torch.tensor(np.hstack(node_data), dtype=torch.float)
             else:
@@ -913,42 +940,41 @@ class GraphDataset(DeeprankDataset):
             if len(self.edge_features) > 0:
                 edge_data = ()
                 for feat in self.edge_features:
-
                     # resetting transformation and standardization for each feature
                     transform = None
                     standard = None
 
-                    if feat[0] != '_':   # ignore metafeatures
+                    if feat[0] != "_":  # ignore metafeatures
                         vals = grp[f"{Efeat.EDGE}/{feat}"][()]
                         # get feat transformation and standardization
-                        if (self.features_transform is not None):
-                            transform = self.features_transform.get('all', {}).get('transform')
-                            standard = self.features_transform.get('all', {}).get('standardize')
+                        if self.features_transform is not None:
+                            transform = self.features_transform.get("all", {}).get("transform")
+                            standard = self.features_transform.get("all", {}).get("standardize")
                             # if no transformation is set for all features, check if one is set for the current feature
                             if (transform is None) and (feat in self.features_transform):
-                                transform = self.features_transform.get(feat, {}).get('transform')
+                                transform = self.features_transform.get(feat, {}).get("transform")
                             # if no standardization is set for all features, check if one is set for the current feature
                             if (standard is None) and (feat in self.features_transform):
-                                standard = self.features_transform.get(feat, {}).get('standardize')
+                                standard = self.features_transform.get(feat, {}).get("standardize")
 
                         # apply transformation
                         if transform:
                             with warnings.catch_warnings(record=True) as w:
                                 vals = transform(vals)
-                                if (len(w) > 0):
-                                    raise ValueError(f"Invalid value occurs in {entry_name}, file {fname},"
-                                                     f"when applying {transform} for feature {feat}."
-                                                     f"Please change the transformation function for {feat}.")
+                                if len(w) > 0:
+                                    raise ValueError(
+                                        f"Invalid value occurs in {entry_name}, file {fname}, when applying {transform} for feature {feat}.\n\t"
+                                        f"Please change the transformation function for {feat}."
+                                    )
 
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
                             if standard:
-                                vals = (vals-self.means[feat])/self.devs[feat]
-                        else:
-                            if standard:
-                                reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
-                                reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
-                                vals = (vals - reshaped_mean)/reshaped_dev
+                                vals = (vals - self.means[feat]) / self.devs[feat]
+                        elif standard:
+                            reshaped_mean = [mean_value for mean_key, mean_value in self.means.items() if feat in mean_key]
+                            reshaped_dev = [dev_value for dev_key, dev_value in self.devs.items() if feat in dev_key]
+                            vals = (vals - reshaped_mean) / reshaped_dev
                         edge_data += (vals,)
                 edge_data = np.hstack(edge_data)
                 edge_data = np.vstack((edge_data, edge_data))
@@ -959,22 +985,24 @@ class GraphDataset(DeeprankDataset):
             # target
             if self.target is None:
                 y = None
+            elif targets.VALUES in grp and self.target in grp[targets.VALUES]:
+                y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous()
+
+                if self.task == targets.REGRESS and self.target_transform is True:
+                    y = torch.sigmoid(torch.log(y))
+                elif self.task is not targets.REGRESS and self.target_transform is True:
+                    raise ValueError(
+                        f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
+                    )
+
             else:
-                if targets.VALUES in grp and self.target in grp[targets.VALUES]:
-                    y = torch.tensor([grp[f"{targets.VALUES}/{self.target}"][()]], dtype=torch.float).contiguous()
-
-                    if self.task == targets.REGRESS and self.target_transform is True:
-                        y = torch.sigmoid(torch.log(y))
-                    elif self.task is not targets.REGRESS and self.target_transform is True:
-                        raise ValueError(f"Sigmoid transformation is not possible for {self.task} tasks. \
-                                         Please change `task` to \"regress\" or set `target_transform` to `False`.")
-
-                else:
-                    y = None
-                    possible_targets = grp[targets.VALUES].keys()
-                    if self.train_source is None:
-                        raise ValueError(f"Target {self.target} missing in entry {entry_name} in file {fname}, possible targets are {possible_targets}." +
-                                        "\n Use the query class to add more target values to input data.")
+                y = None
+                possible_targets = grp[targets.VALUES].keys()
+                if self.train_source is None:
+                    raise ValueError(
+                        f"Target {self.target} missing in entry {entry_name} in file {fname}, possible targets are {possible_targets}.\n\t"
+                        "Use the query class to add more target values to input data."
+                    )
 
             # positions
             pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous()
@@ -982,22 +1010,21 @@ class GraphDataset(DeeprankDataset):
             # cluster
             cluster0 = None
             cluster1 = None
-            if self.clustering_method is not None:
-                if 'clustering' in grp.keys():
-                    if self.clustering_method in grp["clustering"].keys():
-                        if (
-                            "depth_0" in grp[f"clustering/{self.clustering_method}"].keys() and
-                            "depth_1" in grp[f"clustering/{self.clustering_method}"].keys()
-                            ):
-
-                            cluster0 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_0"][()], dtype=torch.long)
-                            cluster1 = torch.tensor(
-                                grp["clustering/" + self.clustering_method + "/depth_1"][()], dtype=torch.long)
-                        else:
-                            _log.warning("no clusters detected")
+            if self.clustering_method is not None and "clustering" in grp:
+                if self.clustering_method in grp["clustering"]:
+                    if "depth_0" in grp[f"clustering/{self.clustering_method}"] and "depth_1" in grp[f"clustering/{self.clustering_method}"]:
+                        cluster0 = torch.tensor(
+                            grp["clustering/" + self.clustering_method + "/depth_0"][()],
+                            dtype=torch.long,
+                        )
+                        cluster1 = torch.tensor(
+                            grp["clustering/" + self.clustering_method + "/depth_1"][()],
+                            dtype=torch.long,
+                        )
                     else:
-                        _log.warning(f"no clustering/{self.clustering_method} detected")
+                        _log.warning("no clusters detected")
+                else:
+                    _log.warning(f"no clustering/{self.clustering_method} detected")
 
         # load
         data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, pos=pos)
@@ -1009,18 +1036,18 @@ class GraphDataset(DeeprankDataset):
 
         return data
 
-    def _check_features(self): #pylint: disable=too-many-branches
-        """Checks if the required features exist"""
+    def _check_features(self):
+        """Checks if the required features exist."""
         f = h5py.File(self.hdf5_paths[0], "r")
-        mol_key = list(f.keys())[0]
+        mol_key = next(iter(f.keys()))
 
         # read available node features
         self.available_node_features = list(f[f"{mol_key}/{Nfeat.NODE}/"].keys())
-        self.available_node_features = [key for key in self.available_node_features if key[0] != '_']  # ignore metafeatures
+        self.available_node_features = [key for key in self.available_node_features if key[0] != "_"]  # ignore metafeatures
 
         # read available edge features
         self.available_edge_features = list(f[f"{mol_key}/{Efeat.EDGE}/"].keys())
-        self.available_edge_features = [key for key in self.available_edge_features if key[0] != '_']  # ignore metafeatures
+        self.available_edge_features = [key for key in self.available_edge_features if key[0] != "_"]  # ignore metafeatures
 
         f.close()
 
@@ -1059,8 +1086,10 @@ class GraphDataset(DeeprankDataset):
         # raise error if any features are missing
         if missing_node_features + missing_edge_features:
             miss_node_error, miss_edge_error = "", ""
-            _log.info("\nCheck feature_modules passed to the preprocess function.\
-                Probably, the feature wasn't generated during the preprocessing step.")
+            _log.info(
+                "\nCheck feature_modules passed to the preprocess function.\
+                Probably, the feature wasn't generated during the preprocessing step."
+            )
             if missing_node_features:
                 _log.info(f"\nAvailable node features: {self.available_node_features}\n")
                 miss_node_error = f"\nMissing node features: {missing_node_features} \
@@ -1070,18 +1099,14 @@ class GraphDataset(DeeprankDataset):
                 miss_edge_error = f"\nMissing edge features: {missing_edge_features} \
                                     \nAvailable edge features: {self.available_edge_features}"
             raise ValueError(
-                f"Not all features could be found in the file {self.hdf5_paths[0]}.\
-                    \nCheck feature_modules passed to the preprocess function. \
-                    \nProbably, the feature wasn't generated during the preprocessing step. \
-                    {miss_node_error}{miss_edge_error}")
+                f"Not all features could be found in the file {self.hdf5_paths[0]}.\n\t"
+                "Check feature_modules passed to the preprocess function.\n\t"
+                "Probably, the feature wasn't generated during the preprocessing step.\n\t"
+                f"{miss_node_error}{miss_edge_error}"
+            )
 
 
-def save_hdf5_keys(
-    f_src_path: str,
-    src_ids: list[str],
-    f_dest_path: str,
-    hardcopy = False
-    ):
+def save_hdf5_keys(f_src_path: str, src_ids: list[str], f_dest_path: str, hardcopy=False):
     """Save references to keys in src_ids in a new .HDF5 file.
 
     Args:
@@ -1096,9 +1121,9 @@ def save_hdf5_keys(
     if not all(isinstance(d, str) for d in src_ids):
         raise TypeError("data_ids should be a list containing strings.")
 
-    with h5py.File(f_dest_path,'w') as f_dest, h5py.File(f_src_path,'r') as f_src:
+    with h5py.File(f_dest_path, "w") as f_dest, h5py.File(f_src_path, "r") as f_src:
         for key in src_ids:
             if hardcopy:
-                f_src.copy(f_src[key],f_dest)
+                f_src.copy(f_src[key], f_dest)
             else:
                 f_dest[key] = h5py.ExternalLink(f_src_path, "/" + key)
