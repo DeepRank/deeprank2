@@ -42,9 +42,13 @@ coverage report
 
 `coverage` can also generate output in HTML and other formats; see `coverage help` for more information.
 
-## Linting
+## Linting and Formatting
 
-We use [prospector](https://pypi.org/project/prospector/) with pyroma for linting. For running it locally, use `prospector` or `prospector <filepath_or_folderpath>` for specific files/folders.
+We use [ruff](https://docs.astral.sh/ruff/) for linting, sorting imports and formatting of python (notebook) files. The configurations of `ruff` are set in [pyproject.toml](pyproject.toml) file.
+
+If you are using VS code, please install and activate the [Ruff extension](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) to automatically format and check linting.
+
+Otherwise, please ensure check both linting (`ruff fix .`) and formatting (`ruff format .`) before requesting a review.
 
 ## Versioning
 
@@ -56,26 +60,26 @@ We use a [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)-in
 - `main` — this branch contains production (stable) code. All development code is merged into `main` in sometime.
 - `dev` — this branch contains pre-production code. When the features are finished then they are merged into `dev`.
 During the development cycle, three main supporting branches are used:
-- Feature branches - Branches that branch off from `dev` and must merge into `dev`: used to develop new features for the upcoming releases. 
+- Feature branches - Branches that branch off from `dev` and must merge into `dev`: used to develop new features for the upcoming releases.
 - Hotfix branches - Branches that branch off from `main` and must merge into `main` and `dev`: necessary to act immediately upon an undesired status of `main`.
 - Release branches - Branches that branch off from `dev` and must merge into `main` and `dev`: support preparation of a new production release. They allow many minor bug to be fixed and preparation of meta-data for a release.
 
-### Development conventions 
+### Development conventions
 
 - Branching
   - When creating a new branch, please use the following convention: `<issue_number>_<description>_<author_name>`.
-  - Always branch from `dev` branch, unless there is the need to fix an undesired status of `main`. See above for more details about the branching workflow adopted. 
+  - Always branch from `dev` branch, unless there is the need to fix an undesired status of `main`. See above for more details about the branching workflow adopted.
 - Pull Requests
   - When creating a pull request, please use the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
 
-## Making a release 
+## Making a release
 
 1. Branch from `dev` and prepare the branch for the release (e.g., removing the unnecessary dev files such as the current one, fix minor bugs if necessary).
-2. [Bump the version](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#versioning). 
+2. [Bump the version](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#versioning).
 3. Verify that the information in `CITATION.cff` is correct (update the release date), and that `.zenodo.json` contains equivalent data.
 5. Merge the release branch into `main` (and `dev`), and [run the tests](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#running-the-tests).
 6. Go to https://github.com/DeepRank/deeprank2/releases and draft a new release; create a new tag for the release, generate release notes automatically and adjust them, and finally publish the release as latest. This will trigger [a GitHub action](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.
-7. Update the doi in `CITATION.cff` with the one corresponding to the new release. 
+7. Update the doi in `CITATION.cff` with the one corresponding to the new release.
 
 ## UML
 

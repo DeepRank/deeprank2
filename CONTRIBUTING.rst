@@ -37,6 +37,8 @@ You want to make some kind of change to the code base
 #. if needed, fork the repository to your own Github profile and create your own feature branch off of the latest main commit. While working on your feature branch, make sure to stay up to date with the main branch by pulling in changes, possibly from the 'upstream' repository (follow the instructions `here <https://help.github.com/articles/configuring-a-remote-for-a-fork/>`__ and `here <https://help.github.com/articles/syncing-a-fork/>`__);
 #. make sure the existing tests still work by running ``python setup.py test``;
 #. add your own tests (if necessary);
+#. ensure the code is correctly linted (`ruff .`) and formatted (`ruff format .`);
+#. see our `developer's readme <README.dev.md>`` for detailed information on our style conventions, etc.;
 #. update or expand the documentation;
 #. `push <http://rogerdudler.github.io/git-guide/>`_ your feature branch to (your fork of) the DeepRank2 repository on GitHub;
 #. create the pull request, e.g. following the instructions `here <https://help.github.com/articles/creating-a-pull-request/>`__.
