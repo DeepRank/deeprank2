@@ -1,15 +1,19 @@
 {
+    // Python
     "[python]": {
+        "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": true
+            "source.fixAll": "explicit"
         },
-        "files.trimTrailingWhitespace": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
+    "autoDocstring.docstringFormat": "google",
 
-    "python.linting.prospectorEnabled": true,
+    // Notebooks
     "notebook.lineNumbers": "on",
-
-    "[*.yml]": {
-        "files.trimTrailingWhitespace": true,
+    "notebook.formatOnSave.enabled": true,
+    "notebook.codeActionsOnSave": {
+        "notebook.source.fixAll": "explicit",
     },
+    "notebook.diff.ignoreMetadata": true,
 }
