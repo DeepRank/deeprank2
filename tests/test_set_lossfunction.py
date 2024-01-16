@@ -94,19 +94,21 @@ class TestLosses(unittest.TestCase):
         assert isinstance(trainer_pretrained.lossfunction, lossfunction)
         assert trainer_pretrained.class_weights
 
-    # def test_classif_invalid_weighted(self):
-    #     dataset = GraphDataset(hdf5_path,
-    #         target=targets.BINARY)
-    #     trainer = Trainer(
-    #         neuralnet = NaiveNetwork,
-    #         dataset_train = dataset,
-    #         class_weights = True
-    #     )
-    #     # use a loss function that does not allow for weighted loss, e.g. MultiLabelMarginLoss
-    #     lossfunction = nn.MultiLabelMarginLoss
+    def test_classif_invalid_weighted(self):
+        dataset = GraphDataset(
+            hdf5_path,
+            target=targets.BINARY,
+        )
+        trainer = Trainer(
+            neuralnet=NaiveNetwork,
+            dataset_train=dataset,
+            class_weights=True,
+        )
+        # use a loss function that does not allow for weighted loss, e.g. MultiLabelMarginLoss
+        lossfunction = nn.MultiLabelMarginLoss
 
-    #     with pytest.raises(ValueError):
-    #         base_test(self.save_path, trainer, lossfunction)
+        with pytest.raises(ValueError):
+            base_test(self.save_path, trainer, lossfunction)
 
     def test_classif_invalid_lossfunction(self):
         dataset = GraphDataset(

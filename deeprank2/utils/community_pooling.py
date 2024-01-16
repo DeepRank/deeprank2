@@ -86,7 +86,6 @@ def community_detection_per_batch(
 
         else:
             raise ValueError(f"Clustering method {method} not supported")
-    # return
     device = edge_index.device
     return torch.tensor(cluster).to(device)
 

@@ -100,7 +100,6 @@ class SGAT(torch.nn.Module):
     def forward(self, data):
         act = nn.Tanhshrink()
         act = F.relu
-        # act = nn.LeakyReLU(0.25)
 
         # first conv block
         data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))
@@ -116,7 +115,5 @@ class SGAT(torch.nn.Module):
         x = scatter_mean(x, batch, dim=0)
         x = act(self.fc1(x))
         x = self.fc2(x)
-        # x = F.dropout(x, training=self.training)
 
         return x  # noqa:RET504 (unnecessary-assign)
-        # return F.relu(x)

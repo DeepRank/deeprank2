@@ -48,11 +48,7 @@ class FoutLayer(torch.nn.Module):
 
     def forward(self, x, edge_index):
         num_node = len(x)
-
-        # alpha = x * Wc
         alpha = torch.mm(x, self.wc)
-
-        # beta = x * Wn
         beta = torch.mm(x, self.wn)
 
         # gamma_i = 1/Ni Sum_j x_j * Wn
@@ -62,7 +58,6 @@ class FoutLayer(torch.nn.Module):
             index = edge_index[:, edge_index[0, :] == n][1, :]
             gamma[n, :] = torch.mean(beta[index, :], dim=0)
 
-        # alpha = alpha + gamma
         alpha = alpha + gamma
 
         # add the bias
@@ -95,7 +90,6 @@ class FoutNet(torch.nn.Module):
     def forward(self, data):
         act = nn.Tanhshrink()
         act = F.relu
-        # act = nn.LeakyReLU(0.25)
 
         # first conv block
         data.x = act(self.conv1(data.x, data.edge_index))
@@ -111,7 +105,5 @@ class FoutNet(torch.nn.Module):
         x = scatter_mean(x, batch, dim=0)
         x = act(self.fc1(x))
         x = self.fc2(x)
-        # x = F.dropout(x, training=self.training)
 
         return x  # noqa:RET504 (unnecessary-assign)
-        # return F.relu(x)

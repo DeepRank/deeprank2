@@ -74,8 +74,8 @@ grid_settings = GridSettings(  # None if you don't want grids
     sizes=[1.0, 1.0, 1.0],
 )
 grid_map_method = MapMethod.GAUSSIAN  # None if you don't want grids
-# grid_settings = None
-# grid_map_method = None
+# grid_settings = None  # noqa: ERA001 (commented out code)
+# grid_map_method = None  # noqa: ERA001 (commented out code)
 feature_modules = [components, contact, exposure, irc, surfacearea, secondary_structure]
 cpu_count = 1
 ####################################################
