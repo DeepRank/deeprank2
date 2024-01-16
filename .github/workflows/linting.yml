@@ -45,5 +45,5 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test
-      - name: Check style against standards using prospector
-        run: prospector --die-on-tool-error
+      - name: Check style against standards using ruff
+        run: ruff .
