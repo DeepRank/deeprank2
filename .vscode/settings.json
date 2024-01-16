@@ -1,19 +1,23 @@
 {
-    // Python
-    "[python]": {
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "explicit"
-        },
-        "editor.defaultFormatter": "charliermarsh.ruff"
+  // Python
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
     },
-    "autoDocstring.docstringFormat": "google",
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "autoDocstring.docstringFormat": "google",
 
-    // Notebooks
-    "notebook.lineNumbers": "on",
-    "notebook.formatOnSave.enabled": true,
-    "notebook.codeActionsOnSave": {
-        "notebook.source.fixAll": "explicit",
-    },
-    "notebook.diff.ignoreMetadata": true,
+  // Notebooks
+  "notebook.lineNumbers": "on",
+  "notebook.formatOnSave.enabled": true,
+  "notebook.codeActionsOnSave": {
+    "notebook.source.fixAll": "explicit"
+  },
+  "notebook.diff.ignoreMetadata": true,
+
+  // Format all files on save
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

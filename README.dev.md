@@ -50,6 +50,8 @@ If you are using VS code, please install and activate the [Ruff extension](https
 
 Otherwise, please ensure check both linting (`ruff fix .`) and formatting (`ruff format .`) before requesting a review.
 
+We use [prettier](https://prettier.io/) for formatting most other files. If you are editing or adding non-python files and using VS code, the [Prettier extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) can be installed to auto-format these files as well.
+
 ## Versioning
 
 Bumping the version across all files is done before creating a new package release, running `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings.
@@ -57,9 +59,12 @@ Bumping the version across all files is done before creating a new package relea
 ## Branching workflow
 
 We use a [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)-inspired branching workflow for development. DeepRank2's repository is based on two main branches with infinite lifetime:
+
 - `main` — this branch contains production (stable) code. All development code is merged into `main` in sometime.
 - `dev` — this branch contains pre-production code. When the features are finished then they are merged into `dev`.
+
 During the development cycle, three main supporting branches are used:
+
 - Feature branches - Branches that branch off from `dev` and must merge into `dev`: used to develop new features for the upcoming releases.
 - Hotfix branches - Branches that branch off from `main` and must merge into `main` and `dev`: necessary to act immediately upon an undesired status of `main`.
 - Release branches - Branches that branch off from `dev` and must merge into `main` and `dev`: support preparation of a new production release. They allow many minor bug to be fixed and preparation of meta-data for a release.
@@ -77,12 +82,13 @@ During the development cycle, three main supporting branches are used:
 1. Branch from `dev` and prepare the branch for the release (e.g., removing the unnecessary dev files such as the current one, fix minor bugs if necessary).
 2. [Bump the version](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#versioning).
 3. Verify that the information in `CITATION.cff` is correct (update the release date), and that `.zenodo.json` contains equivalent data.
-5. Merge the release branch into `main` (and `dev`), and [run the tests](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#running-the-tests).
-6. Go to https://github.com/DeepRank/deeprank2/releases and draft a new release; create a new tag for the release, generate release notes automatically and adjust them, and finally publish the release as latest. This will trigger [a GitHub action](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.
-7. Update the doi in `CITATION.cff` with the one corresponding to the new release.
+4. Merge the release branch into `main` (and `dev`), and [run the tests](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#running-the-tests).
+5. Go to https://github.com/DeepRank/deeprank2/releases and draft a new release; create a new tag for the release, generate release notes automatically and adjust them, and finally publish the release as latest. This will trigger [a GitHub action](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.
+6. Update the doi in `CITATION.cff` with the one corresponding to the new release.
 
 ## UML
 
 Code-base class diagrams updated on 02/11/2023, generated with https://www.gituml.com (save the images and open them in the browser for zooming).
+
 - Data processing classes and functions: <img src="./tests/utils/uml_data_processing.svg" width="50">
 - ML pipeline classes and functions: <img src="./tests/utils/uml_training.svg" width="50">
