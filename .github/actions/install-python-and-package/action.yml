@@ -29,7 +29,7 @@ runs:
       with:
         update-conda: true
         python-version: ${{ inputs.python-version }}
-        conda-channels: anaconda
+        # conda-channels: anaconda
     - run: conda --version
       shell: bash {0}
     - name: Python info
@@ -44,7 +44,7 @@ runs:
       if: runner.os == 'Linux'
       run: |
         conda env create -f ./env/environment.yml
-        conda activate deeprank2
+        conda activate deeprank2 || true
     - name: Install dependencies on MacOS
       shell: bash {0}
       env:
