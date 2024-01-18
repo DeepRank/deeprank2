@@ -45,6 +45,7 @@ runs:
       run: |
         conda env create -f ./env/environment.yml
         conda activate deeprank2 || true
+        conda init bash
     - name: Install dependencies on MacOS
       shell: bash {0}
       env:
