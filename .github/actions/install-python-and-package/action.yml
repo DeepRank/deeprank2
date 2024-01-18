@@ -43,17 +43,8 @@ runs:
         CMAKE_INSTALL_PREFIX: .local
       if: runner.os == 'Linux'
       run: |
-        # Install dependencies not handled by setuptools 
-        conda install -c conda-forge libgcc-ng
-        ## DSSP 
-        conda install -c sbl dssp
-        ## MSMS
-        conda install -c bioconda msms
-        ## PyTorch, PyG, PyG adds
-        ### Installing for CPU only on the CI
-        conda install pytorch torchvision torchaudio cpuonly -c pytorch
-        conda install pyg -c pyg
-        pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
+        conda env create -f ./env/environment.yml
+        conda activate deeprank2
     - name: Install dependencies on MacOS
       shell: bash {0}
       env:
