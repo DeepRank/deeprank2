@@ -3,4 +3,5 @@ torch_scatter==2.1.2
 torch_sparse==0.6.18
 torch_cluster==1.6.3
 torch_spline_conv==1.2.2
+pdb2sql>=0.5.1
 # deeprank2==2.1.2
