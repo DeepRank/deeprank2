@@ -1,3 +1,4 @@
+name: deeprank2
 channels:
   - pytorch
   - pyg
@@ -9,7 +10,6 @@ dependencies:
   - pip==23.3.*
   - msms==2.6.1
   - dssp==4.2.2.1
-  - biopython >= 1.81
   - pytorch==2.1.1
   - pytorch-mutex==1.0.*
   - torchvision==0.16.1
@@ -17,18 +17,5 @@ dependencies:
   - cpuonly==2.0.*
   - pyg==2.4.0
   - notebook==7.0.6
-  - h5py>=3.6.0
-  - numpy>=1.21.5
-  - scipy>=1.11.2
-  - tables>=3.8.0
-  - matplotlib>=3.5.1
-  - scikit-learn >= 1.0.2
-  - chart-studio >= 1.1.0
-  - python-louvain >= 0.16
-  - markov_clustering >= 0.0.6
-  - tqdm >= 4.63.0
-  - freesasa >= 2.1.0
-  - tensorboard >= 0.9.0
-  - protobuf >= 3.20.1
   - pip:
     - --requirement requirements.txt

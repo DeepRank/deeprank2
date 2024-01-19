@@ -2,10 +2,6 @@ name: "Install Python and DeepRank2"
 
 description: "Installs Python, updates pip and installs DeepRank2 together with its dependencies."
 
-defaults:
-  run:
-    shell: bash -el {0}
-
 inputs:
 
   python-version:
@@ -49,17 +45,16 @@ runs:
         CMAKE_INSTALL_PREFIX: .local
       if: runner.os == 'Linux'
       run: |
-        # Install dependencies not handled by setuptools 
-        conda env update --file env/environment.yml
-        # ## DSSP
-        # conda install -c sbl dssp=4.2.2.1
-        # ## MSMS
-        # conda install -c bioconda msms=2.6.1
-        # ## PyTorch, PyG, PyG adds
-        # ### Installing for CPU only on the CI
-        # conda install pytorch=2.1.1 torchvision=0.16.1 torchaudio=2.1.1 cpuonly=2.0.* -c pytorch
-        # conda install pyg=2.4.0 -c pyg
-        # pip install torch_scatter==2.1.2 torch_sparse==0.6.18 torch_cluster==1.6.3 torch_spline_conv==1.2.2 -f https://data.pyg.org/whl/torch-2.1.0+cpu.html
+        # Install deeprank2 conda dependencies
+        ## DSSP
+        conda install -c sbl dssp=4.2.2.1
+        ## MSMS
+        conda install -c bioconda msms=2.6.1
+        ## PyTorch, PyG, PyG adds
+        ### Installing for CPU only on the CI
+        conda install pytorch=2.1.1 torchvision=0.16.1 torchaudio=2.1.1 cpuonly=2.0.* -c pytorch
+        conda install pyg=2.4.0 -c pyg
+        pip install torch_scatter==2.1.2 torch_sparse==0.6.18 torch_cluster==1.6.3 torch_spline_conv==1.2.2 -f https://data.pyg.org/whl/torch-2.1.0+cpu.html
     - name: Install the package
       shell: bash {0}
       run: pip install .'[${{ inputs.extras-require }}]'
