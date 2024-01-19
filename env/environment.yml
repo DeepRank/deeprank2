@@ -5,10 +5,12 @@ channels:
   - bioconda
   - defaults
   - conda-forge
+  - sbl
 dependencies:
   - pip==23.3.*
   - python==3.10.*
   - msms==2.6.1
+  - dssp>=4.2.2.1
   - pytorch==2.1.1
   - pytorch-mutex==1.0.*
   - torchvision==0.16.1

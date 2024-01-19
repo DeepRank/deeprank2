@@ -12,10 +12,6 @@ RUN \
   apt install unzip -y && \
   ## GCC
   apt install -y gcc && \
-  ## DSSP
-  wget https://github.com/PDB-REDO/dssp/releases/download/v4.4.0/mkdssp-4.4.0-linux-x64 && \
-  mv mkdssp-4.4.0-linux-x64 /usr/local/bin/mkdssp && \
-  chmod a+x /usr/local/bin/mkdssp && \
   ## Conda and pip deps
   mamba env create -f /home/deeprank2/environment.yml && \
   ## Get the data for running the tutorials
