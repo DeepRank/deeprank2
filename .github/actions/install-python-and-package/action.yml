@@ -50,7 +50,7 @@ runs:
       if: runner.os == 'Linux'
       run: |
         # Install dependencies not handled by setuptools 
-        conda /usr/share/miniconda/envs/__setup_conda update --file env/environment.yml
+        conda env update --file env/environment.yml
         # ## DSSP
         # conda install -c sbl dssp=4.2.2.1
         # ## MSMS
