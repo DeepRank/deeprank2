@@ -33,7 +33,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10"
 ]
-
 dependencies = [
     "tables >= 3.8.0",
     "numpy >= 1.21.5",
