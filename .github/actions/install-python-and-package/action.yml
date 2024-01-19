@@ -2,6 +2,10 @@ name: "Install Python and DeepRank2"
 
 description: "Installs Python, updates pip and installs DeepRank2 together with its dependencies."
 
+defaults:
+  run:
+    shell: bash -el {0}
+
 inputs:
 
   python-version:
@@ -18,10 +22,6 @@ runs:
 
   using: "composite"
 
-  defaults:
-    run:
-      shell: bash -el {0}
-      
   steps:
     - name: Cancel Previous Runs and Set up Python
       uses: styfle/cancel-workflow-action@0.4.0
