@@ -30,20 +30,16 @@ After running the tutorials, you may want to remove the (quite large) Docker ima
 
 ### Non-pythonic dependencies
 
-Instructions are up to date as of 27 Nov 2023.
+Instructions are up to date as of 19 Jan 2024.
 
-Before installing deeprank2 you need to install some dependencies:
+Before installing DeepRank2 you need to install some dependencies:
 
-*  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
-    * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
-      * on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
-      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed. Alternatively, follow [this](https://github.com/PDB-REDO/libcifpp/issues/49) thread. 
 *  [GCC](https://gcc.gnu.org/install/)
     * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`. 
 
 ### Pythonic dependencies
 
-Instructions are up to date as of 27 Nov 2023.
+Instructions are up to date as of 19 Jan 2024.
 
 Then, you can use the YML file we provide for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of the package and all the other necessary conda and pip dependencies (CPU only, Python 3.10):
 
@@ -58,6 +54,7 @@ conda activate deeprank2
 
 Alternatively, if you are a MacOS user, if the YML file installation is not successfull, or if you want to use CUDA or Python 3.11, you can install each dependency separately, and then the latest stable release of the package using the PyPi package manager. Also in this case, we advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). In case of issues during installation, please refer to the official documentation for each package (linked below), as our instructions may be out of date:
 
+*  [DSSP 4](https://anaconda.org/sbl/dssp): `conda install -c sbl dssp`.
 *  [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`.
     * [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
 *  [PyTorch](https://pytorch.org/get-started/locally/)
