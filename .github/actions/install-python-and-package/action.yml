@@ -34,7 +34,9 @@ runs:
         update-conda: true
         python-version: ${{ inputs.python-version }}
         conda-channels: pytorch, pyg, bioconda, defaults, sbl, conda-forge
-    - run: conda --version
+    - run: |
+        conda --version
+        conda env list
       shell: bash {0}
     - name: Python info
       shell: bash -e {0}
