@@ -11,7 +11,7 @@ def test_atom_features():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
-        detail='atom',
+        detail="atom",
         influence_radius=10,
         max_edge_length=10,
         central_res=25,
@@ -25,7 +25,7 @@ def test_aminoacid_features():
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
-        detail='residue',
+        detail="residue",
         influence_radius=10,
         max_edge_length=10,
         central_res=25,

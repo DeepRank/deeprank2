@@ -13,7 +13,7 @@ See https://onlinelibrary.wiley.com/doi/abs/10.1002/prot.10393 for more details 
 
 ## Compute and add docking scores
 
-The following code snippet shows an example of how to use deeprank2 to compute the docking scores for a given docking model, and how to add one of the scores (e.g., `dockq`) as a target to the already processed data. 
+The following code snippet shows an example of how to use deeprank2 to compute the docking scores for a given docking model, and how to add one of the scores (e.g., `dockq`) as a target to the already processed data.
 
 ```python
 from deeprank2.tools.target import add_target, compute_ppi_scores
@@ -42,4 +42,4 @@ add_target("<path_to_hdf5_file.hdf5>", "dockq", "<path_to_target_list.lst>")
 
 ```
 
-After having run the above code snipped, each processed data point within the indicated HDF5 file will contain a new Dataset called "dockq", containing the value computed through `compute_ppi_scores`. 
+After having run the above code snipped, each processed data point within the indicated HDF5 file will contain a new Dataset called "dockq", containing the value computed through `compute_ppi_scores`.

@@ -1,13 +1,13 @@
 # Deeprank2
 
-| Badges | |
-|:----:|----|
-| **fairness** |  [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403) |
-| **package** |  [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank2?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank2&utm_campaign=Badge_Grade) |
-| **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
-| **tests** | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) ![Python](https://img.shields.io/badge/python-3.10-blue.svg)  ![Python](https://img.shields.io/badge/python-3.11-blue.svg) |
-| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) |
-| **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)  |
+|     Badges     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| :------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  **fairness**  | [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403)                                                                                                                                                                                                                 |
+|  **package**   | [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank2?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank2&utm_campaign=Badge_Grade)                                                                                                                                                                                                      |
+|    **docs**    | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)                                                                                                                                                                                                                                                                                              |
+|   **tests**    | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) ![Python](https://img.shields.io/badge/python-3.10-blue.svg) ![Python](https://img.shields.io/badge/python-3.11-blue.svg) |
+| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+|  **license**   | [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ## Overview
 
@@ -18,6 +18,7 @@ DeepRank2 is an open-source deep learning (DL) framework for data mining of prot
 DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
 
 Main features:
+
 - Predefined atom-level and residue-level feature types
   - e.g. atom/residue type, charge, size, potential energy
   - All features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html)
@@ -58,19 +59,19 @@ The package officially supports ubuntu-latest OS only, whose functioning is wide
 
 Before installing deeprank2 you need to install some dependencies. We advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) with Python >= 3.10 installed. The following dependency installation instructions are updated as of 14/09/2023, but in case of issues during installation always refer to the official documentation which is linked below:
 
-*  [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`.
-    * [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
-*  [PyTorch](https://pytorch.org/get-started/locally/)
-    * We support torch's CPU library as well as CUDA.
-    * Currently, the package is tested using [PyTorch 2.0.1](https://pytorch.org/get-started/previous-versions/#v201). 
-*  [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
-*  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
-    * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
-      * on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
-      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed. Alternatively, follow [this](https://github.com/PDB-REDO/libcifpp/issues/49) thread.
-*  [GCC](https://gcc.gnu.org/install/)
-    * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`.
-*  For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
+- [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`.
+  - [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
+- [PyTorch](https://pytorch.org/get-started/locally/)
+  - We support torch's CPU library as well as CUDA.
+  - Currently, the package is tested using [PyTorch 2.0.1](https://pytorch.org/get-started/previous-versions/#v201).
+- [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
+- [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
+  - Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
+    - on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
+    - on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed. Alternatively, follow [this](https://github.com/PDB-REDO/libcifpp/issues/49) thread.
+- [GCC](https://gcc.gnu.org/install/)
+  - Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`.
+- For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
 
 ## Deeprank2 Package
 
@@ -110,6 +111,7 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
 A `Query` takes as inputs:
+
 - a `.pdb` file, representing the protein-protein structure,
 - the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
@@ -335,7 +337,7 @@ from deeprank2.utils.exporters import HDF5OutputExporter
 
 trainer = Trainer(
     NaiveNetwork,
-    dataset_test = dataset_test, 
+    dataset_test = dataset_test,
     pretrained_model = "<pretrained_model_path>",
     output_exporters = [HDF5OutputExporter("<output_folder_path>")]
 )
@@ -350,10 +352,10 @@ For more details about how to run a pre-trained model on new data, see the [docs
 We measured the efficiency of data generation in DeepRank2 using the tutorials' [PDB files](https://zenodo.org/record/8187806) (~100 data points per data set), averaging the results run on Apple M1 Pro, using a single CPU.
 Parameter settings were: atomic resolution, `distance_cutoff` of 5.5 Å, radius (for SRV only) of 10 Å. The [features modules](https://deeprank2.readthedocs.io/en/latest/features.html) used were `components`, `contact`, `exposure`, `irc`, `secondary_structure`, `surfacearea`, for a total of 33 features for PPIs and 26 for SRVs (the latter do not use `irc` features).
 
-|      |         Data processing speed <br />[seconds/structure]        |                Memory <br />[megabyte/structure]               |
-|------|:--------------------------------------------------------:|:--------------------------------------------------------:|
+|      |            Data processing speed <br />[seconds/structure]             |                   Memory <br />[megabyte/structure]                    |
+| ---- | :--------------------------------------------------------------------: | :--------------------------------------------------------------------: |
 | PPIs | graph only: **2.99** (std 0.23) <br />graph+grid: **11.35** (std 1.30) | graph only: **0.54** (std 0.07) <br />graph+grid: **16.09** (std 0.44) |
-| SRVs | graph only: **2.20** (std 0.08)  <br />graph+grid: **2.85** (std 0.10) | graph only: **0.05** (std 0.01) <br />graph+grid: **17.52** (std 0.59) |
+| SRVs | graph only: **2.20** (std 0.08) <br />graph+grid: **2.85** (std 0.10)  | graph only: **0.05** (std 0.01) <br />graph+grid: **17.52** (std 0.59) |
 
 ## Package development
 

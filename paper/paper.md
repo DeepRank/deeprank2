@@ -1,5 +1,5 @@
 ---
-title: 'DeepRank2: Mining 3D Protein Structures with Geometric Deep Learning'
+title: "DeepRank2: Mining 3D Protein Structures with Geometric Deep Learning"
 tags:
   - Python
   - PyTorch
@@ -44,18 +44,18 @@ authors:
     orcid: 0000-0002-2613-538X
     affiliation: 2
 affiliations:
- - name: Netherlands eScience Center, Amsterdam, The Netherlands
-   index: 1
- - name: Department of Medical BioSciences, Radboud University Medical Center, Nijmegen, The Netherlands
-   index: 2
- - name: Independent Researcher
-   index: 3
+  - name: Netherlands eScience Center, Amsterdam, The Netherlands
+    index: 1
+  - name: Department of Medical BioSciences, Radboud University Medical Center, Nijmegen, The Netherlands
+    index: 2
+  - name: Independent Researcher
+    index: 3
 date: 08 August 2023
 bibliography: paper.bib
-
 ---
 
 # Summary
+
 [comment]: <> (CHECK FOR AUTHORS: Do the summary describe the high-level functionality and purpose of the software for a diverse, non-specialist audience?)
 
 We present DeepRank2, a deep learning (DL) framework geared towards making predictions on 3D protein structures for variety of biologically relevant applications. Our software can be used for predicting structural properties in drug design, immunotherapy, or designing novel proteins, among other fields. DeepRank2 allows for transformation and storage of 3D representations of both protein-protein interfaces (PPIs) and protein single-residue variants (SRVs) into either graphs or volumetric grids containing structural and physico-chemical information. These can be used for training neural networks for a variety of patterns of interest, using either our pre-implemented training pipeline for graph neural networks (GNNs) or convolutional neural networks (CNNs) or external pipelines. The entire framework flowchart is visualized in \autoref{fig:flowchart}. The package is fully open-source, follows the community-endorsed FAIR principles for research software, provides user-friendly APIs, publicily available [documentation](https://deeprank2.readthedocs.io/en/latest/), and in-depth [tutorials](https://github.com/DeepRank/deeprank2/blob/main/tutorials/TUTORIAL.md).
@@ -88,8 +88,9 @@ These limitations create a growing demand for a generic and flexible DL framewor
 DeepRank2 allows to transform and store 3D representations of both PPIs and SRVs into 3D grids or graphs containing both geometric and physico-chemical information, and provides a DL pipeline that can be used for training pre-implemented neural networks for a given pattern of interest to the user. DeepRank2 is an improved and unified version of three previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank), [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN), and [DeepRank-Mut](https://github.com/DeepRank/DeepRank-Mut).
 
 As input, DeepRank2 takes [PDB-formatted](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) atomic structures, which is one of the standard and most widely used formats in the field of structural biology. These are mapped to graphs, where nodes can represent either residues or atoms, as chosen by the user, and edges represent the interactions between them. The user can configure two types of 3D structures as input for the featurization phase:
--  PPIs, for mining interaction patterns within protein-protein complexes;
--  SRVs, for mining mutation phenotypes within protein structures.
+
+- PPIs, for mining interaction patterns within protein-protein complexes;
+- SRVs, for mining mutation phenotypes within protein structures.
 
 The physico-chemical and geometrical features are then computed and assigned to each node and edge. The user can choose which features to generate from several pre-existing options defined in the package, or define custom features modules, as explained in the documentation. Examples of pre-defined node features are the type of the amino acid, its size and polarity, as well as more complex features such as its buried surface area and secondary structure features. Examples of pre-defined edge features are distance, covalency, and potential energy. A detailed list of predefined features can be found in the [documentation's features page](https://deeprank2.readthedocs.io/en/latest/features.html). Graphs can either be used directly or mapped to volumetric grids (i.e., 3D image-like representations), together with their features. Multiple CPUs can be used to parallelize and speed up the featurization process. The processed data are saved into HDF5 files, designed to efficiently store and organize big data. Users can then use the data for any ML or DL framework suited for the application. Specifically, graphs can be used for the training of GNNs, and 3D grids can be used for the training of CNNs.
 

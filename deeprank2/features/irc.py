@@ -14,7 +14,7 @@ _log = logging.getLogger(__name__)
 
 
 def _id_from_residue(residue: tuple[str, int, str]) -> str:
-    """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes
+    """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes.
 
     Args:
         residue (tuple): Input residue as rendered by pdb2sql: ( str(<chain>), int(<residue_number>), str(<three_letter_code> )
@@ -23,22 +23,20 @@ def _id_from_residue(residue: tuple[str, int, str]) -> str:
     Returns:
         str: Output id in form of '<chain><residue_number>'. For example: 'A27'.
     """
-
     return residue[0] + str(residue[1])
 
 
 class _ContactDensity:
-    """Internal class that holds contact density information for a given residue.
-    """
+    """Internal class that holds contact density information for a given residue."""
 
     def __init__(self, residue: tuple[str, int, str], polarity: Polarity):
         self.res = residue
         self.polarity = polarity
         self.id = _id_from_residue(self.res)
         self.densities = {pol: 0 for pol in Polarity}
-        self.densities['total'] = 0
+        self.densities["total"] = 0
         self.connections = {pol: [] for pol in Polarity}
-        self.connections['all'] = []
+        self.connections["all"] = []
 
 
 def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str, _ContactDensity]:
@@ -54,14 +52,14 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
             keys: ids of residues in form returned by id_from_residue.
             items: _ContactDensity objects, containing all contact density information for the residue.
     """
-
     residue_contacts: dict[str, _ContactDensity] = {}
 
     sql = pdb2sql.interface(pdb_path)
     pdb2sql_contacts = sql.get_contact_residues(
         cutoff=cutoff,
-        chain1=chains[0], chain2=chains[1],
-        return_contact_pairs=True
+        chain1=chains[0],
+        chain2=chains[1],
+        return_contact_pairs=True,
     )
 
     for chain1_res, chain2_residues in pdb2sql_contacts.items():
@@ -83,9 +81,9 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
                 continue  # skip keys that are not an amino acid
 
             # populate densities and connections for chain1_res
-            residue_contacts[contact1_id].densities['total'] += 1
+            residue_contacts[contact1_id].densities["total"] += 1
             residue_contacts[contact1_id].densities[aa2.polarity] += 1
-            residue_contacts[contact1_id].connections['all'].append(chain2_res)
+            residue_contacts[contact1_id].connections["all"].append(chain2_res)
             residue_contacts[contact1_id].connections[aa2.polarity].append(chain2_res)
 
             # add chain2_res to residue_contact dict if it doesn't exist yet
@@ -94,9 +92,9 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
                 residue_contacts[contact2_id] = _ContactDensity(chain2_res, aa2.polarity)
 
             # populate densities and connections for chain2_res
-            residue_contacts[contact2_id].densities['total'] += 1
+            residue_contacts[contact2_id].densities["total"] += 1
             residue_contacts[contact2_id].densities[aa1.polarity] += 1
-            residue_contacts[contact2_id].connections['all'].append(chain1_res)
+            residue_contacts[contact2_id].connections["all"].append(chain1_res)
             residue_contacts[contact2_id].connections[aa1.polarity].append(chain1_res)
 
     return residue_contacts
@@ -107,10 +105,9 @@ def add_features(
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
 ):
-
     if not single_amino_acid_variant:  # VariantQueries do not use this feature
         polarity_pairs = list(combinations(Polarity, 2))
-        polarity_pair_string = [f'irc_{x[0].name.lower()}_{x[1].name.lower()}' for x in polarity_pairs]
+        polarity_pair_string = [f"irc_{x[0].name.lower()}_{x[1].name.lower()}" for x in polarity_pairs]
 
         total_contacts = 0
         residue_contacts = get_IRCs(pdb_path, graph.get_all_chains())
@@ -132,7 +129,7 @@ def add_features(
 
             # load correct values to IRC features
             try:
-                node.features[Nfeat.IRCTOTAL] = residue_contacts[contact_id].densities['total']
+                node.features[Nfeat.IRCTOTAL] = residue_contacts[contact_id].densities["total"]
                 for i, pair in enumerate(polarity_pairs):
                     if residue_contacts[contact_id].polarity == pair[0]:
                         node.features[polarity_pair_string[i]] = residue_contacts[contact_id].densities[pair[1]]

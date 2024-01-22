@@ -16,30 +16,29 @@ from tqdm import tqdm
 from deeprank2.dataset import GraphDataset, GridDataset
 from deeprank2.domain import losstypes as losses
 from deeprank2.domain import targetstorage as targets
-from deeprank2.utils.community_pooling import (community_detection,
-                                               community_pooling)
+from deeprank2.utils.community_pooling import community_detection, community_pooling
 from deeprank2.utils.earlystopping import EarlyStopping
-from deeprank2.utils.exporters import (HDF5OutputExporter, OutputExporter,
-                                       OutputExporterCollection)
+from deeprank2.utils.exporters import HDF5OutputExporter, OutputExporter, OutputExporterCollection
 
+# ruff: noqa: PYI041 (redundant-numeric-union), they are used differently in this module
 _log = logging.getLogger(__name__)
 
 
-class Trainer():
-    def __init__( # pylint: disable=too-many-arguments # noqa: MC0001
-                self,
-                neuralnet = None,
-                dataset_train: GraphDataset | GridDataset | None = None,
-                dataset_val: GraphDataset | GridDataset | None = None,
-                dataset_test: GraphDataset | GridDataset | None = None,
-                val_size: float | int | None = None,
-                test_size: float | int | None = None,
-                class_weights: bool = False,
-                pretrained_model: str | None = None,
-                cuda: bool = False,
-                ngpu: int = 0,
-                output_exporters: list[OutputExporter] | None = None,
-            ):
+class Trainer:
+    def __init__(  # noqa: PLR0915 (too-many-statements)
+        self,
+        neuralnet=None,
+        dataset_train: GraphDataset | GridDataset | None = None,
+        dataset_val: GraphDataset | GridDataset | None = None,
+        dataset_test: GraphDataset | GridDataset | None = None,
+        val_size: float | int | None = None,
+        test_size: float | int | None = None,
+        class_weights: bool = False,
+        pretrained_model: str | None = None,
+        cuda: bool = False,
+        ngpu: int = 0,
+        output_exporters: list[OutputExporter] | None = None,
+    ):
         """Class from which the network is trained, evaluated and tested.
 
         Args:
@@ -69,8 +68,7 @@ class Trainer():
         self.neuralnet = neuralnet
         self.pretrained_model = pretrained_model
 
-        self._init_datasets(dataset_train, dataset_val, dataset_test,
-                            val_size, test_size)
+        self._init_datasets(dataset_train, dataset_val, dataset_test, val_size, test_size)
 
         self.cuda = cuda
         self.ngpu = ngpu
@@ -87,14 +85,16 @@ class Trainer():
                     and that you are running on GPUs.\n
                 --> To turn CUDA off set cuda=False in Trainer.\n
                 --> Aborting the experiment \n\n'
-                """)
+                """
+            )
             raise ValueError(
                 """
                 --> CUDA not detected: Make sure that CUDA is installed
                     and that you are running on GPUs.\n
                 --> To turn CUDA off set cuda=False in Trainer.\n
                 --> Aborting the experiment \n\n'
-                """)
+                """
+            )
         else:
             self.device = torch.device("cpu")
             if self.ngpu > 0:
@@ -103,16 +103,18 @@ class Trainer():
                     --> CUDA not detected.
                         Set cuda=True in Trainer to turn CUDA on.\n
                     --> Aborting the experiment \n\n
-                    """)
+                    """
+                )
                 raise ValueError(
                     """
                     --> CUDA not detected.
                         Set cuda=True in Trainer to turn CUDA on.\n
                     --> Aborting the experiment \n\n
-                    """)
+                    """
+                )
 
         _log.info(f"Device set to {self.device}.")
-        if self.device.type == 'cuda':
+        if self.device.type == "cuda":
             _log.info(f"CUDA device name is {torch.cuda.get_device_name(0)}.")
             _log.info(f"Number of GPUs set to {self.ngpu}.")
 
@@ -144,7 +146,7 @@ class Trainer():
 
             # clustering the datasets
             if self.clustering_method is not None:
-                if self.clustering_method in ('mcl', 'louvain'):
+                if self.clustering_method in ("mcl", "louvain"):
                     _log.info("Loading clusters")
                     self._precluster(self.dataset_train)
 
@@ -152,15 +154,12 @@ class Trainer():
                         self._precluster(self.dataset_val)
                     else:
                         _log.warning("No validation dataset given. Randomly splitting training set in training set and validation set.")
-                        self.dataset_train, self.dataset_val = _divide_dataset(
-                            self.dataset_train, splitsize=self.val_size)
+                        self.dataset_train, self.dataset_val = _divide_dataset(self.dataset_train, splitsize=self.val_size)
 
                     if self.dataset_test is not None:
                         self._precluster(self.dataset_test)
                 else:
-                    raise ValueError(
-                        f"Invalid node clustering method: {self.clustering_method}\n\t"
-                        "Please set clustering_method to 'mcl', 'louvain' or None. Default to 'mcl' \n\t")
+                    raise ValueError(f"Invalid node clustering method: {self.clustering_method}. Please set clustering_method to 'mcl', 'louvain' or None.")
 
         else:
             if self.neuralnet is None:
@@ -181,9 +180,9 @@ class Trainer():
         if output_exporters is not None:
             self._output_exporters = OutputExporterCollection(*output_exporters)
         else:
-            self._output_exporters = OutputExporterCollection(HDF5OutputExporter('./output'))
+            self._output_exporters = OutputExporterCollection(HDF5OutputExporter("./output"))
 
-    def _init_datasets(  # pylint: disable=too-many-arguments
+    def _init_datasets(
         self,
         dataset_train: GraphDataset | GridDataset,
         dataset_val: GraphDataset | GridDataset | None,
@@ -191,7 +190,6 @@ class Trainer():
         val_size: int | float | None,
         test_size: int | float | None,
     ):
-
         self._check_dataset_equivalence(dataset_train, dataset_val, dataset_test)
 
         self.dataset_train = dataset_train
@@ -214,7 +212,6 @@ class Trainer():
                 _log.warning("Validation dataset was provided to Trainer; val_size parameter is ignored.")
 
     def _init_from_dataset(self, dataset: GraphDataset | GridDataset):
-
         if isinstance(dataset, GraphDataset):
             self.clustering_method = dataset.clustering_method
             self.node_features = dataset.node_features
@@ -243,14 +240,12 @@ class Trainer():
 
     def _load_model(self):
         """Loads the neural network model."""
-
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
         self.set_lossfunction()
 
     def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
         """Check dataset_train type and train_source parameter settings."""
-
         # dataset_train is None when pretrained_model is set
         if dataset_train is None:
             # only check the test dataset
@@ -259,49 +254,50 @@ class Trainer():
         else:
             # Make sure train dataset has valid type
             if not isinstance(dataset_train, GraphDataset) and not isinstance(dataset_train, GridDataset):
-                raise TypeError(f"""train dataset is not the right type {type(dataset_train)}
-                                Make sure it's either GraphDataset or GridDataset""")
+                raise TypeError(f"train dataset is not the right type {type(dataset_train)}. Make sure it's either GraphDataset or GridDataset")
 
             if dataset_val is not None:
-                self._check_dataset_value(dataset_train, dataset_val, type_dataset = "valid")
+                self._check_dataset_value(
+                    dataset_train,
+                    dataset_val,
+                    type_dataset="valid",
+                )
 
             if dataset_test is not None:
-                self._check_dataset_value(dataset_train, dataset_test, type_dataset = "test")
+                self._check_dataset_value(
+                    dataset_train,
+                    dataset_test,
+                    type_dataset="test",
+                )
 
     def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
         """Check valid/test dataset settings."""
-
         # Check train_source parameter in valid/test is set.
         if dataset_check.train_source is None:
-            raise ValueError(f"""{type_dataset} dataset has train_source parameter set to None.
-                        Make sure to set it as a valid training data source.""")
+            raise ValueError(f"{type_dataset} dataset has train_source parameter set to None. Make sure to set it as a valid training data source.")
         # Check train_source parameter in valid/test is equivalent to train which passed to Trainer.
         if dataset_check.train_source != dataset_train:
-            raise ValueError(f"""{type_dataset} dataset has different train_source parameter compared to the one given in Trainer.
-                        Make sure to assign equivalent train_source in Trainer""")
+            raise ValueError(
+                f"{type_dataset} dataset has different train_source parameter from Trainer. Make sure to assign equivalent train_source in Trainer."
+            )
 
     def _load_pretrained_model(self):
-        """
-        Loads pretrained model
-        """
-
-        self.test_loader = DataLoader(
-            self.dataset_test,
-            pin_memory=self.cuda)
+        """Loads pretrained model."""
+        self.test_loader = DataLoader(self.dataset_test, pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
         self._put_model_to_device(self.dataset_test)
 
         # load the model and the optimizer state
-        self.optimizer = self.optimizer(self.model.parameters(), lr=self.lr, weight_decay = self.weight_decay)
+        self.optimizer = self.optimizer(
+            self.model.parameters(),
+            lr=self.lr,
+            weight_decay=self.weight_decay,
+        )
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
     def _precluster(self, dataset: GraphDataset):
-        """Pre-clusters nodes of the graphs
-
-        Args:
-            dataset (:class:`GraphDataset`)
-        """
+        """Pre-clusters nodes of the graphs."""
         for fname, mol in tqdm(dataset.index_entries):
             data = dataset.load_one_graph(fname, mol)
 
@@ -310,7 +306,7 @@ class Trainer():
                 try:
                     _log.info(f"deleting {mol}")
                     del f5[mol]
-                except BaseException:
+                except BaseException:  # noqa: BLE001 (blind-except)
                     _log.info(f"{mol} not found")
                 f5.close()
                 continue
@@ -323,21 +319,17 @@ class Trainer():
                 del clust_grp[self.clustering_method.lower()]
 
             method_grp = clust_grp.create_group(self.clustering_method.lower())
-            cluster = community_detection(
-                data.edge_index, data.num_nodes, method=self.clustering_method
-            )
+            cluster = community_detection(data.edge_index, data.num_nodes, method=self.clustering_method)
             method_grp.create_dataset("depth_0", data=cluster.cpu())
             data = community_pooling(cluster, data)
-            cluster = community_detection(
-                data.edge_index, data.num_nodes, method=self.clustering_method
-            )
+            cluster = community_detection(data.edge_index, data.num_nodes, method=self.clustering_method)
             method_grp.create_dataset("depth_1", data=cluster.cpu())
 
             f5.close()
 
     def _put_model_to_device(self, dataset: GraphDataset | GridDataset):
         """
-        Puts the model on the available device
+        Puts the model on the available device.
 
         Args:
             dataset (:class:`GraphDataset` | :class:`GridDataset`): GraphDataset object.
@@ -345,7 +337,6 @@ class Trainer():
         Raises:
             ValueError: Incorrect output shape
         """
-
         # regression mode
         if self.task == targets.REGRESS:
             self.output_shape = 1
@@ -361,22 +352,15 @@ class Trainer():
             target_shape = None
 
         if isinstance(dataset, GraphDataset):
-
             num_node_features = dataset.get(0).num_features
             num_edge_features = len(dataset.edge_features)
 
-            self.model = self.neuralnet(
-                num_node_features,
-                self.output_shape,
-                num_edge_features
-            ).to(self.device)
+            self.model = self.neuralnet(num_node_features, self.output_shape, num_edge_features).to(self.device)
 
         elif isinstance(dataset, GridDataset):
             _, num_features, box_width, box_height, box_depth = dataset.get(0).x.shape
 
-            self.model = self.neuralnet(num_features,
-                                        (box_width, box_height, box_depth)
-            ).to(self.device)
+            self.model = self.neuralnet(num_features, (box_width, box_height, box_depth)).to(self.device)
         else:
             raise TypeError(type(dataset))
 
@@ -388,12 +372,18 @@ class Trainer():
         # check for compatibility
         for output_exporter in self._output_exporters:
             if not output_exporter.is_compatible_with(self.output_shape, target_shape):
-                raise ValueError(f"""output exporter of type {type(output_exporter)}\n
-                                 is not compatible with output shape {self.output_shape}\n
-                                 and target shape {target_shape}""")
+                raise ValueError(
+                    f"Output exporter of type {type(output_exporter)}\n\t"
+                    f"is not compatible with output shape {self.output_shape}\n\t"
+                    f"and target shape {target_shape}."
+                )
 
-    def configure_optimizers(self, optimizer = None, lr: float = 0.001, weight_decay: float = 1e-05):
-
+    def configure_optimizers(
+        self,
+        optimizer: torch.optim = None,
+        lr: float = 0.001,
+        weight_decay: float = 1e-05,
+    ):
         """
         Configure optimizer and its main parameters.
 
@@ -406,7 +396,6 @@ class Trainer():
             weight_decay (float, optional): Weight decay (L2 penalty).
                 Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
         """
-
         self.lr = lr
         self.weight_decay = weight_decay
 
@@ -414,14 +403,17 @@ class Trainer():
             self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
         else:
             try:
-                self.optimizer = optimizer(self.model.parameters(), lr = lr, weight_decay = weight_decay)
+                self.optimizer = optimizer(self.model.parameters(), lr=lr, weight_decay=weight_decay)
             except Exception as e:
                 _log.error(e)
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
-                raise e
+                raise
 
-    def set_lossfunction(self, lossfunction = None, override_invalid: bool = False): #pylint: disable=too-many-locals # noqa: MC0001
-
+    def set_lossfunction(
+        self,
+        lossfunction=None,
+        override_invalid: bool = False,
+    ):
         """
         Set the loss function.
 
@@ -438,18 +430,21 @@ class Trainer():
                 invalid for the task do no longer automaticallt raise an exception.
                 Defaults to False.
         """
-
         default_regression_loss = nn.MSELoss
         default_classification_loss = nn.CrossEntropyLoss
 
         def _invalid_loss():
             if override_invalid:
-                _log.warning(f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' +
-                            'You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t' +
-                            'This will likely cause other errors or exceptions down the line.')
+                _log.warning(
+                    f"The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t"
+                    "You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t"
+                    "This will likely cause other errors or exceptions down the line."
+                )
             else:
-                invalid_loss_error = (f'The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t' +
-                                    'If you want to use this loss function anyway, set override_invalid to True.')
+                invalid_loss_error = (
+                    f"The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t"
+                    "If you want to use this loss function anyway, set override_invalid to True."
+                )
                 _log.error(invalid_loss_error)
                 raise ValueError(invalid_loss_error)
 
@@ -465,34 +460,37 @@ class Trainer():
         if self.task == targets.REGRESS:
             if lossfunction is None:
                 lossfunction = default_regression_loss
-                _log.info(f'No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}')
-            else:
-                if custom_loss:
-                    custom_loss_warning = ( f'The provided loss function ({lossfunction}) is not part of the default list.\n\t' +
-                                            f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
-                    _log.warning(custom_loss_warning)
-                elif lossfunction not in losses.regression_losses:
-                    _invalid_loss()
+                _log.info(f"No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}")
+            elif custom_loss:
+                custom_loss_warning = (
+                    f"The provided loss function ({lossfunction}) is not part of the default list.\n\t"
+                    f"Please ensure that this loss function is appropriate for {self.task} tasks.\n\t"
+                )
+                _log.warning(custom_loss_warning)
+            elif lossfunction not in losses.regression_losses:
+                _invalid_loss()
             self.lossfunction = lossfunction()
 
         # Set classification loss
         elif self.task == targets.CLASSIF:
             if lossfunction is None:
                 lossfunction = default_classification_loss
-                _log.info(f'No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}')
-            else:
-                if custom_loss:
-                    custom_loss_warning = ( f'The provided loss function ({lossfunction}) is not part of the default list.\n\t' +
-                                            f'Please ensure that this loss function is appropriate for {self.task} tasks.\n\t')
-                    _log.warning(custom_loss_warning)
-                elif lossfunction not in losses.classification_losses:
-                    _invalid_loss()
+                _log.info(f"No loss function provided, the default loss function for {self.task} tasks is used: {lossfunction}")
+            elif custom_loss:
+                custom_loss_warning = (
+                    f"The provided loss function ({lossfunction}) is not part of the default list.\n\t"
+                    f"Please ensure that this loss function is appropriate for {self.task} tasks.\n\t"
+                )
+                _log.warning(custom_loss_warning)
+            elif lossfunction not in losses.classification_losses:
+                _invalid_loss()
+
             if not self.class_weights:
                 self.lossfunction = lossfunction()
             else:
-                self.lossfunction = lossfunction # weights will be set in the train() method
+                self.lossfunction = lossfunction  # weights will be set in the train() method
 
-    def train( # pylint: disable=too-many-arguments, too-many-branches, too-many-locals # noqa: MC0001
+    def train(  # noqa: PLR0915 (too-many-statements)
         self,
         nepoch: int = 1,
         batch_size: int = 32,
@@ -503,7 +501,7 @@ class Trainer():
         validate: bool = False,
         num_workers: int = 0,
         best_model: bool = True,
-        filename: str | None = 'model.pth.tar'
+        filename: str | None = "model.pth.tar",
     ):
         """
         Performs the training of the model.
@@ -544,7 +542,7 @@ class Trainer():
             batch_size=self.batch_size_train,
             shuffle=self.shuffle,
             num_workers=num_workers,
-            pin_memory=self.cuda
+            pin_memory=self.cuda,
         )
         _log.info("Training set loaded\n")
 
@@ -554,26 +552,23 @@ class Trainer():
                 batch_size=self.batch_size_train,
                 shuffle=self.shuffle,
                 num_workers=num_workers,
-                pin_memory=self.cuda
+                pin_memory=self.cuda,
             )
             _log.info("Validation set loaded\n")
         else:
             self.valid_loader = None
             _log.info("No validation set provided\n")
             _log.warning(
-                "Training data will be used both for learning and model selection, which may lead to overfitting." +
-                "\nIt is usually preferable to use a validation set during the training phase.")
+                "Training data will be used both for learning and model selection, which may lead to overfitting.\n"
+                "It is usually preferable to use a validation set during the training phase."
+            )
 
         # Assign weights to each class
         if self.task == targets.CLASSIF and self.class_weights:
-            targets_all = []
-            for batch in self.train_loader:
-                targets_all.append(batch.y)
+            targets_all = [batch.y for batch in self.train_loader]
 
             targets_all = torch.cat(targets_all).squeeze().tolist()
-            self.weights = torch.tensor(
-                [targets_all.count(i) for i in self.classes], dtype=torch.float32
-            )
+            self.weights = torch.tensor([targets_all.count(i) for i in self.classes], dtype=torch.float32)
             _log.info(f"class occurences: {self.weights}")
             self.weights = 1.0 / self.weights
             self.weights = self.weights / self.weights.sum()
@@ -582,8 +577,10 @@ class Trainer():
             try:
                 self.lossfunction = self.lossfunction(weight=self.weights.to(self.device))  # Check whether loss allows for weighted classes
             except TypeError as e:
-                weight_error = (f"Loss function {self.lossfunction} does not allow for weighted classes.\n\t" +
-                                "Please use a different loss function or set class_weights to False.\n")
+                weight_error = (
+                    f"Loss function {self.lossfunction} does not allow for weighted classes.\n\t"
+                    "Please use a different loss function or set class_weights to False.\n"
+                )
                 _log.error(weight_error)
                 raise ValueError(weight_error) from e
         else:
@@ -594,14 +591,19 @@ class Trainer():
         saved_model = False
 
         if earlystop_patience or earlystop_maxgap:
-            early_stopping = EarlyStopping(patience=earlystop_patience, maxgap=earlystop_maxgap, min_epoch=min_epoch, trace_func=_log.info)
+            early_stopping = EarlyStopping(
+                patience=earlystop_patience,
+                maxgap=earlystop_maxgap,
+                min_epoch=min_epoch,
+                trace_func=_log.info,
+            )
         else:
             early_stopping = None
 
         with self._output_exporters:
             # Number of epochs
             self.nepoch = nepoch
-            _log.info('Epoch 0:')
+            _log.info("Epoch 0:")
             self._eval(self.train_loader, 0, "training")
             if validate:
                 if self.valid_loader is None:
@@ -610,7 +612,7 @@ class Trainer():
 
             # Loop over epochs
             for epoch in range(1, nepoch + 1):
-                _log.info(f'Epoch {epoch}:')
+                _log.info(f"Epoch {epoch}:")
 
                 # Set the module in training mode
                 self.model.train()
@@ -621,12 +623,11 @@ class Trainer():
                 if validate:
                     loss_ = self._eval(self.valid_loader, epoch, "validation")
                     valid_losses.append(loss_)
-                    if best_model:
-                        if min(valid_losses) == loss_:
-                            checkpoint_model = self._save_model()
-                            saved_model = True
-                            self.epoch_saved_model = epoch
-                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
+                    if best_model and min(valid_losses) == loss_:
+                        checkpoint_model = self._save_model()
+                        saved_model = True
+                        self.epoch_saved_model = epoch
+                        _log.info(f"Best model saved at epoch # {self.epoch_saved_model}.")
                     # check early stopping criteria (in validation case only)
                     if early_stopping:
                         # compare last validation and training loss
@@ -634,24 +635,23 @@ class Trainer():
                         if early_stopping.early_stop:
                             break
 
-                else:
-                    # if no validation set, save the best performing model on the training set
-                    if best_model:
-                        if min(train_losses) == loss_:
-                            checkpoint_model = self._save_model()
-                            saved_model = True
-                            self.epoch_saved_model = epoch
-                            _log.info(f'Best model saved at epoch # {self.epoch_saved_model}.')
+                elif best_model:  # if no validation set, save the best performing model on the training set
+                    if min(train_losses) == loss_:
+                        checkpoint_model = self._save_model()
+                        saved_model = True
+                        self.epoch_saved_model = epoch
+                        _log.info(f"Best model saved at epoch # {self.epoch_saved_model}.")
 
             # Save the last model
             if best_model is False or not saved_model:
                 checkpoint_model = self._save_model()
                 self.epoch_saved_model = epoch
-                _log.info(f'Last model saved at epoch # {self.epoch_saved_model}.')
+                _log.info(f"Last model saved at epoch # {self.epoch_saved_model}.")
                 if not saved_model:
-                    warnings.warn("A model has been saved but the validation and/or the training losses were NaN;" +
-                              "\n\ttry to increase the cutoff distance during the data processing or the number of data points " +
-                              "during the training.")
+                    warnings.warn(
+                        "A model has been saved but the validation and/or the training losses were NaN;\n\t"
+                        "try to increase the cutoff distance during the data processing or the number of data points during the training."
+                    )
 
         # Now that the training loop is over, save the model
         if filename:
@@ -663,16 +663,15 @@ class Trainer():
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float | None:
         """
-        Runs a single epoch
+        Runs a single epoch.
 
         Args:
-            epoch_number (int)
+            epoch_number (int): the current epoch number
             pass_name (str): 'training', 'validation' or 'testing'
 
         Returns:
             Running loss.
         """
-
         sum_of_losses = 0
         count_predictions = 0
         target_vals = []
@@ -681,7 +680,7 @@ class Trainer():
         t0 = time()
         for data_batch in self.train_loader:
             if self.cuda:
-                data_batch = data_batch.to(self.device, non_blocking=True)
+                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901 (redefined-loop-name)
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
@@ -712,20 +711,25 @@ class Trainer():
             epoch_loss = None
 
         self._output_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, target_vals, epoch_loss)
+            pass_name,
+            epoch_number,
+            entry_names,
+            outputs,
+            target_vals,
+            epoch_loss,
+        )
         self._log_epoch_data(pass_name, epoch_loss, dt)
 
         return epoch_loss
 
-    def _eval( # pylint: disable=too-many-locals
-            self,
-            loader: DataLoader,
-            epoch_number: int,
-            pass_name: str
-        ) -> float | None:
-
+    def _eval(
+        self,
+        loader: DataLoader,
+        epoch_number: int,
+        pass_name: str,
+    ) -> float | None:
         """
-        Evaluates the model
+        Evaluates the model.
 
         Args:
             loader (Dataloader): Data to evaluate on.
@@ -735,7 +739,6 @@ class Trainer():
         Returns:
             Running loss.
         """
-
         # Sets the module in evaluation mode
         self.model.eval()
         loss_func = self.lossfunction
@@ -747,7 +750,7 @@ class Trainer():
         t0 = time()
         for data_batch in loader:
             if self.cuda:
-                data_batch = data_batch.to(self.device, non_blocking=True)
+                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901 (redefined-loop-name)
             pred = self.model(data_batch)
             pred, y = self._format_output(pred, data_batch.y)
 
@@ -779,7 +782,13 @@ class Trainer():
             eval_loss = None
 
         self._output_exporters.process(
-            pass_name, epoch_number, entry_names, outputs, target_vals, eval_loss)
+            pass_name,
+            epoch_number,
+            entry_names,
+            outputs,
+            target_vals,
+            eval_loss,
+        )
         self._log_epoch_data(pass_name, eval_loss, dt)
 
         return eval_loss
@@ -787,40 +796,34 @@ class Trainer():
     @staticmethod
     def _log_epoch_data(stage: str, loss: float, time: float):
         """
-        Prints the data of each epoch
+        Prints the data of each epoch.
 
         Args:
             stage (str): Train or valid.
             loss (float): Loss during that epoch.
             time (float): Timing of the epoch.
         """
-        _log.info(f'{stage} loss {loss} | time {time}')
+        _log.info(f"{stage} loss {loss} | time {time}")
 
     def _format_output(self, pred, target=None):
-
-        """
-        Format the network output depending on the task (classification/regression).
-        """
-
+        """Format the network output depending on the task (classification/regression)."""
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
             # of class indices with type long and the output should have raw, unnormalized values
-            target = torch.tensor(
-                [self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target]
-            )
-            if isinstance(self.lossfunction, (nn.BCELoss, nn.BCEWithLogitsLoss)):
+            target = torch.tensor([self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target])
+            if isinstance(self.lossfunction, nn.BCELoss | nn.BCEWithLogitsLoss):
                 # # pred must be in (0,1) range and target must be float with same shape as pred
-                # pred = F.softmax(pred)
-                # target = torch.tensor(
-                #     [[0,1] if x == [1] else [1,0] for x in target]
-                # ).float()
-                raise ValueError('BCELoss and BCEWithLogitsLoss are currently not supported.\n\t' +
-                                'For further details see: https://github.com/DeepRank/deeprank2/issues/318')
+                raise ValueError(
+                    "BCELoss and BCEWithLogitsLoss are currently not supported.\n\t"
+                    "For further details see: https://github.com/DeepRank/deeprank2/issues/318"
+                )
 
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
-                raise ValueError(f'{self.lossfunction} is currently not supported.\n\t' +
-                                f'Supported loss functions for classification: {losses.classification_tested}.\n\t' +
-                                'Implementation of other loss functions requires adaptation of Trainer._format_output.')
+                raise ValueError(
+                    f"{self.lossfunction} is currently not supported.\n\t"
+                    f"Supported loss functions for classification: {losses.classification_tested}.\n\t"
+                    "Implementation of other loss functions requires adaptation of Trainer._format_output."
+                )
 
         elif self.task == targets.REGRESS:
             pred = pred.reshape(-1)
@@ -833,7 +836,8 @@ class Trainer():
     def test(
         self,
         batch_size: int = 32,
-        num_workers: int = 0):
+        num_workers: int = 0,
+    ):
         """
         Performs the testing of the model.
 
@@ -844,11 +848,7 @@ class Trainer():
                         Defaults to 0.
         """
         if (not self.pretrained_model) and (not self.model_load_state_dict):
-            raise ValueError(
-                """
-                No pretrained model provided and no training performed.
-                Please provide a pretrained model or train the model before testing.\n
-                """)
+            raise ValueError("No pretrained model provided and no training performed. Please provide a pretrained model or train the model before testing.")
 
         self.batch_size_test = batch_size
 
@@ -859,7 +859,7 @@ class Trainer():
                 self.dataset_test,
                 batch_size=self.batch_size_test,
                 num_workers=num_workers,
-                pin_memory=self.cuda
+                pin_memory=self.cuda,
             )
             _log.info("Testing set loaded\n")
         else:
@@ -867,19 +867,15 @@ class Trainer():
             raise ValueError("No test dataset provided.")
 
         with self._output_exporters:
-
             # Run test
             self._eval(self.test_loader, self.epoch_saved_model, "testing")
 
     def _load_params(self):
-        """
-        Loads the parameters of a pretrained model
-        """
-
+        """Loads the parameters of a pretrained model."""
         if torch.cuda.is_available():
             state = torch.load(self.pretrained_model)
         else:
-            state = torch.load(self.pretrained_model, map_location=torch.device('cpu'))
+            state = torch.load(self.pretrained_model, map_location=torch.device("cpu"))
 
         self.data_type = state["data_type"]
         self.model_load_state_dict = state["model_state"]
@@ -921,12 +917,12 @@ class Trainer():
         features_transform_to_save = copy.deepcopy(self.features_transform)
         # prepare transform dictionary for being saved
         if features_transform_to_save:
-            for _, key in features_transform_to_save.items():
-                if key['transform'] is None:
+            for key in features_transform_to_save.values():
+                if key["transform"] is None:
                     continue
-                str_expr = inspect.getsource(key['transform'])
-                match = re.search(r'\'transform\':.*(lambda.*).*,.*\'standardize\'.*', str_expr).group(1)
-                key['transform'] = match
+                str_expr = inspect.getsource(key["transform"])
+                match = re.search(r"\'transform\':.*(lambda.*).*,.*\'standardize\'.*", str_expr).group(1)
+                key["transform"] = match
 
         state = {
             "data_type": self.data_type,
@@ -957,48 +953,47 @@ class Trainer():
             "means": self.means,
             "devs": self.devs,
             "cuda": self.cuda,
-            "ngpu": self.ngpu
+            "ngpu": self.ngpu,
         }
 
-        return state
+        return state  # noqa:RET504 (unnecessary-assign)
 
 
 def _divide_dataset(
     dataset: GraphDataset | GridDataset,
     splitsize: float | int | None = None,
 ) -> tuple[GraphDataset, GraphDataset] | tuple[GridDataset, GridDataset]:
-
-    """Divides the dataset into a training set and an evaluation set
+    """Divides the dataset into a training set and an evaluation set.
 
     Args:
         dataset (:class:`GraphDataset` | :class:`GridDataset`): Input dataset to be split into training and validation data.
         splitsize (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
             Defaults to None.
     """
-
     if splitsize is None:
         splitsize = 0.25
     full_size = len(dataset)
 
     # find number of datapoints to include in training dataset
-    if isinstance (splitsize, float):
+    if isinstance(splitsize, float):
         n_split = int(splitsize * full_size)
-    elif isinstance (splitsize, int):
+    elif isinstance(splitsize, int):
         n_split = splitsize
     else:
-        raise TypeError (f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
+        raise TypeError(f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
 
     # raise exception if no training data or negative validation size
     if n_split >= full_size or n_split < 0:
-        raise ValueError (f"invalid splitsize: {n_split}\n\t" +
-            f"splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)")
+        raise ValueError(
+            f"Invalid splitsize: {n_split}. splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)"
+        )
 
     if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint
         dataset_main = dataset
         dataset_split = None
     else:
         indices = np.arange(full_size)
-        np.random.shuffle(indices)
+        np.random.default_rng().shuffle(indices)
 
         dataset_main = copy.deepcopy(dataset)
         dataset_main.index_entries = [dataset.index_entries[i] for i in indices[n_split:]]

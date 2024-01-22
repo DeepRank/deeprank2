@@ -1,9 +1,10 @@
 ## Introduction
 
 The tutorial notebooks in this folder can be run to learn how to use DeepRank2.
-- There are two tutorial notebooks for data generation, which demonstrate how to create *.hdf5-formatted input training data from raw *.pdb-formatted data using DeepRank2.
+
+- There are two tutorial notebooks for data generation, which demonstrate how to create _.hdf5-formatted input training data from raw _.pdb-formatted data using DeepRank2.
   - protein-protein interface (PPI) data ([data_generation_ppi.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_ppi.ipynb));
-  - single-residue variant (SRV) data ([data_generation_srv.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_srv.ipynb)). 
+  - single-residue variant (SRV) data ([data_generation_srv.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_srv.ipynb)).
 - The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank2.
 
 ### Use cases
@@ -35,9 +36,9 @@ PDB models and target data used in this tutorial have been retrieved from [Ramak
    - Navigate to your deeprank2 folder.
    - Run `pytest tests`. All tests should pass at this point.
 
-
 ## Running the notebooks
 
 The tutorial notebooks can be run:
+
 - from inside your IDE, if it has that functionality (e.g., VS Code),
 - on JupyterLab by navigating to the tutorials directory in your terminal and running `jupyter-lab`.

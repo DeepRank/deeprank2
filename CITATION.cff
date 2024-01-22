@@ -13,36 +13,36 @@ authors:
     family-names: Crocioni
     email: g.crocioni@esciencecenter.nl
     affiliation: Netherlands eScience Center
-    orcid: 'https://orcid.org/0000-0002-0823-0121'
+    orcid: "https://orcid.org/0000-0002-0823-0121"
   - given-names: Dani
     family-names: Bodor
     email: d.bodor@esciencecenter.nl
     affiliation: Netherlands eScience Center
-    orcid: 'https://orcid.org/0000-0003-2109-2349'
+    orcid: "https://orcid.org/0000-0003-2109-2349"
   - given-names: Coos
     family-names: Baakman
     affiliation: Radboud University Medical Center
-    orcid: 'https://orcid.org/0000-0003-4317-1566'
+    orcid: "https://orcid.org/0000-0003-4317-1566"
   - given-names: Daniel
     family-names: Rademaker
     affiliation: Radboud University Medical Center
-    orcid: 'https://orcid.org/0000-0003-1959-1317'
+    orcid: "https://orcid.org/0000-0003-1959-1317"
   - given-names: Gayatri
     family-names: Ramakrishnan
     affiliation: Radboud University Medical Center
-    orcid: 'https://orcid.org/0000-0001-8203-2783'
+    orcid: "https://orcid.org/0000-0001-8203-2783"
   - given-names: Sven
     family-names: van der Burg
     affiliation: Netherlands eScience Center
-    orcid: 'https://orcid.org/0000-0003-1250-6968'
+    orcid: "https://orcid.org/0000-0003-1250-6968"
   - given-names: Farzaneh Meimandi
     family-names: Parizi
     affiliation: Radboud University Medical Center
-    orcid: 'https://orcid.org/0000-0003-4230-7492'
+    orcid: "https://orcid.org/0000-0003-4230-7492"
   - given-names: Li C.
     family-names: Xue
     affiliation: Radboud University Medical Center
-    orcid: 'https://orcid.org/0000-0002-2613-538X'
+    orcid: "https://orcid.org/0000-0002-2613-538X"
 abstract: >-
   DeepRank2 is an open-source deep learning
   framework for data mining of protein-protein interfaces
@@ -56,4 +56,4 @@ keywords:
 license: Apache-2.0
 commit: 4e8823758ba03f824b4281f5689cb6a335ab2f6c
 version: "2.1.2"
-date-released: '2023-12-21'
+date-released: "2023-12-21"
