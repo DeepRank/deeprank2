@@ -13,17 +13,14 @@ def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
         file_ (python text file object): The pssm file.
         chain (:class:`Chain`): The chain that the pssm file represents, residues from this chain must match the pssm file.
 
-    Returns
+    Returns:
         PssmTable: The position-specific scoring table, parsed from the pssm file.
     """
-
     conservation_rows = {}
 
     # Read the pssm header.
     header = next(file_).split()
-    column_indices = {
-        column_name.strip(): index for index, column_name in enumerate(header)
-    }
+    column_indices = {column_name.strip(): index for index, column_name in enumerate(header)}
 
     for line in file_:
         row = line.split()
@@ -35,7 +32,6 @@ def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
         # exceptions.
         pdb_residue_number_string = row[column_indices["pdbresi"]]
         if pdb_residue_number_string[-1].isalpha():
-
             pdb_residue_number = int(pdb_residue_number_string[:-1])
             pdb_insertion_code = pdb_residue_number_string[-1]
         else:
@@ -47,10 +43,7 @@ def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
 
         # Build the pssm row
         information_content = float(row[column_indices["IC"]])
-        conservations = {
-            amino_acid: float(row[column_indices[amino_acid.one_letter_code]])
-            for amino_acid in amino_acids
-        }
+        conservations = {amino_acid: float(row[column_indices[amino_acid.one_letter_code]]) for amino_acid in amino_acids}
 
         conservation_rows[residue] = PssmRow(conservations, information_content)
 

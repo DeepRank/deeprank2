@@ -55,10 +55,10 @@ class GridSettings:
     def __init__(
         self,
         points_counts: list[int],
-        sizes: list[float]
+        sizes: list[float],
     ):
-        assert len(points_counts) == 3
-        assert len(sizes) == 3
+        if len(points_counts) != 3 or len(sizes) != 3:
+            raise ValueError("Incorrect grid dimensions.")
 
         self._points_counts = points_counts
         self._sizes = sizes
@@ -77,27 +77,24 @@ class GridSettings:
 
 
 class Grid:
-    """
-    An instance of this class holds everything that the grid is made of:
+    """A 3D (volumetric) representation of a `Graph`.
+
+    A Grid contains the following information:
+
     - coordinates of points
     - names of features
-    - feature values on each point
+    - feature values on each point.
     """
 
     def __init__(self, id_: str, center: list[float], settings: GridSettings):
         self.id = id_
-
         self._center = np.array(center)
-
         self._settings = settings
-
         self._set_mesh(self._center, settings)
-
         self._features = {}
 
     def _set_mesh(self, center: NDArray, settings: GridSettings):
         """Builds the grid points."""
-
         half_size_x = settings.sizes[0] / 2
         half_size_y = settings.sizes[1] / 2
         half_size_z = settings.sizes[2] / 2
@@ -114,9 +111,7 @@ class Grid:
         max_z = min_z + (settings.points_counts[2] - 1.0) * settings.resolutions[2]
         self._zs = np.linspace(min_z, max_z, num=settings.points_counts[2])
 
-        self._ygrid, self._xgrid, self._zgrid = np.meshgrid(
-            self._ys, self._xs, self._zs
-        )
+        self._ygrid, self._xgrid, self._zgrid = np.meshgrid(self._ys, self._xs, self._zs)
 
     @property
     def center(self) -> NDArray:
@@ -155,7 +150,6 @@ class Grid:
 
         This method may be called repeatedly to add on to existing grid point values.
         """
-
         if feature_name not in self._features:
             self._features[feature_name] = data
         else:
@@ -164,42 +158,33 @@ class Grid:
     def _get_mapped_feature_gaussian(
         self,
         position: NDArray,
-        value: float
+        value: float,
     ) -> NDArray:
-
         beta = 1.0
 
         fx, fy, fz = position
-        distances = np.sqrt(
-            (self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2
-        )
+        distances = np.sqrt((self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2)
 
         return value * np.exp(-beta * distances)
 
-    def _get_mapped_feature_fast_gaussian(
-        self, position: NDArray, value: float
-    ) -> NDArray:
-
+    def _get_mapped_feature_fast_gaussian(self, position: NDArray, value: float) -> NDArray:
         beta = 1.0
         cutoff = 5.0 * beta
 
         fx, fy, fz = position
-        distances = np.sqrt(
-            (self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2
-        )
+        distances = np.sqrt((self.xgrid - fx) ** 2 + (self.ygrid - fy) ** 2 + (self.zgrid - fz) ** 2)
 
         data = np.zeros(distances.shape)
 
-        data[distances < cutoff] = value * np.exp(
-            -beta * distances[distances < cutoff]
-        )
+        data[distances < cutoff] = value * np.exp(-beta * distances[distances < cutoff])
 
         return data
 
     def _get_mapped_feature_bsp_line(
-        self, position: NDArray, value: float
+        self,
+        position: NDArray,
+        value: float,
     ) -> NDArray:
-
         order = 4
 
         fx, fy, fz = position
@@ -211,10 +196,11 @@ class Grid:
 
         return value * bsp_data
 
-    def _get_mapped_feature_nearest_neighbour( # pylint: disable=too-many-locals
-        self, position: NDArray, value: float
+    def _get_mapped_feature_nearest_neighbour(
+        self,
+        position: NDArray,
+        value: float,
     ) -> NDArray:
-
         fx, _, _ = position
         distances_x = np.abs(self.xs - fx)
         distances_y = np.abs(self.ys - fx)
@@ -239,9 +225,7 @@ class Grid:
         weight_products = list(itertools.product(weights_x, weights_y, weights_z))
         weights = [np.sum(p) for p in weight_products]
 
-        neighbour_data = np.zeros(
-            (self.xs.shape[0], self.ys.shape[0], self.zs.shape[0])
-        )
+        neighbour_data = np.zeros((self.xs.shape[0], self.ys.shape[0], self.zs.shape[0]))
 
         for point_index, point in enumerate(points):
             weight = weights[point_index]
@@ -250,7 +234,11 @@ class Grid:
 
         return neighbour_data
 
-    def _get_atomic_density_koes(self, position: NDArray, vanderwaals_radius: float) -> NDArray:
+    def _get_atomic_density_koes(
+        self,
+        position: NDArray,
+        vanderwaals_radius: float,
+    ) -> NDArray:
         """Function to map individual atomic density on the grid.
 
         The formula is equation (1) of the Koes paper
@@ -259,20 +247,19 @@ class Grid:
         Returns:
             NDArray: The mapped density.
         """
-
-        distances = np.sqrt(np.square(self.xgrid - position[0]) +
-                            np.square(self.ygrid - position[1]) +
-                            np.square(self.zgrid - position[2]))
+        distances = np.sqrt(np.square(self.xgrid - position[0]) + np.square(self.ygrid - position[1]) + np.square(self.zgrid - position[2]))
 
         density_data = np.zeros(distances.shape)
 
         indices_close = distances < vanderwaals_radius
         indices_far = (distances >= vanderwaals_radius) & (distances < 1.5 * vanderwaals_radius)
 
-        density_data[indices_close] = np.exp(-2.0 * np.square(distances[indices_close]) /  np.square(vanderwaals_radius))
-        density_data[indices_far] = 4.0 / np.square(np.e) / np.square(vanderwaals_radius) * np.square(distances[indices_far]) - \
-                                    12.0 / np.square(np.e) / vanderwaals_radius * distances[indices_far] + \
-                                    9.0 / np.square(np.e)
+        density_data[indices_close] = np.exp(-2.0 * np.square(distances[indices_close]) / np.square(vanderwaals_radius))
+        density_data[indices_far] = (
+            4.0 / np.square(np.e) / np.square(vanderwaals_radius) * np.square(distances[indices_far])
+            - 12.0 / np.square(np.e) / vanderwaals_radius * distances[indices_far]
+            + 9.0 / np.square(np.e)
+        )
 
         return density_data
 
@@ -287,7 +274,6 @@ class Grid:
 
         The feature_value should either be a single number or a one-dimensional array.
         """
-
         # determine whether we're dealing with a single number of multiple numbers:
         index_names_values = []
         if isinstance(feature_value, float):
@@ -303,7 +289,6 @@ class Grid:
 
         # map the data to the grid
         for index_name, value in index_names_values:
-
             if method == MapMethod.GAUSSIAN:
                 grid_data = self._get_mapped_feature_gaussian(position, value)
 
@@ -321,9 +306,7 @@ class Grid:
 
     def to_hdf5(self, hdf5_path: str):
         """Write the grid data to hdf5, according to deeprank standards."""
-
         with h5py.File(hdf5_path, "a") as hdf5_file:
-
             # create a group to hold everything
             grid_group = hdf5_file.require_group(self.id)
 
@@ -337,7 +320,6 @@ class Grid:
             # store grid features
             features_group = grid_group.require_group(gridstorage.MAPPED_FEATURES)
             for feature_name, feature_data in self.features.items():
-
                 features_group.create_dataset(
                     feature_name,
                     data=feature_data,

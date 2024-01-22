@@ -3,7 +3,6 @@ name: "Install Python and DeepRank2"
 description: "Installs Python, updates pip and installs DeepRank2 together with its dependencies."
 
 inputs:
-
   python-version:
     required: false
     description: "The Python version to use. Specify major and minor version, e.g. '3.10'."
@@ -15,14 +14,13 @@ inputs:
     default: "test"
 
 runs:
-
   using: "composite"
 
   steps:
     - name: Cancel Previous Runs and Set up Python
       uses: styfle/cancel-workflow-action@0.4.0
       with:
-          access_token: ${{ github.token }}
+        access_token: ${{ github.token }}
     - uses: actions/checkout@v3
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
@@ -61,7 +59,7 @@ runs:
         CMAKE_INSTALL_PREFIX: .local
       if: runner.os == 'macOS'
       run: |
-        # Install dependencies not handled by setuptools 
+        # Install dependencies not handled by setuptools
         ## DSSP
         conda install -c sbl dssp>=4.2.2.1
         ## MSMS

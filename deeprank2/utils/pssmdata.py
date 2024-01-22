@@ -4,7 +4,11 @@ from deeprank2.molstruct.aminoacid import AminoAcid
 class PssmRow:
     """Holds data for one position-specific scoring matrix row."""
 
-    def __init__(self, conservations: dict[AminoAcid, float], information_content: float):
+    def __init__(
+        self,
+        conservations: dict[AminoAcid, float],
+        information_content: float,
+    ):
         self._conservations = conservations
         self._information_content = information_content
 
@@ -37,5 +41,4 @@ class PssmTable:
 
     def update(self, other):
         """Can be used to merge two non-overlapping scoring tables."""
-
-        self._rows.update(other._rows) # pylint: disable=protected-access
+        self._rows.update(other._rows)  # noqa: SLF001 (private-member-access)

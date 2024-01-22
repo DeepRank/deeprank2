@@ -1,7 +1,6 @@
 import numpy as np
 
-from deeprank2.domain.aminoacidlist import (amino_acids, cysteine, lysine,
-                                            pyrrolysine, selenocysteine)
+from deeprank2.domain.aminoacidlist import amino_acids, cysteine, lysine, pyrrolysine, selenocysteine
 
 # Exceptions selenocysteine and pyrrolysine are due to them having the same index as their canonical counterpart.
 # This is not an issue while selenocysteine and pyrrolysine are not part of amino_acids.
@@ -11,9 +10,9 @@ EXCEPTIONS = [
     [lysine, pyrrolysine],
 ]
 
-def test_all_different_onehot():
 
-    for aa1, aa2 in zip(amino_acids, amino_acids):
+def test_all_different_onehot():
+    for aa1, aa2 in zip(amino_acids, amino_acids, strict=True):
         if aa1 == aa2:
             continue
 
@@ -23,4 +22,4 @@ def test_all_different_onehot():
             if (aa1 in EXCEPTIONS[0] and aa2 in EXCEPTIONS[0]) or (aa1 in EXCEPTIONS[1] and aa2 in EXCEPTIONS[1]):
                 assert np.all(aa1.onehot == aa2.onehot)
             else:
-                raise AssertionError(f"one-hot index {aa1.index} is occupied by both {aa1} and {aa2}") from e
+                raise AssertionError(f"One-hot index {aa1.index} is occupied by both {aa1} and {aa2}") from e

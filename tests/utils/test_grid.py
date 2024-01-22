@@ -11,7 +11,7 @@ def test_grid_orientation():
     grid_sizes = [30.0, 30.0, 30.0]
 
     # Extract data from original deeprank's preprocessed file.
-    with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", 'r') as data_file:
+    with h5py.File("tests/data/hdf5/original-deeprank-1ak4.hdf5", "r") as data_file:
         grid_points_group = data_file["1AK4/grid_points"]
         target_xs = grid_points_group["x"][()]
         target_ys = grid_points_group["y"][()]
@@ -23,7 +23,7 @@ def test_grid_orientation():
         query = ProteinProteinInterfaceQuery(
             pdb_path="tests/data/pdb/1ak4/1ak4.pdb",
             resolution=resolution,
-            chain_ids=['C', 'D'],
+            chain_ids=["C", "D"],
             influence_radius=8.5,
             max_edge_length=8.5,
         )

@@ -8,11 +8,11 @@ BINARY = "binary"
 CAPRI = "capri_class"
 
 ## regression tasks
-IRMSD = 'irmsd'
-LRMSD = 'lrmsd'
-FNAT = 'fnat'
-DOCKQ = 'dockq'
+IRMSD = "irmsd"
+LRMSD = "lrmsd"
+FNAT = "fnat"
+DOCKQ = "dockq"
 
 ## task names
-REGRESS = 'regress'
-CLASSIF = 'classif'
+REGRESS = "regress"
+CLASSIF = "classif"

@@ -37,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ['3.10']
+        python-version: ["3.10"]
 
     steps:
       - uses: actions/checkout@v3
@@ -45,5 +45,5 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test
-      - name: Check style against standards using prospector
-        run: prospector --die-on-tool-error
+      - name: Check style against standards using ruff
+        run: ruff .

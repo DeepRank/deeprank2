@@ -1,6 +1,6 @@
 # Installations
 
-Note that the package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows. 
+The package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows.
 
 You can either install DeepRank2 in a [dockerized container](#containerized-installation), which will allow you to run our [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials), or you can [install the package locally](#localremote-installation).
 

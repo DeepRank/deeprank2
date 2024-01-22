@@ -1,4 +1,3 @@
-
 import pickle
 from multiprocessing.connection import _ForkingPickler
 
@@ -13,7 +12,7 @@ def _get_structure(path) -> PDBStructure:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # pylint: disable=protected-access
+        pdb._close()  # noqa: SLF001 (private member accessed)
 
     assert structure is not None
 
@@ -21,11 +20,10 @@ def _get_structure(path) -> PDBStructure:
 
 
 def test_serialization_pickle():
-
     structure = _get_structure("tests/data/pdb/101M/101M.pdb")
 
     s = pickle.dumps(structure)
-    loaded_structure = pickle.loads(s)
+    loaded_structure = pickle.loads(s)  # noqa: S301 (suspicious-pickle-usage)
 
     assert loaded_structure == structure
     assert loaded_structure.get_chain("A") == structure.get_chain("A")
@@ -35,7 +33,6 @@ def test_serialization_pickle():
 
 
 def test_serialization_fork():
-
     structure = _get_structure("tests/data/pdb/101M/101M.pdb")
 
     s = _ForkingPickler.dumps(structure)

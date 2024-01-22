@@ -1,7 +1,8 @@
+from pdb2sql import pdb2sql
+
 from deeprank2.domain.aminoacidlist import alanine
 from deeprank2.utils.buildgraph import get_structure
 from deeprank2.utils.parsing.pssm import parse_pssm
-from pdb2sql import pdb2sql
 
 
 def test_add_pssm():
@@ -9,10 +10,10 @@ def test_add_pssm():
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close() # pylint: disable=protected-access
+        pdb._close()  # noqa: SLF001 (private member accessed)
 
     for chain in structure.chains:
-        with open(f"tests/data/pssm/1ATN/1ATN.{chain.id}.pdb.pssm", "rt", encoding="utf-8") as f:
+        with open(f"tests/data/pssm/1ATN/1ATN.{chain.id}.pdb.pssm", encoding="utf-8") as f:
             chain.pssm = parse_pssm(f, chain)
 
     # Verify that each residue is present and that the data makes sense:

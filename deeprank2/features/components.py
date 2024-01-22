@@ -10,12 +10,12 @@ from deeprank2.utils.parsing import atomic_forcefield
 
 _log = logging.getLogger(__name__)
 
-def add_features( # pylint: disable=unused-argument
-    pdb_path: str,
+
+def add_features(
+    pdb_path: str,  # noqa: ARG001 (unused argument)
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
 ):
-
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id
@@ -37,7 +37,6 @@ def add_features( # pylint: disable=unused-argument
         node.features[Nfeat.RESPI] = residue.amino_acid.pI
         node.features[Nfeat.HBDONORS] = residue.amino_acid.hydrogen_bond_donors
         node.features[Nfeat.HBACCEPTORS] = residue.amino_acid.hydrogen_bond_acceptors
-
 
         if single_amino_acid_variant is not None:
             wildtype = single_amino_acid_variant.wildtype_amino_acid

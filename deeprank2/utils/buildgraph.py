@@ -21,19 +21,17 @@ def _add_atom_to_residue(atom: Atom, residue: Residue):
     If no matching atom is found, add the current atom to the residue.
     If there's another atom with the same name, choose the one with the highest occupancy.
     """
-
     for other_atom in residue.atoms:
-        if other_atom.name == atom.name:
-            if other_atom.occupancy < atom.occupancy:
-                other_atom.change_altloc(atom)
-                return
+        if other_atom.name == atom.name and other_atom.occupancy < atom.occupancy:
+            other_atom.change_altloc(atom)
+            return
     residue.add_atom(atom)
 
 
 def _add_atom_data_to_structure(
     structure: PDBStructure,
     pdb_obj: pdb2sql_object,
-    **kwargs
+    **kwargs,
 ):
     """This subroutine retrieves pdb2sql atomic data for `PDBStructure` objects as defined in DeepRank2.
 
@@ -41,14 +39,13 @@ def _add_atom_data_to_structure(
 
     Args:
         structure (:class:`PDBStructure`): The structure to which this atom should be added to.
-        pdb (pdb2sql_object): The `pdb2sql` object to retrieve the data from.
+        pdb_obj (pdb2sql_object): The `pdb2sql` object to retrieve the data from.
         kwargs: as required by the get function for the `pdb2sql` object.
     """
-
     pdb2sql_columns = "x,y,z,name,altLoc,occ,element,chainID,resSeq,resName,iCode"
-    data_keys = pdb2sql_columns.split(sep=',')
+    data_keys = pdb2sql_columns.split(sep=",")
     for data_values in pdb_obj.get(pdb2sql_columns, **kwargs):
-        atom_data = dict(zip(data_keys, data_values))
+        atom_data = dict(zip(data_keys, data_values, strict=True))
 
         # exit function if this atom is already part of the structure
         if atom_data["altLoc"] not in (None, "", "A"):
@@ -84,7 +81,7 @@ def get_structure(pdb_obj: pdb2sql_object, id_: str) -> PDBStructure:
     """Builds a structure from rows in a pdb file.
 
     Args:
-        pdb (pdb2sql object): The pdb structure that we're investigating.
+        pdb_obj (pdb2sql object): The pdb structure that we're investigating.
         id_ (str): Unique id for the pdb structure.
 
     Returns:
@@ -98,10 +95,9 @@ def get_structure(pdb_obj: pdb2sql_object, id_: str) -> PDBStructure:
 def get_contact_atoms(
     pdb_path: str,
     chain_ids: list[str],
-    influence_radius: float
+    influence_radius: float,
 ) -> list[Atom]:
     """Gets the contact atoms from pdb2sql and wraps them in python objects."""
-
     interface = pdb2sql_interface(pdb_path)
     pdb_name = os.path.splitext(os.path.basename(pdb_path))[0]
     structure = PDBStructure(f"contact_atoms_{pdb_name}")
@@ -115,7 +111,7 @@ def get_contact_atoms(
         pdb_rowID = atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]]
         _add_atom_data_to_structure(structure, interface, rowID=pdb_rowID)
     finally:
-        interface._close()  # pylint: disable=protected-access
+        interface._close()  # noqa: SLF001 (private-member-access)
 
     return structure.get_atoms()
 
@@ -139,7 +135,6 @@ def get_residue_contact_pairs(
     Returns:
         list[Pair]: The pairs of contacting residues.
     """
-
     # Find out which residues are pairs
     interface = pdb2sql_interface(pdb_path)
     try:
@@ -150,10 +145,10 @@ def get_residue_contact_pairs(
             return_contact_pairs=True,
         )
     finally:
-        interface._close() # pylint: disable=protected-access
+        interface._close()  # noqa: SLF001 (private-member-access)
 
     # Map to residue objects
-    residue_pairs = set([])
+    residue_pairs = set()
     for residue_key1, residue_contacts in contact_residues.items():
         residue1 = _get_residue_from_key(structure, residue_key1)
         for residue_key2 in residue_contacts:
@@ -168,20 +163,13 @@ def _get_residue_from_key(
     residue_key: tuple[str, int, str],
 ) -> Residue:
     """Returns a residue object given a pdb2sql-formatted residue key."""
-
     residue_chain_id, residue_number, residue_name = residue_key
     chain = structure.get_chain(residue_chain_id)
 
     for residue in chain.residues:
-        if (
-            residue.number == residue_number
-            and residue.amino_acid is not None
-            and residue.amino_acid.three_letter_code == residue_name
-        ):
+        if residue.number == residue_number and residue.amino_acid is not None and residue.amino_acid.three_letter_code == residue_name:
             return residue
-    raise ValueError(
-        f"Residue ({residue_key}) not found in {structure.id}."
-    )
+    raise ValueError(f"Residue ({residue_key}) not found in {structure.id}.")
 
 
 def get_surrounding_residues(
@@ -199,13 +187,16 @@ def get_surrounding_residues(
     Returns:
         list[:class:`Residue`]: The surrounding residues.
     """
-
     structure_atoms = structure.get_atoms()
     structure_atom_positions = [atom.position for atom in structure_atoms]
     residue_atom_positions = [atom.position for atom in residue.atoms]
-    pairwise_distances = distance_matrix(structure_atom_positions, residue_atom_positions, p=2)
+    pairwise_distances = distance_matrix(
+        structure_atom_positions,
+        residue_atom_positions,
+        p=2,
+    )
 
-    surrounding_residues = set([])
+    surrounding_residues = set()
     for structure_atom_index, structure_atom in enumerate(structure_atoms):
         shortest_distance = np.min(pairwise_distances[structure_atom_index, :])
         if shortest_distance < radius:

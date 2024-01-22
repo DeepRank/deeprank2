@@ -14,24 +14,25 @@ keywords = [
     "protein-protein interfaces",
     "missense variants",
     "deep learning",
-    "pytorch"]
+    "pytorch",
+]
 authors = [
-    {name = "Giulia Crocioni", email = "g.crocioni@esciencecenter.nl"},
-    {name = "Coos Baakman", email = "coos.baakman@radboudumc.nl"},
-    {name = "Dani Bodor", email = "d.bodor@esciencecenter.nl"},
-    {name = "Daniel Rademaker"},
-    {name = "Gayatri Ramakrishnan"},
-    {name = "Sven van der Burg"},
-    {name = "Li Xue"},
-    {name = "Daniil Lepikhov"},
-    ]
-license = {text = "Apache-2.0 license"}
+    { name = "Giulia Crocioni", email = "g.crocioni@esciencecenter.nl" },
+    { name = "Coos Baakman", email = "coos.baakman@radboudumc.nl" },
+    { name = "Dani Bodor", email = "d.bodor@esciencecenter.nl" },
+    { name = "Daniel Rademaker" },
+    { name = "Gayatri Ramakrishnan" },
+    { name = "Sven van der Burg" },
+    { name = "Li Xue" },
+    { name = "Daniil Lepikhov" },
+]
+license = { text = "Apache-2.0 license" }
 classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10"
+    "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
     "tables >= 3.8.0",
@@ -49,15 +50,15 @@ dependencies = [
     "tqdm >= 4.63.0",
     "freesasa >= 2.1.0",
     "tensorboard >= 0.9.0",
-    "protobuf >= 3.20.1"
+    "protobuf >= 3.20.1",
+    "ruff >= 0.1.13",
+    "dill",
 ]
 
 [project.optional-dependencies]
 # development dependency groups
 test = [
     "pytest >= 7.4.0",
-    "pylint <= 2.17.5",
-    "prospector[with_pyroma] <= 1.10.2",
     "bump2version",
     "coverage",
     "pycodestyle",
@@ -65,11 +66,7 @@ test = [
     "pytest-runner",
     "coveralls",
 ]
-publishing = [
-    "build",
-    "twine",
-    "wheel",
-]
+publishing = ["build", "twine", "wheel"]
 
 [project.urls]
 Documentation = "https://deeprank2.readthedocs.io/en/latest/?badge=latest"
@@ -85,8 +82,117 @@ include = ["deeprank2*"]
 exclude = ["tests*", "*tests.*", "*tests"]
 
 [tool.setuptools.package-data]
-"*" = [
-    "*.xlsx",
-    "*.param",
-    "*.top", 
-    "*residue-classes"]
+"*" = ["*.xlsx", "*.param", "*.top", "*residue-classes"]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+extend-exclude = ["docs", "reduce"]
+line-length = 159
+select = [
+    "F",      # Pyflakes
+    "E",      # pycodestyle (error)
+    "W",      # pycodestyle (warning)
+    "I",      # isort
+    "D",      # pydocstyle
+    "UP",     # pyupgrade
+    "SIM",    # simplify
+    "C4",     # flake8-comprehensions
+    "S",      # flake8-bandit
+    "PGH",    # pygrep-hooks
+    "BLE",    # blind-except
+    "FBT003", # boolean-positional-value-in-call
+    "B",      # flake8-bugbear
+    "Q",      # flake8-quotes
+    "PLR",    # pylint refactoring
+    "ARG",    # flake8-unused-arguments
+    "SLF001", # Private member accessed
+    "PIE",    # flake8-pie
+    "RET",    # flaske8-return
+    "PT",     # pytest
+    "TID",    # imports
+    "TCH",    # imports
+    "PD",     # pandas
+    "NPY",    # numpy
+    "PL",     # pylint
+    "RUF",    # ruff rtecommendations
+    "PERF",   # performance
+    "TRY",    # try blocks
+    "ERA",    # commented out code
+    # other linting conventions
+    "FLY",
+    "AIR",
+    "YTT",
+    "ASYNC",
+    "A",
+    "DTZ",
+    "DJ",
+    "FA",
+    "ISC",
+    "ICN",
+    "G",
+    "INP",
+    "PYI",
+    "Q",
+    "RSE102",
+    "SLOT",
+    "INT",
+    # The following are unrealistic for this code base
+    # "PTH"  # flake8-use-pathlib
+    # "ANN",  # annotations
+    # "N",  # naming conventions
+    # "C901",  # mccabe complexity
+]
+ignore = [
+    "PLR0912", # Too many branches,
+    "PLR0913", #Too many arguments in function definition
+    "B028",    # No explicit `stacklevel` keyword argument found in
+    "PLR2004", # Magic value used in comparison
+    "S105",    # Possible hardcoded password
+    "S311",    # insecure random generators
+    "PT011",   # pytest-raises-too-broad
+    "SIM108",  # Use ternary operator
+    "TRY003",  # Long error messages
+    # Missing docstrings Documentation
+    "D100", # Missing module docstring
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D104", # Missing public package docstring
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in `__init__`
+    # Rules irrelevant to the Google style
+    "D203", # 1 blank line required before class docstring
+    "D204",
+    "D212", # Multi-line docstring summary should start at the first line
+    "D213", # Multi-line docstring summary should start at the second line
+    "D215",
+    "D400",
+    "D401",
+    "D404", # First word of the docstring should not be This
+    "D406",
+    "D407",
+    "D408",
+    "D409",
+    "D413",
+]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = [
+    "F401",
+] # unused imports (it's annoying if they automatically disappear while editing code
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.lint]
+extend-safe-fixes = [
+    "D415",   # First line should end with a period, question mark, or exclamation point
+    "D300",   # Use triple double quotes `"""`
+    "D200",   # One-line docstring should fit on one line
+    "TCH",    # type checking only imports
+    "ISC001",
+]
+
+[tool.ruff.isort]
+known-first-party = ["deeprank2"]

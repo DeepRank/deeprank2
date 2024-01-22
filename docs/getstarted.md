@@ -9,6 +9,7 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
 A `Query` takes as inputs:
+
 - a `.pdb` file, representing the protein-protein structure,
 - the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
@@ -432,7 +433,7 @@ hdf5_paths = queries.process(
     feature_modules = 'all')
 ```
 
-Then, the GraphDataset instance for the newly processed data can be created. Do this by specifying the path for the pre-trained model in `train_source`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. 
+Then, the GraphDataset instance for the newly processed data can be created. Do this by specifying the path for the pre-trained model in `train_source`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model.
 
 ```python
 from deeprank2.dataset import GraphDataset
@@ -452,7 +453,7 @@ from deeprank2.utils.exporters import HDF5OutputExporter
 
 trainer = Trainer(
     NaiveNetwork,
-    dataset_test = dataset_test, 
+    dataset_test = dataset_test,
     pretrained_model = "<pretrained_model_path>",
     output_exporters = [HDF5OutputExporter("<output_folder_path>")]
 )
@@ -460,7 +461,7 @@ trainer = Trainer(
 trainer.test()
 ```
 
-The results can then be read in a Pandas Dataframe and visualized: 
+The results can then be read in a Pandas Dataframe and visualized:
 
 ```python
 import os
