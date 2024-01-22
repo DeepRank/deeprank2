@@ -1,14 +1,13 @@
 import re
-from typing import List, Union
 
 
 class ResidueClassCriterium:
     def __init__(
         self,
         class_name: str,
-        amino_acid_names: Union[str, List[str]],
-        present_atom_names: List[str],
-        absent_atom_names: List[str],
+        amino_acid_names: str | list[str],
+        present_atom_names: list[str],
+        absent_atom_names: list[str],
     ):
         self.class_name = class_name
 
@@ -17,7 +16,7 @@ class ResidueClassCriterium:
         self.present_atom_names = present_atom_names
         self.absent_atom_names = absent_atom_names
 
-    def matches(self, amino_acid_name: str, atom_names: List[str]) -> bool:
+    def matches(self, amino_acid_name: str, atom_names: list[str]) -> bool:
 
         # check the amino acid name
         if self.amino_acid_names != "all":

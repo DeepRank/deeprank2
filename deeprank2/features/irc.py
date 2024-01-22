@@ -1,11 +1,10 @@
 import logging
 from itertools import combinations_with_replacement as combinations
-from typing import Dict, List, Optional, Tuple
 
 import pdb2sql
 
 from deeprank2.domain import nodestorage as Nfeat
-from deeprank2.domain.aminoacidlist import amino_acids
+from deeprank2.domain.aminoacidlist import amino_acids_by_code
 from deeprank2.molstruct.aminoacid import Polarity
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import Residue, SingleResidueVariant
@@ -14,7 +13,7 @@ from deeprank2.utils.graph import Graph
 _log = logging.getLogger(__name__)
 
 
-def _id_from_residue(residue: Tuple[str, int, str]) -> str:
+def _id_from_residue(residue: tuple[str, int, str]) -> str:
     """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes
 
     Args:
@@ -32,7 +31,7 @@ class _ContactDensity:
     """Internal class that holds contact density information for a given residue.
     """
 
-    def __init__(self, residue: Tuple[str, int, str], polarity: Polarity):
+    def __init__(self, residue: tuple[str, int, str], polarity: Polarity):
         self.res = residue
         self.polarity = polarity
         self.id = _id_from_residue(self.res)
@@ -42,12 +41,12 @@ class _ContactDensity:
         self.connections['all'] = []
 
 
-def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str, _ContactDensity]:
+def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str, _ContactDensity]:
     """Get all close contact residues from the opposite chain.
 
     Args:
         pdb_path (str): Path to pdb file to read molecular information from.
-        chains (Sequence[str]): List (or list-like object) containing strings of the chains to be considered.
+        chains (Sequence[str]): list (or list-like object) containing strings of the chains to be considered.
         cutoff (float, optional): Cutoff distance (in Ångström) to be considered a close contact. Defaults to 10.
 
     Returns:
@@ -56,7 +55,7 @@ def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str,
             items: _ContactDensity objects, containing all contact density information for the residue.
     """
 
-    residue_contacts: Dict[str, _ContactDensity] = {}
+    residue_contacts: dict[str, _ContactDensity] = {}
 
     sql = pdb2sql.interface(pdb_path)
     pdb2sql_contacts = sql.get_contact_residues(
@@ -68,7 +67,7 @@ def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str,
     for chain1_res, chain2_residues in pdb2sql_contacts.items():
         aa1_code = chain1_res[2]
         try:
-            aa1 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa1_code][0]
+            aa1 = amino_acids_by_code[aa1_code]
         except IndexError:
             continue  # skip keys that are not an amino acid
 
@@ -79,7 +78,7 @@ def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str,
         for chain2_res in chain2_residues:
             aa2_code = chain2_res[2]
             try:
-                aa2 = [amino_acid for amino_acid in amino_acids if amino_acid.three_letter_code == aa2_code][0]
+                aa2 = amino_acids_by_code[aa2_code]
             except IndexError:
                 continue  # skip keys that are not an amino acid
 
@@ -104,11 +103,12 @@ def get_IRCs(pdb_path: str, chains: List[str], cutoff: float = 5.5) -> Dict[str,
 
 
 def add_features(
-    pdb_path: str, graph: Graph,
-    single_amino_acid_variant: Optional[SingleResidueVariant] = None
-    ):
+    pdb_path: str,
+    graph: Graph,
+    single_amino_acid_variant: SingleResidueVariant | None = None,
+):
 
-    if not single_amino_acid_variant: # VariantQueries do not use this feature
+    if not single_amino_acid_variant:  # VariantQueries do not use this feature
         polarity_pairs = list(combinations(Polarity, 2))
         polarity_pair_string = [f'irc_{x[0].name.lower()}_{x[1].name.lower()}' for x in polarity_pairs]
 

@@ -1,6 +1,7 @@
 from enum import Enum
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 class Polarity(Enum):
@@ -108,7 +109,7 @@ class AminoAcid:
         return self._hydrogen_bond_acceptors
 
     @property
-    def onehot(self) -> np.ndarray:
+    def onehot(self) -> NDArray:
         if self._index is None:
             raise ValueError(
                 f"Amino acid {self._name} index is not set, thus no onehot can be computed."

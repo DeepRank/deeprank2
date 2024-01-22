@@ -15,8 +15,7 @@ from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification
 from deeprank2.neuralnets.gnn.ginet import GINet
 from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
-from deeprank2.query import (ProteinProteinInterfaceResidueQuery,
-                             QueryCollection)
+from deeprank2.query import ProteinProteinInterfaceQuery, QueryCollection
 from deeprank2.tools.target import compute_ppi_scores
 from deeprank2.trainer import Trainer
 from deeprank2.utils.exporters import HDF5OutputExporter
@@ -45,17 +44,15 @@ def test_cnn(): # pylint: disable=too-many-locals
 
     prefix = os.path.join(hdf5_directory, "test-queries-process")
 
-    all_targets = compute_ppi_scores(pdb_path, ref_path)
-
     try:
         all_targets = compute_ppi_scores(pdb_path, ref_path)
 
         queries = QueryCollection()
         for _ in range(count_queries):
-            query = ProteinProteinInterfaceResidueQuery(
-                pdb_path,
-                chain_id1,
-                chain_id2,
+            query = ProteinProteinInterfaceQuery(
+                pdb_path=pdb_path,
+                resolution='residue',
+                chain_ids=[chain_id1,chain_id2],
                 pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
                 targets = all_targets
             )
@@ -85,14 +82,12 @@ def test_cnn(): # pylint: disable=too-many-locals
 
         dataset_val = GridDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
         )
 
         dataset_test = GridDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
         )
 
         output_exporters = [HDF5OutputExporter(output_directory)]
@@ -133,10 +128,10 @@ def test_gnn(): # pylint: disable=too-many-locals
 
         queries = QueryCollection()
         for _ in range(count_queries):
-            query = ProteinProteinInterfaceResidueQuery(
-                pdb_path,
-                chain_id1,
-                chain_id2,
+            query = ProteinProteinInterfaceQuery(
+                pdb_path=pdb_path,
+                resolution='residue',
+                chain_ids=[chain_id1,chain_id2],
                 pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
                 targets = all_targets
             )
@@ -168,15 +163,13 @@ def test_gnn(): # pylint: disable=too-many-locals
 
         dataset_val = GraphDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
             clustering_method = "mcl"
         )
 
         dataset_test = GraphDataset(
             hdf5_path = hdf5_paths,
-            train = False,
-            dataset_train = dataset_train,
+            train_source = dataset_train,
             clustering_method = "mcl"
         )
 
@@ -219,13 +212,14 @@ def hdf5_files_for_nan(tmpdir_factory):
 
     queries = QueryCollection()
     for idx, pdb_path in enumerate(pdb_paths):
-        query = ProteinProteinInterfaceResidueQuery(
-            pdb_path,
-            chain_id1,
-            chain_id2,
-            # A very low cutoff distance helps for not making the network to learn
-            distance_cutoff=3,
-            targets = {targets.BINARY: targets_values[idx]}
+        query = ProteinProteinInterfaceQuery(
+            pdb_path=pdb_path,
+            resolution='residue',
+            chain_ids=[chain_id1,chain_id2],
+            targets = {targets.BINARY: targets_values[idx]},
+            # A very low radius and edge length helps for not making the network to learn
+            influence_radius=3,
+            max_edge_length=3
         )
         queries.add(query)
 
@@ -249,8 +243,7 @@ def test_nan_loss_cases(validate, best_model, hdf5_files_for_nan):
     dataset_valid = GraphDataset(
         hdf5_path = hdf5_files_for_nan,
         subset = [mols[0]],
-        dataset_train=dataset_train,
-        train=False
+        train_source=dataset_train
         )
 
     trainer = Trainer(

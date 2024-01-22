@@ -12,15 +12,15 @@ EXCEPTIONS = [
 ]
 
 def test_all_different_onehot():
-    for amino_acid in amino_acids:
-        for other in amino_acids:
-            if other != amino_acid:
-                try:
-                    assert not np.all(amino_acid.onehot == other.onehot)
-                except AssertionError as exc:
-                    if other in EXCEPTIONS[0] and amino_acid in EXCEPTIONS[0]:
-                        assert np.all(amino_acid.onehot == other.onehot)
-                    elif other in EXCEPTIONS[1] and amino_acid in EXCEPTIONS[1]:
-                        assert np.all(amino_acid.onehot == other.onehot)
-                    else:
-                        raise AssertionError(f"one-hot index {amino_acid.index} is occupied by both {amino_acid} and {other}") from exc
+
+    for aa1, aa2 in zip(amino_acids, amino_acids):
+        if aa1 == aa2:
+            continue
+
+        try:
+            assert not np.all(aa1.onehot == aa2.onehot)
+        except AssertionError as e:
+            if (aa1 in EXCEPTIONS[0] and aa2 in EXCEPTIONS[0]) or (aa1 in EXCEPTIONS[1] and aa2 in EXCEPTIONS[1]):
+                assert np.all(aa1.onehot == aa2.onehot)
+            else:
+                raise AssertionError(f"one-hot index {aa1.index} is occupied by both {aa1} and {aa2}") from e

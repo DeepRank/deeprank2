@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable
 
 
 class EarlyStopping:
@@ -6,7 +6,7 @@ class EarlyStopping:
         self,
         patience: int = 10,
         delta: float = 0,
-        maxgap: Optional[float] = None,
+        maxgap: float | None = None,
         min_epoch: int = 10,
         verbose: bool = True,
         trace_func: Callable = print,

@@ -3,10 +3,10 @@
 import itertools
 import logging
 from enum import Enum
-from typing import Dict, List, Union
 
 import h5py
 import numpy as np
+from numpy.typing import NDArray
 from scipy.signal import bspline
 
 from deeprank2.domain import gridstorage
@@ -29,12 +29,12 @@ class MapMethod(Enum):
 class Augmentation:
     """A rotation around an axis, to be applied to a feature before mapping it to a grid."""
 
-    def __init__(self, axis: np.ndarray, angle: float):
+    def __init__(self, axis: NDArray, angle: float):
         self._axis = axis
         self._angle = angle
 
     @property
-    def axis(self) -> np.ndarray:
+    def axis(self) -> NDArray:
         return self._axis
 
     @property
@@ -54,8 +54,8 @@ class GridSettings:
 
     def __init__(
         self,
-        points_counts: List[int],
-        sizes: List[float]
+        points_counts: list[int],
+        sizes: list[float]
     ):
         assert len(points_counts) == 3
         assert len(sizes) == 3
@@ -64,15 +64,15 @@ class GridSettings:
         self._sizes = sizes
 
     @property
-    def resolutions(self) -> List[float]:
+    def resolutions(self) -> list[float]:
         return [self._sizes[i] / self._points_counts[i] for i in range(3)]
 
     @property
-    def sizes(self) -> List[float]:
+    def sizes(self) -> list[float]:
         return self._sizes
 
     @property
-    def points_counts(self) -> List[int]:
+    def points_counts(self) -> list[int]:
         return self._points_counts
 
 
@@ -84,7 +84,7 @@ class Grid:
     - feature values on each point
     """
 
-    def __init__(self, id_: str, center: List[float], settings: GridSettings):
+    def __init__(self, id_: str, center: list[float], settings: GridSettings):
         self.id = id_
 
         self._center = np.array(center)
@@ -95,7 +95,7 @@ class Grid:
 
         self._features = {}
 
-    def _set_mesh(self, center: np.ndarray, settings: GridSettings):
+    def _set_mesh(self, center: NDArray, settings: GridSettings):
         """Builds the grid points."""
 
         half_size_x = settings.sizes[0] / 2
@@ -119,38 +119,38 @@ class Grid:
         )
 
     @property
-    def center(self) -> np.ndarray:
+    def center(self) -> NDArray:
         return self._center
 
     @property
-    def xs(self) -> np.array:
+    def xs(self) -> NDArray:
         return self._xs
 
     @property
-    def xgrid(self) -> np.array:
+    def xgrid(self) -> NDArray:
         return self._xgrid
 
     @property
-    def ys(self) -> np.array:
+    def ys(self) -> NDArray:
         return self._ys
 
     @property
-    def ygrid(self) -> np.array:
+    def ygrid(self) -> NDArray:
         return self._ygrid
 
     @property
-    def zs(self) -> np.array:
+    def zs(self) -> NDArray:
         return self._zs
 
     @property
-    def zgrid(self) -> np.array:
+    def zgrid(self) -> NDArray:
         return self._zgrid
 
     @property
-    def features(self) -> Dict[str, np.array]:
+    def features(self) -> dict[str, NDArray]:
         return self._features
 
-    def add_feature_values(self, feature_name: str, data: np.ndarray):
+    def add_feature_values(self, feature_name: str, data: NDArray):
         """Makes sure feature values per grid point get stored.
 
         This method may be called repeatedly to add on to existing grid point values.
@@ -162,8 +162,10 @@ class Grid:
             self._features[feature_name] += data
 
     def _get_mapped_feature_gaussian(
-        self, position: np.ndarray, value: float
-    ) -> np.ndarray:
+        self,
+        position: NDArray,
+        value: float
+    ) -> NDArray:
 
         beta = 1.0
 
@@ -175,8 +177,8 @@ class Grid:
         return value * np.exp(-beta * distances)
 
     def _get_mapped_feature_fast_gaussian(
-        self, position: np.ndarray, value: float
-    ) -> np.ndarray:
+        self, position: NDArray, value: float
+    ) -> NDArray:
 
         beta = 1.0
         cutoff = 5.0 * beta
@@ -195,8 +197,8 @@ class Grid:
         return data
 
     def _get_mapped_feature_bsp_line(
-        self, position: np.ndarray, value: float
-    ) -> np.ndarray:
+        self, position: NDArray, value: float
+    ) -> NDArray:
 
         order = 4
 
@@ -210,8 +212,8 @@ class Grid:
         return value * bsp_data
 
     def _get_mapped_feature_nearest_neighbour( # pylint: disable=too-many-locals
-        self, position: np.ndarray, value: float
-    ) -> np.ndarray:
+        self, position: NDArray, value: float
+    ) -> NDArray:
 
         fx, _, _ = position
         distances_x = np.abs(self.xs - fx)
@@ -248,14 +250,14 @@ class Grid:
 
         return neighbour_data
 
-    def _get_atomic_density_koes(self, position: np.ndarray, vanderwaals_radius: float) -> np.ndarray:
+    def _get_atomic_density_koes(self, position: NDArray, vanderwaals_radius: float) -> NDArray:
         """Function to map individual atomic density on the grid.
 
         The formula is equation (1) of the Koes paper
         Protein-Ligand Scoring with Convolutional NN Arxiv:1612.02751v1.
 
         Returns:
-            np.ndarray: The mapped density.
+            NDArray: The mapped density.
         """
 
         distances = np.sqrt(np.square(self.xgrid - position[0]) +
@@ -276,9 +278,9 @@ class Grid:
 
     def map_feature(
         self,
-        position: np.ndarray,
+        position: NDArray,
         feature_name: str,
-        feature_value: Union[np.ndarray, float],
+        feature_value: NDArray | float,
         method: MapMethod,
     ):
         """Maps point feature data at a given position to the grid, using the given method.

@@ -41,7 +41,7 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
     - [Local/remote installation](#localremote-installation)
       - [Non-pythonic dependencies](#non-pythonic-dependencies)
       - [Pythonic dependencies](#pythonic-dependencies)
-      - [Install DeepRank2](#install-deeprank2)
+      - [Deeprank2 Package](#deeprank2-package)
       - [Test installation](#test-installation)
   - [Contributing](#contributing)
   - [Data generation](#data-generation)
@@ -49,12 +49,13 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
     - [GraphDataset](#graphdataset)
     - [GridDataset](#griddataset)
   - [Training](#training)
+    - [Run a pre-trained model on new data](#run-a-pre-trained-model-on-new-data)
   - [Computational performances](#computational-performances)
   - [Package development](#package-development)
 
 ## Installations
 
-Note that the package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows. 
+The package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows.
 
 You can either install DeepRank2 in a [dockerized container](#containerized-installation), which will allow you to run our [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials), or you can [install the package locally](#localremote-installation).
 
@@ -112,11 +113,12 @@ Alternatively, if you are a MacOS user, if the YML file installation is not succ
 *  [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`.
     * [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
 *  [PyTorch](https://pytorch.org/get-started/locally/)
-*  [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) `conda install pyg -c pyg`
-    * Also install all [optional additions to PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html#installation-from-wheels), namely: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
+    * We support torch's CPU library as well as CUDA.
+    * Currently, the package is tested using [PyTorch 2.0.1](https://pytorch.org/get-started/previous-versions/#v201).   
+*  [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
 *  For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
 
-#### Install DeepRank2
+#### Deeprank2 Package
 
 Finally do:
 
@@ -150,25 +152,24 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ## Data generation
 
-For each protein-protein complex (or protein structure containing a SRV), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
-- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
+For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structure
+A `Query` takes as inputs:
+- a `.pdb` file, representing the protein-protein structure,
+- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
-from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
 
 queries = QueryCollection()
 
 # Append data points
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -177,10 +178,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_2w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 1
     },
@@ -189,10 +190,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_3w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -260,14 +261,12 @@ dataset_train = GraphDataset(
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 ```
 
@@ -294,14 +293,12 @@ dataset_train = GridDataset(
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
-    dataset_train = dataset_train,
+    train_source = dataset_train,
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
-    dataset_train = dataset_train,
+    train_source = dataset_train,
 )
 ```
 
@@ -359,6 +356,40 @@ trainer.test()
 
 ```
 
+### Run a pre-trained model on new data
+
+If you want to analyze new PDB files using a pre-trained model, the first step is to process and save them into HDF5 files [as we have done above](#data-generation).
+
+Then, the `DeeprankDataset` instance for the newly processed data can be created. Do this by specifying the path for the pre-trained model in `train_source`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. Let's suppose that the model has been trained with `GraphDataset` objects:
+
+```python
+from deeprank2.dataset import GraphDataset
+
+dataset_test = GraphDataset(
+    hdf5_path = "<output_folder>/<prefix_for_outputs>",
+    train_source = "<pretrained_model_path>"
+)
+```
+
+Finally, the `Trainer` instance can be defined and the new data can be tested:
+
+```python
+from deeprank2.trainer import Trainer
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.utils.exporters import HDF5OutputExporter
+
+trainer = Trainer(
+    NaiveNetwork,
+    dataset_test = dataset_test, 
+    pretrained_model = "<pretrained_model_path>",
+    output_exporters = [HDF5OutputExporter("<output_folder_path>")]
+)
+
+trainer.test()
+```
+
+For more details about how to run a pre-trained model on new data, see the [docs](https://deeprank2.readthedocs.io/en/latest/getstarted.html#run-a-pre-trained-model-on-new-data).
+
 ## Computational performances
 
 We measured the efficiency of data generation in DeepRank2 using the tutorials' [PDB files](https://zenodo.org/record/8187806) (~100 data points per data set), averaging the results run on Apple M1 Pro, using a single CPU.
@@ -371,9 +402,4 @@ Parameter settings were: atomic resolution, `distance_cutoff` of 5.5 Å, radius 
 
 ## Package development
 
-- Branching
-  - When creating a new branch, please use the following convention: `<issue_number>_<description>_<author_name>`.
-- Pull Requests
-  - When creating a pull request, please use the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
-- Software release
-  - Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings.
+If you're looking for developer documentation, go [here](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md).

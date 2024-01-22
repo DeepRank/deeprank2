@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import logging
 import os
-from typing import Callable, List, Optional, Union
+from typing import Callable
 
 import h5py
 import numpy as np
 import pdb2sql.transform
+from numpy.typing import NDArray
 from scipy.spatial import distance_matrix
 
 from deeprank2.domain import edgestorage as Efeat
@@ -49,7 +52,7 @@ class Edge:
 
 
 class Node:
-    def __init__(self, id_: Union[Atom, Residue]):
+    def __init__(self, id_: Atom | Residue):
         if isinstance(id_, Atom):
             self._type = "atom"
         elif isinstance(id_, Residue):
@@ -58,7 +61,6 @@ class Node:
             raise TypeError(type(id_))
 
         self.id = id_
-
         self.features = {}
 
     @property
@@ -76,7 +78,7 @@ class Node:
     def add_feature(
         self,
         feature_name: str,
-        feature_function: Callable[[Union[Atom, Residue]], np.ndarray],
+        feature_function: Callable[[Atom | Residue], NDArray],
     ):
         feature_value = feature_function(self.id)
 
@@ -94,9 +96,8 @@ class Node:
 
 
 class Graph:
-    def __init__(self, id_: str, cutoff_distance: Optional[float] = None):
+    def __init__(self, id_: str):
         self.id = id_
-        self.cutoff_distance = cutoff_distance
 
         self._nodes = {}
         self._edges = {}
@@ -110,7 +111,7 @@ class Graph:
     def add_node(self, node: Node):
         self._nodes[node.id] = node
 
-    def get_node(self, id_: Union[Atom, Residue]) -> Node:
+    def get_node(self, id_: Atom | Residue) -> Node:
         return self._nodes[id_]
 
     def add_edge(self, edge: Edge):
@@ -120,11 +121,11 @@ class Graph:
         return self._edges[id_]
 
     @property
-    def nodes(self) -> List[Node]:
+    def nodes(self) -> list[Node]:
         return list(self._nodes.values())
 
     @property
-    def edges(self) -> List[Node]:
+    def edges(self) -> list[Node]:
         return list(self._edges.values())
 
     def has_nan(self) -> bool:
@@ -141,9 +142,9 @@ class Graph:
         return False
 
     def _map_point_features(self, grid: Grid, method: MapMethod,  # pylint: disable=too-many-arguments
-                            feature_name: str, points: List[np.ndarray],
-                            values: List[Union[float, np.ndarray]],
-                            augmentation: Optional[Augmentation] = None):
+                            feature_name: str, points: list[NDArray],
+                            values: list[float | NDArray],
+                            augmentation: Augmentation | None = None):
 
         points = np.stack(points, axis=0)
 
@@ -159,7 +160,7 @@ class Graph:
 
             grid.map_feature(position, feature_name, value, method)
 
-    def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Optional[Augmentation] = None):
+    def map_to_grid(self, grid: Grid, method: MapMethod, augmentation: Augmentation | None = None):
 
         # order edge features by xyz point
         points = []
@@ -283,7 +284,7 @@ class Graph:
         self, hdf5_path: str,
         settings: GridSettings,
         method: MapMethod,
-        augmentation: Optional[Augmentation] = None
+        augmentation: Augmentation | None = None
     ) -> str:
 
         id_ = self.id
@@ -298,9 +299,9 @@ class Graph:
         # store target values
         with h5py.File(hdf5_path, 'a') as hdf5_file:
 
-            entry_group = hdf5_file[id_]
+            grp = hdf5_file[id_]
 
-            targets_group = entry_group.require_group(targets.VALUES)
+            targets_group = grp.require_group(targets.VALUES)
             for target_name, target_data in self.targets.items():
                 if target_name not in targets_group:
                     targets_group.create_dataset(target_name, data=target_data)
@@ -309,7 +310,7 @@ class Graph:
 
         return hdf5_path
 
-    def get_all_chains(self) -> List[str]:
+    def get_all_chains(self) -> list[str]:
         if isinstance(self.nodes[0].id, Residue):
             chains = set(str(res.chain).split()[1] for res in [node.id for node in self.nodes])
         elif isinstance(self.nodes[0].id, Atom):
@@ -319,97 +320,67 @@ class Graph:
         return list(chains)
 
 
-def build_atomic_graph( # pylint: disable=too-many-locals
-    atoms: List[Atom], graph_id: str, edge_distance_cutoff: float
-) -> Graph:
-    """Builds a graph, using the atoms as nodes.
+    @staticmethod
+    def build_graph(  # pylint: disable=too-many-locals
+        nodes: list[Atom] | list[Residue],
+        graph_id: str,
+        max_edge_length: float,
+    ) -> Graph:
+        """Builds a graph.
 
-    The edge distance cutoff is in Ångströms.
-    """
+        Args:
+            nodes (list[Atom] | list[Residue]): List of `Atom`s or `Residue`s to include in graph.
+                All nodes must be of same type.
+            graph_id (str): Human readable identifier for graph.
+            max_edge_length (float): Maximum distance between two nodes to connect them with an edge.
 
-    positions = np.empty((len(atoms), 3))
-    for atom_index, atom in enumerate(atoms):
-        positions[atom_index] = atom.position
+        Returns:
+            Graph: Containing nodes (with positions) and edges.
 
-    distances = distance_matrix(positions, positions, p=2)
-    neighbours = distances < edge_distance_cutoff
+        Raises:
+            TypeError: if `nodes` argument contains a mix of different types.
+        """
 
-    graph = Graph(graph_id, edge_distance_cutoff)
-    for atom1_index, atom2_index in np.transpose(np.nonzero(neighbours)):
-        if atom1_index != atom2_index:
+        if all(isinstance(node, Atom) for node in nodes):
+            atoms = nodes
+            NodeContact = AtomicContact
+        elif all(isinstance(node, Residue) for node in nodes):
+            # collect the set of atoms and remember which are on the same residue (by index)
+            atoms = []
+            atoms_residues = []
+            for residue_index, residue in enumerate(nodes):
+                for atom in residue.atoms:
+                    atoms.append(atom)
+                    atoms_residues.append(residue_index)
+            atoms_residues = np.array(atoms_residues)
+            NodeContact = ResidueContact
+        else:
+            raise TypeError("All nodes in the graph must be of the same type.")
 
-            atom1 = atoms[atom1_index]
-            atom2 = atoms[atom2_index]
-            contact = AtomicContact(atom1, atom2)
+        positions = np.empty((len(atoms), 3))
+        for atom_index, atom in enumerate(atoms):
+            positions[atom_index] = atom.position
+        neighbours = max_edge_length > distance_matrix(positions, positions, p=2)
 
-            node1 = Node(atom1)
-            node2 = Node(atom2)
-            node1.features[Nfeat.POSITION] = atom1.position
-            node2.features[Nfeat.POSITION] = atom2.position
+        index_pairs = np.transpose(np.nonzero(neighbours))  # atom pairs
+        if NodeContact == ResidueContact:
+            index_pairs = np.unique(atoms_residues[index_pairs], axis=0)  # residue pairs
 
-            graph.add_node(node1)
-            graph.add_node(node2)
-            graph.add_edge(Edge(contact))
+        graph = Graph(graph_id)
 
-    return graph
+        for index1, index2 in index_pairs:
+            if index1 != index2:
 
+                node1 = Node(nodes[index1])
+                node2 = Node(nodes[index2])
+                contact = NodeContact(node1.id, node2.id)
 
-def build_residue_graph( # pylint: disable=too-many-locals
-    residues: List[Residue], graph_id: str, edge_distance_cutoff: float
-) -> Graph:
-    """Builds a graph, using the residues as nodes.
+                node1.features[Nfeat.POSITION] = node1.id.position
+                node2.features[Nfeat.POSITION] = node2.id.position
 
-    The edge distance cutoff is in Ångströms.
-    It's the shortest interatomic distance between two residues.
-    """
+                # The same node will be added multiple times, but the Graph class fixes this.
+                graph.add_node(node1)
+                graph.add_node(node2)
+                graph.add_edge(Edge(contact))
 
-    # collect the set of atoms and remember which are on the same residue (by index)
-    atoms = []
-    atoms_residues = []
-    for residue_index, residue in enumerate(residues):
-        for atom in residue.atoms:
-            atoms.append(atom)
-            atoms_residues.append(residue_index)
-
-    atoms_residues = np.array(atoms_residues)
-
-    # calculate the distance matrix
-    positions = np.empty((len(atoms), 3))
-    for atom_index, atom in enumerate(atoms):
-        positions[atom_index] = atom.position
-
-    distances = distance_matrix(positions, positions, p=2)
-
-    # determine which atoms are close enough
-    neighbours = distances < edge_distance_cutoff
-
-    atom_index_pairs = np.transpose(np.nonzero(neighbours))
-
-    # point out the unique residues for the atom pairs
-    residue_index_pairs = np.unique(atoms_residues[atom_index_pairs], axis=0)
-
-    # build the graph
-    graph = Graph(graph_id, edge_distance_cutoff)
-    for residue1_index, residue2_index in residue_index_pairs:
-
-        residue1: Residue = residues[residue1_index]
-        residue2: Residue = residues[residue2_index]
-
-        if residue1 != residue2:
-
-            contact = ResidueContact(residue1, residue2)
-
-            node1 = Node(residue1)
-            node2 = Node(residue2)
-            edge = Edge(contact)
-
-            node1.features[Nfeat.POSITION] = residue1.get_center()
-            node2.features[Nfeat.POSITION] = residue2.get_center()
-
-            # The same residue will be added  multiple times as a node,
-            # but the Graph class fixes this.
-            graph.add_node(node1)
-            graph.add_node(node2)
-            graph.add_edge(edge)
-
-    return graph
+        return graph

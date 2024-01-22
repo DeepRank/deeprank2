@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import numpy as np
+from numpy.typing import NDArray
 
 from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.structure import Chain
@@ -25,8 +26,8 @@ class Residue:
         self,
         chain: Chain,
         number: int,
-        amino_acid: Optional[AminoAcid] = None,
-        insertion_code: Optional[str] = None,
+        amino_acid: AminoAcid | None = None,
+        insertion_code: str | None = None,
     ):
         """
         Args:
@@ -96,9 +97,9 @@ class Residue:
 
     @property
     def position(self) -> np.array:
-        return np.mean([atom.position for atom in self._atoms], axis=0)
+        return self.get_center()
 
-    def get_center(self) -> np.ndarray:
+    def get_center(self) -> NDArray:
         """Find the center position of a `Residue`.
 
         Center position is found as follows:

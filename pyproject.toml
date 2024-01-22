@@ -56,8 +56,8 @@ dependencies = [
 # development dependency groups
 test = [
     "pytest >= 7.4.0",
-    "pylint <= 2.15.3",
-    "prospector[with_pyroma] <= 1.7.7",
+    "pylint <= 2.17.5",
+    "prospector[with_pyroma] <= 1.10.2",
     "bump2version",
     "coverage",
     "pycodestyle",

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from deeprank2.molstruct.aminoacid import AminoAcid, Polarity
 
 # All info below sourced from above websites in December 2022 and summarized in deeprank2/domain/aminoacid_summary.xlsx
@@ -352,9 +350,11 @@ amino_acids = [
     # pyrrolysine,
     ]
 
-def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
+amino_acids_by_code = {amino_acid.three_letter_code: amino_acid for amino_acid in amino_acids}
+amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid in amino_acids}
+amino_acids_by_name = {amino_acid.name: amino_acid for amino_acid in amino_acids}
 
-    # pylint: disable = raise-missing-from
+def convert_aa_nomenclature(aa: str, output_type: int | None = None):
     try:
         if len(aa) == 1:
             aa: AminoAcid = [entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower()][0]
@@ -362,8 +362,8 @@ def convert_aa_nomenclature(aa: str, output_type: Optional[int] = None):
             aa: AminoAcid = [entry for entry in amino_acids if entry.three_letter_code.lower() == aa.lower()][0]
         else:
             aa: AminoAcid = [entry for entry in amino_acids if entry.name.lower() == aa.lower()][0]
-    except IndexError:
-        raise ValueError(f'{aa} is not a valid amino acid.')
+    except IndexError as e:
+        raise ValueError(f'{aa} is not a valid amino acid.') from e
 
     if not output_type:
         return aa.name
