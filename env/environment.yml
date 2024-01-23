@@ -19,4 +19,4 @@ dependencies:
   - pyg==2.4.0
   - notebook==7.0.6
   - pip:
-    - --requirement requirements.txt
+      - --requirement requirements.txt

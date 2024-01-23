@@ -22,7 +22,7 @@ def add_features(
     pass
 ```
 
-Additionally, the nomenclature of the custom feature should be added in `deeprank2.domain.edgestorage` or `deeprank2.domain.nodestorage`, depending on which type of feature it is. 
+Additionally, the nomenclature of the custom feature should be added in `deeprank2.domain.edgestorage` or `deeprank2.domain.nodestorage`, depending on which type of feature it is.
 
 As an example, this is the implementation of the node feature `res_type`, which represents the one-hot encoding of the amino acid residue and is defined in `deeprank2.features.components` module:
 
@@ -75,7 +75,7 @@ dataset = GraphDataset(
 )
 ```
 
-The following is a brief description of the features already implemented in the code-base, for each features' module. 
+The following is a brief description of the features already implemented in the code-base, for each features' module.
 
 ## Default node features
 
