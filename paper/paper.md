@@ -25,32 +25,32 @@ authors:
   - name: Farzaneh M. Parizi
     orcid: 0000-0003-4230-7492
     affiliation: 2
-  - name: Daniel T. Rademaker
+  - name: Daniel-T. Rademaker
     orcid: 0000-0003-1959-1317
     affiliation: 2
   - name: Gayatri Ramakrishnan
     orcid: 0000-0001-8203-2783
     affiliation: 2
-  - name: Sven van der Burg
+  - name: Sven A. van der Burg
     orcid: 0000-0003-1250-6968
     affiliation: 1
   - name: Dario F. Marzella
     orcid: 0000-0002-0043-3055
     affiliation: 2
-  - name: João M. C. Teixeira
+  - name: João M.C. Teixeira
     orcid: 0000-0002-9113-0622
     affiliation: 3
   - name: Li C. Xue
     orcid: 0000-0002-2613-538X
     affiliation: 2
 affiliations:
- - name: Netherlands eScience Center, Amsterdam, The Netherlands
+ - name: Netherlands eScience Center, Amsterdam, NL
    index: 1
- - name: Department of Medical BioSciences, Radboud University Medical Center, Nijmegen, The Netherlands
+ - name: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL
    index: 2
  - name: Independent Researcher
    index: 3
-date: 08 August 2023
+date: 23 January 2024
 bibliography: paper.bib
 
 ---
