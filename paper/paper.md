@@ -8,6 +8,9 @@ tags:
   - 3D protein structures
   - protein-protein interfaces
   - single-residue variants
+  - graph neural networks
+  - convolutional neural networks
+  - DeepRank
 authors:
   - name: Giulia Crocioni
     orcid: 0000-0002-0823-0121

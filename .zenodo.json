@@ -1,42 +1,42 @@
 {
     "creators": [
         {
-            "affiliation": "Netherlands eScience Center",
+            "affiliation": "Netherlands eScience Center, Amsterdam, NL",
             "name": "Giulia Crocioni",
             "orcid": "0000-0002-0823-0121"
         },
         {
-            "affiliation": "Netherlands eScience Center",
+            "affiliation": "Netherlands eScience Center, Amsterdam, NL",
             "name": "Dani L. Bodor",
             "orcid": "0000-0003-2109-2349"
         },
         {
-            "affiliation": "Radboud University Medical Center",
+            "affiliation": "Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL",
             "name": "Coos Baakman",
             "orcid": "0000-0003-4317-1566"
         },
         {
-            "affiliation": "Radboud University Medical Center",
+            "affiliation": "Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL",
             "name": "Farzaneh M. Parizi",
             "orcid": "0000-0003-4230-7492"
         },
         {
-            "affiliation": "Radboud University Medical Center",
+            "affiliation": "Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL",
             "name": "Daniel T. Rademaker",
             "orcid": "0000-0003-1959-1317"
         },
         {
-            "affiliation": "Radboud University Medical Center",
+            "affiliation": "Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL",
             "name": "Gayatri Ramakrishnan",
             "orcid": "0000-0001-8203-2783"
         },
         {
-            "affiliation": "Netherlands eScience Center",
+            "affiliation": "Netherlands eScience Center, Amsterdam, NL",
             "name": "Sven van der Burg",
             "orcid": "0000-0003-1250-6968"
         },
         {
-            "affiliation": "Radboud University Medical Center",
+            "affiliation": "Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL",
             "name": "Dario F. Marzella",
             "orcid": "0000-0002-0043-3055"
         },
@@ -45,20 +45,25 @@
             "orcid": "0000-0002-9113-0622"
         },
         {
-            "affiliation": "Radboud University Medical Center",
+            "affiliation": "Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL",
             "name": "Li C. Xue",
             "orcid": "0000-0002-2613-538X"
         }
     ],
     "keywords": [
-        "Graph neural networks",
-        "Convolutional neural networks",
-        "Protein-protein interface",
-        "Single-residue variant",
+        "Python",
+        "PyTorch",
+        "structural biology",
+        "geometric deep learning",
+        "3D protein structures",
+        "protein-protein interfaces",
+        "single-residue variants",
+        "graph neural networks",
+        "convolutional neural networks",
         "DeepRank"
     ],
     "license": {
         "id": "Apache-2.0"
     },
-    "title": "DeepRank2"
+    "title": "DeepRank2: Mining 3D Protein Structures with Geometric Deep Learning"
 }
