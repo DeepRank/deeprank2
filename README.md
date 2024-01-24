@@ -37,20 +37,20 @@ DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/
 - [DeepRank2](#deeprank2)
   - [Overview](#overview)
   - [Table of contents](#table-of-contents)
-  - [Installations](#installations)
+  - [Installation](#installation)
     - [Containerized Installation](#containerized-installation)
     - [Local/remote installation](#localremote-installation)
-      - [Non-pythonic dependencies](#non-pythonic-dependencies)
-      - [Pythonic dependencies](#pythonic-dependencies)
-      - [Deeprank2 Package](#deeprank2-package)
-      - [Test installation](#test-installation)
+      - [YML file installation](#yml-file-installation)
+      - [Manual installation](#manual-installation)
+      - [Testing DeepRank2 installation](#testing-deeprank2-installation)
   - [Contributing](#contributing)
-  - [Data generation](#data-generation)
-  - [Datasets](#datasets)
-    - [GraphDataset](#graphdataset)
-    - [GridDataset](#griddataset)
-  - [Training](#training)
-    - [Run a pre-trained model on new data](#run-a-pre-trained-model-on-new-data)
+  - [Using DeepRank2](#using-deeprank2)
+    - [Data generation](#data-generation)
+    - [Datasets](#datasets)
+      - [GraphDataset](#graphdataset)
+      - [GridDataset](#griddataset)
+    - [Training](#training)
+      - [Run a pre-trained model on new data](#run-a-pre-trained-model-on-new-data)
   - [Computational performances](#computational-performances)
   - [Package development](#package-development)
 
@@ -91,11 +91,11 @@ Local installation is formally only supported on the latest stable release of ub
 
 Before installing DeepRank2 please ensure you have [GCC](https://gcc.gnu.org/install/) installed: if running `gcc --version` gives an error, run `sudo apt-get install gcc`.
 
-#### Using the provided YML file
+#### YML file installation
 
 You can use the provided YML file for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of DeepRank2 and all its dependencies.
 This will install the CPU-only version of DeepRank2 on Python 3.10.
-Note that this will not work for MacOS. Do the [Manual Installation](#manual-installation) instead
+Note that this will not work for MacOS. Do the [Manual Installation](#manual-installation) instead.
 
 ```bash
 # Clone the DeepRank2 repository and enter its root directory
@@ -110,7 +110,7 @@ conda env create -f env/environment.yml
 conda activate deeprank2
 ```
 
-See instructions below to [test](#testing-your-deeprank2-installation) that the installation was succesful.
+See instructions below to [test](#testing-deeprank2-installation) that the installation was succesful.
 
 #### Manual installation
 
@@ -124,7 +124,7 @@ If you have any issues during installation of dependencies, please refer to the 
   - Pytorch regularly publishes updates and not all newest versions will work stably with DeepRank2. Currently, the package is tested using [PyTorch 2.1.1](https://pytorch.org/get-started/previous-versions/#v211).
   - We support torch's CPU library as well as CUDA.
 - [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
-  - The exact command to install pyg will depend on the versiobn of pytorch you are using. Please refer to the source's installation instructions (we recommend using the pip installation for this as it also shows the command for the dependencies).
+  - The exact command to install pyg will depend on the version of pytorch you are using. Please refer to the source's installation instructions (we recommend using the pip installation for this as it also shows the command for the dependencies).
 - For MacOS with M1 chip users: install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
 
 Finally install deeprank2 itself: `pip install deeprank2`.
@@ -139,7 +139,7 @@ pip install -e .'[test]'
 
 The `test` extra is optional, and can be used to install test-related dependencies, useful during development.
 
-#### Testing your DeepRank2 installation
+#### Testing DeepRank2 installation
 
 You can check that all components were installed correctly, using pytest. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
 
