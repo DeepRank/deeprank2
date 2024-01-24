@@ -46,7 +46,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           extras-require: test
       - name: Run unit tests with coverage
-        run: pytest --cov --cov-append --cov-report xml --cov-report term --cov-report html
+        run: pytest --cov --cov-append --cov-report xml --cov-fail-under=80 --cov-report term --cov-report html
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.github_token }}
