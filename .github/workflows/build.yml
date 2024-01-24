@@ -45,6 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test, publishing
+          test-release: false
       - name: Run unit tests
         run: pytest -v
       - name: Verify that we can build the package

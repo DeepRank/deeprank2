@@ -45,5 +45,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test
+          test-release: false
       - name: Check style against standards using ruff
         run: ruff .

@@ -23,6 +23,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: publishing
+          test-release: false
       - name: Build wheel and source distribution
         run: python -m build
       - uses: actions/upload-artifact@v3
