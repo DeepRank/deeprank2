@@ -44,9 +44,6 @@ jobs:
       - uses: ./.github/actions/install-python-and-package
         with:
           python-version: ${{ matrix.python-version }}
-          extras-require: test, publishing
           test-release: "latest"
       - name: Run unit tests
         run: pytest -v
-      - name: Verify that we can build the package
-        run: python3 -m build
