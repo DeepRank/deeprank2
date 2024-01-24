@@ -45,7 +45,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test
-          test-release: false
       - name: Run unit tests with coverage
         run: pytest --cov --cov-append --cov-report xml --cov-fail-under=80 --cov-report term --cov-report html
       - name: Coveralls

@@ -16,7 +16,7 @@ inputs:
   test-release:
     required: false
     description: "To specify if testing the latest released version of the package (true) or the editable one (false)."
-    default: "false"
+    default: "editable"
 
 runs:
   using: "composite"
@@ -84,11 +84,11 @@ runs:
         conda install pytables
     - name: Install the editable version of the package
       shell: bash {0}
-      if: ${{ inputs.test-release == false}}
+      if: ${{ inputs.test-release == 'editable' }}
       run: pip install .'[${{ inputs.extras-require }}]'
     - name: Install the latest released version of the package
       shell: bash {0}
-      if: ${{ inputs.test-release == true}}
+      if: ${{ inputs.test-release == 'latest' }}
       run: |
         rm -r deeprank2
         pip install deeprank2
