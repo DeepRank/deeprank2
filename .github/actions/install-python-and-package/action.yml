@@ -1,6 +1,6 @@
-name: "Install Python and deeprank2"
+name: "Install Python and DeepRank2"
 
-description: "Installs Python, updates pip and installs deeprank2 together with its dependencies."
+description: "Installs Python, updates pip and installs DeepRank2 together with its dependencies."
 
 inputs:
   python-version:
@@ -32,8 +32,10 @@ runs:
       with:
         update-conda: true
         python-version: ${{ inputs.python-version }}
-        conda-channels: anaconda
-    - run: conda --version
+        conda-channels: pytorch, pyg, bioconda, defaults, sbl, conda-forge
+    - run: |
+        conda --version
+        conda env list
       shell: bash {0}
     - name: Python info
       shell: bash -e {0}
@@ -46,16 +48,16 @@ runs:
         CMAKE_INSTALL_PREFIX: .local
       if: runner.os == 'Linux'
       run: |
-        # Install dependencies not handled by setuptools
+        # Install deeprank2 conda dependencies
         ## DSSP
-        sudo apt-get install -y dssp
+        conda install -c sbl dssp>=4.2.2.1
         ## MSMS
-        conda install -c bioconda msms
+        conda install -c bioconda msms>=2.6.1
         ## PyTorch, PyG, PyG adds
         ### Installing for CPU only on the CI
-        conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 -c pytorch
-        pip install torch_geometric==2.3.1
-        pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
+        conda install pytorch=2.1.1 torchvision=0.16.1 torchaudio=2.1.1 cpuonly=2.0.* -c pytorch
+        conda install pyg=2.4.0 -c pyg
+        pip install torch_scatter==2.1.2 torch_sparse==0.6.18 torch_cluster==1.6.3 torch_spline_conv==1.2.2 -f https://data.pyg.org/whl/torch-2.1.0+cpu.html
     - name: Install dependencies on MacOS
       shell: bash {0}
       env:
@@ -64,26 +66,7 @@ runs:
       run: |
         # Install dependencies not handled by setuptools
         ## DSSP
-        git clone https://github.com/PDB-REDO/libcifpp.git --recurse-submodules
-        cd libcifpp
-        cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release
-        cmake --build build
-        cmake --install build
-        #######
-        git clone https://github.com/mhekkel/libmcfp.git
-        cd libmcfp
-        mkdir build
-        cd build
-        cmake ..
-        cmake --build .
-        cmake --install .
-        #######
-        git clone https://github.com/PDB-REDO/dssp.git
-        cd dssp
-        mkdir build
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-        cmake --build build
-        cmake --install build
+        conda install -c sbl dssp>=4.2.2.1
         ## MSMS
         cd /tmp/
         wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL2.6.1/msms_i86Linux2_2.6.1.tar.gz

@@ -4,7 +4,9 @@ Features implemented in the code-base are defined in `deeprank2.feature` subpack
 
 ## Custom features
 
-Users can add custom features by creating a new module and placing it in `deeprank2.feature` subpackage. One requirement for any feature module is to implement an `add_features` function, as shown below. This will be used in `deeprank2.models.query` to add the features to the nodes or edges of the graph.
+Users can add custom features by cloning the repository, creating a new module and placing it in `deeprank2.feature` subpackage. The custom features can then be used by installing the package in editable mode (see [here](https://deeprank2.readthedocs.io/en/latest/installation.html#install-deeprank2) for more details). We strongly recommend submitting a pull request (PR) to merge the new feature into the official repository.
+
+One requirement for any feature module is to implement an `add_features` function, as shown below. This will be used in `deeprank2.models.query` to add the features to the nodes or edges of the graph.
 
 ```python
 
@@ -18,6 +20,59 @@ def add_features(
     single_amino_acid_variant: SingleResidueVariant | None = None
 ):
     pass
+```
+
+Additionally, the nomenclature of the custom feature should be added in `deeprank2.domain.edgestorage` or `deeprank2.domain.nodestorage`, depending on which type of feature it is.
+
+As an example, this is the implementation of the node feature `res_type`, which represents the one-hot encoding of the amino acid residue and is defined in `deeprank2.features.components` module:
+
+```python
+from deeprank2.domain import nodestorage as Nfeat
+from deeprank2.molstruct.atom import Atom
+from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.utils.graph import Graph
+
+def add_features(
+    pdb_path: str, graph: Graph,
+    single_amino_acid_variant: Optional[SingleResidueVariant] = None
+    ):
+
+    for node in graph.nodes:
+        if isinstance(node.id, Residue):
+            residue = node.id
+        elif isinstance(node.id, Atom):
+            atom = node.id
+            residue = atom.residue
+        else:
+            raise TypeError(f"Unexpected node type: {type(node.id)}")
+
+        node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
+```
+
+`RESTYPE` is the name of the variable assigned to the feature `res_type` in `deeprank2.domain.nodestorage`. In order to use the feature from DeepRank2 API, its module needs to be imported and specified during the queries processing:
+
+```python
+from deeprank2.features import components
+
+feature_modules = [components]
+
+# Save data into 3D-graphs only
+hdf5_paths = queries.process(
+    "<output_folder>/<prefix_for_outputs>",
+    feature_modules = feature_modules)
+```
+
+Then, the feature `res_type` can be used from the DeepRank2 datasets API:
+
+```python
+from deeprank2.dataset import GraphDataset
+
+node_features = ["res_type"]
+
+dataset = GraphDataset(
+    hdf5_path = hdf5_paths,
+    node_features = node_features
+)
 ```
 
 The following is a brief description of the features already implemented in the code-base, for each features' module.
