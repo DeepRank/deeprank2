@@ -6,7 +6,7 @@
   - [Local/remote installation](#localremote-installation)
       - [YML file installation](#yml-file-installation)
     - [Manual installation](#manual-installation)
-      - [Testing DeepRank2 installation](#testing-deeprank2-installation)
+    - [Testing DeepRank2 installation](#testing-deeprank2-installation)
 - [Contributing](#contributing)
 
 # Installation
