@@ -90,6 +90,6 @@ runs:
       shell: bash {0}
       if: ${{ inputs.test-release == 'latest' }}
       run: |
-        pip install pytest >= 7.4.0
+        pip install pytest
         rm -r deeprank2
         pip install deeprank2
