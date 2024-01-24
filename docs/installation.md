@@ -94,7 +94,7 @@ pip install -e .'[test]'
 
 The `test` extra is optional, and can be used to install test-related dependencies, useful during development.
 
-#### Testing DeepRank2 installation
+### Testing DeepRank2 installation
 
 You can check that all components were installed correctly, using pytest. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
 
