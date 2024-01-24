@@ -1,4 +1,4 @@
-name: build
+name: build (editable package)
 
 on:
   push:
