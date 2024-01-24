@@ -89,4 +89,6 @@ runs:
     - name: Install the latest released version of the package
       shell: bash {0}
       if: ${{ inputs.test-release }} == true
-      run: pip install deeprank2
+      run: |
+        rm -r deeprank2
+        pip install deeprank2
