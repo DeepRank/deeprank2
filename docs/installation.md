@@ -1,3 +1,14 @@
+# Table of contents
+
+- [Table of contents](#table-of-contents)
+- [Installation](#installation)
+  - [Containerized Installation](#containerized-installation)
+  - [Local/remote installation](#localremote-installation)
+      - [YML file installation](#yml-file-installation)
+    - [Manual installation](#manual-installation)
+      - [Testing DeepRank2 installation](#testing-deeprank2-installation)
+- [Contributing](#contributing)
+
 # Installation
 
 There are two ways to install DeepRank2:
