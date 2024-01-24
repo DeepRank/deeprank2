@@ -1,0 +1,52 @@
+name: build
+
+on:
+  push:
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
+      - "**.cff"
+      - "**.png"
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.ipynb"
+      - "**.cff"
+      - "**.png"
+
+jobs:
+  build:
+    if: github.event.pull_request.draft == false
+    name: Build for (${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: ["3.10"] # ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-python-and-package
+        with:
+          python-version: ${{ matrix.python-version }}
+          extras-require: test, publishing
+          test-release: true
+      - name: Run unit tests
+        run: pytest -v
+      - name: Verify that we can build the package
+        run: python3 -m build
