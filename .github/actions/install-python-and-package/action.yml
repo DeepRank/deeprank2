@@ -82,7 +82,7 @@ runs:
         pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__)")+cpu.html
         # PyTables via conda only for MacOS
         conda install pytables
-    - name: Install the editable version of the package
+    - name: Install the GitHub repository version of the package
       shell: bash {0}
       if: ${{ inputs.pkg-installation-type == 'repository' }}
       run: pip install .'[${{ inputs.extras-require }}]'
