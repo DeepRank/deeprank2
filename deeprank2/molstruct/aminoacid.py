@@ -1,6 +1,7 @@
 from enum import Enum
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 class Polarity(Enum):
@@ -19,9 +20,7 @@ class Polarity(Enum):
 
 
 class AminoAcid:
-    """An amino acid represents the type of `Residue` in a `PDBStructure`."""
-
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(
         self,
         name: str,
         three_letter_code: str,
@@ -35,7 +34,8 @@ class AminoAcid:
         hydrogen_bond_acceptors: int,
         index: int,
     ):
-        """
+        """An amino acid represents the type of `Residue` in a `PDBStructure`.
+
         Args:
             name (str): Full name of the amino acid.
             three_letter_code (str): Three-letter code of the amino acid (as in PDB).
@@ -49,7 +49,6 @@ class AminoAcid:
             hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
             index (int): The rank of the amino acid, used for computing one-hot encoding.
         """
-
         # amino acid nomenclature
         self._name = name
         self._three_letter_code = three_letter_code
@@ -108,11 +107,9 @@ class AminoAcid:
         return self._hydrogen_bond_acceptors
 
     @property
-    def onehot(self) -> np.ndarray:
+    def onehot(self) -> NDArray:
         if self._index is None:
-            raise ValueError(
-                f"Amino acid {self._name} index is not set, thus no onehot can be computed."
-            )
+            raise ValueError(f"Amino acid {self._name} index is not set, thus no onehot can be computed.")
         # 20 canonical amino acids
         # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
         a = np.zeros(20)

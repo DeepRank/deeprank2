@@ -1,39 +1,32 @@
 import torch
 import torch.nn.functional as F
-from deeprank2.utils.community_pooling import (community_pooling,
-                                               get_preloaded_cluster)
 from torch import nn
 from torch_geometric.nn import max_pool_x
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean, scatter_sum
 
+from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
+
 
 class GINetConvLayer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
-
         super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
 
         self.fc = nn.Linear(self.in_channels, self.out_channels, bias=bias)
-        self.fc_edge_attr = nn.Linear(
-            number_edge_features, number_edge_features, bias=bias
-        )
-        self.fc_attention = nn.Linear(
-            2 * self.out_channels + number_edge_features, 1, bias=bias
-        )
+        self.fc_edge_attr = nn.Linear(number_edge_features, number_edge_features, bias=bias)
+        self.fc_attention = nn.Linear(2 * self.out_channels + number_edge_features, 1, bias=bias)
         self.reset_parameters()
 
     def reset_parameters(self):
-
         size = self.in_channels
         uniform(size, self.fc.weight)
         uniform(size, self.fc_attention.weight)
         uniform(size, self.fc_edge_attr.weight)
 
     def forward(self, x, edge_index, edge_attr):
-
         row, col = edge_index
         num_node = len(x)
         edge_attr = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
@@ -53,7 +46,7 @@ class GINetConvLayer(torch.nn.Module):
         out = torch.zeros(num_node, self.out_channels).to(alpha.device)
         z = scatter_sum(h, row, dim=0, out=out)
 
-        return z
+        return z  # noqa:RET504 (unnecessary-assign)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
@@ -93,16 +86,12 @@ class GINet(torch.nn.Module):
 
         # INTERNAL INTERACTION GRAPH
         # first conv block
-        data_ext.x = act(
-            self.conv1_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr)
-        )
+        data_ext.x = act(self.conv1_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr))
         cluster = get_preloaded_cluster(data_ext.cluster0, data_ext.batch)
         data_ext = community_pooling(cluster, data_ext)
 
         # second conv block
-        data_ext.x = act(
-            self.conv2_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr)
-        )
+        data_ext.x = act(self.conv2_ext(data_ext.x, data_ext.edge_index, data_ext.edge_attr))
         cluster = get_preloaded_cluster(data_ext.cluster1, data_ext.batch)
         x_ext, batch_ext = max_pool_x(cluster, data_ext.x, data_ext.batch)
 
@@ -115,4 +104,4 @@ class GINet(torch.nn.Module):
         x = F.dropout(x, self.dropout, training=self.training)
         x = self.fc2(x)
 
-        return x
+        return x  # noqa:RET504 (unnecessary-assign)

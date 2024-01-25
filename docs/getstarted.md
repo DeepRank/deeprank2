@@ -6,25 +6,25 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ## Data generation
 
-For each protein-protein complex (or protein structure containing a SRV), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
-- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
+For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structure
+A `Query` takes as inputs:
+
+- a `.pdb` file, representing the protein-protein structure,
+- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
-from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
 
 queries = QueryCollection()
 
 # Append data points
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -33,10 +33,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_2w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 1
     },
@@ -45,10 +45,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_3w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -188,14 +188,12 @@ dataset_train = GraphDataset(
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 ```
 
@@ -244,7 +242,7 @@ dataset_train = GraphDataset(
 )
 ```
 
-If `standardize` functionality is used, validation and testing sets need to know the interested features' means and standard deviations in order to use the same values for standardizing validation and testing features. This can be done using `train` and `dataset_train` parameters of the `GraphDataset` class. Example:
+If `standardize` functionality is used, validation and testing sets need to know the interested features' means and standard deviations in order to use the same values for standardizing validation and testing features. This can be done using `train_source` parameter of the `GraphDataset` class. Example:
 
 ```python
 features_transform = {'all':
@@ -253,7 +251,7 @@ features_transform = {'all':
 train_ids = [<ids>]
 valid_ids = [<ids>]
 test_ids = [<ids>]
-# `train` defaults to `True`, and `dataset_train` defaults to `None`
+# `train_source` defaults to `None`
 dataset_train = GraphDataset(
     hdf5_path = hdf5_path,
     subset = train_ids,
@@ -265,14 +263,12 @@ dataset_train = GraphDataset(
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
-    dataset_train = dataset_train # dataset_train means and stds will be used
+    train_source = dataset_train # dataset_train means and stds will be used
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
-    dataset_train = dataset_train # dataset_train means and stds will be used
+    train_source = dataset_train # dataset_train means and stds will be used
 )
 ```
 
@@ -299,14 +295,12 @@ dataset_train = GridDataset(
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 ```
 
@@ -411,4 +405,68 @@ fig.update_layout(
     yaxis_title='Loss',
     title='Loss vs epochs'
 )
+```
+
+## Run a pre-trained model on new data
+
+If you want to run a pre-trained model on new PDB files, the first step is to process and save them into HDF5 files. Let's suppose that the model has been trained with `ProteinProteinInterfaceQuery` queries mapped to graphs:
+
+```python
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
+
+queries = QueryCollection()
+
+# Append data points
+queries.add(ProteinProteinInterfaceQuery(
+    pdb_path = "<new_pdb_file1.pdb>",
+    chain_id1 = "A",
+    chain_id2 = "B"
+))
+queries.add(ProteinProteinInterfaceQuery(
+    pdb_path = "<new_pdb_file2.pdb>",
+    chain_id1 = "A",
+    chain_id2 = "B"
+))
+
+hdf5_paths = queries.process(
+    "<output_folder>/<prefix_for_outputs>",
+    feature_modules = 'all')
+```
+
+Then, the GraphDataset instance for the newly processed data can be created. Do this by specifying the path for the pre-trained model in `train_source`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model.
+
+```python
+from deeprank2.dataset import GraphDataset
+
+dataset_test = GraphDataset(
+    hdf5_path = "<output_folder>/<prefix_for_outputs>",
+    train_source = "<pretrained_model_path>"
+)
+```
+
+Finally, the `Trainer` instance can be defined and the new data can be tested:
+
+```python
+from deeprank2.trainer import Trainer
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.utils.exporters import HDF5OutputExporter
+
+trainer = Trainer(
+    NaiveNetwork,
+    dataset_test = dataset_test,
+    pretrained_model = "<pretrained_model_path>",
+    output_exporters = [HDF5OutputExporter("<output_folder_path>")]
+)
+
+trainer.test()
+```
+
+The results can then be read in a Pandas Dataframe and visualized:
+
+```python
+import os
+import pandas as pd
+
+output = pd.read_hdf(os.path.join("<output_folder_path>", "output_exporter.hdf5"), key="testing")
+output.head()
 ```

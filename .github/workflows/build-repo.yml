@@ -1,4 +1,4 @@
-name: build
+name: build (repository package)
 
 on:
   push:
@@ -36,8 +36,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest']
-        python-version: ['3.10', '3.11']
+        os: ["ubuntu-latest"]
+        python-version: ["3.10"] # ["3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -45,6 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test, publishing
+          pkg-installation-type: "repository"
       - name: Run unit tests
         run: pytest -v
       - name: Verify that we can build the package

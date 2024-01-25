@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from deeprank2.molstruct.residue import Residue
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    from deeprank2.molstruct.residue import Residue
 
 
 class AtomicElement(Enum):
     """One-hot encoding of the atomic element (or atom type)."""
+
     C = 1
-    O = 2 # noqa: pycodestyle
+    O = 2  # noqa: E741 (ambiguous-variable-name)
     N = 3
     S = 4
     P = 5
@@ -24,17 +29,16 @@ class AtomicElement(Enum):
 
 
 class Atom:
-    """One atom in a PDBStructure."""
-
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(
         self,
         residue: Residue,
         name: str,
         element: AtomicElement,
-        position: np.array,
+        position: NDArray,
         occupancy: float,
     ):
-        """
+        """One atom in a PDBStructure.
+
         Args:
             residue (:class:`Residue`): The residue that this atom belongs to.
             name (str): Pdb atom name.
@@ -43,7 +47,7 @@ class Atom:
             occupancy (float): Pdb occupancy value.
                 This represents the proportion of structures where the atom is detected at a given position.
                 Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
-                Note that only the highest occupancy atom is used by deeprank2 (see tools.pdb._add_atom_to_residue)
+                Note that only the highest occupancy atom is used by deeprank2 (see tools.pdb._add_atom_to_residue).
         """
         self._residue = residue
         self._name = name
@@ -52,9 +56,8 @@ class Atom:
         self._occupancy = occupancy
 
     def __eq__(self, other) -> bool:
-        if isinstance (other, Atom):
-            return (self._residue == other._residue
-                    and self._name == other._name)
+        if isinstance(other, Atom):
+            return self._residue == other._residue and self._name == other._name
         return NotImplemented
 
     def __hash__(self) -> hash:
@@ -81,7 +84,7 @@ class Atom:
         return self._occupancy
 
     @property
-    def position(self) -> np.array:
+    def position(self) -> NDArray:
         return self._position
 
     @property

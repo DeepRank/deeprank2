@@ -1,25 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
-
-from deeprank2.utils.pssmdata import PssmRow
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from deeprank2.molstruct.atom import Atom
     from deeprank2.molstruct.residue import Residue
+    from deeprank2.utils.pssmdata import PssmRow
 
 
 class PDBStructure:
-    """A proitein or protein complex structure..
+    """."""
 
-    A `PDBStructure` can contain one or multiple `Chains`, i.e. separate
-    molecular entities (individual proteins).
-    One PDBStructure consists of a number of `Residue`s, each of which is of a
-    particular `AminoAcid` type and in turn consists of a number of `Atom`s.
-    """
+    def __init__(self, id_: str | None = None):
+        """A proitein or protein complex structure.
 
-    def __init__(self, id_: Optional[str] = None):
-        """
+        A `PDBStructure` can contain one or multiple `Chains`, i.e. separate molecular entities (individual proteins).
+        One PDBStructure consists of a number of `Residue`s, each of which is of a particular `AminoAcid` type and in turn consists of a number of `Atom`s.
+
         Args:
             id_ (str, optional): An unique identifier for this structure, can be the pdb accession code.
                 Defaults to None.
@@ -46,7 +43,7 @@ class PDBStructure:
 
     def add_chain(self, chain: Chain):
         if chain.id in self._chains:
-            raise ValueError(f"duplicate chain: {chain.id}")
+            raise ValueError(f"Duplicate chain: {chain.id}")
         self._chains[chain.id] = chain
 
     @property
@@ -72,12 +69,12 @@ class Chain:
     In other words: each `Chain` in a `PDBStructure` is a separate molecule.
     """
 
-    def __init__(self, model: PDBStructure, id_: Optional[str]):
+    def __init__(self, model: PDBStructure, id_: str | None):
         """One chain of a PDBStructure.
 
-            Args:
-            model (:class:`PDBStructure`): The model that this chain is part of.
-            id_ (str): The pdb identifier of this chain.
+        Args:
+        model (:class:`PDBStructure`): The model that this chain is part of.
+        id_ (str): The pdb identifier of this chain.
         """
         self._model = model
         self._id = id_
@@ -99,10 +96,10 @@ class Chain:
     def add_residue(self, residue: Residue):
         self._residues[(residue.number, residue.insertion_code)] = residue
 
-    def has_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> bool:
+    def has_residue(self, residue_number: int, insertion_code: str | None = None) -> bool:
         return (residue_number, insertion_code) in self._residues
 
-    def get_residue(self, residue_number: int, insertion_code: Optional[str] = None) -> Residue:
+    def get_residue(self, residue_number: int, insertion_code: str | None = None) -> Residue:
         return self._residues[(residue_number, insertion_code)]
 
     @property
@@ -123,8 +120,7 @@ class Chain:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Chain):
-            return (self._model == other._model
-                    and self._id == other._id)
+            return self._model == other._model and self._id == other._id
         return NotImplemented
 
     def __hash__(self) -> hash:

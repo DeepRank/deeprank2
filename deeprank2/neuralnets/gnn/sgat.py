@@ -1,17 +1,17 @@
 import torch
 import torch.nn.functional as F
-from deeprank2.utils.community_pooling import (community_pooling,
-                                               get_preloaded_cluster)
 from torch import nn
 from torch.nn import Parameter
 from torch_geometric.nn import max_pool_x
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean
 
+from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
+
 
 class SGraphAttentionLayer(torch.nn.Module):
+    """SGraphAttentionLayer.
 
-    """
     This is a new layer that is similar to the graph attention network but simpler
     z_i =  1 / Ni \\Sum_j a_ij * [x_i || x_j] * W + b_i
     || is the concatenation operator: [1,2,3] || [4,5,6] = [1,2,3,4,5,6]
@@ -23,10 +23,9 @@ class SGraphAttentionLayer(torch.nn.Module):
         out_channels (int): Size of each output sample.
         bias (bool, optional): If set to :obj:`False`, the layer will not learn
             an additive bias. Defaults to True.
-    """
+    """  # noqa: D301 (escape-sequence-in-docstring)
 
     def __init__(self, in_channels: int, out_channels: int, bias: bool = True, undirected=True):
-
         super().__init__()
 
         self.in_channels = in_channels
@@ -48,7 +47,6 @@ class SGraphAttentionLayer(torch.nn.Module):
         uniform(size, self.bias)
 
     def forward(self, x, edge_index, edge_attr):
-
         row, col = edge_index
         num_node = len(x)
         edge_attr = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
@@ -83,7 +81,12 @@ class SGraphAttentionLayer(torch.nn.Module):
 
 
 class SGAT(torch.nn.Module):
-    def __init__(self, input_shape, output_shape=1, input_shape_edge=None): # pylint: disable=unused-argument
+    def __init__(
+        self,
+        input_shape,
+        output_shape=1,
+        input_shape_edge=None,  # noqa: ARG002 (unused argument)
+    ):
         super().__init__()
 
         self.conv1 = SGraphAttentionLayer(input_shape, 16)
@@ -95,10 +98,8 @@ class SGAT(torch.nn.Module):
         self.clustering = "mcl"
 
     def forward(self, data):
-
         act = nn.Tanhshrink()
         act = F.relu
-        # act = nn.LeakyReLU(0.25)
 
         # first conv block
         data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))
@@ -114,7 +115,5 @@ class SGAT(torch.nn.Module):
         x = scatter_mean(x, batch, dim=0)
         x = act(self.fc1(x))
         x = self.fc2(x)
-        # x = F.dropout(x, training=self.training)
 
-        return x
-        # return F.relu(x)
+        return x  # noqa:RET504 (unnecessary-assign)

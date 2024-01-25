@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest']
-        python-version: ['3.10']
+        os: ["ubuntu-latest"]
+        python-version: ["3.10"]
 
     steps:
       - uses: actions/checkout@v3
@@ -23,6 +23,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: publishing
+          pkg-installation-type: "repository"
       - name: Build wheel and source distribution
         run: python -m build
       - uses: actions/upload-artifact@v3

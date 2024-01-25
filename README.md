@@ -1,13 +1,13 @@
 # DeepRank2
 
-| Badges | |
-|:----:|----|
-| **fairness** |  [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403) |
-| **package** |  [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3f98b2d1883493ead50e3acaa23f2cc)](https://app.codacy.com/gh/DeepRank/deeprank2?utm_source=github.com&utm_medium=referral&utm_content=DeepRank/deeprank2&utm_campaign=Badge_Grade) |
-| **docs** | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) |
-| **tests** | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) ![Python](https://img.shields.io/badge/python-3.10-blue.svg)  ![Python](https://img.shields.io/badge/python-3.11-blue.svg) |
-| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) |
-| **license** |  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)  |
+|     Badges     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  **fairness**  | [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403)                                                                                                                                                                                                                           |
+|  **package**   | [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b1bde03fc0334e07b0cd8a69ce2adeb3)](https://app.codacy.com/gh/DeepRank/deeprank2/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)                                                                                                                                                                                                                                |
+|    **docs**    | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)                                                                                                                                                                                                                                                                                                        |
+|   **tests**    | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) ![Python](https://img.shields.io/badge/python-3.10-blue.svg) <!--- ![Python](https://img.shields.io/badge/python-3.11-blue.svg) --> |
+| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|  **license**   | [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ## Overview
 
@@ -20,6 +20,7 @@ DeepRank2 is an open-source deep learning (DL) framework for data mining of prot
 DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
 
 Main features:
+
 - Predefined atom-level and residue-level feature types
   - e.g. atom/residue type, charge, size, potential energy
   - All features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html)
@@ -40,72 +41,71 @@ Main features:
 - [DeepRank2](#deeprank2)
   - [Overview](#overview)
   - [Table of contents](#table-of-contents)
-  - [Installations](#installations)
+  - [Installation](#installation)
     - [Containerized Installation](#containerized-installation)
     - [Local/remote installation](#localremote-installation)
-      - [Non-pythonic dependencies](#non-pythonic-dependencies)
-      - [Pythonic dependencies](#pythonic-dependencies)
-      - [Install DeepRank2](#install-deeprank2)
-      - [Test installation](#test-installation)
+      - [YML file installation](#yml-file-installation)
+      - [Manual installation](#manual-installation)
+      - [Testing DeepRank2 installation](#testing-deeprank2-installation)
   - [Contributing](#contributing)
-  - [Data generation](#data-generation)
-  - [Datasets](#datasets)
-    - [GraphDataset](#graphdataset)
-    - [GridDataset](#griddataset)
-  - [Training](#training)
+  - [Using DeepRank2](#using-deeprank2)
+    - [Data generation](#data-generation)
+    - [Datasets](#datasets)
+      - [GraphDataset](#graphdataset)
+      - [GridDataset](#griddataset)
+    - [Training](#training)
+      - [Run a pre-trained model on new data](#run-a-pre-trained-model-on-new-data)
   - [Computational performances](#computational-performances)
   - [Package development](#package-development)
 
-## Installations
+## Installation
 
-Note that the package officially supports ubuntu-latest OS only, whose functioning is widely tested through the continuous integration workflows. 
+There are two ways to install DeepRank2:
 
-You can either install DeepRank2 in a [dockerized container](#containerized-installation), which will allow you to run our [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials), or you can [install the package locally](#localremote-installation).
+1. In a [dockerized container](#containerized-installation). This allows you to use DeepRank2, including all the notebooks within the container (a protected virtual space), without worrying about your operating system or installation of dependencies.
+   - We recommend this installation for inexperienced users and to learn to use or test our software, e.g. using the provided [tutorials](tutorials/TUTORIAL.md). However, resources might be limited in this installation and we would not recommend using it for large datasets or on high-performance computing facilities.
+2. [Local installation](#localremote-installation) on your system. This allows you to use the full potential of DeepRank2, but requires a few additional steps during installation.
+   - We recommend this installation for more experienced users, for larger projects, and for (potential) [contributors](#contributing) to the codebase.
 
-### Containerized Installation 
+### Containerized Installation
 
-In order to try out the package without worrying about your OS and without the need of installing all the required dependencies, we created a `Dockerfile` that can be used for taking care of everything in a suitable container. After having cloned the repository and installed [Docker](https://docs.docker.com/engine/install/), run the following commands (you may need to have sudo permission) from the root of the repository.
+In order to try out the package without worrying about your OS and without the need of installing all the required dependencies, we created a `Dockerfile` that can be used for taking care of everything in a suitable container.
 
-Build the Docker image:
+For this, you first need to install [Docker](https://docs.docker.com/engine/install/) on your system. Then run the following commands. You may need to have sudo permission for some steps, in which case the commands below can be preceded by `sudo`:
 
 ```bash
+# Clone the DeepRank2 repository and enter its root directory
+git clone https://github.com/DeepRank/deeprank2
+cd deeprank2
+
+# Build and run the Docker image
 docker build -t deeprank2 .
-```
-
-Run the Docker container:
-
-```bash
 docker run -p 8888:8888 deeprank2
 ```
 
-This assumes that your application inside the container is listening on port 8888, and you want to map it to port 8888 on your host machine. Open a browser and go to `http://localhost:8888` to access the application running inside the Docker container and run the tutorials' notebooks.
+Next, open a browser and go to `http://localhost:8888` to access the application running inside the Docker container. From there you can use DeepRank2, e.g. to run the tutorial notebooks.
 
-More details about the tutorials' content can be found [here](https://github.com/DeepRank/deeprank2/blob/main/tutorials/TUTORIAL.md). Note that in the docker container only the raw PDB files are downloaded, needed as a starting point for the tutorials. You can obtain the processed HDF5 files by running the `data_generation_xxx.ipynb` notebooks. Because Docker containers are limited in memory resources, we limit the number of data points processed in the tutorials'. Please install the package locally to fully leverage its capabilities.
+More details about the tutorials' contents can be found [here](https://github.com/DeepRank/deeprank2/blob/main/tutorials/TUTORIAL.md). Note that in the docker container only the raw PDB files are downloaded, which needed as a starting point for the tutorials. You can obtain the processed HDF5 files by running the `data_generation_xxx.ipynb` notebooks. Because Docker containers are limited in memory resources, we limit the number of data points processed in the tutorials. Please [install the package locally](#localremote-installation) to fully leverage its capabilities.
 
-After running the tutorials, you may want to remove the (quite large) Docker image from your machine. In this case, remember to [stop the container](https://docs.docker.com/engine/reference/commandline/stop/) and then [remove the image](https://docs.docker.com/engine/reference/commandline/image_rm/). More general information about Docker can be found on the [official website docs](https://docs.docker.com/get-started/). 
+If after running the tutorials you want to remove the (quite large) Docker image from your machine, you must first [stop the container](https://docs.docker.com/engine/reference/commandline/stop/) and can then [remove the image](https://docs.docker.com/engine/reference/commandline/image_rm/). More general information about Docker can be found on the [official website docs](https://docs.docker.com/get-started/).
 
 ### Local/remote installation
 
-#### Non-pythonic dependencies
+Local installation is formally only supported on the latest stable release of ubuntu, for which widespread automated testing through continuous integration workflows has been set up. However, it is likely that the package runs smoothly on other operating systems as well.
 
-Instructions are up to date as of 27 Nov 2023.
+Before installing DeepRank2 please ensure you have [GCC](https://gcc.gnu.org/install/) installed: if running `gcc --version` gives an error, run `sudo apt-get install gcc`.
 
-Before installing DeepRank2 you need to install some dependencies:
+#### YML file installation
 
-*  [DSSP 4](https://swift.cmbi.umcn.nl/gv/dssp/)
-    * Check if `dssp` is installed: `dssp --version`. If this gives an error or shows a version lower than 4:
-      * on ubuntu 22.04 or newer: `sudo apt-get install dssp`. If the package cannot be located, first run `sudo apt-get update`.
-      * on older versions of ubuntu or on mac or lacking sudo priviliges: install from [here](https://github.com/pdb-redo/dssp), following the instructions listed. Alternatively, follow [this](https://github.com/PDB-REDO/libcifpp/issues/49) thread. 
-*  [GCC](https://gcc.gnu.org/install/)
-    * Check if gcc is installed: `gcc --version`. If this gives an error, run `sudo apt-get install gcc`. 
-
-#### Pythonic dependencies
-
-Instructions are up to date as of 27 Nov 2023.
-
-Then, you can use the YML file we provide for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of the package and all the other necessary conda and pip dependencies (CPU only, Python 3.10):
+You can use the provided YML file for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of DeepRank2 and all its dependencies.
+This will install the CPU-only version of DeepRank2 on Python 3.10.
+Note that this will not work for MacOS. Do the [Manual Installation](#manual-installation) instead.
 
 ```bash
+# Clone the DeepRank2 repository and enter its root directory
+git clone https://github.com/DeepRank/deeprank2
+cd deeprank2
+
 # Ensure you are in your base environment
 conda activate
 # Create the environment
@@ -114,22 +114,24 @@ conda env create -f env/environment.yml
 conda activate deeprank2
 ```
 
-Alternatively, if you are a MacOS user, if the YML file installation is not successfull, or if you want to use CUDA or Python 3.11, you can install each dependency separately, and then the latest stable release of the package using the PyPi package manager. Also in this case, we advise to use a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). In case of issues during installation, please refer to the official documentation for each package (linked below), as our instructions may be out of date:
+See instructions below to [test](#testing-deeprank2-installation) that the installation was succesful.
 
-*  [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`.
-    * [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
-*  [PyTorch](https://pytorch.org/get-started/locally/)
-*  [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) `conda install pyg -c pyg`
-    * Also install all [optional additions to PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html#installation-from-wheels), namely: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
-*  For MacOS with M1 chip users only install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
+#### Manual installation
 
-#### Install DeepRank2
+If you want to use the GPUs, choose a specific python version, are a MacOS user, or if the YML installation was not succesful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
+If you have any issues during installation of dependencies, please refer to the official documentation for each package (linked below), as our instructions may be out of date (last tested on 19 Jan 2024):
 
-Finally do:
+- [DSSP 4](https://anaconda.org/sbl/dssp): `conda install -c sbl dssp`
+- [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`
+  - [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
+- [PyTorch](https://pytorch.org/get-started/locally/): `conda install pytorch torchvision torchaudio cpuonly -c pytorch`
+  - Pytorch regularly publishes updates and not all newest versions will work stably with DeepRank2. Currently, the package is tested using [PyTorch 2.1.1](https://pytorch.org/get-started/previous-versions/#v211).
+  - We support torch's CPU library as well as CUDA.
+- [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
+  - The exact command to install pyg will depend on the version of pytorch you are using. Please refer to the source's installation instructions (we recommend using the pip installation for this as it also shows the command for the dependencies).
+- For MacOS with M1 chip users: install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
 
-```bash
-pip install deeprank2
-```
+Finally install deeprank2 itself: `pip install deeprank2`.
 
 Alternatively, get the latest updates by cloning the repo and installing the editable version of the package with:
 
@@ -139,43 +141,46 @@ cd deeprank2
 pip install -e .'[test]'
 ```
 
-The `test` extra is optional, and can be used to install test-related dependencies useful during the development.
+The `test` extra is optional, and can be used to install test-related dependencies, useful during development.
 
-#### Test installation
+#### Testing DeepRank2 installation
 
-If you have installed the package from a cloned repository (the latter option above), you can check that all components were installed correctly, using pytest (run `pip install pytest` if you did not install it above).
+You can check that all components were installed correctly, using pytest. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
+
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
 
-Run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
+First run `pip install pytest`, if you did not install it above. Then run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
 
 ## Contributing
 
 If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
 
+## Using DeepRank2
+
 The following section serves as a first guide to start using the package, using protein-protein Interface (PPI) queries as example. For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating SVR data, and for the training pipeline.
 For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
-## Data generation
+### Data generation
 
-For each protein-protein complex (or protein structure containing a SRV), a query can be created and added to the `QueryCollection` object, to be processed later on. Different types of queries exist:
-- In a `ProteinProteinInterfaceResidueQuery` and `SingleResidueVariantResidueQuery`, each node represents one amino acid residue.
-- In a `ProteinProteinInterfaceAtomicQuery` and `SingleResidueVariantAtomicQuery`, each node represents one atom within the amino acid residues.
+For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-A query takes as inputs:
-- a `.pdb` file, representing the protein-protein structure
+A `Query` takes as inputs:
+
+- a `.pdb` file, representing the protein-protein structure,
+- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
-from deeprank2.query import QueryCollection, ProteinProteinInterfaceResidueQuery
+from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
 
 queries = QueryCollection()
 
 # Append data points
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -184,10 +189,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_2w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 1
     },
@@ -196,10 +201,10 @@ queries.add(ProteinProteinInterfaceResidueQuery(
         "B": "tests/data/pssm/1ATN/1ATN.B.pdb.pssm"
     }
 ))
-queries.add(ProteinProteinInterfaceResidueQuery(
+queries.add(ProteinProteinInterfaceQuery(
     pdb_path = "tests/data/pdb/1ATN/1ATN_3w.pdb",
-    chain_id1 = "A",
-    chain_id2 = "B",
+    resolution = "residue",
+    chain_ids = ["A", "B"],
     targets = {
         "binary": 0
     },
@@ -238,11 +243,11 @@ hdf5_paths = queries.process(
     grid_map_method = MapMethod.GAUSSIAN)
 ```
 
-## Datasets
+### Datasets
 
 Data can be split in sets implementing custom splits according to the specific application. Assuming that the training, validation and testing ids have been chosen (keys of the HDF5 file/s), then the `DeeprankDataset` objects can be defined.
 
-### GraphDataset
+#### GraphDataset
 
 For training GNNs the user can create a `GraphDataset` instance:
 
@@ -267,18 +272,16 @@ dataset_train = GraphDataset(
 dataset_val = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 dataset_test = GraphDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
-    dataset_train = dataset_train
+    train_source = dataset_train
 )
 ```
 
-### GridDataset
+#### GridDataset
 
 For training CNNs the user can create a `GridDataset` instance:
 
@@ -301,18 +304,16 @@ dataset_train = GridDataset(
 dataset_val = GridDataset(
     hdf5_path = hdf5_paths,
     subset = valid_ids,
-    train = False,
-    dataset_train = dataset_train,
+    train_source = dataset_train,
 )
 dataset_test = GridDataset(
     hdf5_path = hdf5_paths,
     subset = test_ids,
-    train = False,
-    dataset_train = dataset_train,
+    train_source = dataset_train,
 )
 ```
 
-## Training
+### Training
 
 Let's define a `Trainer` instance, using for example of the already existing `GINet`. Because `GINet` is a GNN, it requires a dataset instance of type `GraphDataset`.
 
@@ -366,21 +367,50 @@ trainer.test()
 
 ```
 
+#### Run a pre-trained model on new data
+
+If you want to analyze new PDB files using a pre-trained model, the first step is to process and save them into HDF5 files [as we have done above](#data-generation).
+
+Then, the `DeeprankDataset` instance for the newly processed data can be created. Do this by specifying the path for the pre-trained model in `train_source`, together with the path to the HDF5 files just created. Note that there is no need of setting the dataset's parameters, since they are inherited from the information saved in the pre-trained model. Let's suppose that the model has been trained with `GraphDataset` objects:
+
+```python
+from deeprank2.dataset import GraphDataset
+
+dataset_test = GraphDataset(
+    hdf5_path = "<output_folder>/<prefix_for_outputs>",
+    train_source = "<pretrained_model_path>"
+)
+```
+
+Finally, the `Trainer` instance can be defined and the new data can be tested:
+
+```python
+from deeprank2.trainer import Trainer
+from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.utils.exporters import HDF5OutputExporter
+
+trainer = Trainer(
+    NaiveNetwork,
+    dataset_test = dataset_test,
+    pretrained_model = "<pretrained_model_path>",
+    output_exporters = [HDF5OutputExporter("<output_folder_path>")]
+)
+
+trainer.test()
+```
+
+For more details about how to run a pre-trained model on new data, see the [docs](https://deeprank2.readthedocs.io/en/latest/getstarted.html#run-a-pre-trained-model-on-new-data).
+
 ## Computational performances
 
 We measured the efficiency of data generation in DeepRank2 using the tutorials' [PDB files](https://zenodo.org/record/8187806) (~100 data points per data set), averaging the results run on Apple M1 Pro, using a single CPU.
 Parameter settings were: atomic resolution, `distance_cutoff` of 5.5 Å, radius (for SRV only) of 10 Å. The [features modules](https://deeprank2.readthedocs.io/en/latest/features.html) used were `components`, `contact`, `exposure`, `irc`, `secondary_structure`, `surfacearea`, for a total of 33 features for PPIs and 26 for SRVs (the latter do not use `irc` features).
 
-|      |         Data processing speed <br />[seconds/structure]        |                Memory <br />[megabyte/structure]               |
-|------|:--------------------------------------------------------:|:--------------------------------------------------------:|
+|      |            Data processing speed <br />[seconds/structure]             |                   Memory <br />[megabyte/structure]                    |
+| ---- | :--------------------------------------------------------------------: | :--------------------------------------------------------------------: |
 | PPIs | graph only: **2.99** (std 0.23) <br />graph+grid: **11.35** (std 1.30) | graph only: **0.54** (std 0.07) <br />graph+grid: **16.09** (std 0.44) |
-| SRVs | graph only: **2.20** (std 0.08)  <br />graph+grid: **2.85** (std 0.10) | graph only: **0.05** (std 0.01) <br />graph+grid: **17.52** (std 0.59) |
+| SRVs | graph only: **2.20** (std 0.08) <br />graph+grid: **2.85** (std 0.10)  | graph only: **0.05** (std 0.01) <br />graph+grid: **17.52** (std 0.59) |
 
 ## Package development
 
-- Branching
-  - When creating a new branch, please use the following convention: `<issue_number>_<description>_<author_name>`.
-- Pull Requests
-  - When creating a pull request, please use the following convention: `<type>: <description>`. Example _types_ are `fix:`, `feat:`, `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines).
-- Software release
-  - Before creating a new package release, make sure to have updated all version strings in the source code. An easy way to do it is to run `bump2version [part]` from command line after having installed [bump2version](https://pypi.org/project/bump2version/) on your local environment. Instead of `[part]`, type the part of the version to increase, e.g. minor. The settings in `.bumpversion.cfg` will take care of updating all the files containing version strings.
+If you're looking for developer documentation, go [here](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md).

@@ -3,15 +3,16 @@ from torch import nn
 
 __author__ = "Daniel-Tobias Rademaker"
 
+
 class GNNLayer(nn.Module):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(
         self,
         nmb_edge_projection,
         nmb_hidden_attr,
         nmb_output_features,
         message_vector_length,
         nmb_mlp_neurons,
-        act_fn=nn.SiLU(),
+        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
         is_last_layer=True,
     ):
         super().__init__()
@@ -54,11 +55,8 @@ class GNNLayer(nn.Module):
     # and node attributes in order to create a 'message vector'between those
     # nodes
     def edge_model(self, edge_attr, hidden_features_source, hidden_features_target):
-        cat = torch.cat(
-            [edge_attr, hidden_features_source, hidden_features_target], dim=1
-        )
-        output = self.edge_mlp(cat)
-        return output
+        cat = torch.cat([edge_attr, hidden_features_source, hidden_features_target], dim=1)
+        return self.edge_mlp(cat)
 
     # A function that updates the node-attributes. Assumed that submessages
     # are already summed
@@ -88,9 +86,7 @@ class GNNLayer(nn.Module):
         # It is possible to run input through the same same layer multiple
         # times
         for _ in range(steps):
-            node_pair_messages = self.edge_model(
-                edge_attr, h[row], h[col]
-            )  # get all atom-pair messages
+            node_pair_messages = self.edge_model(edge_attr, h[row], h[col])  # get all atom-pair messages
             # sum all messages per node to single message vector
             messages = self.sum_messages(edges, node_pair_messages, len(h))
             # Use the messages to update the node-attributes
@@ -107,7 +103,7 @@ class GNNLayer(nn.Module):
 
 
 class SuperGNN(nn.Module):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(
         self,
         nmb_edge_attr,
         nmb_node_attr,
@@ -117,7 +113,7 @@ class SuperGNN(nn.Module):
         nmb_gnn_layers,
         nmb_output_features,
         message_vector_length,
-        act_fn=nn.SiLU(),
+        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
     ):
         super().__init__()
 
@@ -164,21 +160,18 @@ class SuperGNN(nn.Module):
 
     # Runs data through layers and return output. Potentially, attention can
     # also be returned
-    def run_through_network(
-        self, edges, edge_attr, node_attr, with_output_attention=False
-    ):
+    def run_through_network(self, edges, edge_attr, node_attr, with_output_attention=False):
         edge_attr, node_attr = self.preprocess(edge_attr, node_attr)
         for layer in self.modlist:
             node_attr = layer.update_nodes(edges, edge_attr, node_attr)
         if with_output_attention:
-            representations, attention = self.modlist[-1].output(node_attr, True)
+            representations, attention = self.modlist[-1].output(node_attr, True)  # noqa: FBT003 (boolean-positional-value-in-call)
             return representations, attention
-        representations = self.modlist[-1].output(node_attr, True)
-        return representations
+        return self.modlist[-1].output(node_attr, True)  # noqa: FBT003 (boolean-positional-value-in-call)
 
 
 class AlignmentGNN(SuperGNN):
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(
         self,
         nmb_edge_attr,
         nmb_node_attr,
@@ -188,7 +181,7 @@ class AlignmentGNN(SuperGNN):
         nmb_mlp_neurons,
         nmb_gnn_layers,
         nmb_edge_projection,
-        act_fn=nn.SiLU(),
+        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
     ):
         super().__init__(
             nmb_edge_attr,
@@ -204,5 +197,4 @@ class AlignmentGNN(SuperGNN):
 
     # Run over all layers, and return the ouput vectors
     def forward(self, edges, edge_attr, node_attr):
-        representations = self.run_through_network(edges, edge_attr, node_attr)
-        return representations
+        return self.run_through_network(edges, edge_attr, node_attr)
