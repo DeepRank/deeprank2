@@ -543,6 +543,7 @@ class QueryCollection:
 
         self._feature_modules = self._set_feature_modules(feature_modules)
         _log.info(f"\nSelected feature modules: {self._feature_modules}.")
+
         self._grid_settings = grid_settings
         self._grid_map_method = grid_map_method
 
