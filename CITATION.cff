@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-doi: 10.5281/zenodo.10417724
+doi: 10.5281/zenodo.6674124
 title: "DeepRank2: Mining 3D Protein Structures with Geometric Deep Learning"
 message: >-
   If you use this software, please cite it using the
