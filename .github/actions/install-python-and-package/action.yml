@@ -15,8 +15,8 @@ inputs:
 
   pkg-installation-type:
     required: false
-    description: "The package installation type to install, the latest released version (latest) or the editable one (editable)."
-    default: "editable"
+    description: "The package installation type to install, the latest released version on PyPI ('latest') or the GitHub repository one ('repository')."
+    default: "repository"
 
 runs:
   using: "composite"
@@ -84,7 +84,7 @@ runs:
         conda install pytables
     - name: Install the editable version of the package
       shell: bash {0}
-      if: ${{ inputs.pkg-installation-type == 'editable' }}
+      if: ${{ inputs.pkg-installation-type == 'repository' }}
       run: pip install .'[${{ inputs.extras-require }}]'
     - name: Install the latest released version of the package
       shell: bash {0}
