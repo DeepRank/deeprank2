@@ -1,4 +1,4 @@
-name: build
+name: build (repository package)
 
 on:
   push:
@@ -45,6 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test, publishing
+          pkg-installation-type: "repository"
       - name: Run unit tests
         run: pytest -v
       - name: Verify that we can build the package
