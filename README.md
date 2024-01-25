@@ -11,7 +11,9 @@
 
 ## Overview
 
-![alt-text](./deeprank2.png)
+<p align="center">
+  <img src="./deeprank2.png" width="700">
+</p>
 
 DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue variants (SRVs). This package is an improved and unified version of three previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank), [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN), and [DeepRank-Mut](https://github.com/DeepRank/DeepRank-Mut).
 
@@ -30,7 +32,9 @@ Main features:
 - Efficient data storage in HDF5 format
 - Support for both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
-DeepRank2 extensive documentation can be found [here](https://deeprank2.rtfd.io/).
+📚 [Documentation](https://deeprank2.rtfd.io/)
+
+📣 [Discussions](https://github.com/DeepRank/deeprank2/discussions)
 
 ## Table of contents
 
