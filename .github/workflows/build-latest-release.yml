@@ -23,6 +23,6 @@ jobs:
       - uses: ./.github/actions/install-python-and-package
         with:
           python-version: ${{ matrix.python-version }}
-          test-release: "latest"
+          pkg-installation-type: "latest"
       - name: Run unit tests
         run: pytest -v

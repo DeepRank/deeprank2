@@ -13,7 +13,7 @@ inputs:
     description: "The extras dependencies packages to be installed, for instance 'dev' or 'dev,publishing,notebooks'."
     default: "test"
 
-  test-release:
+  pkg-installation-type:
     required: false
     description: "To specify if testing the latest released version of the package (true) or the editable one (false)."
     default: "editable"
@@ -84,11 +84,11 @@ runs:
         conda install pytables
     - name: Install the editable version of the package
       shell: bash {0}
-      if: ${{ inputs.test-release == 'editable' }}
+      if: ${{ inputs.pkg-installation-type == 'editable' }}
       run: pip install .'[${{ inputs.extras-require }}]'
     - name: Install the latest released version of the package
       shell: bash {0}
-      if: ${{ inputs.test-release == 'latest' }}
+      if: ${{ inputs.pkg-installation-type == 'latest' }}
       run: |
         pip install pytest
         rm -r deeprank2
