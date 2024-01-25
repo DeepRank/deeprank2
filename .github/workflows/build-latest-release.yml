@@ -1,35 +1,14 @@
 name: build (latest release)
 
+# Only trigger, when the release workflow succeeded
 on:
-  push:
-    paths-ignore:
-      # specific folder locations
-      - ".vscode/**"
-      - "docs/**"
-      # filetypes
-      - "**.md"
-      - "**.rst"
-      - "**.ipynb"
-      - "**.cff"
-      - "**.png"
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      # specific folder locations
-      - ".vscode/**"
-      - "docs/**"
-      # filetypes
-      - "**.md"
-      - "**.rst"
-      - "**.ipynb"
-      - "**.cff"
-      - "**.png"
+  workflow_run:
+    workflows: ["Build and upload to PyPI"]
+    types:
+      - completed
 
 jobs:
   build:
-    if: github.event.pull_request.draft == false
     name: Build for (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
 
