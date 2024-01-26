@@ -85,73 +85,24 @@ exclude = ["tests*", "*tests.*", "*tests"]
 "*" = ["*.xlsx", "*.param", "*.top", "*residue-classes"]
 
 [tool.ruff]
-# Exclude a variety of commonly ignored directories.
-extend-exclude = ["docs", "reduce"]
 line-length = 159
-select = [
-    "F",      # Pyflakes
-    "E",      # pycodestyle (error)
-    "W",      # pycodestyle (warning)
-    "I",      # isort
-    "D",      # pydocstyle
-    "UP",     # pyupgrade
-    "SIM",    # simplify
-    "C4",     # flake8-comprehensions
-    "S",      # flake8-bandit
-    "PGH",    # pygrep-hooks
-    "BLE",    # blind-except
-    "FBT003", # boolean-positional-value-in-call
-    "B",      # flake8-bugbear
-    "Q",      # flake8-quotes
-    "PLR",    # pylint refactoring
-    "ARG",    # flake8-unused-arguments
-    "SLF001", # Private member accessed
-    "PIE",    # flake8-pie
-    "RET",    # flaske8-return
-    "PT",     # pytest
-    "TID",    # imports
-    "TCH",    # imports
-    "PD",     # pandas
-    "NPY",    # numpy
-    "PL",     # pylint
-    "RUF",    # ruff rtecommendations
-    "PERF",   # performance
-    "TRY",    # try blocks
-    "ERA",    # commented out code
-    # other linting conventions
-    "FLY",
-    "AIR",
-    "YTT",
-    "ASYNC",
-    "A",
-    "DTZ",
-    "DJ",
-    "FA",
-    "ISC",
-    "ICN",
-    "G",
-    "INP",
-    "PYI",
-    "Q",
-    "RSE102",
-    "SLOT",
-    "INT",
-    # The following are unrealistic for this code base
-    # "PTH"  # flake8-use-pathlib
-    # "ANN",  # annotations
-    # "N",  # naming conventions
-    # "C901",  # mccabe complexity
-]
+select = ["ALL"]
 ignore = [
+    # Unrealistic for this code base
+    "PTH",     # flake8-use-pathlib    
+    "N",       # naming conventions
     "PLR0912", # Too many branches,
-    "PLR0913", #Too many arguments in function definition
-    "B028",    # No explicit `stacklevel` keyword argument found in
-    "PLR2004", # Magic value used in comparison
-    "S105",    # Possible hardcoded password
-    "S311",    # insecure random generators
-    "PT011",   # pytest-raises-too-broad
-    "SIM108",  # Use ternary operator
-    "TRY003",  # Long error messages
+    "PLR0913", # Too many arguments in function definition
+    # Unwanted
+    "FBT",    # Using boolean arguments
+    "ANN101", # Missing type annotation for `self` in method
+    "ANN102", # Missing type annotation for `cls` in classmethod
+    "ANN204", # Missing return type annotation for special (dunder) method
+    "B028",   # No explicit `stacklevel` keyword argument found in warning
+    "S105",   # Possible hardcoded password
+    "S311",   # insecure random generators
+    "PT011",  # pytest-raises-too-broad
+    "SIM108", # Use ternary operator
     # Missing docstrings Documentation
     "D100", # Missing module docstring
     "D101", # Missing docstring in public class
@@ -176,22 +127,28 @@ ignore = [
     "D413",
 ]
 
-# Allow autofix for all enabled rules (when `--fix`) is provided.
+# Allow autofix for all enabled rules.
 fixable = ["ALL"]
-unfixable = [
-    "F401",
-] # unused imports (it's annoying if they automatically disappear while editing code
+unfixable = ["F401"] # unused imports (should not disappear while editing)
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101"]
+"tests/*" = [
+    "S101",    # Use of `assert` detected
+    "PLR2004", # Magic value used in comparison
+]
+"docs/*" = ["ALL"]
+"tests/perf/*" = ["T201"] # Use of print statements
 
 [tool.ruff.lint]
 extend-safe-fixes = [
     "D415",   # First line should end with a period, question mark, or exclamation point
     "D300",   # Use triple double quotes `"""`
     "D200",   # One-line docstring should fit on one line
-    "TCH",    # type checking only imports
-    "ISC001",
+    "TCH",    # Format type checking only imports
+    "ISC001", # Implicitly concatenated strings on a single line
+    "EM",     # Exception message variables
+    "RUF013", # Implicit Optional
+    "B006",   # Mutable default argument
 ]
 
 [tool.ruff.isort]
