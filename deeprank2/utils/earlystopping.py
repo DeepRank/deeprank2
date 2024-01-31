@@ -41,7 +41,7 @@ class EarlyStopping:
         self.best_score = None
         self.val_loss_min = None
 
-    def __call__(
+    def __call__(  # noqa: C901 (complex-structure)
         self,
         epoch: int,
         val_loss: float,
@@ -58,10 +58,9 @@ class EarlyStopping:
         elif score < self.best_score + self.delta:
             self.counter += 1
             if self.verbose:
+                extra_trace = ""
                 if self.delta:
                     extra_trace = f"more than {self.delta} "
-                else:
-                    extra_trace = ""
                 self.trace_func(
                     f"Validation loss did not decrease {extra_trace}({self.val_loss_min:.6f} --> {val_loss:.6f}). "
                     f"EarlyStopping counter: {self.counter} out of {self.patience}",

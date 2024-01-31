@@ -483,7 +483,7 @@ class TestDataSet(unittest.TestCase):
                 n += len(hdf5_r.keys())
         assert len(dataset) == n, f"total data points got was {len(dataset)}"
 
-    def test_hdf5_to_pandas_graphdataset(self) -> None:
+    def test_hdf5_to_pandas_graphdataset(self) -> None:  # noqa: C901 (complex-structure)
         hdf5_path = "tests/data/hdf5/train.hdf5"
         dataset = GraphDataset(
             hdf5_path=hdf5_path,

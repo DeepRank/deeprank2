@@ -137,25 +137,25 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
             prediction_value = argmax(tensor(output_values[entry_index]))
             target_value = target_values[entry_index]
 
-            if prediction_value > 0.0 and target_value > 0.0:
+            if prediction_value > 0 and target_value > 0:
                 tp += 1
 
-            elif prediction_value <= 0.0 and target_value <= 0.0:
+            elif prediction_value <= 0 and target_value <= 0:
                 tn += 1
 
-            elif target_value <= 0.0 < prediction_value:
+            elif target_value <= 0 < prediction_value:
                 fp += 1
 
-            elif prediction_value <= 0.0 < target_value:
+            elif prediction_value <= 0 < target_value:
                 fn += 1
 
         mcc_numerator = tn * tp - fp * fn
-        if mcc_numerator == 0.0:
+        if mcc_numerator == 0:
             self._writer.add_scalar(f"{pass_name} MCC", 0.0, epoch_number)
         else:
             mcc_denominator = sqrt((tn + fn) * (fp + tp) * (tn + fp) * (fn + tp))
 
-            if mcc_denominator != 0.0:
+            if mcc_denominator != 0:
                 mcc = mcc_numerator / mcc_denominator
                 self._writer.add_scalar(f"{pass_name} MCC", mcc, epoch_number)
 
@@ -163,7 +163,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         self._writer.add_scalar(f"{pass_name} accuracy", accuracy, epoch_number)
 
         # for ROC curves to work, we need both class values in the set
-        if len(set(target_values)) == 2:
+        if len(set(target_values)) == 2:  # noqa:PLR2004
             roc_auc = roc_auc_score(target_values, probabilities)
             self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
 
@@ -173,7 +173,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         target_data_shape: int | None = None,
     ) -> bool:
         """For regression, target data is needed and output data must be a list of two-dimensional values."""
-        return output_data_shape == 2 and target_data_shape == 1
+        return output_data_shape == 2 and target_data_shape == 1  # noqa:PLR2004
 
 
 class ScatterPlotExporter(OutputExporter):

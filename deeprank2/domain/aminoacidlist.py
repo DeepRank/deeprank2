@@ -381,7 +381,7 @@ def convert_aa_nomenclature(aa: str, output_type: int | None = None) -> str:
     try:
         if len(aa) == 1:
             aa: AminoAcid = next(entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower())
-        elif len(aa) == 3:
+        elif len(aa) == 3:  # noqa:PLR2004
             aa: AminoAcid = next(entry for entry in amino_acids if entry.three_letter_code.lower() == aa.lower())
         else:
             aa: AminoAcid = next(entry for entry in amino_acids if entry.name.lower() == aa.lower())
@@ -390,7 +390,7 @@ def convert_aa_nomenclature(aa: str, output_type: int | None = None) -> str:
 
     if not output_type:
         return aa.name
-    if output_type == 3:
+    if output_type == 3:  # noqa:PLR2004
         return aa.three_letter_code
     if output_type == 1:
         return aa.one_letter_code

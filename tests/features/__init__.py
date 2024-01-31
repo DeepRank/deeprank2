@@ -19,7 +19,7 @@ def _get_residue(chain: Chain, number: int) -> Residue:
     raise ValueError(f"Not found: {number}")
 
 
-def build_testgraph(
+def build_testgraph(  # noqa: C901 (complex-structure)
     pdb_path: str,
     detail: Literal["atom", "residue"],
     influence_radius: float,

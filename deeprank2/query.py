@@ -113,7 +113,7 @@ class Query:
                 with open(pssm_path, encoding="utf-8") as f:
                     chain.pssm = parse_pssm(f, chain)
 
-    def _check_pssm(self, verbosity: Literal[0, 1, 2] = 0) -> None:
+    def _check_pssm(self, verbosity: Literal[0, 1, 2] = 0) -> None:  # noqa: C901 (complex-structure)
         """Checks whether information stored in pssm file matches the corresponding pdb file.
 
         Args:
@@ -157,11 +157,11 @@ class Query:
             if verbosity:
                 if len(mismatches) > 0:
                     error_message = error_message + f"\n\t{len(mismatches)} entries are incorrect."
-                    if verbosity == 2:
+                    if verbosity == 2:  # noqa: PLR2004
                         error_message = error_message[-1] + f":\n\t{missing_entries}"
                 if len(missing_entries) > 0:
                     error_message = error_message + f"\n\t{len(missing_entries)} entries are missing."
-                    if verbosity == 2:
+                    if verbosity == 2:  # noqa: PLR2004
                         error_message = error_message[-1] + f":\n\t{missing_entries}"
 
             # raise exception (or warning)
@@ -342,7 +342,7 @@ class ProteinProteinInterfaceQuery(Query):
     def __post_init__(self):
         super().__post_init__()
 
-        if len(self.chain_ids) != 2:
+        if len(self.chain_ids) != 2:  # noqa: PLR2004
             raise ValueError(
                 "`chain_ids` must contain exactly 2 chains for `ProteinProteinInterfaceQuery` objects, " + f"but {len(self.chain_ids)} was/were given.",
             )

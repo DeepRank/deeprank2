@@ -26,7 +26,7 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer:
-    def __init__(  # noqa: PLR0915 (too-many-statements)
+    def __init__(  # noqa: PLR0915, C901 (too-many-statements, complex-structure)
         self,
         neuralnet: nn.Module = None,
         dataset_train: GraphDataset | GridDataset | None = None,
@@ -420,7 +420,7 @@ class Trainer:
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise
 
-    def set_lossfunction(
+    def set_lossfunction(  # noqa: C901 (complex-structure)
         self,
         lossfunction: nn.modules.loss._Loss | None = None,
         override_invalid: bool = False,
@@ -501,7 +501,7 @@ class Trainer:
             else:
                 self.lossfunction = lossfunction  # weights will be set in the train() method
 
-    def train(  # noqa: PLR0915 (too-many-statements)
+    def train(  # noqa: PLR0915, C901 (too-many-statements, complex-structure)
         self,
         nepoch: int = 1,
         batch_size: int = 32,

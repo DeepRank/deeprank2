@@ -7,8 +7,10 @@ from pdb2sql import StructureSimilarity
 
 from deeprank2.domain import targetstorage as targets
 
+MIN_IRMS_FOR_BINARY = 4
 
-def add_target(
+
+def add_target(  # noqa: C901 (complex-structure)
     graph_path: str | list[str],
     target_name: str,
     target_list: str,
@@ -113,7 +115,7 @@ def compute_ppi_scores(
 
     scores[targets.FNAT] = sim.compute_fnat_fast()
     scores[targets.DOCKQ] = sim.compute_DockQScore(scores[targets.FNAT], scores[targets.LRMSD], scores[targets.IRMSD])
-    scores[targets.BINARY] = scores[targets.IRMSD] < 4.0
+    scores[targets.BINARY] = scores[targets.IRMSD] < MIN_IRMS_FOR_BINARY
 
     scores[targets.CAPRI] = 4
     for thr, val in zip([4.0, 2.0, 1.0], [3, 2, 1], strict=True):

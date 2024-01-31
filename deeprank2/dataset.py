@@ -86,7 +86,7 @@ class DeeprankDataset(Dataset):
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def _check_and_inherit_train(
+    def _check_and_inherit_train(  # noqa: C901 (complex-structure)
         self,
         data_type: GridDataset | GraphDataset,
         inherited_params: list[str],
@@ -297,7 +297,7 @@ class DeeprankDataset(Dataset):
         """
         return len(self.index_entries)
 
-    def hdf5_to_pandas(
+    def hdf5_to_pandas(  # noqa: C901 (complex-structure)
         self,
     ) -> pd.DataFrame:
         """Loads features data from the HDF5 files into a Pandas DataFrame in the attribute `df` of the class.
@@ -329,7 +329,7 @@ class DeeprankDataset(Dataset):
                             if (transform is None) and (feat in self.features_transform):
                                 transform = self.features_transform.get(feat, {}).get("transform")
                         # Check the number of channels the features have
-                        if f[entry_name][feat_type][feat][()].ndim == 2:
+                        if f[entry_name][feat_type][feat][()].ndim == 2:  # noqa:PLR2004
                             for i in range(f[entry_name][feat_type][feat][:].shape[1]):
                                 df_dict[feat + "_" + str(i)] = [f[entry_name][feat_type][feat][:][:, i] for entry_name in entry_names]
                                 # apply transformation for each channel in this feature
@@ -349,7 +349,7 @@ class DeeprankDataset(Dataset):
         self.df = df_concat.reset_index(drop=True)
         return self.df
 
-    def save_hist(
+    def save_hist(  # noqa: C901 (complex-structure)
         self,
         features: str | list[str],
         fname: str = "features_hist.png",
@@ -588,7 +588,7 @@ class GridDataset(DeeprankDataset):
             else:
                 self.features_dict[targets.VALUES] = self.target
 
-    def _check_features(self) -> None:
+    def _check_features(self) -> None:  # noqa: C901 (complex-structure)
         """Checks if the required features exist."""
         hdf5_path = self.hdf5_paths[0]
 
@@ -718,7 +718,7 @@ class GridDataset(DeeprankDataset):
 
 
 class GraphDataset(DeeprankDataset):
-    def __init__(
+    def __init__(  # noqa: C901 (complex-structure)
         self,
         hdf5_path: str | list,
         subset: list[str] | None = None,
@@ -893,7 +893,7 @@ class GraphDataset(DeeprankDataset):
         fname, mol = self.index_entries[idx]
         return self.load_one_graph(fname, mol)
 
-    def load_one_graph(self, fname: str, entry_name: str) -> Data:  # noqa: PLR0915 (too-many-statements)
+    def load_one_graph(self, fname: str, entry_name: str) -> Data:  # noqa: PLR0915, C901 (too-many-statements, complex-structure)
         """Loads one graph.
 
         Args:
@@ -958,7 +958,7 @@ class GraphDataset(DeeprankDataset):
             # we have to have all the edges i.e : (i,j) and (j,i)
             if Efeat.INDEX in grp[Efeat.EDGE]:
                 ind = grp[f"{Efeat.EDGE}/{Efeat.INDEX}"][()]
-                if ind.ndim == 2:
+                if ind.ndim == 2:  # noqa: PLR2004
                     ind = np.vstack((ind, np.flip(ind, 1))).T
                 edge_index = torch.tensor(ind, dtype=torch.long).contiguous()
             else:
@@ -1072,7 +1072,7 @@ class GraphDataset(DeeprankDataset):
 
         return data
 
-    def _check_features(self) -> None:
+    def _check_features(self) -> None:  # noqa: C901 (complex-structure)
         """Checks if the required features exist."""
         f = h5py.File(self.hdf5_paths[0], "r")
         mol_key = next(iter(f.keys()))

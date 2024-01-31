@@ -11,6 +11,7 @@ from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 _log = logging.getLogger(__name__)
+SAFE_MIN_CONTACTS = 5
 
 
 def _id_from_residue(residue: tuple[str, int, str]) -> str:
@@ -100,7 +101,7 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
     return residue_contacts
 
 
-def add_features(
+def add_features(  # noqa: C901 (complex-structure)
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
@@ -139,5 +140,5 @@ def add_features(
             except KeyError:  # node has no contact residues and all counts remain 0
                 pass
 
-        if total_contacts < 5:
+        if total_contacts < SAFE_MIN_CONTACTS:
             _log.warning(f"Few ({total_contacts}) contacts detected for {pdb_path}.")

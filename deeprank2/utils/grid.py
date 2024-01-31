@@ -57,7 +57,7 @@ class GridSettings:
         points_counts: list[int],
         sizes: list[float],
     ):
-        if len(points_counts) != 3 or len(sizes) != 3:
+        if len(points_counts) != 3 or len(sizes) != 3:  # noqa:PLR2004
             raise ValueError("Incorrect grid dimensions.")
 
         self._points_counts = points_counts
