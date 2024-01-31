@@ -13,7 +13,7 @@ def add_target(
     target_name: str,
     target_list: str,
     sep: str = " ",
-):
+) -> None:
     """Add a target to all the graphs in hdf5 files.
 
     Args:

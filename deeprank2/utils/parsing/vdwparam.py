@@ -17,7 +17,7 @@ class VanderwaalsParam:
 
 class ParamParser:
     @staticmethod
-    def parse(file_):
+    def parse(file_: str) -> dict[str, VanderwaalsParam]:
         result = {}
         for line in file_:
             if line.startswith("#"):

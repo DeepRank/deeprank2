@@ -104,7 +104,7 @@ def add_features(
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
-):
+) -> None:
     if not single_amino_acid_variant:  # VariantQueries do not use this feature
         polarity_pairs = list(combinations(Polarity, 2))
         polarity_pair_string = [f"irc_{x[0].name.lower()}_{x[1].name.lower()}" for x in polarity_pairs]

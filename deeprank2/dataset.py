@@ -57,7 +57,8 @@ class DeeprankDataset(Dataset):
             self.hdf5_paths = hdf5_path
 
         else:
-            raise TypeError(f"hdf5_path: unexpected type: {type(hdf5_path)}")
+            msg = f"hdf5_path: unexpected type: {type(hdf5_path)}"
+            raise TypeError(msg)
 
         self.subset = subset
         self.train_source = train_source
@@ -88,8 +89,8 @@ class DeeprankDataset(Dataset):
     def _check_and_inherit_train(
         self,
         data_type: GridDataset | GraphDataset,
-        inherited_params,
-    ):
+        inherited_params: list[str],
+    ) -> None:
         """Check if the pre-trained model or training set provided are valid for validation and/or testing, and inherit the parameters."""
         if isinstance(self.train_source, str):
             try:
@@ -98,10 +99,13 @@ class DeeprankDataset(Dataset):
                 else:
                     data = torch.load(self.train_source, map_location=torch.device("cpu"))
                 if data["data_type"] is not data_type:
-                    raise TypeError(
+                    msg = (
                         f"The pre-trained model has been trained with data of type {data['data_type']}, but you are trying \n\t"
                         f"to define a {data_type}-class validation/testing dataset. Please provide a valid DeepRank2 \n\t"
                         f"model trained with {data_type}-class type data, or define the dataset using the appropriate class."
+                    )
+                    raise TypeError(
+                        msg,
                     )
                 if data_type is GraphDataset:
                     self.train_means = data["means"]
@@ -113,22 +117,26 @@ class DeeprankDataset(Dataset):
                                 continue
                             key["transform"] = eval(key["transform"])  # noqa: S307, PGH001 (suspicious-eval-usage)
             except pickle.UnpicklingError as e:
-                raise ValueError("The path provided to `train_source` is not a valid DeepRank2 pre-trained model.") from e
+                msg = "The path provided to `train_source` is not a valid DeepRank2 pre-trained model."
+                raise ValueError(msg) from e
         elif isinstance(self.train_source, data_type):
             data = self.train_source
             if data_type is GraphDataset:
                 self.train_means = self.train_source.means
                 self.train_devs = self.train_source.devs
         else:
-            raise TypeError(
+            msg = (
                 f"The train data provided is invalid: {type(self.train_source)}.\n\t"
                 f"Please provide a valid training {data_type} or the path to a valid DeepRank2 pre-trained model."
+            )
+            raise TypeError(
+                msg,
             )
 
         # match parameters with the ones in the training set
         self._check_inherited_params(inherited_params, data)
 
-    def _check_hdf5_files(self):
+    def _check_hdf5_files(self) -> None:
         """Checks if the data contained in the .HDF5 file is valid."""
         _log.info("\nChecking dataset Integrity...")
         to_be_removed = []
@@ -147,7 +155,7 @@ class DeeprankDataset(Dataset):
         for hdf5_path in to_be_removed:
             self.hdf5_paths.remove(hdf5_path)
 
-    def _check_task_and_classes(self, task: str, classes: str | None = None):
+    def _check_task_and_classes(self, task: str, classes: str | None = None) -> None:
         if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]:
             self.task = targets.REGRESS
 
@@ -158,11 +166,12 @@ class DeeprankDataset(Dataset):
             self.task = task
 
         if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
-            raise ValueError(f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}")
+            msg = f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}"
+            raise ValueError(msg)
 
         if task != self.task and task is not None:
             warnings.warn(
-                f"Target {self.target} expects {self.task}, but was set to task {task} by user.\nUser set task is ignored and {self.task} will be used."
+                f"Target {self.target} expects {self.task}, but was set to task {task} by user.\nUser set task is ignored and {self.task} will be used.",
             )
 
         if self.task == targets.CLASSIF:
@@ -181,7 +190,7 @@ class DeeprankDataset(Dataset):
         self,
         inherited_params: list[str],
         data: dict | GraphDataset | GridDataset,
-    ):
+    ) -> None:
         """Check if the parameters for validation and/or testing are the same as in the pre-trained model or training set provided.
 
         Args:
@@ -199,11 +208,11 @@ class DeeprankDataset(Dataset):
                     _log.warning(
                         f"The {param} parameter set here is: {self_vars[param]}, "
                         f"which is not equivalent to the one in the training phase: {data[param]}./n"
-                        f"Overwriting {param} parameter with the one used in the training phase."
+                        f"Overwriting {param} parameter with the one used in the training phase.",
                     )
                 setattr(self, param, data[param])
 
-    def _create_index_entries(self):
+    def _create_index_entries(self) -> None:
         """Creates the indexing of each molecule in the dataset.
 
         Creates the indexing: [ ('1ak4.hdf5,1AK4_100w),...,('1fqj.hdf5,1FGJ_400w)].
@@ -273,7 +282,8 @@ class DeeprankDataset(Dataset):
                         return False
 
                 elif target_condition is not None:
-                    raise ValueError("Conditions not supported", target_condition)
+                    msg = "Conditions not supported"
+                    raise ValueError(msg, target_condition)
 
             else:
                 _log.warning(f"   :Filter {target_name} not found for entry {grp}\n   :Filter options are: {present_target_names}")
@@ -346,7 +356,7 @@ class DeeprankDataset(Dataset):
         bins: int | list[float] | str = 10,
         figsize: tuple = (15, 15),
         log: bool = False,
-    ):
+    ) -> None:
         """After having generated a pd.DataFrame using hdf5_to_pandas method, histograms of the features can be saved in an image.
 
         Args:
@@ -428,7 +438,8 @@ class DeeprankDataset(Dataset):
             )
 
         else:
-            raise ValueError("Please provide valid features names. They must be present in the current :class:`DeeprankDataset` children instance.")
+            msg = "Please provide valid features names. They must be present in the current :class:`DeeprankDataset` children instance."
+            raise ValueError(msg)
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -436,7 +447,7 @@ class DeeprankDataset(Dataset):
             fig.savefig(fname)
             plt.close(fig)
 
-    def _compute_mean_std(self):
+    def _compute_mean_std(self) -> None:
         means = {
             col: round(np.nanmean(np.concatenate(self.df[col].values)), 1)
             if isinstance(self.df[col].to_numpy()[0], np.ndarray)
@@ -557,14 +568,17 @@ class GridDataset(DeeprankDataset):
             try:
                 fname, mol = self.index_entries[0]
             except IndexError as e:
-                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from e
+                msg = "No entries found in the dataset. Please check the dataset parameters."
+                raise IndexError(msg) from e
             with h5py.File(fname, "r") as f5:
                 grp = f5[mol]
                 possible_targets = grp[targets.VALUES].keys()
                 if self.target is None:
-                    raise ValueError(f"Please set the target during training dataset definition; targets present in the file/s are {possible_targets}.")
+                    msg = f"Please set the target during training dataset definition; targets present in the file/s are {possible_targets}."
+                    raise ValueError(msg)
                 if self.target not in possible_targets:
-                    raise ValueError(f"Target {self.target} not present in the file/s; targets present in the file/s are {possible_targets}.")
+                    msg = f"Target {self.target} not present in the file/s; targets present in the file/s are {possible_targets}."
+                    raise ValueError(msg)
 
         self.features_dict = {}
         self.features_dict[gridstorage.MAPPED_FEATURES] = self.features
@@ -574,7 +588,7 @@ class GridDataset(DeeprankDataset):
             else:
                 self.features_dict[targets.VALUES] = self.target
 
-    def _check_features(self):
+    def _check_features(self) -> None:
         """Checks if the required features exist."""
         hdf5_path = self.hdf5_paths[0]
 
@@ -630,12 +644,15 @@ class GridDataset(DeeprankDataset):
 
         # raise error if any features are missing
         if len(missing_features) > 0:
-            raise ValueError(
+            msg = (
                 f"Not all features could be found in the file {hdf5_path} under entry {mol_key}.\n\t"
                 f"Missing features are: {missing_features}.\n\t"
                 "Check feature_modules passed to the preprocess function.\n\t"
                 "Probably, the feature wasn't generated during the preprocessing step.\n\t"
                 f"Available features: {available_features}"
+            )
+            raise ValueError(
+                msg,
             )
 
     def get(self, idx: int) -> Data:
@@ -677,16 +694,20 @@ class GridDataset(DeeprankDataset):
                 if self.task == targets.REGRESS and self.target_transform is True:
                     y = torch.sigmoid(torch.log(y))
                 elif self.task is not targets.REGRESS and self.target_transform is True:
+                    msg = f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
                     raise ValueError(
-                        f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
+                        msg,
                     )
             else:
                 y = None
                 possible_targets = grp[targets.VALUES].keys()
                 if self.train_source is None:
-                    raise ValueError(
+                    msg = (
                         f"Target {self.target} missing in entry {entry_name} in file {hdf5_path}, possible targets are {possible_targets}.\n\t"
                         "Use the query class to add more target values to input data."
+                    )
+                    raise ValueError(
+                        msg,
                     )
 
         # Wrap up the data in this object, for the collate_fn to handle it properly:
@@ -826,14 +847,17 @@ class GraphDataset(DeeprankDataset):
             try:
                 fname, mol = self.index_entries[0]
             except IndexError as e:
-                raise IndexError("No entries found in the dataset. Please check the dataset parameters.") from e
+                msg = "No entries found in the dataset. Please check the dataset parameters."
+                raise IndexError(msg) from e
             with h5py.File(fname, "r") as f5:
                 grp = f5[mol]
                 possible_targets = grp[targets.VALUES].keys()
                 if self.target is None:
-                    raise ValueError(f"Please set the target during training dataset definition; targets present in the file/s are {possible_targets}.")
+                    msg = f"Please set the target during training dataset definition; targets present in the file/s are {possible_targets}."
+                    raise ValueError(msg)
                 if self.target not in possible_targets:
-                    raise ValueError(f"Target {self.target} not present in the file/s; targets present in the file/s are {possible_targets}.")
+                    msg = f"Target {self.target} not present in the file/s; targets present in the file/s are {possible_targets}."
+                    raise ValueError(msg)
 
         self.features_dict = {}
         self.features_dict[Nfeat.NODE] = self.node_features
@@ -908,9 +932,12 @@ class GraphDataset(DeeprankDataset):
                             with warnings.catch_warnings(record=True) as w:
                                 vals = transform(vals)
                                 if len(w) > 0:
-                                    raise ValueError(
+                                    msg = (
                                         f"Invalid value occurs in {entry_name}, file {fname},when applying {transform} for feature {feat}.\n\t"
                                         f"Please change the transformation function for {feat}."
+                                    )
+                                    raise ValueError(
+                                        msg,
                                     )
 
                         if vals.ndim == 1:  # features with only one channel
@@ -964,9 +991,12 @@ class GraphDataset(DeeprankDataset):
                             with warnings.catch_warnings(record=True) as w:
                                 vals = transform(vals)
                                 if len(w) > 0:
-                                    raise ValueError(
+                                    msg = (
                                         f"Invalid value occurs in {entry_name}, file {fname}, when applying {transform} for feature {feat}.\n\t"
                                         f"Please change the transformation function for {feat}."
+                                    )
+                                    raise ValueError(
+                                        msg,
                                     )
 
                         if vals.ndim == 1:
@@ -993,17 +1023,21 @@ class GraphDataset(DeeprankDataset):
                 if self.task == targets.REGRESS and self.target_transform is True:
                     y = torch.sigmoid(torch.log(y))
                 elif self.task is not targets.REGRESS and self.target_transform is True:
+                    msg = f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
                     raise ValueError(
-                        f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
+                        msg,
                     )
 
             else:
                 y = None
                 possible_targets = grp[targets.VALUES].keys()
                 if self.train_source is None:
-                    raise ValueError(
+                    msg = (
                         f"Target {self.target} missing in entry {entry_name} in file {fname}, possible targets are {possible_targets}.\n\t"
                         "Use the query class to add more target values to input data."
+                    )
+                    raise ValueError(
+                        msg,
                     )
 
             # positions
@@ -1038,7 +1072,7 @@ class GraphDataset(DeeprankDataset):
 
         return data
 
-    def _check_features(self):
+    def _check_features(self) -> None:
         """Checks if the required features exist."""
         f = h5py.File(self.hdf5_paths[0], "r")
         mol_key = next(iter(f.keys()))
@@ -1090,7 +1124,7 @@ class GraphDataset(DeeprankDataset):
             miss_node_error, miss_edge_error = "", ""
             _log.info(
                 "\nCheck feature_modules passed to the preprocess function.\
-                Probably, the feature wasn't generated during the preprocessing step."
+                Probably, the feature wasn't generated during the preprocessing step.",
             )
             if missing_node_features:
                 _log.info(f"\nAvailable node features: {self.available_node_features}\n")
@@ -1100,15 +1134,23 @@ class GraphDataset(DeeprankDataset):
                 _log.info(f"\nAvailable edge features: {self.available_edge_features}\n")
                 miss_edge_error = f"\nMissing edge features: {missing_edge_features} \
                                     \nAvailable edge features: {self.available_edge_features}"
-            raise ValueError(
+            msg = (
                 f"Not all features could be found in the file {self.hdf5_paths[0]}.\n\t"
                 "Check feature_modules passed to the preprocess function.\n\t"
                 "Probably, the feature wasn't generated during the preprocessing step.\n\t"
                 f"{miss_node_error}{miss_edge_error}"
             )
+            raise ValueError(
+                msg,
+            )
 
 
-def save_hdf5_keys(f_src_path: str, src_ids: list[str], f_dest_path: str, hardcopy=False):
+def save_hdf5_keys(
+    f_src_path: str,
+    src_ids: list[str],
+    f_dest_path: str,
+    hardcopy: bool = False,
+) -> None:
     """Save references to keys in src_ids in a new .HDF5 file.
 
     Args:
@@ -1121,7 +1163,8 @@ def save_hdf5_keys(f_src_path: str, src_ids: list[str], f_dest_path: str, hardco
             Defaults to False.
     """
     if not all(isinstance(d, str) for d in src_ids):
-        raise TypeError("data_ids should be a list containing strings.")
+        msg = "data_ids should be a list containing strings."
+        raise TypeError(msg)
 
     with h5py.File(f_dest_path, "w") as f_dest, h5py.File(f_src_path, "r") as f_src:
         for key in src_ids:

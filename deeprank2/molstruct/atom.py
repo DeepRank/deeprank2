@@ -4,6 +4,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 import numpy as np
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -55,7 +56,7 @@ class Atom:
         self._position = position
         self._occupancy = occupancy
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, Atom):
             return self._residue == other._residue and self._name == other._name
         return NotImplemented
@@ -66,7 +67,7 @@ class Atom:
     def __repr__(self) -> str:
         return f"{self._residue} {self._name}"
 
-    def change_altloc(self, alternative_atom: Atom):
+    def change_altloc(self, alternative_atom: Atom) -> None:
         """Replace the atom's location by another atom's location."""
         self._position = alternative_atom.position
         self._occupancy = alternative_atom.occupancy

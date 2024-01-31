@@ -8,6 +8,7 @@ import h5py
 import numpy as np
 import pytest
 import torch
+from numpy.typing import NDArray
 from torch_geometric.loader import DataLoader
 
 from deeprank2.dataset import GraphDataset, GridDataset, save_hdf5_keys
@@ -30,7 +31,7 @@ def _compute_features_manually(
     hdf5_path: str,
     features_transform: dict,
     feat: str,
-):
+) -> (NDArray, float, float):
     """Return specified feature.
 
     This function returns the feature specified read from the hdf5 file, after applying manually features_transform dict.
@@ -78,7 +79,7 @@ def _compute_features_manually(
         return arr, mean, dev
 
 
-def _compute_features_with_get(hdf5_path: str, dataset: GraphDataset):
+def _compute_features_with_get(hdf5_path: str, dataset: GraphDataset) -> dict[str, NDArray]:
     # This function computes features using the Dataset `get` method,
     # so as they will be seen by the network. It returns a dictionary
     # whose keys are the features' names and values are the features' values.
@@ -131,7 +132,7 @@ def _check_inherited_params(
     inherited_params: list[str],
     dataset_train: GraphDataset | GridDataset,
     dataset_test: GraphDataset | GridDataset,
-):
+) -> None:
     dataset_train_vars = vars(dataset_train)
     dataset_test_vars = vars(dataset_test)
 
@@ -140,10 +141,10 @@ def _check_inherited_params(
 
 
 class TestDataSet(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.hdf5_path = "tests/data/hdf5/1ATN_ppi.hdf5"
 
-    def test_collates_entry_names_datasets(self):
+    def test_collates_entry_names_datasets(self) -> None:
         for dataset_name, dataset in [
             (
                 "GraphDataset",
@@ -176,7 +177,7 @@ class TestDataSet(unittest.TestCase):
                 ],
             ), f"entry names of {dataset_name} were not collated correctly"
 
-    def test_datasets(self):
+    def test_datasets(self) -> None:
         dataset_graph = GraphDataset(
             hdf5_path=self.hdf5_path,
             subset=None,
@@ -197,7 +198,7 @@ class TestDataSet(unittest.TestCase):
         assert len(dataset_grid) == 4
         assert dataset_grid[0] is not None
 
-    def test_regression_griddataset(self):
+    def test_regression_griddataset(self) -> None:
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
             features=[Efeat.VDW, Efeat.ELEC],
@@ -218,7 +219,7 @@ class TestDataSet(unittest.TestCase):
         # 1 entry with rmsd value
         assert dataset[0].y.shape == (1,)
 
-    def test_classification_griddataset(self):
+    def test_classification_griddataset(self) -> None:
         dataset = GridDataset(
             hdf5_path=self.hdf5_path,
             features=[Efeat.VDW, Efeat.ELEC],
@@ -239,7 +240,7 @@ class TestDataSet(unittest.TestCase):
         # 1 entry with class value
         assert dataset[0].y.shape == (1,)
 
-    def test_inherit_info_dataset_train_griddataset(self):
+    def test_inherit_info_dataset_train_griddataset(self) -> None:
         dataset_train = GridDataset(
             hdf5_path=self.hdf5_path,
             features=[Efeat.VDW, Efeat.ELEC],
@@ -276,7 +277,7 @@ class TestDataSet(unittest.TestCase):
             dataset_test,
         )
 
-    def test_inherit_info_pretrained_model_griddataset(self):
+    def test_inherit_info_pretrained_model_griddataset(self) -> None:
         # Test the inheritance not giving in any parameters
         pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
         dataset_test = GridDataset(
@@ -307,7 +308,7 @@ class TestDataSet(unittest.TestCase):
         for param in dataset_test.inherited_params:
             assert dataset_test_vars[param] == data[param]
 
-    def test_no_target_dataset_griddataset(self):
+    def test_no_target_dataset_griddataset(self) -> None:
         hdf5_no_target = "tests/data/hdf5/test_no_target.hdf5"
         hdf5_target = "tests/data/hdf5/1ATN_ppi.hdf5"
         pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
@@ -328,7 +329,7 @@ class TestDataSet(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset = GridDataset(hdf5_path=hdf5_target, target="CAPRI")
 
-    def test_filter_griddataset(self):
+    def test_filter_griddataset(self) -> None:
         # filtering out all values
         with pytest.raises(IndexError):
             GridDataset(
@@ -346,7 +347,7 @@ class TestDataSet(unittest.TestCase):
         )
         assert len(dataset) == 3
 
-    def test_filter_graphdataset(self):
+    def test_filter_graphdataset(self) -> None:
         # filtering out all values
         with pytest.raises(IndexError):
             GraphDataset(
@@ -368,7 +369,7 @@ class TestDataSet(unittest.TestCase):
         )
         assert len(dataset) == 3
 
-    def test_multi_file_graphdataset(self):
+    def test_multi_file_graphdataset(self) -> None:
         dataset = GraphDataset(
             hdf5_path=["tests/data/hdf5/train.hdf5", "tests/data/hdf5/valid.hdf5"],
             node_features=node_feats,
@@ -379,7 +380,7 @@ class TestDataSet(unittest.TestCase):
         assert dataset.len() > 0
         assert dataset.get(0) is not None
 
-    def test_save_external_links_graphdataset(self):
+    def test_save_external_links_graphdataset(self) -> None:
         n = 2
 
         with h5py.File("tests/data/hdf5/test.hdf5", "r") as hdf5:
@@ -399,7 +400,7 @@ class TestDataSet(unittest.TestCase):
         for new_id in new_ids:
             assert new_id in original_ids
 
-    def test_save_hard_links_graphdataset(self):
+    def test_save_hard_links_graphdataset(self) -> None:
         n = 2
 
         with h5py.File("tests/data/hdf5/test.hdf5", "r") as hdf5:
@@ -420,7 +421,7 @@ class TestDataSet(unittest.TestCase):
         for new_id in new_ids:
             assert new_id in original_ids
 
-    def test_subset_graphdataset(self):
+    def test_subset_graphdataset(self) -> None:
         hdf5 = h5py.File("tests/data/hdf5/train.hdf5", "r")  # contains 44 datapoints
         hdf5_keys = list(hdf5.keys())
         n = 10
@@ -443,7 +444,7 @@ class TestDataSet(unittest.TestCase):
 
         hdf5.close()
 
-    def test_target_transform_graphdataset(self):
+    def test_target_transform_graphdataset(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/train.hdf5",
             target="BA",  # continuous values --> regression
@@ -454,7 +455,7 @@ class TestDataSet(unittest.TestCase):
         for i in range(len(dataset)):
             assert 0 <= dataset.get(i).y <= 1
 
-    def test_invalid_target_transform_graphdataset(self):
+    def test_invalid_target_transform_graphdataset(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/train.hdf5",
             target=targets.BINARY,  # --> classification
@@ -464,7 +465,7 @@ class TestDataSet(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset.get(0)
 
-    def test_size_graphdataset(self):
+    def test_size_graphdataset(self) -> None:
         hdf5_paths = [
             "tests/data/hdf5/train.hdf5",
             "tests/data/hdf5/valid.hdf5",
@@ -482,7 +483,7 @@ class TestDataSet(unittest.TestCase):
                 n += len(hdf5_r.keys())
         assert len(dataset) == n, f"total data points got was {len(dataset)}"
 
-    def test_hdf5_to_pandas_graphdataset(self):
+    def test_hdf5_to_pandas_graphdataset(self) -> None:
         hdf5_path = "tests/data/hdf5/train.hdf5"
         dataset = GraphDataset(
             hdf5_path=hdf5_path,
@@ -564,7 +565,7 @@ class TestDataSet(unittest.TestCase):
 
         assert dataset.df.shape[0] == len(keys[2:])
 
-    def test_save_hist_graphdataset(self):
+    def test_save_hist_graphdataset(self) -> None:
         output_directory = mkdtemp()
         fname = os.path.join(output_directory, "test.png")
         hdf5_path = "tests/data/hdf5/test.hdf5"
@@ -580,7 +581,7 @@ class TestDataSet(unittest.TestCase):
 
         rmtree(output_directory)
 
-    def test_logic_train_graphdataset(self):
+    def test_logic_train_graphdataset(self) -> None:
         hdf5_path = "tests/data/hdf5/train.hdf5"
 
         # without specifying features_transform in training set
@@ -613,7 +614,7 @@ class TestDataSet(unittest.TestCase):
                 target="binary",
             )
 
-    def test_only_transform_graphdataset(self):
+    def test_only_transform_graphdataset(self) -> None:
         # define a features_transform dict for only transformations,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse) and a case with transform equals to None (sasa)
@@ -722,7 +723,7 @@ class TestDataSet(unittest.TestCase):
         assert sorted(checked_features) == sorted(features_transform.keys())
         assert len(checked_features) == len(features_transform.keys())
 
-    def test_only_transform_all_graphdataset(self):
+    def test_only_transform_all_graphdataset(self) -> None:
         # define a features_transform dict for only transformations for `all` features
 
         hdf5_path = "tests/data/hdf5/train.hdf5"
@@ -799,7 +800,7 @@ class TestDataSet(unittest.TestCase):
         assert sorted(checked_features) == sorted(features)
         assert len(checked_features) == len(features)
 
-    def test_only_standardize_graphdataset(self):
+    def test_only_standardize_graphdataset(self) -> None:
         # define a features_transform dict for only standardization,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse) and a case with standardize False (sasa)
@@ -909,7 +910,7 @@ class TestDataSet(unittest.TestCase):
         assert sorted(checked_features) == sorted(features_transform.keys())
         assert len(checked_features) == len(features_transform.keys())
 
-    def test_only_standardize_all_graphdataset(self):
+    def test_only_standardize_all_graphdataset(self) -> None:
         # define a features_transform dict for only standardization for `all` features
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {"all": {"standardize": True}}
@@ -987,7 +988,7 @@ class TestDataSet(unittest.TestCase):
         assert sorted(checked_features) == sorted(features)
         assert len(checked_features) == len(features)
 
-    def test_transform_standardize_graphdataset(self):
+    def test_transform_standardize_graphdataset(self) -> None:
         # define a features_transform dict for both transformations and standardization,
         # including node (bsa) and edge features (electrostatic),
         # a multi-channel feature (hse)
@@ -1094,7 +1095,7 @@ class TestDataSet(unittest.TestCase):
         assert sorted(checked_features) == sorted(features_transform.keys())
         assert len(checked_features) == len(features_transform.keys())
 
-    def test_features_transform_logic_graphdataset(self):
+    def test_features_transform_logic_graphdataset(self) -> None:
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {"all": {"transform": lambda t: np.cbrt(t), "standardize": True}}
         other_feature_transform = {"all": {"transform": None, "standardize": False}}
@@ -1131,7 +1132,7 @@ class TestDataSet(unittest.TestCase):
         assert dataset_train.means == dataset_test.means
         assert dataset_train.devs == dataset_test.devs
 
-    def test_invalid_value_features_transform(self):
+    def test_invalid_value_features_transform(self) -> None:
         hdf5_path = "tests/data/hdf5/train.hdf5"
         features_transform = {"all": {"transform": lambda t: np.log(t + 10), "standardize": True}}
 
@@ -1145,7 +1146,7 @@ class TestDataSet(unittest.TestCase):
             with pytest.raises(ValueError):
                 _compute_features_with_get(hdf5_path, transf_dataset)
 
-    def test_inherit_info_dataset_train_graphdataset(self):
+    def test_inherit_info_dataset_train_graphdataset(self) -> None:
         hdf5_path = "tests/data/hdf5/train.hdf5"
         feature_transform = {"all": {"transform": None, "standardize": True}}
 
@@ -1189,7 +1190,7 @@ class TestDataSet(unittest.TestCase):
             dataset_test,
         )
 
-    def test_inherit_info_pretrained_model_graphdataset(self):
+    def test_inherit_info_pretrained_model_graphdataset(self) -> None:
         hdf5_path = "tests/data/hdf5/test.hdf5"
         pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
         dataset_test = GraphDataset(
@@ -1236,7 +1237,7 @@ class TestDataSet(unittest.TestCase):
             else:
                 assert dataset_test_vars[param] == data[param]
 
-    def test_no_target_dataset_graphdataset(self):
+    def test_no_target_dataset_graphdataset(self) -> None:
         hdf5_no_target = "tests/data/hdf5/test_no_target.hdf5"
         hdf5_target = "tests/data/hdf5/test.hdf5"
         pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
@@ -1260,7 +1261,7 @@ class TestDataSet(unittest.TestCase):
                 target="CAPRI",
             )
 
-    def test_incompatible_dataset_train_type(self):
+    def test_incompatible_dataset_train_type(self) -> None:
         dataset_train = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             edge_features=[Efeat.DISTANCE, Efeat.COVALENT],
@@ -1274,7 +1275,7 @@ class TestDataSet(unittest.TestCase):
                 train_source=dataset_train,
             )
 
-    def test_invalid_pretrained_model_path(self):
+    def test_invalid_pretrained_model_path(self) -> None:
         hdf5_graph = "tests/data/hdf5/test.hdf5"
         with pytest.raises(ValueError):
             GraphDataset(
@@ -1289,7 +1290,7 @@ class TestDataSet(unittest.TestCase):
                 train_source=hdf5_grid,
             )
 
-    def test_invalid_pretrained_model_data_type(self):
+    def test_invalid_pretrained_model_data_type(self) -> None:
         hdf5_graph = "tests/data/hdf5/test.hdf5"
         pretrained_grid_model = "tests/data/pretrained/testing_grid_model.pth.tar"
         with pytest.raises(TypeError):

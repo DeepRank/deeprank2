@@ -11,7 +11,7 @@ def add_features(
     pdb_path: str,  # noqa: ARG001 (unused argument)
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
-):
+) -> None:
     profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.three_letter_code)
 
     for node in graph.nodes:

@@ -12,7 +12,7 @@ from deeprank2.features.secondary_structure import (
 from . import build_testgraph
 
 
-def test_secondary_structure_residue():
+def test_secondary_structure_residue() -> None:
     test_case = "9api"  # properly formatted pdb file
     pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
     graph, _ = build_testgraph(
@@ -56,7 +56,7 @@ def test_secondary_structure_residue():
         ), f"Ground truth examples: res {res[1]} {res[0]} is not {res[3]}."
 
 
-def test_secondary_structure_atom():
+def test_secondary_structure_atom() -> None:
     test_case = "1ak4"  # ATOM list
     pdb_path = f"tests/data/pdb/{test_case}/{test_case}.pdb"
     graph, _ = build_testgraph(

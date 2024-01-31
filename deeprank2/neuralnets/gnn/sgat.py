@@ -8,6 +8,8 @@ from torch_scatter import scatter_mean
 
 from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
 
+# ruff: noqa: ANN001, ANN201
+
 
 class SGraphAttentionLayer(torch.nn.Module):
     """SGraphAttentionLayer.
@@ -25,7 +27,13 @@ class SGraphAttentionLayer(torch.nn.Module):
             an additive bias. Defaults to True.
     """  # noqa: D301 (escape-sequence-in-docstring)
 
-    def __init__(self, in_channels: int, out_channels: int, bias: bool = True, undirected=True):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        bias: bool = True,
+        undirected: bool = True,
+    ):
         super().__init__()
 
         self.in_channels = in_channels
@@ -41,7 +49,7 @@ class SGraphAttentionLayer(torch.nn.Module):
 
         self.reset_parameters()
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         size = 2 * self.in_channels
         uniform(size, self.weight)
         uniform(size, self.bias)

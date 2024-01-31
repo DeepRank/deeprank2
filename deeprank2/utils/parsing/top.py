@@ -16,7 +16,7 @@ class TopRowObject:
         self.atom_name = atom_name
         self.kwargs = kwargs
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         return self.kwargs[key]
 
 
@@ -26,7 +26,7 @@ class TopParser:
     _NUMBER_PATTERN = re.compile(r"\-?[0-9]+(\.[0-9]+)?")
 
     @staticmethod
-    def parse(file_):
+    def parse(file_: str) -> list[TopRowObject]:
         result = []
         for line in file_:
             # parse the line
@@ -46,7 +46,7 @@ class TopParser:
         return result
 
     @staticmethod
-    def _parse_value(s):
+    def _parse_value(s: str) -> float | str:
         # remove parentheses
         if s[0] == "(" and s[-1] == ")":
             return TopParser._parse_value(s[1:-1])

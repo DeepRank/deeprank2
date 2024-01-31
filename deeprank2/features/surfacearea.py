@@ -12,7 +12,7 @@ freesasa.setVerbosity(freesasa.nowarnings)
 logging.getLogger(__name__)
 
 
-def add_sasa(pdb_path: str, graph: Graph):
+def add_sasa(pdb_path: str, graph: Graph) -> None:
     structure = freesasa.Structure(pdb_path)
     result = freesasa.calc(structure)
 
@@ -36,7 +36,7 @@ def add_sasa(pdb_path: str, graph: Graph):
         node.features[Nfeat.SASA] = area
 
 
-def add_bsa(graph: Graph):
+def add_bsa(graph: Graph) -> None:
     sasa_complete_structure = freesasa.Structure()
     sasa_chain_structures = {}
 
@@ -124,7 +124,7 @@ def add_features(
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+) -> None:
     """Calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA)."""
     # BSA
     add_bsa(graph)

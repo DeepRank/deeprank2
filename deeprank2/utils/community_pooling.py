@@ -11,8 +11,10 @@ from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.nn.pool.pool import pool_batch, pool_edge
 from torch_scatter import scatter_max, scatter_mean
 
+# ruff: noqa: ANN001, ANN201 (missing type hints and return types)
 
-def plot_graph(graph, cluster):
+
+def plot_graph(graph, cluster) -> None:
     pos = nx.spring_layout(graph, iterations=200)
     nx.draw(graph, pos, node_color=cluster)
     plt.show()

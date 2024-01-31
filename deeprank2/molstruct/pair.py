@@ -1,12 +1,14 @@
 from abc import ABC
 from typing import Any
 
+from typing_extensions import Self
+
 from deeprank2.molstruct.atom import Atom
 from deeprank2.molstruct.residue import Residue
 
 
 class Pair:
-    def __init__(self, item1: Any, item2: Any):
+    def __init__(self, item1: Any, item2: Any):  # noqa: ANN401 (Use Any as type hint)
         """A hashable, comparable object for any set of two inputs where order doesn't matter.
 
         Args:
@@ -24,7 +26,7 @@ class Pair:
             return hash(s1 + s2)
         return hash(s2 + s1)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         """Compare the pairs as sets, so the order doesn't matter."""
         if isinstance(other, Pair):
             return self.item1 == other.item1 and self.item2 == other.item2 or self.item1 == other.item2 and self.item2 == other.item1

@@ -15,7 +15,7 @@ def add_features(
     pdb_path: str,  # noqa: ARG001 (unused argument)
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
-):
+) -> None:
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id

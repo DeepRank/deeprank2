@@ -31,7 +31,7 @@ class AtomicForcefield:
         with open(param_path, encoding="utf-8") as f:
             self._vanderwaals_parameters = ParamParser.parse(f)
 
-    def _find_matching_residue_class(self, residue: Residue):
+    def _find_matching_residue_class(self, residue: Residue):  # noqa: ANN202 (missing return type)
         for criterium in self._residue_class_criteria:
             if criterium.matches(
                 residue.amino_acid.three_letter_code,
@@ -41,7 +41,7 @@ class AtomicForcefield:
 
         return None
 
-    def get_vanderwaals_parameters(self, atom: Atom):
+    def get_vanderwaals_parameters(self, atom: Atom) -> VanderwaalsParam:
         atom_name = atom.name
 
         if atom.residue.amino_acid is None:
@@ -69,7 +69,7 @@ class AtomicForcefield:
             return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
         return self._vanderwaals_parameters[type_]
 
-    def get_charge(self, atom: Atom):
+    def get_charge(self, atom: Atom) -> float:
         """Get the charge of a given `Atom`.
 
         Args:

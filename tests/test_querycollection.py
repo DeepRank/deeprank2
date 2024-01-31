@@ -21,7 +21,7 @@ def _querycollection_tester(
     feature_modules: ModuleType | list[ModuleType] = [components, contact],  # noqa: B006 (unsafe default value)
     cpu_count: int = 1,
     combine_output: bool = True,
-):
+) -> (QueryCollection, str, list[str]):
     """
     Generic function to test QueryCollection class.
 
@@ -97,7 +97,7 @@ def _assert_correct_modules(
     output_paths: str,
     features: str | list[str],
     absent: str,
-):
+) -> None:
     """Helper function to assert inclusion of correct features.
 
     Args:
@@ -125,7 +125,7 @@ def _assert_correct_modules(
             _ = f5[next(iter(f5.keys()))][f"{Nfeat.NODE}/{absent}"]
 
 
-def test_querycollection_process():
+def test_querycollection_process() -> None:
     """Tests processing method of QueryCollection class."""
     for query_type in ["ppi", "srv"]:
         n_queries = 3
@@ -141,7 +141,7 @@ def test_querycollection_process():
         rmtree(output_directory)
 
 
-def test_querycollection_process_single_feature_module():
+def test_querycollection_process_single_feature_module() -> None:
     """Test processing for generating from a single feature module.
 
     Tested for following input types: ModuleType, list[ModuleType] str, list[str]
@@ -153,7 +153,7 @@ def test_querycollection_process_single_feature_module():
             rmtree(output_directory)
 
 
-def test_querycollection_process_all_features_modules():
+def test_querycollection_process_all_features_modules() -> None:
     """Tests processing for generating all features."""
     one_feature_from_each_module = [
         Nfeat.RESTYPE,
@@ -179,7 +179,7 @@ def test_querycollection_process_all_features_modules():
     rmtree(output_directory)
 
 
-def test_querycollection_process_default_features_modules():
+def test_querycollection_process_default_features_modules() -> None:
     """Tests processing for generating all features."""
     for query_type in ["ppi", "srv"]:
         _, output_directory, output_paths = _querycollection_tester(query_type)
@@ -192,7 +192,7 @@ def test_querycollection_process_default_features_modules():
         rmtree(output_directory)
 
 
-def test_querycollection_process_combine_output_true():
+def test_querycollection_process_combine_output_true() -> None:
     """Tests processing for combining hdf5 files into one."""
     for query_type in ["ppi", "srv"]:
         modules = [surfacearea, components]
@@ -215,7 +215,7 @@ def test_querycollection_process_combine_output_true():
         rmtree(output_directory_f)
 
 
-def test_querycollection_process_combine_output_false():
+def test_querycollection_process_combine_output_false() -> None:
     """Tests processing for keeping all generated hdf5 files ."""
     for query_type in ["ppi", "srv"]:
         cpu_count = 2
@@ -232,7 +232,7 @@ def test_querycollection_process_combine_output_false():
         rmtree(output_directory)
 
 
-def test_querycollection_duplicates_add():
+def test_querycollection_duplicates_add() -> None:
     """Tests add method of QueryCollection class."""
     ref_path = "tests/data/ref/1ATN/1ATN.pdb"
     pssm_path1 = "tests/data/pssm/1ATN/1ATN.A.pdb.pssm"

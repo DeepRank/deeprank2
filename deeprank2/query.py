@@ -75,7 +75,8 @@ class Query:
             self.max_edge_length = 4.5 if not self.max_edge_length else self.max_edge_length
             self.influence_radius = 4.5 if not self.influence_radius else self.influence_radius
         else:
-            raise ValueError(f"Invalid resolution given ({self.resolution}). Must be one of {VALID_RESOLUTIONS}")
+            msg = f"Invalid resolution given ({self.resolution}). Must be one of {VALID_RESOLUTIONS}"
+            raise ValueError(msg)
 
         if not isinstance(self.chain_ids, list):
             self.chain_ids = [self.chain_ids]
@@ -86,7 +87,7 @@ class Query:
             if value is None and f.default_factory is not MISSING:
                 setattr(self, f.name, f.default_factory())
 
-    def _set_graph_targets(self, graph: Graph):
+    def _set_graph_targets(self, graph: Graph) -> None:
         """Copy target data from query to graph."""
         for target_name, target_data in self.targets.items():
             graph.targets[target_name] = target_data
@@ -104,7 +105,7 @@ class Query:
 
         return structure
 
-    def _load_pssm_data(self, structure: PDBStructure):
+    def _load_pssm_data(self, structure: PDBStructure) -> None:
         self._check_pssm()
         for chain in structure.chains:
             if chain.id in self.pssm_paths:
@@ -112,7 +113,7 @@ class Query:
                 with open(pssm_path, encoding="utf-8") as f:
                     chain.pssm = parse_pssm(f, chain)
 
-    def _check_pssm(self, verbosity: Literal[0, 1, 2] = 0):
+    def _check_pssm(self, verbosity: Literal[0, 1, 2] = 0) -> None:
         """Checks whether information stored in pssm file matches the corresponding pdb file.
 
         Args:
@@ -128,7 +129,8 @@ class Query:
             ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
         """
         if not self.pssm_paths:
-            raise ValueError("No pssm paths provided for conservation feature module.")
+            msg = "No pssm paths provided for conservation feature module."
+            raise ValueError(msg)
 
         # load residues from pssm and pdb files
         pssm_file_residues = {}
@@ -174,7 +176,7 @@ class Query:
         return self._model_id
 
     @model_id.setter
-    def model_id(self, value: str):
+    def model_id(self, value: str) -> None:
         self._model_id = value
 
     def __repr__(self) -> str:
@@ -207,10 +209,12 @@ class Query:
         return graph
 
     def _build_helper(self) -> Graph:
-        raise NotImplementedError("Must be defined in child classes.")
+        msg = "Must be defined in child classes."
+        raise NotImplementedError(msg)
 
     def get_query_id(self) -> str:
-        raise NotImplementedError("Must be defined in child classes.")
+        msg = "Must be defined in child classes."
+        raise NotImplementedError(msg)
 
 
 @dataclass(kw_only=True)
@@ -282,7 +286,8 @@ class SingleResidueVariantQuery(Query):
                 variant_residue = residue
                 break
         if variant_residue is None:
-            raise ValueError(f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}")
+            msg = f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}"
+            raise ValueError(msg)
         self.variant = SingleResidueVariant(variant_residue, self.variant_amino_acid)
         residues = get_surrounding_residues(
             structure,
@@ -309,7 +314,8 @@ class SingleResidueVariantQuery(Query):
             graph = Graph.build_graph(atoms, self.get_query_id(), self.max_edge_length)
 
         else:
-            raise NotImplementedError(f"No function exists to build graphs with resolution of {self.resolution}.")
+            msg = f"No function exists to build graphs with resolution of {self.resolution}."
+            raise NotImplementedError(msg)
         graph.center = variant_residue.get_center()
 
         return graph
@@ -338,7 +344,7 @@ class ProteinProteinInterfaceQuery(Query):
 
         if len(self.chain_ids) != 2:
             raise ValueError(
-                "`chain_ids` must contain exactly 2 chains for `ProteinProteinInterfaceQuery` objects, " + f"but {len(self.chain_ids)} was/were given."
+                "`chain_ids` must contain exactly 2 chains for `ProteinProteinInterfaceQuery` objects, " + f"but {len(self.chain_ids)} was/were given.",
             )
 
     def get_query_id(self) -> str:
@@ -361,7 +367,8 @@ class ProteinProteinInterfaceQuery(Query):
             self.influence_radius,
         )
         if len(contact_atoms) == 0:
-            raise ValueError("No contact atoms found")
+            msg = "No contact atoms found"
+            raise ValueError(msg)
 
         # build the graph
         if self.resolution == "atom":
@@ -417,7 +424,7 @@ class QueryCollection:
         query: Query,
         verbose: bool = False,
         warn_duplicate: bool = True,
-    ):
+    ) -> None:
         """Add a new query to the collection.
 
         Args:
@@ -440,7 +447,7 @@ class QueryCollection:
 
         self._queries.append(query)
 
-    def export_dict(self, dataset_path: str):
+    def export_dict(self, dataset_path: str) -> None:
         """Exports the colection of all queries to a dictionary file.
 
         Args:
@@ -463,7 +470,7 @@ class QueryCollection:
     def __len__(self) -> int:
         return len(self._queries)
 
-    def _process_one_query(self, query: Query):
+    def _process_one_query(self, query: Query) -> None:
         """Only one process may access an hdf5 file at a time."""
         try:
             output_path = f"{self._prefix}-{os.getpid()}.hdf5"
@@ -490,7 +497,7 @@ class QueryCollection:
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
             _log.warning(
                 f"\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),"
-                " and it has not been written to the hdf5 file. More details below:"
+                " and it has not been written to the hdf5 file. More details below:",
             )
             _log.exception(e)
 
@@ -548,7 +555,8 @@ class QueryCollection:
         self._grid_map_method = grid_map_method
 
         if grid_augmentation_count < 0:
-            raise ValueError(f"`grid_augmentation_count` cannot be negative, but was given as {grid_augmentation_count}")
+            msg = f"`grid_augmentation_count` cannot be negative, but was given as {grid_augmentation_count}"
+            raise ValueError(msg)
         self._grid_augmentation_count = grid_augmentation_count
 
         _log.info(f"Creating pool function to process {len(self)} queries...")
@@ -584,9 +592,11 @@ class QueryCollection:
         if isinstance(feature_modules, list):
             invalid_inputs = [type(el) for el in feature_modules if not isinstance(el, str | ModuleType)]
             if invalid_inputs:
-                raise TypeError(f"`feature_modules` contains invalid input ({invalid_inputs}). Only `str` and `ModuleType` are accepted.")
+                msg = f"`feature_modules` contains invalid input ({invalid_inputs}). Only `str` and `ModuleType` are accepted."
+                raise TypeError(msg)
             return [
                 re.sub(".py$", "", m) if isinstance(m, str) else os.path.basename(m.__file__)[:-3]  # for ModuleTypes
                 for m in feature_modules
             ]
-        raise TypeError(f"`feature_modules` has received an invalid input type: {type(feature_modules)}. Only `str` and `ModuleType` are accepted.")
+        msg = f"`feature_modules` has received an invalid input type: {type(feature_modules)}. Only `str` and `ModuleType` are accepted."
+        raise TypeError(msg)

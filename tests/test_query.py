@@ -25,7 +25,7 @@ def _check_graph_makes_sense(
     g: Graph,
     node_feature_names: list[str],
     edge_feature_names: list[str],
-):
+) -> None:
     assert len(g.nodes) > 0, "no nodes"
     assert Nfeat.POSITION in g.nodes[0].features
 
@@ -77,7 +77,7 @@ def _check_graph_makes_sense(
         os.remove(tmp_path)
 
 
-def test_interface_graph_residue():
+def test_interface_graph_residue() -> None:
     query = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
         resolution="residue",
@@ -101,7 +101,7 @@ def test_interface_graph_residue():
     )
 
 
-def test_interface_graph_atomic():
+def test_interface_graph_atomic() -> None:
     query = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
         resolution="atom",
@@ -127,7 +127,7 @@ def test_interface_graph_atomic():
     )
 
 
-def test_variant_graph_101M():
+def test_variant_graph_101M() -> None:
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/101M/101M.pdb",
         resolution="atom",
@@ -160,7 +160,7 @@ def test_variant_graph_101M():
     )
 
 
-def test_variant_graph_1A0Z():
+def test_variant_graph_1A0Z() -> None:
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/1A0Z/1A0Z.pdb",
         resolution="atom",
@@ -198,7 +198,7 @@ def test_variant_graph_1A0Z():
     )
 
 
-def test_variant_graph_9API():
+def test_variant_graph_9API() -> None:
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/9api/9api.pdb",
         resolution="atom",
@@ -234,7 +234,7 @@ def test_variant_graph_9API():
     )
 
 
-def test_variant_residue_graph_101M():
+def test_variant_residue_graph_101M() -> None:
     query = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/101M/101M.pdb",
         resolution="residue",
@@ -262,7 +262,7 @@ def test_variant_residue_graph_101M():
     )
 
 
-def test_res_ppi():
+def test_res_ppi() -> None:
     query = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3MRC/3MRC.pdb",
         resolution="residue",
@@ -272,7 +272,7 @@ def test_res_ppi():
     _check_graph_makes_sense(g, [Nfeat.SASA], [Efeat.ELEC])
 
 
-def test_augmentation():
+def test_augmentation() -> None:
     qc = QueryCollection()
 
     qc.add(
@@ -358,7 +358,7 @@ def test_augmentation():
         shutil.rmtree(tmp_dir)
 
 
-def test_incorrect_pssm_order():
+def test_incorrect_pssm_order() -> None:
     q = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
         resolution="residue",
@@ -382,7 +382,7 @@ def test_incorrect_pssm_order():
         _ = q.build(conservation)
 
 
-def test_incomplete_pssm():
+def test_incomplete_pssm() -> None:
     q = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
         resolution="residue",
@@ -405,7 +405,7 @@ def test_incomplete_pssm():
         _ = q.build(conservation)
 
 
-def test_no_pssm_provided():
+def test_no_pssm_provided() -> None:
     # pssm_paths is empty dictionary
     q_empty_dict = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
@@ -431,7 +431,7 @@ def test_no_pssm_provided():
     _ = q_not_provided.build([components])
 
 
-def test_incorrect_pssm_provided():
+def test_incorrect_pssm_provided() -> None:
     # non-existing file
     q_non_existing = ProteinProteinInterfaceQuery(
         pdb_path="tests/data/pdb/3C8P/3C8P.pdb",
@@ -463,7 +463,7 @@ def test_incorrect_pssm_provided():
     _ = q_missing.build([components])
 
 
-def test_variant_query_multiple_chains():
+def test_variant_query_multiple_chains() -> None:
     q = SingleResidueVariantQuery(
         pdb_path="tests/data/pdb/2g98/pdb2g98.pdb",
         resolution="atom",

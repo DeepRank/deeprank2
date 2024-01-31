@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 if TYPE_CHECKING:
     from deeprank2.molstruct.atom import Atom
     from deeprank2.molstruct.residue import Residue
@@ -24,7 +26,7 @@ class PDBStructure:
         self._id = id_
         self._chains = {}
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, PDBStructure):
             return self._id == other._id
         return NotImplemented
@@ -41,7 +43,7 @@ class PDBStructure:
     def get_chain(self, chain_id: str) -> Chain:
         return self._chains[chain_id]
 
-    def add_chain(self, chain: Chain):
+    def add_chain(self, chain: Chain) -> None:
         if chain.id in self._chains:
             raise ValueError(f"Duplicate chain: {chain.id}")
         self._chains[chain.id] = chain
@@ -90,10 +92,10 @@ class Chain:
         return self._pssm
 
     @pssm.setter
-    def pssm(self, pssm: PssmRow):
+    def pssm(self, pssm: PssmRow) -> None:
         self._pssm = pssm
 
-    def add_residue(self, residue: Residue):
+    def add_residue(self, residue: Residue) -> None:
         self._residues[(residue.number, residue.insertion_code)] = residue
 
     def has_residue(self, residue_number: int, insertion_code: str | None = None) -> bool:
@@ -118,7 +120,7 @@ class Chain:
 
         return atoms
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, Chain):
             return self._model == other._model and self._id == other._id
         return NotImplemented

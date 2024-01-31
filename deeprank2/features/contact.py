@@ -76,7 +76,7 @@ def add_features(
     pdb_path: str,  # noqa: ARG001 (unused argument)
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+) -> None:
     # assign each atoms (from all edges) a unique index
     all_atoms = set()
     if isinstance(graph.edges[0].id, AtomicContact):

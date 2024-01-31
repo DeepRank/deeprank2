@@ -28,7 +28,7 @@ class OutputExporter:
         """Overridable."""
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
         """Overridable."""
 
     def process(
@@ -39,7 +39,7 @@ class OutputExporter:
         output_values: list,
         target_values: list,
         loss: float,
-    ):
+    ) -> None:
         """The entry_names, output_values, target_values MUST have the same length."""
 
     def is_compatible_with(
@@ -63,7 +63,7 @@ class OutputExporterCollection:
 
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
         for output_exporter in self._output_exporters:
             output_exporter.__exit__(exception_type, exception, traceback)
 
@@ -75,7 +75,7 @@ class OutputExporterCollection:
         output_values: list,
         target_values: list,
         loss: float,
-    ):
+    ) -> None:
         for output_exporter in self._output_exporters:
             output_exporter.process(
                 pass_name,
@@ -108,7 +108,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         self._writer.__enter__()
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
         self._writer.__exit__(exception_type, exception, traceback)
 
     def process(
@@ -119,7 +119,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         output_values: list,
         target_values: list,
         loss: float,  # noqa: ARG002 (unused argument)
-    ):
+    ) -> None:
         """Write to tensorboard."""
         ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
         self._writer.add_scalar(
@@ -194,15 +194,15 @@ class ScatterPlotExporter(OutputExporter):
         self._plot_data = {}
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
         self._plot_data.clear()
 
-    def get_filename(self, epoch_number):
+    def get_filename(self, epoch_number: int) -> str:
         """Returns the filename for the table."""
         return os.path.join(self._directory_path, f"scatter-{epoch_number}.png")
 
     @staticmethod
-    def _get_color(pass_name):
+    def _get_color(pass_name: str) -> str:
         pass_name = pass_name.lower().strip()
         if pass_name in ("train", "training"):
             return "blue"
@@ -217,7 +217,7 @@ class ScatterPlotExporter(OutputExporter):
         epoch_number: int,
         data: dict[str, tuple[list[float], list[float]]],
         png_path: str,
-    ):
+    ) -> None:
         plt.title(f"Epoch {epoch_number}")
 
         for pass_name, (truth_values, prediction_values) in data.items():
@@ -243,7 +243,7 @@ class ScatterPlotExporter(OutputExporter):
         output_values: list,
         target_values: list,
         loss: float,  # noqa: ARG002 (unused argument)
-    ):
+    ) -> None:
         """Make the plot, if the epoch matches with the interval."""
         if epoch_number % self._epoch_interval == 0:
             if epoch_number not in self._plot_data:
@@ -296,7 +296,7 @@ class HDF5OutputExporter(OutputExporter):
 
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
         if self.phase is not None:
             if self.phase == "validation":
                 self.phase = "training"
@@ -315,7 +315,7 @@ class HDF5OutputExporter(OutputExporter):
         output_values: list,
         target_values: list,
         loss: float,
-    ):
+    ) -> None:
         self.phase = pass_name
         pass_name = [pass_name] * len(output_values)
         loss = [loss] * len(output_values)

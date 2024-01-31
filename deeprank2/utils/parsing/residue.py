@@ -38,7 +38,7 @@ class ResidueClassParser:
     _RESIDUE_ATOMS_PATTERN = re.compile(r"(present|absent)\(([A-Z0-9\, ]+)\)")
 
     @staticmethod
-    def parse(file_):
+    def parse(file_: str) -> list[ResidueClassCriterium]:
         result = []
         for line in file_:
             match = ResidueClassParser._RESIDUE_CLASS_PATTERN.match(line)
@@ -62,7 +62,7 @@ class ResidueClassParser:
         return result
 
     @staticmethod
-    def _parse_amino_acids(string: str):
+    def _parse_amino_acids(string: str) -> str | list[str]:
         if string.strip() == "all":
             return string.strip()
         return [name.strip() for name in string.split(",")]

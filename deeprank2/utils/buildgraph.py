@@ -15,7 +15,7 @@ from deeprank2.molstruct.structure import Chain, PDBStructure
 _log = logging.getLogger(__name__)
 
 
-def _add_atom_to_residue(atom: Atom, residue: Residue):
+def _add_atom_to_residue(atom: Atom, residue: Residue) -> None:
     """Adds an `Atom` to a `Residue` if not already there.
 
     If no matching atom is found, add the current atom to the residue.
@@ -31,8 +31,8 @@ def _add_atom_to_residue(atom: Atom, residue: Residue):
 def _add_atom_data_to_structure(
     structure: PDBStructure,
     pdb_obj: pdb2sql_object,
-    **kwargs,
-):
+    **kwargs,  # noqa: ANN003 (missing type hint)
+) -> None:
     """This subroutine retrieves pdb2sql atomic data for `PDBStructure` objects as defined in DeepRank2.
 
     This function should be called for one atom at a time.

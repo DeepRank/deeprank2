@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+# ruff: noqa: ANN001, ANN201
+
 __author__ = "Daniel-Tobias Rademaker"
 
 

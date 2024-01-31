@@ -4,6 +4,8 @@ import torch
 from torch.nn import Linear, Module, ReLU, Sequential
 from torch_scatter import scatter_mean, scatter_sum
 
+# ruff: noqa: ANN001, ANN201
+
 
 class NaiveConvolutionalLayer(Module):
     def __init__(self, count_node_features, count_edge_features):

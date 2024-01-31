@@ -5,7 +5,7 @@ from deeprank2.utils.buildgraph import get_structure
 from deeprank2.utils.parsing.pssm import parse_pssm
 
 
-def test_add_pssm():
+def test_add_pssm() -> None:
     pdb = pdb2sql("tests/data/pdb/1ATN/1ATN_1w.pdb")
     try:
         structure = get_structure(pdb, "1ATN")

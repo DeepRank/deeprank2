@@ -7,7 +7,7 @@ from deeprank2.features.components import add_features
 from . import build_testgraph
 
 
-def test_atom_features():
+def test_atom_features() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
@@ -21,7 +21,7 @@ def test_atom_features():
     assert not any(np.isnan(node.features[Nfeat.PDBOCCUPANCY]) for node in graph.nodes)
 
 
-def test_aminoacid_features():
+def test_aminoacid_features() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,

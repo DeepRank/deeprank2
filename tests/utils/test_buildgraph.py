@@ -5,7 +5,7 @@ from deeprank2.molstruct.atom import AtomicElement
 from deeprank2.utils.buildgraph import get_residue_contact_pairs, get_structure, get_surrounding_residues
 
 
-def test_get_structure_complete():
+def test_get_structure_complete() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     pdb = pdb2sql(pdb_path)
 
@@ -34,7 +34,7 @@ def test_get_structure_complete():
     assert atom.residue == residue
 
 
-def test_get_structure_from_nmr_with_dna():
+def test_get_structure_from_nmr_with_dna() -> None:
     pdb_path = "tests/data/pdb/1A6B/1A6B.pdb"
     pdb = pdb2sql(pdb_path)
     try:
@@ -46,7 +46,7 @@ def test_get_structure_from_nmr_with_dna():
     assert structure.chains[0].residues[0].amino_acid is None  # DNA
 
 
-def test_residue_contact_pairs():
+def test_residue_contact_pairs() -> None:
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
     pdb = pdb2sql(pdb_path)
     try:
@@ -58,7 +58,7 @@ def test_residue_contact_pairs():
     assert len(residue_pairs) > 0
 
 
-def test_surrounding_residues():
+def test_surrounding_residues() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     pdb = pdb2sql(pdb_path)
     try:

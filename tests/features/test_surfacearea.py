@@ -2,11 +2,16 @@ import numpy as np
 
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.features.surfacearea import add_features
+from deeprank2.utils.graph import Graph, Node
 
 from . import build_testgraph
 
 
-def _find_residue_node(graph, chain_id, residue_number):
+def _find_residue_node(
+    graph: Graph,
+    chain_id: str,
+    residue_number: int,
+) -> Node:
     for node in graph.nodes:
         residue = node.id
         if residue.chain.id == chain_id and residue.number == residue_number:
@@ -14,7 +19,12 @@ def _find_residue_node(graph, chain_id, residue_number):
     raise ValueError(f"Not found: {chain_id} {residue_number}")
 
 
-def _find_atom_node(graph, chain_id, residue_number, atom_name):
+def _find_atom_node(
+    graph: Graph,
+    chain_id: str,
+    residue_number: int,
+    atom_name: str,
+) -> Node:
     for node in graph.nodes:
         atom = node.id
         if atom.residue.chain.id == chain_id and atom.residue.number == residue_number and atom.name == atom_name:
@@ -22,7 +32,7 @@ def _find_atom_node(graph, chain_id, residue_number, atom_name):
     raise ValueError(f"Not found: {chain_id} {residue_number} {atom_name}")
 
 
-def test_bsa_residue():
+def test_bsa_residue() -> None:
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
@@ -37,7 +47,7 @@ def test_bsa_residue():
     assert node.features[Nfeat.BSA] > 0.0
 
 
-def test_bsa_atom():
+def test_bsa_atom() -> None:
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
@@ -52,7 +62,7 @@ def test_bsa_atom():
     assert node.features[Nfeat.BSA] > 0.0
 
 
-def test_sasa_residue():
+def test_sasa_residue() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
@@ -75,7 +85,7 @@ def test_sasa_residue():
     assert buried_residue_node.features[Nfeat.SASA] < 25.0
 
 
-def test_sasa_atom():
+def test_sasa_atom() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,

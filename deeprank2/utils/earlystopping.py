@@ -41,7 +41,12 @@ class EarlyStopping:
         self.best_score = None
         self.val_loss_min = None
 
-    def __call__(self, epoch, val_loss, train_loss=None):
+    def __call__(
+        self,
+        epoch: int,
+        val_loss: float,
+        train_loss: float | None = None,
+    ):
         score = -val_loss
 
         # initialize
@@ -59,7 +64,7 @@ class EarlyStopping:
                     extra_trace = ""
                 self.trace_func(
                     f"Validation loss did not decrease {extra_trace}({self.val_loss_min:.6f} --> {val_loss:.6f}). "
-                    f"EarlyStopping counter: {self.counter} out of {self.patience}"
+                    f"EarlyStopping counter: {self.counter} out of {self.patience}",
                 )
             if self.counter >= self.patience:
                 self.trace_func(f"EarlyStopping activated at epoch # {epoch} because patience of {self.patience} has been reached.")
@@ -77,12 +82,13 @@ class EarlyStopping:
         # check maxgap
         if self.maxgap and epoch > self.min_epoch:
             if train_loss is None:
-                raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping.")
+                msg = "Cannot compute gap because no train_loss is provided to EarlyStopping."
+                raise ValueError(msg)
             gap = val_loss - train_loss
             if gap > self.maxgap:
                 self.trace_func(
                     f"EarlyStopping activated at epoch # {epoch} due to overfitting. "
-                    f"The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})"
+                    f"The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})",
                 )
                 self.early_stop = True
 

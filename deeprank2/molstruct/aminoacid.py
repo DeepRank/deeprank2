@@ -2,6 +2,7 @@ from enum import Enum
 
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import Self
 
 
 class Polarity(Enum):
@@ -13,7 +14,7 @@ class Polarity(Enum):
     POSITIVE = 3
 
     @property
-    def onehot(self):
+    def onehot(self) -> NDArray:
         t = np.zeros(4)
         t[self.value] = 1.0
         return t
@@ -123,7 +124,7 @@ class AminoAcid:
     def __hash__(self) -> hash:
         return hash(self.name)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, AminoAcid):
             return other.name == self.name
         return NotImplemented

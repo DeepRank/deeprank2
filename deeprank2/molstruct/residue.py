@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -41,7 +42,7 @@ class Residue:
         self._insertion_code = insertion_code
         self._atoms = []
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, Residue):
             return self._chain == other._chain and self._number == other._number and self._insertion_code == other._insertion_code
         return NotImplemented
@@ -83,7 +84,7 @@ class Residue:
     def insertion_code(self) -> str:
         return self._insertion_code
 
-    def add_atom(self, atom: Atom):
+    def add_atom(self, atom: Atom) -> None:
         self._atoms.append(atom)
 
     def __repr__(self) -> str:

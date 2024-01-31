@@ -377,7 +377,7 @@ amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid i
 amino_acids_by_name = {amino_acid.name: amino_acid for amino_acid in amino_acids}
 
 
-def convert_aa_nomenclature(aa: str, output_type: int | None = None):
+def convert_aa_nomenclature(aa: str, output_type: int | None = None) -> str:
     try:
         if len(aa) == 1:
             aa: AminoAcid = next(entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower())

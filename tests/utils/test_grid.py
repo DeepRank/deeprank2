@@ -5,7 +5,7 @@ from deeprank2.query import VALID_RESOLUTIONS, ProteinProteinInterfaceQuery
 from deeprank2.utils.grid import Grid, GridSettings, MapMethod
 
 
-def test_grid_orientation():
+def test_grid_orientation() -> None:
     coord_error_margin = 1.0  # Angstrom
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]

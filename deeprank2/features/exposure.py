@@ -2,6 +2,7 @@ import logging
 import signal
 import sys
 import warnings
+from typing import NoReturn
 
 import numpy as np
 from Bio.PDB.Atom import PDBConstructionWarning
@@ -17,16 +18,16 @@ from deeprank2.utils.graph import Graph
 _log = logging.getLogger(__name__)
 
 
-def handle_sigint(sig, frame):  # noqa: ARG001 (unused argument)
+def handle_sigint(sig, frame) -> None:  # noqa: ARG001, ANN001 (unused argument, missing type hint)
     print("SIGINT received, terminating.")
     sys.exit()
 
 
-def handle_timeout(sig, frame):  # noqa: ARG001 (unused argument)
+def handle_timeout(sig, frame) -> NoReturn:  # noqa: ARG001, ANN001 (unused argument, missing type hint)
     raise TimeoutError("Timed out!")
 
 
-def space_if_none(value):
+def space_if_none(value: str) -> str:
     if value is None:
         return " "
     return value
@@ -36,7 +37,7 @@ def add_features(
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+) -> None:
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)
 

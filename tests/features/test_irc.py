@@ -7,7 +7,7 @@ from deeprank2.utils.graph import Graph
 from . import build_testgraph
 
 
-def _run_assertions(graph: Graph):
+def _run_assertions(graph: Graph) -> None:
     assert not np.any([np.isnan(node.features[Nfeat.IRCTOTAL]) for node in graph.nodes]), "nan found"
     assert np.any([node.features[Nfeat.IRCTOTAL] > 0 for node in graph.nodes]), "no contacts"
 
@@ -16,7 +16,7 @@ def _run_assertions(graph: Graph):
     ), "incorrect total"
 
 
-def test_irc_residue():
+def test_irc_residue() -> None:
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
@@ -28,7 +28,7 @@ def test_irc_residue():
     _run_assertions(graph)
 
 
-def test_irc_atom():
+def test_irc_atom() -> None:
     pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,

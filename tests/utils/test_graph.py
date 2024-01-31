@@ -28,7 +28,7 @@ target_value = 1.0
 
 
 @pytest.fixture()
-def graph():
+def graph() -> Graph:
     """Build a simple graph of two nodes and one edge in between them."""
     # load the structure
     pdb = pdb2sql("tests/data/pdb/101M/101M.pdb")
@@ -69,7 +69,7 @@ def graph():
     return graph
 
 
-def test_graph_write_to_hdf5(graph):
+def test_graph_write_to_hdf5(graph: Graph) -> None:
     """Test that the graph is correctly written to hdf5 file."""
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
@@ -108,7 +108,7 @@ def test_graph_write_to_hdf5(graph):
         shutil.rmtree(tmp_dir_path)  # clean up after the test
 
 
-def test_graph_write_as_grid_to_hdf5(graph):
+def test_graph_write_as_grid_to_hdf5(graph: Graph) -> None:
     """Test that the graph is correctly written to hdf5 file as a grid."""
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
@@ -152,7 +152,7 @@ def test_graph_write_as_grid_to_hdf5(graph):
         shutil.rmtree(tmp_dir_path)  # clean up after the test
 
 
-def test_graph_augmented_write_as_grid_to_hdf5(graph):
+def test_graph_augmented_write_as_grid_to_hdf5(graph: Graph) -> None:
     """Test that the graph is correctly written to hdf5 file as a grid."""
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()

@@ -4,6 +4,7 @@ import logging
 import re
 import warnings
 from time import time
+from typing import Any
 
 import h5py
 import numpy as np
@@ -27,7 +28,7 @@ _log = logging.getLogger(__name__)
 class Trainer:
     def __init__(  # noqa: PLR0915 (too-many-statements)
         self,
-        neuralnet=None,
+        neuralnet: nn.Module = None,
         dataset_train: GraphDataset | GridDataset | None = None,
         dataset_val: GraphDataset | GridDataset | None = None,
         dataset_test: GraphDataset | GridDataset | None = None,
@@ -176,7 +177,7 @@ class Trainer:
             self._load_params()
             self._load_pretrained_model()
 
-    def _init_output_exporters(self, output_exporters: list[OutputExporter] | None):
+    def _init_output_exporters(self, output_exporters: list[OutputExporter] | None) -> None:
         if output_exporters is not None:
             self._output_exporters = OutputExporterCollection(*output_exporters)
         else:
@@ -189,7 +190,7 @@ class Trainer:
         dataset_test: GraphDataset | GridDataset | None,
         val_size: int | float | None,
         test_size: int | float | None,
-    ):
+    ) -> None:
         self._check_dataset_equivalence(dataset_train, dataset_val, dataset_test)
 
         self.dataset_train = dataset_train
@@ -211,7 +212,7 @@ class Trainer:
             else:
                 _log.warning("Validation dataset was provided to Trainer; val_size parameter is ignored.")
 
-    def _init_from_dataset(self, dataset: GraphDataset | GridDataset):
+    def _init_from_dataset(self, dataset: GraphDataset | GridDataset) -> None:
         if isinstance(dataset, GraphDataset):
             self.clustering_method = dataset.clustering_method
             self.node_features = dataset.node_features
@@ -238,13 +239,18 @@ class Trainer:
         self.classes = dataset.classes
         self.classes_to_index = dataset.classes_to_index
 
-    def _load_model(self):
+    def _load_model(self) -> None:
         """Loads the neural network model."""
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
         self.set_lossfunction()
 
-    def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
+    def _check_dataset_equivalence(
+        self,
+        dataset_train: GraphDataset | GridDataset,
+        dataset_val: GraphDataset | GridDataset,
+        dataset_test: GraphDataset | GridDataset,
+    ) -> None:
         """Check dataset_train type and train_source parameter settings."""
         # dataset_train is None when pretrained_model is set
         if dataset_train is None:
@@ -270,7 +276,12 @@ class Trainer:
                     type_dataset="test",
                 )
 
-    def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
+    def _check_dataset_value(
+        self,
+        dataset_train: GraphDataset | GridDataset,
+        dataset_check: GraphDataset | GridDataset,
+        type_dataset: str,
+    ) -> None:
         """Check valid/test dataset settings."""
         # Check train_source parameter in valid/test is set.
         if dataset_check.train_source is None:
@@ -281,7 +292,7 @@ class Trainer:
                 f"{type_dataset} dataset has different train_source parameter from Trainer. Make sure to assign equivalent train_source in Trainer."
             )
 
-    def _load_pretrained_model(self):
+    def _load_pretrained_model(self) -> None:
         """Loads pretrained model."""
         self.test_loader = DataLoader(self.dataset_test, pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
@@ -296,7 +307,7 @@ class Trainer:
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def _precluster(self, dataset: GraphDataset):
+    def _precluster(self, dataset: GraphDataset) -> None:
         """Pre-clusters nodes of the graphs."""
         for fname, mol in tqdm(dataset.index_entries):
             data = dataset.load_one_graph(fname, mol)
@@ -327,7 +338,7 @@ class Trainer:
 
             f5.close()
 
-    def _put_model_to_device(self, dataset: GraphDataset | GridDataset):
+    def _put_model_to_device(self, dataset: GraphDataset | GridDataset) -> None:
         """
         Puts the model on the available device.
 
@@ -383,7 +394,7 @@ class Trainer:
         optimizer: torch.optim = None,
         lr: float = 0.001,
         weight_decay: float = 1e-05,
-    ):
+    ) -> None:
         """
         Configure optimizer and its main parameters.
 
@@ -411,9 +422,9 @@ class Trainer:
 
     def set_lossfunction(
         self,
-        lossfunction=None,
+        lossfunction: nn.modules.loss._Loss | None = None,
         override_invalid: bool = False,
-    ):
+    ) -> None:
         """
         Set the loss function.
 
@@ -433,7 +444,7 @@ class Trainer:
         default_regression_loss = nn.MSELoss
         default_classification_loss = nn.CrossEntropyLoss
 
-        def _invalid_loss():
+        def _invalid_loss() -> None:
             if override_invalid:
                 _log.warning(
                     f"The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t"
@@ -502,7 +513,7 @@ class Trainer:
         num_workers: int = 0,
         best_model: bool = True,
         filename: str | None = "model.pth.tar",
-    ):
+    ) -> None:
         """
         Performs the training of the model.
 
@@ -794,7 +805,7 @@ class Trainer:
         return eval_loss
 
     @staticmethod
-    def _log_epoch_data(stage: str, loss: float, time: float):
+    def _log_epoch_data(stage: str, loss: float, time: float) -> None:
         """
         Prints the data of each epoch.
 
@@ -805,7 +816,7 @@ class Trainer:
         """
         _log.info(f"{stage} loss {loss} | time {time}")
 
-    def _format_output(self, pred, target=None):
+    def _format_output(self, pred, target=None):  # noqa: ANN001, ANN202 (missing type hint, missing return type)
         """Format the network output depending on the task (classification/regression)."""
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
@@ -837,7 +848,7 @@ class Trainer:
         self,
         batch_size: int = 32,
         num_workers: int = 0,
-    ):
+    ) -> None:
         """
         Performs the testing of the model.
 
@@ -870,7 +881,7 @@ class Trainer:
             # Run test
             self._eval(self.test_loader, self.epoch_saved_model, "testing")
 
-    def _load_params(self):
+    def _load_params(self) -> None:
         """Loads the parameters of a pretrained model."""
         if torch.cuda.is_available():
             state = torch.load(self.pretrained_model)
@@ -907,7 +918,7 @@ class Trainer:
         self.cuda = state["cuda"]
         self.ngpu = state["ngpu"]
 
-    def _save_model(self):
+    def _save_model(self) -> dict[str, Any]:
         """
         Saves the model to a file.
 

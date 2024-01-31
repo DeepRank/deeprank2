@@ -11,7 +11,7 @@ EXCEPTIONS = [
 ]
 
 
-def test_all_different_onehot():
+def test_all_different_onehot() -> None:
     for aa1, aa2 in zip(amino_acids, amino_acids, strict=True):
         if aa1 == aa2:
             continue

@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 from Bio.PDB import PDBParser
 from Bio.PDB.DSSP import DSSP
+from numpy.typing import NDArray
 
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.molstruct.atom import Atom
@@ -23,20 +24,20 @@ class SecondarySctructure(Enum):
     COIL = 2  # ' -STP'
 
     @property
-    def onehot(self):
+    def onehot(self) -> NDArray:
         t = np.zeros(3)
         t[self.value] = 1.0
 
         return t
 
 
-def _get_records(lines: list[str]):
+def _get_records(lines: list[str]) -> list[str]:
     seen = set()
     seen_add = seen.add
     return [x.split()[0] for x in lines if not (x in seen or seen_add(x))]
 
 
-def _check_pdb(pdb_path: str):
+def _check_pdb(pdb_path: str) -> None:
     fix_pdb = False
     with open(pdb_path, encoding="utf-8") as f:
         lines = f.readlines()
@@ -71,7 +72,7 @@ def _check_pdb(pdb_path: str):
             f.writelines(lines)
 
 
-def _classify_secstructure(subtype: str):
+def _classify_secstructure(subtype: str) -> SecondarySctructure:
     if subtype in "GHI":
         return SecondarySctructure.HELIX
     if subtype in "BE":
@@ -124,7 +125,7 @@ def add_features(
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+) -> None:
     sec_structure_features = _get_secstructure(pdb_path)
 
     for node in graph.nodes:

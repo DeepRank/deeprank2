@@ -7,13 +7,13 @@ from deeprank2.utils.graph import Graph
 from . import build_testgraph
 
 
-def _run_assertions(graph: Graph):
+def _run_assertions(graph: Graph) -> None:
     assert np.any(node.features[Nfeat.HSE] != 0.0 for node in graph.nodes), "hse"
 
     assert np.any(node.features[Nfeat.RESDEPTH] != 0.0 for node in graph.nodes), "resdepth"
 
 
-def test_exposure_residue():
+def test_exposure_residue() -> None:
     pdb_path = "tests/data/pdb/1ATN/1ATN_1w.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
@@ -25,7 +25,7 @@ def test_exposure_residue():
     _run_assertions(graph)
 
 
-def test_exposure_atom():
+def test_exposure_atom() -> None:
     pdb_path = "tests/data/pdb/1ak4/1ak4.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,

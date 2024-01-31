@@ -30,7 +30,7 @@ class Edge:
         self.id = id_
         self.features = {}
 
-    def add_feature(self, feature_name: str, feature_function: Callable[[Contact], float]):
+    def add_feature(self, feature_name: str, feature_function: Callable[[Contact], float]) -> None:
         feature_value = feature_function(self.id)
 
         self.features[feature_name] = feature_value
@@ -61,7 +61,7 @@ class Node:
         self.features = {}
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self._type
 
     def has_nan(self) -> bool:
@@ -72,7 +72,7 @@ class Node:
         self,
         feature_name: str,
         feature_function: Callable[[Atom | Residue], NDArray],
-    ):
+    ) -> None:
         feature_value = feature_function(self.id)
 
         if len(feature_value.shape) != 1:
@@ -99,13 +99,13 @@ class Graph:
         # the center only needs to be set when this graph should be mapped to a grid.
         self.center = np.array((0.0, 0.0, 0.0))
 
-    def add_node(self, node: Node):
+    def add_node(self, node: Node) -> None:
         self._nodes[node.id] = node
 
     def get_node(self, id_: Atom | Residue) -> Node:
         return self._nodes[id_]
 
-    def add_edge(self, edge: Edge):
+    def add_edge(self, edge: Edge) -> None:
         self._edges[edge.id] = edge
 
     def get_edge(self, id_: Contact) -> Edge:
@@ -134,7 +134,7 @@ class Graph:
         points: list[NDArray],
         values: list[float | NDArray],
         augmentation: Augmentation | None = None,
-    ):
+    ) -> None:
         points = np.stack(points, axis=0)
 
         if augmentation is not None:
@@ -156,7 +156,7 @@ class Graph:
         grid: Grid,
         method: MapMethod,
         augmentation: Augmentation | None = None,
-    ):
+    ) -> None:
         # order edge features by xyz point
         points = []
         feature_values = {}
@@ -200,7 +200,7 @@ class Graph:
                 augmentation,
             )
 
-    def write_to_hdf5(self, hdf5_path: str):
+    def write_to_hdf5(self, hdf5_path: str) -> None:
         """Write a featured graph to an hdf5 file, according to deeprank standards."""
         with h5py.File(hdf5_path, "a") as hdf5_file:
             # create groups to hold data

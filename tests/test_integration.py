@@ -31,7 +31,7 @@ chain_id2 = "B"
 count_queries = 3
 
 
-def test_cnn():
+def test_cnn() -> None:
     """
     Tests processing several PDB files into their features representation HDF5 file.
 
@@ -124,7 +124,7 @@ def test_cnn():
         rmtree(output_directory)
 
 
-def test_gnn():
+def test_gnn() -> None:
     """Tests processing several PDB files into their features representation HDF5 file.
 
     Then uses HDF5 generated files to train and test a GINet network.
@@ -219,7 +219,7 @@ def test_gnn():
 
 
 @pytest.fixture(scope="session")
-def hdf5_files_for_nan(tmpdir_factory):
+def hdf5_files_for_nan(tmpdir_factory: str) -> QueryCollection:
     # For testing cases in which the loss function is nan for the validation and/or for
     # the training sets. It doesn't matter if the dataset is a GraphDataset or a GridDataset,
     # since it is a functionality of the trainer module, which does not depend on the dataset type.
@@ -251,7 +251,11 @@ def hdf5_files_for_nan(tmpdir_factory):
 
 
 @pytest.mark.parametrize("validate, best_model", [(True, True), (False, True), (False, False), (True, False)])  # noqa: PT006 (pytest-parametrize-names-wrong-type)
-def test_nan_loss_cases(validate, best_model, hdf5_files_for_nan):
+def test_nan_loss_cases(
+    validate: bool,
+    best_model: bool,
+    hdf5_files_for_nan,  # noqa: ANN001 (missing type hint)
+) -> None:
     mols = []
     for fname in hdf5_files_for_nan:
         with h5py.File(fname, "r") as hdf5:
