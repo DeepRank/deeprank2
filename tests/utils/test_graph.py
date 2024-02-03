@@ -35,7 +35,7 @@ def graph() -> Graph:
     try:
         structure = get_structure(pdb, entry_id)
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     # build a contact from two residues
     residue0 = structure.chains[0].residues[0]

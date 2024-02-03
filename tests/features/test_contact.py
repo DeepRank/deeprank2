@@ -43,7 +43,7 @@ def _get_contact(
     try:
         structure = get_structure(pdb, pdb_id)
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     if not chains:
         chains = [structure.chains[0], structure.chains[0]]

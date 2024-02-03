@@ -168,14 +168,12 @@ class TestDataSet(unittest.TestCase):
             for batch_data in DataLoader(dataset, batch_size=2, shuffle=True):
                 entry_names += batch_data.entry_names
 
-            assert set(entry_names) == set(  # noqa: C405 (unnecessary-literal-set)
-                [
-                    "residue-ppi-1ATN_1w:A-B",
-                    "residue-ppi-1ATN_2w:A-B",
-                    "residue-ppi-1ATN_3w:A-B",
-                    "residue-ppi-1ATN_4w:A-B",
-                ],
-            ), f"entry names of {dataset_name} were not collated correctly"
+            assert set(entry_names) == {
+                "residue-ppi-1ATN_1w:A-B",
+                "residue-ppi-1ATN_2w:A-B",
+                "residue-ppi-1ATN_3w:A-B",
+                "residue-ppi-1ATN_4w:A-B",
+            }, f"entry names of {dataset_name} were not collated correctly"
 
     def test_datasets(self) -> None:
         dataset_graph = GraphDataset(
@@ -483,7 +481,7 @@ class TestDataSet(unittest.TestCase):
                 n += len(hdf5_r.keys())
         assert len(dataset) == n, f"total data points got was {len(dataset)}"
 
-    def test_hdf5_to_pandas_graphdataset(self) -> None:  # noqa: C901 (complex-structure)
+    def test_hdf5_to_pandas_graphdataset(self) -> None:  # noqa: C901
         hdf5_path = "tests/data/hdf5/train.hdf5"
         dataset = GraphDataset(
             hdf5_path=hdf5_path,
@@ -1203,7 +1201,7 @@ class TestDataSet(unittest.TestCase):
             for key in data["features_transform"].values():
                 if key["transform"] is None:
                     continue
-                key["transform"] = eval(key["transform"])  # noqa: S307, PGH001 (suspicious-eval-usage)
+                key["transform"] = eval(key["transform"])  # noqa: S307, PGH001
 
         dataset_test_vars = vars(dataset_test)
         for param in dataset_test.inherited_params:

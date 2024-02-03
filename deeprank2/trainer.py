@@ -26,7 +26,7 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer:
-    def __init__(  # noqa: PLR0915, C901 (too-many-statements, complex-structure)
+    def __init__(  # noqa: PLR0915, C901
         self,
         neuralnet: nn.Module = None,
         dataset_train: GraphDataset | GridDataset | None = None,
@@ -330,7 +330,7 @@ class Trainer:
                 try:
                     _log.info(f"deleting {mol}")
                     del f5[mol]
-                except BaseException:  # noqa: BLE001 (blind-except)
+                except BaseException:  # noqa: BLE001
                     _log.info(f"{mol} not found")
                 f5.close()
                 continue
@@ -436,7 +436,7 @@ class Trainer:
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise
 
-    def set_lossfunction(  # noqa: C901 (complex-structure)
+    def set_lossfunction(  # noqa: C901
         self,
         lossfunction: nn.modules.loss._Loss | None = None,
         override_invalid: bool = False,
@@ -517,7 +517,7 @@ class Trainer:
             else:
                 self.lossfunction = lossfunction  # weights will be set in the train() method
 
-    def train(  # noqa: PLR0915, C901 (too-many-statements, complex-structure)
+    def train(  # noqa: PLR0915, C901
         self,
         nepoch: int = 1,
         batch_size: int = 32,
@@ -709,7 +709,7 @@ class Trainer:
         t0 = time()
         for data_batch in self.train_loader:
             if self.cuda:
-                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901 (redefined-loop-name)
+                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
@@ -779,7 +779,7 @@ class Trainer:
         t0 = time()
         for data_batch in loader:
             if self.cuda:
-                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901 (redefined-loop-name)
+                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901
             pred = self.model(data_batch)
             pred, y = self._format_output(pred, data_batch.y)
 
@@ -834,7 +834,7 @@ class Trainer:
         """
         _log.info(f"{stage} loss {loss} | time {time}")
 
-    def _format_output(self, pred, target=None):  # noqa: ANN001, ANN202 (missing type hint, missing return type)
+    def _format_output(self, pred, target=None):  # noqa: ANN001, ANN202
         """Format the network output depending on the task (classification/regression)."""
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor

@@ -77,7 +77,7 @@ class FoutNet(torch.nn.Module):
         self,
         input_shape,
         output_shape=1,
-        input_shape_edge=None,  # noqa: ARG002 (unused argument)
+        input_shape_edge=None,  # noqa: ARG002
     ):
         super().__init__()
 

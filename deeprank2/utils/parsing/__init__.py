@@ -31,7 +31,7 @@ class AtomicForcefield:
         with open(param_path, encoding="utf-8") as f:
             self._vanderwaals_parameters = ParamParser.parse(f)
 
-    def _find_matching_residue_class(self, residue: Residue):  # noqa: ANN202 (missing return type)
+    def _find_matching_residue_class(self, residue: Residue) -> str | None:
         for criterium in self._residue_class_criteria:
             if criterium.matches(
                 residue.amino_acid.three_letter_code,

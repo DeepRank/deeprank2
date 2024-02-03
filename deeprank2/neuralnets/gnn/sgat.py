@@ -25,7 +25,7 @@ class SGraphAttentionLayer(torch.nn.Module):
         out_channels (int): Size of each output sample.
         bias (bool, optional): If set to :obj:`False`, the layer will not learn
             an additive bias. Defaults to True.
-    """  # noqa: D301 (escape-sequence-in-docstring)
+    """  # noqa: D301
 
     def __init__(
         self,
@@ -93,7 +93,7 @@ class SGAT(torch.nn.Module):
         self,
         input_shape,
         output_shape=1,
-        input_shape_edge=None,  # noqa: ARG002 (unused argument)
+        input_shape_edge=None,  # noqa: ARG002
     ):
         super().__init__()
 

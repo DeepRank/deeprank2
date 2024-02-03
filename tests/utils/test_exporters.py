@@ -49,7 +49,7 @@ class TestOutputExporters(unittest.TestCase):
         assert len(os.listdir(self._work_dir)) == 2  # tensorboard & table
 
     @patch("torch.utils.tensorboard.SummaryWriter.add_scalar")
-    def test_tensorboard_binary_classif(self, mock_add_scalar) -> None:  # noqa: ANN001 (missing type hint)
+    def test_tensorboard_binary_classif(self, mock_add_scalar) -> None:  # noqa: ANN001
         tensorboard_exporter = TensorboardBinaryClassificationExporter(self._work_dir)
 
         pass_name = "test"
@@ -60,7 +60,7 @@ class TestOutputExporters(unittest.TestCase):
         targets = [0, 1, 1]
         loss = 0.1
 
-        def _check_scalar(name: str, scalar: float, timestep) -> None:  # noqa: ARG001, ANN001 (unused argument, missing type hint)
+        def _check_scalar(name: str, scalar: float, timestep) -> None:  # noqa: ARG001, ANN001
             if name == f"{pass_name} cross entropy loss":
                 assert scalar < 1.0
             else:

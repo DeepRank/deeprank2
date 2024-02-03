@@ -8,7 +8,7 @@ from deeprank2.molstruct.residue import Residue
 
 
 class Pair:
-    def __init__(self, item1: Any, item2: Any):  # noqa: ANN401 (Use Any as type hint)
+    def __init__(self, item1: Any, item2: Any):  # noqa: ANN401
         """A hashable, comparable object for any set of two inputs where order doesn't matter.
 
         Args:

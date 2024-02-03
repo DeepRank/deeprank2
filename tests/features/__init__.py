@@ -20,7 +20,7 @@ def _get_residue(chain: Chain, number: int) -> Residue:
     raise ValueError(msg)
 
 
-def build_testgraph(  # noqa: C901 (complex-structure)
+def build_testgraph(  # noqa: C901
     pdb_path: str,
     detail: Literal["atom", "residue"],
     influence_radius: float,
@@ -55,7 +55,7 @@ def build_testgraph(  # noqa: C901 (complex-structure)
     try:
         structure: PDBStructure = get_structure(pdb, Path(pdb_path).stem)
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     if not central_res:
         nodes = set()

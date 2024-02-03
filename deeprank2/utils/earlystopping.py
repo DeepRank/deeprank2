@@ -41,7 +41,7 @@ class EarlyStopping:
         self.best_score = None
         self.val_loss_min = None
 
-    def __call__(  # noqa: C901 (complex-structure)
+    def __call__(  # noqa: C901
         self,
         epoch: int,
         val_loss: float,

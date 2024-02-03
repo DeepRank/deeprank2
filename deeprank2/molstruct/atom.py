@@ -16,7 +16,7 @@ class AtomicElement(Enum):
     """One-hot encoding of the atomic element (or atom type)."""
 
     C = 1
-    O = 2  # noqa: E741 (ambiguous-variable-name)
+    O = 2  # noqa: E741
     N = 3
     S = 4
     P = 5

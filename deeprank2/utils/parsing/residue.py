@@ -51,7 +51,7 @@ class ResidueClassParser:
 
             present_atom_names = []
             absent_atom_names = []
-            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(line[match.end() :]):  # noqa: B020 (loop-variable-overrides-iterator)
+            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(line[match.end() :]):  # noqa: B020
                 atom_names = [name.strip() for name in match.group(2).split(",")]
                 if match.group(1) == "present":
                     present_atom_names.extend(atom_names)

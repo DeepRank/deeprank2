@@ -12,7 +12,7 @@ def test_get_structure_complete() -> None:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     assert structure is not None
 
@@ -40,7 +40,7 @@ def test_get_structure_from_nmr_with_dna() -> None:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     assert structure is not None
     assert structure.chains[0].residues[0].amino_acid is None  # DNA
@@ -52,7 +52,7 @@ def test_residue_contact_pairs() -> None:
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
     residue_pairs = get_residue_contact_pairs(pdb_path, structure, "A", "B", 8.5)
 
     assert len(residue_pairs) > 0
@@ -64,7 +64,7 @@ def test_surrounding_residues() -> None:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     all_residues = structure.get_chain("A").residues
     # A nicely centered residue

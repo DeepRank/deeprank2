@@ -98,7 +98,7 @@ class Query:
         try:
             structure = get_structure(pdb, self.model_id)
         finally:
-            pdb._close()  # noqa: SLF001 (private-member-access)
+            pdb._close()  # noqa: SLF001
         # read the pssm
         if self._pssm_required:
             self._load_pssm_data(structure)
@@ -113,7 +113,7 @@ class Query:
                 with open(pssm_path, encoding="utf-8") as f:
                     chain.pssm = parse_pssm(f, chain)
 
-    def _check_pssm(self, verbosity: Literal[0, 1, 2] = 0) -> None:  # noqa: C901 (complex-structure)
+    def _check_pssm(self, verbosity: Literal[0, 1, 2] = 0) -> None:  # noqa: C901
         """Checks whether information stored in pssm file matches the corresponding pdb file.
 
         Args:
@@ -148,7 +148,7 @@ class Query:
             try:
                 if pdb_file_residues[residue] != pssm_file_residues[residue]:
                     mismatches.append(residue)
-            except KeyError:  # noqa: PERF203 (try-except-in-loop)
+            except KeyError:  # noqa: PERF203
                 missing_entries.append(residue)
 
         # generate error message
@@ -504,7 +504,7 @@ class QueryCollection:
     def process(
         self,
         prefix: str = "processed-queries",
-        feature_modules: list[ModuleType, str] | ModuleType | str | Literal["all"] = [  # noqa: B006, PYI051 (mutable-argument-default, redundant-literal-union)
+        feature_modules: list[ModuleType, str] | ModuleType | str | Literal["all"] = [  # noqa: PYI051
             components,
             contact,
         ],
@@ -577,7 +577,7 @@ class QueryCollection:
 
         return output_paths
 
-    def _set_feature_modules(self, feature_modules: list[ModuleType, str] | ModuleType | str | Literal["all"]) -> list[str]:  # noqa: PYI051 (redundant-literal-union)
+    def _set_feature_modules(self, feature_modules: list[ModuleType, str] | ModuleType | str | Literal["all"]) -> list[str]:  # noqa: PYI051
         """Convert `feature_modules` to list[str] irrespective of input type.
 
         Raises:

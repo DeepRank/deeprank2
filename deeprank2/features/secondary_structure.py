@@ -98,7 +98,7 @@ def _get_secstructure(pdb_path: str) -> dict:
 
     try:
         dssp = DSSP(model, pdb_path, dssp="mkdssp")
-    except Exception as e:  # noqa: BLE001 (blind-except), namely: # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
+    except Exception as e:  # noqa: BLE001, namely: # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
         pdb_format_link = "https://www.wwpdb.org/documentation/file-format-content/format33/sect1.html#Order"
         msg = (
             f"DSSP has raised the following exception: {e}.\n\t"
@@ -127,7 +127,7 @@ def _get_secstructure(pdb_path: str) -> dict:
 def add_features(
     pdb_path: str,
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001
 ) -> None:
     sec_structure_features = _get_secstructure(pdb_path)
 

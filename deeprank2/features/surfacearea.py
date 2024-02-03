@@ -126,7 +126,7 @@ def add_bsa(graph: Graph) -> None:
 def add_features(
     pdb_path: str,
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001
 ) -> None:
     """Calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA)."""
     # BSA

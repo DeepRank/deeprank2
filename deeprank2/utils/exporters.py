@@ -28,7 +28,7 @@ class OutputExporter:
         """Overridable."""
         return self
 
-    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         """Overridable."""
 
     def process(
@@ -44,8 +44,8 @@ class OutputExporter:
 
     def is_compatible_with(
         self,
-        output_data_shape: int,  # noqa: ARG002 (unused argument)
-        target_data_shape: int | None = None,  # noqa: ARG002 (unused argument)
+        output_data_shape: int,  # noqa: ARG002
+        target_data_shape: int | None = None,  # noqa: ARG002
     ) -> bool:
         """True if this exporter can work with the given data shapes."""
         return True
@@ -63,7 +63,7 @@ class OutputExporterCollection:
 
         return self
 
-    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         for output_exporter in self._output_exporters:
             output_exporter.__exit__(exception_type, exception, traceback)
 
@@ -108,7 +108,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         self._writer.__enter__()
         return self
 
-    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         self._writer.__exit__(exception_type, exception, traceback)
 
     def process(
@@ -118,7 +118,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         entry_names: list[str],
         output_values: list,
         target_values: list,
-        loss: float,  # noqa: ARG002 (unused argument)
+        loss: float,  # noqa: ARG002
     ) -> None:
         """Write to tensorboard."""
         ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
@@ -194,7 +194,7 @@ class ScatterPlotExporter(OutputExporter):
         self._plot_data = {}
         return self
 
-    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         self._plot_data.clear()
 
     def get_filename(self, epoch_number: int) -> str:
@@ -239,10 +239,10 @@ class ScatterPlotExporter(OutputExporter):
         self,
         pass_name: str,
         epoch_number: int,
-        entry_names: list[str],  # noqa: ARG002 (unused argument)
+        entry_names: list[str],  # noqa: ARG002
         output_values: list,
         target_values: list,
-        loss: float,  # noqa: ARG002 (unused argument)
+        loss: float,  # noqa: ARG002
     ) -> None:
         """Make the plot, if the epoch matches with the interval."""
         if epoch_number % self._epoch_interval == 0:
@@ -296,7 +296,7 @@ class HDF5OutputExporter(OutputExporter):
 
         return self
 
-    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001 (missing type hints)
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         if self.phase is not None:
             if self.phase == "validation":
                 self.phase = "training"

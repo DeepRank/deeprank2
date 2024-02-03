@@ -14,7 +14,7 @@ class GNNLayer(nn.Module):
         nmb_output_features,
         message_vector_length,
         nmb_mlp_neurons,
-        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
+        act_fn=nn.SiLU(),  # noqa: B008
         is_last_layer=True,
     ):
         super().__init__()
@@ -115,7 +115,7 @@ class SuperGNN(nn.Module):
         nmb_gnn_layers,
         nmb_output_features,
         message_vector_length,
-        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
+        act_fn=nn.SiLU(),  # noqa: B008
     ):
         super().__init__()
 
@@ -183,7 +183,7 @@ class AlignmentGNN(SuperGNN):
         nmb_mlp_neurons,
         nmb_gnn_layers,
         nmb_edge_projection,
-        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
+        act_fn=nn.SiLU(),  # noqa: B008
     ):
         super().__init__(
             nmb_edge_attr,

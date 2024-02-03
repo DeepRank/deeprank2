@@ -44,4 +44,4 @@ class PssmTable:
 
     def update(self, other: Self) -> None:
         """Can be used to merge two non-overlapping scoring tables."""
-        self._rows.update(other._rows)  # noqa: SLF001 (private-member-access)
+        self._rows.update(other._rows)  # noqa: SLF001

@@ -165,7 +165,7 @@ class Graph:
             points += [edge.position1, edge.position2]
 
             for feature_name, feature_value in edge.features.items():
-                feature_values[feature_name] = feature_values.get(feature_name, []) + [  # noqa: RUF005 (collection-literal-concatenation)
+                feature_values[feature_name] = feature_values.get(feature_name, []) + [  # noqa: RUF005
                     feature_value,
                     feature_value,
                 ]
@@ -188,7 +188,7 @@ class Graph:
             points.append(node.position)
 
             for feature_name, feature_value in node.features.items():
-                feature_values[feature_name] = feature_values.get(feature_name, []) + [feature_value]  # noqa: RUF005 (collection-literal-concatenation)
+                feature_values[feature_name] = feature_values.get(feature_name, []) + [feature_value]  # noqa: RUF005
 
         # map node features to grid
         for feature_name, values in feature_values.items():

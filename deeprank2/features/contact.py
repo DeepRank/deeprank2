@@ -73,9 +73,9 @@ def _get_nonbonded_energy(
 
 
 def add_features(
-    pdb_path: str,  # noqa: ARG001 (unused argument)
+    pdb_path: str,  # noqa: ARG001
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001
 ) -> None:
     # assign each atoms (from all edges) a unique index
     all_atoms = set()

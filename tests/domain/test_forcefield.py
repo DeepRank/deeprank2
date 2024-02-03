@@ -10,7 +10,7 @@ def test_atomic_forcefield() -> None:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     # The arginine C-zeta should get a positive charge
     arg = next(r for r in structure.get_chain("A").residues if r.amino_acid == arginine)

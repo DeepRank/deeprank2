@@ -12,7 +12,7 @@ _log = logging.getLogger(__name__)
 MIN_IRMS_FOR_BINARY = 4
 
 
-def add_target(  # noqa: C901 (complex-structure)
+def add_target(  # noqa: C901
     graph_path: str | list[str],
     target_name: str,
     target_list: str,
@@ -63,7 +63,7 @@ def add_target(  # noqa: C901 (complex-structure)
             for model in target_dict:
                 if model not in f5:
                     msg = f"{hdf5} does not contain an entry named {model}."
-                    raise ValueError(msg)  # noqa: TRY301 (raise-within-try)
+                    raise ValueError(msg)  # noqa: TRY301
                 try:
                     model_gp = f5[model]
                     if targets.VALUES not in model_gp:
@@ -74,11 +74,11 @@ def add_target(  # noqa: C901 (complex-structure)
                         del group[target_name]
                     # Create the target
                     group.create_dataset(target_name, data=target_dict[model])
-                except BaseException:  # noqa: BLE001 (blind-except)
+                except BaseException:  # noqa: BLE001
                     _log.info(f"no graph for {model}")
             f5.close()
 
-        except BaseException:  # noqa: BLE001 (blind-except)
+        except BaseException:  # noqa: BLE001
             _log.info(f"no graph for {hdf5}")
 
 

@@ -12,7 +12,7 @@ _log = logging.getLogger(__name__)
 
 
 def add_features(
-    pdb_path: str,  # noqa: ARG001 (unused argument)
+    pdb_path: str,  # noqa: ARG001
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
 ) -> None:

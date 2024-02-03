@@ -31,7 +31,7 @@ def _add_atom_to_residue(atom: Atom, residue: Residue) -> None:
 def _add_atom_data_to_structure(
     structure: PDBStructure,
     pdb_obj: pdb2sql_object,
-    **kwargs,  # noqa: ANN003 (missing type hint)
+    **kwargs,  # noqa: ANN003
 ) -> None:
     """This subroutine retrieves pdb2sql atomic data for `PDBStructure` objects as defined in DeepRank2.
 
@@ -111,7 +111,7 @@ def get_contact_atoms(
         pdb_rowID = atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]]
         _add_atom_data_to_structure(structure, interface, rowID=pdb_rowID)
     finally:
-        interface._close()  # noqa: SLF001 (private-member-access)
+        interface._close()  # noqa: SLF001
 
     return structure.get_atoms()
 
@@ -145,7 +145,7 @@ def get_residue_contact_pairs(
             return_contact_pairs=True,
         )
     finally:
-        interface._close()  # noqa: SLF001 (private-member-access)
+        interface._close()  # noqa: SLF001
 
     # Map to residue objects
     residue_pairs = set()

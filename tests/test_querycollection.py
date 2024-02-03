@@ -18,7 +18,7 @@ from deeprank2.tools.target import compute_ppi_scores
 def _querycollection_tester(
     query_type: str,
     n_queries: int = 3,
-    feature_modules: ModuleType | list[ModuleType] = [components, contact],  # noqa: B006 (unsafe default value)
+    feature_modules: ModuleType | list[ModuleType] = [components, contact],
     cpu_count: int = 1,
     combine_output: bool = True,
 ) -> (QueryCollection, str, list[str]):
@@ -278,6 +278,6 @@ def test_querycollection_duplicates_add() -> None:
         "1ATN_2w_2",
         "1ATN_3w",
     ]
-    assert queries._ids_count["residue-ppi:A-B:1ATN_1w"] == 3  # noqa: SLF001 (private member accessed)
-    assert queries._ids_count["residue-ppi:A-B:1ATN_2w"] == 2  # noqa: SLF001 (private member accessed)
-    assert queries._ids_count["residue-ppi:A-B:1ATN_3w"] == 1  # noqa: SLF001 (private member accessed)
+    assert queries._ids_count["residue-ppi:A-B:1ATN_1w"] == 3  # noqa: SLF001
+    assert queries._ids_count["residue-ppi:A-B:1ATN_2w"] == 2  # noqa: SLF001
+    assert queries._ids_count["residue-ppi:A-B:1ATN_3w"] == 1  # noqa: SLF001

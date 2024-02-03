@@ -86,7 +86,7 @@ class DeeprankDataset(Dataset):
         # get the device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def _check_and_inherit_train(  # noqa: C901 (complex-structure)
+    def _check_and_inherit_train(  # noqa: C901
         self,
         data_type: GridDataset | GraphDataset,
         inherited_params: list[str],
@@ -113,7 +113,7 @@ class DeeprankDataset(Dataset):
                         for key in data["features_transform"].values():
                             if key["transform"] is None:
                                 continue
-                            key["transform"] = eval(key["transform"])  # noqa: S307, PGH001 (suspicious-eval-usage)
+                            key["transform"] = eval(key["transform"])  # noqa: S307, PGH001
             except pickle.UnpicklingError as e:
                 msg = "The path provided to `train_source` is not a valid DeepRank2 pre-trained model."
                 raise ValueError(msg) from e
@@ -148,7 +148,7 @@ class DeeprankDataset(Dataset):
                     if len(entry_names) == 0:
                         _log.info(f"    -> {hdf5_path} is empty ")
                         to_be_removed.append(hdf5_path)
-            except Exception as e:  # noqa: BLE001, PERF203 (blind-except, try-except-in-loop)
+            except Exception as e:  # noqa: BLE001, PERF203
                 _log.error(e)
                 _log.info(f"    -> {hdf5_path} is corrupted ")
                 to_be_removed.append(hdf5_path)
@@ -247,7 +247,7 @@ class DeeprankDataset(Dataset):
                     else:
                         self.index_entries += [(hdf5_path, entry_name) for entry_name in entry_names if self._filter_targets(hdf5_file[entry_name])]
 
-            except Exception:  # noqa: BLE001 (blind-except)
+            except Exception:  # noqa: BLE001
                 _log.exception(f"on {hdf5_path}")
 
     def _filter_targets(self, grp: h5py.Group) -> bool:
@@ -279,7 +279,7 @@ class DeeprankDataset(Dataset):
                     for operator_string in [">", "<", "==", "<=", ">=", "!="]:
                         operation = operation.replace(operator_string, f"{target_value}" + operator_string)
 
-                    if not eval(operation):  # noqa: S307, PGH001 (suspicious-eval-usage)
+                    if not eval(operation):  # noqa: S307, PGH001
                         return False
 
                 elif target_condition is not None:
@@ -298,7 +298,7 @@ class DeeprankDataset(Dataset):
         """
         return len(self.index_entries)
 
-    def hdf5_to_pandas(  # noqa: C901 (complex-structure)
+    def hdf5_to_pandas(  # noqa: C901
         self,
     ) -> pd.DataFrame:
         """Loads features data from the HDF5 files into a Pandas DataFrame in the attribute `df` of the class.
@@ -350,7 +350,7 @@ class DeeprankDataset(Dataset):
         self.df = df_concat.reset_index(drop=True)
         return self.df
 
-    def save_hist(  # noqa: C901 (complex-structure)
+    def save_hist(  # noqa: C901
         self,
         features: str | list[str],
         fname: str = "features_hist.png",
@@ -589,7 +589,7 @@ class GridDataset(DeeprankDataset):
             else:
                 self.features_dict[targets.VALUES] = self.target
 
-    def _check_features(self) -> None:  # noqa: C901 (complex-structure)
+    def _check_features(self) -> None:  # noqa: C901
         """Checks if the required features exist."""
         hdf5_path = self.hdf5_paths[0]
 
@@ -723,7 +723,7 @@ class GridDataset(DeeprankDataset):
 
 
 class GraphDataset(DeeprankDataset):
-    def __init__(  # noqa: C901 (complex-structure)
+    def __init__(  # noqa: C901
         self,
         hdf5_path: str | list,
         subset: list[str] | None = None,
@@ -898,7 +898,7 @@ class GraphDataset(DeeprankDataset):
         fname, mol = self.index_entries[idx]
         return self.load_one_graph(fname, mol)
 
-    def load_one_graph(self, fname: str, entry_name: str) -> Data:  # noqa: PLR0915, C901 (too-many-statements, complex-structure)
+    def load_one_graph(self, fname: str, entry_name: str) -> Data:  # noqa: PLR0915, C901
         """Loads one graph.
 
         Args:
@@ -1084,7 +1084,7 @@ class GraphDataset(DeeprankDataset):
 
         return data
 
-    def _check_features(self) -> None:  # noqa: C901 (complex-structure)
+    def _check_features(self) -> None:  # noqa: C901
         """Checks if the required features exist."""
         f = h5py.File(self.hdf5_paths[0], "r")
         mol_key = next(iter(f.keys()))
