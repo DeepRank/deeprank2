@@ -23,8 +23,6 @@ from deeprank2.domain import gridstorage
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 
-# ruff: noqa: PYI051 (redundant-literal-union), the literal is a special case, while the str is generic
-
 _log = logging.getLogger(__name__)
 
 
@@ -477,7 +475,7 @@ class GridDataset(DeeprankDataset):
         hdf5_path: str | list,
         subset: list[str] | None = None,
         train_source: str | GridDataset | None = None,
-        features: list[str] | str | Literal["all"] | None = "all",
+        features: list[str] | str | None = "all",
         target: str | None = None,
         target_transform: bool = False,
         target_filter: dict[str, str] | None = None,
@@ -728,8 +726,8 @@ class GraphDataset(DeeprankDataset):
         hdf5_path: str | list,
         subset: list[str] | None = None,
         train_source: str | GridDataset | None = None,
-        node_features: list[str] | str | Literal["all"] | None = "all",
-        edge_features: list[str] | str | Literal["all"] | None = "all",
+        node_features: list[str] | str | None = "all",
+        edge_features: list[str] | str | None = "all",
         features_transform: dict | None = None,
         clustering_method: str | None = None,
         target: str | None = None,

@@ -12,7 +12,7 @@ from pdb2sql.transform import get_rot_axis_angle
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import gridstorage
 from deeprank2.domain import nodestorage as Nfeat
-from deeprank2.domain import targetstorage as Target
+from deeprank2.domain import targetstorage as targets
 from deeprank2.molstruct.pair import ResidueContact
 from deeprank2.utils.buildgraph import get_structure
 from deeprank2.utils.graph import Edge, Graph, Node
@@ -102,7 +102,7 @@ def test_graph_write_to_hdf5(graph: Graph) -> None:
             assert len(np.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
 
             # target
-            assert grp[Target.VALUES][target_name][()] == target_value
+            assert grp[targets.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
@@ -146,7 +146,7 @@ def test_graph_write_as_grid_to_hdf5(graph: Graph) -> None:
             assert np.all(data.shape == tuple(grid_settings.points_counts))
 
             # target
-            assert grp[Target.VALUES][target_name][()] == target_value
+            assert grp[targets.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
@@ -209,7 +209,7 @@ def test_graph_augmented_write_as_grid_to_hdf5(graph: Graph) -> None:
                 assert np.abs(np.sum(data) - np.sum(unaugmented_data)).item() < 0.2
 
                 # target
-                assert grp[Target.VALUES][target_name][()] == target_value
+                assert grp[targets.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test

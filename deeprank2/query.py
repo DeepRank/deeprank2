@@ -504,10 +504,7 @@ class QueryCollection:
     def process(
         self,
         prefix: str = "processed-queries",
-        feature_modules: list[ModuleType, str] | ModuleType | str | Literal["all"] = [  # noqa: PYI051
-            components,
-            contact,
-        ],
+        feature_modules: list[ModuleType, str] | ModuleType | str | None = None,
         cpu_count: int | None = None,
         combine_output: bool = True,
         grid_settings: GridSettings | None = None,
@@ -540,6 +537,7 @@ class QueryCollection:
             list[str]: The list of paths of the generated HDF5 files.
         """
         # set defaults
+        feature_modules = feature_modules or [components, contact]
         self._prefix = "processed-queries" if not prefix else re.sub(".hdf5$", "", prefix)  # scrape extension if present
 
         max_cpus = os.cpu_count()
@@ -577,7 +575,7 @@ class QueryCollection:
 
         return output_paths
 
-    def _set_feature_modules(self, feature_modules: list[ModuleType, str] | ModuleType | str | Literal["all"]) -> list[str]:  # noqa: PYI051
+    def _set_feature_modules(self, feature_modules: list[ModuleType, str] | ModuleType | str) -> list[str]:
         """Convert `feature_modules` to list[str] irrespective of input type.
 
         Raises:
