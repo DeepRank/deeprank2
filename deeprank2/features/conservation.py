@@ -21,7 +21,8 @@ def add_features(
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         pssm_row = residue.get_pssm()
         profile = np.array([pssm_row.get_conservation(amino_acid) for amino_acid in profile_amino_acid_order])

@@ -18,7 +18,8 @@ def _get_atom(chain: Chain, residue_number: int, atom_name: str) -> Atom:
             for atom in residue.atoms:
                 if atom.name == atom_name:
                     return atom
-    raise ValueError(f"Not found: chain {chain.id} residue {residue_number} atom {atom_name}")
+    msg = f"Not found: chain {chain.id} residue {residue_number} atom {atom_name}"
+    raise ValueError(msg)
 
 
 def _wrap_in_graph(edge: Edge) -> Graph:

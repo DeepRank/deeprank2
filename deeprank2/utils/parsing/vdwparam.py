@@ -42,6 +42,7 @@ class ParamParser:
             elif len(line.strip()) == 0:
                 continue
             else:
-                raise ValueError(f"Unparsable param line: {line}")
+                msg = f"Unparsable param line: {line}"
+                raise ValueError(msg)
 
         return result

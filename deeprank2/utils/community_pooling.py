@@ -87,7 +87,8 @@ def community_detection_per_batch(
             ncluster = max(cluster)
 
         else:
-            raise ValueError(f"Clustering method {method} not supported")
+            msg = f"Clustering method {method} not supported"
+            raise ValueError(msg)
     device = edge_index.device
     return torch.tensor(cluster).to(device)
 
@@ -157,7 +158,8 @@ def community_detection(
 
         return torch.tensor(index).to(device)
 
-    raise ValueError(f"Clustering method {method} not supported")
+    msg = f"Clustering method {method} not supported"
+    raise ValueError(msg)
 
 
 def community_pooling(cluster, data):

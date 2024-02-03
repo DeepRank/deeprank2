@@ -77,7 +77,8 @@ class Node:
 
         if len(feature_value.shape) != 1:
             shape_s = "x".join(feature_value.shape)
-            raise ValueError(f"Expected a 1-dimensional array for feature {feature_name}, but got {shape_s}")
+            msg = f"Expected a 1-dimensional array for feature {feature_name}, but got {shape_s}"
+            raise ValueError(msg)
 
         self.features[feature_name] = feature_value
 
@@ -344,7 +345,8 @@ class Graph:
             atoms_residues = np.array(atoms_residues)
             NodeContact = ResidueContact
         else:
-            raise TypeError("All nodes in the graph must be of the same type.")
+            msg = "All nodes in the graph must be of the same type."
+            raise TypeError(msg)
 
         positions = np.empty((len(atoms), 3))
         for atom_index, atom in enumerate(atoms):

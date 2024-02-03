@@ -12,7 +12,7 @@ def _run_assertions(graph: Graph) -> None:
     assert np.any([node.features[Nfeat.IRCTOTAL] > 0 for node in graph.nodes]), "no contacts"
 
     assert np.all(
-        [node.features[Nfeat.IRCTOTAL] == sum(node.features[IRCtype] for IRCtype in Nfeat.IRC_FEATURES[:-1]) for node in graph.nodes]
+        [node.features[Nfeat.IRCTOTAL] == sum(node.features[IRCtype] for IRCtype in Nfeat.IRC_FEATURES[:-1]) for node in graph.nodes],
     ), "incorrect total"
 
 

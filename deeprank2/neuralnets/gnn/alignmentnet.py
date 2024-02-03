@@ -151,7 +151,7 @@ class SuperGNN(nn.Module):
                     is_last_layer=(gnn_layer == (nmb_gnn_layers - 1)),
                 )
                 for gnn_layer in range(nmb_gnn_layers)
-            ]
+            ],
         )
 
     # always use this function before running the GNN layers
@@ -167,9 +167,9 @@ class SuperGNN(nn.Module):
         for layer in self.modlist:
             node_attr = layer.update_nodes(edges, edge_attr, node_attr)
         if with_output_attention:
-            representations, attention = self.modlist[-1].output(node_attr, True)  # noqa: FBT003 (boolean-positional-value-in-call)
+            representations, attention = self.modlist[-1].output(node_attr, True)  # (boolean-positional-value-in-call)
             return representations, attention
-        return self.modlist[-1].output(node_attr, True)  # noqa: FBT003 (boolean-positional-value-in-call)
+        return self.modlist[-1].output(node_attr, True)  # (boolean-positional-value-in-call)
 
 
 class AlignmentGNN(SuperGNN):

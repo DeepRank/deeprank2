@@ -45,7 +45,8 @@ class PDBStructure:
 
     def add_chain(self, chain: Chain) -> None:
         if chain.id in self._chains:
-            raise ValueError(f"Duplicate chain: {chain.id}")
+            msg = f"Duplicate chain: {chain.id}"
+            raise ValueError(msg)
         self._chains[chain.id] = chain
 
     @property

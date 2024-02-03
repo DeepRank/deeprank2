@@ -45,7 +45,7 @@ def _querycollection_tester(
                     "A": "tests/data/pssm/3C8P/3C8P.A.pdb.pssm",
                     "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
                 },
-            )
+            ),
         ] * n_queries
     elif query_type == "srv":
         queries = [
@@ -58,10 +58,11 @@ def _querycollection_tester(
                 wildtype_amino_acid=alanine,
                 variant_amino_acid=phenylalanine,
                 pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
-            )
+            ),
         ] * n_queries
     else:
-        raise ValueError("Please insert a valid type (either ppi or srv).")
+        msg = "Please insert a valid type (either ppi or srv)."
+        raise ValueError(msg)
 
     output_directory = mkdtemp()
     prefix = join(output_directory, "test-process-queries")
@@ -119,7 +120,8 @@ def _assert_correct_modules(
             except KeyError:
                 missing.append(feat)
             if missing:
-                raise KeyError(f"The following feature(s) were not created: {missing}.")
+                msg = f"The following feature(s) were not created: {missing}."
+                raise KeyError(msg)
 
         with pytest.raises(KeyError):
             _ = f5[next(iter(f5.keys()))][f"{Nfeat.NODE}/{absent}"]
@@ -261,7 +263,7 @@ def test_querycollection_duplicates_add() -> None:
                     chain_ids=[chain_id1, chain_id2],
                     targets=targets,
                     pssm_paths={chain_id1: pssm_path1, chain_id2: pssm_path2},
-                )
+                ),
             )
 
     # check id naming for all pdb files

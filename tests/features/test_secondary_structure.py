@@ -49,10 +49,10 @@ def test_secondary_structure_residue() -> None:
         node_list = [node_info for node_info in node_info_list if (node_info[0] == res[0] and node_info[1] == res[1])]
         assert len(node_list) > 0, f"no nodes detected in {res[1]} {res[0]}"
         assert np.all(
-            [np.array_equal(node_info[2], _classify_secstructure(res[2]).onehot) for node_info in node_list]
+            [np.array_equal(node_info[2], _classify_secstructure(res[2]).onehot) for node_info in node_list],
         ), f"Ground truth examples: res {res[1]} {res[0]} is not {(res[2])}."
         assert np.all(
-            [np.array_equal(node_info[2], res[3].onehot) for node_info in node_list]
+            [np.array_equal(node_info[2], res[3].onehot) for node_info in node_list],
         ), f"Ground truth examples: res {res[1]} {res[0]} is not {res[3]}."
 
 
@@ -92,4 +92,5 @@ def test_secondary_structure_atom() -> None:
         elif dssp_code in ["G", "H", "I"]:
             assert np.array_equal(node[2], SecondarySctructure.HELIX.onehot), f"Full file test: res {node[1]}{node[0]} is not a HELIX"
         else:
-            raise ValueError(f"Unexpected secondary structure type found at {node[1]}{node[0]}")
+            msg = f"Unexpected secondary structure type found at {node[1]}{node[0]}"
+            raise ValueError(msg)

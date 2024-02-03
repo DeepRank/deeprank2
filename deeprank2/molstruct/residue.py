@@ -54,7 +54,8 @@ class Residue:
         """Load pssm info linked to the residue."""
         pssm = self._chain.pssm
         if pssm is None:
-            raise FileNotFoundError(f"No pssm file found for Chain {self._chain}.")
+            msg = f"No pssm file found for Chain {self._chain}."
+            raise FileNotFoundError(msg)
         return pssm[self]
 
     @property
@@ -111,7 +112,8 @@ class Residue:
             return alphas[0].position
 
         if len(self.atoms) == 0:
-            raise ValueError(f"Cannot get the center position from {self}, because it has no atoms")
+            msg = f"Cannot get the center position from {self}, because it has no atoms"
+            raise ValueError(msg)
 
         return np.mean([atom.position for atom in self.atoms], axis=0)
 

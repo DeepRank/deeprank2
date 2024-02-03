@@ -120,7 +120,8 @@ def add_features(  # noqa: C901 (complex-structure)
                 atom = node.id
                 residue = atom.residue
             else:
-                raise TypeError(f"Unexpected node type: {type(node.id)}")
+                msg = f"Unexpected node type: {type(node.id)}"
+                raise TypeError(msg)
 
             contact_id = residue.chain.id + residue.number_string  # reformat id to be in line with residue_contacts keys
 

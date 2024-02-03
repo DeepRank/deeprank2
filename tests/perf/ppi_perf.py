@@ -69,7 +69,7 @@ if __name__ == "__main__":
                     "binary": int(float(bas[i]) <= 500),  # binary target value
                     "BA": bas[i],  # continuous target value
                 },
-            )
+            ),
         )
 
         start = time.perf_counter()

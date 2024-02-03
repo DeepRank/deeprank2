@@ -386,7 +386,8 @@ def convert_aa_nomenclature(aa: str, output_type: int | None = None) -> str:
         else:
             aa: AminoAcid = next(entry for entry in amino_acids if entry.name.lower() == aa.lower())
     except IndexError as e:
-        raise ValueError(f"{aa} is not a valid amino acid.") from e
+        msg = f"{aa} is not a valid amino acid."
+        raise ValueError(msg) from e
 
     if not output_type:
         return aa.name
@@ -394,4 +395,5 @@ def convert_aa_nomenclature(aa: str, output_type: int | None = None) -> str:
         return aa.three_letter_code
     if output_type == 1:
         return aa.one_letter_code
-    raise ValueError(f"output_type {output_type} not recognized. Must be set to None (amino acid name), 1 (one letter code), or 3 (three letter code).")
+    msg = f"output_type {output_type} not recognized. Must be set to None (amino acid name), 1 (one letter code), or 3 (three letter code)."
+    raise ValueError(msg)

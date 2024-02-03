@@ -86,15 +86,16 @@ class Trainer:
                     and that you are running on GPUs.\n
                 --> To turn CUDA off set cuda=False in Trainer.\n
                 --> Aborting the experiment \n\n'
-                """
+                """,
             )
-            raise ValueError(
-                """
+            msg = """
                 --> CUDA not detected: Make sure that CUDA is installed
                     and that you are running on GPUs.\n
                 --> To turn CUDA off set cuda=False in Trainer.\n
                 --> Aborting the experiment \n\n'
                 """
+            raise ValueError(
+                msg,
             )
         else:
             self.device = torch.device("cpu")
@@ -104,14 +105,15 @@ class Trainer:
                     --> CUDA not detected.
                         Set cuda=True in Trainer to turn CUDA on.\n
                     --> Aborting the experiment \n\n
-                    """
+                    """,
                 )
-                raise ValueError(
-                    """
+                msg = """
                     --> CUDA not detected.
                         Set cuda=True in Trainer to turn CUDA on.\n
                     --> Aborting the experiment \n\n
                     """
+                raise ValueError(
+                    msg,
                 )
 
         _log.info(f"Device set to {self.device}.")
@@ -130,9 +132,11 @@ class Trainer:
 
         if self.pretrained_model is None:
             if self.dataset_train is None:
-                raise ValueError("No training data specified. Training data is required if there is no pretrained model.")
+                msg = "No training data specified. Training data is required if there is no pretrained model."
+                raise ValueError(msg)
             if self.neuralnet is None:
-                raise ValueError("No neural network specified. Specifying a model framework is required if there is no pretrained model.")
+                msg = "No neural network specified. Specifying a model framework is required if there is no pretrained model."
+                raise ValueError(msg)
 
             self._init_from_dataset(self.dataset_train)
             self.optimizer = None
@@ -141,7 +145,8 @@ class Trainer:
             self.epoch_saved_model = None
 
             if self.target is None:
-                raise ValueError("No target set. You need to choose a target (set in the dataset) for training.")
+                msg = "No target set. You need to choose a target (set in the dataset) for training."
+                raise ValueError(msg)
 
             self._load_model()
 
@@ -160,13 +165,16 @@ class Trainer:
                     if self.dataset_test is not None:
                         self._precluster(self.dataset_test)
                 else:
-                    raise ValueError(f"Invalid node clustering method: {self.clustering_method}. Please set clustering_method to 'mcl', 'louvain' or None.")
+                    msg = f"Invalid node clustering method: {self.clustering_method}. Please set clustering_method to 'mcl', 'louvain' or None."
+                    raise ValueError(msg)
 
         else:
             if self.neuralnet is None:
-                raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
+                msg = "No neural network class found. Please add it to complete loading the pretrained model."
+                raise ValueError(msg)
             if self.dataset_test is None:
-                raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
+                msg = "No dataset_test found. Please add it to evaluate the pretrained model."
+                raise ValueError(msg)
             if self.dataset_train is not None:
                 self.dataset_train = None
                 _log.warning("Pretrained model loaded: dataset_train will be ignored.")
@@ -231,7 +239,8 @@ class Trainer:
             self.means = None
             self.devs = None
         else:
-            raise TypeError(f"Incorrect `dataset` type provided: {type(dataset)}. Please provide a `GridDataset` or `GraphDataset` object instead.")
+            msg = f"Incorrect `dataset` type provided: {type(dataset)}. Please provide a `GridDataset` or `GraphDataset` object instead."
+            raise TypeError(msg)
 
         self.target = dataset.target
         self.target_transform = dataset.target_transform
@@ -256,11 +265,13 @@ class Trainer:
         if dataset_train is None:
             # only check the test dataset
             if dataset_test is None:
-                raise ValueError("Please provide at least a train or test dataset")
+                msg = "Please provide at least a train or test dataset"
+                raise ValueError(msg)
         else:
             # Make sure train dataset has valid type
             if not isinstance(dataset_train, GraphDataset) and not isinstance(dataset_train, GridDataset):
-                raise TypeError(f"train dataset is not the right type {type(dataset_train)}. Make sure it's either GraphDataset or GridDataset")
+                msg = f"train dataset is not the right type {type(dataset_train)}. Make sure it's either GraphDataset or GridDataset"
+                raise TypeError(msg)
 
             if dataset_val is not None:
                 self._check_dataset_value(
@@ -285,11 +296,13 @@ class Trainer:
         """Check valid/test dataset settings."""
         # Check train_source parameter in valid/test is set.
         if dataset_check.train_source is None:
-            raise ValueError(f"{type_dataset} dataset has train_source parameter set to None. Make sure to set it as a valid training data source.")
+            msg = f"{type_dataset} dataset has train_source parameter set to None. Make sure to set it as a valid training data source."
+            raise ValueError(msg)
         # Check train_source parameter in valid/test is equivalent to train which passed to Trainer.
         if dataset_check.train_source != dataset_train:
+            msg = f"{type_dataset} dataset has different train_source parameter from Trainer. Make sure to assign equivalent train_source in Trainer."
             raise ValueError(
-                f"{type_dataset} dataset has different train_source parameter from Trainer. Make sure to assign equivalent train_source in Trainer."
+                msg,
             )
 
     def _load_pretrained_model(self) -> None:
@@ -383,10 +396,13 @@ class Trainer:
         # check for compatibility
         for output_exporter in self._output_exporters:
             if not output_exporter.is_compatible_with(self.output_shape, target_shape):
-                raise ValueError(
+                msg = (
                     f"Output exporter of type {type(output_exporter)}\n\t"
                     f"is not compatible with output shape {self.output_shape}\n\t"
                     f"and target shape {target_shape}."
+                )
+                raise ValueError(
+                    msg,
                 )
 
     def configure_optimizers(
@@ -449,7 +465,7 @@ class Trainer:
                 _log.warning(
                     f"The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t"
                     "You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t"
-                    "This will likely cause other errors or exceptions down the line."
+                    "This will likely cause other errors or exceptions down the line.",
                 )
             else:
                 invalid_loss_error = (
@@ -542,7 +558,8 @@ class Trainer:
                 If None, the model is not saved. Defaults to 'model.pth.tar'.
         """
         if self.dataset_train is None:
-            raise ValueError("No training dataset provided.")
+            msg = "No training dataset provided."
+            raise ValueError(msg)
 
         self.data_type = type(self.dataset_train)
         self.batch_size_train = batch_size
@@ -571,7 +588,7 @@ class Trainer:
             _log.info("No validation set provided\n")
             _log.warning(
                 "Training data will be used both for learning and model selection, which may lead to overfitting.\n"
-                "It is usually preferable to use a validation set during the training phase."
+                "It is usually preferable to use a validation set during the training phase.",
             )
 
         # Assign weights to each class
@@ -618,7 +635,8 @@ class Trainer:
             self._eval(self.train_loader, 0, "training")
             if validate:
                 if self.valid_loader is None:
-                    raise ValueError("No validation dataset provided.")
+                    msg = "No validation dataset provided."
+                    raise ValueError(msg)
                 self._eval(self.valid_loader, 0, "validation")
 
             # Loop over epochs
@@ -661,7 +679,7 @@ class Trainer:
                 if not saved_model:
                     warnings.warn(
                         "A model has been saved but the validation and/or the training losses were NaN;\n\t"
-                        "try to increase the cutoff distance during the data processing or the number of data points during the training."
+                        "try to increase the cutoff distance during the data processing or the number of data points during the training.",
                     )
 
         # Now that the training loop is over, save the model
@@ -824,16 +842,22 @@ class Trainer:
             target = torch.tensor([self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target])
             if isinstance(self.lossfunction, nn.BCELoss | nn.BCEWithLogitsLoss):
                 # # pred must be in (0,1) range and target must be float with same shape as pred
-                raise ValueError(
+                msg = (
                     "BCELoss and BCEWithLogitsLoss are currently not supported.\n\t"
                     "For further details see: https://github.com/DeepRank/deeprank2/issues/318"
                 )
+                raise ValueError(
+                    msg,
+                )
 
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
-                raise ValueError(
+                msg = (
                     f"{self.lossfunction} is currently not supported.\n\t"
                     f"Supported loss functions for classification: {losses.classification_tested}.\n\t"
                     "Implementation of other loss functions requires adaptation of Trainer._format_output."
+                )
+                raise ValueError(
+                    msg,
                 )
 
         elif self.task == targets.REGRESS:
@@ -859,7 +883,8 @@ class Trainer:
                         Defaults to 0.
         """
         if (not self.pretrained_model) and (not self.model_load_state_dict):
-            raise ValueError("No pretrained model provided and no training performed. Please provide a pretrained model or train the model before testing.")
+            msg = "No pretrained model provided and no training performed. Please provide a pretrained model or train the model before testing."
+            raise ValueError(msg)
 
         self.batch_size_test = batch_size
 
@@ -875,7 +900,8 @@ class Trainer:
             _log.info("Testing set loaded\n")
         else:
             _log.error("No test dataset provided.")
-            raise ValueError("No test dataset provided.")
+            msg = "No test dataset provided."
+            raise ValueError(msg)
 
         with self._output_exporters:
             # Run test
@@ -991,12 +1017,15 @@ def _divide_dataset(
     elif isinstance(splitsize, int):
         n_split = splitsize
     else:
-        raise TypeError(f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
+        msg = f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)"
+        raise TypeError(msg)
 
     # raise exception if no training data or negative validation size
     if n_split >= full_size or n_split < 0:
+        msg = f"Invalid Split size: {n_split}.\n"
+        f"Split size must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)"
         raise ValueError(
-            f"Invalid splitsize: {n_split}. splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)"
+            msg,
         )
 
     if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint

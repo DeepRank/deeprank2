@@ -24,7 +24,8 @@ def handle_sigint(sig, frame) -> None:  # noqa: ARG001, ANN001 (unused argument,
 
 
 def handle_timeout(sig, frame) -> NoReturn:  # noqa: ARG001, ANN001 (unused argument, missing type hint)
-    raise TimeoutError("Timed out!")
+    msg = "Timed out!"
+    raise TimeoutError(msg)
 
 
 def space_if_none(value: str) -> str:
@@ -51,7 +52,8 @@ def add_features(
         surface = get_surface(bio_model)
         signal.alarm(0)
     except TimeoutError as e:
-        raise TimeoutError("Bio.PDB.ResidueDepth.get_surface timed out.") from e
+        msg = "Bio.PDB.ResidueDepth.get_surface timed out."
+        raise TimeoutError(msg) from e
 
     # These can only be calculated per residue, not per atom.
     # So for atomic graphs, every atom gets its residue's value.
@@ -63,7 +65,8 @@ def add_features(
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         bio_residue = bio_model[residue.chain.id][residue.number]
         node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)

@@ -47,18 +47,21 @@ def add_target(  # noqa: C901 (complex-structure)
     elif isinstance(graph_path, list):
         graphs = graph_path
     else:
-        raise TypeError("Incorrect input passed.")
+        msg = "Incorrect input passed."
+        raise TypeError(msg)
 
     for hdf5 in graphs:
         print(hdf5)
         if not os.path.isfile(hdf5):
-            raise FileNotFoundError(f"File {hdf5} not found.")
+            msg = f"File {hdf5} not found."
+            raise FileNotFoundError(msg)
 
         try:
             f5 = h5py.File(hdf5, "a")
             for model in target_dict:
                 if model not in f5:
-                    raise ValueError(f"{hdf5} does not contain an entry named {model}.")  # noqa: TRY301 (raise-within-try)
+                    msg = f"{hdf5} does not contain an entry named {model}."
+                    raise ValueError(msg)  # noqa: TRY301 (raise-within-try)
                 try:
                     model_gp = f5[model]
                     if targets.VALUES not in model_gp:

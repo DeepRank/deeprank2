@@ -27,7 +27,8 @@ def add_features(
             node.features[Nfeat.PDBOCCUPANCY] = atom.occupancy
             node.features[Nfeat.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
         node.features[Nfeat.RESCHARGE] = residue.amino_acid.charge

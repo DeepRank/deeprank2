@@ -129,7 +129,7 @@ if __name__ == "__main__":
                 targets={"binary": targets[i]},
                 radius=radius,
                 distance_cutoff=distance_cutoff,
-            )
+            ),
         )
 
         start = time.perf_counter()

@@ -110,7 +110,8 @@ class AminoAcid:
     @property
     def onehot(self) -> NDArray:
         if self._index is None:
-            raise ValueError(f"Amino acid {self._name} index is not set, thus no onehot can be computed.")
+            msg = f"Amino acid {self._name} index is not set, thus no onehot can be computed."
+            raise ValueError(msg)
         # 20 canonical amino acids
         # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
         a = np.zeros(20)

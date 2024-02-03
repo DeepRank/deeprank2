@@ -22,4 +22,5 @@ def test_all_different_onehot() -> None:
             if (aa1 in EXCEPTIONS[0] and aa2 in EXCEPTIONS[0]) or (aa1 in EXCEPTIONS[1] and aa2 in EXCEPTIONS[1]):
                 assert np.all(aa1.onehot == aa2.onehot)
             else:
-                raise AssertionError(f"One-hot index {aa1.index} is occupied by both {aa1} and {aa2}") from e
+                msg = f"One-hot index {aa1.index} is occupied by both {aa1} and {aa2}"
+                raise AssertionError(msg) from e

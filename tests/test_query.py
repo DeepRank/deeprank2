@@ -34,7 +34,8 @@ def _check_graph_makes_sense(
 
     for edge in g.edges:
         if edge.id.item1 == edge.id.item2:
-            raise ValueError(f"an edge pairs {edge.id.item1} with itself")
+            msg = f"an edge pairs {edge.id.item1} with itself"
+            raise ValueError(msg)
 
     assert not g.has_nan()
 
@@ -285,7 +286,7 @@ def test_augmentation() -> None:
                 "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
             },
             targets={targets.BINARY: 0},
-        )
+        ),
     )
 
     qc.add(
@@ -298,7 +299,7 @@ def test_augmentation() -> None:
                 "B": "tests/data/pssm/3C8P/3C8P.B.pdb.pssm",
             },
             targets={targets.BINARY: 0},
-        )
+        ),
     )
 
     qc.add(
@@ -312,7 +313,7 @@ def test_augmentation() -> None:
             variant_amino_acid=aa.alanine,
             pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
             targets={targets.BINARY: 0},
-        )
+        ),
     )
 
     qc.add(
@@ -327,7 +328,7 @@ def test_augmentation() -> None:
             pssm_paths={"A": "tests/data/pssm/101M/101M.A.pdb.pssm"},
             targets={targets.BINARY: 0},
             influence_radius=3.0,
-        )
+        ),
     )
 
     augmentation_count = 3

@@ -169,7 +169,8 @@ def _get_residue_from_key(
     for residue in chain.residues:
         if residue.number == residue_number and residue.amino_acid is not None and residue.amino_acid.three_letter_code == residue_name:
             return residue
-    raise ValueError(f"Residue ({residue_key}) not found in {structure.id}.")
+    msg = f"Residue ({residue_key}) not found in {structure.id}."
+    raise ValueError(msg)
 
 
 def get_surrounding_residues(

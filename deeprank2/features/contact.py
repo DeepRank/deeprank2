@@ -90,7 +90,8 @@ def add_features(
             for atom in contact.residue1.atoms + contact.residue2.atoms:
                 all_atoms.add(atom)
     else:
-        raise TypeError(f"Unexpected edge type: {type(graph.edges[0].id)}")
+        msg = f"Unexpected edge type: {type(graph.edges[0].id)}"
+        raise TypeError(msg)
 
     all_atoms = list(all_atoms)
     atom_dict = {atom: i for i, atom in enumerate(all_atoms)}

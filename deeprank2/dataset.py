@@ -104,9 +104,7 @@ class DeeprankDataset(Dataset):
                         f"to define a {data_type}-class validation/testing dataset. Please provide a valid DeepRank2 \n\t"
                         f"model trained with {data_type}-class type data, or define the dataset using the appropriate class."
                     )
-                    raise TypeError(
-                        msg,
-                    )
+                    raise TypeError(msg)
                 if data_type is GraphDataset:
                     self.train_means = data["means"]
                     self.train_devs = data["devs"]
@@ -128,6 +126,9 @@ class DeeprankDataset(Dataset):
             msg = (
                 f"The train data provided is invalid: {type(self.train_source)}.\n\t"
                 f"Please provide a valid training {data_type} or the path to a valid DeepRank2 pre-trained model."
+            )
+            raise TypeError(
+                msg,
             )
             raise TypeError(
                 msg,
@@ -654,6 +655,9 @@ class GridDataset(DeeprankDataset):
             raise ValueError(
                 msg,
             )
+            raise ValueError(
+                msg,
+            )
 
     def get(self, idx: int) -> Data:
         """Gets one grid item from its unique index.
@@ -695,9 +699,7 @@ class GridDataset(DeeprankDataset):
                     y = torch.sigmoid(torch.log(y))
                 elif self.task is not targets.REGRESS and self.target_transform is True:
                     msg = f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
-                    raise ValueError(
-                        msg,
-                    )
+                    raise ValueError(msg)
             else:
                 y = None
                 possible_targets = grp[targets.VALUES].keys()
@@ -705,6 +707,9 @@ class GridDataset(DeeprankDataset):
                     msg = (
                         f"Target {self.target} missing in entry {entry_name} in file {hdf5_path}, possible targets are {possible_targets}.\n\t"
                         "Use the query class to add more target values to input data."
+                    )
+                    raise ValueError(
+                        msg,
                     )
                     raise ValueError(
                         msg,
@@ -939,6 +944,9 @@ class GraphDataset(DeeprankDataset):
                                     raise ValueError(
                                         msg,
                                     )
+                                    raise ValueError(
+                                        msg,
+                                    )
 
                         if vals.ndim == 1:  # features with only one channel
                             vals = vals.reshape(-1, 1)
@@ -998,6 +1006,9 @@ class GraphDataset(DeeprankDataset):
                                     raise ValueError(
                                         msg,
                                     )
+                                    raise ValueError(
+                                        msg,
+                                    )
 
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
@@ -1024,9 +1035,7 @@ class GraphDataset(DeeprankDataset):
                     y = torch.sigmoid(torch.log(y))
                 elif self.task is not targets.REGRESS and self.target_transform is True:
                     msg = f'Sigmoid transformation not possible for {self.task} tasks. Please change `task` to "regress" or set `target_transform` to `False`.'
-                    raise ValueError(
-                        msg,
-                    )
+                    raise ValueError(msg)
 
             else:
                 y = None
@@ -1035,6 +1044,9 @@ class GraphDataset(DeeprankDataset):
                     msg = (
                         f"Target {self.target} missing in entry {entry_name} in file {fname}, possible targets are {possible_targets}.\n\t"
                         "Use the query class to add more target values to input data."
+                    )
+                    raise ValueError(
+                        msg,
                     )
                     raise ValueError(
                         msg,
@@ -1139,6 +1151,9 @@ class GraphDataset(DeeprankDataset):
                 "Check feature_modules passed to the preprocess function.\n\t"
                 "Probably, the feature wasn't generated during the preprocessing step.\n\t"
                 f"{miss_node_error}{miss_edge_error}"
+            )
+            raise ValueError(
+                msg,
             )
             raise ValueError(
                 msg,

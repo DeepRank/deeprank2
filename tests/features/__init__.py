@@ -16,7 +16,8 @@ def _get_residue(chain: Chain, number: int) -> Residue:
     for residue in chain.residues:
         if residue.number == number:
             return residue
-    raise ValueError(f"Not found: {number}")
+    msg = f"Not found: {number}"
+    raise ValueError(msg)
 
 
 def build_testgraph(  # noqa: C901 (complex-structure)
@@ -73,7 +74,8 @@ def build_testgraph(  # noqa: C901 (complex-structure)
                 for atom in residue2.atoms:
                     nodes.add(atom)
             else:
-                raise TypeError('detail must be "atom" or "residue"')
+                msg = 'detail must be "atom" or "residue"'
+                raise TypeError(msg)
 
         return Graph.build_graph(list(nodes), structure.id, max_edge_length), None
 
@@ -99,4 +101,5 @@ def build_testgraph(  # noqa: C901 (complex-structure)
     if detail == "atom":
         atoms = {atom for residue in surrounding_residues for atom in residue.atoms}
         return Graph.build_graph(list(atoms), structure.id, max_edge_length), SingleResidueVariant(residue, variant)
-    raise TypeError('detail must be "atom" or "residue"')
+    msg = 'detail must be "atom" or "residue"'
+    raise TypeError(msg)

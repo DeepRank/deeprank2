@@ -16,7 +16,8 @@ def _find_residue_node(
         residue = node.id
         if residue.chain.id == chain_id and residue.number == residue_number:
             return node
-    raise ValueError(f"Not found: {chain_id} {residue_number}")
+    msg = f"Not found: {chain_id} {residue_number}"
+    raise ValueError(msg)
 
 
 def _find_atom_node(
@@ -29,7 +30,8 @@ def _find_atom_node(
         atom = node.id
         if atom.residue.chain.id == chain_id and atom.residue.number == residue_number and atom.name == atom_name:
             return node
-    raise ValueError(f"Not found: {chain_id} {residue_number} {atom_name}")
+    msg = f"Not found: {chain_id} {residue_number} {atom_name}"
+    raise ValueError(msg)
 
 
 def test_bsa_residue() -> None:

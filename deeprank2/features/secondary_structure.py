@@ -100,11 +100,14 @@ def _get_secstructure(pdb_path: str) -> dict:
         dssp = DSSP(model, pdb_path, dssp="mkdssp")
     except Exception as e:  # noqa: BLE001 (blind-except), namely: # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
         pdb_format_link = "https://www.wwpdb.org/documentation/file-format-content/format33/sect1.html#Order"
-        raise DSSPError(
+        msg = (
             f"DSSP has raised the following exception: {e}.\n\t"
             f"This is likely due to an improrperly formatted pdb file: {pdb_path}.\n\t"
             f"See {pdb_format_link} for guidance on how to format your pdb files.\n\t"
             "Alternatively, turn off secondary_structure feature module during QueryCollection.process()."
+        )
+        raise DSSPError(
+            msg,
         ) from e
 
     chain_ids = [dssp_key[0] for dssp_key in dssp.property_keys]
@@ -135,7 +138,8 @@ def add_features(
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         chain_id = residue.chain.id
         res_num = residue.number
@@ -143,6 +147,7 @@ def add_features(
         try:
             node.features[Nfeat.SECSTRUCT] = _classify_secstructure(sec_structure_features[chain_id][res_num]).onehot
         except AttributeError as e:
+            msg = f"Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) detected on chain {chain_id} residues {res_num}."
             raise ValueError(
-                f"Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) detected on chain {chain_id} residues {res_num}."
+                msg,
             ) from e
