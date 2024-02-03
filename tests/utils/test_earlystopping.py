@@ -18,7 +18,7 @@ def base_earlystopper(
 
     for ep, loss in enumerate(dummy_val_losses):
         # check early stopping criteria
-        print(f"Epoch #{ep}", end=": ")
+        print(f"Epoch #{ep}", end=": ")  # noqa:T201
         early_stopping(ep, loss, dummy_train_losses[ep])
         if early_stopping.early_stop:
             break

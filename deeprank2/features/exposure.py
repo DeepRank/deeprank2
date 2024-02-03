@@ -19,7 +19,7 @@ _log = logging.getLogger(__name__)
 
 
 def handle_sigint(sig, frame) -> None:  # noqa: ARG001, ANN001 (unused argument, missing type hint)
-    print("SIGINT received, terminating.")
+    _log.info("SIGINT received, terminating.")
     sys.exit()
 
 

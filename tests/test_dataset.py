@@ -65,7 +65,7 @@ def _compute_features_manually(
                 for entry_name in entry_names
             ]
         else:
-            print(f"Feat {feat} not present in the file.")
+            warnings.warn(f"Feat {feat} not present in the file.")
 
         # apply transformation
         if transform:

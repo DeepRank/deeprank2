@@ -629,7 +629,7 @@ class TestTrainer(unittest.TestCase):
         ]
 
         for t in test_cases:
-            print(t)
+            print(t)  # noqa: T201, print in case it fails we can see on which one it failed
             with pytest.raises(ValueError):
                 _divide_dataset(
                     dataset=GraphDataset(hdf5_path=hdf5),

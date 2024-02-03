@@ -27,7 +27,6 @@ def test_secondary_structure_residue() -> None:
 
     # Create a list of node information (residue number, chain ID, and secondary structure features)
     node_info_list = [[node.id.number, node.id.chain.id, node.features[Nfeat.SECSTRUCT]] for node in graph.nodes]
-    print(node_info_list)
 
     # Check that all nodes have exactly 1 secondary structure type
     assert np.all([np.sum(node.features[Nfeat.SECSTRUCT]) == 1.0 for node in graph.nodes]), "one hot encoding error"

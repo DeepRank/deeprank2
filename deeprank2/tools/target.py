@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 
 import h5py
@@ -7,6 +8,7 @@ from pdb2sql import StructureSimilarity
 
 from deeprank2.domain import targetstorage as targets
 
+_log = logging.getLogger(__name__)
 MIN_IRMS_FOR_BINARY = 4
 
 
@@ -51,7 +53,7 @@ def add_target(  # noqa: C901 (complex-structure)
         raise TypeError(msg)
 
     for hdf5 in graphs:
-        print(hdf5)
+        _log.info(hdf5)
         if not os.path.isfile(hdf5):
             msg = f"File {hdf5} not found."
             raise FileNotFoundError(msg)
@@ -73,11 +75,11 @@ def add_target(  # noqa: C901 (complex-structure)
                     # Create the target
                     group.create_dataset(target_name, data=target_dict[model])
                 except BaseException:  # noqa: BLE001 (blind-except)
-                    print(f"no graph for {model}")
+                    _log.info(f"no graph for {model}")
             f5.close()
 
         except BaseException:  # noqa: BLE001 (blind-except)
-            print(f"no graph for {hdf5}")
+            _log.info(f"no graph for {hdf5}")
 
 
 def compute_ppi_scores(

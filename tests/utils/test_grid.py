@@ -19,7 +19,7 @@ def test_grid_orientation() -> None:
         target_center = grid_points_group["center"][()]
 
     for resolution in VALID_RESOLUTIONS:
-        print(f"Testing for {resolution} level grids.")  # in case pytest fails, this will be printed.
+        print(f"Testing for {resolution} level grids.")  # noqa:T201; in case pytest fails, this will be printed.
         query = ProteinProteinInterfaceQuery(
             pdb_path="tests/data/pdb/1ak4/1ak4.pdb",
             resolution=resolution,
