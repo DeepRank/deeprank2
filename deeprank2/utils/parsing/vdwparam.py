@@ -1,4 +1,4 @@
-class VanderwaalsParam:
+class VanderwaalsParam:  # noqa: D101
     def __init__(
         self,
         epsilon_main: float,
@@ -15,7 +15,7 @@ class VanderwaalsParam:
         return f"{self.epsilon_main}, {self.sigma_main}, {self.epsilon_14}, {self.sigma_14}"
 
 
-class ParamParser:
+class ParamParser:  # noqa: D101
     @staticmethod
     def parse(file_: str) -> dict[str, VanderwaalsParam]:
         result = {}

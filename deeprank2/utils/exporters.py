@@ -177,16 +177,17 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
 
 
 class ScatterPlotExporter(OutputExporter):
+    """An output exporter that can make scatter plots, containing every single data point.
+
+    On the X-axis: targets values
+    On the Y-axis: output values
+
+    Args:
+        directory_path (str): Where to store the plots.
+        epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
+    """
+
     def __init__(self, directory_path: str, epoch_interval: int = 1):
-        """An output exporter that can make scatter plots, containing every single data point.
-
-        On the X-axis: targets values
-        On the Y-axis: output values
-
-        Args:
-            directory_path (str): Where to store the plots.
-            epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
-        """
         super().__init__(directory_path)
         self._epoch_interval = epoch_interval
 

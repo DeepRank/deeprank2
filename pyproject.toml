@@ -93,6 +93,7 @@ ignore = [
     "N",       # naming conventions
     "PLR0912", # Too many branches,
     "PLR0913", # Too many arguments in function definition
+    "D102",    # Missing docstring in public method
     # Unwanted
     "FBT",    # Using boolean arguments
     "ANN101", # Missing type annotation for `self` in method
@@ -103,28 +104,25 @@ ignore = [
     "S311",   # insecure random generators
     "PT011",  # pytest-raises-too-broad
     "SIM108", # Use ternary operator
-    # Missing docstrings Documentation
+    # Unwanted docstrings
     "D100", # Missing module docstring
-    "D101", # Missing docstring in public class
-    "D102", # Missing docstring in public method
-    "D103", # Missing docstring in public function
     "D104", # Missing public package docstring
     "D105", # Missing docstring in magic method
     "D107", # Missing docstring in `__init__`
-    # Rules irrelevant to the Google style
+    # Docstring rules irrelevant to the Google style
     "D203", # 1 blank line required before class docstring
-    "D204",
+    "D204", # 1 blank line required after class docstring
     "D212", # Multi-line docstring summary should start at the first line
     "D213", # Multi-line docstring summary should start at the second line
-    "D215",
-    "D400",
-    "D401",
+    "D215", # Section underline is over-indented 
+    "D400", # First line should end with a period (clashes with D415:First line should end with a period, question mark, or exclamation point) 
+    "D401", # First line of docstring should be in imperative mood
     "D404", # First word of the docstring should not be This
-    "D406",
-    "D407",
-    "D408",
-    "D409",
-    "D413",
+    "D406", # Section name should end with a newline
+    "D407", # Missing dashed underline after section 
+    "D408", # Section underline should be in the line following the section's name
+    "D409", # Section underline should match the length of its name
+    "D413", # Missing blank line after last section 
 ]
 
 # Allow autofix for all enabled rules.
@@ -135,6 +133,9 @@ unfixable = ["F401"] # unused imports (should not disappear while editing)
 "tests/*" = [
     "S101",    # Use of `assert` detected
     "PLR2004", # Magic value used in comparison
+    "D101",    # Missing class docstring
+    "D102",    # Missing docstring in public method
+    "D103",    # Missing docstring in public function
 ]
 "docs/*" = ["ALL"]
 "tests/perf/*" = ["T201"] # Use of print statements

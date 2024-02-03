@@ -8,13 +8,14 @@ from deeprank2.molstruct.residue import Residue
 
 
 class Pair:
-    def __init__(self, item1: Any, item2: Any):  # noqa: ANN401
-        """A hashable, comparable object for any set of two inputs where order doesn't matter.
+    """A hashable, comparable object for any set of two inputs where order doesn't matter.
 
-        Args:
-            item1 (Any object): The pair's first object, must be convertable to string.
-            item2 (Any object): The pair's second object, must be convertable to string.
-        """
+    Args:
+        item1 (Any object): The pair's first object, must be convertable to string.
+        item2 (Any object): The pair's second object, must be convertable to string.
+    """
+
+    def __init__(self, item1: Any, item2: Any):  # noqa: ANN401
         self.item1 = item1
         self.item2 = item2
 

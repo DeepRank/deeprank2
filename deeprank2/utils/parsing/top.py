@@ -5,7 +5,7 @@ from typing import Any
 logging.getLogger(__name__)
 
 
-class TopRowObject:
+class TopRowObject:  # noqa: D101
     def __init__(
         self,
         residue_name: str,
@@ -20,7 +20,7 @@ class TopRowObject:
         return self.kwargs[key]
 
 
-class TopParser:
+class TopParser:  # noqa: D101
     _VAR_PATTERN = re.compile(r"([^\s]+)\s*=\s*([^\s\(\)]+|\(.*\))")
     _LINE_PATTERN = re.compile(r"^([A-Z0-9]{3})\s+atom\s+([A-Z0-9]{1,4})\s+(.+)\s+end\s*(\s+\!\s+[ _A-Za-z0-9]+)?$")
     _NUMBER_PATTERN = re.compile(r"\-?[0-9]+(\.[0-9]+)?")

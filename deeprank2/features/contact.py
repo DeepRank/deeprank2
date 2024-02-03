@@ -72,7 +72,7 @@ def _get_nonbonded_energy(
     return E_elec, E_vdw
 
 
-def add_features(
+def add_features(  # noqa:D103
     pdb_path: str,  # noqa: ARG001
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001

@@ -23,7 +23,7 @@ from torch.autograd import Variable
 # ----------------------------------------------------------------------
 
 
-class CnnRegression(torch.nn.Module):
+class CnnRegression(torch.nn.Module):  # noqa: D101
     def __init__(self, num_features: int, box_shape: tuple[int]):
         super().__init__()
 
@@ -76,7 +76,7 @@ class CnnRegression(torch.nn.Module):
 # ----------------------------------------------------------------------
 
 
-class CnnClassification(torch.nn.Module):
+class CnnClassification(torch.nn.Module):  # noqa: D101
     def __init__(self, num_features, box_shape):
         super().__init__()
 

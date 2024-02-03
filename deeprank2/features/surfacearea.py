@@ -12,7 +12,7 @@ freesasa.setVerbosity(freesasa.nowarnings)
 logging.getLogger(__name__)
 
 
-def add_sasa(pdb_path: str, graph: Graph) -> None:
+def add_sasa(pdb_path: str, graph: Graph) -> None:  # noqa:D103
     structure = freesasa.Structure(pdb_path)
     result = freesasa.calc(structure)
 
@@ -38,7 +38,7 @@ def add_sasa(pdb_path: str, graph: Graph) -> None:
         node.features[Nfeat.SASA] = area
 
 
-def add_bsa(graph: Graph) -> None:
+def add_bsa(graph: Graph) -> None:  # noqa:D103
     sasa_complete_structure = freesasa.Structure()
     sasa_chain_structures = {}
 

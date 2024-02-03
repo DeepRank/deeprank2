@@ -7,7 +7,7 @@ from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 
-def add_features(
+def add_features(  # noqa:D103
     pdb_path: str,  # noqa: ARG001
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,

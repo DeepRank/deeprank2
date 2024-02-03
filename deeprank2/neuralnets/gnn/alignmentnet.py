@@ -6,7 +6,7 @@ from torch import nn
 __author__ = "Daniel-Tobias Rademaker"
 
 
-class GNNLayer(nn.Module):
+class GNNLayer(nn.Module):  # noqa: D101
     def __init__(
         self,
         nmb_edge_projection,
@@ -104,7 +104,7 @@ class GNNLayer(nn.Module):
         return output
 
 
-class SuperGNN(nn.Module):
+class SuperGNN(nn.Module):  # noqa: D101
     def __init__(
         self,
         nmb_edge_attr,
@@ -172,7 +172,7 @@ class SuperGNN(nn.Module):
         return self.modlist[-1].output(node_attr, True)  # (boolean-positional-value-in-call)
 
 
-class AlignmentGNN(SuperGNN):
+class AlignmentGNN(SuperGNN):  # noqa: D101
     def __init__(
         self,
         nmb_edge_attr,

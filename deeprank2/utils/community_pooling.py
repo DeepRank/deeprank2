@@ -14,13 +14,13 @@ from torch_scatter import scatter_max, scatter_mean
 # ruff: noqa: ANN001, ANN201 (missing type hints and return types)
 
 
-def plot_graph(graph, cluster) -> None:
+def plot_graph(graph, cluster) -> None:  # noqa:D103
     pos = nx.spring_layout(graph, iterations=200)
     nx.draw(graph, pos, node_color=cluster)
     plt.show()
 
 
-def get_preloaded_cluster(cluster, batch):
+def get_preloaded_cluster(cluster, batch):  # noqa:D103
     nbatch = torch.max(batch) + 1
     for ib in range(1, nbatch):
         cluster[batch == ib] += torch.max(cluster[batch == ib - 1]) + 1

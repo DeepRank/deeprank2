@@ -18,23 +18,23 @@ from deeprank2.utils.graph import Graph
 _log = logging.getLogger(__name__)
 
 
-def handle_sigint(sig, frame) -> None:  # noqa: ARG001, ANN001
+def handle_sigint(sig, frame) -> None:  # noqa: ARG001, ANN001, D103
     _log.info("SIGINT received, terminating.")
     sys.exit()
 
 
-def handle_timeout(sig, frame) -> NoReturn:  # noqa: ARG001, ANN001
+def handle_timeout(sig, frame) -> NoReturn:  # noqa: ARG001, ANN001, D103
     msg = "Timed out!"
     raise TimeoutError(msg)
 
 
-def space_if_none(value: str) -> str:
+def space_if_none(value: str) -> str:  # noqa:D103
     if value is None:
         return " "
     return value
 
 
-def add_features(
+def add_features(  # noqa:D103
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001

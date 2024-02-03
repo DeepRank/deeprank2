@@ -26,6 +26,33 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer:
+    """Class from which the network is trained, evaluated and tested.
+
+    Args:
+        neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+            It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
+            in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
+            More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+            Defaults to None.
+        dataset_train (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Training set used during training.
+            Can't be None if pretrained_model is also None. Defaults to None.
+        dataset_val (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Evaluation set used during training.
+            If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
+            Defaults to None.
+        dataset_test (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Independent evaluation set. Defaults to None.
+        val_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+            Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to None (in _divide_dataset function).
+        test_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
+            Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to None.
+        class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
+        pretrained_model (str | None, optional): Path to pre-trained model. Defaults to None.
+        cuda (bool, optional): Whether to use CUDA. Defaults to False.
+        ngpu (int, optional): Number of GPU to be used. Defaults to 0.
+        output_exporters (list[OutputExporter] | None, optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
+            over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+            Defaults to None.
+    """
+
     def __init__(  # noqa: PLR0915, C901
         self,
         neuralnet: nn.Module = None,
@@ -40,32 +67,6 @@ class Trainer:
         ngpu: int = 0,
         output_exporters: list[OutputExporter] | None = None,
     ):
-        """Class from which the network is trained, evaluated and tested.
-
-        Args:
-            neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
-                It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
-                in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
-                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
-                Defaults to None.
-            dataset_train (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Training set used during training.
-                Can't be None if pretrained_model is also None. Defaults to None.
-            dataset_val (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Evaluation set used during training.
-                If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
-                Defaults to None.
-            dataset_test (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Independent evaluation set. Defaults to None.
-            val_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
-                Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to None (in _divide_dataset function).
-            test_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
-                Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to None.
-            class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
-            pretrained_model (str | None, optional): Path to pre-trained model. Defaults to None.
-            cuda (bool, optional): Whether to use CUDA. Defaults to False.
-            ngpu (int, optional): Number of GPU to be used. Defaults to 0.
-            output_exporters (list[OutputExporter] | None, optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
-                over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
-                Defaults to None.
-        """
         self.neuralnet = neuralnet
         self.pretrained_model = pretrained_model
 

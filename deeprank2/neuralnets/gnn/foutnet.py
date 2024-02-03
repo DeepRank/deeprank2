@@ -72,7 +72,7 @@ class FoutLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class FoutNet(torch.nn.Module):
+class FoutNet(torch.nn.Module):  # noqa: D101
     def __init__(
         self,
         input_shape,

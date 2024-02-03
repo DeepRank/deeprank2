@@ -21,6 +21,22 @@ class Polarity(Enum):
 
 
 class AminoAcid:
+    """An amino acid represents the type of `Residue` in a `PDBStructure`.
+
+    Args:
+        name (str): Full name of the amino acid.
+        three_letter_code (str): Three-letter code of the amino acid (as in PDB).
+        one_letter_code (str): One-letter of the amino acid (as in fasta).
+        charge (int): Charge of the amino acid.
+        polarity (:class:`Polarity`): The polarity of the amino acid.
+        size (int): The number of non-hydrogen atoms in the side chain.
+        mass (float): Average residue mass (i.e. mass of amino acid - H20) in Daltons.
+        pI (float): Isolectric point; pH at which the molecule has no net electric charge.
+        hydrogen_bond_donors (int): Number of hydrogen bond donors.
+        hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
+        index (int): The rank of the amino acid, used for computing one-hot encoding.
+    """
+
     def __init__(
         self,
         name: str,
@@ -35,21 +51,6 @@ class AminoAcid:
         hydrogen_bond_acceptors: int,
         index: int,
     ):
-        """An amino acid represents the type of `Residue` in a `PDBStructure`.
-
-        Args:
-            name (str): Full name of the amino acid.
-            three_letter_code (str): Three-letter code of the amino acid (as in PDB).
-            one_letter_code (str): One-letter of the amino acid (as in fasta).
-            charge (int): Charge of the amino acid.
-            polarity (:class:`Polarity`): The polarity of the amino acid.
-            size (int): The number of non-hydrogen atoms in the side chain.
-            mass (float): Average residue mass (i.e. mass of amino acid - H20) in Daltons.
-            pI (float): Isolectric point; pH at which the molecule has no net electric charge.
-            hydrogen_bond_donors (int): Number of hydrogen bond donors.
-            hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
-            index (int): The rank of the amino acid, used for computing one-hot encoding.
-        """
         # amino acid nomenclature
         self._name = name
         self._three_letter_code = three_letter_code

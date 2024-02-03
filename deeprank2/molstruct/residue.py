@@ -119,13 +119,14 @@ class Residue:
 
 
 class SingleResidueVariant:
-    def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
-        """A single residue mutation of a PDBStrcture.
+    """A single residue mutation of a PDBStrcture.
 
-        Args:
-            residue (Residue): the `Residue` object from the PDBStructure that is mutated.
-            variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.
-        """
+    Args:
+        residue (Residue): the `Residue` object from the PDBStructure that is mutated.
+        variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.
+    """
+
+    def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
         self._residue = residue
         self._variant_amino_acid = variant_amino_acid
 

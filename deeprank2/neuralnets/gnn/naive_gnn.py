@@ -7,7 +7,7 @@ from torch_scatter import scatter_mean, scatter_sum
 # ruff: noqa: ANN001, ANN201
 
 
-class NaiveConvolutionalLayer(Module):
+class NaiveConvolutionalLayer(Module):  # noqa: D101
     def __init__(self, count_node_features, count_edge_features):
         super().__init__()
         message_size = 32
@@ -31,7 +31,7 @@ class NaiveConvolutionalLayer(Module):
         return self._node_mlp(node_input)
 
 
-class NaiveNetwork(Module):
+class NaiveNetwork(Module):  # noqa: D101
     def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
         """NaiveNetwork.
 

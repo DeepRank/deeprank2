@@ -11,7 +11,7 @@ from deeprank2.utils.parsing import atomic_forcefield
 _log = logging.getLogger(__name__)
 
 
-def add_features(
+def add_features(  # noqa:D103
     pdb_path: str,  # noqa: ARG001
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,

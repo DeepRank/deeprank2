@@ -101,7 +101,7 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
     return residue_contacts
 
 
-def add_features(  # noqa: C901
+def add_features(  # noqa: C901, D103
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,

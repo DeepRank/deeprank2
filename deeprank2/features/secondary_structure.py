@@ -124,7 +124,7 @@ def _get_secstructure(pdb_path: str) -> dict:
     return sec_structure_dict
 
 
-def add_features(
+def add_features(  # noqa:D103
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001

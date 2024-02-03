@@ -13,7 +13,7 @@ _log = logging.getLogger(__name__)
 _forcefield_directory_path = os.path.realpath(os.path.join(os.path.dirname(__file__), "../../domain/forcefield"))
 
 
-class AtomicForcefield:
+class AtomicForcefield:  # noqa: D101
     def __init__(self):
         top_path = os.path.join(_forcefield_directory_path, "protein-allhdg5-5_new.top")
         with open(top_path, encoding="utf-8") as f:

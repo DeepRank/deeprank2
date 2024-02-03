@@ -1,7 +1,7 @@
 import re
 
 
-class ResidueClassCriterium:
+class ResidueClassCriterium:  # noqa: D101
     def __init__(
         self,
         class_name: str,
@@ -33,7 +33,7 @@ class ResidueClassCriterium:
         return True
 
 
-class ResidueClassParser:
+class ResidueClassParser:  # noqa: D101
     _RESIDUE_CLASS_PATTERN = re.compile(r"([A-Z]{3,4}) *\: *name *\= *(all|[A-Z]{3})")
     _RESIDUE_ATOMS_PATTERN = re.compile(r"(present|absent)\(([A-Z0-9\, ]+)\)")
 

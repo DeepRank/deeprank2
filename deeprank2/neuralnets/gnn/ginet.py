@@ -10,7 +10,7 @@ from deeprank2.utils.community_pooling import community_pooling, get_preloaded_c
 # ruff: noqa: ANN001, ANN201
 
 
-class GINetConvLayer(torch.nn.Module):
+class GINetConvLayer(torch.nn.Module):  # noqa: D101
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
         super().__init__()
 
@@ -54,7 +54,7 @@ class GINetConvLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class GINet(torch.nn.Module):
+class GINet(torch.nn.Module):  # noqa: D101
     # input_shape -> number of node input features
     # output_shape -> number of output value per graph
     # input_shape_edge -> number of edge input features

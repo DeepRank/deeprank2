@@ -2,6 +2,8 @@ import re
 from enum import Enum
 from typing import Any
 
+# ruff: noqa: D101
+
 
 class PatchActionType(Enum):
     MODIFY = 1

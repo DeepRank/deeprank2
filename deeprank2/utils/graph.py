@@ -26,6 +26,8 @@ _log = logging.getLogger(__name__)
 
 
 class Edge:
+    """Graph edge."""
+
     def __init__(self, id_: Contact):
         self.id = id_
         self.features = {}
@@ -49,6 +51,8 @@ class Edge:
 
 
 class Node:
+    """Graph node."""
+
     def __init__(self, id_: Atom | Residue):
         if isinstance(id_, Atom):
             self._type = "atom"
@@ -88,6 +92,8 @@ class Node:
 
 
 class Graph:
+    """Graph."""
+
     def __init__(self, id_: str):
         self.id = id_
 

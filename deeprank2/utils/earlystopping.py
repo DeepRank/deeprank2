@@ -2,6 +2,25 @@ from collections.abc import Callable
 
 
 class EarlyStopping:
+    """Terminate training upon trigger.
+
+    Triggered if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
+
+    Args:
+        patience (int, optional): How long to wait after last time validation loss improved.
+            Defaults to 10.
+        delta (float, optional): Minimum change required to reset the early stopping counter.
+            Defaults to 0.
+        maxgap (float, optional): Maximum difference between between training and validation loss.
+            Defaults to None.
+        min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
+            Defaults to 10.
+        verbose (bool, optional): If True, prints a message for each validation loss improvement.
+            Defaults to True.
+        trace_func (Callable, optional): Function used for recording EarlyStopping status.
+            Defaults to print.
+    """
+
     def __init__(
         self,
         patience: int = 10,
@@ -11,24 +30,6 @@ class EarlyStopping:
         verbose: bool = True,
         trace_func: Callable = print,
     ):
-        """Terminate training upon trigger.
-
-        Triggered if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
-
-        Args:
-            patience (int, optional): How long to wait after last time validation loss improved.
-                Defaults to 10.
-            delta (float, optional): Minimum change required to reset the early stopping counter.
-                Defaults to 0.
-            maxgap (float, optional): Maximum difference between between training and validation loss.
-                Defaults to None.
-            min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
-                Defaults to 10.
-            verbose (bool, optional): If True, prints a message for each validation loss improvement.
-                Defaults to True.
-            trace_func (Callable, optional): Function used for recording EarlyStopping status.
-                Defaults to print.
-        """
         self.patience = patience
         self.delta = delta
         self.maxgap = maxgap

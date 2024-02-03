@@ -88,7 +88,7 @@ class SGraphAttentionLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class SGAT(torch.nn.Module):
+class SGAT(torch.nn.Module):  # noqa:D101
     def __init__(
         self,
         input_shape,
