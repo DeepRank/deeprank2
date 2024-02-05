@@ -106,9 +106,7 @@ def _get_secstructure(pdb_path: str) -> dict:
             f"See {pdb_format_link} for guidance on how to format your pdb files.\n\t"
             "Alternatively, turn off secondary_structure feature module during QueryCollection.process()."
         )
-        raise DSSPError(
-            msg,
-        ) from e
+        raise DSSPError(msg) from e
 
     chain_ids = [dssp_key[0] for dssp_key in dssp.property_keys]
     res_numbers = [dssp_key[1][1] for dssp_key in dssp.property_keys]
@@ -148,6 +146,4 @@ def add_features(  # noqa:D103
             node.features[Nfeat.SECSTRUCT] = _classify_secstructure(sec_structure_features[chain_id][res_num]).onehot
         except AttributeError as e:
             msg = f"Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) detected on chain {chain_id} residues {res_num}."
-            raise ValueError(
-                msg,
-            ) from e
+            raise ValueError(msg) from e

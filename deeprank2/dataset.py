@@ -126,12 +126,7 @@ class DeeprankDataset(Dataset):
                 f"The train data provided is invalid: {type(self.train_source)}.\n\t"
                 f"Please provide a valid training {data_type} or the path to a valid DeepRank2 pre-trained model."
             )
-            raise TypeError(
-                msg,
-            )
-            raise TypeError(
-                msg,
-            )
+            raise TypeError(msg)
 
         # match parameters with the ones in the training set
         self._check_inherited_params(inherited_params, data)
@@ -652,12 +647,7 @@ class GridDataset(DeeprankDataset):
                 "Probably, the feature wasn't generated during the preprocessing step.\n\t"
                 f"Available features: {available_features}"
             )
-            raise ValueError(
-                msg,
-            )
-            raise ValueError(
-                msg,
-            )
+            raise ValueError(msg)
 
     def get(self, idx: int) -> Data:
         """Gets one grid item from its unique index.
@@ -708,12 +698,7 @@ class GridDataset(DeeprankDataset):
                         f"Target {self.target} missing in entry {entry_name} in file {hdf5_path}, possible targets are {possible_targets}.\n\t"
                         "Use the query class to add more target values to input data."
                     )
-                    raise ValueError(
-                        msg,
-                    )
-                    raise ValueError(
-                        msg,
-                    )
+                    raise ValueError(msg)
 
         # Wrap up the data in this object, for the collate_fn to handle it properly:
         data = Data(x=x, y=y)
@@ -942,12 +927,7 @@ class GraphDataset(DeeprankDataset):
                                         f"Invalid value occurs in {entry_name}, file {fname},when applying {transform} for feature {feat}.\n\t"
                                         f"Please change the transformation function for {feat}."
                                     )
-                                    raise ValueError(
-                                        msg,
-                                    )
-                                    raise ValueError(
-                                        msg,
-                                    )
+                                    raise ValueError(msg)
 
                         if vals.ndim == 1:  # features with only one channel
                             vals = vals.reshape(-1, 1)
@@ -1004,12 +984,7 @@ class GraphDataset(DeeprankDataset):
                                         f"Invalid value occurs in {entry_name}, file {fname}, when applying {transform} for feature {feat}.\n\t"
                                         f"Please change the transformation function for {feat}."
                                     )
-                                    raise ValueError(
-                                        msg,
-                                    )
-                                    raise ValueError(
-                                        msg,
-                                    )
+                                    raise ValueError(msg)
 
                         if vals.ndim == 1:
                             vals = vals.reshape(-1, 1)
@@ -1046,12 +1021,7 @@ class GraphDataset(DeeprankDataset):
                         f"Target {self.target} missing in entry {entry_name} in file {fname}, possible targets are {possible_targets}.\n\t"
                         "Use the query class to add more target values to input data."
                     )
-                    raise ValueError(
-                        msg,
-                    )
-                    raise ValueError(
-                        msg,
-                    )
+                    raise ValueError(msg)
 
             # positions
             pos = torch.tensor(grp[f"{Nfeat.NODE}/{Nfeat.POSITION}/"][()], dtype=torch.float).contiguous()
@@ -1153,12 +1123,7 @@ class GraphDataset(DeeprankDataset):
                 "Probably, the feature wasn't generated during the preprocessing step.\n\t"
                 f"{miss_node_error}{miss_edge_error}"
             )
-            raise ValueError(
-                msg,
-            )
-            raise ValueError(
-                msg,
-            )
+            raise ValueError(msg)
 
 
 def save_hdf5_keys(
