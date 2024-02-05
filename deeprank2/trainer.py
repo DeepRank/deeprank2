@@ -95,9 +95,7 @@ class Trainer:
                 --> To turn CUDA off set cuda=False in Trainer.\n
                 --> Aborting the experiment \n\n'
                 """
-            raise ValueError(
-                msg,
-            )
+            raise ValueError(msg)
         else:
             self.device = torch.device("cpu")
             if self.ngpu > 0:
@@ -113,9 +111,7 @@ class Trainer:
                         Set cuda=True in Trainer to turn CUDA on.\n
                     --> Aborting the experiment \n\n
                     """
-                raise ValueError(
-                    msg,
-                )
+                raise ValueError(msg)
 
         _log.info(f"Device set to {self.device}.")
         if self.device.type == "cuda":
@@ -302,9 +298,7 @@ class Trainer:
         # Check train_source parameter in valid/test is equivalent to train which passed to Trainer.
         if dataset_check.train_source != dataset_train:
             msg = f"{type_dataset} dataset has different train_source parameter from Trainer. Make sure to assign equivalent train_source in Trainer."
-            raise ValueError(
-                msg,
-            )
+            raise ValueError(msg)
 
     def _load_pretrained_model(self) -> None:
         """Loads pretrained model."""
@@ -402,9 +396,7 @@ class Trainer:
                     f"is not compatible with output shape {self.output_shape}\n\t"
                     f"and target shape {target_shape}."
                 )
-                raise ValueError(
-                    msg,
-                )
+                raise ValueError(msg)
 
     def configure_optimizers(
         self,
@@ -847,9 +839,7 @@ class Trainer:
                     "BCELoss and BCEWithLogitsLoss are currently not supported.\n\t"
                     "For further details see: https://github.com/DeepRank/deeprank2/issues/318"
                 )
-                raise ValueError(
-                    msg,
-                )
+                raise ValueError(msg)
 
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
                 msg = (
@@ -857,9 +847,7 @@ class Trainer:
                     f"Supported loss functions for classification: {losses.classification_tested}.\n\t"
                     "Implementation of other loss functions requires adaptation of Trainer._format_output."
                 )
-                raise ValueError(
-                    msg,
-                )
+                raise ValueError(msg)
 
         elif self.task == targets.REGRESS:
             pred = pred.reshape(-1)
@@ -1025,9 +1013,7 @@ def _divide_dataset(
     if n_split >= full_size or n_split < 0:
         msg = f"Invalid Split size: {n_split}.\n"
         f"Split size must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)"
-        raise ValueError(
-            msg,
-        )
+        raise ValueError(msg)
 
     if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint
         dataset_main = dataset
