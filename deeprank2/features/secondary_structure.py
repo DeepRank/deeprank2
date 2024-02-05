@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 from Bio.PDB import PDBParser
 from Bio.PDB.DSSP import DSSP
+from numpy.typing import NDArray
 
 from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.molstruct.atom import Atom
@@ -23,20 +24,20 @@ class SecondarySctructure(Enum):
     COIL = 2  # ' -STP'
 
     @property
-    def onehot(self):
+    def onehot(self) -> NDArray:
         t = np.zeros(3)
         t[self.value] = 1.0
 
         return t
 
 
-def _get_records(lines: list[str]):
+def _get_records(lines: list[str]) -> list[str]:
     seen = set()
     seen_add = seen.add
     return [x.split()[0] for x in lines if not (x in seen or seen_add(x))]
 
 
-def _check_pdb(pdb_path: str):
+def _check_pdb(pdb_path: str) -> None:
     fix_pdb = False
     with open(pdb_path, encoding="utf-8") as f:
         lines = f.readlines()
@@ -71,7 +72,7 @@ def _check_pdb(pdb_path: str):
             f.writelines(lines)
 
 
-def _classify_secstructure(subtype: str):
+def _classify_secstructure(subtype: str) -> SecondarySctructure:
     if subtype in "GHI":
         return SecondarySctructure.HELIX
     if subtype in "BE":
@@ -97,13 +98,16 @@ def _get_secstructure(pdb_path: str) -> dict:
 
     try:
         dssp = DSSP(model, pdb_path, dssp="mkdssp")
-    except Exception as e:  # noqa: BLE001 (blind-except), namely: # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
+    except Exception as e:  # noqa: BLE001, namely: # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
         pdb_format_link = "https://www.wwpdb.org/documentation/file-format-content/format33/sect1.html#Order"
-        raise DSSPError(
+        msg = (
             f"DSSP has raised the following exception: {e}.\n\t"
             f"This is likely due to an improrperly formatted pdb file: {pdb_path}.\n\t"
             f"See {pdb_format_link} for guidance on how to format your pdb files.\n\t"
             "Alternatively, turn off secondary_structure feature module during QueryCollection.process()."
+        )
+        raise DSSPError(
+            msg,
         ) from e
 
     chain_ids = [dssp_key[0] for dssp_key in dssp.property_keys]
@@ -120,11 +124,11 @@ def _get_secstructure(pdb_path: str) -> dict:
     return sec_structure_dict
 
 
-def add_features(
+def add_features(  # noqa:D103
     pdb_path: str,
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001
+) -> None:
     sec_structure_features = _get_secstructure(pdb_path)
 
     for node in graph.nodes:
@@ -134,7 +138,8 @@ def add_features(
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         chain_id = residue.chain.id
         res_num = residue.number
@@ -142,6 +147,7 @@ def add_features(
         try:
             node.features[Nfeat.SECSTRUCT] = _classify_secstructure(sec_structure_features[chain_id][res_num]).onehot
         except AttributeError as e:
+            msg = f"Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) detected on chain {chain_id} residues {res_num}."
             raise ValueError(
-                f"Unknown secondary structure type ({sec_structure_features[chain_id][res_num]}) detected on chain {chain_id} residues {res_num}."
+                msg,
             ) from e

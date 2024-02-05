@@ -12,7 +12,7 @@ freesasa.setVerbosity(freesasa.nowarnings)
 logging.getLogger(__name__)
 
 
-def add_sasa(pdb_path: str, graph: Graph):
+def add_sasa(pdb_path: str, graph: Graph) -> None:  # noqa:D103
     structure = freesasa.Structure(pdb_path)
     result = freesasa.calc(structure)
 
@@ -29,14 +29,16 @@ def add_sasa(pdb_path: str, graph: Graph):
             area = freesasa.selectArea(selection, structure, result)["atom"]
 
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         if np.isnan(area):
-            raise ValueError(f"freesasa returned {area} for {residue}")
+            msg = f"freesasa returned {area} for {residue}"
+            raise ValueError(msg)
         node.features[Nfeat.SASA] = area
 
 
-def add_bsa(graph: Graph):
+def add_bsa(graph: Graph) -> None:  # noqa:D103
     sasa_complete_structure = freesasa.Structure()
     sasa_chain_structures = {}
 
@@ -96,7 +98,8 @@ def add_bsa(graph: Graph):
             area_key = "atom"
             selection = f"atom, (name {atom.name}) and (resi {atom.residue.number_string}) and (chain {atom.residue.chain.id})"
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
     sasa_complete_result = freesasa.calc(sasa_complete_structure)
     sasa_chain_results = {chain_id: freesasa.calc(structure) for chain_id, structure in sasa_chain_structures.items()}
@@ -123,8 +126,8 @@ def add_bsa(graph: Graph):
 def add_features(
     pdb_path: str,
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001
+) -> None:
     """Calculates the Buried Surface Area (BSA) and the Solvent Accessible Surface Area (SASA)."""
     # BSA
     add_bsa(graph)

@@ -28,7 +28,7 @@ class OutputExporter:
         """Overridable."""
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         """Overridable."""
 
     def process(
@@ -39,13 +39,13 @@ class OutputExporter:
         output_values: list,
         target_values: list,
         loss: float,
-    ):
+    ) -> None:
         """The entry_names, output_values, target_values MUST have the same length."""
 
     def is_compatible_with(
         self,
-        output_data_shape: int,  # noqa: ARG002 (unused argument)
-        target_data_shape: int | None = None,  # noqa: ARG002 (unused argument)
+        output_data_shape: int,  # noqa: ARG002
+        target_data_shape: int | None = None,  # noqa: ARG002
     ) -> bool:
         """True if this exporter can work with the given data shapes."""
         return True
@@ -63,7 +63,7 @@ class OutputExporterCollection:
 
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         for output_exporter in self._output_exporters:
             output_exporter.__exit__(exception_type, exception, traceback)
 
@@ -75,7 +75,7 @@ class OutputExporterCollection:
         output_values: list,
         target_values: list,
         loss: float,
-    ):
+    ) -> None:
         for output_exporter in self._output_exporters:
             output_exporter.process(
                 pass_name,
@@ -108,7 +108,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         self._writer.__enter__()
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         self._writer.__exit__(exception_type, exception, traceback)
 
     def process(
@@ -118,8 +118,8 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         entry_names: list[str],
         output_values: list,
         target_values: list,
-        loss: float,  # noqa: ARG002 (unused argument)
-    ):
+        loss: float,  # noqa: ARG002
+    ) -> None:
         """Write to tensorboard."""
         ce_loss = cross_entropy(tensor(output_values), tensor(target_values)).item()
         self._writer.add_scalar(
@@ -137,25 +137,25 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
             prediction_value = argmax(tensor(output_values[entry_index]))
             target_value = target_values[entry_index]
 
-            if prediction_value > 0.0 and target_value > 0.0:
+            if prediction_value > 0 and target_value > 0:
                 tp += 1
 
-            elif prediction_value <= 0.0 and target_value <= 0.0:
+            elif prediction_value <= 0 and target_value <= 0:
                 tn += 1
 
-            elif target_value <= 0.0 < prediction_value:
+            elif target_value <= 0 < prediction_value:
                 fp += 1
 
-            elif prediction_value <= 0.0 < target_value:
+            elif prediction_value <= 0 < target_value:
                 fn += 1
 
         mcc_numerator = tn * tp - fp * fn
-        if mcc_numerator == 0.0:
+        if mcc_numerator == 0:
             self._writer.add_scalar(f"{pass_name} MCC", 0.0, epoch_number)
         else:
             mcc_denominator = sqrt((tn + fn) * (fp + tp) * (tn + fp) * (fn + tp))
 
-            if mcc_denominator != 0.0:
+            if mcc_denominator != 0:
                 mcc = mcc_numerator / mcc_denominator
                 self._writer.add_scalar(f"{pass_name} MCC", mcc, epoch_number)
 
@@ -163,7 +163,7 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         self._writer.add_scalar(f"{pass_name} accuracy", accuracy, epoch_number)
 
         # for ROC curves to work, we need both class values in the set
-        if len(set(target_values)) == 2:
+        if len(set(target_values)) == 2:  # noqa:PLR2004
             roc_auc = roc_auc_score(target_values, probabilities)
             self._writer.add_scalar(f"{pass_name} ROC AUC", roc_auc, epoch_number)
 
@@ -173,20 +173,21 @@ class TensorboardBinaryClassificationExporter(OutputExporter):
         target_data_shape: int | None = None,
     ) -> bool:
         """For regression, target data is needed and output data must be a list of two-dimensional values."""
-        return output_data_shape == 2 and target_data_shape == 1
+        return output_data_shape == 2 and target_data_shape == 1  # noqa:PLR2004
 
 
 class ScatterPlotExporter(OutputExporter):
+    """An output exporter that can make scatter plots, containing every single data point.
+
+    On the X-axis: targets values
+    On the Y-axis: output values
+
+    Args:
+        directory_path (str): Where to store the plots.
+        epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
+    """
+
     def __init__(self, directory_path: str, epoch_interval: int = 1):
-        """An output exporter that can make scatter plots, containing every single data point.
-
-        On the X-axis: targets values
-        On the Y-axis: output values
-
-        Args:
-            directory_path (str): Where to store the plots.
-            epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
-        """
         super().__init__(directory_path)
         self._epoch_interval = epoch_interval
 
@@ -194,15 +195,15 @@ class ScatterPlotExporter(OutputExporter):
         self._plot_data = {}
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         self._plot_data.clear()
 
-    def get_filename(self, epoch_number):
+    def get_filename(self, epoch_number: int) -> str:
         """Returns the filename for the table."""
         return os.path.join(self._directory_path, f"scatter-{epoch_number}.png")
 
     @staticmethod
-    def _get_color(pass_name):
+    def _get_color(pass_name: str) -> str:
         pass_name = pass_name.lower().strip()
         if pass_name in ("train", "training"):
             return "blue"
@@ -217,7 +218,7 @@ class ScatterPlotExporter(OutputExporter):
         epoch_number: int,
         data: dict[str, tuple[list[float], list[float]]],
         png_path: str,
-    ):
+    ) -> None:
         plt.title(f"Epoch {epoch_number}")
 
         for pass_name, (truth_values, prediction_values) in data.items():
@@ -239,11 +240,11 @@ class ScatterPlotExporter(OutputExporter):
         self,
         pass_name: str,
         epoch_number: int,
-        entry_names: list[str],  # noqa: ARG002 (unused argument)
+        entry_names: list[str],  # noqa: ARG002
         output_values: list,
         target_values: list,
-        loss: float,  # noqa: ARG002 (unused argument)
-    ):
+        loss: float,  # noqa: ARG002
+    ) -> None:
         """Make the plot, if the epoch matches with the interval."""
         if epoch_number % self._epoch_interval == 0:
             if epoch_number not in self._plot_data:
@@ -296,7 +297,7 @@ class HDF5OutputExporter(OutputExporter):
 
         return self
 
-    def __exit__(self, exception_type, exception, traceback):
+    def __exit__(self, exception_type, exception, traceback):  # noqa: ANN001
         if self.phase is not None:
             if self.phase == "validation":
                 self.phase = "training"
@@ -315,7 +316,7 @@ class HDF5OutputExporter(OutputExporter):
         output_values: list,
         target_values: list,
         loss: float,
-    ):
+    ) -> None:
         self.phase = pass_name
         pass_name = [pass_name] * len(output_values)
         loss = [loss] * len(output_values)

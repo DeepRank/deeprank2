@@ -11,6 +11,7 @@ from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 _log = logging.getLogger(__name__)
+SAFE_MIN_CONTACTS = 5
 
 
 def _id_from_residue(residue: tuple[str, int, str]) -> str:
@@ -100,11 +101,11 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
     return residue_contacts
 
 
-def add_features(
+def add_features(  # noqa: C901, D103
     pdb_path: str,
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
-):
+) -> None:
     if not single_amino_acid_variant:  # VariantQueries do not use this feature
         polarity_pairs = list(combinations(Polarity, 2))
         polarity_pair_string = [f"irc_{x[0].name.lower()}_{x[1].name.lower()}" for x in polarity_pairs]
@@ -119,7 +120,8 @@ def add_features(
                 atom = node.id
                 residue = atom.residue
             else:
-                raise TypeError(f"Unexpected node type: {type(node.id)}")
+                msg = f"Unexpected node type: {type(node.id)}"
+                raise TypeError(msg)
 
             contact_id = residue.chain.id + residue.number_string  # reformat id to be in line with residue_contacts keys
 
@@ -139,5 +141,5 @@ def add_features(
             except KeyError:  # node has no contact residues and all counts remain 0
                 pass
 
-        if total_contacts < 5:
+        if total_contacts < SAFE_MIN_CONTACTS:
             _log.warning(f"Few ({total_contacts}) contacts detected for {pdb_path}.")

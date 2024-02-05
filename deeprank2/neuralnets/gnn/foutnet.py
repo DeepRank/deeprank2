@@ -8,6 +8,8 @@ from torch_scatter import scatter_mean
 
 from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
 
+# ruff: noqa: ANN001, ANN201
+
 
 class FoutLayer(torch.nn.Module):
     """FoutLayer.
@@ -40,7 +42,7 @@ class FoutLayer(torch.nn.Module):
 
         self.reset_parameters()
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         size = self.in_channels
         uniform(size, self.wc)
         uniform(size, self.wn)
@@ -70,12 +72,12 @@ class FoutLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class FoutNet(torch.nn.Module):
+class FoutNet(torch.nn.Module):  # noqa: D101
     def __init__(
         self,
         input_shape,
         output_shape=1,
-        input_shape_edge=None,  # noqa: ARG002 (unused argument)
+        input_shape_edge=None,  # noqa: ARG002
     ):
         super().__init__()
 

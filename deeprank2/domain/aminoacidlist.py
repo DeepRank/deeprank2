@@ -1,3 +1,5 @@
+from typing import Literal
+
 from deeprank2.molstruct.aminoacid import AminoAcid, Polarity
 
 # All info below sourced from above websites in December 2022 and summarized in deeprank2/domain/aminoacid_summary.xlsx
@@ -377,21 +379,42 @@ amino_acids_by_letter = {amino_acid.one_letter_code: amino_acid for amino_acid i
 amino_acids_by_name = {amino_acid.name: amino_acid for amino_acid in amino_acids}
 
 
-def convert_aa_nomenclature(aa: str, output_type: int | None = None):
+def convert_aa_nomenclature(aa: str, output_format: Literal[0, 1, 3] = 0) -> str:
+    """Converts amino acid nomenclatures.
+
+    Conversions are possible between the standard 1-letter codes, 3-letter
+    codes, and full names of amino acids.
+
+    Args:
+        aa (str): The amino acid to be converted in any of its formats. The
+            length of the string is used to determine which format is used.
+        output_format (Literal[0, 1, 3], optional): Nomenclature style to return:
+            0 (default) returns the full name,
+            1 returns the 1-letter code,
+            3 returns the 3-letter code.
+
+    Raises:
+        ValueError: If aa is not recognized or an invalid output format was given
+
+    Returns:
+        str: amino acid in the selected nomenclature system.
+    """
     try:
         if len(aa) == 1:
             aa: AminoAcid = next(entry for entry in amino_acids if entry.one_letter_code.lower() == aa.lower())
-        elif len(aa) == 3:
+        elif len(aa) == 3:  # noqa:PLR2004
             aa: AminoAcid = next(entry for entry in amino_acids if entry.three_letter_code.lower() == aa.lower())
         else:
             aa: AminoAcid = next(entry for entry in amino_acids if entry.name.lower() == aa.lower())
     except IndexError as e:
-        raise ValueError(f"{aa} is not a valid amino acid.") from e
+        msg = f"{aa} is not a valid amino acid."
+        raise ValueError(msg) from e
 
-    if not output_type:
+    if not output_format:
         return aa.name
-    if output_type == 3:
+    if output_format == 3:  # noqa:PLR2004
         return aa.three_letter_code
-    if output_type == 1:
+    if output_format == 1:
         return aa.one_letter_code
-    raise ValueError(f"output_type {output_type} not recognized. Must be set to None (amino acid name), 1 (one letter code), or 3 (three letter code).")
+    msg = f"output_format {output_format} not recognized. Must be set to 0 (amino acid name), 1 (one letter code), or 3 (three letter code)."
+    raise ValueError(msg)

@@ -12,24 +12,24 @@ from deeprank2.utils.community_pooling import (
 
 
 class TestCommunity(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.edge_index = torch.tensor([[0, 1, 1, 2, 3, 4, 4, 5], [1, 0, 2, 1, 4, 3, 5, 4]], dtype=torch.long)
 
         self.x = torch.tensor([[0], [1], [2], [3], [4], [5]], dtype=torch.float)
         self.data = Data(x=self.x, edge_index=self.edge_index)
-        self.data.pos = torch.tensor(np.random.rand(self.data.num_nodes, 3))  # noqa: NPY002 (legacy numpy code)
+        self.data.pos = torch.tensor(np.random.rand(self.data.num_nodes, 3))  # noqa: NPY002
 
-    def test_detection_mcl(self):
+    def test_detection_mcl(self) -> None:
         community_detection(self.data.edge_index, self.data.num_nodes, method="mcl")
 
-    def test_detection_louvain(self):
+    def test_detection_louvain(self) -> None:
         community_detection(self.data.edge_index, self.data.num_nodes, method="louvain")
 
     @unittest.expectedFailure
-    def test_detection_error(self):
+    def test_detection_error(self) -> None:
         community_detection(self.data.edge_index, self.data.num_nodes, method="xxx")
 
-    def test_detection_per_batch_mcl(self):
+    def test_detection_per_batch_mcl(self) -> None:
         Batch().from_data_list([self.data, self.data])
         community_detection_per_batch(
             self.data.edge_index,
@@ -38,7 +38,7 @@ class TestCommunity(unittest.TestCase):
             method="mcl",
         )
 
-    def test_detection_per_batch_louvain1(self):
+    def test_detection_per_batch_louvain1(self) -> None:
         Batch().from_data_list([self.data, self.data])
         community_detection_per_batch(
             self.data.edge_index,
@@ -48,7 +48,7 @@ class TestCommunity(unittest.TestCase):
         )
 
     @unittest.expectedFailure
-    def test_detection_per_batch_louvain2(self):
+    def test_detection_per_batch_louvain2(self) -> None:
         Batch().from_data_list([self.data, self.data])
         community_detection_per_batch(
             self.data.edge_index,
@@ -57,7 +57,7 @@ class TestCommunity(unittest.TestCase):
             method="xxxx",
         )
 
-    def test_pooling(self):
+    def test_pooling(self) -> None:
         batch = Batch().from_data_list([self.data, self.data])
         cluster = community_detection(batch.edge_index, batch.num_nodes)
 

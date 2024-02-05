@@ -5,7 +5,7 @@ from deeprank2.query import VALID_RESOLUTIONS, ProteinProteinInterfaceQuery
 from deeprank2.utils.grid import Grid, GridSettings, MapMethod
 
 
-def test_grid_orientation():
+def test_grid_orientation() -> None:
     coord_error_margin = 1.0  # Angstrom
     points_counts = [10, 10, 10]
     grid_sizes = [30.0, 30.0, 30.0]
@@ -19,7 +19,7 @@ def test_grid_orientation():
         target_center = grid_points_group["center"][()]
 
     for resolution in VALID_RESOLUTIONS:
-        print(f"Testing for {resolution} level grids.")  # in case pytest fails, this will be printed.
+        print(f"Testing for {resolution} level grids.")  # noqa:T201; in case pytest fails, this will be printed.
         query = ProteinProteinInterfaceQuery(
             pdb_path="tests/data/pdb/1ak4/1ak4.pdb",
             resolution=resolution,

@@ -1,7 +1,7 @@
 import re
 
 
-class ResidueClassCriterium:
+class ResidueClassCriterium:  # noqa: D101
     def __init__(
         self,
         class_name: str,
@@ -33,24 +33,25 @@ class ResidueClassCriterium:
         return True
 
 
-class ResidueClassParser:
+class ResidueClassParser:  # noqa: D101
     _RESIDUE_CLASS_PATTERN = re.compile(r"([A-Z]{3,4}) *\: *name *\= *(all|[A-Z]{3})")
     _RESIDUE_ATOMS_PATTERN = re.compile(r"(present|absent)\(([A-Z0-9\, ]+)\)")
 
     @staticmethod
-    def parse(file_):
+    def parse(file_: str) -> list[ResidueClassCriterium]:
         result = []
         for line in file_:
             match = ResidueClassParser._RESIDUE_CLASS_PATTERN.match(line)
             if not match:
-                raise ValueError(f"Unparsable line: '{line}'")
+                msg = f"Unparsable line: '{line}'"
+                raise ValueError(msg)
 
             class_name = match.group(1)
             amino_acid_names = ResidueClassParser._parse_amino_acids(match.group(2))
 
             present_atom_names = []
             absent_atom_names = []
-            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(line[match.end() :]):  # noqa: B020 (loop-variable-overrides-iterator)
+            for match in ResidueClassParser._RESIDUE_ATOMS_PATTERN.finditer(line[match.end() :]):  # noqa: B020
                 atom_names = [name.strip() for name in match.group(2).split(",")]
                 if match.group(1) == "present":
                     present_atom_names.extend(atom_names)
@@ -62,7 +63,7 @@ class ResidueClassParser:
         return result
 
     @staticmethod
-    def _parse_amino_acids(string: str):
+    def _parse_amino_acids(string: str) -> str | list[str]:
         if string.strip() == "all":
             return string.strip()
         return [name.strip() for name in string.split(",")]

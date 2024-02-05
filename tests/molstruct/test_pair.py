@@ -1,7 +1,7 @@
 from deeprank2.molstruct.pair import Pair
 
 
-def test_order_independency():
+def test_order_independency() -> None:
     # These should be the same:
     pair1 = Pair(1, 2)
     pair2 = Pair(2, 1)
@@ -15,7 +15,7 @@ def test_order_independency():
     assert d[pair1] == 2
 
 
-def test_uniqueness():
+def test_uniqueness() -> None:
     # These should be different:
     pair1 = Pair(1, 2)
     pair2 = Pair(1, 3)

@@ -2,6 +2,7 @@ import logging
 import signal
 import sys
 import warnings
+from typing import NoReturn
 
 import numpy as np
 from Bio.PDB.Atom import PDBConstructionWarning
@@ -17,26 +18,27 @@ from deeprank2.utils.graph import Graph
 _log = logging.getLogger(__name__)
 
 
-def handle_sigint(sig, frame):  # noqa: ARG001 (unused argument)
-    print("SIGINT received, terminating.")
+def handle_sigint(sig, frame) -> None:  # noqa: ARG001, ANN001, D103
+    _log.info("SIGINT received, terminating.")
     sys.exit()
 
 
-def handle_timeout(sig, frame):  # noqa: ARG001 (unused argument)
-    raise TimeoutError("Timed out!")
+def handle_timeout(sig, frame) -> NoReturn:  # noqa: ARG001, ANN001, D103
+    msg = "Timed out!"
+    raise TimeoutError(msg)
 
 
-def space_if_none(value):
+def space_if_none(value: str) -> str:  # noqa:D103
     if value is None:
         return " "
     return value
 
 
-def add_features(
+def add_features(  # noqa:D103
     pdb_path: str,
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001
+) -> None:
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)
 
@@ -50,7 +52,8 @@ def add_features(
         surface = get_surface(bio_model)
         signal.alarm(0)
     except TimeoutError as e:
-        raise TimeoutError("Bio.PDB.ResidueDepth.get_surface timed out.") from e
+        msg = "Bio.PDB.ResidueDepth.get_surface timed out."
+        raise TimeoutError(msg) from e
 
     # These can only be calculated per residue, not per atom.
     # So for atomic graphs, every atom gets its residue's value.
@@ -62,7 +65,8 @@ def add_features(
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         bio_residue = bio_model[residue.chain.id][residue.number]
         node.features[Nfeat.RESDEPTH] = residue_depth(bio_residue, surface)

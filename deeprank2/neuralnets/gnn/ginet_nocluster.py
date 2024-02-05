@@ -4,8 +4,10 @@ from torch import nn
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean, scatter_sum
 
+# ruff: noqa: ANN001, ANN201
 
-class GINetConvLayer(torch.nn.Module):
+
+class GINetConvLayer(torch.nn.Module):  # noqa: D101
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
         super().__init__()
 
@@ -17,7 +19,7 @@ class GINetConvLayer(torch.nn.Module):
         self.fc_attention = nn.Linear(2 * self.out_channels + number_edge_features, 1, bias=bias)
         self.reset_parameters()
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         size = self.in_channels
         uniform(size, self.fc.weight)
         uniform(size, self.fc_attention.weight)
@@ -49,7 +51,7 @@ class GINetConvLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class GINet(torch.nn.Module):
+class GINet(torch.nn.Module):  # noqa: D101
     # input_shape -> number of node input features
     # output_shape -> number of output value per graph
     # input_shape_edge -> number of edge input features

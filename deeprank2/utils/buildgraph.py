@@ -15,7 +15,7 @@ from deeprank2.molstruct.structure import Chain, PDBStructure
 _log = logging.getLogger(__name__)
 
 
-def _add_atom_to_residue(atom: Atom, residue: Residue):
+def _add_atom_to_residue(atom: Atom, residue: Residue) -> None:
     """Adds an `Atom` to a `Residue` if not already there.
 
     If no matching atom is found, add the current atom to the residue.
@@ -31,8 +31,8 @@ def _add_atom_to_residue(atom: Atom, residue: Residue):
 def _add_atom_data_to_structure(
     structure: PDBStructure,
     pdb_obj: pdb2sql_object,
-    **kwargs,
-):
+    **kwargs,  # noqa: ANN003
+) -> None:
     """This subroutine retrieves pdb2sql atomic data for `PDBStructure` objects as defined in DeepRank2.
 
     This function should be called for one atom at a time.
@@ -111,7 +111,7 @@ def get_contact_atoms(
         pdb_rowID = atom_indexes[chain_ids[0]] + atom_indexes[chain_ids[1]]
         _add_atom_data_to_structure(structure, interface, rowID=pdb_rowID)
     finally:
-        interface._close()  # noqa: SLF001 (private-member-access)
+        interface._close()  # noqa: SLF001
 
     return structure.get_atoms()
 
@@ -145,7 +145,7 @@ def get_residue_contact_pairs(
             return_contact_pairs=True,
         )
     finally:
-        interface._close()  # noqa: SLF001 (private-member-access)
+        interface._close()  # noqa: SLF001
 
     # Map to residue objects
     residue_pairs = set()
@@ -169,7 +169,8 @@ def _get_residue_from_key(
     for residue in chain.residues:
         if residue.number == residue_number and residue.amino_acid is not None and residue.amino_acid.three_letter_code == residue_name:
             return residue
-    raise ValueError(f"Residue ({residue_key}) not found in {structure.id}.")
+    msg = f"Residue ({residue_key}) not found in {structure.id}."
+    raise ValueError(msg)
 
 
 def get_surrounding_residues(

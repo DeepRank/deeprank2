@@ -4,6 +4,7 @@ import logging
 import re
 import warnings
 from time import time
+from typing import Any
 
 import h5py
 import numpy as np
@@ -25,9 +26,36 @@ _log = logging.getLogger(__name__)
 
 
 class Trainer:
-    def __init__(  # noqa: PLR0915 (too-many-statements)
+    """Class from which the network is trained, evaluated and tested.
+
+    Args:
+        neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+            It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
+            in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
+            More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
+            Defaults to None.
+        dataset_train (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Training set used during training.
+            Can't be None if pretrained_model is also None. Defaults to None.
+        dataset_val (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Evaluation set used during training.
+            If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
+            Defaults to None.
+        dataset_test (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Independent evaluation set. Defaults to None.
+        val_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+            Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to None (in _divide_dataset function).
+        test_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
+            Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to None.
+        class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
+        pretrained_model (str | None, optional): Path to pre-trained model. Defaults to None.
+        cuda (bool, optional): Whether to use CUDA. Defaults to False.
+        ngpu (int, optional): Number of GPU to be used. Defaults to 0.
+        output_exporters (list[OutputExporter] | None, optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
+            over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+            Defaults to None.
+    """
+
+    def __init__(  # noqa: PLR0915, C901
         self,
-        neuralnet=None,
+        neuralnet: nn.Module = None,
         dataset_train: GraphDataset | GridDataset | None = None,
         dataset_val: GraphDataset | GridDataset | None = None,
         dataset_test: GraphDataset | GridDataset | None = None,
@@ -39,32 +67,6 @@ class Trainer:
         ngpu: int = 0,
         output_exporters: list[OutputExporter] | None = None,
     ):
-        """Class from which the network is trained, evaluated and tested.
-
-        Args:
-            neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
-                It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
-                in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
-                More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
-                Defaults to None.
-            dataset_train (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Training set used during training.
-                Can't be None if pretrained_model is also None. Defaults to None.
-            dataset_val (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Evaluation set used during training.
-                If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
-                Defaults to None.
-            dataset_test (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Independent evaluation set. Defaults to None.
-            val_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
-                Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to None (in _divide_dataset function).
-            test_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
-                Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to None.
-            class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
-            pretrained_model (str | None, optional): Path to pre-trained model. Defaults to None.
-            cuda (bool, optional): Whether to use CUDA. Defaults to False.
-            ngpu (int, optional): Number of GPU to be used. Defaults to 0.
-            output_exporters (list[OutputExporter] | None, optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
-                over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
-                Defaults to None.
-        """
         self.neuralnet = neuralnet
         self.pretrained_model = pretrained_model
 
@@ -85,15 +87,16 @@ class Trainer:
                     and that you are running on GPUs.\n
                 --> To turn CUDA off set cuda=False in Trainer.\n
                 --> Aborting the experiment \n\n'
-                """
+                """,
             )
-            raise ValueError(
-                """
+            msg = """
                 --> CUDA not detected: Make sure that CUDA is installed
                     and that you are running on GPUs.\n
                 --> To turn CUDA off set cuda=False in Trainer.\n
                 --> Aborting the experiment \n\n'
                 """
+            raise ValueError(
+                msg,
             )
         else:
             self.device = torch.device("cpu")
@@ -103,14 +106,15 @@ class Trainer:
                     --> CUDA not detected.
                         Set cuda=True in Trainer to turn CUDA on.\n
                     --> Aborting the experiment \n\n
-                    """
+                    """,
                 )
-                raise ValueError(
-                    """
+                msg = """
                     --> CUDA not detected.
                         Set cuda=True in Trainer to turn CUDA on.\n
                     --> Aborting the experiment \n\n
                     """
+                raise ValueError(
+                    msg,
                 )
 
         _log.info(f"Device set to {self.device}.")
@@ -129,9 +133,11 @@ class Trainer:
 
         if self.pretrained_model is None:
             if self.dataset_train is None:
-                raise ValueError("No training data specified. Training data is required if there is no pretrained model.")
+                msg = "No training data specified. Training data is required if there is no pretrained model."
+                raise ValueError(msg)
             if self.neuralnet is None:
-                raise ValueError("No neural network specified. Specifying a model framework is required if there is no pretrained model.")
+                msg = "No neural network specified. Specifying a model framework is required if there is no pretrained model."
+                raise ValueError(msg)
 
             self._init_from_dataset(self.dataset_train)
             self.optimizer = None
@@ -140,7 +146,8 @@ class Trainer:
             self.epoch_saved_model = None
 
             if self.target is None:
-                raise ValueError("No target set. You need to choose a target (set in the dataset) for training.")
+                msg = "No target set. You need to choose a target (set in the dataset) for training."
+                raise ValueError(msg)
 
             self._load_model()
 
@@ -159,13 +166,16 @@ class Trainer:
                     if self.dataset_test is not None:
                         self._precluster(self.dataset_test)
                 else:
-                    raise ValueError(f"Invalid node clustering method: {self.clustering_method}. Please set clustering_method to 'mcl', 'louvain' or None.")
+                    msg = f"Invalid node clustering method: {self.clustering_method}. Please set clustering_method to 'mcl', 'louvain' or None."
+                    raise ValueError(msg)
 
         else:
             if self.neuralnet is None:
-                raise ValueError("No neural network class found. Please add it to complete loading the pretrained model.")
+                msg = "No neural network class found. Please add it to complete loading the pretrained model."
+                raise ValueError(msg)
             if self.dataset_test is None:
-                raise ValueError("No dataset_test found. Please add it to evaluate the pretrained model.")
+                msg = "No dataset_test found. Please add it to evaluate the pretrained model."
+                raise ValueError(msg)
             if self.dataset_train is not None:
                 self.dataset_train = None
                 _log.warning("Pretrained model loaded: dataset_train will be ignored.")
@@ -176,7 +186,7 @@ class Trainer:
             self._load_params()
             self._load_pretrained_model()
 
-    def _init_output_exporters(self, output_exporters: list[OutputExporter] | None):
+    def _init_output_exporters(self, output_exporters: list[OutputExporter] | None) -> None:
         if output_exporters is not None:
             self._output_exporters = OutputExporterCollection(*output_exporters)
         else:
@@ -189,7 +199,7 @@ class Trainer:
         dataset_test: GraphDataset | GridDataset | None,
         val_size: int | float | None,
         test_size: int | float | None,
-    ):
+    ) -> None:
         self._check_dataset_equivalence(dataset_train, dataset_val, dataset_test)
 
         self.dataset_train = dataset_train
@@ -211,7 +221,7 @@ class Trainer:
             else:
                 _log.warning("Validation dataset was provided to Trainer; val_size parameter is ignored.")
 
-    def _init_from_dataset(self, dataset: GraphDataset | GridDataset):
+    def _init_from_dataset(self, dataset: GraphDataset | GridDataset) -> None:
         if isinstance(dataset, GraphDataset):
             self.clustering_method = dataset.clustering_method
             self.node_features = dataset.node_features
@@ -230,7 +240,8 @@ class Trainer:
             self.means = None
             self.devs = None
         else:
-            raise TypeError(f"Incorrect `dataset` type provided: {type(dataset)}. Please provide a `GridDataset` or `GraphDataset` object instead.")
+            msg = f"Incorrect `dataset` type provided: {type(dataset)}. Please provide a `GridDataset` or `GraphDataset` object instead."
+            raise TypeError(msg)
 
         self.target = dataset.target
         self.target_transform = dataset.target_transform
@@ -238,23 +249,30 @@ class Trainer:
         self.classes = dataset.classes
         self.classes_to_index = dataset.classes_to_index
 
-    def _load_model(self):
+    def _load_model(self) -> None:
         """Loads the neural network model."""
         self._put_model_to_device(self.dataset_train)
         self.configure_optimizers()
         self.set_lossfunction()
 
-    def _check_dataset_equivalence(self, dataset_train, dataset_val, dataset_test):
+    def _check_dataset_equivalence(
+        self,
+        dataset_train: GraphDataset | GridDataset,
+        dataset_val: GraphDataset | GridDataset,
+        dataset_test: GraphDataset | GridDataset,
+    ) -> None:
         """Check dataset_train type and train_source parameter settings."""
         # dataset_train is None when pretrained_model is set
         if dataset_train is None:
             # only check the test dataset
             if dataset_test is None:
-                raise ValueError("Please provide at least a train or test dataset")
+                msg = "Please provide at least a train or test dataset"
+                raise ValueError(msg)
         else:
             # Make sure train dataset has valid type
             if not isinstance(dataset_train, GraphDataset) and not isinstance(dataset_train, GridDataset):
-                raise TypeError(f"train dataset is not the right type {type(dataset_train)}. Make sure it's either GraphDataset or GridDataset")
+                msg = f"train dataset is not the right type {type(dataset_train)}. Make sure it's either GraphDataset or GridDataset"
+                raise TypeError(msg)
 
             if dataset_val is not None:
                 self._check_dataset_value(
@@ -270,18 +288,25 @@ class Trainer:
                     type_dataset="test",
                 )
 
-    def _check_dataset_value(self, dataset_train, dataset_check, type_dataset):
+    def _check_dataset_value(
+        self,
+        dataset_train: GraphDataset | GridDataset,
+        dataset_check: GraphDataset | GridDataset,
+        type_dataset: str,
+    ) -> None:
         """Check valid/test dataset settings."""
         # Check train_source parameter in valid/test is set.
         if dataset_check.train_source is None:
-            raise ValueError(f"{type_dataset} dataset has train_source parameter set to None. Make sure to set it as a valid training data source.")
+            msg = f"{type_dataset} dataset has train_source parameter set to None. Make sure to set it as a valid training data source."
+            raise ValueError(msg)
         # Check train_source parameter in valid/test is equivalent to train which passed to Trainer.
         if dataset_check.train_source != dataset_train:
+            msg = f"{type_dataset} dataset has different train_source parameter from Trainer. Make sure to assign equivalent train_source in Trainer."
             raise ValueError(
-                f"{type_dataset} dataset has different train_source parameter from Trainer. Make sure to assign equivalent train_source in Trainer."
+                msg,
             )
 
-    def _load_pretrained_model(self):
+    def _load_pretrained_model(self) -> None:
         """Loads pretrained model."""
         self.test_loader = DataLoader(self.dataset_test, pin_memory=self.cuda)
         _log.info("Testing set loaded\n")
@@ -296,7 +321,7 @@ class Trainer:
         self.optimizer.load_state_dict(self.opt_loaded_state_dict)
         self.model.load_state_dict(self.model_load_state_dict)
 
-    def _precluster(self, dataset: GraphDataset):
+    def _precluster(self, dataset: GraphDataset) -> None:
         """Pre-clusters nodes of the graphs."""
         for fname, mol in tqdm(dataset.index_entries):
             data = dataset.load_one_graph(fname, mol)
@@ -306,7 +331,7 @@ class Trainer:
                 try:
                     _log.info(f"deleting {mol}")
                     del f5[mol]
-                except BaseException:  # noqa: BLE001 (blind-except)
+                except BaseException:  # noqa: BLE001
                     _log.info(f"{mol} not found")
                 f5.close()
                 continue
@@ -327,7 +352,7 @@ class Trainer:
 
             f5.close()
 
-    def _put_model_to_device(self, dataset: GraphDataset | GridDataset):
+    def _put_model_to_device(self, dataset: GraphDataset | GridDataset) -> None:
         """
         Puts the model on the available device.
 
@@ -372,10 +397,13 @@ class Trainer:
         # check for compatibility
         for output_exporter in self._output_exporters:
             if not output_exporter.is_compatible_with(self.output_shape, target_shape):
-                raise ValueError(
+                msg = (
                     f"Output exporter of type {type(output_exporter)}\n\t"
                     f"is not compatible with output shape {self.output_shape}\n\t"
                     f"and target shape {target_shape}."
+                )
+                raise ValueError(
+                    msg,
                 )
 
     def configure_optimizers(
@@ -383,7 +411,7 @@ class Trainer:
         optimizer: torch.optim = None,
         lr: float = 0.001,
         weight_decay: float = 1e-05,
-    ):
+    ) -> None:
         """
         Configure optimizer and its main parameters.
 
@@ -409,11 +437,11 @@ class Trainer:
                 _log.info("Invalid optimizer. Please use only optimizers classes from torch.optim package.")
                 raise
 
-    def set_lossfunction(
+    def set_lossfunction(  # noqa: C901
         self,
-        lossfunction=None,
+        lossfunction: nn.modules.loss._Loss | None = None,
         override_invalid: bool = False,
-    ):
+    ) -> None:
         """
         Set the loss function.
 
@@ -433,12 +461,12 @@ class Trainer:
         default_regression_loss = nn.MSELoss
         default_classification_loss = nn.CrossEntropyLoss
 
-        def _invalid_loss():
+        def _invalid_loss() -> None:
             if override_invalid:
                 _log.warning(
                     f"The provided loss function ({lossfunction}) is not appropriate for {self.task} tasks.\n\t"
                     "You have set override_invalid to True, so the training will run with this loss function nonetheless.\n\t"
-                    "This will likely cause other errors or exceptions down the line."
+                    "This will likely cause other errors or exceptions down the line.",
                 )
             else:
                 invalid_loss_error = (
@@ -490,7 +518,7 @@ class Trainer:
             else:
                 self.lossfunction = lossfunction  # weights will be set in the train() method
 
-    def train(  # noqa: PLR0915 (too-many-statements)
+    def train(  # noqa: PLR0915, C901
         self,
         nepoch: int = 1,
         batch_size: int = 32,
@@ -502,7 +530,7 @@ class Trainer:
         num_workers: int = 0,
         best_model: bool = True,
         filename: str | None = "model.pth.tar",
-    ):
+    ) -> None:
         """
         Performs the training of the model.
 
@@ -531,7 +559,8 @@ class Trainer:
                 If None, the model is not saved. Defaults to 'model.pth.tar'.
         """
         if self.dataset_train is None:
-            raise ValueError("No training dataset provided.")
+            msg = "No training dataset provided."
+            raise ValueError(msg)
 
         self.data_type = type(self.dataset_train)
         self.batch_size_train = batch_size
@@ -560,7 +589,7 @@ class Trainer:
             _log.info("No validation set provided\n")
             _log.warning(
                 "Training data will be used both for learning and model selection, which may lead to overfitting.\n"
-                "It is usually preferable to use a validation set during the training phase."
+                "It is usually preferable to use a validation set during the training phase.",
             )
 
         # Assign weights to each class
@@ -607,7 +636,8 @@ class Trainer:
             self._eval(self.train_loader, 0, "training")
             if validate:
                 if self.valid_loader is None:
-                    raise ValueError("No validation dataset provided.")
+                    msg = "No validation dataset provided."
+                    raise ValueError(msg)
                 self._eval(self.valid_loader, 0, "validation")
 
             # Loop over epochs
@@ -650,7 +680,7 @@ class Trainer:
                 if not saved_model:
                     warnings.warn(
                         "A model has been saved but the validation and/or the training losses were NaN;\n\t"
-                        "try to increase the cutoff distance during the data processing or the number of data points during the training."
+                        "try to increase the cutoff distance during the data processing or the number of data points during the training.",
                     )
 
         # Now that the training loop is over, save the model
@@ -680,7 +710,7 @@ class Trainer:
         t0 = time()
         for data_batch in self.train_loader:
             if self.cuda:
-                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901 (redefined-loop-name)
+                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901
             self.optimizer.zero_grad()
             pred = self.model(data_batch)
             pred, data_batch.y = self._format_output(pred, data_batch.y)
@@ -750,7 +780,7 @@ class Trainer:
         t0 = time()
         for data_batch in loader:
             if self.cuda:
-                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901 (redefined-loop-name)
+                data_batch = data_batch.to(self.device, non_blocking=True)  # noqa: PLW2901
             pred = self.model(data_batch)
             pred, y = self._format_output(pred, data_batch.y)
 
@@ -794,7 +824,7 @@ class Trainer:
         return eval_loss
 
     @staticmethod
-    def _log_epoch_data(stage: str, loss: float, time: float):
+    def _log_epoch_data(stage: str, loss: float, time: float) -> None:
         """
         Prints the data of each epoch.
 
@@ -805,7 +835,7 @@ class Trainer:
         """
         _log.info(f"{stage} loss {loss} | time {time}")
 
-    def _format_output(self, pred, target=None):
+    def _format_output(self, pred, target=None):  # noqa: ANN001, ANN202
         """Format the network output depending on the task (classification/regression)."""
         if (self.task == targets.CLASSIF) and (target is not None):
             # For categorical cross entropy, the target must be a one-dimensional tensor
@@ -813,16 +843,22 @@ class Trainer:
             target = torch.tensor([self.classes_to_index[x] if isinstance(x, str) else self.classes_to_index[int(x)] for x in target])
             if isinstance(self.lossfunction, nn.BCELoss | nn.BCEWithLogitsLoss):
                 # # pred must be in (0,1) range and target must be float with same shape as pred
-                raise ValueError(
+                msg = (
                     "BCELoss and BCEWithLogitsLoss are currently not supported.\n\t"
                     "For further details see: https://github.com/DeepRank/deeprank2/issues/318"
                 )
+                raise ValueError(
+                    msg,
+                )
 
             if isinstance(self.lossfunction, losses.classification_losses) and not isinstance(self.lossfunction, losses.classification_tested):
-                raise ValueError(
+                msg = (
                     f"{self.lossfunction} is currently not supported.\n\t"
                     f"Supported loss functions for classification: {losses.classification_tested}.\n\t"
                     "Implementation of other loss functions requires adaptation of Trainer._format_output."
+                )
+                raise ValueError(
+                    msg,
                 )
 
         elif self.task == targets.REGRESS:
@@ -837,7 +873,7 @@ class Trainer:
         self,
         batch_size: int = 32,
         num_workers: int = 0,
-    ):
+    ) -> None:
         """
         Performs the testing of the model.
 
@@ -848,7 +884,8 @@ class Trainer:
                         Defaults to 0.
         """
         if (not self.pretrained_model) and (not self.model_load_state_dict):
-            raise ValueError("No pretrained model provided and no training performed. Please provide a pretrained model or train the model before testing.")
+            msg = "No pretrained model provided and no training performed. Please provide a pretrained model or train the model before testing."
+            raise ValueError(msg)
 
         self.batch_size_test = batch_size
 
@@ -864,13 +901,14 @@ class Trainer:
             _log.info("Testing set loaded\n")
         else:
             _log.error("No test dataset provided.")
-            raise ValueError("No test dataset provided.")
+            msg = "No test dataset provided."
+            raise ValueError(msg)
 
         with self._output_exporters:
             # Run test
             self._eval(self.test_loader, self.epoch_saved_model, "testing")
 
-    def _load_params(self):
+    def _load_params(self) -> None:
         """Loads the parameters of a pretrained model."""
         if torch.cuda.is_available():
             state = torch.load(self.pretrained_model)
@@ -907,7 +945,7 @@ class Trainer:
         self.cuda = state["cuda"]
         self.ngpu = state["ngpu"]
 
-    def _save_model(self):
+    def _save_model(self) -> dict[str, Any]:
         """
         Saves the model to a file.
 
@@ -980,12 +1018,15 @@ def _divide_dataset(
     elif isinstance(splitsize, int):
         n_split = splitsize
     else:
-        raise TypeError(f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)")
+        msg = f"type(splitsize) must be float, int or None ({type(splitsize)} detected.)"
+        raise TypeError(msg)
 
     # raise exception if no training data or negative validation size
     if n_split >= full_size or n_split < 0:
+        msg = f"Invalid Split size: {n_split}.\n"
+        f"Split size must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)"
         raise ValueError(
-            f"Invalid splitsize: {n_split}. splitsize must be a float between 0 and 1 OR an int smaller than the size of the dataset ({full_size} datapoints)"
+            msg,
         )
 
     if splitsize == 0:  # i.e. the fraction of splitsize was so small that it rounded to <1 datapoint

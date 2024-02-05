@@ -7,23 +7,23 @@ from deeprank2.molstruct.structure import PDBStructure
 from deeprank2.utils.buildgraph import get_structure
 
 
-def _get_structure(path) -> PDBStructure:
+def _get_structure(path: str) -> PDBStructure:
     pdb = pdb2sql(path)
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     assert structure is not None
 
     return structure
 
 
-def test_serialization_pickle():
+def test_serialization_pickle() -> None:
     structure = _get_structure("tests/data/pdb/101M/101M.pdb")
 
     s = pickle.dumps(structure)
-    loaded_structure = pickle.loads(s)  # noqa: S301 (suspicious-pickle-usage)
+    loaded_structure = pickle.loads(s)  # noqa: S301
 
     assert loaded_structure == structure
     assert loaded_structure.get_chain("A") == structure.get_chain("A")
@@ -32,7 +32,7 @@ def test_serialization_pickle():
     assert loaded_structure.get_chain("A").get_residue(0).atoms[0] == structure.get_chain("A").get_residue(0).atoms[0]
 
 
-def test_serialization_fork():
+def test_serialization_fork() -> None:
     structure = _get_structure("tests/data/pdb/101M/101M.pdb")
 
     s = _ForkingPickler.dumps(structure)

@@ -10,13 +10,13 @@ from deeprank2.tools.target import add_target, compute_ppi_scores
 
 
 class TestTools(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.pdb_path = "./tests/data/pdb/1ATN/"
         self.pssm_path = "./tests/data/pssm/1ATN/1ATN.A.pdb.pssm"
         self.ref = "./tests/data/ref/1ATN/"
         self.h5_graphs = "tests/data/hdf5/1ATN_ppi.hdf5"
 
-    def test_add_target(self):
+    def test_add_target(self) -> None:
         f, target_path = tempfile.mkstemp(prefix="target", suffix=".lst")
         os.close(f)
         f, graph_path = tempfile.mkstemp(prefix="1ATN_ppi", suffix=".hdf5")
@@ -34,7 +34,7 @@ class TestTools(unittest.TestCase):
             os.remove(target_path)
             os.remove(graph_path)
 
-    def test_compute_ppi_scores(self):
+    def test_compute_ppi_scores(self) -> None:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
@@ -64,7 +64,7 @@ class TestTools(unittest.TestCase):
         assert scores["binary"] == binary
         assert scores["capri_class"] == capri
 
-    def test_compute_ppi_scores_same_struct(self):
+    def test_compute_ppi_scores_same_struct(self) -> None:
         scores = compute_ppi_scores(
             os.path.join(self.pdb_path, "1ATN_1w.pdb"),
             os.path.join(self.pdb_path, "1ATN_1w.pdb"),

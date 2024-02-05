@@ -72,11 +72,11 @@ def _get_nonbonded_energy(
     return E_elec, E_vdw
 
 
-def add_features(
-    pdb_path: str,  # noqa: ARG001 (unused argument)
+def add_features(  # noqa:D103
+    pdb_path: str,  # noqa: ARG001
     graph: Graph,
-    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001 (unused argument)
-):
+    single_amino_acid_variant: SingleResidueVariant | None = None,  # noqa: ARG001
+) -> None:
     # assign each atoms (from all edges) a unique index
     all_atoms = set()
     if isinstance(graph.edges[0].id, AtomicContact):
@@ -90,7 +90,8 @@ def add_features(
             for atom in contact.residue1.atoms + contact.residue2.atoms:
                 all_atoms.add(atom)
     else:
-        raise TypeError(f"Unexpected edge type: {type(graph.edges[0].id)}")
+        msg = f"Unexpected edge type: {type(graph.edges[0].id)}"
+        raise TypeError(msg)
 
     all_atoms = list(all_atoms)
     atom_dict = {atom: i for i, atom in enumerate(all_atoms)}

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -41,7 +42,7 @@ class Residue:
         self._insertion_code = insertion_code
         self._atoms = []
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, Residue):
             return self._chain == other._chain and self._number == other._number and self._insertion_code == other._insertion_code
         return NotImplemented
@@ -53,7 +54,8 @@ class Residue:
         """Load pssm info linked to the residue."""
         pssm = self._chain.pssm
         if pssm is None:
-            raise FileNotFoundError(f"No pssm file found for Chain {self._chain}.")
+            msg = f"No pssm file found for Chain {self._chain}."
+            raise FileNotFoundError(msg)
         return pssm[self]
 
     @property
@@ -83,7 +85,7 @@ class Residue:
     def insertion_code(self) -> str:
         return self._insertion_code
 
-    def add_atom(self, atom: Atom):
+    def add_atom(self, atom: Atom) -> None:
         self._atoms.append(atom)
 
     def __repr__(self) -> str:
@@ -110,19 +112,21 @@ class Residue:
             return alphas[0].position
 
         if len(self.atoms) == 0:
-            raise ValueError(f"Cannot get the center position from {self}, because it has no atoms")
+            msg = f"Cannot get the center position from {self}, because it has no atoms"
+            raise ValueError(msg)
 
         return np.mean([atom.position for atom in self.atoms], axis=0)
 
 
 class SingleResidueVariant:
-    def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
-        """A single residue mutation of a PDBStrcture.
+    """A single residue mutation of a PDBStrcture.
 
-        Args:
-            residue (Residue): the `Residue` object from the PDBStructure that is mutated.
-            variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.
-        """
+    Args:
+        residue (Residue): the `Residue` object from the PDBStructure that is mutated.
+        variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.
+    """
+
+    def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):
         self._residue = residue
         self._variant_amino_acid = variant_amino_acid
 

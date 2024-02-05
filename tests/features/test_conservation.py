@@ -8,7 +8,7 @@ from deeprank2.features.conservation import add_features
 from . import build_testgraph
 
 
-def test_conservation_residue():
+def test_conservation_residue() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
@@ -29,7 +29,7 @@ def test_conservation_residue():
         assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f"all 0s found for {feature_name}"
 
 
-def test_conservation_atom():
+def test_conservation_atom() -> None:
     pdb_path = "tests/data/pdb/101M/101M.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,
@@ -50,7 +50,7 @@ def test_conservation_atom():
         assert np.any([node.features[feature_name] != 0.0 for node in graph.nodes]), f"all 0s found for {feature_name}"
 
 
-def test_no_pssm_file_error():
+def test_no_pssm_file_error() -> None:
     pdb_path = "tests/data/pdb/1CRN/1CRN.pdb"
     graph, variant = build_testgraph(
         pdb_path=pdb_path,

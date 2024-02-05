@@ -2,6 +2,8 @@ import re
 from enum import Enum
 from typing import Any
 
+# ruff: noqa: D101
+
 
 class PatchActionType(Enum):
     MODIFY = 1
@@ -20,10 +22,10 @@ class PatchAction:
         self.selection = selection
         self.kwargs = kwargs
 
-    def __contains__(self, key):
+    def __contains__(self, key: str):
         return key in self.kwargs
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         return self.kwargs[key]
 
 
@@ -33,15 +35,16 @@ class PatchParser:
     ACTION_PATTERN = re.compile(r"^([A-Z]{3,4})\s+([A-Z]+)\s+ATOM\s+([A-Z0-9]{1,3})\s+(.*)$")
 
     @staticmethod
-    def _parse_action_type(s):
+    def _parse_action_type(s: str) -> PatchActionType:
         for type_ in PatchActionType:
             if type_.name == s:
                 return type_
 
-        raise ValueError(f"Unmatched residue action: {s!r}")
+        msg = f"Unmatched residue action: {s!r}"
+        raise ValueError(msg)
 
     @staticmethod
-    def parse(file_):
+    def parse(file_: str) -> list[PatchAction]:
         result = []
         for line in file_:
             if line.startswith(("#", "!")) or len(line.strip()) == 0:
@@ -49,7 +52,8 @@ class PatchParser:
 
             m = PatchParser.ACTION_PATTERN.match(line)
             if not m:
-                raise ValueError(f"Unmatched patch action: {line!r}")
+                msg = f"Unmatched patch action: {line!r}"
+                raise ValueError(msg)
 
             residue_type = m.group(1)
             action_type = PatchParser._parse_action_type(m.group(2))

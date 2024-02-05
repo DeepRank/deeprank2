@@ -5,12 +5,12 @@ from deeprank2.utils.buildgraph import get_structure
 from deeprank2.utils.parsing import atomic_forcefield
 
 
-def test_atomic_forcefield():
+def test_atomic_forcefield() -> None:
     pdb = pdb2sql("tests/data/pdb/101M/101M.pdb")
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     # The arginine C-zeta should get a positive charge
     arg = next(r for r in structure.get_chain("A").residues if r.amino_acid == arginine)

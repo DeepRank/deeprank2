@@ -4,6 +4,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 import numpy as np
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -15,7 +16,7 @@ class AtomicElement(Enum):
     """One-hot encoding of the atomic element (or atom type)."""
 
     C = 1
-    O = 2  # noqa: E741 (ambiguous-variable-name)
+    O = 2  # noqa: E741
     N = 3
     S = 4
     P = 5
@@ -29,6 +30,19 @@ class AtomicElement(Enum):
 
 
 class Atom:
+    """One atom in a PDBStructure.
+
+    Args:
+        residue (:class:`Residue`): The residue that this atom belongs to.
+        name (str): Pdb atom name.
+        element (:class:`AtomicElement`): The chemical element.
+        position (np.array): Pdb position xyz of this atom.
+        occupancy (float): Pdb occupancy value.
+            This represents the proportion of structures where the atom is detected at a given position.
+            Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
+            Note that only the highest occupancy atom is used by deeprank2 (see tools.pdb._add_atom_to_residue).
+    """
+
     def __init__(
         self,
         residue: Residue,
@@ -37,25 +51,13 @@ class Atom:
         position: NDArray,
         occupancy: float,
     ):
-        """One atom in a PDBStructure.
-
-        Args:
-            residue (:class:`Residue`): The residue that this atom belongs to.
-            name (str): Pdb atom name.
-            element (:class:`AtomicElement`): The chemical element.
-            position (np.array): Pdb position xyz of this atom.
-            occupancy (float): Pdb occupancy value.
-                This represents the proportion of structures where the atom is detected at a given position.
-                Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
-                Note that only the highest occupancy atom is used by deeprank2 (see tools.pdb._add_atom_to_residue).
-        """
         self._residue = residue
         self._name = name
         self._element = element
         self._position = position
         self._occupancy = occupancy
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, Atom):
             return self._residue == other._residue and self._name == other._name
         return NotImplemented
@@ -66,7 +68,7 @@ class Atom:
     def __repr__(self) -> str:
         return f"{self._residue} {self._name}"
 
-    def change_altloc(self, alternative_atom: Atom):
+    def change_altloc(self, alternative_atom: Atom) -> None:
         """Replace the atom's location by another atom's location."""
         self._position = alternative_atom.position
         self._occupancy = alternative_atom.occupancy

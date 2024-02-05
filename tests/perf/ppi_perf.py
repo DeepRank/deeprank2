@@ -28,8 +28,8 @@ grid_settings = GridSettings(  # None if you don't want grids
     sizes=[1.0, 1.0, 1.0],
 )
 grid_map_method = MapMethod.GAUSSIAN  # None if you don't want grids
-# grid_settings = None  # noqa: ERA001 (commented out code)
-# grid_map_method = None  # noqa: ERA001 (commented out code)
+# grid_settings = None  # noqa: ERA001
+# grid_map_method = None  # noqa: ERA001
 feature_modules = [components, contact, exposure, irc, secondary_structure, surfacearea]
 cpu_count = 1
 ####################################################
@@ -41,7 +41,7 @@ if not os.path.exists(os.path.join(processed_data_path, "atomic")):
     os.makedirs(os.path.join(processed_data_path, "atomic"))
 
 
-def get_pdb_files_and_target_data(data_path):
+def get_pdb_files_and_target_data(data_path: str) -> (list[str], list):
     csv_data = pd.read_csv(os.path.join(data_path, "BA_values.csv"))
     pdb_files = glob.glob(os.path.join(data_path, "pdb", "*.pdb"))
     pdb_files.sort()
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                     "binary": int(float(bas[i]) <= 500),  # binary target value
                     "BA": bas[i],  # continuous target value
                 },
-            )
+            ),
         )
 
         start = time.perf_counter()

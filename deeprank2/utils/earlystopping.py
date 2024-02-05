@@ -2,6 +2,25 @@ from collections.abc import Callable
 
 
 class EarlyStopping:
+    """Terminate training upon trigger.
+
+    Triggered if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
+
+    Args:
+        patience (int, optional): How long to wait after last time validation loss improved.
+            Defaults to 10.
+        delta (float, optional): Minimum change required to reset the early stopping counter.
+            Defaults to 0.
+        maxgap (float, optional): Maximum difference between between training and validation loss.
+            Defaults to None.
+        min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
+            Defaults to 10.
+        verbose (bool, optional): If True, prints a message for each validation loss improvement.
+            Defaults to True.
+        trace_func (Callable, optional): Function used for recording EarlyStopping status.
+            Defaults to print.
+    """
+
     def __init__(
         self,
         patience: int = 10,
@@ -11,24 +30,6 @@ class EarlyStopping:
         verbose: bool = True,
         trace_func: Callable = print,
     ):
-        """Terminate training upon trigger.
-
-        Triggered if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
-
-        Args:
-            patience (int, optional): How long to wait after last time validation loss improved.
-                Defaults to 10.
-            delta (float, optional): Minimum change required to reset the early stopping counter.
-                Defaults to 0.
-            maxgap (float, optional): Maximum difference between between training and validation loss.
-                Defaults to None.
-            min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
-                Defaults to 10.
-            verbose (bool, optional): If True, prints a message for each validation loss improvement.
-                Defaults to True.
-            trace_func (Callable, optional): Function used for recording EarlyStopping status.
-                Defaults to print.
-        """
         self.patience = patience
         self.delta = delta
         self.maxgap = maxgap
@@ -41,7 +42,12 @@ class EarlyStopping:
         self.best_score = None
         self.val_loss_min = None
 
-    def __call__(self, epoch, val_loss, train_loss=None):
+    def __call__(  # noqa: C901
+        self,
+        epoch: int,
+        val_loss: float,
+        train_loss: float | None = None,
+    ):
         score = -val_loss
 
         # initialize
@@ -53,13 +59,12 @@ class EarlyStopping:
         elif score < self.best_score + self.delta:
             self.counter += 1
             if self.verbose:
+                extra_trace = ""
                 if self.delta:
                     extra_trace = f"more than {self.delta} "
-                else:
-                    extra_trace = ""
                 self.trace_func(
                     f"Validation loss did not decrease {extra_trace}({self.val_loss_min:.6f} --> {val_loss:.6f}). "
-                    f"EarlyStopping counter: {self.counter} out of {self.patience}"
+                    f"EarlyStopping counter: {self.counter} out of {self.patience}",
                 )
             if self.counter >= self.patience:
                 self.trace_func(f"EarlyStopping activated at epoch # {epoch} because patience of {self.patience} has been reached.")
@@ -77,12 +82,13 @@ class EarlyStopping:
         # check maxgap
         if self.maxgap and epoch > self.min_epoch:
             if train_loss is None:
-                raise ValueError("Cannot compute gap because no train_loss is provided to EarlyStopping.")
+                msg = "Cannot compute gap because no train_loss is provided to EarlyStopping."
+                raise ValueError(msg)
             gap = val_loss - train_loss
             if gap > self.maxgap:
                 self.trace_func(
                     f"EarlyStopping activated at epoch # {epoch} due to overfitting. "
-                    f"The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})"
+                    f"The difference between validation and training loss of {gap} exceeds the maximum allowed ({self.maxgap})",
                 )
                 self.early_stop = True
 

@@ -11,14 +11,16 @@ from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.nn.pool.pool import pool_batch, pool_edge
 from torch_scatter import scatter_max, scatter_mean
 
+# ruff: noqa: ANN001, ANN201 (missing type hints and return types)
 
-def plot_graph(graph, cluster):
+
+def plot_graph(graph, cluster) -> None:  # noqa:D103
     pos = nx.spring_layout(graph, iterations=200)
     nx.draw(graph, pos, node_color=cluster)
     plt.show()
 
 
-def get_preloaded_cluster(cluster, batch):
+def get_preloaded_cluster(cluster, batch):  # noqa:D103
     nbatch = torch.max(batch) + 1
     for ib in range(1, nbatch):
         cluster[batch == ib] += torch.max(cluster[batch == ib - 1]) + 1
@@ -85,7 +87,8 @@ def community_detection_per_batch(
             ncluster = max(cluster)
 
         else:
-            raise ValueError(f"Clustering method {method} not supported")
+            msg = f"Clustering method {method} not supported"
+            raise ValueError(msg)
     device = edge_index.device
     return torch.tensor(cluster).to(device)
 
@@ -155,7 +158,8 @@ def community_detection(
 
         return torch.tensor(index).to(device)
 
-    raise ValueError(f"Clustering method {method} not supported")
+    msg = f"Clustering method {method} not supported"
+    raise ValueError(msg)
 
 
 def community_pooling(cluster, data):

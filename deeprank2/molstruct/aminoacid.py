@@ -2,6 +2,7 @@ from enum import Enum
 
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import Self
 
 
 class Polarity(Enum):
@@ -13,13 +14,29 @@ class Polarity(Enum):
     POSITIVE = 3
 
     @property
-    def onehot(self):
+    def onehot(self) -> NDArray:
         t = np.zeros(4)
         t[self.value] = 1.0
         return t
 
 
 class AminoAcid:
+    """An amino acid represents the type of `Residue` in a `PDBStructure`.
+
+    Args:
+        name (str): Full name of the amino acid.
+        three_letter_code (str): Three-letter code of the amino acid (as in PDB).
+        one_letter_code (str): One-letter of the amino acid (as in fasta).
+        charge (int): Charge of the amino acid.
+        polarity (:class:`Polarity`): The polarity of the amino acid.
+        size (int): The number of non-hydrogen atoms in the side chain.
+        mass (float): Average residue mass (i.e. mass of amino acid - H20) in Daltons.
+        pI (float): Isolectric point; pH at which the molecule has no net electric charge.
+        hydrogen_bond_donors (int): Number of hydrogen bond donors.
+        hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
+        index (int): The rank of the amino acid, used for computing one-hot encoding.
+    """
+
     def __init__(
         self,
         name: str,
@@ -34,21 +51,6 @@ class AminoAcid:
         hydrogen_bond_acceptors: int,
         index: int,
     ):
-        """An amino acid represents the type of `Residue` in a `PDBStructure`.
-
-        Args:
-            name (str): Full name of the amino acid.
-            three_letter_code (str): Three-letter code of the amino acid (as in PDB).
-            one_letter_code (str): One-letter of the amino acid (as in fasta).
-            charge (int): Charge of the amino acid.
-            polarity (:class:`Polarity`): The polarity of the amino acid.
-            size (int): The number of non-hydrogen atoms in the side chain.
-            mass (float): Average residue mass (i.e. mass of amino acid - H20) in Daltons.
-            pI (float): Isolectric point; pH at which the molecule has no net electric charge.
-            hydrogen_bond_donors (int): Number of hydrogen bond donors.
-            hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
-            index (int): The rank of the amino acid, used for computing one-hot encoding.
-        """
         # amino acid nomenclature
         self._name = name
         self._three_letter_code = three_letter_code
@@ -109,7 +111,8 @@ class AminoAcid:
     @property
     def onehot(self) -> NDArray:
         if self._index is None:
-            raise ValueError(f"Amino acid {self._name} index is not set, thus no onehot can be computed.")
+            msg = f"Amino acid {self._name} index is not set, thus no onehot can be computed."
+            raise ValueError(msg)
         # 20 canonical amino acids
         # selenocysteine and pyrrolysine are indexed as cysteine and lysine, respectively
         a = np.zeros(20)
@@ -123,7 +126,7 @@ class AminoAcid:
     def __hash__(self) -> hash:
         return hash(self.name)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if isinstance(other, AminoAcid):
             return other.name == self.name
         return NotImplemented

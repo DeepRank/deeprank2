@@ -1,10 +1,12 @@
 import torch
 from torch import nn
 
+# ruff: noqa: ANN001, ANN201
+
 __author__ = "Daniel-Tobias Rademaker"
 
 
-class GNNLayer(nn.Module):
+class GNNLayer(nn.Module):  # noqa: D101
     def __init__(
         self,
         nmb_edge_projection,
@@ -12,7 +14,7 @@ class GNNLayer(nn.Module):
         nmb_output_features,
         message_vector_length,
         nmb_mlp_neurons,
-        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
+        act_fn=nn.SiLU(),  # noqa: B008
         is_last_layer=True,
     ):
         super().__init__()
@@ -102,7 +104,7 @@ class GNNLayer(nn.Module):
         return output
 
 
-class SuperGNN(nn.Module):
+class SuperGNN(nn.Module):  # noqa: D101
     def __init__(
         self,
         nmb_edge_attr,
@@ -113,7 +115,7 @@ class SuperGNN(nn.Module):
         nmb_gnn_layers,
         nmb_output_features,
         message_vector_length,
-        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
+        act_fn=nn.SiLU(),  # noqa: B008
     ):
         super().__init__()
 
@@ -149,7 +151,7 @@ class SuperGNN(nn.Module):
                     is_last_layer=(gnn_layer == (nmb_gnn_layers - 1)),
                 )
                 for gnn_layer in range(nmb_gnn_layers)
-            ]
+            ],
         )
 
     # always use this function before running the GNN layers
@@ -165,12 +167,12 @@ class SuperGNN(nn.Module):
         for layer in self.modlist:
             node_attr = layer.update_nodes(edges, edge_attr, node_attr)
         if with_output_attention:
-            representations, attention = self.modlist[-1].output(node_attr, True)  # noqa: FBT003 (boolean-positional-value-in-call)
+            representations, attention = self.modlist[-1].output(node_attr, True)  # (boolean-positional-value-in-call)
             return representations, attention
-        return self.modlist[-1].output(node_attr, True)  # noqa: FBT003 (boolean-positional-value-in-call)
+        return self.modlist[-1].output(node_attr, True)  # (boolean-positional-value-in-call)
 
 
-class AlignmentGNN(SuperGNN):
+class AlignmentGNN(SuperGNN):  # noqa: D101
     def __init__(
         self,
         nmb_edge_attr,
@@ -181,7 +183,7 @@ class AlignmentGNN(SuperGNN):
         nmb_mlp_neurons,
         nmb_gnn_layers,
         nmb_edge_projection,
-        act_fn=nn.SiLU(),  # noqa: B008 (function-call-in-default-argument)
+        act_fn=nn.SiLU(),  # noqa: B008
     ):
         super().__init__(
             nmb_edge_attr,

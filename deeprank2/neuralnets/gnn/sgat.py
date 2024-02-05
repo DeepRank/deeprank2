@@ -8,6 +8,8 @@ from torch_scatter import scatter_mean
 
 from deeprank2.utils.community_pooling import community_pooling, get_preloaded_cluster
 
+# ruff: noqa: ANN001, ANN201
+
 
 class SGraphAttentionLayer(torch.nn.Module):
     """SGraphAttentionLayer.
@@ -23,9 +25,15 @@ class SGraphAttentionLayer(torch.nn.Module):
         out_channels (int): Size of each output sample.
         bias (bool, optional): If set to :obj:`False`, the layer will not learn
             an additive bias. Defaults to True.
-    """  # noqa: D301 (escape-sequence-in-docstring)
+    """  # noqa: D301
 
-    def __init__(self, in_channels: int, out_channels: int, bias: bool = True, undirected=True):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        bias: bool = True,
+        undirected: bool = True,
+    ):
         super().__init__()
 
         self.in_channels = in_channels
@@ -41,7 +49,7 @@ class SGraphAttentionLayer(torch.nn.Module):
 
         self.reset_parameters()
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         size = 2 * self.in_channels
         uniform(size, self.weight)
         uniform(size, self.bias)
@@ -80,12 +88,12 @@ class SGraphAttentionLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class SGAT(torch.nn.Module):
+class SGAT(torch.nn.Module):  # noqa:D101
     def __init__(
         self,
         input_shape,
         output_shape=1,
-        input_shape_edge=None,  # noqa: ARG002 (unused argument)
+        input_shape_edge=None,  # noqa: ARG002
     ):
         super().__init__()
 

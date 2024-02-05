@@ -11,11 +11,11 @@ from deeprank2.utils.parsing import atomic_forcefield
 _log = logging.getLogger(__name__)
 
 
-def add_features(
-    pdb_path: str,  # noqa: ARG001 (unused argument)
+def add_features(  # noqa:D103
+    pdb_path: str,  # noqa: ARG001
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
-):
+) -> None:
     for node in graph.nodes:
         if isinstance(node.id, Residue):
             residue = node.id
@@ -27,7 +27,8 @@ def add_features(
             node.features[Nfeat.PDBOCCUPANCY] = atom.occupancy
             node.features[Nfeat.ATOMCHARGE] = atomic_forcefield.get_charge(atom)
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         node.features[Nfeat.RESTYPE] = residue.amino_acid.onehot
         node.features[Nfeat.RESCHARGE] = residue.amino_acid.charge

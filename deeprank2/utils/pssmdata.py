@@ -1,4 +1,7 @@
+from typing_extensions import Self
+
 from deeprank2.molstruct.aminoacid import AminoAcid
+from deeprank2.molstruct.residue import Residue
 
 
 class PssmRow:
@@ -33,12 +36,12 @@ class PssmTable:
         else:
             self._rows = rows
 
-    def __contains__(self, residue) -> bool:
+    def __contains__(self, residue: Residue) -> bool:
         return residue in self._rows
 
-    def __getitem__(self, residue) -> PssmRow:
+    def __getitem__(self, residue: Residue) -> PssmRow:
         return self._rows[residue]
 
-    def update(self, other):
+    def update(self, other: Self) -> None:
         """Can be used to merge two non-overlapping scoring tables."""
-        self._rows.update(other._rows)  # noqa: SLF001 (private-member-access)
+        self._rows.update(other._rows)  # noqa: SLF001

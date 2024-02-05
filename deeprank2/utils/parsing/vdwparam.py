@@ -1,4 +1,4 @@
-class VanderwaalsParam:
+class VanderwaalsParam:  # noqa: D101
     def __init__(
         self,
         epsilon_main: float,
@@ -15,9 +15,9 @@ class VanderwaalsParam:
         return f"{self.epsilon_main}, {self.sigma_main}, {self.epsilon_14}, {self.sigma_14}"
 
 
-class ParamParser:
+class ParamParser:  # noqa: D101
     @staticmethod
-    def parse(file_):
+    def parse(file_: str) -> dict[str, VanderwaalsParam]:
         result = {}
         for line in file_:
             if line.startswith("#"):
@@ -42,6 +42,7 @@ class ParamParser:
             elif len(line.strip()) == 0:
                 continue
             else:
-                raise ValueError(f"Unparsable param line: {line}")
+                msg = f"Unparsable param line: {line}"
+                raise ValueError(msg)
 
         return result

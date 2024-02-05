@@ -57,8 +57,9 @@ class GridSettings:
         points_counts: list[int],
         sizes: list[float],
     ):
-        if len(points_counts) != 3 or len(sizes) != 3:
-            raise ValueError("Incorrect grid dimensions.")
+        if len(points_counts) != 3 or len(sizes) != 3:  # noqa:PLR2004
+            msg = "Incorrect grid dimensions."
+            raise ValueError(msg)
 
         self._points_counts = points_counts
         self._sizes = sizes
@@ -93,7 +94,7 @@ class Grid:
         self._set_mesh(self._center, settings)
         self._features = {}
 
-    def _set_mesh(self, center: NDArray, settings: GridSettings):
+    def _set_mesh(self, center: NDArray, settings: GridSettings) -> None:
         """Builds the grid points."""
         half_size_x = settings.sizes[0] / 2
         half_size_y = settings.sizes[1] / 2
@@ -145,7 +146,7 @@ class Grid:
     def features(self) -> dict[str, NDArray]:
         return self._features
 
-    def add_feature_values(self, feature_name: str, data: NDArray):
+    def add_feature_values(self, feature_name: str, data: NDArray) -> None:
         """Makes sure feature values per grid point get stored.
 
         This method may be called repeatedly to add on to existing grid point values.
@@ -269,7 +270,7 @@ class Grid:
         feature_name: str,
         feature_value: NDArray | float,
         method: MapMethod,
-    ):
+    ) -> None:
         """Maps point feature data at a given position to the grid, using the given method.
 
         The feature_value should either be a single number or a one-dimensional array.
@@ -304,7 +305,7 @@ class Grid:
             # set to grid
             self.add_feature_values(index_name, grid_data)
 
-    def to_hdf5(self, hdf5_path: str):
+    def to_hdf5(self, hdf5_path: str) -> None:
         """Write the grid data to hdf5, according to deeprank standards."""
         with h5py.File(hdf5_path, "a") as hdf5_file:
             # create a group to hold everything

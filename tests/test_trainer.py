@@ -39,20 +39,20 @@ default_features = [
 
 
 def _model_base_test(
-    save_path,
-    model_class,
-    train_hdf5_path,
-    val_hdf5_path,
-    test_hdf5_path,
-    node_features,
-    edge_features,
-    task,
-    target,
-    target_transform,
-    output_exporters,
-    clustering_method,
-    use_cuda=False,
-):
+    save_path: str,
+    model_class: torch.nn.Module,
+    train_hdf5_path: str,
+    val_hdf5_path: str,
+    test_hdf5_path: str,
+    node_features: list[str],
+    edge_features: list[str],
+    task: str,
+    target: str,
+    target_transform: bool,
+    output_exporters: list[HDF5OutputExporter],
+    clustering_method: str,
+    use_cuda: bool = False,
+) -> None:
     dataset_train = GraphDataset(
         hdf5_path=train_hdf5_path,
         node_features=node_features,
@@ -128,15 +128,15 @@ def _model_base_test(
 
 class TestTrainer(unittest.TestCase):
     @classmethod
-    def setUpClass(class_):
+    def setUpClass(class_) -> None:
         class_.work_directory = tempfile.mkdtemp()
         class_.save_path = class_.work_directory + "test.tar"
 
     @classmethod
-    def tearDownClass(class_):
+    def tearDownClass(class_) -> None:
         shutil.rmtree(class_.work_directory)
 
-    def test_grid_regression(self):
+    def test_grid_regression(self) -> None:
         dataset = GridDataset(
             hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
             subset=None,
@@ -147,7 +147,7 @@ class TestTrainer(unittest.TestCase):
         trainer = Trainer(CnnRegression, dataset)
         trainer.train(nepoch=1, batch_size=2, best_model=False, filename=None)
 
-    def test_grid_classification(self):
+    def test_grid_classification(self) -> None:
         dataset = GridDataset(
             hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
             subset=None,
@@ -163,7 +163,7 @@ class TestTrainer(unittest.TestCase):
             filename=None,
         )
 
-    def test_ginet_sigmoid(self):
+    def test_ginet_sigmoid(self) -> None:
         files = glob.glob(self.work_directory + "/*")
         for f in files:
             os.remove(f)
@@ -185,7 +185,7 @@ class TestTrainer(unittest.TestCase):
         )
         assert len(os.listdir(self.work_directory)) > 0
 
-    def test_ginet(self):
+    def test_ginet(self) -> None:
         files = glob.glob(self.work_directory + "/*")
         for f in files:
             os.remove(f)
@@ -207,7 +207,7 @@ class TestTrainer(unittest.TestCase):
         )
         assert len(os.listdir(self.work_directory)) > 0
 
-    def test_ginet_class(self):
+    def test_ginet_class(self) -> None:
         files = glob.glob(self.work_directory + "/*")
         for f in files:
             os.remove(f)
@@ -230,7 +230,7 @@ class TestTrainer(unittest.TestCase):
 
         assert len(os.listdir(self.work_directory)) > 0
 
-    def test_fout(self):
+    def test_fout(self) -> None:
         files = glob.glob(self.work_directory + "/*")
         for f in files:
             os.remove(f)
@@ -252,7 +252,7 @@ class TestTrainer(unittest.TestCase):
         )
         assert len(os.listdir(self.work_directory)) > 0
 
-    def test_sgat(self):
+    def test_sgat(self) -> None:
         files = glob.glob(self.work_directory + "/*")
         for f in files:
             os.remove(f)
@@ -274,7 +274,7 @@ class TestTrainer(unittest.TestCase):
         )
         assert len(os.listdir(self.work_directory)) > 0
 
-    def test_naive(self):
+    def test_naive(self) -> None:
         files = glob.glob(self.work_directory + "/*")
         for f in files:
             os.remove(f)
@@ -296,7 +296,7 @@ class TestTrainer(unittest.TestCase):
         )
         assert len(os.listdir(self.work_directory)) > 0
 
-    def test_incompatible_regression(self):
+    def test_incompatible_regression(self) -> None:
         with pytest.raises(ValueError):
             _model_base_test(
                 self.save_path,
@@ -313,7 +313,7 @@ class TestTrainer(unittest.TestCase):
                 "mcl",
             )
 
-    def test_incompatible_classification(self):
+    def test_incompatible_classification(self) -> None:
         with pytest.raises(ValueError):
             _model_base_test(
                 self.save_path,
@@ -336,7 +336,7 @@ class TestTrainer(unittest.TestCase):
                 "mcl",
             )
 
-    def test_incompatible_no_pretrained_no_train(self):
+    def test_incompatible_no_pretrained_no_train(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
@@ -348,13 +348,13 @@ class TestTrainer(unittest.TestCase):
                 dataset_test=dataset,
             )
 
-    def test_incompatible_no_pretrained_no_Net(self):
+    def test_incompatible_no_pretrained_no_Net(self) -> None:
         with pytest.raises(ValueError):
             _ = GraphDataset(
                 hdf5_path="tests/data/hdf5/test.hdf5",
             )
 
-    def test_incompatible_no_pretrained_no_target(self):
+    def test_incompatible_no_pretrained_no_target(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
@@ -364,7 +364,7 @@ class TestTrainer(unittest.TestCase):
                 dataset_train=dataset,
             )
 
-    def test_incompatible_pretrained_no_test(self):
+    def test_incompatible_pretrained_no_test(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             clustering_method="mcl",
@@ -384,7 +384,7 @@ class TestTrainer(unittest.TestCase):
                 pretrained_model=self.save_path,
             )
 
-    def test_incompatible_pretrained_no_Net(self):
+    def test_incompatible_pretrained_no_Net(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             clustering_method="mcl",
@@ -400,7 +400,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             Trainer(dataset_test=dataset, pretrained_model=self.save_path)
 
-    def test_no_training_no_pretrained(self):
+    def test_no_training_no_pretrained(self) -> None:
         dataset_train = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             clustering_method="mcl",
@@ -417,7 +417,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             trainer.test()
 
-    def test_no_valid_provided(self):
+    def test_no_valid_provided(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             clustering_method="mcl",
@@ -431,7 +431,7 @@ class TestTrainer(unittest.TestCase):
         assert len(trainer.train_loader) == int(0.75 * len(dataset))
         assert len(trainer.valid_loader) == int(0.25 * len(dataset))
 
-    def test_no_test_provided(self):
+    def test_no_test_provided(self) -> None:
         dataset_train = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             clustering_method="mcl",
@@ -447,7 +447,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             trainer.test()
 
-    def test_no_valid_full_train(self):
+    def test_no_valid_full_train(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             clustering_method="mcl",
@@ -462,7 +462,7 @@ class TestTrainer(unittest.TestCase):
         assert len(trainer.train_loader) == len(dataset)
         assert trainer.valid_loader is None
 
-    def test_optim(self):
+    def test_optim(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
@@ -493,7 +493,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer_pretrained.lr == lr
         assert trainer_pretrained.weight_decay == weight_decay
 
-    def test_default_optim(self):
+    def test_default_optim(self) -> None:
         dataset = GraphDataset(
             hdf5_path="tests/data/hdf5/test.hdf5",
             target=targets.BINARY,
@@ -507,7 +507,7 @@ class TestTrainer(unittest.TestCase):
         assert trainer.lr == 0.001
         assert trainer.weight_decay == 1e-05
 
-    def test_cuda(self):  # test_ginet, but with cuda
+    def test_cuda(self) -> None:  # test_ginet, but with cuda
         if torch.cuda.is_available():
             files = glob.glob(self.work_directory + "/*")
             for f in files:
@@ -535,7 +535,7 @@ class TestTrainer(unittest.TestCase):
             warnings.warn("CUDA is not available; test_cuda was skipped")
             _log.info("CUDA is not available; test_cuda was skipped")
 
-    def test_dataset_equivalence_no_pretrained(self):
+    def test_dataset_equivalence_no_pretrained(self) -> None:
         # TestCase: dataset_train set (no pretrained model assigned).
 
         # Raise error when train dataset is neither a GraphDataset or GridDataset.
@@ -575,7 +575,7 @@ class TestTrainer(unittest.TestCase):
                 dataset_test=dataset_test,
             )
 
-    def test_dataset_equivalence_pretrained(self):
+    def test_dataset_equivalence_pretrained(self) -> None:
         # TestCase: No dataset_train set (pretrained model assigned).
         # Raise error when no dataset_test is set.
 
@@ -598,7 +598,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             Trainer(neuralnet=GINet, pretrained_model=self.save_path)
 
-    def test_trainsize(self):
+    def test_trainsize(self) -> None:
         hdf5 = "tests/data/hdf5/train.hdf5"
         hdf5_file = h5py.File(hdf5, "r")  # contains 44 datapoints
         n_val = int(0.25 * len(hdf5_file))
@@ -615,7 +615,7 @@ class TestTrainer(unittest.TestCase):
 
         hdf5_file.close()
 
-    def test_invalid_trainsize(self):
+    def test_invalid_trainsize(self) -> None:
         hdf5 = "tests/data/hdf5/train.hdf5"
         hdf5_file = h5py.File(hdf5, "r")  # contains 44 datapoints
         n = len(hdf5_file)
@@ -629,7 +629,7 @@ class TestTrainer(unittest.TestCase):
         ]
 
         for t in test_cases:
-            print(t)
+            print(t)  # noqa: T201, print in case it fails we can see on which one it failed
             with pytest.raises(ValueError):
                 _divide_dataset(
                     dataset=GraphDataset(hdf5_path=hdf5),
@@ -638,7 +638,7 @@ class TestTrainer(unittest.TestCase):
 
         hdf5_file.close()
 
-    def test_invalid_cuda_ngpus(self):
+    def test_invalid_cuda_ngpus(self) -> None:
         dataset_train = GraphDataset(hdf5_path="tests/data/hdf5/test.hdf5", target=targets.BINARY)
         dataset_val = GraphDataset(hdf5_path="tests/data/hdf5/test.hdf5", train_source=dataset_train)
 
@@ -650,7 +650,7 @@ class TestTrainer(unittest.TestCase):
                 ngpu=2,
             )
 
-    def test_invalid_no_cuda_available(self):
+    def test_invalid_no_cuda_available(self) -> None:
         if not torch.cuda.is_available():
             dataset_train = GraphDataset(hdf5_path="tests/data/hdf5/test.hdf5", target=targets.BINARY)
             dataset_val = GraphDataset(hdf5_path="tests/data/hdf5/test.hdf5", train_source=dataset_train)
@@ -667,7 +667,7 @@ class TestTrainer(unittest.TestCase):
             warnings.warn("CUDA is available; test_invalid_no_cuda_available was skipped")
             _log.info("CUDA is available; test_invalid_no_cuda_available was skipped")
 
-    def test_train_method_no_train(self):
+    def test_train_method_no_train(self) -> None:
         # Graphs data
         test_data_graph = "tests/data/hdf5/test.hdf5"
         pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
@@ -696,7 +696,7 @@ class TestTrainer(unittest.TestCase):
         with pytest.raises(ValueError):
             trainer.train()
 
-    def test_test_method_pretrained_model_on_dataset_with_target(self):
+    def test_test_method_pretrained_model_on_dataset_with_target(self) -> None:
         # Graphs data
         test_data_graph = "tests/data/hdf5/test.hdf5"
         pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
@@ -733,7 +733,7 @@ class TestTrainer(unittest.TestCase):
         output = pd.read_hdf("output_exporter.hdf5", key="testing")
         assert len(output) == len(dataset_test)
 
-    def test_test_method_pretrained_model_on_dataset_without_target(self):
+    def test_test_method_pretrained_model_on_dataset_without_target(self) -> None:
         # Graphs data
         test_data_graph = "tests/data/hdf5/test_no_target.hdf5"
         pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"

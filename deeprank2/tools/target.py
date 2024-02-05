@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 
 import h5py
@@ -7,13 +8,16 @@ from pdb2sql import StructureSimilarity
 
 from deeprank2.domain import targetstorage as targets
 
+_log = logging.getLogger(__name__)
+MIN_IRMS_FOR_BINARY = 4
 
-def add_target(
+
+def add_target(  # noqa: C901
     graph_path: str | list[str],
     target_name: str,
     target_list: str,
     sep: str = " ",
-):
+) -> None:
     """Add a target to all the graphs in hdf5 files.
 
     Args:
@@ -45,18 +49,21 @@ def add_target(
     elif isinstance(graph_path, list):
         graphs = graph_path
     else:
-        raise TypeError("Incorrect input passed.")
+        msg = "Incorrect input passed."
+        raise TypeError(msg)
 
     for hdf5 in graphs:
-        print(hdf5)
+        _log.info(hdf5)
         if not os.path.isfile(hdf5):
-            raise FileNotFoundError(f"File {hdf5} not found.")
+            msg = f"File {hdf5} not found."
+            raise FileNotFoundError(msg)
 
         try:
             f5 = h5py.File(hdf5, "a")
             for model in target_dict:
                 if model not in f5:
-                    raise ValueError(f"{hdf5} does not contain an entry named {model}.")  # noqa: TRY301 (raise-within-try)
+                    msg = f"{hdf5} does not contain an entry named {model}."
+                    raise ValueError(msg)  # noqa: TRY301
                 try:
                     model_gp = f5[model]
                     if targets.VALUES not in model_gp:
@@ -67,12 +74,12 @@ def add_target(
                         del group[target_name]
                     # Create the target
                     group.create_dataset(target_name, data=target_dict[model])
-                except BaseException:  # noqa: BLE001 (blind-except)
-                    print(f"no graph for {model}")
+                except BaseException:  # noqa: BLE001
+                    _log.info(f"no graph for {model}")
             f5.close()
 
-        except BaseException:  # noqa: BLE001 (blind-except)
-            print(f"no graph for {hdf5}")
+        except BaseException:  # noqa: BLE001
+            _log.info(f"no graph for {hdf5}")
 
 
 def compute_ppi_scores(
@@ -113,7 +120,7 @@ def compute_ppi_scores(
 
     scores[targets.FNAT] = sim.compute_fnat_fast()
     scores[targets.DOCKQ] = sim.compute_DockQScore(scores[targets.FNAT], scores[targets.LRMSD], scores[targets.IRMSD])
-    scores[targets.BINARY] = scores[targets.IRMSD] < 4.0
+    scores[targets.BINARY] = scores[targets.IRMSD] < MIN_IRMS_FOR_BINARY
 
     scores[targets.CAPRI] = 4
     for thr, val in zip([4.0, 2.0, 1.0], [3, 2, 1], strict=True):

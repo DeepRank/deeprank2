@@ -12,7 +12,7 @@ from pdb2sql.transform import get_rot_axis_angle
 from deeprank2.domain import edgestorage as Efeat
 from deeprank2.domain import gridstorage
 from deeprank2.domain import nodestorage as Nfeat
-from deeprank2.domain import targetstorage as Target
+from deeprank2.domain import targetstorage as targets
 from deeprank2.molstruct.pair import ResidueContact
 from deeprank2.utils.buildgraph import get_structure
 from deeprank2.utils.graph import Edge, Graph, Node
@@ -28,14 +28,14 @@ target_value = 1.0
 
 
 @pytest.fixture()
-def graph():
+def graph() -> Graph:
     """Build a simple graph of two nodes and one edge in between them."""
     # load the structure
     pdb = pdb2sql("tests/data/pdb/101M/101M.pdb")
     try:
         structure = get_structure(pdb, entry_id)
     finally:
-        pdb._close()  # noqa: SLF001 (private member accessed)
+        pdb._close()  # noqa: SLF001
 
     # build a contact from two residues
     residue0 = structure.chains[0].residues[0]
@@ -69,7 +69,7 @@ def graph():
     return graph
 
 
-def test_graph_write_to_hdf5(graph):
+def test_graph_write_to_hdf5(graph: Graph) -> None:
     """Test that the graph is correctly written to hdf5 file."""
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
@@ -102,13 +102,13 @@ def test_graph_write_to_hdf5(graph):
             assert len(np.nonzero(edge_features_group[Efeat.INDEX][()])) > 0
 
             # target
-            assert grp[Target.VALUES][target_name][()] == target_value
+            assert grp[targets.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
 
 
-def test_graph_write_as_grid_to_hdf5(graph):
+def test_graph_write_as_grid_to_hdf5(graph: Graph) -> None:
     """Test that the graph is correctly written to hdf5 file as a grid."""
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
@@ -146,13 +146,13 @@ def test_graph_write_as_grid_to_hdf5(graph):
             assert np.all(data.shape == tuple(grid_settings.points_counts))
 
             # target
-            assert grp[Target.VALUES][target_name][()] == target_value
+            assert grp[targets.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test
 
 
-def test_graph_augmented_write_as_grid_to_hdf5(graph):
+def test_graph_augmented_write_as_grid_to_hdf5(graph: Graph) -> None:
     """Test that the graph is correctly written to hdf5 file as a grid."""
     # create a temporary hdf5 file to write to
     tmp_dir_path = tempfile.mkdtemp()
@@ -209,7 +209,7 @@ def test_graph_augmented_write_as_grid_to_hdf5(graph):
                 assert np.abs(np.sum(data) - np.sum(unaugmented_data)).item() < 0.2
 
                 # target
-                assert grp[Target.VALUES][target_name][()] == target_value
+                assert grp[targets.VALUES][target_name][()] == target_value
 
     finally:
         shutil.rmtree(tmp_dir_path)  # clean up after the test

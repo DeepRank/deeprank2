@@ -4,7 +4,11 @@ dummy_val_losses = [3, 2, 1, 2, 0.5, 2, 3, 4, 5, 6, 7]
 dummy_train_losses = [3, 2, 1, 2, 0.5, 2, 3, 4, 5, 1, 7]
 
 
-def base_earlystopper(patience=10, delta=0, maxgap=None):
+def base_earlystopper(
+    patience: int = 10,
+    delta: float = 0,
+    maxgap: float | None = None,
+) -> int:
     early_stopping = EarlyStopping(
         patience=patience,
         delta=delta,
@@ -14,7 +18,7 @@ def base_earlystopper(patience=10, delta=0, maxgap=None):
 
     for ep, loss in enumerate(dummy_val_losses):
         # check early stopping criteria
-        print(f"Epoch #{ep}", end=": ")
+        print(f"Epoch #{ep}", end=": ")  # noqa:T201
         early_stopping(ep, loss, dummy_train_losses[ep])
         if early_stopping.early_stop:
             break
@@ -22,14 +26,14 @@ def base_earlystopper(patience=10, delta=0, maxgap=None):
     return ep
 
 
-def test_patience():
+def test_patience() -> None:
     patience = 3
     final_ep = base_earlystopper(patience=patience)
     # should terminate at epoch 7
     assert final_ep == 7
 
 
-def test_patience_with_delta():
+def test_patience_with_delta() -> None:
     patience = 3
     delta = 1
     final_ep = base_earlystopper(patience=patience, delta=delta)
@@ -37,7 +41,7 @@ def test_patience_with_delta():
     assert final_ep == 5
 
 
-def test_maxgap():
+def test_maxgap() -> None:
     maxgap = 1
     final_ep = base_earlystopper(maxgap=maxgap)
     # should terminate at epoch 9

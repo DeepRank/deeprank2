@@ -16,11 +16,11 @@ hdf5_path = "tests/data/hdf5/test.hdf5"
 
 
 def base_test(
-    model_path,
+    model_path: str,
     trainer: Trainer,
-    lossfunction=None,
-    override=False,
-):
+    lossfunction: nn.modules.loss._Loss | None = None,
+    override: bool = False,
+) -> Trainer:
     if lossfunction:
         trainer.set_lossfunction(lossfunction=lossfunction, override_invalid=override)
 
@@ -37,16 +37,16 @@ def base_test(
 
 class TestLosses(unittest.TestCase):
     @classmethod
-    def setUpClass(class_):
+    def setUpClass(class_) -> None:
         class_.work_directory = tempfile.mkdtemp()
         class_.save_path = class_.work_directory + "test.tar"
 
     @classmethod
-    def tearDownClass(class_):
+    def tearDownClass(class_) -> None:
         shutil.rmtree(class_.work_directory)
 
     # Classification tasks
-    def test_classif_default(self):
+    def test_classif_default(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target=targets.BINARY,
@@ -60,7 +60,7 @@ class TestLosses(unittest.TestCase):
         assert isinstance(trainer.lossfunction, nn.CrossEntropyLoss)
         assert isinstance(trainer_pretrained.lossfunction, nn.CrossEntropyLoss)
 
-    def test_classif_all(self):
+    def test_classif_all(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target=targets.BINARY,
@@ -77,7 +77,7 @@ class TestLosses(unittest.TestCase):
             assert isinstance(trainer.lossfunction, lossfunction)
             assert isinstance(trainer_pretrained.lossfunction, lossfunction)
 
-    def test_classif_weighted(self):
+    def test_classif_weighted(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target=targets.BINARY,
@@ -94,7 +94,7 @@ class TestLosses(unittest.TestCase):
         assert isinstance(trainer_pretrained.lossfunction, lossfunction)
         assert trainer_pretrained.class_weights
 
-    def test_classif_invalid_weighted(self):
+    def test_classif_invalid_weighted(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target=targets.BINARY,
@@ -110,7 +110,7 @@ class TestLosses(unittest.TestCase):
         with pytest.raises(ValueError):
             base_test(self.save_path, trainer, lossfunction)
 
-    def test_classif_invalid_lossfunction(self):
+    def test_classif_invalid_lossfunction(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target=targets.BINARY,
@@ -124,7 +124,7 @@ class TestLosses(unittest.TestCase):
         with pytest.raises(ValueError):
             base_test(self.save_path, trainer, lossfunction)
 
-    def test_classif_invalid_lossfunction_override(self):
+    def test_classif_invalid_lossfunction_override(self) -> None:
         dataset = GraphDataset(hdf5_path, target=targets.BINARY)
         trainer = Trainer(
             neuralnet=NaiveNetwork,
@@ -141,7 +141,7 @@ class TestLosses(unittest.TestCase):
             )
 
     # Regression tasks
-    def test_regress_default(self):
+    def test_regress_default(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target="BA",
@@ -156,7 +156,7 @@ class TestLosses(unittest.TestCase):
         assert isinstance(trainer.lossfunction, nn.MSELoss)
         assert isinstance(trainer_pretrained.lossfunction, nn.MSELoss)
 
-    def test_regress_all(self):
+    def test_regress_all(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target="BA",
@@ -173,7 +173,7 @@ class TestLosses(unittest.TestCase):
             assert isinstance(trainer.lossfunction, lossfunction)
             assert isinstance(trainer_pretrained.lossfunction, lossfunction)
 
-    def test_regress_invalid_lossfunction(self):
+    def test_regress_invalid_lossfunction(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target="BA",
@@ -188,7 +188,7 @@ class TestLosses(unittest.TestCase):
         with pytest.raises(ValueError):
             base_test(self.save_path, trainer, lossfunction)
 
-    def test_regress_invalid_lossfunction_override(self):
+    def test_regress_invalid_lossfunction_override(self) -> None:
         dataset = GraphDataset(
             hdf5_path,
             target="BA",

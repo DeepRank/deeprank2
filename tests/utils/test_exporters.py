@@ -14,13 +14,13 @@ logging.getLogger(__name__)
 
 
 class TestOutputExporters(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self._work_dir = mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         shutil.rmtree(self._work_dir)
 
-    def test_collection(self):
+    def test_collection(self) -> None:
         exporters = [
             TensorboardBinaryClassificationExporter(self._work_dir),
             HDF5OutputExporter(self._work_dir),
@@ -49,7 +49,7 @@ class TestOutputExporters(unittest.TestCase):
         assert len(os.listdir(self._work_dir)) == 2  # tensorboard & table
 
     @patch("torch.utils.tensorboard.SummaryWriter.add_scalar")
-    def test_tensorboard_binary_classif(self, mock_add_scalar):
+    def test_tensorboard_binary_classif(self, mock_add_scalar) -> None:  # noqa: ANN001
         tensorboard_exporter = TensorboardBinaryClassificationExporter(self._work_dir)
 
         pass_name = "test"
@@ -60,7 +60,7 @@ class TestOutputExporters(unittest.TestCase):
         targets = [0, 1, 1]
         loss = 0.1
 
-        def _check_scalar(name, scalar, timestep):  # noqa: ARG001 (unused argument)
+        def _check_scalar(name: str, scalar: float, timestep) -> None:  # noqa: ARG001, ANN001
             if name == f"{pass_name} cross entropy loss":
                 assert scalar < 1.0
             else:
@@ -72,7 +72,7 @@ class TestOutputExporters(unittest.TestCase):
             tensorboard_exporter.process(pass_name, epoch_number, entry_names, outputs, targets, loss)
         assert mock_add_scalar.called
 
-    def test_scatter_plot(self):
+    def test_scatter_plot(self) -> None:
         scatterplot_exporter = ScatterPlotExporter(self._work_dir)
 
         epoch_number = 0
@@ -98,7 +98,7 @@ class TestOutputExporters(unittest.TestCase):
 
         assert os.path.isfile(scatterplot_exporter.get_filename(epoch_number))
 
-    def test_hdf5_output(self):
+    def test_hdf5_output(self) -> None:
         output_exporter = HDF5OutputExporter(self._work_dir)
         path_output_exporter = os.path.join(self._work_dir, "output_exporter.hdf5")
         entry_names = ["entry1", "entry2", "entry3"]

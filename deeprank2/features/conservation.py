@@ -7,11 +7,11 @@ from deeprank2.molstruct.residue import Residue, SingleResidueVariant
 from deeprank2.utils.graph import Graph
 
 
-def add_features(
-    pdb_path: str,  # noqa: ARG001 (unused argument)
+def add_features(  # noqa:D103
+    pdb_path: str,  # noqa: ARG001
     graph: Graph,
     single_amino_acid_variant: SingleResidueVariant | None = None,
-):
+) -> None:
     profile_amino_acid_order = sorted(amino_acids, key=lambda aa: aa.three_letter_code)
 
     for node in graph.nodes:
@@ -21,7 +21,8 @@ def add_features(
             atom = node.id
             residue = atom.residue
         else:
-            raise TypeError(f"Unexpected node type: {type(node.id)}")
+            msg = f"Unexpected node type: {type(node.id)}"
+            raise TypeError(msg)
 
         pssm_row = residue.get_pssm()
         profile = np.array([pssm_row.get_conservation(amino_acid) for amino_acid in profile_amino_acid_order])
