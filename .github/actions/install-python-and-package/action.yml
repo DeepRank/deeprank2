@@ -56,11 +56,8 @@ runs:
         ## PyTorch, PyG, PyG adds
         ### Installing for CPU only on the CI
         conda install pytorch=2.1.1 torchvision=0.16.1 torchaudio=2.1.1 cpuonly=2.0.* -c pytorch
-        conda install pyg=2.4.0 -c pyg
-        conda install pytorch-scatter=2.1.2 -c pyg
-        conda install pytorch-sparse=0.6.18 -c pyg
-        conda install pytorch-cluster=1.6.3 -c pyg
-        conda install pytorch-spline-conv=1.2.2 -c pyg
+        conda install pyg=2.4.0 pytorch-scatter=2.1.2 pytorch-sparse=0.6.18 pytorch-cluster=1.6.3 pytorch-spline-conv=1.2.2 -c pyg
+        conda install 'tables>=3.8.0' 'numpy>=1.21.5' 'scipy>=1.11.2' 'h5py>=3.6.0' 'networkx>=2.6.3' 'matplotlib>=3.5.1' 'pdb2sql>=0.5.1' 'scikit-learn>=1.0.2' 'chart-studio>=1.1.0' -c conda-forge
     - name: Install dependencies on MacOS
       shell: bash {0}
       env:
