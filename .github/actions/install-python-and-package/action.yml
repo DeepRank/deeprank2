@@ -43,13 +43,16 @@ runs:
     - run: |
         conda --version
         conda env list
+      shell: bash {0}
 
     - name: Python info
+      shell: bash -e {0}
       run: |
         which python3
         python3 --version
 
     - name: Activate deeprank2 environment on Linux
+      shell: bash {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
       if: runner.os == 'Linux'
@@ -68,10 +71,11 @@ runs:
         # conda install tables>=3.8.0 numpy>=1.21.5 scipy>=1.11.2 h5py>=3.6.0 networkx>=2.6.3 matplotlib>=3.5.1 scikit-learn>=1.0.2 chart-studio>=1.1.0 biopython>=1.81 python-louvain>=0.16 tqdm>=4.63.0 freesasa>=2.1.0 tensorboard>=0.9.0 protobuf>=3.20.1 ruff>=0.1.13 dill>=0.3.8 -c conda-forge
 
     - name: Install the GitHub repository version of the package
+      shell: bash {0}
       if: ${{ inputs.pkg-installation-type == 'repository' }}
       run: pip install .'[${{ inputs.extras-require }}]'
-
     - name: Install the latest released version of the package
+      shell: bash {0}
       if: ${{ inputs.pkg-installation-type == 'latest' }}
       run: |
         pip install pytest
