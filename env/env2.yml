@@ -1,3 +1,4 @@
+name: deeprank2
 channels:
   - pytorch
   - pyg
