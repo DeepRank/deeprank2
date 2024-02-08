@@ -52,7 +52,7 @@ runs:
         python3 --version
 
     - name: Activate deeprank2 environment on Linux
-      shell: bash {0}
+      shell: bash -el {0}
       env:
         CMAKE_INSTALL_PREFIX: .local
       if: runner.os == 'Linux'
