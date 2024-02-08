@@ -73,7 +73,9 @@ runs:
     - name: Install the GitHub repository version of the package
       shell: bash {0}
       if: ${{ inputs.pkg-installation-type == 'repository' }}
-      run: pip install .'[${{ inputs.extras-require }}]'
+      run: |
+        conda activate deeprank2
+        pip install .'[${{ inputs.extras-require }}]'
     - name: Install the latest released version of the package
       shell: bash {0}
       if: ${{ inputs.pkg-installation-type == 'latest' }}

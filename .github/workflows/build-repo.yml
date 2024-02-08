@@ -54,7 +54,9 @@ jobs:
           pkg-installation-type: "repository"
 
       - name: Run unit tests
-        run: pytest -v
+        run: |
+          conda activate deeprank2
+          pytest -v
 
       - name: Verify that we can build the package
         run: python3 -m build
