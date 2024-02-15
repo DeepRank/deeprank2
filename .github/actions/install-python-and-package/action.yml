@@ -37,7 +37,7 @@ runs:
         channels: conda-forge
         python-version: ${{ inputs.python-version }}
         activate-environment: deeprank2
-        environment-file: env/env2.yml
+        environment-file: env/deeprank2-py${{ join(inputs.python-version, '.') }}.yml
         use-mamba: true
 
     - run: |
