@@ -31,6 +31,7 @@ dependencies:
   - scikit-learn>=1.0.2
   - chart-studio>=1.1.0
   - biopython>=1.81
+  - pdb2sql>=0.5.1
   - python-louvain>=0.16
   - tqdm>=4.63.0
   - freesasa>=2.1.0
@@ -39,5 +40,3 @@ dependencies:
   - ruff>=0.1.13
   - dill>=0.3.8
   - pyarrow>=15.0.0
-  - pip:
-      - --requirement requirements.txt

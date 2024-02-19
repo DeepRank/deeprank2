@@ -1,2 +1,1 @@
-pdb2sql>=0.5.1
 deeprank2>=3.0.0
