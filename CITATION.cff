@@ -12,36 +12,36 @@ authors:
   - given-names: Giulia
     family-names: Crocioni
     email: g.crocioni@esciencecenter.nl
-    affiliation: Netherlands eScience Center, Amsterdam, NL
+    affiliation: Netherlands eScience Center, Amsterdam, The Netherlands
     orcid: "https://orcid.org/0000-0002-0823-0121"
   - given-names: Dani L.
     family-names: Bodor
     email: d.bodor@esciencecenter.nl
-    affiliation: Netherlands eScience Center, Amsterdam, NL
+    affiliation: Netherlands eScience Center, Amsterdam, The Netherlands
     orcid: "https://orcid.org/0000-0003-2109-2349"
   - given-names: Coos
     family-names: Baakman
-    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL
+    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, The Netherlands
     orcid: "https://orcid.org/0000-0003-4317-1566"
   - given-names: Farzaneh Meimandi
     family-names: Parizi
-    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL
+    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, The Netherlands
     orcid: "https://orcid.org/0000-0003-4230-7492"
   - given-names: Daniel-T.
     family-names: Rademaker
-    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL
+    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, The Netherlands
     orcid: "https://orcid.org/0000-0003-1959-1317"
   - given-names: Gayatri
     family-names: Ramakrishnan
-    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL
+    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, The Netherlands
     orcid: "https://orcid.org/0000-0001-8203-2783"
   - given-names: Sven A.
     family-names: van der Burg
-    affiliation: Netherlands eScience Center, Amsterdam, NL
+    affiliation: Netherlands eScience Center, Amsterdam, The Netherlands
     orcid: "https://orcid.org/0000-0003-1250-6968"
   - given-names: Dario F.
     family-names: Marzella
-    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL
+    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, The Netherlands
     orcid: "https://orcid.org/0000-0002-0043-3055"
   - given-names: João M.C.
     family-names: Teixeira
@@ -49,7 +49,7 @@ authors:
     orcid: "https://orcid.org/0000-0002-9113-0622"
   - given-names: Li C.
     family-names: Xue
-    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, NL
+    affiliation: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, The Netherlands
     orcid: "https://orcid.org/0000-0002-2613-538X"
 abstract: >-
   DeepRank2 is an open-source deep learning
