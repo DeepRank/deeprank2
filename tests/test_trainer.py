@@ -86,6 +86,7 @@ def _model_base_test(
         dataset_train,
         dataset_val,
         dataset_test,
+        cuda=use_cuda,
         output_exporters=output_exporters,
     )
 
@@ -93,20 +94,6 @@ def _model_base_test(
         _log.debug("cuda is available, testing that the model is cuda")
         for parameter in trainer.model.parameters():
             assert parameter.is_cuda, f"{parameter} is not cuda"
-
-        data = dataset_train.get(0)
-
-        for name, data_tensor in (
-            ("x", data.x),
-            ("y", data.y),
-            (Efeat.INDEX, data.edge_index),
-            ("edge_attr", data.edge_attr),
-            (Nfeat.POSITION, data.pos),
-            ("cluster0", data.cluster0),
-            ("cluster1", data.cluster1),
-        ):
-            if data_tensor is not None:
-                assert data_tensor.is_cuda, f"data.{name} is not cuda"
 
     with warnings.catch_warnings(record=UserWarning):
         trainer.train(
