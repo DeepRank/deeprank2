@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deeprank2"
-version = "3.0.0"
+version = "3.0.1"
 description = "DeepRank2 is an open-source deep learning framework for data mining of protein-protein interfaces or single-residue missense variants."
 readme = "README.md"
 requires-python = ">=3.10"
