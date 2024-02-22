@@ -32,7 +32,7 @@ def test_irc_atom() -> None:
     pdb_path = "tests/data/pdb/1A0Z/1A0Z.pdb"
     graph, _ = build_testgraph(
         pdb_path=pdb_path,
-        detail="residue",
+        detail="atom",
         influence_radius=4.5,
         max_edge_length=4.5,
     )

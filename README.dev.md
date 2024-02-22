@@ -79,7 +79,7 @@ During the development cycle, three main supporting branches are used:
 
 ## Making a release
 
-1. Branch from `dev` and prepare the branch for the release (e.g., removing the unnecessary dev files such as the current one, fix minor bugs if necessary).
+1. Branch from `dev` and prepare the branch for the release (e.g., removing the unnecessary dev files, fix minor bugs if necessary).
 2. [Bump the version](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#versioning).
 3. Verify that the information in `CITATION.cff` is correct (update the release date), and that `.zenodo.json` contains equivalent data.
 4. Merge the release branch into `main` (and `dev`), and [run the tests](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#running-the-tests).
