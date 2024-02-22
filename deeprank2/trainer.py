@@ -947,7 +947,7 @@ class Trainer:
                 if key["transform"] is None:
                     continue
                 str_expr = inspect.getsource(key["transform"])
-                match = re.search(r"\'transform\':.*(lambda.*).*,.*\'standardize\'.*", str_expr).group(1)
+                match = re.search(r"[\"|\']transform[\"|\']:.*(lambda.*).*,.*[\"|\']standardize[\"|\'].*", str_expr).group(1)
                 key["transform"] = match
 
         state = {
