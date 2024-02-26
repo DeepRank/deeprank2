@@ -69,7 +69,7 @@ pip install deeprank2
 
 See instructions below to [test](#testing-deeprank2-installation) that the installation was succesful.
 
-#### Manual installation (not recommended)
+#### Manual installation (customizable)
 
 If you want to use the GPUs, choose a specific python version, are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
