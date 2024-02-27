@@ -7,6 +7,7 @@ channels:
   - conda-forge
   - sbl
 dependencies:
+  - python==3.10
   - pip>=23.3
   - notebook>=7.0.6
   - sbl::libcifpp>=5.1.0
