@@ -4,9 +4,9 @@
 - [Installation](#installation)
   - [Containerized Installation](#containerized-installation)
   - [Local/remote installation](#localremote-installation)
-    - [YML file installation (recommended)](#yml-file-installation-recommended)
-    - [Manual installation (not recommended)](#manual-installation-not-recommended)
-    - [Testing DeepRank2 installation](#testing-deeprank2-installation)
+      - [YML file installation (recommended)](#yml-file-installation-recommended)
+      - [Manual installation (customizable)](#manual-installation-customizable)
+      - [Testing DeepRank2 installation](#testing-deeprank2-installation)
 - [Contributing](#contributing)
 
 # Installation
