@@ -1,13 +1,13 @@
 # DeepRank2
 
-|     Badges     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| :------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|  **fairness**  | [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403)                                                                                                                                                                                                                           |
-|  **package**   | [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b1bde03fc0334e07b0cd8a69ce2adeb3)](https://app.codacy.com/gh/DeepRank/deeprank2/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)                                                                                                                                                                                                                                |
-|    **docs**    | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![RSD](https://img.shields.io/badge/RSD-deeprank2-pink)](https://research-software-directory.org/software/deeprankcore) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)                                                                                                                                                                                                                                                                                                        |
+|     Badges     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  **fairness**  | [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403)                                                                                                                                                                                                                                |
+|  **package**   | [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b1bde03fc0334e07b0cd8a69ce2adeb3)](https://app.codacy.com/gh/DeepRank/deeprank2/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)                                                                                                                                                                                                                                     |
+|    **docs**    | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![RSD](https://img.shields.io/badge/RSD-deeprank2-pink)](https://research-software-directory.org/software/deeprankcore) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)                                                                                                                                                                                    |
 |   **tests**    | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build-repo.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) ![Python](https://img.shields.io/badge/python-3.10-blue.svg) <!--- ![Python](https://img.shields.io/badge/python-3.11-blue.svg) --> |
-| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-|  **license**   | [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|  **license**   | [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ## Overview
 
@@ -44,8 +44,8 @@ Main features:
   - [Installation](#installation)
     - [Containerized Installation](#containerized-installation)
     - [Local/remote installation](#localremote-installation)
-      - [YML file installation](#yml-file-installation)
-      - [Manual installation](#manual-installation)
+      - [YML file installation (recommended)](#yml-file-installation-recommended)
+      - [Manual installation (customizable)](#manual-installation-customizable)
       - [Testing DeepRank2 installation](#testing-deeprank2-installation)
   - [Contributing](#contributing)
   - [Using DeepRank2](#using-deeprank2)
@@ -95,7 +95,7 @@ Local installation is formally only supported on the latest stable release of ub
 
 Before installing DeepRank2 please ensure you have [GCC](https://gcc.gnu.org/install/) installed: if running `gcc --version` gives an error, run `sudo apt-get install gcc`.
 
-#### YML file installation
+#### YML file installation (recommended)
 
 You can use the provided YML file for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of DeepRank2 and all its dependencies.
 This will install the CPU-only version of DeepRank2 on Python 3.10.
@@ -109,27 +109,28 @@ cd deeprank2
 # Ensure you are in your base environment
 conda activate
 # Create the environment
-conda env create -f env/environment.yml
+conda env create -f env/deeprank2.yml
 # Activate the environment
 conda activate deeprank2
+# Install the latest deeprank2 release
+pip install deeprank2
 ```
 
 See instructions below to [test](#testing-deeprank2-installation) that the installation was succesful.
 
-#### Manual installation
+#### Manual installation (customizable)
 
-If you want to use the GPUs, choose a specific python version, are a MacOS user, or if the YML installation was not succesful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
-If you have any issues during installation of dependencies, please refer to the official documentation for each package (linked below), as our instructions may be out of date (last tested on 19 Jan 2024):
+If you want to use the GPUs, choose a specific python version, are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
-- [DSSP 4](https://anaconda.org/sbl/dssp): `conda install -c sbl dssp`
-- [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`
-  - [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
-- [PyTorch](https://pytorch.org/get-started/locally/): `conda install pytorch torchvision torchaudio cpuonly -c pytorch`
-  - Pytorch regularly publishes updates and not all newest versions will work stably with DeepRank2. Currently, the package is tested using [PyTorch 2.1.1](https://pytorch.org/get-started/previous-versions/#v211).
+You can first remove from `env/deeprank2.yml` the packages that cannot be installed properly, or the ones that you want to install differently (e.g., pytorch-related packages if you wish to install the CUDA version), and then proceed with the environment creation by using the edited YML file: `conda env create -f env/deeprank2.yml`. Then activate the environment, and proceed with installing the missing packages, which might fall into the following list. If you have any issues during installation of dependencies, please refer to the official documentation for each package (linked below), as our instructions may be out of date (last tested on 19 Feb 2024):
+
+- [MSMS](https://anaconda.org/bioconda/msms): [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
+- [PyTorch](https://pytorch.org/get-started/locally/)
+  - Pytorch regularly publishes updates and not all newest versions will work stably with DeepRank2. Currently, the package is tested on ubuntu using [PyTorch 2.1.1](https://pytorch.org/get-started/previous-versions/#v211).
   - We support torch's CPU library as well as CUDA.
 - [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
   - The exact command to install pyg will depend on the version of pytorch you are using. Please refer to the source's installation instructions (we recommend using the pip installation for this as it also shows the command for the dependencies).
-- For MacOS with M1 chip users: install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
+- [FreeSASA](https://freesasa.github.io/python/).
 
 Finally install deeprank2 itself: `pip install deeprank2`.
 
@@ -145,7 +146,7 @@ The `test` extra is optional, and can be used to install test-related dependenci
 
 #### Testing DeepRank2 installation
 
-You can check that all components were installed correctly, using pytest. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
+You can check that all components were installed correctly, using `pytest`. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
 
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
 

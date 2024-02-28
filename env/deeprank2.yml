@@ -1,0 +1,43 @@
+name: deeprank2
+channels:
+  - pytorch
+  - pyg
+  - bioconda
+  - defaults
+  - conda-forge
+  - sbl
+dependencies:
+  - python==3.10
+  - pip>=23.3
+  - notebook>=7.0.6
+  - sbl::libcifpp>=5.1.0
+  - sbl::dssp>=4.2.2.1
+  - msms>=2.6.1
+  - markov_clustering>=0.0.6
+  - pytorch=2.1.1
+  - torchvision>=0.16.1
+  - torchaudio>=2.1.1
+  - cpuonly>=2.0
+  - pyg>=2.4.0
+  - pytorch-scatter>=2.1.2
+  - pytorch-sparse>=0.6.18
+  - pytorch-cluster>=1.6.3
+  - pytorch-spline-conv>=1.2.2
+  - tables>=3.8.0
+  - numpy>=1.21.5
+  - scipy>=1.11.2
+  - h5py>=3.6.0
+  - networkx>=2.6.3
+  - matplotlib>=3.5.1
+  - scikit-learn>=1.0.2
+  - chart-studio>=1.1.0
+  - biopython>=1.81
+  - pdb2sql>=0.5.1
+  - python-louvain>=0.16
+  - tqdm>=4.63.0
+  - freesasa>=2.1.0
+  - tensorboard>=0.9.0
+  - protobuf>=3.20.1
+  - ruff>=0.1.13
+  - dill>=0.3.8
+  - pyarrow>=15.0.0
