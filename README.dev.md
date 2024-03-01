@@ -48,7 +48,7 @@ We use [ruff](https://docs.astral.sh/ruff/) for linting, sorting imports and for
 
 If you are using VS code, please install and activate the [Ruff extension](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) to automatically format and check linting.
 
-Otherwise, please ensure check both linting (`ruff fix .`) and formatting (`ruff format .`) before requesting a review.
+Otherwise, please ensure check both linting (`ruff check .`) and formatting (`ruff format .`) before requesting a review.
 
 We use [prettier](https://prettier.io/) for formatting most other files. If you are editing or adding non-python files and using VS code, the [Prettier extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) can be installed to auto-format these files as well.
 

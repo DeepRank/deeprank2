@@ -51,4 +51,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
           extras-require: test
       - name: Check style against standards using ruff
-        run: ruff .
+        run: ruff check .
