@@ -130,6 +130,7 @@ isort.known-first-party = ["deeprank2"]
     "D101",    # Missing class docstring
     "D102",    # Missing docstring in public method
     "D103",    # Missing docstring in public function
+    "SLF001",  # private member access
 ]
 "docs/*" = ["ALL"]
 "tests/perf/*" = ["T201"] # Use of print statements

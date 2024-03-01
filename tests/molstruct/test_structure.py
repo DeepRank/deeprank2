@@ -12,7 +12,7 @@ def _get_structure(path: str) -> PDBStructure:
     try:
         structure = get_structure(pdb, "101M")
     finally:
-        pdb._close()  # noqa: SLF001
+        pdb._close()
 
     assert structure is not None
 

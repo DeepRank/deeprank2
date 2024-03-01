@@ -10,7 +10,7 @@ def test_add_pssm() -> None:
     try:
         structure = get_structure(pdb, "1ATN")
     finally:
-        pdb._close()  # noqa: SLF001
+        pdb._close()
 
     for chain in structure.chains:
         with open(f"tests/data/pssm/1ATN/1ATN.{chain.id}.pdb.pssm", encoding="utf-8") as f:
