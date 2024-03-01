@@ -44,12 +44,13 @@ authors:
     orcid: 0000-0002-9113-0622
     affiliation: 3
   - name: Li C. Xue
+    corresponding: true
     orcid: 0000-0002-2613-538X
     affiliation: 2
 affiliations:
   - name: Netherlands eScience Center, Amsterdam, The Netherlands
     index: 1
-  - name: Center for Molecular Bioinformatics, Radboud Universitair Medisch Centrum, Nijmegen, Gelderland, The Netherlands
+  - name: The Department of Medical BioSciences, Radboud University Medical Center, Nijmegen, The Netherlands
     index: 2
   - name: Independent Researcher
     index: 3
