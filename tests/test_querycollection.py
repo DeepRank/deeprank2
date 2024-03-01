@@ -21,7 +21,7 @@ def _querycollection_tester(
     feature_modules: ModuleType | list[ModuleType] | None = None,
     cpu_count: int = 1,
     combine_output: bool = True,
-) -> (QueryCollection, str, list[str]):
+) -> tuple[QueryCollection, str, list[str]]:
     """
     Generic function to test QueryCollection class.
 

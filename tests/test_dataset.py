@@ -31,7 +31,7 @@ def _compute_features_manually(
     hdf5_path: str,
     features_transform: dict,
     feat: str,
-) -> (NDArray, float, float):
+) -> tuple[NDArray, float, float]:
     """Return specified feature.
 
     This function returns the feature specified read from the hdf5 file, after applying manually features_transform dict.
