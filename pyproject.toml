@@ -47,6 +47,7 @@ test = [
     "coveralls",
 ]
 publishing = ["build", "twine", "wheel"]
+notebooks = ["nbmake"]
 
 [project.urls]
 Documentation = "https://deeprank2.readthedocs.io/en/latest/?badge=latest"
