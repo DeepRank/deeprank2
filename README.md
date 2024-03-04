@@ -165,12 +165,20 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-A `Query` takes as inputs:
+The `Query` parent class takes as inputs:
 
-- a `.pdb` file, representing the protein-protein structure,
+- a `.pdb` file, representing the molecular structure,
 - the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
 - the ids of the chains composing the structure, and
 - optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
+
+Then in particular, for the `SingleResidueVariantQuery` child class:
+
+- `chain_ids` represents the chain identifier of the variant residue (generally a single capital letter). Note that this does not limit the structure to residues from this chain. The structure contained in the `.pdb` can thus have any number of chains.
+
+For the `ProteinProteinInterfaceQuery` child class:
+
+- `chain_ids` represents the chain identifiers of the interacting interfaces (generally a single capital letter each). Note that this does not limit the structure to residues from these chains. But `chain_ids` must contain exactly 2 chains, since right now the code-base handles mono interfaces only.
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
