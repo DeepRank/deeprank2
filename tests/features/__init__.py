@@ -55,7 +55,7 @@ def build_testgraph(  # noqa: C901
     try:
         structure: PDBStructure = get_structure(pdb, Path(pdb_path).stem)
     finally:
-        pdb._close()  # noqa: SLF001
+        pdb._close()
 
     if not central_res:
         nodes = set()

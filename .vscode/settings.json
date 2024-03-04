@@ -17,6 +17,10 @@
   },
   "notebook.diff.ignoreMetadata": true,
 
+  // Pytest
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+
   // Format all files on save
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
