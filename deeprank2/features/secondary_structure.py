@@ -38,11 +38,6 @@ def _get_records(lines: list[str]) -> list[str]:
 
 
 def _check_pdb(pdb_path: str) -> None:
-    """Check whether pdb metadata required for DSSP exists and auto-fix in place where possible.
-
-    Args:
-        pdb_path: file location of pdb file
-    """
     fix_pdb = False
     with open(pdb_path, encoding="utf-8") as f:
         lines = f.readlines()
