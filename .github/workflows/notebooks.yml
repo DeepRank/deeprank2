@@ -22,7 +22,6 @@ on:
       # filetypes
       - "**.md"
       - "**.rst"
-      - "**.ipynb"
       - "**.cff"
       - "**.png"
 
