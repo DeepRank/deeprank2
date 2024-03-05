@@ -165,20 +165,15 @@ For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 For each protein-protein complex (or protein structure containing a missense variant), a `Query` can be created and added to the `QueryCollection` object, to be processed later on. Two subtypes of `Query` exist: `ProteinProteinInterfaceQuery` and `SingleResidueVariantQuery`.
 
-The `Query` parent class takes as inputs:
+A `Query` takes as inputs:
 
-- a `.pdb` file, representing the molecular structure,
-- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
-- the ids of the chains composing the structure, and
-- optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
-
-Then in particular, for the `SingleResidueVariantQuery` child class:
-
-- `chain_ids` represents the chain identifier of the variant residue (generally a single capital letter). Note that this does not limit the structure to residues from this chain. The structure contained in the `.pdb` can thus have any number of chains.
-
-For the `ProteinProteinInterfaceQuery` child class:
-
-- `chain_ids` represents the chain identifiers of the interacting interfaces (generally a single capital letter each). Note that this does not limit the structure to residues from these chains. But `chain_ids` must contain exactly 2 chains, since right now the code-base handles mono interfaces only.
+- A `.pdb` file, representing the molecular structure.
+- The resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom.
+- `chain_ids`, the chain ID or IDs (generally single capital letter(s)).
+  - `SingleResidueVariantQuery` takes a single ID, which represents the chain containing the variant residue.
+  - `ProteinProteinInterfaceQuery` takes a pair of ids, which represent the chains between which the interface exists.
+  - Note that in either case this does not limit the structure to residues from this/these chain/s. The structure contained in the `.pdb` can thus have any number of chains, and residues from these chains will be included in the graphs and grids produced by DeepRank2 (if they are within the `influence_radius`).
+- Optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
