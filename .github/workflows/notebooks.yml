@@ -1,0 +1,62 @@
+name: notebooks
+
+on:
+  push:
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.cff"
+      - "**.png"
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      # specific folder locations
+      - ".vscode/**"
+      - "docs/**"
+      # filetypes
+      - "**.md"
+      - "**.rst"
+      - "**.cff"
+      - "**.png"
+
+jobs:
+  build:
+    if: github.event.pull_request.draft == false
+    name: Build for (${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: ["3.10"] # ["3.10", "3.11"]
+
+    # https://github.com/marketplace/actions/setup-miniconda#use-a-default-shell
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/install-python-and-package
+        with:
+          python-version: ${{ matrix.python-version }}
+          extras-require: test, notebooks
+          pkg-installation-type: "repository"
+
+      - name: Download the data for the tutorials
+        shell: bash -l {0}
+        run: |
+          wget https://zenodo.org/records/8349335/files/data_raw.zip
+          unzip data_raw.zip -d data_raw
+          mv data_raw tutorials
+
+      - name: Run tutorial notebooks
+        run: pytest --nbmake tutorials
