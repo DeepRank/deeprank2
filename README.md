@@ -17,7 +17,12 @@
 
 DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue variants (SRVs). This package is an improved and unified version of three previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank), [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN), and [DeepRank-Mut](https://github.com/DeepRank/DeepRank-Mut).
 
-DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
+As input, DeepRank2 takes [PDB-formatted](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) atomic structures, and map them to graphs, where nodes can represent either residues or atoms, as chosen by the user, and edges represent the interactions between them. DeepRank2 has the option to choose between two types of queries as input for the featurization phase:
+
+- PPIs, for mining interaction patterns within protein-protein complexes, implemented by the `ProteinProteinInterfaceQuery` class;
+- SRVs, for mining mutation phenotypes within protein structures, implemented by the `SingleResidueVariantQuery` class.
+
+The physico-chemical and geometrical features are then computed and assigned to each node and edge. The user can choose which features to generate from several pre-existing options defined in the package, or define custom features modules, as explained in the documentation. The graphs can then be mapped to 3D-grids as well. The generated data can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for 3D-grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
 
 Main features:
 
@@ -28,7 +33,7 @@ Main features:
   - binary class, CAPRI categories, DockQ, RMSD, and FNAT
   - Detailed docking scores documentation is available [here](https://deeprank2.readthedocs.io/en/latest/docking.html)
 - Flexible definition of both new features and targets
-- Features generation for both graphs and grids
+- Features generation for both graphs and 3D-grids
 - Efficient data storage in HDF5 format
 - Support for both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
@@ -167,10 +172,13 @@ For each protein-protein complex (or protein structure containing a missense var
 
 A `Query` takes as inputs:
 
-- a `.pdb` file, representing the protein-protein structure,
-- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
-- the ids of the chains composing the structure, and
-- optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
+- A `.pdb` file, representing the molecular structure.
+- The resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom.
+- `chain_ids`, the chain ID or IDs (generally single capital letter(s)).
+  - `SingleResidueVariantQuery` takes a single ID, which represents the chain containing the variant residue.
+  - `ProteinProteinInterfaceQuery` takes a pair of ids, which represent the chains between which the interface exists.
+  - Note that in either case this does not limit the structure to residues from this/these chain/s. The structure contained in the `.pdb` can thus have any number of chains, and residues from these chains will be included in the graphs and 3D-grids produced by DeepRank2 (if they are within the `influence_radius`).
+- Optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
@@ -219,7 +227,7 @@ queries.add(ProteinProteinInterfaceQuery(
 
 The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
-The queries can then be processed into graphs only or both graphs and 3D grids, depending on which kind of network will be used later for training.
+The queries can then be processed into graphs only or both graphs and 3D-grids, depending on which kind of network will be used later for training.
 
 ```python
 from deeprank2.features import components, conservation, contact, exposure, irc, surfacearea
@@ -232,7 +240,7 @@ hdf5_paths = queries.process(
     "<output_folder>/<prefix_for_outputs>",
     feature_modules = feature_modules)
 
-# Save data into 3D-graphs and 3D-grids
+# Save data into graphs and 3D-grids
 hdf5_paths = queries.process(
     "<output_folder>/<prefix_for_outputs>",
     feature_modules = feature_modules,
