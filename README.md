@@ -17,7 +17,7 @@
 
 DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue variants (SRVs). This package is an improved and unified version of three previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank), [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN), and [DeepRank-Mut](https://github.com/DeepRank/DeepRank-Mut).
 
-As input, DeepRank2 takes [PDB-formatted](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) atomic structures, and map them to graphs, where nodes can represent either residues or atoms, as chosen by the user, and edges represent the interactions between them. The user can configure two types of 3D structures as input for the featurization phase:
+As input, DeepRank2 takes [PDB-formatted](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) atomic structures, and map them to graphs, where nodes can represent either residues or atoms, as chosen by the user, and edges represent the interactions between them. DeepRank2 has the option to choose between two types of queries as input for the featurization phase:
 
 - PPIs, for mining interaction patterns within protein-protein complexes, implemented by the `ProteinProteinInterfaceQuery` class;
 - SRVs, for mining mutation phenotypes within protein structures, implemented by the `SingleResidueVariantQuery` class.
