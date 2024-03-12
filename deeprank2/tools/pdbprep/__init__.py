@@ -56,11 +56,14 @@ def _prune_records(fhandle: TextIO) -> Generator[str]:
         "HSD": "HIS",
     }
 
-    for record in fhandle:
+    for i, record in enumerate(fhandle):
         resname = record[_RESNAME_COLS]
-        if record.startswith(atomic_record) and resname != water:
+        if record.startswith(atomic_record) and resname != water and i not in _find_low_occ_records(fhandle):
+            # TODO: if within a single file mixed residue nomenclature is used, it is not detected by _find_low_occ_records
+            # probably fix this by running these in separate functions rather than all at once.
             standardized_resname = standard_resnames.get(resname, resname)
-            yield record[:17] + standardized_resname + record[20:]
+            record = record[: _RESNAME_COLS.start] + standardized_resname + record[_RESNAME_COLS.stop :]  # noqa: PLW2901
+            yield record
 
 
 def _find_low_occ_records(pdb: list[str]) -> list[int]:
@@ -111,9 +114,8 @@ def pdb_prep(fhandle: TextIO) -> None:
     # step 1 - keep coordinates: removes non coordinate lines for simplicity
     # step 2 - delresname: remove waters
     # step 3 - rplresname: convert residue names to standard names, ex: MSE to MET
-    _new_pdb = _prune_records(fhandle)
-
     # step 4 - selaltloc: select most probable alternative location
+    _new_pdb = _prune_records(fhandle)
 
     # step 5 - fixinsert: fix inserts
     # step 6 - sort: sort chains and resides, necessary for OpenMM
