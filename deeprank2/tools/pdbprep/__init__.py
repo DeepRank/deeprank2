@@ -2,8 +2,16 @@
 # which is published under an Apache 2.0 licence
 
 import sys
+from collections import defaultdict
 from collections.abc import Generator
 from typing import TextIO
+
+# define record columns for each datum
+_ATOMNAME_COLS = slice(12, 16)
+_RESNAME_COLS = slice(17, 20)
+_CHAIN_COLS = slice(21, 22)
+_RESNUM_COLS = slice(22, 27)  # this includes both the residue number and insertion code
+_OCCUPANCY_COLS = slice(54, 60)
 
 
 def write_pdb(new_pdb: list, pdbfh: TextIO) -> None:
@@ -49,94 +57,53 @@ def _prune_records(fhandle: TextIO) -> Generator[str]:
     }
 
     for record in fhandle:
-        resname = record[17:20]
+        resname = record[_RESNAME_COLS]
         if record.startswith(atomic_record) and resname != water:
             standardized_resname = standard_resnames.get(resname, resname)
             yield record[:17] + standardized_resname + record[20:]
 
 
-def _select_alt_location(pdb: list[str]) -> Generator[str]:
-    """Select alternate location."""
-    register = {}  # register atom information
-    prev_chain = None  # register previous chain
+def _find_low_occ_records(pdb: list[str]) -> list[int]:
+    """Helper function to identify records with lowest occupancy alternate locations.
 
-    # This loop will collect information on the different atoms throughout the PDB file until a new chain or any terminal line is
-    # found. At that point, the collected information is processed because all altlocs for that block have been defined.
-    for nline, record in enumerate(pdb):  # line number will be used to sort lines after selecting the desired alternative location
-        atomname = record[12:16]
-        altloc = record[16]
-        chain = record[21:22]
-        resnum = record[22:27]  # resnum (22-25) + insertion code (26) is taken to identify different residues
+    In case an atom is detected at more than one position (e.g. due to alternate conformations), the structure will
+    contain the same atom multiple times with separate "alternate location indicators" (col 17 of the pdb record).
+    Each location will have a certain occupancy, i.e. proportion of structures where this particular location is found
+    (and thus all occupancies for a given atom sum to 1).
 
-        # process lines because we enter a new chain
-        if chain != prev_chain:
-            yield from _process_altloc(register)
-            register = {}
+    This function first identifies atoms that are listed more than once in a pdb file, based on their chain identifier
+    (col 22), residue sequence number (col 23-26), and atom name (col 13-16). It then identifies the record with the
+    highest occupancy for each atom (in case of equal occupancy, the first entry is considered higher). From this, a
+    list of indices is returned representing the records that do not contain the highest occupancy for the atom in that
+    record.
 
-        # add info to dictionary in a hierarchically organized manner
-        resnum_d: dict = register.setdefault(resnum, {})
-        atomname_d: dict = resnum_d.setdefault(atomname, {})
-        altloc_d: list = atomname_d.setdefault(altloc, [])
-        altloc_d.append((nline, record))
+    Args:
+        pdb: list of records (lines) from a pdb file
 
-        prev_chain = chain
+    Returns:
+        list of indices of records that do not contain the highest occupancy location
+    """
+    # define record columns for each datum
 
-    # at the end of the PDB, process the remaining lines
-    yield from _process_altloc(register)
+    atom_indentiers = [record[_CHAIN_COLS] + record[_RESNUM_COLS] + record[_ATOMNAME_COLS] for record in pdb]
 
+    # create a dictionary containing only duplicated atom_indentiers (keys) and their indices in pdb (values)
+    # from: https://stackoverflow.com/a/11236042/5170442
+    duplicates = defaultdict(list)
+    for i, atom in enumerate(atom_indentiers):
+        duplicates[atom].append(i)
+    duplicates = {k: v for k, v in duplicates.items() if len(v) > 1}
 
-def _process_altloc(register: dict[str, dict[str, dict[str, list[tuple[int, str]]]]]) -> Generator[str]:
-    # TODO: Reduce complexity of `register` if possible
-    """Processes the collected atoms according to the selaltloc option."""
-    lines_to_yield = []
-
-    anisou_record = ("ANISOU",)  # anisou lines are treated specially and always follow atom records
-
-    for atomnames in register.values():
-        for altlocs in atomnames.values():
-            all_lines: list[tuple[int, str]] = list(*altlocs.values())  # all alternative locations for the atom
-
-            # identify the highest occupancy combining dictionary and sorting
-            occ_line_dict = {}  # TODO: rename
-            for line_number, line in all_lines:
-                occupancy = line[54:60]
-                occ_line_dict[occupancy] = [(line_number, line)]
-
-            # sort keys by occupancy
-            keys_ = sorted(occ_line_dict.keys(), key=lambda x: float(x.strip()), reverse=True)  # TODO: rename once I know what this is used for
-
-            these_atom_lines = occ_line_dict[keys_[0]]
-            if len(keys_) == 1 and len(these_atom_lines) > 1:
-                # address "take first if occ is the same"
-                # see: https://github.com/haddocking/pdb-tools/issues/153#issuecomment-1488627668
-                lines_to_yield.extend(_remove_altloc(these_atom_lines[0:1]))
-
-                # if there's ANISOU, add it
-                if these_atom_lines[1][1].startswith(anisou_record):
-                    lines_to_yield.extend(_remove_altloc(these_atom_lines[1:2]))
-
-            # this should run when there are more than one key or
-            # the key has only one atom line. Keys are the occ
-            # value.
-            else:
-                # when occs are different, select the highest one
-                lines_to_yield.extend(_remove_altloc(these_atom_lines))
-
-            del all_lines, occ_line_dict
-
-    # lines are sorted to the line number so that the output is sorted
-    # the same way as in the input PDB
-    lines_to_yield.sort(key=lambda x: x[0])
-
-    # the line number is ignored, only the line is yield
-    for _, line in lines_to_yield:
-        yield line
-
-
-def _remove_altloc(lines: str) -> Generator[str]:
-    # the altloc ID is removed in processed altloc lines
-    for line_num, line in lines:
-        yield (line_num, line[:16] + " " + line[17:])
+    highest_occupancies = {}
+    for atom, record_indices in duplicates.items():
+        highest_occ = 0
+        for i in record_indices:
+            occupancy = pdb[i][_OCCUPANCY_COLS]
+            if occupancy > highest_occ:
+                # only keep the record with the highest occupancy; in case of tie keep the first
+                highest_occ = occupancy
+                highest_occupancies[atom] = i
+    return [x for xs in duplicates.values() for x in xs if x not in highest_occupancies.values()]
 
 
 def pdb_prep(fhandle: TextIO) -> None:
@@ -144,7 +111,7 @@ def pdb_prep(fhandle: TextIO) -> None:
     # step 1 - keep coordinates: removes non coordinate lines for simplicity
     # step 2 - delresname: remove waters
     # step 3 - rplresname: convert residue names to standard names, ex: MSE to MET
-    new_pdb = _prune_records(fhandle)
+    _new_pdb = _prune_records(fhandle)
 
     # step 4 - selaltloc: select most probable alternative location
 
