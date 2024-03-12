@@ -55,117 +55,64 @@ def _prune_records(fhandle: TextIO) -> Generator[str]:
             yield record[:17] + standardized_resname + record[20:]
 
 
-def run(fhandle):
-    records = ("ATOM", "HETATM")
-    # terminators = ('TER', 'END', 'CONECT', 'END', 'ENDMDL', 'MODEL')
-    # meaningful = records + terminators
+def _select_alt_location(pdb: list[str]) -> Generator[str]:
+    """Select alternate location."""
+    register = {}  # register atom information
+    prev_chain = None  # register previous chain
 
-    # register atom information
-    register = dict()
+    # This loop will collect information on the different atoms throughout the PDB file until a new chain or any terminal line is
+    # found. At that point, the collected information is processed because all altlocs for that block have been defined.
+    for nline, record in enumerate(pdb):  # line number will be used to sort lines after selecting the desired alternative location
+        atomname = record[12:16]
+        altloc = record[16]
+        chain = record[21:22]
+        resnum = record[22:27]  # resnum (22-25) + insertion code (26) is taken to identify different residues
 
-    # register comment lines
-    others = []
+        # process lines because we enter a new chain
+        if chain != prev_chain:
+            yield from _process_altloc(register)
+            register = {}
 
-    # register current chain
-    chain = None
-    prev_chain = None
-
-    # keep record of the line number. This will be used to sort lines
-    # after selecting the desired alternative location
-    nline = 0
-
-    # the loop will collect information on the different atoms
-    # throughout the PDB file until a new chain or any terminal line is
-    # found. At that point, the collected information is flushed because
-    # all altlocs for that block have been defined.
-    for line in fhandle:
-        nline += 1
-
-        if line.startswith(records):
-            # here resnum + insertion code are taken to identify
-            # different residues
-            resnum = line[22:27]
-            atomname = line[12:16]
-            altloc = line[16]
-            chain = line[21:22]
-
-            # flush lines because we enter a new chain
-            if chain != prev_chain:
-                # the "yield from" statement is avoided to keep
-                # compatibility with Python 2.7
-                for _line in _flush(register):
-                    yield _line
-
-                # Python 2.7 compatibility. Do not use .clear() method
-                # restart help variables
-                del register, others
-                register, others = dict(), []
-
-            # organizes information hierarchically
-            resnum_d = register.setdefault(resnum, {})
-            atomname_d = resnum_d.setdefault(atomname, {})
-            altloc_d = atomname_d.setdefault(altloc, [])
-
-            # adds info to dictionary
-            altloc_d.append((nline, line))
-
-        # flush information because we reached the end of a block
-        # elif line.startswith(terminators):
-        #    for _line in _flush(register):
-        #        yield _line
-
-        #    del register, others
-        #    register, others = dict(), []
-
-        #    yield line  # yield the current line after flush
+        # add info to dictionary in a hierarchically organized manner
+        resnum_d: dict = register.setdefault(resnum, {})
+        atomname_d: dict = resnum_d.setdefault(atomname, {})
+        altloc_d: list = atomname_d.setdefault(altloc, [])
+        altloc_d.append((nline, record))
 
         prev_chain = chain
 
-    # at the end of the PDB, flush the remaining lines
-    for _line in _flush(register):
-        yield _line
+    # at the end of the PDB, process the remaining lines
+    yield from _process_altloc(register)
 
 
-def _flush(register):
+def _process_altloc(register: dict[str, dict[str, dict[str, list[tuple[int, str]]]]]) -> Generator[str]:
+    # TODO: Reduce complexity of `register` if possible
     """Processes the collected atoms according to the selaltloc option."""
     lines_to_yield = []
 
-    atom_lines = ("ATOM", "HETATM")
+    anisou_record = ("ANISOU",)  # anisou lines are treated specially and always follow atom records
 
-    # anisou lines are treated specially
-    anisou_lines = ("ANISOU",)
+    for atomnames in register.values():
+        for altlocs in atomnames.values():
+            all_lines: list[tuple[int, str]] = list(*altlocs.values())  # all alternative locations for the atom
 
-    for resnum, atomnames in register.items():
-        for atomname, altlocs in atomnames.items():
-            # gathers all alternative locations for the atom
-            all_lines = []
-            for altloc, lines in altlocs.items():
-                all_lines.extend(lines)
-
-            # identifies the highest occupancy combining dictionary
-            # and sorting
-            new = {}
+            # identify the highest occupancy combining dictionary and sorting
+            occ_line_dict = {}  # TODO: rename
             for line_number, line in all_lines:
-                if line.startswith(atom_lines):
-                    occupancy_number = line[54:60]
-                    list_ = new.setdefault(occupancy_number, [])
-                    list_.append((line_number, line))
-
-                # assumes ANISOU succeed the respective ATOM line
-                elif line.startswith(anisou_lines):
-                    list_.append((line_number, line))
+                occupancy = line[54:60]
+                occ_line_dict[occupancy] = [(line_number, line)]
 
             # sort keys by occupancy
-            keys_ = sorted(new.keys(), key=lambda x: float(x.strip()), reverse=True)
+            keys_ = sorted(occ_line_dict.keys(), key=lambda x: float(x.strip()), reverse=True)  # TODO: rename once I know what this is used for
 
-            these_atom_lines = new[keys_[0]]
+            these_atom_lines = occ_line_dict[keys_[0]]
             if len(keys_) == 1 and len(these_atom_lines) > 1:
                 # address "take first if occ is the same"
                 # see: https://github.com/haddocking/pdb-tools/issues/153#issuecomment-1488627668
                 lines_to_yield.extend(_remove_altloc(these_atom_lines[0:1]))
 
                 # if there's ANISOU, add it
-                if these_atom_lines[1][1].startswith(anisou_lines):
+                if these_atom_lines[1][1].startswith(anisou_record):
                     lines_to_yield.extend(_remove_altloc(these_atom_lines[1:2]))
 
             # this should run when there are more than one key or
@@ -175,18 +122,18 @@ def _flush(register):
                 # when occs are different, select the highest one
                 lines_to_yield.extend(_remove_altloc(these_atom_lines))
 
-            del all_lines, new
+            del all_lines, occ_line_dict
 
     # lines are sorted to the line number so that the output is sorted
     # the same way as in the input PDB
     lines_to_yield.sort(key=lambda x: x[0])
 
     # the line number is ignored, only the line is yield
-    for line_number, line in lines_to_yield:
+    for _, line in lines_to_yield:
         yield line
 
 
-def _remove_altloc(lines):
+def _remove_altloc(lines: str) -> Generator[str]:
     # the altloc ID is removed in processed altloc lines
     for line_num, line in lines:
         yield (line_num, line[:16] + " " + line[17:])
