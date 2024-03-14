@@ -1,4 +1,71 @@
+from tempfile import TemporaryFile
+
+from openmm import LangevinIntegrator, unit
+from openmm import app as mmapp
+
 _MIN_ATOMS_TO_PROTONATE = 5  # TODO: why do we need this check?
+_TEMPERATURE = 310
+
+
+def add_hydrogens(
+    pdb_str: str,
+    protonated_sequence: list[str | None],
+    max_iterations: int = 100,
+    random_seed: int = 917,
+) -> str:
+    """Add hydrogens."""
+    with TemporaryFile(mode="w", suffix="pdb", encoding="utf-8") as input_pdb, TemporaryFile(mode="r", encoding="utf-8") as output_pdb:
+        input_pdb.write(pdb_str)
+
+        # PARAMETERS
+        forcefield_model = "amber14-all.xml"  #'charmm36.xml'
+        water_model = "amber14/tip3p.xml"  #'charmm36/tip3p-pme-b.xml'
+        platform_properties = {"Threads": str(1)}
+
+        # PREPARES MODEL
+        forcefield = mmapp.ForceField(forcefield_model, water_model)
+        structure = mmapp.PDBFile(input_pdb)
+
+        model = mmapp.Modeller(structure.topology, structure.positions)
+        model.addHydrogens(forcefield=forcefield, variants=protonated_sequence)
+
+        structure.positions = model.positions
+        structure.topology = model.topology
+
+        system = forcefield.createSystem(structure.topology)
+
+        integrator = LangevinIntegrator(
+            _TEMPERATURE * unit.kelvin,
+            1.0 / unit.picosecond,
+            2.0 * unit.femtosecond,
+        )
+
+        integrator.setRandomNumberSeed(random_seed)
+        integrator.setConstraintTolerance(0.00001)
+
+        simulation = mmapp.Simulation(
+            structure.topology,
+            system,
+            integrator,
+            platformProperties=platform_properties,
+        )
+
+        context = simulation.context
+        context.setPositions(model.positions)
+
+        state = context.getState(getEnergy=True)
+        ini_ene = state.getPotentialEnergy().value_in_unit(unit.kilocalorie_per_mole)  # noqa:F841 TODO: check if this line is needed
+        simulation.minimizeEnergy(maxIterations=max_iterations)
+        structure.positions = context.getState(getPositions=True).getPositions()
+
+        # TODO: check whether these lines need to be repeated or whether that's a typo.
+        state = context.getState(getEnergy=True)
+        simulation.minimizeEnergy(maxIterations=max_iterations)
+        structure.positions = context.getState(getPositions=True).getPositions()
+
+        mmapp.PDBFile.writeFile(structure.topology, structure.positions, output_pdb)
+
+        return output_pdb.read()
 
 
 def detect_protonation_state(pdb_str: str) -> list[str | None]:
@@ -67,7 +134,8 @@ def _protonation_resname(resname: str, atoms_in_residue: list[str]) -> str:  # n
     return resname
 
 
-# This module is modified from https://github.com/DeepRank/pdbprep/blob/main/detect_protonation.py,
+# This module is modified from https://github.com/DeepRank/pdbprep/blob/main/
+# original modules names: detect_protonation.py and add_hydrogens.py),
 # written by João M.C. Teixeira (https://github.com/joaomcteixeira)
 # publishd under the following license:
 
