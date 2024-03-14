@@ -1,7 +1,10 @@
+from dataclasses import dataclass
 from tempfile import TemporaryFile
 
 from openmm import LangevinIntegrator, unit
 from openmm import app as mmapp
+from pdb2pqr.config import FORCE_FIELDS
+from pdb2pqr.main import main_driver as pdb2pqr
 
 _MIN_ATOMS_TO_PROTONATE = 5  # TODO: why do we need this check?
 _TEMPERATURE = 310
@@ -9,12 +12,20 @@ _TEMPERATURE = 310
 
 def add_hydrogens(
     pdb_str: str,
-    protonated_sequence: list[str | None],
     max_iterations: int = 100,
+    constraint_tolerance: float = 1e-05,
     random_seed: int = 917,
 ) -> str:
-    """Add hydrogens."""
-    with TemporaryFile(mode="w", suffix="pdb", encoding="utf-8") as input_pdb, TemporaryFile(mode="r", encoding="utf-8") as output_pdb:
+    """Add hydrogens to pdb file.
+
+    Args:
+        pdb_str: String representation of pdb file, preprocessed using deeprank2.tools.pdbprep.preprocess.
+        max_iterations: Maximum number of iterations to perform during energy minimization. Defaults to 100.
+        constraint_tolerance: Distance tolerance of LangevinIntegrator within which constraints are maintained, as a
+            fraction of the constrained distance. Defaults to  1e-05.
+        random_seed: Random seed for LangevinIntegrator.
+    """
+    with TemporaryFile(mode="w", suffix="pdb") as input_pdb, TemporaryFile(mode="r") as output_pdb:
         input_pdb.write(pdb_str)
 
         # PARAMETERS
@@ -25,6 +36,7 @@ def add_hydrogens(
         # PREPARES MODEL
         forcefield = mmapp.ForceField(forcefield_model, water_model)
         structure = mmapp.PDBFile(input_pdb)
+        protonated_sequence = _detect_protonation_state(pdb_str)
 
         model = mmapp.Modeller(structure.topology, structure.positions)
         model.addHydrogens(forcefield=forcefield, variants=protonated_sequence)
@@ -35,13 +47,13 @@ def add_hydrogens(
         system = forcefield.createSystem(structure.topology)
 
         integrator = LangevinIntegrator(
-            _TEMPERATURE * unit.kelvin,
-            1.0 / unit.picosecond,
-            2.0 * unit.femtosecond,
+            temperature=_TEMPERATURE * unit.kelvin,
+            frictionCoeff=1.0 / unit.picosecond,
+            stepSize=2.0 * unit.femtosecond,
         )
 
         integrator.setRandomNumberSeed(random_seed)
-        integrator.setConstraintTolerance(0.00001)
+        integrator.setConstraintTolerance(constraint_tolerance)
 
         simulation = mmapp.Simulation(
             structure.topology,
@@ -68,15 +80,10 @@ def add_hydrogens(
         return output_pdb.read()
 
 
-def detect_protonation_state(pdb_str: str) -> list[str | None]:
-    """Detect protonation states.
+def _detect_protonation_state(pdb_str: str) -> list[str | None]:
+    """Detect protonation states and return them as a sequence of alternative residue names."""
+    _calculate_protonation_state(pdb_str)
 
-    Args:
-        pdb_str (str): string representation of pdb file.
-
-    Returns:
-        list of protonation-specific residue names, which can be used to ... #TODO: finish this sentence
-    """
     pdb_lines = pdb_str.splitlines()
     protonable_residues = ("HIS", "ASP", "GLU", "CYS", "LYS")
 
@@ -108,8 +115,11 @@ def detect_protonation_state(pdb_str: str) -> list[str | None]:
     return residues
 
 
-def _protonation_resname(resname: str, atoms_in_residue: list[str]) -> str:  # noqa: PLR0911
-    """Returns alternate residue name based on protonation state."""
+def _protonation_resname(  # noqa:PLR0911
+    resname: str,
+    atoms_in_residue: list[str],
+) -> str:
+    """Return alternate residue name based on protonation state."""
     if resname == "HIS":
         if "HD1" in atoms_in_residue and "HE2" in atoms_in_residue:
             return "HIP"
@@ -134,11 +144,96 @@ def _protonation_resname(resname: str, atoms_in_residue: list[str]) -> str:  # n
     return resname
 
 
-# This module is modified from https://github.com/DeepRank/pdbprep/blob/main/
-# original modules names: detect_protonation.py and add_hydrogens.py),
+def _calculate_protonation_state(
+    pdb_str: str,
+    forcefield: str = "AMBER",
+) -> str:
+    """Calculate the protonation states using PDB2PQR.
+
+    PDB2PQR can only use files (no strings) as input and output, which is why this function is wrapped inside
+    TemporaryFile context managers.
+    """
+    with TemporaryFile(mode="w", suffix="pdb") as input_pdb, TemporaryFile(mode="r") as output_pdb:
+        input_pdb.write(pdb_str)
+
+        input_args = _Pdb2pqrArgs(input_pdb, output_pdb, forcefield)
+        pdb2pqr(input_args)
+
+        return output_pdb.read()
+
+
+@dataclass
+class _Pdb2pqrArgs:
+    """Input arguments to `main_driver` function of PDB2PQR.
+
+    These are usually given via CLI using argparse. All arguments, including those kept as default need to be given to
+    `main_driver` if called from script.
+    The argument given to `main_driver` is accessed via dot notation and is iterated over, which is why this is created
+    as a dataclass with an iterator.
+
+    Args*:
+        input_path: Input file path.
+        output_pqr: Output file path.
+        ff: Name of the selected forcefield.
+
+        *all other arguments should remain untouched.
+
+    Raises:
+        ValueError: if the forcefield is not recognized
+    """
+
+    input_path: str
+    output_pqr: str
+    ff: str = "AMBER"
+
+    # arguments set different from default
+    debump: bool = True
+    keep_chain: bool = True
+    log_level: str = "CRITICAL"
+
+    # arguments kept as default
+    ph: float = 7.0
+    assign_only: bool = False
+    clean: bool = False
+    userff: None = None
+    ffout: None = None
+    usernames: None = None
+    ligand: None = None
+    neutraln: bool = False
+    neutralc: bool = False
+    drop_water: bool = False
+    pka_method: None = None
+    opt: bool = True
+    include_header: bool = False
+    whitespace: bool = False
+    pdb_output: None = None
+    apbs_input: None = None
+
+    def __post_init__(self):
+        self._index = 0
+        if self.ff.lower() not in FORCE_FIELDS:
+            msg = f"Forcefield {self.ff} not recognized. Valid options: {FORCE_FIELDS}."
+            raise ValueError(msg)
+        if self.ff.lower() != "amber":
+            msg = f"Forcefield given as {self.ff}. Currently only AMBER forcefield is implemented."
+            raise NotImplementedError(msg)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        settings = vars(self)
+        if self._index < len(settings):
+            setting = list(settings)[self._index]
+            self._index += 1
+            return setting
+        raise StopIteration
+
+
+# Part of this module is modified from https://github.com/DeepRank/pdbprep/blob/main/
+# original module names: detect_protonation.py and add_hydrogens.py),
 # written by João M.C. Teixeira (https://github.com/joaomcteixeira)
 # publishd under the following license:
-
 
 #                                  Apache License
 #                            Version 2.0, January 2004
