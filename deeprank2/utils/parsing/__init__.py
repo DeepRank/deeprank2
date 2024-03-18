@@ -65,7 +65,7 @@ class AtomicForcefield:  # noqa: D101
                     type_ = action["TYPE"]
 
         if type_ is None:
-            _log.warning(f"Atom {atom} is unknown to the forcefield; vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0)")
+            _log.warning(f"Atom {atom} is unknown to OPLS, the forcefield used in deeprank2; vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0)")
             return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
         return self._vanderwaals_parameters[type_]
 
@@ -94,7 +94,7 @@ class AtomicForcefield:  # noqa: D101
                     charge = float(action["CHARGE"])
 
         if charge is None:
-            _log.warning(f"Atom {atom} is unknown to the forcefield; charge is set to 0.0")
+            _log.warning(f"Atom {atom} is unknown to OPLS, the forcefield used in deeprank2; charge is set to 0.0")
             return 0.0
         return charge
 
