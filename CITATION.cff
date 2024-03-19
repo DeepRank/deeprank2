@@ -1,45 +1,5 @@
 cff-version: "1.2.0"
 authors:
-- family-names: Crocioni
-  given-names: Giulia
-  orcid: "https://orcid.org/0000-0002-0823-0121"
-- family-names: Bodor
-  given-names: Dani L.
-  orcid: "https://orcid.org/0000-0003-2109-2349"
-- family-names: Baakman
-  given-names: Coos
-  orcid: "https://orcid.org/0000-0003-4317-1566"
-- family-names: Parizi
-  given-names: Farzaneh M.
-  orcid: "https://orcid.org/0000-0003-4230-7492"
-- family-names: Rademaker
-  given-names: Daniel-T.
-  orcid: "https://orcid.org/0000-0003-1959-1317"
-- family-names: Ramakrishnan
-  given-names: Gayatri
-  orcid: "https://orcid.org/0000-0001-8203-2783"
-- family-names: Burg
-  given-names: Sven A.
-  name-particle: van der
-  orcid: "https://orcid.org/0000-0003-1250-6968"
-- family-names: Marzella
-  given-names: Dario F.
-  orcid: "https://orcid.org/0000-0002-0043-3055"
-- family-names: Teixeira
-  given-names: João M. C.
-  orcid: "https://orcid.org/0000-0002-9113-0622"
-- family-names: Xue
-  given-names: Li C.
-  orcid: "https://orcid.org/0000-0002-2613-538X"
-contact:
-- family-names: Crocioni
-  given-names: Giulia
-  orcid: "https://orcid.org/0000-0002-0823-0121"
-doi: 10.5281/zenodo.10566809
-message: If you use this software, please cite our article in the
-  Journal of Open Source Software.
-preferred-citation:
-  authors:
   - family-names: Crocioni
     given-names: Giulia
     orcid: "https://orcid.org/0000-0002-0823-0121"
@@ -71,6 +31,46 @@ preferred-citation:
   - family-names: Xue
     given-names: Li C.
     orcid: "https://orcid.org/0000-0002-2613-538X"
+contact:
+  - family-names: Crocioni
+    given-names: Giulia
+    orcid: "https://orcid.org/0000-0002-0823-0121"
+doi: 10.5281/zenodo.10566809
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+    - family-names: Crocioni
+      given-names: Giulia
+      orcid: "https://orcid.org/0000-0002-0823-0121"
+    - family-names: Bodor
+      given-names: Dani L.
+      orcid: "https://orcid.org/0000-0003-2109-2349"
+    - family-names: Baakman
+      given-names: Coos
+      orcid: "https://orcid.org/0000-0003-4317-1566"
+    - family-names: Parizi
+      given-names: Farzaneh M.
+      orcid: "https://orcid.org/0000-0003-4230-7492"
+    - family-names: Rademaker
+      given-names: Daniel-T.
+      orcid: "https://orcid.org/0000-0003-1959-1317"
+    - family-names: Ramakrishnan
+      given-names: Gayatri
+      orcid: "https://orcid.org/0000-0001-8203-2783"
+    - family-names: Burg
+      given-names: Sven A.
+      name-particle: van der
+      orcid: "https://orcid.org/0000-0003-1250-6968"
+    - family-names: Marzella
+      given-names: Dario F.
+      orcid: "https://orcid.org/0000-0002-0043-3055"
+    - family-names: Teixeira
+      given-names: João M. C.
+      orcid: "https://orcid.org/0000-0002-9113-0622"
+    - family-names: Xue
+      given-names: Li C.
+      orcid: "https://orcid.org/0000-0002-2613-538X"
   date-published: 2024-02-27
   doi: 10.21105/joss.05983
   issn: 2475-9066
@@ -86,3 +86,4 @@ preferred-citation:
   volume: 9
 title: "DeepRank2: Mining 3D Protein Structures with Geometric Deep
   Learning"
+version: 3.0.1
