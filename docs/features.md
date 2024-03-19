@@ -168,9 +168,14 @@ These features relate to the structural relationship between nodes.
 
 #### Nonbond energies:
 
-These features measure nonbond energy potentials between nodes.
+These features measure nonbond energy potentials between nodes, and are calculated using [OPLS forcefield](https://en.wikipedia.org/wiki/OPLS).
 For residue graphs, the pairwise sum of potentials for all atoms from each residue is used. Note that no distance cutoff is used and the radius of influence is assumed to be infinite, although the potentials tends to 0 at large distance. Also edges are only assigned within a given cutoff radius when graphs are created.
+
 Nonbond energies are set to 0 for any atom pairs (on the same chain) that are within a cutoff radius of 3.6 Å, as these are assumed to be covalent neighbors or linked by no more than 2 covalent bonds (i.e. 1-3 pairs).
 
 - `electrostatic`: Electrostatic potential (also known as Coulomb potential) between two nodes, calculated using interatomic distances and charges of each atom (float).
 - `vanderwaals`: Van der Waals potential (also known as Lennard-Jones potential) between two nodes, calculated using interatomic distance/s and a list of atoms with vanderwaals parameters (`deeprank2.domain.forcefield.protein-allhdg5-4_new`, float). Atom pairs within a cutoff radius of 4.2 Å (but above 3.6 Å) are assumed to be separated by separated by exactly 2 covalent bonds (i.e. 1-4 pairs) and use a set of lower energy parameters.
+
+Charge and vanderwaals parameters are set to 0 for those atoms that are unknown to the OPLS forcefield, treating such cases as missing values. If this happens for many of the atoms in the PDB file/s provided, depending on the specific dataset it may be worth it to drop the features affected, i.e., `electrostatic`, `vanderwaals`, and `atom_charge`.
+
+- It may be useful to generate histograms of the processed data to further investigate the distribution of these features' values before deciding whether to drop them. Refer to the `data_generation_xxx.ipynb` [tutorial files](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for comprehensive instructions on transforming the data into a Pandas dataframe and generating histograms of the features.
