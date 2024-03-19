@@ -99,9 +99,9 @@ class AtomicForcefield:  # noqa: D101
 
         if charge is None:
             _log.warning(
-                f"Atom {atom} is unknown to the forcefield, charge is set to 0.0. \n \
-                    This will affect `electrostatic` and `atom_charge` features.\n \
-                        Check https://deeprank2.readthedocs.io/en/latest/features.html#nonbond-energies for more details.",
+                f"Atom {atom} is unknown to the forcefield, `electrostatic` and `atom_charge` charge is set to 0.0.\n"
+                "   This will affect `electrostatic` and `atom_charge` features.\n"
+                "       Check https://deeprank2.readthedocs.io/en/latest/features.html#nonbond-energies for more details.",
             )
             return 0.0
         return charge
