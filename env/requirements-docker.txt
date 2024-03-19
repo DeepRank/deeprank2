@@ -1,1 +1,1 @@
-deeprank2>=3.0.1
+deeprank2==3.0.2
