@@ -86,4 +86,4 @@ preferred-citation:
   volume: 9
 title: "DeepRank2: Mining 3D Protein Structures with Geometric Deep
   Learning"
-version: 3.0.1
+version: "3.0.1"
