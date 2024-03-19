@@ -66,9 +66,9 @@ class AtomicForcefield:  # noqa: D101
 
         if type_ is None:
             _log.warning(
-                f"Atom {atom} is unknown to the forcefield, vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0).\n \
-                    This will affect `vanderwaals` feature.\n \
-                        Check https://deeprank2.readthedocs.io/en/latest/features.html#nonbond-energies for more details.",
+                f"Atom {atom} is unknown to the forcefield, vanderwaals_parameters set to (0.0, 0.0, 0.0, 0.0).\n"
+                "   This will affect `vanderwaals` feature.\n"
+                "       Check https://deeprank2.readthedocs.io/en/latest/features.html#nonbond-energies for more details.",
             )
             return VanderwaalsParam(0.0, 0.0, 0.0, 0.0)
         return self._vanderwaals_parameters[type_]
