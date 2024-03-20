@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deeprank2"
-version = "3.0.1"
+version = "3.0.2"
 description = "DeepRank2 is an open-source deep learning framework for data mining of protein-protein interfaces or single-residue missense variants."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -34,26 +34,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
 ]
-dependencies = [
-    "tables >= 3.8.0",
-    "numpy >= 1.21.5",
-    "scipy >= 1.11.2",
-    "h5py >= 3.6.0",
-    "networkx >= 2.6.3",
-    "matplotlib >= 3.5.1",
-    "pdb2sql >= 0.5.1",
-    "scikit-learn >= 1.0.2",
-    "chart-studio >= 1.1.0",
-    "biopython >= 1.81",
-    "python-louvain >= 0.16",
-    "markov-clustering >= 0.0.6.dev0",
-    "tqdm >= 4.63.0",
-    "freesasa >= 2.1.0",
-    "tensorboard >= 0.9.0",
-    "protobuf >= 3.20.1",
-    "ruff >= 0.1.13",
-    "dill",
-]
 
 [project.optional-dependencies]
 # development dependency groups
@@ -67,6 +47,7 @@ test = [
     "coveralls",
 ]
 publishing = ["build", "twine", "wheel"]
+notebooks = ["nbmake"]
 
 [project.urls]
 Documentation = "https://deeprank2.readthedocs.io/en/latest/?badge=latest"
@@ -79,13 +60,15 @@ source = ["deeprank2"]
 
 [tool.setuptools.packages.find]
 include = ["deeprank2*"]
-exclude = ["tests*", "*tests.*", "*tests"]
+exclude = ["tests", "tests*", "*tests.*", "*tests"]
 
 [tool.setuptools.package-data]
 "*" = ["*.xlsx", "*.param", "*.top", "*residue-classes"]
 
 [tool.ruff]
 line-length = 159
+
+[tool.ruff.lint]
 select = ["ALL"]
 ignore = [
     # Unrealistic for this code base
@@ -125,22 +108,9 @@ ignore = [
     "D413", # Missing blank line after last section 
 ]
 
-# Allow autofix for all enabled rules.
+# Autofix settings
 fixable = ["ALL"]
 unfixable = ["F401"] # unused imports (should not disappear while editing)
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = [
-    "S101",    # Use of `assert` detected
-    "PLR2004", # Magic value used in comparison
-    "D101",    # Missing class docstring
-    "D102",    # Missing docstring in public method
-    "D103",    # Missing docstring in public function
-]
-"docs/*" = ["ALL"]
-"tests/perf/*" = ["T201"] # Use of print statements
-
-[tool.ruff.lint]
 extend-safe-fixes = [
     "D415",   # First line should end with a period, question mark, or exclamation point
     "D300",   # Use triple double quotes `"""`
@@ -152,5 +122,16 @@ extend-safe-fixes = [
     "B006",   # Mutable default argument
 ]
 
-[tool.ruff.isort]
-known-first-party = ["deeprank2"]
+isort.known-first-party = ["deeprank2"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",    # Use of `assert` detected
+    "PLR2004", # Magic value used in comparison
+    "D101",    # Missing class docstring
+    "D102",    # Missing docstring in public method
+    "D103",    # Missing docstring in public function
+    "SLF001",  # private member access
+]
+"docs/*" = ["ALL"]
+"tests/perf/*" = ["T201"] # Use of print statements

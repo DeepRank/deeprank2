@@ -21,7 +21,7 @@ from deeprank2.utils.community_pooling import community_detection, community_poo
 from deeprank2.utils.earlystopping import EarlyStopping
 from deeprank2.utils.exporters import HDF5OutputExporter, OutputExporter, OutputExporterCollection
 
-# ruff: noqa: PYI041 (redundant-numeric-union), they are used differently in this module
+# ruff: noqa: PYI041 (usage depends on type in this module)
 _log = logging.getLogger(__name__)
 
 

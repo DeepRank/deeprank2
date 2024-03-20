@@ -1,13 +1,13 @@
 # DeepRank2
 
-|     Badges     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| :------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|  **fairness**  | [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403)                                                                                                                                                                                                                           |
-|  **package**   | [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b1bde03fc0334e07b0cd8a69ce2adeb3)](https://app.codacy.com/gh/DeepRank/deeprank2/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)                                                                                                                                                                                                                                |
-|    **docs**    | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![RSD](https://img.shields.io/badge/RSD-deeprank2-pink)](https://research-software-directory.org/software/deeprankcore) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579)  [![DOI](https://joss.theoj.org/papers/10.21105/joss.05983/status.svg)](https://doi.org/10.21105/joss.05983)                                                                                                                                                                                                                                                                                                      |
+|     Badges     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  **fairness**  | [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6403/badge)](https://bestpractices.coreinfrastructure.org/projects/6403)                                                                                                                                                                                                                                |
+|  **package**   | [![PyPI version](https://badge.fury.io/py/deeprank2.svg)](https://badge.fury.io/py/deeprank2) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b1bde03fc0334e07b0cd8a69ce2adeb3)](https://app.codacy.com/gh/DeepRank/deeprank2/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)                                                                                                                                                                                                                                     |
+|    **docs**    | [![Documentation Status](https://readthedocs.org/projects/deeprank2/badge/?version=latest)](https://deeprank2.readthedocs.io/en/latest/?badge=latest) [![RSD](https://img.shields.io/badge/RSD-deeprank2-pink)](https://research-software-directory.org/software/deeprankcore) [![DOI](https://zenodo.org/badge/450496579.svg)](https://zenodo.org/badge/latestdoi/450496579) [![DOI](https://joss.theoj.org/papers/10.21105/joss.05983/status.svg)](https://doi.org/10.21105/joss.05983)                                                                        |
 |   **tests**    | [![Build Status](https://github.com/DeepRank/deeprank2/actions/workflows/build-repo.yml/badge.svg)](https://github.com/DeepRank/deeprank2/actions) ![Linting status](https://github.com/DeepRank/deeprank2/actions/workflows/linting.yml/badge.svg?branch=main) [![Coverage Status](https://coveralls.io/repos/github/DeepRank/deeprank2/badge.svg?branch=main)](https://coveralls.io/github/DeepRank/deeprank2?branch=main) ![Python](https://img.shields.io/badge/python-3.10-blue.svg) <!--- ![Python](https://img.shields.io/badge/python-3.11-blue.svg) --> |
-| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-|  **license**   | [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **running on** | ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|  **license**   | [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ## Overview
 
@@ -17,7 +17,12 @@
 
 DeepRank2 is an open-source deep learning (DL) framework for data mining of protein-protein interfaces (PPIs) or single-residue variants (SRVs). This package is an improved and unified version of three previously developed packages: [DeepRank](https://github.com/DeepRank/deeprank), [DeepRank-GNN](https://github.com/DeepRank/Deeprank-GNN), and [DeepRank-Mut](https://github.com/DeepRank/DeepRank-Mut).
 
-DeepRank2 allows for transformation of (pdb formatted) molecular data into 3D representations (either grids or graphs) containing structural and physico-chemical information, which can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
+As input, DeepRank2 takes [PDB-formatted](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) atomic structures, and map them to graphs, where nodes can represent either residues or atoms, as chosen by the user, and edges represent the interactions between them. DeepRank2 has the option to choose between two types of queries as input for the featurization phase:
+
+- PPIs, for mining interaction patterns within protein-protein complexes, implemented by the `ProteinProteinInterfaceQuery` class;
+- SRVs, for mining mutation phenotypes within protein structures, implemented by the `SingleResidueVariantQuery` class.
+
+The physico-chemical and geometrical features are then computed and assigned to each node and edge. The user can choose which features to generate from several pre-existing options defined in the package, or define custom features modules, as explained in the documentation. The graphs can then be mapped to 3D-grids as well. The generated data can be used for training neural networks. DeepRank2 also offers a pre-implemented training pipeline, using either [CNNs](https://en.wikipedia.org/wiki/Convolutional_neural_network) (for 3D-grids) or [GNNs](https://en.wikipedia.org/wiki/Graph_neural_network) (for graphs), as well as output exporters for evaluating performances.
 
 Main features:
 
@@ -28,7 +33,7 @@ Main features:
   - binary class, CAPRI categories, DockQ, RMSD, and FNAT
   - Detailed docking scores documentation is available [here](https://deeprank2.readthedocs.io/en/latest/docking.html)
 - Flexible definition of both new features and targets
-- Features generation for both graphs and grids
+- Features generation for both graphs and 3D-grids
 - Efficient data storage in HDF5 format
 - Support for both classification and regression (based on [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/))
 
@@ -44,8 +49,8 @@ Main features:
   - [Installation](#installation)
     - [Containerized Installation](#containerized-installation)
     - [Local/remote installation](#localremote-installation)
-      - [YML file installation](#yml-file-installation)
-      - [Manual installation](#manual-installation)
+      - [YML file installation (recommended)](#yml-file-installation-recommended)
+      - [Manual installation (customizable)](#manual-installation-customizable)
       - [Testing DeepRank2 installation](#testing-deeprank2-installation)
   - [Contributing](#contributing)
   - [Using DeepRank2](#using-deeprank2)
@@ -95,7 +100,7 @@ Local installation is formally only supported on the latest stable release of ub
 
 Before installing DeepRank2 please ensure you have [GCC](https://gcc.gnu.org/install/) installed: if running `gcc --version` gives an error, run `sudo apt-get install gcc`.
 
-#### YML file installation
+#### YML file installation (recommended)
 
 You can use the provided YML file for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) containing the latest stable release of DeepRank2 and all its dependencies.
 This will install the CPU-only version of DeepRank2 on Python 3.10.
@@ -109,27 +114,28 @@ cd deeprank2
 # Ensure you are in your base environment
 conda activate
 # Create the environment
-conda env create -f env/environment.yml
+conda env create -f env/deeprank2.yml
 # Activate the environment
 conda activate deeprank2
+# Install the latest deeprank2 release
+pip install deeprank2
 ```
 
 See instructions below to [test](#testing-deeprank2-installation) that the installation was succesful.
 
-#### Manual installation
+#### Manual installation (customizable)
 
-If you want to use the GPUs, choose a specific python version, are a MacOS user, or if the YML installation was not succesful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
-If you have any issues during installation of dependencies, please refer to the official documentation for each package (linked below), as our instructions may be out of date (last tested on 19 Jan 2024):
+If you want to use the GPUs, choose a specific python version, are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
-- [DSSP 4](https://anaconda.org/sbl/dssp): `conda install -c sbl dssp`
-- [MSMS](https://anaconda.org/bioconda/msms): `conda install -c bioconda msms`
-  - [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
-- [PyTorch](https://pytorch.org/get-started/locally/): `conda install pytorch torchvision torchaudio cpuonly -c pytorch`
-  - Pytorch regularly publishes updates and not all newest versions will work stably with DeepRank2. Currently, the package is tested using [PyTorch 2.1.1](https://pytorch.org/get-started/previous-versions/#v211).
+You can first remove from `env/deeprank2.yml` the packages that cannot be installed properly, or the ones that you want to install differently (e.g., pytorch-related packages if you wish to install the CUDA version), and then proceed with the environment creation by using the edited YML file: `conda env create -f env/deeprank2.yml`. Then activate the environment, and proceed with installing the missing packages, which might fall into the following list. If you have any issues during installation of dependencies, please refer to the official documentation for each package (linked below), as our instructions may be out of date (last tested on 19 Feb 2024):
+
+- [MSMS](https://anaconda.org/bioconda/msms): [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
+- [PyTorch](https://pytorch.org/get-started/locally/)
+  - Pytorch regularly publishes updates and not all newest versions will work stably with DeepRank2. Currently, the package is tested on ubuntu using [PyTorch 2.1.1](https://pytorch.org/get-started/previous-versions/#v211).
   - We support torch's CPU library as well as CUDA.
 - [PyG](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) and its optional dependencies: `torch_scatter`, `torch_sparse`, `torch_cluster`, `torch_spline_conv`.
   - The exact command to install pyg will depend on the version of pytorch you are using. Please refer to the source's installation instructions (we recommend using the pip installation for this as it also shows the command for the dependencies).
-- For MacOS with M1 chip users: install [the conda version of PyTables](https://www.pytables.org/usersguide/installation.html).
+- [FreeSASA](https://freesasa.github.io/python/).
 
 Finally install deeprank2 itself: `pip install deeprank2`.
 
@@ -145,7 +151,7 @@ The `test` extra is optional, and can be used to install test-related dependenci
 
 #### Testing DeepRank2 installation
 
-You can check that all components were installed correctly, using pytest. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
+You can check that all components were installed correctly, using `pytest`. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
 
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
 
@@ -166,10 +172,13 @@ For each protein-protein complex (or protein structure containing a missense var
 
 A `Query` takes as inputs:
 
-- a `.pdb` file, representing the protein-protein structure,
-- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
-- the ids of the chains composing the structure, and
-- optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
+- A `.pdb` file, representing the molecular structure.
+- The resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom.
+- `chain_ids`, the chain ID or IDs (generally single capital letter(s)).
+  - `SingleResidueVariantQuery` takes a single ID, which represents the chain containing the variant residue.
+  - `ProteinProteinInterfaceQuery` takes a pair of ids, which represent the chains between which the interface exists.
+  - Note that in either case this does not limit the structure to residues from this/these chain/s. The structure contained in the `.pdb` can thus have any number of chains, and residues from these chains will be included in the graphs and 3D-grids produced by DeepRank2 (if they are within the `influence_radius`).
+- Optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery
@@ -218,7 +227,7 @@ queries.add(ProteinProteinInterfaceQuery(
 
 The user is free to implement a custom query class. Each implementation requires the `build` method to be present.
 
-The queries can then be processed into graphs only or both graphs and 3D grids, depending on which kind of network will be used later for training.
+The queries can then be processed into graphs only or both graphs and 3D-grids, depending on which kind of network will be used later for training.
 
 ```python
 from deeprank2.features import components, conservation, contact, exposure, irc, surfacearea
@@ -231,7 +240,7 @@ hdf5_paths = queries.process(
     "<output_folder>/<prefix_for_outputs>",
     feature_modules = feature_modules)
 
-# Save data into 3D-graphs and 3D-grids
+# Save data into graphs and 3D-grids
 hdf5_paths = queries.process(
     "<output_folder>/<prefix_for_outputs>",
     feature_modules = feature_modules,

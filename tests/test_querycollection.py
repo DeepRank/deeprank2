@@ -21,7 +21,7 @@ def _querycollection_tester(
     feature_modules: ModuleType | list[ModuleType] | None = None,
     cpu_count: int = 1,
     combine_output: bool = True,
-) -> (QueryCollection, str, list[str]):
+) -> tuple[QueryCollection, str, list[str]]:
     """
     Generic function to test QueryCollection class.
 
@@ -279,6 +279,6 @@ def test_querycollection_duplicates_add() -> None:
         "1ATN_2w_2",
         "1ATN_3w",
     ]
-    assert queries._ids_count["residue-ppi:A-B:1ATN_1w"] == 3  # noqa: SLF001
-    assert queries._ids_count["residue-ppi:A-B:1ATN_2w"] == 2  # noqa: SLF001
-    assert queries._ids_count["residue-ppi:A-B:1ATN_3w"] == 1  # noqa: SLF001
+    assert queries._ids_count["residue-ppi:A-B:1ATN_1w"] == 3
+    assert queries._ids_count["residue-ppi:A-B:1ATN_2w"] == 2
+    assert queries._ids_count["residue-ppi:A-B:1ATN_3w"] == 1

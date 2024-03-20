@@ -1,4 +1,4 @@
-name: linting
+name: notebooks
 
 on:
   push:
@@ -9,7 +9,6 @@ on:
       # filetypes
       - "**.md"
       - "**.rst"
-      - "**.ipynb"
       - "**.cff"
       - "**.png"
     branches:
@@ -23,21 +22,20 @@ on:
       # filetypes
       - "**.md"
       - "**.rst"
-      - "**.ipynb"
       - "**.cff"
       - "**.png"
 
 jobs:
   build:
     if: github.event.pull_request.draft == false
-    name: Linting build
+    name: Build for (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.10"]
+        python-version: ["3.10"] # ["3.10", "3.11"]
 
     # https://github.com/marketplace/actions/setup-miniconda#use-a-default-shell
     defaults:
@@ -46,11 +44,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: ./.github/actions/install-python-and-package
         with:
           python-version: ${{ matrix.python-version }}
-          extras-require: test
-      - name: Check style against standards using ruff
+          extras-require: test, notebooks
+          pkg-installation-type: "repository"
+
+      - name: Download the data for the tutorials
+        shell: bash -l {0}
         run: |
-          ruff check
-          ruff format --check
+          wget https://zenodo.org/records/8349335/files/data_raw.zip
+          unzip data_raw.zip -d data_raw
+          mv data_raw tutorials
+
+      - name: Run tutorial notebooks
+        run: pytest --nbmake tutorials

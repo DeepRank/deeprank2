@@ -10,10 +10,13 @@ For each protein-protein complex (or protein structure containing a missense var
 
 A `Query` takes as inputs:
 
-- a `.pdb` file, representing the protein-protein structure,
-- the resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom,
-- the ids of the chains composing the structure, and
-- optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
+- A `.pdb` file, representing the molecular structure.
+- The resolution (`"residue"` or `"atom"`), i.e. whether each node should represent an amino acid residue or an atom.
+- `chain_ids`, the chain ID or IDs (generally single capital letter(s)).
+  - `SingleResidueVariantQuery` takes a single ID, which represents the chain containing the variant residue.
+  - `ProteinProteinInterfaceQuery` takes a pair of ids, which represent the chains between which the interface exists.
+  - Note that in either case this does not limit the structure to residues from this/these chain/s. The structure contained in the `.pdb` can thus have any number of chains, and residues from these chains will be included in the graphs and grids produced by DeepRank2 (if they are within the `influence_radius`).
+- Optionally, the correspondent position-specific scoring matrices (PSSMs), in the form of `.pssm` files.
 
 ```python
 from deeprank2.query import QueryCollection, ProteinProteinInterfaceQuery

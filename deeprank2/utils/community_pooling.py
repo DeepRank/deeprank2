@@ -11,7 +11,7 @@ from torch_geometric.nn.pool.consecutive import consecutive_cluster
 from torch_geometric.nn.pool.pool import pool_batch, pool_edge
 from torch_scatter import scatter_max, scatter_mean
 
-# ruff: noqa: ANN001, ANN201 (missing type hints and return types)
+# ruff: noqa: ANN001, ANN201
 
 
 def plot_graph(graph, cluster) -> None:  # noqa:D103
