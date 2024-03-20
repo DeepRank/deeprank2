@@ -30,7 +30,7 @@ jobs:
           extras-require: publishing
           pkg-installation-type: "repository"
       - name: Build wheel and source distribution
-        run: python -m build
+        run: python3 -m build
       - uses: actions/upload-artifact@v3
         with:
           path: dist/*
