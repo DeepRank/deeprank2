@@ -41,5 +41,10 @@ dependencies:
   - ruff>=0.3.0
   - dill>=0.3.8
   - pyarrow>=15.0.0
+  - openmm>=8.0.0
+  - chardet>=4.0.0
   - pip:
+      - pdb-tools==2.5.0
+      - Pras-Server==1.2.1
+      - pdb2pqr==3.6.2
       - --requirement requirements-docker.txt

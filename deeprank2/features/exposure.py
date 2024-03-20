@@ -1,11 +1,9 @@
 import logging
 import signal
 import sys
-import warnings
 from typing import NoReturn
 
 import numpy as np
-from Bio.PDB.Atom import PDBConstructionWarning
 from Bio.PDB.HSExposure import HSExposureCA
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import get_surface, residue_depth
@@ -42,9 +40,8 @@ def add_features(  # noqa:D103
     signal.signal(signal.SIGINT, handle_sigint)
     signal.signal(signal.SIGALRM, handle_timeout)
 
-    with warnings.catch_warnings(record=PDBConstructionWarning):
-        parser = PDBParser()
-        structure = parser.get_structure("_tmp", pdb_path)
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("_tmp", pdb_path)
     bio_model = structure[0]
 
     try:
