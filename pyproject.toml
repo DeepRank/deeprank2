@@ -59,8 +59,7 @@ branch = true
 source = ["deeprank2"]
 
 [tool.setuptools.packages.find]
-include = ["deeprank2*", "README.md", "env/deeprank2.yml", "CITATION.cff", "LICENSE", "NOTICE"]
-exclude = ["tests", "tests*", "*tests.*", "*tests"]
+include = ["deeprank2*"]
 
 [tool.setuptools.package-data]
 "*" = ["*.xlsx", "*.param", "*.top", "*residue-classes"]
