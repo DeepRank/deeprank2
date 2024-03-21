@@ -59,7 +59,7 @@ branch = true
 source = ["deeprank2"]
 
 [tool.setuptools.packages.find]
-include = ["deeprank2*"]
+include = ["deeprank2*", "LICENSE", "README.md", "CITATION.cff", "NOTICE"]
 exclude = ["tests", "tests*", "*tests.*", "*tests"]
 
 [tool.setuptools.package-data]
