@@ -1,6 +1,0 @@
-include CITATION.cff
-include LICENSE
-include NOTICE
-include README.md
-include env/deeprank2.yml
-prune tests
