@@ -1,0 +1,6 @@
+include README.md
+include env/deeprank2.yml
+include CITATION.cff
+include LICENSE
+include NOTICE
+prune tests
