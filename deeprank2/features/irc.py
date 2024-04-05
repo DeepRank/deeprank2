@@ -40,7 +40,11 @@ class _ContactDensity:
         self.connections["all"] = []
 
 
-def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str, _ContactDensity]:
+def get_IRCs(
+    pdb_path: str,
+    chains: list[str],
+    cutoff: float = 5.5,
+) -> dict[str, _ContactDensity]:
     """Get all close contact residues from the opposite chain.
 
     Args:

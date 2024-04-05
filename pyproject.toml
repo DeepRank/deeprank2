@@ -86,6 +86,10 @@ ignore = [
     "S311",   # insecure random generators
     "PT011",  # pytest-raises-too-broad
     "SIM108", # Use ternary operator
+    # TODO formatting
+    "TD002",  # Missing TODO author
+    "TD003",  # Missing TODO link
+    "FIX002", # Consider resolving the issue instead 
     # Unwanted docstrings
     "D100", # Missing module docstring
     "D104", # Missing public package docstring
