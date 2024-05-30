@@ -950,7 +950,7 @@ class Trainer:
                 # Serialize the function
                 serialized_func = dill.dumps(key["transform"])
                 # Deserialize the function
-                deserialized_func = dill.loads(serialized_func)
+                deserialized_func = dill.loads(serialized_func)  # noqa: S301
                 str_expr = inspect.getsource(deserialized_func)
                 match = re.search(r"[\"|\']transform[\"|\']:.*(lambda.*).*,.*[\"|\']standardize[\"|\'].*", str_expr).group(1)
                 key["transform"] = match
