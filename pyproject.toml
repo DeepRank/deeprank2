@@ -67,8 +67,7 @@ exclude = ["tests", "tests*", "*tests.*", "*tests"]
 
 [tool.pytest.ini_options]
 # pytest options: -ra: show summary info for all test outcomes
-# -n auto: run tests in parallel
-addopts = "-ra -n auto"  
+addopts = "-ra"  
 
 [tool.ruff]
 line-length = 159
