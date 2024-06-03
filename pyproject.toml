@@ -65,6 +65,11 @@ exclude = ["tests", "tests*", "*tests.*", "*tests"]
 [tool.setuptools.package-data]
 "*" = ["*.xlsx", "*.param", "*.top", "*residue-classes"]
 
+[tool.pytest.ini_options]
+# pytest options: -ra: show summary info for all test outcomes
+# -n auto: run tests in parallel
+addopts = "-ra -n auto"  
+
 [tool.ruff]
 line-length = 159
 
