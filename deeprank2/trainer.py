@@ -6,6 +6,7 @@ import warnings
 from time import time
 from typing import Any
 
+import dill
 import h5py
 import numpy as np
 import torch
@@ -946,7 +947,11 @@ class Trainer:
             for key in features_transform_to_save.values():
                 if key["transform"] is None:
                     continue
-                str_expr = inspect.getsource(key["transform"])
+                # Serialize the function
+                serialized_func = dill.dumps(key["transform"])
+                # Deserialize the function
+                deserialized_func = dill.loads(serialized_func)  # noqa: S301
+                str_expr = inspect.getsource(deserialized_func)
                 match = re.search(r"[\"|\']transform[\"|\']:.*(lambda.*).*,.*[\"|\']standardize[\"|\'].*", str_expr).group(1)
                 key["transform"] = match
 

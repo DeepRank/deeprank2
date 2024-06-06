@@ -7,7 +7,7 @@ from enum import Enum
 import h5py
 import numpy as np
 from numpy.typing import NDArray
-from scipy.signal import bspline
+from scipy.interpolate import BSpline
 
 from deeprank2.domain import gridstorage
 
@@ -190,9 +190,9 @@ class Grid:
 
         fx, fy, fz = position
         bsp_data = (
-            bspline((self.xgrid - fx) / self._settings.resolutions[0], order)
-            * bspline((self.ygrid - fy) / self._settings.resolutions[1], order)
-            * bspline((self.zgrid - fz) / self._settings.resolutions[2], order)
+            BSpline((self.xgrid - fx) / self._settings.resolutions[0], order)
+            * BSpline((self.ygrid - fy) / self._settings.resolutions[1], order)
+            * BSpline((self.zgrid - fz) / self._settings.resolutions[2], order)
         )
 
         return value * bsp_data

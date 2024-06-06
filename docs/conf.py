@@ -28,7 +28,7 @@ autodoc_mock_imports = [
     "scipy",
     "h5py",
     "sklearn",
-    "scipy.signal",
+    "scipy.interpolate",
     "torch",
     "torch.utils",
     "torch.utils.data",
