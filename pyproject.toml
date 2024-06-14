@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deeprank2"
-version = "3.0.2"
+version = "3.0.3"
 description = "DeepRank2 is an open-source deep learning framework for data mining of protein-protein interfaces or single-residue missense variants."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -60,7 +60,6 @@ source = ["deeprank2"]
 
 [tool.setuptools.packages.find]
 include = ["deeprank2*"]
-exclude = ["tests", "tests*", "*tests.*", "*tests"]
 
 [tool.setuptools.package-data]
 "*" = ["*.xlsx", "*.param", "*.top", "*residue-classes"]
