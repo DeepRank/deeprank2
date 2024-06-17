@@ -55,8 +55,8 @@ runs:
       shell: bash -l {0}
       run: |
         # Install deeprank2 conda dependencies
-        ## DSSP
-        conda install -c sbl dssp>=4.2.2.1
+        ## DSSP and libcifpp
+        conda install -c sbl dssp >= 4.2.2.1 libcifpp >= 5.1.0
         ## MSMS
         conda install -c bioconda msms>=2.6.1
 
