@@ -9,8 +9,3 @@ channels:
 dependencies:
   - python==3.10
   - pip>=23.3
-  - pyg>=2.4.0
-  - pytorch-scatter>=2.1.2
-  - pytorch-sparse>=0.6.18
-  - pytorch-cluster>=1.6.3
-  - pytorch-spline-conv>=1.2.2

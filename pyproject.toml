@@ -53,10 +53,7 @@ dependencies = [
     "python-louvain >= 0.16",
     "tqdm >= 4.63.0",
     "freesasa >= 2.1.0",
-    "biopython >= 1.81",
-    "torch == 2.1.1", 
-    "torchvision == 0.16.1",
-    "torchaudio == 2.1.1"
+    "biopython >= 1.81"
     ]
 
 [project.optional-dependencies]
