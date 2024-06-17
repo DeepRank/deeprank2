@@ -11,8 +11,6 @@ dependencies:
   - pip>=23.3
   - notebook>=7.0.6
   - sbl::libcifpp>=5.1.0
-  - sbl::dssp>=4.2.2.1
-  - msms>=2.6.1
   - markov_clustering>=0.0.6
   - pytorch=2.1.1
   - torchvision>=0.16.1
