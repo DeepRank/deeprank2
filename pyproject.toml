@@ -36,7 +36,7 @@ classifiers = [
 ]
 dependencies = [
     "notebook >= 7.0.6",
-    "markov-clustering >= 0.0.6",
+    "markov-clustering >= 0.0.6.dev0",
     "tensorboard>=0.9.0",
     "protobuf >= 3.20.1",
     "dill >= 0.3.8",
