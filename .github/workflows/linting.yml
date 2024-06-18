@@ -30,7 +30,7 @@ on:
 jobs:
   build:
     if: github.event.pull_request.draft == false
-    name: Linting build
+    name: Linting
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -46,11 +46,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/install-python-and-package
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-          extras-require: test
-      - name: Check style against standards using ruff
+      - name: Python info
+        shell: bash -l {0}
         run: |
-          ruff check
-          ruff format --check
+          which python3
+          python3 --version
+      - name: Check linting and formatting using ruff
+        run: |
+          python3 -m pip install ruff
+          ruff check || echo "Please ensure you have the latest version of ruff (`ruff -V`) installed locally." && (exit 1)
+          ruff format --check || echo "Please ensure you have the latest version of ruff (`ruff -V`) installed locally." && (exit 1)
