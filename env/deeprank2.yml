@@ -1,0 +1,21 @@
+name: deeprank2
+channels:
+  - pytorch
+  - pyg
+  - bioconda
+  - defaults
+  - conda-forge
+  - sbl
+dependencies:
+  - sbl::libcifpp>=5.1.0
+  - sbl::dssp>=4.2.2.1
+  - msms>=2.6.1
+  - pytorch=2.1.1
+  - torchvision>=0.16.1
+  - torchaudio>=2.1.1
+  - cpuonly>=2.0
+  - pyg>=2.4.0
+  - pytorch-scatter>=2.1.2
+  - pytorch-sparse>=0.6.18
+  - pytorch-cluster>=1.6.3
+  - pytorch-spline-conv>=1.2.2
