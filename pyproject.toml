@@ -35,38 +35,38 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
-    "notebook >= 7.0.6",
-    "markov-clustering >= 0.0.6.dev0",
-    "tensorboard>=0.9.0",
-    "protobuf >= 3.20.1",
-    "dill >= 0.3.8",
-    "pyarrow >= 15.0.0",
-    "tables >= 3.8.0",
+    "notebook >= 7.0.6, < 8.0",
+    "markov-clustering >= 0.0.6.dev0, < 1.0",
+    "tensorboard>=0.9.0, < 1.0",
+    "protobuf >= 3.20.1, < 4.0",
+    "dill >= 0.3.8, < 1.0",
+    "pyarrow >= 15.0.0, < 16.0",
+    "tables >= 3.8.0, < 4.0",
     "numpy >= 1.25, < 2.0",
-    "scipy >= 1.13.1",
-    "h5py >= 3.6.0",
-    "networkx >= 2.6.3",
-    "matplotlib >= 3.5.1",
-    "scikit-learn >= 1.0.2",
-    "chart-studio >= 1.1.0",
-    "pdb2sql >= 0.5.1",
-    "python-louvain >= 0.16",
-    "tqdm >= 4.63.0",
-    "freesasa >= 2.1.0",
-    "biopython >= 1.81"
+    "scipy >= 1.13.1, < 2.0",
+    "h5py >= 3.6.0, < 4.0",
+    "networkx >= 2.6.3, < 3.0",
+    "matplotlib >= 3.5.1, < 4.0",
+    "scikit-learn >= 1.0.2, < 2.0",
+    "chart-studio >= 1.1.0, < 2.0",
+    "pdb2sql >= 0.5.1, < 1.0",
+    "python-louvain >= 0.16, < 1.0",
+    "tqdm >= 4.63.0, < 5.0",
+    "freesasa >= 2.1.0, < 3.0",
+    "biopython >= 1.81, < 2.0"
     ]
 
 [project.optional-dependencies]
 # development dependency groups
 test = [
-    "pytest >= 7.4.0",
-    "bump2version",
-    "coverage",
-    "pycodestyle",
-    "pytest-cov",
-    "pytest-runner",
-    "coveralls",
-    "ruff>=0.3.0"
+    "pytest >= 7.4.0, < 8.0",
+    "bump2version >= 1.0.1, < 2.0",
+    "coverage >= 6.5.0, < 7.0",
+    "pycodestyle >= 2.8.0, < 3.0",
+    "pytest-cov >= 4.1.0, < 5.0",
+    "pytest-runner >= 6.0.0, < 7.0",
+    "coveralls >= 3.3.1, < 4.0",
+    "ruff >= 0.3.0, < 1.0"
 ]
 publishing = ["build", "twine", "wheel"]
 notebooks = ["nbmake"]
