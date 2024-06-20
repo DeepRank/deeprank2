@@ -14,6 +14,8 @@ RUN \
   apt install -y gcc && \
   ## Create the environment and install the dependencies
   mamba env create -f /home/deeprank2/deeprank2-docker.yml && \
+  ## Activate the environment and install pip packages
+  /opt/conda/bin/conda run -n deeprank2 pip install -r /home/deeprank2/requirements-docker.txt && \
   ## Activate the environment automatically when entering the container
   echo "source activate deeprank2" >~/.bashrc && \
   # Get the data for running the tutorials
