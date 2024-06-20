@@ -103,7 +103,7 @@ def _get_secstructure(pdb_path: str) -> dict:
 
     try:
         dssp = DSSP(model, pdb_path, dssp="mkdssp")
-    except Exception as e:  # noqa: BLE001, namely: # improperly formatted pdb files raise: `Exception: DSSP failed to produce an output`
+    except Exception as e:
         pdb_format_link = "https://www.wwpdb.org/documentation/file-format-content/format33/sect1.html#Order"
         msg = (
             f"DSSP has raised the following exception: {e}.\n\t"
