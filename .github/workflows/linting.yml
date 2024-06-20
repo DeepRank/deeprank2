@@ -58,5 +58,5 @@ jobs:
       - name: Check linting and formatting using ruff
         run: |
           python3 -m pip install ruff
-          ruff check || echo "Please ensure you have the latest version of ruff (`ruff -V`) installed locally." && (exit 1)
-          ruff format --check || echo "Please ensure you have the latest version of ruff (`ruff -V`) installed locally." && (exit 1)
+          ruff check || (echo "Please ensure you have the latest version of ruff (`ruff -V`) installed locally." && (exit 1))
+          ruff format --check || (echo "Please ensure you have the latest version of ruff (`ruff -V`) installed locally." && (exit 1))
