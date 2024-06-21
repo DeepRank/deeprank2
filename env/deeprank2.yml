@@ -7,6 +7,8 @@ channels:
   - conda-forge
   - sbl
 dependencies:
+  - python=3.10
+  - pip>=23.3
   - sbl::libcifpp=5.1.0
   - sbl::dssp=4.2.2.1
   - msms=2.6.1
