@@ -4,9 +4,9 @@
 - [Installation](#installation)
   - [Containerized Installation](#containerized-installation)
   - [Local/remote installation](#localremote-installation)
-      - [YML file installation (recommended)](#yml-file-installation-recommended)
-      - [Manual installation (customizable)](#manual-installation-customizable)
-      - [Testing DeepRank2 installation](#testing-deeprank2-installation)
+    - [YML file installation (recommended)](#yml-file-installation-recommended)
+    - [Manual installation (customizable)](#manual-installation-customizable)
+    - [Testing DeepRank2 installation](#testing-deeprank2-installation)
 - [Contributing](#contributing)
 
 # Installation
@@ -53,14 +53,8 @@ This will install the CPU-only version of DeepRank2 on Python 3.10.
 Note that this will not work for MacOS. Do the [Manual Installation](#manual-installation) instead.
 
 ```bash
-# Clone the DeepRank2 repository and enter its root directory
-git clone https://github.com/DeepRank/deeprank2
-cd deeprank2
-
-# Ensure you are in your base environment
-conda activate
 # Create the environment
-conda env create -f env/deeprank2.yml
+conda env create -f https://raw.githubusercontent.com/DeepRank/deeprank2/main/env/deeprank2.yml
 # Activate the environment
 conda activate deeprank2
 # Install the latest deeprank2 release
@@ -73,7 +67,7 @@ See instructions below to [test](#testing-deeprank2-installation) that the insta
 
 If you want to use the GPUs, choose a specific python version, are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
-You can first remove from `env/deeprank2.yml` the packages that cannot be installed properly, or the ones that you want to install differently (e.g., pytorch-related packages if you wish to install the CUDA version), and then proceed with the environment creation by using the edited YML file: `conda env create -f env/deeprank2.yml`. Then activate the environment, and proceed with installing the missing packages, which might fall into the following list. If you have any issues during installation of dependencies, please refer to the official documentation for each package (linked below), as our instructions may be out of date (last tested on 19 Feb 2024):
+You can first create a copy of the `deeprank2.yml` file, place it in your current directory, and remove the packages that cannot be installed properly, or the ones that you want to install differently (e.g., pytorch-related packages if you wish to install the CUDA version), and then proceed with the environment creation by using the edited YML file: `conda env create -f deeprank2.yml`. Then activate the environment, and proceed with installing the missing packages, which might fall into the following list. If you have any issues during installation of dependencies, please refer to the official documentation for each package (linked below), as our instructions may be out of date (last tested on 19 Feb 2024):
 
 - [MSMS](https://anaconda.org/bioconda/msms): [Here](https://ssbio.readthedocs.io/en/latest/instructions/msms.html) for MacOS with M1 chip users.
 - [PyTorch](https://pytorch.org/get-started/locally/)
