@@ -3,8 +3,7 @@ FROM --platform=linux/x86_64 condaforge/miniforge3:23.3.1-1
 
 # Add files
 ADD ./tutorials /home/deeprank2/tutorials
-ADD ./env/deeprank2-docker.yml /home/deeprank2
-ADD ./env/requirements-docker.txt /home/deeprank2
+ADD ./env/deeprank2.yml /home/deeprank2
 
 RUN \
   # Install dependencies and package
@@ -13,9 +12,9 @@ RUN \
   ## GCC
   apt install -y gcc && \
   ## Create the environment and install the dependencies
-  mamba env create -f /home/deeprank2/deeprank2-docker.yml && \
+  mamba env create -f /home/deeprank2/deeprank2.yml && \
   ## Activate the environment and install pip packages
-  /opt/conda/bin/conda run -n deeprank2 pip install -r /home/deeprank2/requirements-docker.txt && \
+  /opt/conda/bin/conda run -n deeprank2 pip install deeprank2 && \
   ## Activate the environment automatically when entering the container
   echo "source activate deeprank2" >~/.bashrc && \
   # Get the data for running the tutorials
