@@ -61,8 +61,6 @@ conda activate deeprank2
 pip install deeprank2
 ```
 
-See instructions below to [test](#testing-deeprank2-installation) that the installation was succesful.
-
 #### Manual installation (customizable)
 
 If you want to use the GPUs, choose a specific python version (note that at the moment we support python 3.10 only), are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
@@ -91,7 +89,7 @@ The `test` extra is optional, and can be used to install test-related dependenci
 
 #### Testing DeepRank2 installation
 
-You can check that all components were installed correctly, using `pytest`. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
+If you have cloned the repository, you can check that all components were installed correctly using `pytest`. We especially recommend doing this in case you installed DeepRank2 and its dependencies manually (the latter option above).
 
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
 
