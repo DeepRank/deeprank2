@@ -9,7 +9,7 @@ The tutorial notebooks in this folder can be run to learn how to use DeepRank2.
 
 ### :heavy_exclamation_mark: Important :heavy_exclamation_mark:
 
-For correct results, please run these tutorials within the expected Jupyter notebooks (`.ipynb` files) and avoid using the Python interactive shell (command line), which may cause certain functions (e.g., such as `inspect.getsource()`) to not work as expected.
+For a smooth experience, please run these tutorials within the Jupyter notebooks provided (`.ipynb` files). Running the commands in a Python (interactive) shell or on command line may lead to unexpected errors.
 
 ### Use cases
 
