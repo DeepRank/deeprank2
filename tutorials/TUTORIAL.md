@@ -7,8 +7,6 @@ The tutorial notebooks in this folder can be run to learn how to use DeepRank2.
   - single-residue variant (SRV) data ([data_generation_srv.ipynb](https://github.com/DeepRank/deeprank2/blob/main/tutorials/data_generation_srv.ipynb)).
 - The [training tutorial](tutorials/training_ppi.ipynb) will demonstrate how to train neural networks using DeepRank2.
 
-### :heavy_exclamation_mark: Important :heavy_exclamation_mark:
-
 For correct results, please run these tutorials within the expected Jupyter notebooks (`.ipynb` files) and avoid using the Python interactive shell (command line), which may cause certain functions (e.g., such as `inspect.getsource()`) to not work as expected.
 
 ### Use cases
