@@ -391,7 +391,7 @@ output_test = pd.read_hdf(os.path.join("<output_folder_path>", "output_exporter.
 
 The dataframes contain `phase`, `epoch`, `entry`, `output`, `target`, and `loss` columns, and can be easily used to visualize the results.
 
-For classification tasks, the `output` column contains the results from a [softmax function](https://pytorch.org/docs/stable/generated/torch.nn.functional.softmax.html). This means each entry in the `output` column is a list with one element for each class. Each element represents the probability of that class occurring.
+For classification tasks, the `output` column contains a list of probabilities that each class occurs. For more details, please see documentation on the [softmax function](https://pytorch.org/docs/stable/generated/torch.nn.functional.softmax.html)
 
 Example for plotting training loss curves using [Plotly Express](https://plotly.com/python/plotly-express/):
 
