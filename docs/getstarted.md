@@ -391,7 +391,7 @@ output_test = pd.read_hdf(os.path.join("<output_folder_path>", "output_exporter.
 
 The dataframes contain `phase`, `epoch`, `entry`, `output`, `target`, and `loss` columns, and can be easily used to visualize the results.
 
-For classification tasks, the `output` column contains a list of probabilities that each class occurs, and each list sums to 1 (for more details, please see documentation on the [softmax function](https://pytorch.org/docs/stable/generated/torch.nn.functional.softmax.html)). Note that the order of the classes in the list depends on the `classes` attribute of the DeepRankDataset instances. For classification tasks, if `classes` is not specified (as in this example case), it is defaulted to [0, 1].
+For classification tasks, the `output` column contains a list of probabilities that each class occurs, and each list sums to 1 (for more details, please see documentation on the [softmax function](https://pytorch.org/docs/stable/generated/torch.nn.functional.softmax.html)). Note that the order of the classes in the list depends on the `classes` attribute of the DeeprankDataset instances. For classification tasks, if `classes` is not specified (as in this example case), it is defaulted to [0, 1].
 
 Example for plotting training loss curves using [Plotly Express](https://plotly.com/python/plotly-express/):
 
