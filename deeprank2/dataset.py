@@ -151,32 +151,37 @@ class DeeprankDataset(Dataset):
             self.hdf5_paths.remove(hdf5_path)
 
     def _check_task_and_classes(self, task: str, classes: str | None = None) -> None:
-        if self.target in [targets.IRMSD, targets.LRMSD, targets.FNAT, targets.DOCKQ]:
-            self.task = targets.REGRESS
-
-        elif self.target in [targets.BINARY, targets.CAPRI]:
-            self.task = targets.CLASSIF
-
+        # Determine the task based on the target or use the provided task
+        if task is None:
+            target_to_task_map = {
+                targets.IRMSD: targets.REGRESS,
+                targets.LRMSD: targets.REGRESS,
+                targets.FNAT: targets.REGRESS,
+                targets.DOCKQ: targets.REGRESS,
+                targets.BINARY: targets.CLASSIF,
+                targets.CAPRI: targets.CLASSIF,
+            }
+            self.task = target_to_task_map.get(self.target)
         else:
             self.task = task
 
+        # Validate the task
         if self.task not in [targets.CLASSIF, targets.REGRESS] and self.target is not None:
             msg = f"User target detected: {self.target} -> The task argument must be 'classif' or 'regress', currently set as {self.task}"
             raise ValueError(msg)
 
-        if task != self.task and task is not None:
+        # Warn if the user-set task does not match the determined task
+        if task and task != self.task:
             warnings.warn(
-                f"Target {self.target} expects {self.task}, but was set to task {task} by user.\nUser set task is ignored and {self.task} will be used.",
+                f"Target {self.target} expects {self.task}, but was set to task {task} by user. User set task is ignored and {self.task} will be used.",
             )
 
+        # Handle classification task
         if self.task == targets.CLASSIF:
             if classes is None:
-                self.classes = [0, 1]
-                _log.info(f"Target classes set to: {self.classes}")
-            else:
-                self.classes = classes
-
+                self.classes = [0, 1, 2, 3, 4, 5] if self.target == targets.CAPRI else [0, 1]
             self.classes_to_index = {class_: index for index, class_ in enumerate(self.classes)}
+            _log.info(f"Target classes set to: {self.classes}")
         else:
             self.classes = None
             self.classes_to_index = None
