@@ -202,15 +202,11 @@ def test_querycollection_process_combine_output_true() -> None:
         _, output_directory_f, output_paths_f = _querycollection_tester(query_type, feature_modules=modules, combine_output=False, cpu_count=2)
         assert len(output_paths_t) == 1
 
-        keys_t = {}
         with h5py.File(output_paths_t[0], "r") as file_t:
-            for key, value in file_t.items():
-                keys_t[key] = value
-        keys_f = {}
+            keys_t = dict(file_t.items())
         for output_path in output_paths_f:
             with h5py.File(output_path, "r") as file_f:
-                for key, value in file_f.items():
-                    keys_f[key] = value
+                keys_f = dict(file_f.items())
         assert keys_t == keys_f
 
         rmtree(output_directory_t)

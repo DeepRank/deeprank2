@@ -35,12 +35,9 @@ def add_target(  # noqa: C901
         1ATN_xxx-3 0
         1ATN_xxx-4 0
     """
-    target_dict = {}
-
     labels = np.loadtxt(target_list, delimiter=sep, usecols=[0], dtype=str)
     values = np.loadtxt(target_list, delimiter=sep, usecols=[1])
-    for label, value in zip(labels, values, strict=True):
-        target_dict[label] = value
+    target_dict = dict(zip(labels, values, strict=False))
 
     if os.path.isdir(graph_path):
         graphs = glob.glob(f"{graph_path}/*.hdf5")
