@@ -107,6 +107,7 @@ During the development cycle, three main supporting branches are used:
 
 #### Updating the token:
 
+In order for the workflow above to be able to bypass the branch protection on `main` and `dev`, a token with admin priviliges for the current repo is required. Below are instructions on how to create such a token.
 NOTE: the current token (associated to @DaniBodor) allowing to bypass branch protection will expire on 9 July 2025. To update the token do the following:
 
 1. [Create a personal access token](https://github.com/settings/tokens/new) from a GitHub user account with admin
