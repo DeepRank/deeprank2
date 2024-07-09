@@ -39,6 +39,19 @@ runs:
         activate-environment: deeprank2
         environment-file: env/deeprank2.yml
         use-mamba: true
+      if: ${{ inputs.pkg-installation-type != 'freezed' }}
+
+    - name: Setup miniconda with freezed dependencies
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        miniforge-variant: Mambaforge
+        channels: conda-forge
+        python-version: ${{ inputs.python-version }}
+        activate-environment: deeprank2
+        environment-file: env/deeprank2_freezed.yml
+        use-mamba: true
+      if: ${{ inputs.pkg-installation-type == 'freezed' }}
 
     - run: |
         conda --version
@@ -53,7 +66,7 @@ runs:
 
     - name: Install the GitHub repository version of the package
       shell: bash -l {0}
-      if: ${{ inputs.pkg-installation-type == 'repository' }}
+      if: ${{ inputs.pkg-installation-type == 'repository' || inputs.pkg-installation-type == 'freezed' }}
       run: |
         conda activate deeprank2
         pip install .'[${{ inputs.extras-require }}]'
