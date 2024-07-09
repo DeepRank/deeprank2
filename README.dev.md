@@ -81,7 +81,7 @@ During the development cycle, three main supporting branches are used:
 
 ### Automated release workflow:
 
-0. **IMP0RTANT:** Create a PR for the release branch (usually `dev`) and make sure that all checks pass!
+0. **IMP0RTANT:** Create a PR pointing to `main` for the release branch (usually `dev`) and make sure that there are no conflicts and that all checks pass!
    - if everything goes well, this PR will automatically be closed after the draft release is created.
 1. Navigate to [Draft Github Release](https://github.com/DeepRank/deeprank2/actions/workflows/release_github.yml)
    on the [Actions](https://github.com/DeepRank/deeprank2/actions) tab.
@@ -94,9 +94,9 @@ During the development cycle, three main supporting branches are used:
      directly, you must [create the release manually](#manually-create-a-release).
 3. Visit [Actions](https://github.com/DeepRank/deeprank2/actions) tab to check whether everything went as expected.
    - NOTE: there are two separate jobs in the workflow: "draft_release" and "tidy_workspace". The first creates the draft release on github, while the second merges changes into `dev` and closes the PR.
-     - If "draft_release" fails, then there are likely merge conflicts with `main` that need to be resolved first. No release draft is created and the "tidy_workspace" job does not run.
-     - If "draft_release" is succesfull but "tidy_workspace" fails, then there are likely merge conflicts with `dev` that are not conflicts with `main`. In the latter case, the draft release is created and it is up to the user to decide whether to proceed with finalizing the release or first resolving the conflicts with `dev` (this should never happen if the release branch was `dev`, as the only change will be the version bump).
-     - If both jobs succeed, then the draft release is created and the changes are merged into `dev` without any problems and the associated PR is closed. Also, if the release branch is different from `dev`, then that branch will be deleted from the remote repository.
+     - If "draft_release" fails, then there are likely merge conflicts with `main` that need to be resolved first. No release draft is created and the "tidy_workspace" job does not run. If this action is succesfull, then the release branch (including a version bump) have been merged into the remote `main` branch.
+     - If "draft_release" is succesfull but "tidy_workspace" fails, then there are likely merge conflicts with `dev` that are not conflicts with `main`. In this case, the draft release is created (and changes were merged into the remote `main`). Conflicts with `dev` need to be resolved with `dev` by the user (note that this should never happen if the release branch was `dev`, as the only change will be the version bump).
+     - If both jobs succeed, then the draft release is created and the changes are merged into both remote `main` and `dev` without any problems and the associated PR is closed. Also, if the release branch is different from `dev`, then that branch will be deleted from the remote repository.
 4. Navigate to the [Releases](https://github.com/DeepRank/deeprank2/releases) tab and click on the newest draft
    release that was just generated.
 5. Click on the edit (pencil) icon on the right side of the draft release.
@@ -123,7 +123,7 @@ NOTE: the current token (associated to @DaniBodor) allowing to bypass branch pro
 0. Make sure you have all required developers tools installed `pip install -e .'[test]'`.
 1. Create a `release` branch from `main` and merge the changes into this branch.
    - Ensure that the `release` branch is ready to be merged back into `main` (e.g., removing the unnecessary files, fix minor bugs if necessary).
-   - Also see our [branching strategy](#branching-strategy) above.
+   - Normally speaking, `release` should contain the changes from `dev` (see our [development workflow](#branching-workflow)), although in some cases a hotfix may be implemented from a different branch.
 2. Ensure all tests pass `pytest -v` and that linting (`ruff check`) and formatting (`ruff format --check`) conventions
    are adhered to.
 3. Bump the version using [bump-my-version](https://github.com/callowayproject/bump-my-version): `bump-my-version bump <level>`
