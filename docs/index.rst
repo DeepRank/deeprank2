@@ -75,9 +75,3 @@ Package reference
 
 :doc:`reference/deeprank2`
     This section documents the DeepRank2 API.
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
