@@ -83,7 +83,7 @@ Contributing
    :caption: Contributing
    :hidden:
 
-   contributing
+   contributing_link
 
-:doc:`contributing`
+:doc:`contributing_link`
     Learn how to contribute to DeepRank2.
