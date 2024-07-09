@@ -41,11 +41,15 @@ Getting started
 
    installation
    getstarted
+   contributing
 
 :doc:`installation`
     Get DeepRank2 installed on your computer.
 
 :doc:`getstarted`
+    Understand how to use DeepRank2 and how it can help you.
+
+:doc:`contributing`
     Understand how to use DeepRank2 and how it can help you.
 
 Notes

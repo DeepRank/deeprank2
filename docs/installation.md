@@ -83,7 +83,3 @@ If you have cloned the repository, you can check that all components were instal
 The quick test should be sufficient to ensure that the software works, while the full test (a few minutes) will cover a much broader range of settings to ensure everything is correct.
 
 First run `pip install pytest`, if you did not install it above. Then run `pytest tests/test_integration.py` for the quick test or just `pytest` for the full test (expect a few minutes to run).
-
-# Contributing
-
-If you would like to contribute to the package in any way, please see [our guidelines](CONTRIBUTING.rst).
