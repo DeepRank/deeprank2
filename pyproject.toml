@@ -150,7 +150,7 @@ isort.known-first-party = ["deeprank2"]
 "tests/perf/*" = ["T201"] # Use of print statements
 
 [tool.bumpversion]
-current_version = "1.0.2"
+current_version = "3.0.4"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
