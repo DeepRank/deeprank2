@@ -79,8 +79,11 @@ Package reference
 Contributing
 ===========
 
-.. literalinclude:: ../CONTRIBUTING.md
+.. toctree::
    :caption: Contributing
    :hidden:
 
-Learn how to contribute to DeepRank2 by reading the full :doc:`CONTRIBUTING` document.
+   contributing
+
+:doc:`contributing`
+    Learn how to contribute to DeepRank2.
