@@ -348,8 +348,7 @@ class Trainer:
             f5.close()
 
     def _put_model_to_device(self, dataset: GraphDataset | GridDataset) -> None:
-        """
-        Puts the model on the available device.
+        """Puts the model on the available device.
 
         Args:
             dataset (:class:`GraphDataset` | :class:`GridDataset`): GraphDataset object.
@@ -405,8 +404,7 @@ class Trainer:
         lr: float = 0.001,
         weight_decay: float = 1e-05,
     ) -> None:
-        """
-        Configure optimizer and its main parameters.
+        """Configure optimizer and its main parameters.
 
         Args:
             optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
@@ -435,8 +433,7 @@ class Trainer:
         lossfunction: nn.modules.loss._Loss | None = None,
         override_invalid: bool = False,
     ) -> None:
-        """
-        Set the loss function.
+        """Set the loss function.
 
         Args:
             lossfunction (optional): Make sure to use a loss function that is appropriate for
@@ -524,8 +521,7 @@ class Trainer:
         best_model: bool = True,
         filename: str | None = "model.pth.tar",
     ) -> None:
-        """
-        Performs the training of the model.
+        """Performs the training of the model.
 
         Args:
             nepoch (int, optional): Maximum number of epochs to run.
@@ -685,8 +681,7 @@ class Trainer:
         self.model.load_state_dict(self.model_load_state_dict)
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float | None:
-        """
-        Runs a single epoch.
+        """Runs a single epoch.
 
         Args:
             epoch_number (int): the current epoch number
@@ -751,8 +746,7 @@ class Trainer:
         epoch_number: int,
         pass_name: str,
     ) -> float | None:
-        """
-        Evaluates the model.
+        """Evaluates the model.
 
         Args:
             loader (Dataloader): Data to evaluate on.
@@ -818,8 +812,7 @@ class Trainer:
 
     @staticmethod
     def _log_epoch_data(stage: str, loss: float, time: float) -> None:
-        """
-        Prints the data of each epoch.
+        """Prints the data of each epoch.
 
         Args:
             stage (str): Train or valid.
@@ -863,8 +856,7 @@ class Trainer:
         batch_size: int = 32,
         num_workers: int = 0,
     ) -> None:
-        """
-        Performs the testing of the model.
+        """Performs the testing of the model.
 
         Args:
             batch_size (int, optional): Sets the size of the batch.
@@ -935,8 +927,7 @@ class Trainer:
         self.ngpu = state["ngpu"]
 
     def _save_model(self) -> dict[str, Any]:
-        """
-        Saves the model to a file.
+        """Saves the model to a file.
 
         Args:
             filename (str, optional): Name of the file. Defaults to None.

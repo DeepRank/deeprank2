@@ -91,10 +91,12 @@ include = ["deeprank2*"]
 addopts = "-ra"  
 
 [tool.ruff]
+output-format = "concise"
 line-length = 159
 
 [tool.ruff.lint]
 select = ["ALL"]
+pydocstyle.convention = "google" # docstring settings
 ignore = [
     # Unrealistic for this code base
     "PTH",     # flake8-use-pathlib    
@@ -117,20 +119,6 @@ ignore = [
     "D104", # Missing public package docstring
     "D105", # Missing docstring in magic method
     "D107", # Missing docstring in `__init__`
-    # Docstring rules irrelevant to the Google style
-    "D203", # 1 blank line required before class docstring
-    "D204", # 1 blank line required after class docstring
-    "D212", # Multi-line docstring summary should start at the first line
-    "D213", # Multi-line docstring summary should start at the second line
-    "D215", # Section underline is over-indented 
-    "D400", # First line should end with a period (clashes with D415:First line should end with a period, question mark, or exclamation point) 
-    "D401", # First line of docstring should be in imperative mood
-    "D404", # First word of the docstring should not be This
-    "D406", # Section name should end with a newline
-    "D407", # Missing dashed underline after section 
-    "D408", # Section underline should be in the line following the section's name
-    "D409", # Section underline should match the length of its name
-    "D413", # Missing blank line after last section 
 ]
 
 # Autofix settings
