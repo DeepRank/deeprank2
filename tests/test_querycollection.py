@@ -22,8 +22,7 @@ def _querycollection_tester(
     cpu_count: int = 1,
     combine_output: bool = True,
 ) -> tuple[QueryCollection, str, list[str]]:
-    """
-    Generic function to test QueryCollection class.
+    """Generic function to test QueryCollection class.
 
     Args:
         query_type (str): query type to be generated. It accepts only 'ppi' (ProteinProteinInterface) or 'srv' (SingleResidueVariant).

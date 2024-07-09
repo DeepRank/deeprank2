@@ -32,8 +32,7 @@ count_queries = 3
 
 
 def test_cnn() -> None:
-    """
-    Tests processing several PDB files into their features representation HDF5 file.
+    """Tests processing several PDB files into their features representation HDF5 file.
 
     Then uses HDF5 generated files to train and test a CnnRegression network.
     """
