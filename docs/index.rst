@@ -79,6 +79,8 @@ Package reference
 Contributing
 ===========
 
-Learn how to contribute to DeepRank2 by reading the full :doc:`CONTRIBUTING` document.
+.. literalinclude:: ../CONTRIBUTING.md
+   :caption: Contributing
+   :hidden:
 
-.. include:: ../CONTRIBUTING.md
+Learn how to contribute to DeepRank2 by reading the full :doc:`CONTRIBUTING` document.
