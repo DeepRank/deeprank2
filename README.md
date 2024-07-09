@@ -115,7 +115,7 @@ conda activate deeprank2
 pip install deeprank2
 ```
 
-We also provide a frozen environment YML file located at `env/deeprank2_frozen.yml` with all dependencies set to fixed versions. If necessary, this file can be used instead of `env/deeprank2.yml`.
+We also provide a frozen environment YML file located at `env/deeprank2_frozen.yml` with all dependencies set to fixed versions. The `env/deeprank2_frozen.yml` file provides a frozen environment with all dependencies set to fixed versions. This ensures reproducibility of experiments and results by preventing changes in package versions that could occur due to updates or modifications in the default `env/deeprank2.yml`. Use this frozen environment file for a stable and consistent setup, particularly if you encounter issues with the default environment file.
 
 #### Manual installation (customizable)
 
