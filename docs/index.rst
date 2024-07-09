@@ -50,7 +50,7 @@ Getting started
     Understand how to use DeepRank2 and how it can help you.
 
 :doc:`contributing`
-    Understand how to use DeepRank2 and how it can help you.
+    See our guidelines to contribute to the package.
 
 Notes
 ===========
