@@ -1,4 +1,4 @@
-name: build (repository package) using the freezed environment
+name: build (repository package) using the frozen environment
 
 on:
   push:
@@ -51,7 +51,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test, publishing
-          pkg-installation-type: "freezed"
+          pkg-installation-type: "frozen"
 
       - name: Run unit tests
         run: pytest -v
