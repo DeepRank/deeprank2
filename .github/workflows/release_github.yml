@@ -33,6 +33,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # token with admin priviliges to override brach protection on main and dev
           token: ${{ secrets.GH_RELEASE }}
 
       - name: Configure git
@@ -81,6 +82,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # token with admin priviliges to override brach protection on main and dev
           token: ${{ secrets.GH_RELEASE }}
 
       - name: Configure git
