@@ -41,16 +41,12 @@ Getting started
 
    installation
    getstarted
-   contributing
 
 :doc:`installation`
     Get DeepRank2 installed on your computer.
 
 :doc:`getstarted`
     Understand how to use DeepRank2 and how it can help you.
-
-:doc:`contributing`
-    See our guidelines to contribute to the package.
 
 Notes
 ===========
@@ -79,3 +75,11 @@ Package reference
 
 :doc:`reference/deeprank2`
     This section documents the DeepRank2 API.
+
+Contributing
+===========
+
+.. include:: ../CONTRIBUTING.md
+
+:doc:`contributing`
+    Learn how to contribute to DeepRank2.
