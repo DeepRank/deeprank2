@@ -10,8 +10,8 @@ import dill
 import h5py
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
+from torch.nn.functional import softmax
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
 
@@ -714,7 +714,7 @@ class Trainer:
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == targets.CLASSIF:
-                pred = F.softmax(pred.detach(), dim=1)
+                pred = softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
             outputs += pred.cpu().numpy().tolist()
@@ -784,7 +784,7 @@ class Trainer:
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == targets.CLASSIF:
-                pred = F.softmax(pred.detach(), dim=1)
+                pred = softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
             outputs += pred.cpu().numpy().tolist()

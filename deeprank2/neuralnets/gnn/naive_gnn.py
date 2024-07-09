@@ -1,20 +1,20 @@
 # Example of network that doesn't require clusters.
 
 import torch
-from torch.nn import Linear, Module, ReLU, Sequential
+from torch import nn
 from torch_scatter import scatter_mean, scatter_sum
 
 # ruff: noqa: ANN001, ANN201
 
 
-class NaiveConvolutionalLayer(Module):  # noqa: D101
+class NaiveConvolutionalLayer(nn.Module):  # noqa: D101
     def __init__(self, count_node_features, count_edge_features):
         super().__init__()
         message_size = 32
         edge_input_size = 2 * count_node_features + count_edge_features
-        self._edge_mlp = Sequential(Linear(edge_input_size, message_size), ReLU())
+        self._edge_mlp = nn.Sequential(nn.Linear(edge_input_size, message_size), nn.ReLU())
         node_input_size = count_node_features + message_size
-        self._node_mlp = Sequential(Linear(node_input_size, count_node_features), ReLU())
+        self._node_mlp = nn.Sequential(nn.Linear(node_input_size, count_node_features), nn.ReLU())
 
     def forward(self, node_features, edge_node_indices, edge_features):
         # generate messages over edges
@@ -31,7 +31,7 @@ class NaiveConvolutionalLayer(Module):  # noqa: D101
         return self._node_mlp(node_input)
 
 
-class NaiveNetwork(Module):  # noqa: D101
+class NaiveNetwork(nn.Module):  # noqa: D101
     def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
         """NaiveNetwork.
 
@@ -44,7 +44,7 @@ class NaiveNetwork(Module):  # noqa: D101
         self._external1 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
         self._external2 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
         hidden_size = 128
-        self._graph_mlp = Sequential(Linear(input_shape, hidden_size), ReLU(), Linear(hidden_size, output_shape))
+        self._graph_mlp = nn.Sequential(nn.Linear(input_shape, hidden_size), nn.ReLU(), nn.Linear(hidden_size, output_shape))
 
     def forward(self, data):
         external_updated1_node_features = self._external1(data.x, data.edge_index, data.edge_attr)
