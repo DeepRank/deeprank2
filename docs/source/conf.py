@@ -13,15 +13,13 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import configparser
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os
 import sys
 
-import toml  # pyright: ignore[reportMissingModuleSource]
+import toml
 
 autodoc_mock_imports = [
     "numpy",
@@ -57,8 +55,7 @@ autodoc_mock_imports = [
 ]
 
 # Add the project's root directory to sys.path
-sys.path.insert(0, os.path.abspath("."))
-sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath("../../../../"))
 
 # -- General configuration ------------------------------------------------
 
@@ -86,7 +83,6 @@ extensions = [
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
-    "special-members": "__init__",
     "inherited-members": True,
     "show-inheritance": True,
 }
@@ -97,7 +93,6 @@ templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
 source_suffix = [".rst", ".md"]
 
 # The master toctree document.
@@ -113,7 +108,7 @@ copyright = f"2022, {author}"
 # built documents.
 #
 # The short X.Y version.
-with open("./../pyproject.toml", "r") as f:
+with open("./../../pyproject.toml", "r") as f:
     toml_file = toml.load(f)
     version = toml_file["project"]["version"]
 # The full version, including alpha/beta/rc tags.
@@ -151,15 +146,6 @@ todo_include_todos = False
 
 html_theme = "sphinx_rtd_theme"
 # html_logo = "qmctorch_white.png"
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
-# html_theme_options = {
-#     "rightsidebar": 'true',
-#     "relbarbgcolor": "black"
-# }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

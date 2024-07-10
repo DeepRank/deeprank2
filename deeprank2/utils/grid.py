@@ -1,15 +1,19 @@
 """This module holds the classes that are used when working with a 3D grid."""
+from __future__ import annotations
 
 import itertools
 import logging
 from enum import Enum
+from typing import TYPE_CHECKING
 
 import h5py
 import numpy as np
-from numpy.typing import NDArray
 from scipy.interpolate import BSpline
 
 from deeprank2.domain import gridstorage
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 _log = logging.getLogger(__name__)
 

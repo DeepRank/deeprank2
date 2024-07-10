@@ -72,9 +72,18 @@ Package reference
    :hidden:
 
    deeprank2
+   deeprank2.molstruct
+   deeprank2.neuralnets
+   deeprank2.tools
 
 :doc:`deeprank2`
-    This section documents the DeepRank2 API.
+    This section documents the main DeepRank2 modules.
+:doc:`deeprank2.molstruct`
+    This section documents the molecular structures submodules.
+:doc:`deeprank2.neuralnets`
+    This section documents the pre-implemented neural networks architectures.
+:doc:`deeprank2.tools`
+    This section documents the pre-implemented targets.
 
 Contributing
 ===========
