@@ -3,7 +3,7 @@
 There are two ways to install DeepRank2:
 
 1. In a [dockerized container](#containerized-installation). This allows you to use DeepRank2, including all the notebooks within the container (a protected virtual space), without worrying about your operating system or installation of dependencies.
-   - We recommend this installation for inexperienced users and to learn to use or test our software, e.g. using the provided [tutorials](tutorials/TUTORIAL.md). However, resources might be limited in this installation and we would not recommend using it for large datasets or on high-performance computing facilities.
+   - We recommend this installation for inexperienced users and to learn to use or test our software, e.g. using the provided [tutorials](https://github.com/DeepRank/deeprank2/blob/main/tutorials/TUTORIAL.md). However, resources might be limited in this installation and we would not recommend using it for large datasets or on high-performance computing facilities.
 2. [Local installation](#localremote-installation) on your system. This allows you to use the full potential of DeepRank2, but requires a few additional steps during installation.
    - We recommend this installation for more experienced users, for larger projects, and for (potential) [contributors](contributing_link.md) to the codebase.
 
@@ -39,7 +39,7 @@ Before installing DeepRank2 please ensure you have [GCC](https://gcc.gnu.org/ins
 
 You can use the provided YML file for creating a [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) via [mamba](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html), containing the latest stable release of DeepRank2 and all its dependencies.
 This will install the CPU-only version of DeepRank2 on Python 3.10.
-Note that this will not work for MacOS. Do the [Manual Installation](#manual-installation) instead.
+Note that this will not work for MacOS. Do the [manual installation](#manual-installation) instead.
 
 ```bash
 # Create the environment
