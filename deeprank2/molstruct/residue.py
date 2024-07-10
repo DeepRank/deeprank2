@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class Residue:
-    """One protein residue in a :class:`PDBStructure`."""
+    """One protein residue in a `PDBStructure`."""
 
     def __init__(
         self,
