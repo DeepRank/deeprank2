@@ -7,7 +7,7 @@ There are two ways to install DeepRank2:
 2. [Local installation](#localremote-installation) on your system. This allows you to use the full potential of DeepRank2, but requires a few additional steps during installation.
    - We recommend this installation for more experienced users, for larger projects, and for (potential) [contributors](contributing_link.md) to the codebase.
 
-## Containerized Installation {#containerized-installation}
+<h2 id="containerized-installation">Containerized Installation</h2>
 
 In order to try out the package without worrying about your OS and without the need of installing all the required dependencies, we created a `Dockerfile` that can be used for taking care of everything in a suitable container.
 
@@ -29,7 +29,7 @@ More details about the tutorials' contents can be found [here](https://github.co
 
 If after running the tutorials you want to remove the (quite large) Docker image from your machine, you must first [stop the container](https://docs.docker.com/engine/reference/commandline/stop/) and can then [remove the image](https://docs.docker.com/engine/reference/commandline/image_rm/). More general information about Docker can be found on the [official website docs](https://docs.docker.com/get-started/).
 
-## Local/remote installation {#localremote-installation}
+<h2 id="localremote-installation">Local/remote installation</h2>
 
 Local installation is formally only supported on the latest stable release of ubuntu, for which widespread automated testing through continuous integration workflows has been set up. However, it is likely that the package runs smoothly on other operating systems as well.
 
@@ -50,7 +50,7 @@ conda activate deeprank2
 pip install deeprank2
 ```
 
-#### Manual installation (customizable) {#manual-installation}
+#### Manual installation (customizable)
 
 If you want to use the GPUs, choose a specific python version (note that at the moment we support python 3.10 only), are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
