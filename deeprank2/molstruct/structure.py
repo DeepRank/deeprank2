@@ -67,9 +67,9 @@ class PDBStructure:
 
 
 class Chain:
-    """One independent molecular entity of a :class:`PDBStructure`.
+    """One independent molecular entity of a `PDBStructure`.
 
-    In other words: each :class:`Chain` in a :class:`PDBStructure` is a separate molecule.
+    In other words: each `Chain` in a `PDBStructure` is a separate molecule.
     """
 
     def __init__(self, model: PDBStructure, id_: str | None):
