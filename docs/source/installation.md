@@ -50,7 +50,7 @@ conda activate deeprank2
 pip install deeprank2
 ```
 
-#### Manual installation (customizable)
+<h2 id="manual-installation">Manual installation (customizable)</h2>
 
 If you want to use the GPUs, choose a specific python version (note that at the moment we support python 3.10 only), are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
