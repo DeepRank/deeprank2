@@ -71,9 +71,9 @@ Package reference
    :caption: API
    :hidden:
 
-   reference/modules
+   reference/deeprank2
 
-:doc:`reference/modules`
+:doc:`reference/deeprank2`
     This section documents the DeepRank2 API.
 
 Contributing

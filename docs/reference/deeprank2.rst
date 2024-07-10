@@ -27,11 +27,3 @@ deeprank2.trainer
    :members:
    :undoc-members:
    :show-inheritance:
-
-deeprank2.features
----------------------------
-
-.. automodule:: deeprank2.features
-   :members:
-   :undoc-members:
-   :show-inheritance:
