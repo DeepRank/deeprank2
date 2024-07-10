@@ -5,7 +5,7 @@ There are two ways to install DeepRank2:
 1. In a [dockerized container](#containerized-installation). This allows you to use DeepRank2, including all the notebooks within the container (a protected virtual space), without worrying about your operating system or installation of dependencies.
    - We recommend this installation for inexperienced users and to learn to use or test our software, e.g. using the provided [tutorials](tutorials/TUTORIAL.md). However, resources might be limited in this installation and we would not recommend using it for large datasets or on high-performance computing facilities.
 2. [Local installation](#localremote-installation) on your system. This allows you to use the full potential of DeepRank2, but requires a few additional steps during installation.
-   - We recommend this installation for more experienced users, for larger projects, and for (potential) [contributors](#contributing_link) to the codebase.
+   - We recommend this installation for more experienced users, for larger projects, and for (potential) [contributors](contributing_link.md) to the codebase.
 
 ## Containerized Installation {#containerized-installation}
 
