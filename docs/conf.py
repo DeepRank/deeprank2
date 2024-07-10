@@ -56,8 +56,10 @@ autodoc_mock_imports = [
     "markov_clustering",
 ]
 
-sys.path.insert(0, os.path.abspath("."))
-sys.path.insert(0, os.path.abspath("../"))
+# sys.path.insert(0, os.path.abspath("."))
+# sys.path.insert(0, os.path.abspath("../"))
+# Add the project's root directory to sys.path
+sys.path.insert(0, os.path.abspath("../deeprank2"))
 
 
 # -- General configuration ------------------------------------------------
@@ -81,6 +83,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "myst_parser",
 ]
+
+# Options for autodoc
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
