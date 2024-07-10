@@ -2,7 +2,6 @@
 
 The following section serves as a first guide to start using the package, using protein-protein interface (PPI) queries as example.
 For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating SRVs data, and for the training pipeline.
-For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ## Data generation
 
