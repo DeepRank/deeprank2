@@ -5,9 +5,9 @@ There are two ways to install DeepRank2:
 1. In a [dockerized container](#containerized-installation). This allows you to use DeepRank2, including all the notebooks within the container (a protected virtual space), without worrying about your operating system or installation of dependencies.
    - We recommend this installation for inexperienced users and to learn to use or test our software, e.g. using the provided [tutorials](tutorials/TUTORIAL.md). However, resources might be limited in this installation and we would not recommend using it for large datasets or on high-performance computing facilities.
 2. [Local installation](#localremote-installation) on your system. This allows you to use the full potential of DeepRank2, but requires a few additional steps during installation.
-   - We recommend this installation for more experienced users, for larger projects, and for (potential) [contributors](#contributing) to the codebase.
+   - We recommend this installation for more experienced users, for larger projects, and for (potential) [contributors](#contributing_link) to the codebase.
 
-## Containerized Installation
+## Containerized Installation {#containerized-installation}
 
 In order to try out the package without worrying about your OS and without the need of installing all the required dependencies, we created a `Dockerfile` that can be used for taking care of everything in a suitable container.
 
@@ -29,7 +29,7 @@ More details about the tutorials' contents can be found [here](https://github.co
 
 If after running the tutorials you want to remove the (quite large) Docker image from your machine, you must first [stop the container](https://docs.docker.com/engine/reference/commandline/stop/) and can then [remove the image](https://docs.docker.com/engine/reference/commandline/image_rm/). More general information about Docker can be found on the [official website docs](https://docs.docker.com/get-started/).
 
-## Local/remote installation
+## Local/remote installation {#localremote-installation}
 
 Local installation is formally only supported on the latest stable release of ubuntu, for which widespread automated testing through continuous integration workflows has been set up. However, it is likely that the package runs smoothly on other operating systems as well.
 
@@ -50,7 +50,7 @@ conda activate deeprank2
 pip install deeprank2
 ```
 
-#### Manual installation (customizable)
+#### Manual installation (customizable) {#manual-installation}
 
 If you want to use the GPUs, choose a specific python version (note that at the moment we support python 3.10 only), are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
