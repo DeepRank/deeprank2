@@ -1,4 +1,5 @@
 """This module holds the classes that are used when working with a 3D grid."""
+
 from __future__ import annotations
 
 import itertools
