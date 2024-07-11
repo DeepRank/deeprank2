@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import importlib
 import logging
 import os
@@ -5,14 +7,13 @@ import pickle
 import pkgutil
 import re
 import warnings
-from collections.abc import Iterator
 from dataclasses import MISSING, dataclass, field, fields
 from functools import partial
 from glob import glob
 from multiprocessing import Pool
 from random import randrange
 from types import ModuleType
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import h5py
 import numpy as np
@@ -21,13 +22,17 @@ import pdb2sql
 import deeprank2.features
 from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
-from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.residue import Residue, SingleResidueVariant
-from deeprank2.molstruct.structure import PDBStructure
 from deeprank2.utils.buildgraph import get_contact_atoms, get_structure, get_surrounding_residues
 from deeprank2.utils.graph import Graph
 from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 from deeprank2.utils.parsing.pssm import parse_pssm
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from deeprank2.molstruct.aminoacid import AminoAcid
+    from deeprank2.molstruct.structure import PDBStructure
 
 _log = logging.getLogger(__name__)
 
@@ -36,23 +41,9 @@ VALID_RESOLUTIONS = ["atom", "residue"]
 
 @dataclass(repr=False, kw_only=True)
 class Query:
-    """Represents one entity of interest: a single residue variant (SRV) or a protein-protein interface (PPI).
+    """Parent class of :class:`SingleResidueVariantQuery` and :class:`ProteinProteinInterfaceQuery`.
 
-    :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
-    They can have target values associated with them, which will be stored with the resulting graph.
-
-    Args:
-        pdb_path (str): the path to the PDB file to query.
-        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
-        chain_ids (list[str] | str): the chain identifier(s) of the variant residue or interacting interfaces.
-            Note that this does not limit the structure to residues from this/these chain(s).
-        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
-        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
-        influence_radius (float | None): all residues within this radius from the variant residue or interacting interfaces
-            will be included in the graph, irrespective of the chain they are on.
-        max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
-        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
-            match the .pdb files. If True, a warning is returned instead.
+    More detailed information about the parameters can be found in :class:`SingleResidueVariantQuery` and :class:`ProteinProteinInterfaceQuery`.
     """
 
     pdb_path: str
@@ -126,7 +117,7 @@ class Query:
                 2 (high): Also list the incorrect residues
 
         Raises:
-            ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
+            ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided.
         """
         if not self.pssm_paths:
             msg = "No pssm paths provided for conservation feature module."
@@ -221,7 +212,7 @@ class Query:
 class SingleResidueVariantQuery(Query):
     """A query that builds a single residue variant graph.
 
-    Args (common for `Query`):
+    Args:
         pdb_path (str): the path to the PDB file to query.
         resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
         chain_ids (list[str] | str): the chain identifier of the variant residue (generally a single capital letter).
@@ -231,16 +222,14 @@ class SingleResidueVariantQuery(Query):
         influence_radius (float | None): all residues within this radius from the variant residue
             will be included in the graph, irrespective of the chain they are on.
         max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
-
         suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
             match the .pdb files. If True, a warning is returned instead.
-    SRV specific Args:
         variant_residue_number (int): the residue number of the variant residue.
         insertion_code (str | None): the insertion code of the variant residue.
         wildtype_amino_acid (AminoAcid): the amino acid at above position in the wildtype protein.
         variant_amino_acid (AminoAcid): the amino acid at above position in the variant protein.
         radius (float): all Residues within this radius (in Å) from the variant residue will
-            be included in the graph
+            be included in the graph.
     """
 
     variant_residue_number: int
