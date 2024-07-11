@@ -30,8 +30,8 @@ class Trainer:
     """Class from which the network is trained, evaluated and tested.
 
     Args:
-        neuralnet (child class of :class:`nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
-            It should subclass :class:`nn.Module`, and it shouldn't be specific to regression or classification
+        neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+            It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
             in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
             More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
             Defaults to None.
@@ -438,7 +438,7 @@ class Trainer:
         Args:
             lossfunction (optional): Make sure to use a loss function that is appropriate for
                 your task (classification or regression). All loss functions
-                from nn.modules.loss are listed as belonging to either
+                from torch.nn.modules.loss are listed as belonging to either
                 category (or to neither) and an exception is raised if an invalid
                 loss function is chosen for the set task.
                 Default for regression: MSELoss.
