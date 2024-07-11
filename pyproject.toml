@@ -35,38 +35,38 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
-    "notebook >= 7.0.6",
-    "markov-clustering >= 0.0.6.dev0",
-    "tensorboard>=0.9.0",
-    "protobuf >= 3.20.1",
-    "dill >= 0.3.8",
-    "pyarrow >= 15.0.0",
-    "tables >= 3.8.0",
+    "notebook >= 7.2.1, < 8.0",
+    "markov-clustering >= 0.0.6.dev0, < 1.0",
+    "tensorboard >= 0.9.0, < 3.0",
+    "protobuf >= 3.20.1, < 6.0",
+    "dill >= 0.3.8, < 1.0",
+    "pyarrow >= 16.1.0, < 17.0",
+    "tables >= 3.9.2, < 4.0",
     "numpy >= 1.25, < 2.0",
-    "scipy >= 1.13.1",
-    "h5py >= 3.6.0",
-    "networkx >= 2.6.3",
-    "matplotlib >= 3.5.1",
-    "scikit-learn >= 1.0.2",
-    "chart-studio >= 1.1.0",
-    "pdb2sql >= 0.5.1",
-    "python-louvain >= 0.16",
-    "tqdm >= 4.63.0",
-    "freesasa >= 2.1.0",
-    "biopython >= 1.81"
+    "scipy >= 1.13.1, < 2.0",
+    "h5py >= 3.11.0, < 4.0",
+    "networkx >= 3.1, < 4.0",
+    "matplotlib >= 3.9.0, < 4.0",
+    "scikit-learn >= 1.5.0, < 2.0",
+    "chart-studio >= 1.1.0, < 2.0",
+    "pdb2sql >= 0.5.3, < 1.0",
+    "python-louvain >= 0.16, < 1.0",
+    "tqdm >= 4.66.4, < 5.0",
+    "freesasa >= 2.1.1, < 3.0",
+    "biopython >= 1.83, < 2.0"
     ]
 
 [project.optional-dependencies]
 # development dependency groups
 test = [
-    "pytest >= 7.4.0",
-    "bump2version",
-    "coverage",
-    "pycodestyle",
-    "pytest-cov",
-    "pytest-runner",
-    "coveralls",
-    "ruff>=0.3.0"
+    "pytest >= 7.4.0, < 8.0",
+    "bump2version >= 1.0.1, < 2.0",
+    "coverage >= 6.5.0, < 7.0",
+    "pycodestyle >= 2.8.0, < 3.0",
+    "pytest-cov >= 4.1.0, < 5.0",
+    "pytest-runner >= 6.0.0, < 7.0",
+    "coveralls >= 3.3.1, < 4.0",
+    "ruff == 0.5.1"
 ]
 publishing = ["build", "twine", "wheel"]
 notebooks = ["nbmake"]
@@ -91,10 +91,12 @@ include = ["deeprank2*"]
 addopts = "-ra"  
 
 [tool.ruff]
+output-format = "concise"
 line-length = 159
 
 [tool.ruff.lint]
 select = ["ALL"]
+pydocstyle.convention = "google" # docstring settings
 ignore = [
     # Unrealistic for this code base
     "PTH",     # flake8-use-pathlib    
@@ -117,20 +119,6 @@ ignore = [
     "D104", # Missing public package docstring
     "D105", # Missing docstring in magic method
     "D107", # Missing docstring in `__init__`
-    # Docstring rules irrelevant to the Google style
-    "D203", # 1 blank line required before class docstring
-    "D204", # 1 blank line required after class docstring
-    "D212", # Multi-line docstring summary should start at the first line
-    "D213", # Multi-line docstring summary should start at the second line
-    "D215", # Section underline is over-indented 
-    "D400", # First line should end with a period (clashes with D415:First line should end with a period, question mark, or exclamation point) 
-    "D401", # First line of docstring should be in imperative mood
-    "D404", # First word of the docstring should not be This
-    "D406", # Section name should end with a newline
-    "D407", # Missing dashed underline after section 
-    "D408", # Section underline should be in the line following the section's name
-    "D409", # Section underline should match the length of its name
-    "D413", # Missing blank line after last section 
 ]
 
 # Autofix settings

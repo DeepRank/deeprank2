@@ -115,6 +115,8 @@ conda activate deeprank2
 pip install deeprank2
 ```
 
+We also provide a frozen environment YML file located at `env/deeprank2_frozen.yml` with all dependencies set to fixed versions. The `env/deeprank2_frozen.yml` file provides a frozen environment with all dependencies set to fixed versions. This ensures reproducibility of experiments and results by preventing changes in package versions that could occur due to updates or modifications in the default `env/deeprank2.yml`. Use this frozen environment file for a stable and consistent setup, particularly if you encounter issues with the default environment file.
+
 #### Manual installation (customizable)
 
 If you want to use the GPUs, choose a specific python version (note that at the moment we support python 3.10 only), are a MacOS user, or if the YML installation was not successful, you can install the package manually. We advise to do this inside a [conda virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
