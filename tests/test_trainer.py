@@ -10,6 +10,7 @@ import h5py
 import pandas as pd
 import pytest
 import torch
+from torch import nn
 
 from deeprank2.dataset import GraphDataset, GridDataset
 from deeprank2.domain import edgestorage as Efeat
@@ -40,7 +41,7 @@ default_features = [
 
 def _model_base_test(
     save_path: str,
-    model_class: torch.nn.Module,
+    model_class: nn.Module,
     train_hdf5_path: str,
     val_hdf5_path: str,
     test_hdf5_path: str,

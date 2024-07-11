@@ -1,6 +1,6 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
+from torch.nn.functional import dropout, leaky_relu, relu, softmax
 from torch_geometric.nn import max_pool_x
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean, scatter_sum
@@ -10,7 +10,7 @@ from deeprank2.utils.community_pooling import community_pooling, get_preloaded_c
 # ruff: noqa: ANN001, ANN201
 
 
-class GINetConvLayer(torch.nn.Module):  # noqa: D101
+class GINetConvLayer(nn.Module):  # noqa: D101
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
         super().__init__()
 
@@ -40,9 +40,9 @@ class GINetConvLayer(torch.nn.Module):  # noqa: D101
         # create edge feature by concatenating node feature
         alpha = torch.cat([xrow, xcol, ed], dim=1)
         alpha = self.fc_attention(alpha)
-        alpha = F.leaky_relu(alpha)
+        alpha = leaky_relu(alpha)
 
-        alpha = F.softmax(alpha, dim=1)
+        alpha = softmax(alpha, dim=1)
         h = alpha * xcol
 
         out = torch.zeros(num_node, self.out_channels).to(alpha.device)
@@ -54,7 +54,7 @@ class GINetConvLayer(torch.nn.Module):  # noqa: D101
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class GINet(torch.nn.Module):  # noqa: D101
+class GINet(nn.Module):  # noqa: D101
     # input_shape -> number of node input features
     # output_shape -> number of output value per graph
     # input_shape_edge -> number of edge input features
@@ -72,7 +72,7 @@ class GINet(torch.nn.Module):  # noqa: D101
         self.dropout = 0.4
 
     def forward(self, data):
-        act = F.relu
+        act = relu
         data_ext = data.clone()
 
         # EXTERNAL INTERACTION GRAPH
@@ -103,7 +103,7 @@ class GINet(torch.nn.Module):  # noqa: D101
 
         x = torch.cat([x, x_ext], dim=1)
         x = act(self.fc1(x))
-        x = F.dropout(x, self.dropout, training=self.training)
+        x = dropout(x, self.dropout, training=self.training)
         x = self.fc2(x)
 
         return x  # noqa:RET504 (unnecessary-assign)
