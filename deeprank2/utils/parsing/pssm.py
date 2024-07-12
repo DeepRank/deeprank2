@@ -10,11 +10,11 @@ def parse_pssm(file_: TextIO, chain: Chain) -> PssmTable:
     """Read the PSSM data.
 
     Args:
-        file_ (python text file object): The pssm file.
-        chain (:class:`Chain`): The chain that the pssm file represents, residues from this chain must match the pssm file.
+        file_: The pssm file.
+        chain: The chain that the pssm file represents, residues from this chain must match the pssm file.
 
     Returns:
-        PssmTable: The position-specific scoring table, parsed from the pssm file.
+        The position-specific scoring table, parsed from the pssm file.
     """
     conservation_rows = {}
 

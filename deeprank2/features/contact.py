@@ -32,8 +32,8 @@ def _get_nonbonded_energy(
     However, the potential tends to 0 at large distance.
 
     Args:
-        atoms (list[Atom]): list of all atoms in the structure
-        distances (NDArray[np.float64]): matrix of pairwise distances between all atoms in the structure
+        atoms: list of all atoms in the structure
+        distances: matrix of pairwise distances between all atoms in the structure
             in the format that is the output of scipy.spatial's distance_matrix (i.e. a diagonally symmetric matrix)
 
     Returns:

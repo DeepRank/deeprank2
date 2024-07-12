@@ -18,7 +18,7 @@ def _id_from_residue(residue: tuple[str, int, str]) -> str:
     """Create and id from pdb2sql rendered residues that is similar to the id of residue nodes.
 
     Args:
-        residue (tuple): Input residue as rendered by pdb2sql: ( str(<chain>), int(<residue_number>), str(<three_letter_code> )
+        residue: Input residue as rendered by pdb2sql: ( str(<chain>), int(<residue_number>), str(<three_letter_code> )
             For example: ('A', 27, 'GLU').
 
     Returns:
@@ -44,9 +44,9 @@ def get_IRCs(pdb_path: str, chains: list[str], cutoff: float = 5.5) -> dict[str,
     """Get all close contact residues from the opposite chain.
 
     Args:
-        pdb_path (str): Path to pdb file to read molecular information from.
-        chains (Sequence[str]): list (or list-like object) containing strings of the chains to be considered.
-        cutoff (float, optional): Cutoff distance (in Ångström) to be considered a close contact. Defaults to 10.
+        pdb_path: Path to pdb file to read molecular information from.
+        chains: list (or list-like object) containing strings of the chains to be considered.
+        cutoff: Cutoff distance (in Ångström) to be considered a close contact. Defaults to 10.
 
     Returns:
         Dict[str, _ContactDensity]:

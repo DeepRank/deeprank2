@@ -38,8 +38,8 @@ def _add_atom_data_to_structure(
     This function should be called for one atom at a time.
 
     Args:
-        structure (:class:`PDBStructure`): The structure to which this atom should be added to.
-        pdb_obj (pdb2sql_object): The `pdb2sql` object to retrieve the data from.
+        structure: The structure to which this atom should be added to.
+        pdb_obj: The `pdb2sql` object to retrieve the data from.
         kwargs: as required by the get function for the `pdb2sql` object.
     """
     pdb2sql_columns = "x,y,z,name,altLoc,occ,element,chainID,resSeq,resName,iCode"
@@ -81,8 +81,8 @@ def get_structure(pdb_obj: pdb2sql_object, id_: str) -> PDBStructure:
     """Builds a structure from rows in a pdb file.
 
     Args:
-        pdb_obj (pdb2sql object): The pdb structure that we're investigating.
-        id_ (str): Unique id for the pdb structure.
+        pdb_obj: The pdb structure that we're investigating.
+        id_: Unique id for the pdb structure.
 
     Returns:
         PDBStructure: The structure object, giving access to chains, residues, atoms.
@@ -126,14 +126,14 @@ def get_residue_contact_pairs(
     """Find all residue pairs that may influence each other.
 
     Args:
-        pdb_path (str): The path of the pdb file, that the structure was built from.
-        structure (:class:`PDBStructure`): From which to take the residues.
-        chain_id1 (str): First protein chain identifier.
-        chain_id2 (str): Second protein chain identifier.
-        influence_radius (float): Maximum distance between residues to consider them as interacting.
+        pdb_path: The path of the pdb file, that the structure was built from.
+        structure: From which to take the residues.
+        chain_id1: First protein chain identifier.
+        chain_id2: Second protein chain identifier.
+        influence_radius: Maximum distance between residues to consider them as interacting.
 
     Returns:
-        list[Pair]: The pairs of contacting residues.
+        list of Pair objects of contacting residues.
     """
     # Find out which residues are pairs
     interface = pdb2sql_interface(pdb_path)
@@ -181,12 +181,12 @@ def get_surrounding_residues(
     """Get the residues that lie within a radius around a residue.
 
     Args:
-        structure (:class:`Chain` | :class:`PDBStructure`): The structure to take residues from.
-        residue (:class:`Residue`): The residue in the structure.
-        radius (float): Max distance in Ångström between atoms of the residue and the other residues.
+        structure: The structure to take residues from.
+        residue: The residue in the structure.
+        radius: Max distance in Ångström between atoms of the residue and the other residues.
 
     Returns:
-        list[:class:`Residue`]: The surrounding residues.
+        list of surrounding Residue objects.
     """
     structure_atoms = structure.get_atoms()
     structure_atom_positions = [atom.position for atom in structure_atoms]
