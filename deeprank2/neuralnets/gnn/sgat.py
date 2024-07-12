@@ -87,7 +87,19 @@ class SGraphAttentionLayer(nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class SGAT(nn.Module):  # noqa:D101
+class SGAT(nn.Module):
+    """SGAT.
+
+    Implementation of a simple graph attention network.
+    It uses two graph attention layers and a MLP to predict the output.
+    It can be used for both regression and classification tasks.
+
+    Args:
+        input_shape: Size of each input sample.
+        output_shape: Size of each output sample. Defaults to 1.
+        input_shape_edge: Size of each input edge. Defaults to None.
+    """
+
     def __init__(
         self,
         input_shape,

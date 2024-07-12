@@ -7,7 +7,14 @@ from torch_scatter import scatter_mean, scatter_sum
 # ruff: noqa: ANN001, ANN201
 
 
-class NaiveConvolutionalLayer(nn.Module):  # noqa: D101
+class NaiveConvolutionalLayer(nn.Module):
+    """Naive convolutional layer for graph neural networks.
+
+    Args:
+        count_node_features: Number of node features.
+        count_edge_features: Number of edge features.
+    """
+
     def __init__(self, count_node_features, count_edge_features):
         super().__init__()
         message_size = 32
@@ -31,15 +38,20 @@ class NaiveConvolutionalLayer(nn.Module):  # noqa: D101
         return self._node_mlp(node_input)
 
 
-class NaiveNetwork(nn.Module):  # noqa: D101
-    def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
-        """NaiveNetwork.
+class NaiveNetwork(nn.Module):
+    """NaiveNetwork.
 
-        Args:
-            input_shape: Number of node input features.
-            output_shape: Number of output value per graph.
-            input_shape_edge: Number of edge input features.
-        """
+    Implementation of a naive graph neural network suited for classification tasks.
+    It uses two naive convolutional layers and a MLP to predict the output.
+    It can be used for both regression and classification tasks.
+
+    Args:
+        input_shape: Number of node input features.
+        output_shape: Number of output value per graph.
+        input_shape_edge: Number of edge input features.
+    """
+
+    def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
         super().__init__()
         self._external1 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
         self._external2 = NaiveConvolutionalLayer(input_shape, input_shape_edge)

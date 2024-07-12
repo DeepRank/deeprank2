@@ -13,8 +13,7 @@ from deeprank2.utils.community_pooling import community_pooling, get_preloaded_c
 class FoutLayer(nn.Module):
     """FoutLayer.
 
-    This layer is described by eq. (1) of
-    Protein Interface Predition using Graph Convolutional Network
+    This layer is described by eq. (1) of Protein Interface Predition using Graph Convolutional Network
     by Alex Fout et al. NIPS 2018.
 
     Args:
@@ -70,7 +69,18 @@ class FoutLayer(nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class FoutNet(nn.Module):  # noqa: D101
+class FoutNet(nn.Module):
+    """FoutNet.
+
+    Architecture based on the FoutLayer. It also uses community pooling to reduce the number of nodes.
+    It can be used for both regression and classification tasks.
+
+    Args:
+        input_shape: Size of each input sample.
+        output_shape: Size of each output sample. Defaults to 1.
+        input_shape_edge: Size of each input edge. Defaults to None.
+    """
+
     def __init__(
         self,
         input_shape,

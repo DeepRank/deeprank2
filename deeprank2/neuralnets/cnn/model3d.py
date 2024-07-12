@@ -23,7 +23,16 @@ from torch.nn.functional import relu
 # ----------------------------------------------------------------------
 
 
-class CnnRegression(nn.Module):  # noqa: D101
+class CnnRegression(nn.Module):
+    """Convolutional Neural Network architecture for regression.
+
+    This type of network is used to predict a single scalar value of a continuous variable.
+
+    Args:
+        num_features: Number of features in the input data.
+        box_shape: Shape of the input data.
+    """
+
     def __init__(self, num_features: int, box_shape: tuple[int]):
         super().__init__()
 
@@ -76,7 +85,16 @@ class CnnRegression(nn.Module):  # noqa: D101
 # ----------------------------------------------------------------------
 
 
-class CnnClassification(nn.Module):  # noqa: D101
+class CnnClassification(nn.Module):
+    """Convolutional Neural Network architecture for binary classification.
+
+    This type of network is used to predict the class of an input data point.
+
+    Args:
+        num_features: Number of features in the input data.
+        box_shape: Shape of the input data.
+    """
+
     def __init__(self, num_features, box_shape):
         super().__init__()
 

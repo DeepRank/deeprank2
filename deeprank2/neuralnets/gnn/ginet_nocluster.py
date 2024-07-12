@@ -7,7 +7,16 @@ from torch_scatter import scatter_mean, scatter_sum
 # ruff: noqa: ANN001, ANN201
 
 
-class GINetConvLayer(nn.Module):  # noqa: D101
+class GINetConvLayer(nn.Module):
+    """GiNet convolutional layer for graph neural networks.
+
+    Args:
+        in_channels: Number of input features.
+        out_channels: Number of output features.
+        number_edge_features: Number of edge features. Defaults to 1.
+        bias: If set to :obj:`False`, the layer will not learn an additive bias. Defaults to False.
+    """
+
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
         super().__init__()
 
@@ -51,10 +60,18 @@ class GINetConvLayer(nn.Module):  # noqa: D101
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class GINet(nn.Module):  # noqa: D101
-    # input_shape -> number of node input features
-    # output_shape -> number of output value per graph
-    # input_shape_edge -> number of edge input features
+class GINet(nn.Module):
+    """GINet.
+
+    A graph neural network architecture based on the GiNet convolutional layer.
+    It can be used for both regression and classification tasks.
+
+    Args:
+        input_shape: Number of input features.
+        output_shape: Number of output value per graph. Defaults to 1.
+        input_shape_edge: Number of edge input features. Defaults to 1.
+    """
+
     def __init__(self, input_shape, output_shape=1, input_shape_edge=1):
         super().__init__()
         self.conv1 = GINetConvLayer(input_shape, 16, input_shape_edge)
