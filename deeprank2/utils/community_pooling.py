@@ -39,9 +39,9 @@ def community_detection_per_batch(
     Args:
         edge_index (Tensor): Edge index.
         batch (?): ?
-        num_nodes (int): Number of nodes.
+        num_nodes: Number of nodes.
         edge_attr (Tensor, optional): Edge attributes. Defaults to None.
-        method (str, optional): Method. Defaults to "mcl".
+        method: Method. Defaults to "mcl".
 
     Raises:
         ValueError: Requires a valid clustering method ('mcl' or 'louvain')
@@ -103,9 +103,9 @@ def community_detection(
 
     Args:
         edge_index (Tensor): Edge index.
-        num_nodes (int): Number of nodes.
+        num_nodes: Number of nodes.
         edge_attr (Tensor, optional): Edge attributes. Defaults to None.
-        method (str, optional): Method. Defaults to "mcl".
+        method: Method. Defaults to "mcl".
 
     Raises:
         ValueError: Requires a valid clustering method ('mcl' or 'louvain')

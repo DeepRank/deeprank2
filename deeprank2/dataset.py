@@ -194,9 +194,8 @@ class DeeprankDataset(Dataset):
         """Check if the parameters for validation and/or testing are the same as in the pre-trained model or training set provided.
 
         Args:
-        inherited_params (List[str]): List of parameters that need to be checked for inheritance.
-        data (Union[dict, class:`GraphDataset`, class:`GridDataset`]): The parameters in `inherited_param` will be inherited
-        from the information contained in `data`.
+            inherited_params: List of parameters that need to be checked for inheritance.
+            data: The parameters in `inherited_param` will be inherited from the information contained in `data`.
         """
         self_vars = vars(self)
         if not isinstance(data, dict):
@@ -256,10 +255,10 @@ class DeeprankDataset(Dataset):
         of the form: { target_name : target_condition } or None.
 
         Args:
-            grp (:class:`h5py.Group`): The entry group in the .HDF5 file.
+            grp: The entry group in the .HDF5 file.
 
         Returns:
-            bool: True if we keep the entry False otherwise.
+            True if we keep the entry; False otherwise.
 
         Raises:
             ValueError: If an unsuported condition is provided.
@@ -360,17 +359,16 @@ class DeeprankDataset(Dataset):
         """After having generated a pd.DataFrame using hdf5_to_pandas method, histograms of the features can be saved in an image.
 
         Args:
-            features (str | list[str]): Features to be plotted.
-            fname (str): str or path-like or binary file-like object.
-                Defaults to 'features_hist.png'.
-            bins (int | list[float] | str, optional): If bins is an integer, it defines the number of equal-width bins in the range.
+            features: Features to be plotted.
+            fname: str or path-like or binary file-like object. Defaults to 'features_hist.png'.
+            bins: If bins is an integer, it defines the number of equal-width bins in the range.
                 If bins is a sequence, it defines the bin edges, including the left edge of the first bin and the right edge
                 of the last bin; in this case, bins may be unequally spaced. All but the last (righthand-most) bin is half-open.
                 If bins is a string, it is one of the binning strategies supported by numpy.histogram_bin_edges:
                 'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
                 Defaults to 10.
-            figsize (tuple, optional): Saved figure sizes. Defaults to (15, 15).
-            log (bool): Whether to apply log transformation to the data indicated by the `features` parameter. Defaults to False.
+            figsize: Saved figure sizes. Defaults to (15, 15).
+            log: Whether to apply log transformation to the data indicated by the `features` parameter. Defaults to False.
         """
         if self.df is None:
             self.hdf5_to_pandas()
@@ -474,18 +472,18 @@ class GridDataset(DeeprankDataset):
     """Class to load the .HDF5 files data into grids.
 
     Args:
-        hdf5_path (str | list): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a list. Defaults to None.
-        subset (list[str] | None, optional): list of keys from .HDF5 file to include. Defaults to None (meaning include all).
-        train_source (str | class:`GridDataset` | None, optional): data to inherit information from the training dataset or the pre-trained model.
+        hdf5_path: Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a list. Defaults to None.
+        subset: list of keys from .HDF5 file to include. Defaults to None (meaning include all).
+        train_source: data to inherit information from the training dataset or the pre-trained model.
             If None, the current dataset is considered as the training set. Otherwise, `train_source` needs to be a dataset of the same class or
             the path of a DeepRank2 pre-trained model. If set, the parameters `features`, `target`, `traget_transform`, `task`, and `classes`
             will be inherited from `train_source`.
             Defaults to None.
-        features (list[str] | str | Literal["all"] | None, optional): Consider all pre-computed features ("all") or some defined node features
+        features: Consider all pre-computed features ("all") or some defined node features
             (provide a list, example: ["res_type", "polarity", "bsa"]). The complete list can be found in `deeprank2.domain.gridstorage`.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to "all".
-        target (str | None, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq. It can also be
+        target: Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq. It can also be
             a custom-defined target given to the Query class as input (see: `deeprank2.query`); in this case,
             the task parameter needs to be explicitly specified as well.
             Only numerical target variables are supported, not categorical.
@@ -493,28 +491,25 @@ class GridDataset(DeeprankDataset):
             numerical class indices before defining the :class:`GraphDataset` instance.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to None.
-        target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
+        target_transform: Apply a log and then a sigmoid transformation to the target (for regression only).
             This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to False.
-        target_filter (dict[str, str] | None, optional): Dictionary of type [target: cond] to filter the molecules.
+        target_filter: Dictionary of type [target: cond] to filter the molecules.
             Note that the you can filter on a different target than the one selected as the dataset target.
             Defaults to None.
-        task (Literal["regress", "classif"] | None, optional): 'regress' for regression or 'classif' for classification. Required if target not in
+        task: 'regress' for regression or 'classif' for classification. Required if target not in
             ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', or 'dockq'], otherwise this setting is ignored.
             Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
             Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', or 'dockq'.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to None.
-        classes (list[str] | list[int] | list[float] | None): Define the dataset target classes in classification mode.
+        classes: Define the dataset target classes in classification mode.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to None.
-        use_tqdm (bool, optional): Show progress bar.
-            Defaults to True.
-        root (str, optional): Root directory where the dataset should be saved.
-            Defaults to "./".
-        check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
-            Defaults to True.
+        use_tqdm: Show progress bar. Defaults to True.
+        root: Root directory where the dataset should be saved. Defaults to "./".
+        check_integrity: Whether to check the integrity of the hdf5 files. Defaults to True.
     """
 
     def __init__(
@@ -658,7 +653,7 @@ class GridDataset(DeeprankDataset):
         """Gets one grid item from its unique index.
 
         Args:
-            idx (int): Index of the item, ranging from 0 to len(dataset).
+            idx: Index of the item, ranging from 0 to len(dataset).
 
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
@@ -670,8 +665,8 @@ class GridDataset(DeeprankDataset):
         """Loads one grid.
 
         Args:
-            hdf5_path (str): .HDF5 file name.
-            entry_name (str): Name of the entry.
+            hdf5_path: .HDF5 file name.
+            entry_name: Name of the entry.
 
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, entry_names.
@@ -716,26 +711,24 @@ class GraphDataset(DeeprankDataset):
     """Class to load the .HDF5 files data into graphs.
 
     Args:
-        hdf5_path (str | list): Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a list. Defaults to None.
-        subset (list[str] | None, optional): list of keys from .HDF5 file to include. Defaults to None (meaning include all).
-        train_source (str | class:`GraphDataset` | None, optional): data to inherit information from the training dataset or the pre-trained model.
+        hdf5_path: Path to .HDF5 file(s). For multiple .HDF5 files, insert the paths in a list. Defaults to None.
+        subset: list of keys from .HDF5 file to include. Defaults to None (meaning include all).
+        train_source: data to inherit information from the training dataset or the pre-trained model.
             If None, the current dataset is considered as the training set. Otherwise, `train_source` needs to be a dataset of the same class or
             the path of a DeepRank2 pre-trained model. If set, the parameters `node_features`, `edge_features`, `features_transform`,
             `target`, `target_transform`, `task`, and `classes` will be inherited from `train_source`. If standardization was performed in the
             training dataset/step, also the attributes `means` and `devs` will be inherited from `train_source`, and they will be used to scale
             the validation/testing set.
             Defaults to None.
-        node_features (list[str] | str | Literal["all"] | None, optional): Consider all pre-computed node features ("all") or
-            some defined node features (provide a list, example: ["res_type", "polarity", "bsa"]).
+        node_features: Consider all pre-computed node features ("all") or some defined node features (provide a list, e.g.: ["res_type", "polarity", "bsa"]).
             The complete list can be found in `deeprank2.domain.nodestorage`.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to "all".
-        edge_features (list[str] | str | Literal["all"] | None, optional): Consider all pre-computed edge features ("all") or
-            some defined edge features (provide a list, example: ["dist", "coulomb"]).
+        edge_features: Consider all pre-computed edge features ("all") or some defined edge features (provide a list, e.g.: ["dist", "coulomb"]).
             The complete list can be found in `deeprank2.domain.edgestorage`.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to "all".
-        features_transform (dict | None, optional): Dictionary to indicate the transformations to apply to each feature in the dictionary, being the
+        features_transform: Dictionary to indicate the transformations to apply to each feature in the dictionary, being the
             transformations lambda functions and/or standardization.
             Example: `features_transform = {'bsa': {'transform': lambda t:np.log(t+1),' standardize': True}}` for the feature `bsa`.
             An `all` key can be set in the dictionary for indicating to apply the same `standardize` and `transform` to all the features.
@@ -743,16 +736,15 @@ class GraphDataset(DeeprankDataset):
             If both `all` and feature name/s are present, the latter have the priority over what indicated in `all`.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to None.
-        clustering_method (str | None, optional): "mcl" for Markov cluster algorithm (see https://micans.org/mcl/),
-            or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
+        clustering_method: "mcl" for Markov cluster algorithm (see https://micans.org/mcl/), or "louvain" for Louvain method (see https://en.wikipedia.org/wiki/Louvain_method).
             In both options, for each graph, the chosen method first finds communities (clusters) of nodes and generates
-            a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved in
-            the .HDF5 file as a :class:`Dataset` called "depth_0". Then, all cluster members beloging to the same community are
-            pooled into a single node, and the resulting tensor is used to find communities among the pooled clusters.
-            The latter tensor is saved into the .HDF5 file as a :class:`Dataset` called "depth_1". Both "depth_0" and "depth_1"
-            :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to make them available to networks
-            that make use of clustering methods. Defaults to None.
-        target (str | None, optional): Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq.
+            a torch tensor whose elements represent the cluster to which the node belongs to. Each tensor is then saved
+            in the .HDF5 file as a :class:`Dataset` called "depth_0". Then, all cluster members beloging to the same
+            community are pooled into a single node, and the resulting tensor is used to find communities among the
+            pooled clusters. The latter tensor is saved into the .HDF5 file as a :class:`Dataset` called "depth_1". Both
+            "depth_0" and "depth_1" :class:`Datasets` belong to the "cluster" Group. They are saved in the .HDF5 file to
+            make them available to networks that make use of clustering methods. Defaults to None.
+        target: Default options are irmsd, lrmsd, fnat, binary, capri_class, and dockq.
             It can also be a custom-defined target given to the Query class as input (see: `deeprank2.query`);
             in this case, the task parameter needs to be explicitly specified as well.
             Only numerical target variables are supported, not categorical.
@@ -760,26 +752,25 @@ class GraphDataset(DeeprankDataset):
             numerical class indices before defining the :class:`GraphDataset` instance.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to None.
-        target_transform (bool, optional): Apply a log and then a sigmoid transformation to the target (for regression only).
+        target_transform: Apply a log and then a sigmoid transformation to the target (for regression only).
             This puts the target value between 0 and 1, and can result in a more uniform target distribution and speed up the optimization.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to False.
-        target_filter (dict[str, str] | None, optional): Dictionary of type [target: cond] to filter the molecules.
+        target_filter: Dictionary of type [target: cond] to filter the molecules.
             Note that the you can filter on a different target than the one selected as the dataset target.
             Defaults to None.
-        task (Literal["regress", "classif"] | None, optional): 'regress' for regression or 'classif' for classification. Required if target not in
+        task: 'regress' for regression or 'classif' for classification. Required if target not in
             ['irmsd', 'lrmsd', 'fnat', 'binary', 'capri_class', or 'dockq'], otherwise this setting is ignored.
             Automatically set to 'classif' if the target is 'binary' or 'capri_classes'.
             Automatically set to 'regress' if the target is 'irmsd', 'lrmsd', 'fnat', or 'dockq'.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to None.
-        classes (list[str] | list[int] | list[float] | None): Define the dataset target classes in classification mode.
+        classes: Define the dataset target classes in classification mode.
             Value will be ignored and inherited from `train_source` if `train_source` is assigned.
             Defaults to None.
-        use_tqdm (bool, optional): Show progress bar. Defaults to True.
-        root (str, optional): Root directory where the dataset should be saved. Defaults to "./".
-        check_integrity (bool, optional): Whether to check the integrity of the hdf5 files.
-            Defaults to True.
+        use_tqdm: Show progress bar. Defaults to True.
+        root: Root directory where the dataset should be saved. Defaults to "./".
+        check_integrity: Whether to check the integrity of the hdf5 files. Defaults to True.
     """
 
     def __init__(  # noqa: C901
@@ -881,7 +872,7 @@ class GraphDataset(DeeprankDataset):
         """Gets one graph item from its unique index.
 
         Args:
-            idx (int): Index of the item, ranging from 0 to len(dataset).
+            idx: Index of the item, ranging from 0 to len(dataset).
 
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
@@ -893,8 +884,8 @@ class GraphDataset(DeeprankDataset):
         """Loads one graph.
 
         Args:
-            fname (str): .HDF5 file name.
-            entry_name (str): Name of the entry.
+            fname: .HDF5 file name.
+            entry_name: Name of the entry.
 
         Returns:
             :class:`torch_geometric.data.data.Data`: item with tensors x, y if present, edge_index, edge_attr, pos, entry_names.
@@ -1140,10 +1131,10 @@ def save_hdf5_keys(
     """Save references to keys in src_ids in a new .HDF5 file.
 
     Args:
-        f_src_path (str): The path to the .HDF5 file containing the keys.
-        src_ids (list[str]): Keys to be saved in the new .HDF5 file. It should be a list containing at least one key.
-        f_dest_path (str): The path to the new .HDF5 file.
-        hardcopy (bool, optional): If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`)
+        f_src_path: The path to the .HDF5 file containing the keys.
+        src_ids: Keys to be saved in the new .HDF5 file. It should be a list containing at least one key.
+        f_dest_path: The path to the new .HDF5 file.
+        hardcopy: If False, the new file contains only references (external links, see :class:`ExternalLink` class from `h5py`)
             to the original .HDF5 file.
             If True, the new file contains a copy of the objects specified in src_ids (see h5py :class:`HardLink` from `h5py`).
             Defaults to False.

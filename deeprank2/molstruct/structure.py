@@ -20,8 +20,7 @@ class PDBStructure:
         One PDBStructure consists of a number of `Residue`s, each of which is of a particular `AminoAcid` type and in turn consists of a number of `Atom`s.
 
         Args:
-            id_ (str, optional): An unique identifier for this structure, can be the pdb accession code.
-                Defaults to None.
+            id_: An unique identifier for this structure, can be the pdb accession code. Defaults to None.
         """
         self._id = id_
         self._chains = {}
@@ -76,8 +75,8 @@ class Chain:
         """One chain of a PDBStructure.
 
         Args:
-        model (:class:`PDBStructure`): The model that this chain is part of.
-        id_ (str): The pdb identifier of this chain.
+        model: The model that this chain is part of.
+        id_: The pdb identifier of this chain.
         """
         self._model = model
         self._id = id_

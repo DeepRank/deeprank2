@@ -7,18 +7,12 @@ class EarlyStopping:
     Triggered if validation loss doesn't improve after a given patience or if a maximum gap between validation and training loss is reached.
 
     Args:
-        patience (int, optional): How long to wait after last time validation loss improved.
-            Defaults to 10.
-        delta (float, optional): Minimum change required to reset the early stopping counter.
-            Defaults to 0.
-        maxgap (float, optional): Maximum difference between between training and validation loss.
-            Defaults to None.
-        min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
-            Defaults to 10.
-        verbose (bool, optional): If True, prints a message for each validation loss improvement.
-            Defaults to True.
-        trace_func (Callable, optional): Function used for recording EarlyStopping status.
-            Defaults to print.
+        patience: How long to wait after last time validation loss improved. Defaults to 10.
+        delta: Minimum change required to reset the early stopping counter. Defaults to 0.
+        maxgap: Maximum difference between between training and validation loss. Defaults to None.
+        min_epoch: Minimum epoch to be reached before looking at maxgap. Defaults to 10.
+        verbose: If True, prints a message for each validation loss improvement. Defaults to True.
+        trace_func: Function used for recording EarlyStopping status. Defaults to print.
     """
 
     def __init__(

@@ -30,11 +30,10 @@ class Residue:
         Each `Residue` is of a certain `AminoAcid` type and consists of multiple `Atom`s.
 
         Args:
-            chain (:class:`Chain`): The chain that this residue belongs to.
-            number (int): the residue number
-            amino_acid (:class:`AminoAcid`, optional): The residue's amino acid (if it's part of a protein).
-                Defaults to None.
-            insertion_code (str, optional): The pdb insertion code, if any. Defaults to None.
+            chain: The chain that this residue belongs to.
+            number: the residue number
+            amino_acid: The residue's amino acid (if it's part of a protein). Defaults to None.
+            insertion_code: The pdb insertion code, if any. Defaults to None.
         """
         self._chain = chain
         self._number = number
@@ -122,8 +121,8 @@ class SingleResidueVariant:
     """A single residue mutation of a PDBStrcture.
 
     Args:
-        residue (Residue): the `Residue` object from the PDBStructure that is mutated.
-        variant_amino_acid (AminoAcid): the amino acid that the `Residue` is mutated into.
+        residue: the `Residue` object from the PDBStructure that is mutated.
+        variant_amino_acid: the amino acid that the `Residue` is mutated into.
     """
 
     def __init__(self, residue: Residue, variant_amino_acid: AminoAcid):

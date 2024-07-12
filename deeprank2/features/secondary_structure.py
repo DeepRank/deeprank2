@@ -91,7 +91,7 @@ def _get_secstructure(pdb_path: str) -> dict:
     """Process the DSSP output to extract secondary structure information.
 
     Args:
-        pdb_path (str): The file path of the PDB file to be processed.
+        pdb_path: The file path of the PDB file to be processed.
 
     Returns:
         dict: A dictionary containing secondary structure information for each chain and residue.

@@ -36,9 +36,9 @@ class NaiveNetwork(nn.Module):  # noqa: D101
         """NaiveNetwork.
 
         Args:
-            input_shape (int): Number of node input features.
-            output_shape (int): Number of output value per graph.
-            input_shape_edge (int): Number of edge input features.
+            input_shape: Number of node input features.
+            output_shape: Number of output value per graph.
+            input_shape_edge: Number of edge input features.
         """
         super().__init__()
         self._external1 = NaiveConvolutionalLayer(input_shape, input_shape_edge)

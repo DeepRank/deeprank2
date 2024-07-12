@@ -18,10 +18,9 @@ class FoutLayer(nn.Module):
     by Alex Fout et al. NIPS 2018.
 
     Args:
-        in_channels (int): Size of each input sample.
-        out_channels (int): Size of each output sample.
-        bias (bool, optional): If set to :obj:`False`, the layer will not learn
-            an additive bias. Defaults to True.
+        in_channels: Size of each input sample.
+        out_channels: Size of each output sample.
+        bias: If set to :obj:`False`, the layer will not learn an additive bias. Defaults to True.
     """
 
     def __init__(self, in_channels: int, out_channels: int, bias: bool = True):

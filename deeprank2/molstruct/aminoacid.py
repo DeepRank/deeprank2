@@ -24,17 +24,17 @@ class AminoAcid:
     """An amino acid represents the type of `Residue` in a `PDBStructure`.
 
     Args:
-        name (str): Full name of the amino acid.
-        three_letter_code (str): Three-letter code of the amino acid (as in PDB).
-        one_letter_code (str): One-letter of the amino acid (as in fasta).
-        charge (int): Charge of the amino acid.
-        polarity (:class:`Polarity`): The polarity of the amino acid.
-        size (int): The number of non-hydrogen atoms in the side chain.
-        mass (float): Average residue mass (i.e. mass of amino acid - H20) in Daltons.
-        pI (float): Isolectric point; pH at which the molecule has no net electric charge.
-        hydrogen_bond_donors (int): Number of hydrogen bond donors.
-        hydrogen_bond_acceptors (int): Number of hydrogen bond acceptors.
-        index (int): The rank of the amino acid, used for computing one-hot encoding.
+        name: Full name of the amino acid.
+        three_letter_code: Three-letter code of the amino acid (as in PDB).
+        one_letter_code: One-letter of the amino acid (as in fasta).
+        charge: Charge of the amino acid.
+        polarity: The polarity of the amino acid.
+        size: The number of non-hydrogen atoms in the side chain.
+        mass: Average residue mass (i.e. mass of amino acid - H20) in Daltons.
+        pI: Isolectric point; pH at which the molecule has no net electric charge.
+        hydrogen_bond_donors: Number of hydrogen bond donors.
+        hydrogen_bond_acceptors: Number of hydrogen bond acceptors.
+        index: The rank of the amino acid, used for computing one-hot encoding.
     """
 
     def __init__(

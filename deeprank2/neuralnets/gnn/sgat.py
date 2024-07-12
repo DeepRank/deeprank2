@@ -19,11 +19,11 @@ class SGraphAttentionLayer(nn.Module):
     Ni is the number of neighbor of node i
     \\Sum_j runs over the neighbors of node i
     a_ij is the edge attribute between node i and j
+
     Args:
-        in_channels (int): Size of each input sample.
-        out_channels (int): Size of each output sample.
-        bias (bool, optional): If set to :obj:`False`, the layer will not learn
-            an additive bias. Defaults to True.
+        in_channels: Size of each input sample.
+        out_channels: Size of each output sample.
+        bias: If set to :obj:`False`, the layer will not learn an additive bias. Defaults to True.
     """  # noqa: D301
 
     def __init__(
