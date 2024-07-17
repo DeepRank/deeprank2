@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Fail if main branch was selected
-        if: ${{ github.ref_name }} == 'main'
+        if: ${{ github.ref_name == 'main' }}
         run: |
           echo "Cannot release from main branch, please select valid release branch."
           exit 1
@@ -35,6 +35,8 @@ jobs:
         with:
           # token with admin priviliges to override brach protection on main and dev
           token: ${{ secrets.GH_RELEASE }}
+          ref: main
+          fetch-depth: 0
 
       - name: Configure git
         run: |
@@ -45,8 +47,8 @@ jobs:
       - name: Merge changes into main
         run: |
           git switch main
-          git merge ${{ github.ref_name }} --no-ff --no-commit
-          git merge --continue
+          git merge origin/${{ github.ref_name }} --no-ff --no-commit
+          git commit --no-edit
 
       - name: Bump version
         id: bump
@@ -84,6 +86,7 @@ jobs:
         with:
           # token with admin priviliges to override brach protection on main and dev
           token: ${{ secrets.GH_RELEASE }}
+          fetch-depth: 0
 
       - name: Configure git
         run: |
