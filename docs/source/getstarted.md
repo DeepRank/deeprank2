@@ -312,10 +312,10 @@ Let's define a `Trainer` instance, using for example of the already existing `GI
 
 ```python
 from deeprank2.trainer import Trainer
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 
 trainer = Trainer(
-    NaiveNetwork,
+    VanillaNetwork,
     dataset_train,
     dataset_val,
     dataset_test
@@ -366,11 +366,11 @@ The user can specify a DeepRank2 exporter or a custom one in `output_exporters` 
 
 ```python
 from deeprank2.trainer import Trainer
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 from deeprank2.utils.exporters import HDF5OutputExporter
 
 trainer = Trainer(
-    NaiveNetwork,
+    VanillaNetwork,
     dataset_train,
     dataset_val,
     dataset_test,
@@ -452,11 +452,11 @@ Finally, the `Trainer` instance can be defined and the new data can be tested:
 
 ```python
 from deeprank2.trainer import Trainer
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 from deeprank2.utils.exporters import HDF5OutputExporter
 
 trainer = Trainer(
-    NaiveNetwork,
+    VanillaNetwork,
     dataset_test = dataset_test,
     pretrained_model = "<pretrained_model_path>",
     output_exporters = [HDF5OutputExporter("<output_folder_path>")]

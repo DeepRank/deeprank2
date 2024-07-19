@@ -9,7 +9,7 @@ from torch import nn
 from deeprank2.dataset import GraphDataset
 from deeprank2.domain import losstypes as losses
 from deeprank2.domain import targetstorage as targets
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 from deeprank2.trainer import Trainer
 
 hdf5_path = "tests/data/hdf5/test.hdf5"
@@ -29,7 +29,7 @@ def base_test(
         trainer.train(nepoch=2, best_model=False, filename=model_path)
 
         return Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_test=trainer.dataset_train,
             pretrained_model=model_path,
         )
@@ -52,7 +52,7 @@ class TestLosses(unittest.TestCase):
             target=targets.BINARY,
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
 
@@ -66,7 +66,7 @@ class TestLosses(unittest.TestCase):
             target=targets.BINARY,
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
 
@@ -83,7 +83,7 @@ class TestLosses(unittest.TestCase):
             target=targets.BINARY,
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
             class_weights=True,
         )
@@ -100,7 +100,7 @@ class TestLosses(unittest.TestCase):
             target=targets.BINARY,
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
             class_weights=True,
         )
@@ -116,7 +116,7 @@ class TestLosses(unittest.TestCase):
             target=targets.BINARY,
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
         lossfunction = nn.MSELoss
@@ -127,7 +127,7 @@ class TestLosses(unittest.TestCase):
     def test_classif_invalid_lossfunction_override(self) -> None:
         dataset = GraphDataset(hdf5_path, target=targets.BINARY)
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
         lossfunction = nn.MSELoss
@@ -148,7 +148,7 @@ class TestLosses(unittest.TestCase):
             task="regress",
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
 
@@ -163,7 +163,7 @@ class TestLosses(unittest.TestCase):
             task="regress",
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
         for f in losses.regression_losses:
@@ -180,7 +180,7 @@ class TestLosses(unittest.TestCase):
             task="regress",
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
         lossfunction = nn.CrossEntropyLoss
@@ -195,7 +195,7 @@ class TestLosses(unittest.TestCase):
             task="regress",
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
         lossfunction = nn.CrossEntropyLoss

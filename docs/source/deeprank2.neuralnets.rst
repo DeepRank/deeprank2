@@ -41,10 +41,10 @@ deeprank2.neuralnets.gnn.ginet\_nocluster
    :undoc-members:
    :show-inheritance:
 
-deeprank2.neuralnets.gnn.naive\_gnn
+deeprank2.neuralnets.gnn.vanilla\_gnn
 ------------------------------------------
 
-.. automodule:: deeprank2.neuralnets.gnn.naive_gnn
+.. automodule:: deeprank2.neuralnets.gnn.vanilla_gnn
    :members:
    :undoc-members:
    :show-inheritance:
