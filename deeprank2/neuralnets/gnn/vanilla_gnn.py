@@ -7,8 +7,8 @@ from torch_scatter import scatter_mean, scatter_sum
 # ruff: noqa: ANN001, ANN201
 
 
-class NaiveConvolutionalLayer(nn.Module):
-    """Naive convolutional layer for graph neural networks.
+class VanillaConvolutionalLayer(nn.Module):
+    """Vanilla convolutional layer for graph neural networks.
 
     Args:
         count_node_features: Number of node features.
@@ -38,12 +38,10 @@ class NaiveConvolutionalLayer(nn.Module):
         return self._node_mlp(node_input)
 
 
-class NaiveNetwork(nn.Module):
-    """NaiveNetwork.
+class VanillaNetwork(nn.Module):
+    """Vanilla graph neural network architecture suited for both regression and classification tasks.
 
-    Implementation of a naive graph neural network suited for classification tasks.
-    It uses two naive convolutional layers and a MLP to predict the output.
-    It can be used for both regression and classification tasks.
+    It uses two vanilla convolutional layers and a MLP to predict the output.
 
     Args:
         input_shape: Number of node input features.
@@ -53,8 +51,8 @@ class NaiveNetwork(nn.Module):
 
     def __init__(self, input_shape: int, output_shape: int, input_shape_edge: int):
         super().__init__()
-        self._external1 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
-        self._external2 = NaiveConvolutionalLayer(input_shape, input_shape_edge)
+        self._external1 = VanillaConvolutionalLayer(input_shape, input_shape_edge)
+        self._external2 = VanillaConvolutionalLayer(input_shape, input_shape_edge)
         hidden_size = 128
         self._graph_mlp = nn.Sequential(nn.Linear(input_shape, hidden_size), nn.ReLU(), nn.Linear(hidden_size, output_shape))
 

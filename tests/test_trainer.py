@@ -19,8 +19,8 @@ from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification, CnnRegression
 from deeprank2.neuralnets.gnn.foutnet import FoutNet
 from deeprank2.neuralnets.gnn.ginet import GINet
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
 from deeprank2.neuralnets.gnn.sgat import SGAT
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 from deeprank2.trainer import Trainer, _divide_dataset
 from deeprank2.utils.exporters import HDF5OutputExporter, ScatterPlotExporter, TensorboardBinaryClassificationExporter
 
@@ -262,7 +262,7 @@ class TestTrainer(unittest.TestCase):
         )
         assert len(os.listdir(self.work_directory)) > 0
 
-    def test_naive(self) -> None:
+    def test_vanilla(self) -> None:
         files = glob.glob(self.work_directory + "/*")
         for f in files:
             os.remove(f)
@@ -270,7 +270,7 @@ class TestTrainer(unittest.TestCase):
 
         _model_base_test(
             self.save_path,
-            NaiveNetwork,
+            VanillaNetwork,
             "tests/data/hdf5/test.hdf5",
             "tests/data/hdf5/test.hdf5",
             "tests/data/hdf5/test.hdf5",
@@ -332,7 +332,7 @@ class TestTrainer(unittest.TestCase):
 
         with pytest.raises(ValueError):
             Trainer(
-                neuralnet=NaiveNetwork,
+                neuralnet=VanillaNetwork,
                 dataset_test=dataset,
             )
 
@@ -456,7 +456,7 @@ class TestTrainer(unittest.TestCase):
             target=targets.BINARY,
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
 
@@ -472,7 +472,7 @@ class TestTrainer(unittest.TestCase):
         with warnings.catch_warnings(record=UserWarning):
             trainer.train(nepoch=3, best_model=False, filename=self.save_path)
             trainer_pretrained = Trainer(
-                neuralnet=NaiveNetwork,
+                neuralnet=VanillaNetwork,
                 dataset_test=dataset,
                 pretrained_model=self.save_path,
             )
@@ -487,7 +487,7 @@ class TestTrainer(unittest.TestCase):
             target=targets.BINARY,
         )
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_train=dataset,
         )
 
@@ -662,7 +662,7 @@ class TestTrainer(unittest.TestCase):
 
         dataset_test = GraphDataset(hdf5_path=test_data_graph, train_source=pretrained_model_graph)
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_test=dataset_test,
             pretrained_model=pretrained_model_graph,
         )
@@ -692,7 +692,7 @@ class TestTrainer(unittest.TestCase):
         dataset_test = GraphDataset(hdf5_path=test_data_graph, train_source=pretrained_model_graph)
 
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_test=dataset_test,
             pretrained_model=pretrained_model_graph,
             output_exporters=[HDF5OutputExporter("./")],
@@ -729,7 +729,7 @@ class TestTrainer(unittest.TestCase):
         dataset_test = GraphDataset(hdf5_path=test_data_graph, train_source=pretrained_model_graph)
 
         trainer = Trainer(
-            neuralnet=NaiveNetwork,
+            neuralnet=VanillaNetwork,
             dataset_test=dataset_test,
             pretrained_model=pretrained_model_graph,
             output_exporters=[HDF5OutputExporter("./")],
@@ -777,7 +777,7 @@ class TestTrainer(unittest.TestCase):
             task=targets.CLASSIF,
             features_transform=features_transform,
         )
-        trainer = Trainer(NaiveNetwork, dataset)
+        trainer = Trainer(VanillaNetwork, dataset)
         # during the training the model is saved
         trainer.train(nepoch=2, batch_size=2, filename=self.save_path)
         assert trainer.features_transform == features_transform

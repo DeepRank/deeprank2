@@ -204,11 +204,10 @@ class SuperGNN(nn.Module):
 
 
 class AlignmentGNN(SuperGNN):
-    """Graph Neural Network.
+    """Architecture based on multiple :class:`GNNLayer` layers, suited for both regression and classification tasks.
 
     It applies different layers to the nodes and edges of a graph (`preproc_edge_mlp` and `preproc_node_mlp`),
     and then applies multiple GNN layers (`modlist`).
-    It can be used for both regression and classification tasks.
 
     Args:
         nm_edge_attr: Number of edge features.

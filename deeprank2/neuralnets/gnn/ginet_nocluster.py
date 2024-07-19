@@ -14,7 +14,7 @@ class GINetConvLayer(nn.Module):
         in_channels: Number of input features.
         out_channels: Number of output features.
         number_edge_features: Number of edge features. Defaults to 1.
-        bias: If set to :obj:`False`, the layer will not learn an additive bias. Defaults to False.
+        bias: If set to `False`, the layer will not learn an additive bias. Defaults to False.
     """
 
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
@@ -61,10 +61,7 @@ class GINetConvLayer(nn.Module):
 
 
 class GINet(nn.Module):
-    """GINet.
-
-    A graph neural network architecture based on the GiNet convolutional layer.
-    It can be used for both regression and classification tasks.
+    """Architecture based on the GiNet convolutional layer, suited for both regression and classification tasks.
 
     Args:
         input_shape: Number of input features.

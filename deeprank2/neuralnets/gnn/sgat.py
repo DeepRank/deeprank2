@@ -23,7 +23,7 @@ class SGraphAttentionLayer(nn.Module):
     Args:
         in_channels: Size of each input sample.
         out_channels: Size of each output sample.
-        bias: If set to :obj:`False`, the layer will not learn an additive bias. Defaults to True.
+        bias: If set to `False`, the layer will not learn an additive bias. Defaults to True.
     """  # noqa: D301
 
     def __init__(
@@ -88,11 +88,9 @@ class SGraphAttentionLayer(nn.Module):
 
 
 class SGAT(nn.Module):
-    """SGAT.
+    """Simple graph attention network, suited for both regression and classification tasks.
 
-    Implementation of a simple graph attention network.
     It uses two graph attention layers and a MLP to predict the output.
-    It can be used for both regression and classification tasks.
 
     Args:
         input_shape: Size of each input sample.

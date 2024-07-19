@@ -19,7 +19,7 @@ class FoutLayer(nn.Module):
     Args:
         in_channels: Size of each input sample.
         out_channels: Size of each output sample.
-        bias: If set to :obj:`False`, the layer will not learn an additive bias. Defaults to True.
+        bias: If set to `False`, the layer will not learn an additive bias. Defaults to True.
     """
 
     def __init__(self, in_channels: int, out_channels: int, bias: bool = True):
@@ -70,10 +70,9 @@ class FoutLayer(nn.Module):
 
 
 class FoutNet(nn.Module):
-    """FoutNet.
+    """Architecture based on the FoutLayer, suited for both regression and classification tasks.
 
-    Architecture based on the FoutLayer. It also uses community pooling to reduce the number of nodes.
-    It can be used for both regression and classification tasks.
+    It also uses community pooling to reduce the number of nodes.
 
     Args:
         input_shape: Size of each input sample.
