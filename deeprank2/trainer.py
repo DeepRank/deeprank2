@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
@@ -10,8 +12,8 @@ import dill
 import h5py
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
+from torch.nn.functional import softmax
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
 
@@ -30,33 +32,31 @@ class Trainer:
     """Class from which the network is trained, evaluated and tested.
 
     Args:
-        neuralnet (child class of :class:`torch.nn.Module`, optional): Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
+        neuralnet: Neural network class (ex. :class:`GINet`, :class:`Foutnet` etc.).
             It should subclass :class:`torch.nn.Module`, and it shouldn't be specific to regression or classification
             in terms of output shape (:class:`Trainer` class takes care of formatting the output shape according to the task).
             More specifically, in classification task cases, softmax shouldn't be used as the last activation function.
             Defaults to None.
-        dataset_train (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Training set used during training.
-            Can't be None if pretrained_model is also None. Defaults to None.
-        dataset_val (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Evaluation set used during training.
-            If None, training set will be split randomly into training set and validation set during training, using val_size parameter.
-            Defaults to None.
-        dataset_test (:class:`GraphDataset` | :class:`GridDataset` | None, optional): Independent evaluation set. Defaults to None.
-        val_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
+        dataset_train: Training set used during training. Can't be None if pretrained_model is also None. Defaults to None.
+        dataset_val: Evaluation set used during training. If None, training set will be split randomly into training set and validation set during training,
+            using val_size parameter. Defaults to None.
+        dataset_test: Independent evaluation set. Defaults to None.
+        val_size: Fraction of dataset (if float) or number of datapoints (if int) to use for validation.
             Only used if dataset_val is not specified. Can be set to 0 if no validation set is needed. Defaults to None (in _divide_dataset function).
-        test_size (float | int | None, optional): Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
+        test_size: Fraction of dataset (if float) or number of datapoints (if int) to use for test dataset.
             Only used if dataset_test is not specified. Can be set to 0 if no test set is needed. Defaults to None.
-        class_weights (bool, optional): Assign class weights based on the dataset content. Defaults to False.
-        pretrained_model (str | None, optional): Path to pre-trained model. Defaults to None.
-        cuda (bool, optional): Whether to use CUDA. Defaults to False.
-        ngpu (int, optional): Number of GPU to be used. Defaults to 0.
-        output_exporters (list[OutputExporter] | None, optional): The output exporters to use for saving/exploring/plotting predictions/targets/losses
-            over the epochs. If None, defaults to :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
+        class_weights: Assign class weights based on the dataset content. Defaults to False.
+        pretrained_model: Path to pre-trained model. Defaults to None.
+        cuda: Whether to use CUDA. Defaults to False.
+        ngpu: Number of GPU to be used. Defaults to 0.
+        output_exporters: The output exporters to use for saving/exploring/plotting predictions/targets/losses over the epochs. If None, defaults to
+            :class:`HDF5OutputExporter`, which saves all the results in an .HDF5 file stored in ./output directory.
             Defaults to None.
     """
 
     def __init__(  # noqa: PLR0915, C901
         self,
-        neuralnet: nn.Module = None,
+        neuralnet: nn.Module | None = None,
         dataset_train: GraphDataset | GridDataset | None = None,
         dataset_val: GraphDataset | GridDataset | None = None,
         dataset_test: GraphDataset | GridDataset | None = None,
@@ -348,11 +348,10 @@ class Trainer:
             f5.close()
 
     def _put_model_to_device(self, dataset: GraphDataset | GridDataset) -> None:
-        """
-        Puts the model on the available device.
+        """Puts the model on the available device.
 
         Args:
-            dataset (:class:`GraphDataset` | :class:`GridDataset`): GraphDataset object.
+            dataset: GraphDataset object.
 
         Raises:
             ValueError: Incorrect output shape
@@ -405,17 +404,13 @@ class Trainer:
         lr: float = 0.001,
         weight_decay: float = 1e-05,
     ) -> None:
-        """
-        Configure optimizer and its main parameters.
+        """Configure optimizer and its main parameters.
 
         Args:
-            optimizer (:class:`torch.optim`, optional): PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`.
-                Defaults to None.
-
-            lr (float, optional): Learning rate. Defaults to 0.001.
-
-            weight_decay (float, optional): Weight decay (L2 penalty).
-                Weight decay is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode. Defaults to 1e-05.
+            optimizer: PyTorch optimizer object. If none, defaults to :class:`torch.optim.Adam`. Defaults to None.
+            lr: Learning rate. Defaults to 0.001.
+            weight_decay: Weight decay (L2 penalty). This is fundamental for GNNs, otherwise, parameters can become too big and the gradient may explode.
+                Defaults to 1e-05.
         """
         self.lr = lr
         self.weight_decay = weight_decay
@@ -435,20 +430,14 @@ class Trainer:
         lossfunction: nn.modules.loss._Loss | None = None,
         override_invalid: bool = False,
     ) -> None:
-        """
-        Set the loss function.
+        """Set the loss function.
 
         Args:
-            lossfunction (optional): Make sure to use a loss function that is appropriate for
-                your task (classification or regression). All loss functions
-                from torch.nn.modules.loss are listed as belonging to either
-                category (or to neither) and an exception is raised if an invalid
-                loss function is chosen for the set task.
-                Default for regression: MSELoss.
-                Default for classification: CrossEntropyLoss.
-                Defaults to None.
-            override_invalid (bool, optional): If True, loss functions that are considered
-                invalid for the task do no longer automaticallt raise an exception.
+            lossfunction: Make sure to use a loss function that is appropriate for your task (classification or
+                regression). All loss functions from torch.nn.modules.loss are listed as belonging to either category
+                (or to neither) and an exception is raised if an invalid loss function is chosen for the set task.
+                Default for regression: MSELoss. Default for classification: CrossEntropyLoss.
+            override_invalid: If True, loss functions that are considered invalid for the task do no longer automaticallt raise an exception.
                 Defaults to False.
         """
         default_regression_loss = nn.MSELoss
@@ -524,31 +513,21 @@ class Trainer:
         best_model: bool = True,
         filename: str | None = "model.pth.tar",
     ) -> None:
-        """
-        Performs the training of the model.
+        """Performs the training of the model.
 
         Args:
-            nepoch (int, optional): Maximum number of epochs to run.
-                        Defaults to 1.
-            batch_size (int, optional): Sets the size of the batch.
-                        Defaults to 32.
-            shuffle (bool, optional): Whether to shuffle the training dataloaders data (train set and validation set).
-                        Default: True.
-            earlystop_patience (int | None, optional): Training ends if the model has run for this number of epochs without improving the validation loss.
-                        Defaults to None.
-            earlystop_maxgap (float | None, optional): Training ends if the difference between validation and training loss exceeds this value.
-                        Defaults to None.
-            min_epoch (float, optional): Minimum epoch to be reached before looking at maxgap.
-                        Defaults to 10.
-            validate (bool, optional): Perform validation on independent data set (requires a validation data set).
-                        Defaults to False.
-            num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
-                        Defaults to 0.
-            best_model (bool, optional):
-                        If True, the best model (in terms of validation loss) is selected for later testing or saving.
-                        If False, the last model tried is selected.
-                        Defaults to True.
-            filename (str, optional): Name of the file where to save the selected model. If not None, the model is saved to `filename`.
+            nepoch: Maximum number of epochs to run. Defaults to 1.
+            batch_size: Sets the size of the batch. Defaults to 32.
+            shuffle: Whether to shuffle the training dataloaders data (train set and validation set). Default: True.
+            earlystop_patience: Training ends if the model has run for this number of epochs without improving the validation loss. Defaults to None.
+            earlystop_maxgap: Training ends if the difference between validation and training loss exceeds this value. Defaults to None.
+            min_epoch: Minimum epoch to be reached before looking at maxgap. Defaults to 10.
+            validate: Perform validation on independent data set (requires a validation data set). Defaults to False.
+            num_workers: How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process. Defaults to 0.
+            best_model:
+                If True (default), the best model (in terms of validation loss) is selected for later testing or saving.
+                If False, the last model tried is selected.
+            filename: Name of the file where to save the selected model. If not None, the model is saved to `filename`.
                 If None, the model is not saved. Defaults to 'model.pth.tar'.
         """
         if self.dataset_train is None:
@@ -685,12 +664,11 @@ class Trainer:
         self.model.load_state_dict(self.model_load_state_dict)
 
     def _epoch(self, epoch_number: int, pass_name: str) -> float | None:
-        """
-        Runs a single epoch.
+        """Runs a single epoch.
 
         Args:
-            epoch_number (int): the current epoch number
-            pass_name (str): 'training', 'validation' or 'testing'
+            epoch_number: the current epoch number
+            pass_name: 'training', 'validation' or 'testing'
 
         Returns:
             Running loss.
@@ -719,7 +697,7 @@ class Trainer:
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == targets.CLASSIF:
-                pred = F.softmax(pred.detach(), dim=1)
+                pred = softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
             outputs += pred.cpu().numpy().tolist()
@@ -751,13 +729,12 @@ class Trainer:
         epoch_number: int,
         pass_name: str,
     ) -> float | None:
-        """
-        Evaluates the model.
+        """Evaluates the model.
 
         Args:
-            loader (Dataloader): Data to evaluate on.
-            epoch_number (int): Number for this epoch, used for storing the outputs.
-            pass_name (str): 'training', 'validation' or 'testing'
+            loader: Data to evaluate on.
+            epoch_number: Number for this epoch, used for storing the outputs.
+            pass_name: 'training', 'validation' or 'testing'
 
         Returns:
             Running loss.
@@ -790,7 +767,7 @@ class Trainer:
             # Get the outputs for export
             # Remember that non-linear activation is automatically applied in CrossEntropyLoss
             if self.task == targets.CLASSIF:
-                pred = F.softmax(pred.detach(), dim=1)
+                pred = softmax(pred.detach(), dim=1)
             else:
                 pred = pred.detach().reshape(-1)
             outputs += pred.cpu().numpy().tolist()
@@ -818,13 +795,12 @@ class Trainer:
 
     @staticmethod
     def _log_epoch_data(stage: str, loss: float, time: float) -> None:
-        """
-        Prints the data of each epoch.
+        """Prints the data of each epoch.
 
         Args:
-            stage (str): Train or valid.
-            loss (float): Loss during that epoch.
-            time (float): Timing of the epoch.
+            stage: Train or valid.
+            loss: Loss during that epoch.
+            time: Timing of the epoch.
         """
         _log.info(f"{stage} loss {loss} | time {time}")
 
@@ -863,14 +839,11 @@ class Trainer:
         batch_size: int = 32,
         num_workers: int = 0,
     ) -> None:
-        """
-        Performs the testing of the model.
+        """Performs the testing of the model.
 
         Args:
-            batch_size (int, optional): Sets the size of the batch.
-                        Defaults to 32.
-            num_workers (int, optional): How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process.
-                        Defaults to 0.
+            batch_size: Sets the size of the batch. Defaults to 32.
+            num_workers: How many subprocesses to use for data loading. 0 means that the data will be loaded in the main process. Defaults to 0.
         """
         if (not self.pretrained_model) and (not self.model_load_state_dict):
             msg = "No pretrained model provided and no training performed. Please provide a pretrained model or train the model before testing."
@@ -935,12 +908,7 @@ class Trainer:
         self.ngpu = state["ngpu"]
 
     def _save_model(self) -> dict[str, Any]:
-        """
-        Saves the model to a file.
-
-        Args:
-            filename (str, optional): Name of the file. Defaults to None.
-        """
+        """Saves the model to a file."""
         features_transform_to_save = copy.deepcopy(self.features_transform)
         # prepare transform dictionary for being saved
         if features_transform_to_save:

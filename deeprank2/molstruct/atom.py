@@ -33,11 +33,11 @@ class Atom:
     """One atom in a PDBStructure.
 
     Args:
-        residue (:class:`Residue`): The residue that this atom belongs to.
-        name (str): Pdb atom name.
-        element (:class:`AtomicElement`): The chemical element.
-        position (np.array): Pdb position xyz of this atom.
-        occupancy (float): Pdb occupancy value.
+        residue: The residue that this atom belongs to.
+        name: Pdb atom name.
+        element: The chemical element.
+        position: Pdb position xyz of this atom.
+        occupancy: Pdb occupancy value.
             This represents the proportion of structures where the atom is detected at a given position.
             Sometimes a single atom can be detected at multiple positions. In that case separate structures exist where sum(occupancy) == 1.
             Note that only the highest occupancy atom is used by deeprank2 (see tools.pdb._add_atom_to_residue).

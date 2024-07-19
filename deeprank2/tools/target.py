@@ -21,12 +21,10 @@ def add_target(  # noqa: C901
     """Add a target to all the graphs in hdf5 files.
 
     Args:
-        graph_path (str | list(str)): Either a directory containing all the hdf5 files,
-            or a single hdf5 filename
-            or a list of hdf5 filenames.
-        target_name (str): The name of the new target.
-        target_list (str): Name of the file containing the data.
-        sep (str, optional): Separator in target list. Defaults to " ".
+        graph_path: Either a directory containing all the hdf5 files, a single hdf5 filename, or a list of hdf5 filenames.
+        target_name: The name of the new target.
+        target_list: Name of the file containing the data.
+        sep: Separator in target list. Defaults to " " (single space).
 
     Notes:
         The input target list should respect the following format :
@@ -35,12 +33,9 @@ def add_target(  # noqa: C901
         1ATN_xxx-3 0
         1ATN_xxx-4 0
     """
-    target_dict = {}
-
     labels = np.loadtxt(target_list, delimiter=sep, usecols=[0], dtype=str)
     values = np.loadtxt(target_list, delimiter=sep, usecols=[1])
-    for label, value in zip(labels, values, strict=True):
-        target_dict[label] = value
+    target_dict = dict(zip(labels, values, strict=False))
 
     if os.path.isdir(graph_path):
         graphs = glob.glob(f"{graph_path}/*.hdf5")
@@ -94,10 +89,10 @@ def compute_ppi_scores(
     4 - incorrect). See https://deeprank2.readthedocs.io/en/latest/docking.html for more details about the scores.
 
     Args:
-        pdb_path (str): Path to the decoy.
-        reference_pdb_path (str): Path to the reference (native) structure.
+        pdb_path: Path to the decoy.
+        reference_pdb_path: Path to the reference (native) structure.
 
-    Returns: a dictionary containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.
+    Returns: dict containing values for lrmsd, irmsd, fnat, dockq, binary, capri_class.
     """
     ref_name = os.path.splitext(os.path.basename(reference_pdb_path))[0]
     sim = StructureSimilarity(

@@ -10,9 +10,7 @@ class ResidueClassCriterium:  # noqa: D101
         absent_atom_names: list[str],
     ):
         self.class_name = class_name
-
         self.amino_acid_names = amino_acid_names
-
         self.present_atom_names = present_atom_names
         self.absent_atom_names = absent_atom_names
 
@@ -26,11 +24,7 @@ class ResidueClassCriterium:  # noqa: D101
             return False
 
         # check the atom names that should be present
-        if not all(atom_name in atom_names for atom_name in self.present_atom_names):
-            return False
-
-        # all checks passed
-        return True
+        return all(atom_name in atom_names for atom_name in self.present_atom_names)
 
 
 class ResidueClassParser:  # noqa: D101

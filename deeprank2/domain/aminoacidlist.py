@@ -386,9 +386,8 @@ def convert_aa_nomenclature(aa: str, output_format: Literal[0, 1, 3] = 0) -> str
     codes, and full names of amino acids.
 
     Args:
-        aa (str): The amino acid to be converted in any of its formats. The
-            length of the string is used to determine which format is used.
-        output_format (Literal[0, 1, 3], optional): Nomenclature style to return:
+        aa: The amino acid to be converted in any of its formats. The length of the string is used to determine which format is used.
+        output_format: Nomenclature style to return:
             0 (default) returns the full name,
             1 returns the 1-letter code,
             3 returns the 3-letter code.
@@ -397,7 +396,7 @@ def convert_aa_nomenclature(aa: str, output_format: Literal[0, 1, 3] = 0) -> str
         ValueError: If aa is not recognized or an invalid output format was given
 
     Returns:
-        str: amino acid in the selected nomenclature system.
+        Amino acid identifier in the selected nomenclature system.
     """
     try:
         if len(aa) == 1:

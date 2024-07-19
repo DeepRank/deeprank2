@@ -1,13 +1,22 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
+from torch.nn.functional import dropout, leaky_relu, relu, softmax
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean, scatter_sum
 
 # ruff: noqa: ANN001, ANN201
 
 
-class GINetConvLayer(torch.nn.Module):  # noqa: D101
+class GINetConvLayer(nn.Module):
+    """GiNet convolutional layer for graph neural networks.
+
+    Args:
+        in_channels: Number of input features.
+        out_channels: Number of output features.
+        number_edge_features: Number of edge features. Defaults to 1.
+        bias: If set to `False`, the layer will not learn an additive bias. Defaults to False.
+    """
+
     def __init__(self, in_channels, out_channels, number_edge_features=1, bias=False):
         super().__init__()
 
@@ -37,9 +46,9 @@ class GINetConvLayer(torch.nn.Module):  # noqa: D101
         # create edge feature by concatenating node feature
         alpha = torch.cat([xrow, xcol, ed], dim=1)
         alpha = self.fc_attention(alpha)
-        alpha = F.leaky_relu(alpha)
+        alpha = leaky_relu(alpha)
 
-        alpha = F.softmax(alpha, dim=1)
+        alpha = softmax(alpha, dim=1)
         h = alpha * xcol
 
         out = torch.zeros(num_node, self.out_channels).to(alpha.device)
@@ -51,10 +60,15 @@ class GINetConvLayer(torch.nn.Module):  # noqa: D101
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class GINet(torch.nn.Module):  # noqa: D101
-    # input_shape -> number of node input features
-    # output_shape -> number of output value per graph
-    # input_shape_edge -> number of edge input features
+class GINet(nn.Module):
+    """Architecture based on the GiNet convolutional layer, suited for both regression and classification tasks.
+
+    Args:
+        input_shape: Number of input features.
+        output_shape: Number of output value per graph. Defaults to 1.
+        input_shape_edge: Number of edge input features. Defaults to 1.
+    """
+
     def __init__(self, input_shape, output_shape=1, input_shape_edge=1):
         super().__init__()
         self.conv1 = GINetConvLayer(input_shape, 16, input_shape_edge)
@@ -68,7 +82,7 @@ class GINet(torch.nn.Module):  # noqa: D101
         self.dropout = 0.4
 
     def forward(self, data):
-        act = F.relu
+        act = relu
         data_ext = data.clone()
 
         # EXTERNAL INTERACTION GRAPH
@@ -91,7 +105,7 @@ class GINet(torch.nn.Module):  # noqa: D101
 
         x = torch.cat([x, x_ext], dim=1)
         x = act(self.fc1(x))
-        x = F.dropout(x, self.dropout, training=self.training)
+        x = dropout(x, self.dropout, training=self.training)
         x = self.fc2(x)
 
         return x  # noqa:RET504 (unnecessary-assign)

@@ -14,7 +14,7 @@ from deeprank2.domain import nodestorage as Nfeat
 from deeprank2.domain import targetstorage as targets
 from deeprank2.neuralnets.cnn.model3d import CnnClassification
 from deeprank2.neuralnets.gnn.ginet import GINet
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 from deeprank2.query import ProteinProteinInterfaceQuery, QueryCollection
 from deeprank2.tools.target import compute_ppi_scores
 from deeprank2.trainer import Trainer
@@ -32,8 +32,7 @@ count_queries = 3
 
 
 def test_cnn() -> None:
-    """
-    Tests processing several PDB files into their features representation HDF5 file.
+    """Tests processing several PDB files into their features representation HDF5 file.
 
     Then uses HDF5 generated files to train and test a CnnRegression network.
     """
@@ -274,7 +273,7 @@ def test_nan_loss_cases(
         train_source=dataset_train,
     )
 
-    trainer = Trainer(NaiveNetwork, dataset_train, dataset_valid)
+    trainer = Trainer(VanillaNetwork, dataset_train, dataset_valid)
 
     optimizer = torch.optim.SGD
     lr = 10000

@@ -1,7 +1,7 @@
 import torch
-import torch.nn
-import torch.nn.functional as F
+from torch import nn
 from torch.autograd import Variable
+from torch.nn.functional import relu
 
 # ruff: noqa: ANN001, ANN201, ANN202
 
@@ -23,19 +23,28 @@ from torch.autograd import Variable
 # ----------------------------------------------------------------------
 
 
-class CnnRegression(torch.nn.Module):  # noqa: D101
+class CnnRegression(nn.Module):
+    """Convolutional Neural Network architecture for regression.
+
+    This type of network is used to predict a single scalar value of a continuous variable.
+
+    Args:
+        num_features: Number of features in the input data.
+        box_shape: Shape of the input data.
+    """
+
     def __init__(self, num_features: int, box_shape: tuple[int]):
         super().__init__()
 
-        self.convlayer_000 = torch.nn.Conv3d(num_features, 4, kernel_size=2)
-        self.convlayer_001 = torch.nn.MaxPool3d((2, 2, 2))
-        self.convlayer_002 = torch.nn.Conv3d(4, 5, kernel_size=2)
-        self.convlayer_003 = torch.nn.MaxPool3d((2, 2, 2))
+        self.convlayer_000 = nn.Conv3d(num_features, 4, kernel_size=2)
+        self.convlayer_001 = nn.MaxPool3d((2, 2, 2))
+        self.convlayer_002 = nn.Conv3d(4, 5, kernel_size=2)
+        self.convlayer_003 = nn.MaxPool3d((2, 2, 2))
 
         size = self._get_conv_output(num_features, box_shape)
 
-        self.fclayer_000 = torch.nn.Linear(size, 84)
-        self.fclayer_001 = torch.nn.Linear(84, 1)
+        self.fclayer_000 = nn.Linear(size, 84)
+        self.fclayer_001 = nn.Linear(84, 1)
 
     def _get_conv_output(self, num_features: int, shape: tuple[int]):
         num_data_points = 2
@@ -44,16 +53,16 @@ class CnnRegression(torch.nn.Module):  # noqa: D101
         return output.data.view(num_data_points, -1).size(1)
 
     def _forward_features(self, x):
-        x = F.relu(self.convlayer_000(x))
+        x = relu(self.convlayer_000(x))
         x = self.convlayer_001(x)
-        x = F.relu(self.convlayer_002(x))
+        x = relu(self.convlayer_002(x))
         x = self.convlayer_003(x)
         return x  # noqa:RET504 (unnecessary-assign)
 
     def forward(self, data):
         x = self._forward_features(data.x)
         x = x.view(x.size(0), -1)
-        x = F.relu(self.fclayer_000(x))
+        x = relu(self.fclayer_000(x))
         x = self.fclayer_001(x)
         return x  # noqa:RET504 (unnecessary-assign)
 
@@ -76,19 +85,28 @@ class CnnRegression(torch.nn.Module):  # noqa: D101
 # ----------------------------------------------------------------------
 
 
-class CnnClassification(torch.nn.Module):  # noqa: D101
+class CnnClassification(nn.Module):
+    """Convolutional Neural Network architecture for binary classification.
+
+    This type of network is used to predict the class of an input data point.
+
+    Args:
+        num_features: Number of features in the input data.
+        box_shape: Shape of the input data.
+    """
+
     def __init__(self, num_features, box_shape):
         super().__init__()
 
-        self.convlayer_000 = torch.nn.Conv3d(num_features, 4, kernel_size=2)
-        self.convlayer_001 = torch.nn.MaxPool3d((2, 2, 2))
-        self.convlayer_002 = torch.nn.Conv3d(4, 5, kernel_size=2)
-        self.convlayer_003 = torch.nn.MaxPool3d((2, 2, 2))
+        self.convlayer_000 = nn.Conv3d(num_features, 4, kernel_size=2)
+        self.convlayer_001 = nn.MaxPool3d((2, 2, 2))
+        self.convlayer_002 = nn.Conv3d(4, 5, kernel_size=2)
+        self.convlayer_003 = nn.MaxPool3d((2, 2, 2))
 
         size = self._get_conv_output(num_features, box_shape)
 
-        self.fclayer_000 = torch.nn.Linear(size, 84)
-        self.fclayer_001 = torch.nn.Linear(84, 2)
+        self.fclayer_000 = nn.Linear(size, 84)
+        self.fclayer_001 = nn.Linear(84, 2)
 
     def _get_conv_output(self, num_features, shape):
         inp = Variable(torch.rand(1, num_features, *shape))
@@ -96,15 +114,15 @@ class CnnClassification(torch.nn.Module):  # noqa: D101
         return out.data.view(1, -1).size(1)
 
     def _forward_features(self, x):
-        x = F.relu(self.convlayer_000(x))
+        x = relu(self.convlayer_000(x))
         x = self.convlayer_001(x)
-        x = F.relu(self.convlayer_002(x))
+        x = relu(self.convlayer_002(x))
         x = self.convlayer_003(x)
         return x  # noqa:RET504 (unnecessary-assign)
 
     def forward(self, data):
         x = self._forward_features(data.x)
         x = x.view(x.size(0), -1)
-        x = F.relu(self.fclayer_000(x))
+        x = relu(self.fclayer_000(x))
         x = self.fclayer_001(x)
         return x  # noqa:RET504 (unnecessary-assign)

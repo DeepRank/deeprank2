@@ -1,7 +1,6 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
-from torch.nn import Parameter
+from torch.nn.functional import relu
 from torch_geometric.nn import max_pool_x
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean
@@ -11,18 +10,16 @@ from deeprank2.utils.community_pooling import community_pooling, get_preloaded_c
 # ruff: noqa: ANN001, ANN201
 
 
-class FoutLayer(torch.nn.Module):
+class FoutLayer(nn.Module):
     """FoutLayer.
 
-    This layer is described by eq. (1) of
-    Protein Interface Predition using Graph Convolutional Network
+    This layer is described by eq. (1) of Protein Interface Predition using Graph Convolutional Network
     by Alex Fout et al. NIPS 2018.
 
     Args:
-        in_channels (int): Size of each input sample.
-        out_channels (int): Size of each output sample.
-        bias (bool, optional): If set to :obj:`False`, the layer will not learn
-            an additive bias. Defaults to True.
+        in_channels: Size of each input sample.
+        out_channels: Size of each output sample.
+        bias: If set to `False`, the layer will not learn an additive bias. Defaults to True.
     """
 
     def __init__(self, in_channels: int, out_channels: int, bias: bool = True):
@@ -32,11 +29,11 @@ class FoutLayer(torch.nn.Module):
         self.out_channels = out_channels
 
         # Wc and Wn are the center and neighbor weight matrix
-        self.wc = Parameter(torch.Tensor(in_channels, out_channels))
-        self.wn = Parameter(torch.Tensor(in_channels, out_channels))
+        self.wc = nn.Parameter(torch.Tensor(in_channels, out_channels))
+        self.wn = nn.Parameter(torch.Tensor(in_channels, out_channels))
 
         if bias:
-            self.bias = Parameter(torch.Tensor(out_channels))
+            self.bias = nn.Parameter(torch.Tensor(out_channels))
         else:
             self.register_parameter("bias", None)
 
@@ -72,7 +69,17 @@ class FoutLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class FoutNet(torch.nn.Module):  # noqa: D101
+class FoutNet(nn.Module):
+    """Architecture based on the FoutLayer, suited for both regression and classification tasks.
+
+    It also uses community pooling to reduce the number of nodes.
+
+    Args:
+        input_shape: Size of each input sample.
+        output_shape: Size of each output sample. Defaults to 1.
+        input_shape_edge: Size of each input edge. Defaults to None.
+    """
+
     def __init__(
         self,
         input_shape,
@@ -84,14 +91,14 @@ class FoutNet(torch.nn.Module):  # noqa: D101
         self.conv1 = FoutLayer(input_shape, 16)
         self.conv2 = FoutLayer(16, 32)
 
-        self.fc1 = torch.nn.Linear(32, 64)
-        self.fc2 = torch.nn.Linear(64, output_shape)
+        self.fc1 = nn.Linear(32, 64)
+        self.fc2 = nn.Linear(64, output_shape)
 
         self.clustering = "mcl"
 
     def forward(self, data):
         act = nn.Tanhshrink()
-        act = F.relu
+        act = relu
 
         # first conv block
         data.x = act(self.conv1(data.x, data.edge_index))

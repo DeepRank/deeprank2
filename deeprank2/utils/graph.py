@@ -326,10 +326,9 @@ class Graph:
         """Builds a graph.
 
         Args:
-            nodes (list[Atom] | list[Residue]): List of `Atom`s or `Residue`s to include in graph.
-                All nodes must be of same type.
-            graph_id (str): Human readable identifier for graph.
-            max_edge_length (float): Maximum distance between two nodes to connect them with an edge.
+            nodes: List of `Atom`s or `Residue`s to include in graph. All nodes must be of same type.
+            graph_id: Human readable identifier for graph.
+            max_edge_length: Maximum distance between two nodes to connect them with an edge.
 
         Returns:
             Graph: Containing nodes (with positions) and edges.

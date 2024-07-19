@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import importlib
 import logging
 import os
@@ -5,14 +7,13 @@ import pickle
 import pkgutil
 import re
 import warnings
-from collections.abc import Iterator
 from dataclasses import MISSING, dataclass, field, fields
 from functools import partial
 from glob import glob
 from multiprocessing import Pool
 from random import randrange
 from types import ModuleType
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import h5py
 import numpy as np
@@ -21,13 +22,17 @@ import pdb2sql
 import deeprank2.features
 from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
-from deeprank2.molstruct.aminoacid import AminoAcid
 from deeprank2.molstruct.residue import Residue, SingleResidueVariant
-from deeprank2.molstruct.structure import PDBStructure
 from deeprank2.utils.buildgraph import get_contact_atoms, get_structure, get_surrounding_residues
 from deeprank2.utils.graph import Graph
 from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
 from deeprank2.utils.parsing.pssm import parse_pssm
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from deeprank2.molstruct.aminoacid import AminoAcid
+    from deeprank2.molstruct.structure import PDBStructure
 
 _log = logging.getLogger(__name__)
 
@@ -36,23 +41,9 @@ VALID_RESOLUTIONS = ["atom", "residue"]
 
 @dataclass(repr=False, kw_only=True)
 class Query:
-    """Represents one entity of interest: a single residue variant (SRV) or a protein-protein interface (PPI).
+    """Parent class of :class:`SingleResidueVariantQuery` and :class:`ProteinProteinInterfaceQuery`.
 
-    :class:`Query` objects are used to generate graphs from structures, and they should be created before any model is loaded.
-    They can have target values associated with them, which will be stored with the resulting graph.
-
-    Args:
-        pdb_path (str): the path to the PDB file to query.
-        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
-        chain_ids (list[str] | str): the chain identifier(s) of the variant residue or interacting interfaces.
-            Note that this does not limit the structure to residues from this/these chain(s).
-        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
-        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
-        influence_radius (float | None): all residues within this radius from the variant residue or interacting interfaces
-            will be included in the graph, irrespective of the chain they are on.
-        max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
-        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
-            match the .pdb files. If True, a warning is returned instead.
+    More detailed information about the parameters can be found in :class:`SingleResidueVariantQuery` and :class:`ProteinProteinInterfaceQuery`.
     """
 
     pdb_path: str
@@ -117,16 +108,16 @@ class Query:
         """Checks whether information stored in pssm file matches the corresponding pdb file.
 
         Args:
-            pdb_path (str): Path to the PDB file.
-            pssm_paths (dict[str, str]): The paths to the PSSM files, per chain identifier.
-            suppress (bool): Suppress errors and throw warnings instead.
-            verbosity (int): Level of verbosity of error/warning. Defaults to 0.
+            pdb_path: Path to the PDB file.
+            pssm_paths: The paths to the PSSM files, per chain identifier.
+            suppress: Suppress errors and throw warnings instead.
+            verbosity: Level of verbosity of error/warning. Defaults to 0.
                 0 (low): Only state file name where error occurred;
                 1 (medium): Also state number of incorrect and missing residues;
                 2 (high): Also list the incorrect residues
 
         Raises:
-            ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided
+            ValueError: Raised if info between pdb file and pssm file doesn't match or if no pssms were provided.
         """
         if not self.pssm_paths:
             msg = "No pssm paths provided for conservation feature module."
@@ -189,8 +180,7 @@ class Query:
         """Builds the graph from the .PDB structure.
 
         Args:
-            feature_modules (list[str]): the feature modules used to build the graph.
-                These must be filenames existing inside `deeprank2.features` subpackage.
+            feature_modules: the feature modules used to build the graph. These must be filenames existing inside `deeprank2.features` subpackage.
 
         Returns:
             :class:`Graph`: The resulting :class:`Graph` object with all the features and targets.
@@ -221,26 +211,21 @@ class Query:
 class SingleResidueVariantQuery(Query):
     """A query that builds a single residue variant graph.
 
-    Args (common for `Query`):
-        pdb_path (str): the path to the PDB file to query.
-        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
-        chain_ids (list[str] | str): the chain identifier of the variant residue (generally a single capital letter).
+    Args:
+        pdb_path: the path to the PDB file to query.
+        resolution: sets whether each node is a residue or atom.
+        chain_ids: the chain identifier of the variant residue (generally a single capital letter).
             Note that this does not limit the structure to residues from this chain.
-        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
-        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
-        influence_radius (float | None): all residues within this radius from the variant residue
-            will be included in the graph, irrespective of the chain they are on.
-        max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
-
-        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
-            match the .pdb files. If True, a warning is returned instead.
-    SRV specific Args:
-        variant_residue_number (int): the residue number of the variant residue.
-        insertion_code (str | None): the insertion code of the variant residue.
-        wildtype_amino_acid (AminoAcid): the amino acid at above position in the wildtype protein.
-        variant_amino_acid (AminoAcid): the amino acid at above position in the variant protein.
-        radius (float): all Residues within this radius (in Å) from the variant residue will
-            be included in the graph
+        pssm_paths: the name of the chain(s) (key) and path to the pssm file(s) (value).
+        targets: Name(s) (key) and target value(s) (value) associated with this query.
+        influence_radius: all residues within this radius from the variant residue will be included in the graph, irrespective of the chain they are on.
+        max_edge_length: the maximum distance between two nodes to generate an edge connecting them.
+        suppress_pssm_errors: Whether to suppress the error raised if the .pssm files do not match the .pdb files. If True, a warning is returned instead.
+        variant_residue_number: the residue number of the variant residue.
+        insertion_code: the insertion code of the variant residue.
+        wildtype_amino_acid: the amino acid at above position in the wildtype protein.
+        variant_amino_acid: the amino acid at above position in the variant protein.
+        radius: all Residues within this radius (in Å) from the variant residue will be included in the graph.
     """
 
     variant_residue_number: int
@@ -326,17 +311,15 @@ class ProteinProteinInterfaceQuery(Query):
     """A query that builds a protein-protein interface graph.
 
     Args:
-        pdb_path (str): the path to the PDB file to query.
-        resolution (Literal['residue', 'atom']): sets whether each node is a residue or atom.
-        chain_ids (list[str] | str): the chain identifiers of the interacting interfaces (generally a single capital letter each).
+        pdb_path: the path to the PDB file to query.
+        resolution: sets whether each node is a residue or atom.
+        chain_ids: the chain identifiers of the interacting interfaces (generally a single capital letter each).
             Note that this does not limit the structure to residues from these chains.
-        pssm_paths (dict[str, str]): the name of the chain(s) (key) and path to the pssm file(s) (value).
-        targets (dict[str, float]) = Name(s) (key) and target value(s) (value) associated with this query.
-        influence_radius (float | None): all residues within this radius from the interacting interface
-            will be included in the graph, irrespective of the chain they are on.
-        max_edge_length (float | None): the maximum distance between two nodes to generate an edge connecting them.
-        suppress_pssm_errors (bool): Whether or not to suppress the error raised if the .pssm files do not
-            match the .pdb files. If True, a warning is returned instead.
+        pssm_paths: the name of the chain(s) (key) and path to the pssm file(s) (value).
+        targets: Name(s) (key) and target value(s) (value) associated with this query.
+        influence_radius: all residues within this radius from the interacting interface will be included in the graph, irrespective of the chain they are on.
+        max_edge_length: the maximum distance between two nodes to generate an edge connecting them.
+        suppress_pssm_errors: Whether to suppress the error raised if the .pssm files do not match the .pdb files. If True, a warning is returned instead.
     """
 
     def __post_init__(self):
@@ -428,9 +411,9 @@ class QueryCollection:
         """Add a new query to the collection.
 
         Args:
-            query(:class:`Query`): The `Query` to add to the collection.
-            verbose(bool): For logging query IDs added. Defaults to `False`.
-            warn_duplicate (bool): Log a warning before renaming if a duplicate query is identified. Defaults to `True`.
+            query: The `Query` to add to the collection.
+            verbose: For logging query IDs added. Defaults to `False`.
+            warn_duplicate: Log a warning before renaming if a duplicate query is identified. Defaults to `True`.
         """
         query_id = query.get_query_id()
         if verbose:
@@ -451,7 +434,7 @@ class QueryCollection:
         """Exports the colection of all queries to a dictionary file.
 
         Args:
-            dataset_path (str): The path where to save the list of queries.
+            dataset_path: The path where to save the list of queries.
         """
         with open(dataset_path, "wb") as pkl_file:
             pickle.dump(self, pkl_file)
@@ -514,27 +497,22 @@ class QueryCollection:
         """Render queries into graphs (and optionally grids).
 
         Args:
-            prefix (str | None, optional): Prefix for naming the output files. Defaults to "processed-queries".
-            feature_modules (list[ModuleType] | list[str] | Literal ['all'], optional): Feature module or list of feature modules
-                used to generate features (given as string or as an imported module).
+            prefix: Prefix for naming the output files. Defaults to "processed-queries".
+            feature_modules: Feature module or list of feature modules used to generate features (given as string or as an imported module).
                 Each module must implement the :py:func:`add_features` function, and all feature modules must exist inside `deeprank2.features` folder.
                 If set to 'all', all available modules in `deeprank2.features` are used to generate the features.
                 Defaults to the two primary feature modules `deeprank2.features.components` and `deeprank2.features.contact`.
-            cpu_count (int | None, optional): The number of processes to be run in parallel (i.e. number of CPUs used), capped by
-                the number of CPUs available to the system.
+            cpu_count: The number of processes to be run in parallel (i.e. number of CPUs used), capped by the number of CPUs available to the system.
                 Defaults to None, which takes all available cpu cores.
-            combine_output (bool, optional):
+            combine_output:
                 If `True` (default): all processes are combined into a single HDF5 file.
                 If `False`: separate HDF5 files are created for each process (i.e. for each CPU used).
-            grid_settings (:class:`GridSettings` | None, optional): If valid together with `grid_map_method`, the grid data will be stored as well.
-                Defaults to None.
-            grid_map_method (:class:`MapMethod` | None, optional): If valid together with `grid_settings`, the grid data will be stored as well.
-                Defaults to None.
-            grid_augmentation_count (int, optional): Number of grid data augmentations (must be >= 0).
-                Defaults to 0.
+            grid_settings: If valid together with `grid_map_method`, the grid data will be stored as well. Defaults to None.
+            grid_map_method: If valid together with `grid_settings`, the grid data will be stored as well. Defaults to None.
+            grid_augmentation_count: Number of grid data augmentations (must be >= 0). Defaults to 0.
 
         Returns:
-            list[str]: The list of paths of the generated HDF5 files.
+            The list of paths of the generated HDF5 files.
         """
         # set defaults
         feature_modules = feature_modules or [components, contact]

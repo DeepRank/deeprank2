@@ -183,8 +183,8 @@ class ScatterPlotExporter(OutputExporter):
     On the Y-axis: output values
 
     Args:
-        directory_path (str): Where to store the plots.
-        epoch_interval (int, optional): How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
+        directory_path: Where to store the plots.
+        epoch_interval: How often to make a plot, 5 means: every 5 epochs. Defaults to 1.
     """
 
     def __init__(self, directory_path: str, epoch_interval: int = 1):

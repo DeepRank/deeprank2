@@ -2,7 +2,6 @@
 
 The following section serves as a first guide to start using the package, using protein-protein interface (PPI) queries as example.
 For an enhanced learning experience, we provide in-depth [tutorial notebooks](https://github.com/DeepRank/deeprank2/tree/main/tutorials) for generating PPI data, generating SRVs data, and for the training pipeline.
-For more details, see the [extended documentation](https://deeprank2.rtfd.io/).
 
 ## Data generation
 
@@ -313,10 +312,10 @@ Let's define a `Trainer` instance, using for example of the already existing `GI
 
 ```python
 from deeprank2.trainer import Trainer
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 
 trainer = Trainer(
-    NaiveNetwork,
+    VanillaNetwork,
     dataset_train,
     dataset_val,
     dataset_test
@@ -367,11 +366,11 @@ The user can specify a DeepRank2 exporter or a custom one in `output_exporters` 
 
 ```python
 from deeprank2.trainer import Trainer
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 from deeprank2.utils.exporters import HDF5OutputExporter
 
 trainer = Trainer(
-    NaiveNetwork,
+    VanillaNetwork,
     dataset_train,
     dataset_val,
     dataset_test,
@@ -390,6 +389,8 @@ output_test = pd.read_hdf(os.path.join("<output_folder_path>", "output_exporter.
 ```
 
 The dataframes contain `phase`, `epoch`, `entry`, `output`, `target`, and `loss` columns, and can be easily used to visualize the results.
+
+For classification tasks, the `output` column contains a list of probabilities that each class occurs, and each list sums to 1 (for more details, please see documentation on the [softmax function](https://pytorch.org/docs/stable/generated/torch.nn.functional.softmax.html)). Note that the order of the classes in the list depends on the `classes` attribute of the DeeprankDataset instances. For classification tasks, if `classes` is not specified (as in this example case), it is defaulted to [0, 1].
 
 Example for plotting training loss curves using [Plotly Express](https://plotly.com/python/plotly-express/):
 
@@ -451,11 +452,11 @@ Finally, the `Trainer` instance can be defined and the new data can be tested:
 
 ```python
 from deeprank2.trainer import Trainer
-from deeprank2.neuralnets.gnn.naive_gnn import NaiveNetwork
+from deeprank2.neuralnets.gnn.vanilla_gnn import VanillaNetwork
 from deeprank2.utils.exporters import HDF5OutputExporter
 
 trainer = Trainer(
-    NaiveNetwork,
+    VanillaNetwork,
     dataset_test = dataset_test,
     pretrained_model = "<pretrained_model_path>",
     output_exporters = [HDF5OutputExporter("<output_folder_path>")]

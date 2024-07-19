@@ -1,7 +1,6 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
-from torch.nn import Parameter
+from torch.nn.functional import relu
 from torch_geometric.nn import max_pool_x
 from torch_geometric.nn.inits import uniform
 from torch_scatter import scatter_mean
@@ -11,7 +10,7 @@ from deeprank2.utils.community_pooling import community_pooling, get_preloaded_c
 # ruff: noqa: ANN001, ANN201
 
 
-class SGraphAttentionLayer(torch.nn.Module):
+class SGraphAttentionLayer(nn.Module):
     """SGraphAttentionLayer.
 
     This is a new layer that is similar to the graph attention network but simpler
@@ -20,11 +19,11 @@ class SGraphAttentionLayer(torch.nn.Module):
     Ni is the number of neighbor of node i
     \\Sum_j runs over the neighbors of node i
     a_ij is the edge attribute between node i and j
+
     Args:
-        in_channels (int): Size of each input sample.
-        out_channels (int): Size of each output sample.
-        bias (bool, optional): If set to :obj:`False`, the layer will not learn
-            an additive bias. Defaults to True.
+        in_channels: Size of each input sample.
+        out_channels: Size of each output sample.
+        bias: If set to `False`, the layer will not learn an additive bias. Defaults to True.
     """  # noqa: D301
 
     def __init__(
@@ -40,10 +39,10 @@ class SGraphAttentionLayer(torch.nn.Module):
         self.out_channels = out_channels
         self.undirected = undirected
 
-        self.weight = Parameter(torch.Tensor(2 * in_channels, out_channels))
+        self.weight = nn.Parameter(torch.Tensor(2 * in_channels, out_channels))
 
         if bias:
-            self.bias = Parameter(torch.Tensor(out_channels))
+            self.bias = nn.Parameter(torch.Tensor(out_channels))
         else:
             self.register_parameter("bias", None)
 
@@ -88,7 +87,17 @@ class SGraphAttentionLayer(torch.nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class SGAT(torch.nn.Module):  # noqa:D101
+class SGAT(nn.Module):
+    """Simple graph attention network, suited for both regression and classification tasks.
+
+    It uses two graph attention layers and a MLP to predict the output.
+
+    Args:
+        input_shape: Size of each input sample.
+        output_shape: Size of each output sample. Defaults to 1.
+        input_shape_edge: Size of each input edge. Defaults to None.
+    """
+
     def __init__(
         self,
         input_shape,
@@ -100,14 +109,14 @@ class SGAT(torch.nn.Module):  # noqa:D101
         self.conv1 = SGraphAttentionLayer(input_shape, 16)
         self.conv2 = SGraphAttentionLayer(16, 32)
 
-        self.fc1 = torch.nn.Linear(32, 64)
-        self.fc2 = torch.nn.Linear(64, output_shape)
+        self.fc1 = nn.Linear(32, 64)
+        self.fc2 = nn.Linear(64, output_shape)
 
         self.clustering = "mcl"
 
     def forward(self, data):
         act = nn.Tanhshrink()
-        act = F.relu
+        act = relu
 
         # first conv block
         data.x = act(self.conv1(data.x, data.edge_index, data.edge_attr))

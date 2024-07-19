@@ -6,7 +6,19 @@ from torch import nn
 __author__ = "Daniel-Tobias Rademaker"
 
 
-class GNNLayer(nn.Module):  # noqa: D101
+class GNNLayer(nn.Module):
+    """Custom-defined layer of a Graph Neural Network.
+
+    Args:
+        nmb_edge_projection: Number of features in the edge projection.
+        nmb_hidden_attr: Number of features in the hidden attributes.
+        nmb_output_features: Number of output features.
+        message_vector_length: Length of the message vector.
+        nmb_mlp_neurons: Number of neurons in the MLP.
+        act_fn: Activation function. Defaults to nn.SiLU().
+        is_last_layer: Whether this is the last layer of the GNN. Defaults to True.
+    """
+
     def __init__(
         self,
         nmb_edge_projection,
@@ -104,7 +116,26 @@ class GNNLayer(nn.Module):  # noqa: D101
         return output
 
 
-class SuperGNN(nn.Module):  # noqa: D101
+class SuperGNN(nn.Module):
+    """SuperGNN is a class that defines multiple GNN layers.
+
+    In particular, the `preproc_edge_mlp` and `preproc_node_mlp` are meant to
+    preprocess the edge and node attributes, respectively.
+
+    The `modlist` is a list of GNNLayer objects.
+
+    Args:
+        nm_edge_attr: Number of edge features.
+        nmb_node_attr: Number of node features.
+        nmb_hidden_attr: Number of hidden features.
+        nmb_mlp_neurons: Number of neurons in the MLP.
+        nmb_edge_projection: Number of edge projections.
+        nmb_gnn_layers: Number of GNN layers.
+        nmb_output_features: Number of output features.
+        message_vector_length: Length of the message vector.
+        act_fn: Activation function. Defaults to nn.SiLU().
+    """
+
     def __init__(
         self,
         nmb_edge_attr,
@@ -172,7 +203,25 @@ class SuperGNN(nn.Module):  # noqa: D101
         return self.modlist[-1].output(node_attr, True)  # (boolean-positional-value-in-call)
 
 
-class AlignmentGNN(SuperGNN):  # noqa: D101
+class AlignmentGNN(SuperGNN):
+    """Architecture based on multiple :class:`GNNLayer` layers, suited for both regression and classification tasks.
+
+    It applies different layers to the nodes and edges of a graph (`preproc_edge_mlp` and `preproc_node_mlp`),
+    and then applies multiple GNN layers (`modlist`).
+
+    Args:
+        nm_edge_attr: Number of edge features.
+        nmb_node_attr: Number of node features.
+        nmb_output_features: Number of output features.
+        nmb_hidden_attr: Number of hidden features.
+        message_vector_length: Length of the message vector.
+        nmb_mlp_neurons: Number of neurons in the MLP.
+        nmb_gnn_layers: Number of GNN layers.
+        nmb_edge_projection: Number of edge projections.
+        act_fn: Activation function. Defaults to nn.SiLU().
+
+    """
+
     def __init__(
         self,
         nmb_edge_attr,
