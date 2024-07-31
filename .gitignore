@@ -21,7 +21,7 @@ dist/*
 
 # hdf5 and tar
 *.hdf5
-*.tar
+# *.tar
 
 # test
 htmlcov

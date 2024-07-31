@@ -277,7 +277,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_inherit_info_pretrained_model_griddataset(self) -> None:
         # Test the inheritance not giving in any parameters
-        pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
+        pretrained_model = "tests/data/pretrained/testing_grid_model2.pth.tar"
         dataset_test = GridDataset(
             hdf5_path=self.hdf5_path,
             train_source=pretrained_model,
@@ -309,7 +309,7 @@ class TestDataSet(unittest.TestCase):
     def test_no_target_dataset_griddataset(self) -> None:
         hdf5_no_target = "tests/data/hdf5/test_no_target.hdf5"
         hdf5_target = "tests/data/hdf5/1ATN_ppi.hdf5"
-        pretrained_model = "tests/data/pretrained/testing_grid_model.pth.tar"
+        pretrained_model = "tests/data/pretrained/testing_grid_model2.pth.tar"
 
         dataset = GridDataset(
             hdf5_path=hdf5_no_target,
@@ -1190,7 +1190,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_inherit_info_pretrained_model_graphdataset(self) -> None:
         hdf5_path = "tests/data/hdf5/test.hdf5"
-        pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
+        pretrained_model = "tests/data/pretrained/testing_graph_model2.pth.tar"
         dataset_test = GraphDataset(
             hdf5_path=hdf5_path,
             train_source=pretrained_model,
@@ -1238,7 +1238,7 @@ class TestDataSet(unittest.TestCase):
     def test_no_target_dataset_graphdataset(self) -> None:
         hdf5_no_target = "tests/data/hdf5/test_no_target.hdf5"
         hdf5_target = "tests/data/hdf5/test.hdf5"
-        pretrained_model = "tests/data/pretrained/testing_graph_model.pth.tar"
+        pretrained_model = "tests/data/pretrained/testing_graph_model2.pth.tar"
 
         dataset = GraphDataset(
             hdf5_path=hdf5_no_target,
@@ -1290,7 +1290,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_invalid_pretrained_model_data_type(self) -> None:
         hdf5_graph = "tests/data/hdf5/test.hdf5"
-        pretrained_grid_model = "tests/data/pretrained/testing_grid_model.pth.tar"
+        pretrained_grid_model = "tests/data/pretrained/testing_grid_model2.pth.tar"
         with pytest.raises(TypeError):
             GraphDataset(
                 hdf5_path=hdf5_graph,
@@ -1298,7 +1298,7 @@ class TestDataSet(unittest.TestCase):
             )
 
         hdf5_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
-        pretrained_graph_model = "tests/data/pretrained/testing_graph_model.pth.tar"
+        pretrained_graph_model = "tests/data/pretrained/testing_graph_model2.pth.tar"
         with pytest.raises(TypeError):
             GridDataset(
                 hdf5_path=hdf5_grid,
