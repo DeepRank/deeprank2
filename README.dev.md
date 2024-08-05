@@ -79,10 +79,69 @@ During the development cycle, three main supporting branches are used:
 
 ## Making a release
 
-1. Branch from `dev` and prepare the branch for the release (e.g., removing the unnecessary dev files, fix minor bugs if necessary).
-2. [Bump the version](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#versioning).
-3. Merge the release branch into `main` (and `dev`), and [run the tests](https://github.com/DeepRank/deeprank2/blob/dev/README.dev.md#running-the-tests).
-4. Go to https://github.com/DeepRank/deeprank2/releases and draft a new release; create a new tag for the release, generate release notes automatically and adjust them, and finally publish the release as latest. This will trigger [a GitHub action](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.
+### Automated release workflow:
+
+0. **IMP0RTANT:** Create a PR pointing to `main` for the release branch (usually `dev`) and make sure that there are no conflicts and that all checks pass!
+   - if everything goes well, this PR will automatically be closed after the draft release is created.
+1. Navigate to [Draft Github Release](https://github.com/DeepRank/deeprank2/actions/workflows/release_github.yml)
+   on the [Actions](https://github.com/DeepRank/deeprank2/actions) tab.
+2. On the right hand side, you can select the level increase ("patch", "minor", or "major") and which branch to release from.
+   - [Follow semantic versioning conventions](https://semver.org/) to chose the level increase:
+     - `patch`: when backward compatible bug fixes were made
+     - `minor`: when functionality was added in a backward compatible manner
+     - `major`: when API-incompatible changes have been made
+   - Note that you cannot release from `main` (the default shown) using the automated workflow. To release from `main`
+     directly, you must [create the release manually](#manually-create-a-release).
+3. Visit [Actions](https://github.com/DeepRank/deeprank2/actions) tab to check whether everything went as expected.
+   - NOTE: there are two separate jobs in the workflow: "draft_release" and "tidy_workspace". The first creates the draft release on github, while the second merges changes into `dev` and closes the PR.
+     - If "draft_release" fails, then there are likely merge conflicts with `main` that need to be resolved first. No release draft is created and the "tidy_workspace" job does not run. If this action is succesfull, then the release branch (including a version bump) have been merged into the remote `main` branch.
+     - If "draft_release" is succesfull but "tidy_workspace" fails, then there are likely merge conflicts with `dev` that are not conflicts with `main`. In this case, the draft release is created (and changes were merged into the remote `main`). Conflicts with `dev` need to be resolved with `dev` by the user (note that this should never happen if the release branch was `dev`, as the only change will be the version bump).
+     - If both jobs succeed, then the draft release is created and the changes are merged into both remote `main` and `dev` without any problems and the associated PR is closed. Also, if the release branch is different from `dev`, then that branch will be deleted from the remote repository.
+4. Navigate to the [Releases](https://github.com/DeepRank/deeprank2/releases) tab and click on the newest draft
+   release that was just generated.
+5. Click on the edit (pencil) icon on the right side of the draft release.
+6. Check/adapt the release notes and make sure that everything is as expected.
+7. Check that "Set as the latest release is checked".
+8. Click green "Publish Release" button to convert the draft to a published release on GitHub.
+   - This will automatically trigger [another GitHub workflow](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.
+
+#### Updating the token:
+
+In order for the workflow above to be able to bypass the branch protection on `main` and `dev`, a token with admin priviliges for the current repo is required. Below are instructions on how to create such a token.
+NOTE: the current token (associated to @DaniBodor) allowing to bypass branch protection will expire on 9 July 2025. To update the token do the following:
+
+1. [Create a personal access token](https://github.com/settings/tokens/new) from a GitHub user account with admin
+   priviliges for this repo.
+2. Check all the "repo" boxes and the "workflow" box, set an expiration date, and give the token a note.
+3. Click green "Generate token" button on the bottom
+4. Copy the token immediately, as it will not be visible again later.
+5. Navigate to the [secrets settings](https://github.com/DeepRank/deeprank2/settings/secrets/actions).
+6. Edit the `GH_RELEASE` key giving your access token as the new value.
+
+### Manually create a release:
+
+0. Make sure you have all required developers tools installed `pip install -e .'[test]'`.
+1. Create a `release` branch from `main` and merge the changes into this branch.
+   - Ensure that the `release` branch is ready to be merged back into `main` (e.g., removing the unnecessary files, fix minor bugs if necessary).
+   - Normally speaking, `release` should contain the changes from `dev` (see our [development workflow](#branching-workflow)), although in some cases a hotfix may be implemented from a different branch.
+2. Ensure all tests pass `pytest -v` and that linting (`ruff check`) and formatting (`ruff format --check`) conventions
+   are adhered to.
+3. Bump the version using [bump-my-version](https://github.com/callowayproject/bump-my-version): `bump-my-version bump <level>`
+   where level must be one of the following ([following semantic versioning conventions](https://semver.org/)):
+   - `major`: when API-incompatible changes have been made
+   - `minor`: when functionality was added in a backward compatible manner
+   - `patch`: when backward compatible bug fixes were made
+4. Merge the release branch into `main` and `dev`.
+5. On the [Releases page](https://github.com/DeepRank/deeprank2/releases):
+   1. Click "Draft a new release"
+   2. By convention, use `v<version number>` as both the release title and as a tag for the release.
+   3. Click "Generate release notes" to automatically load release notes from merged PRs since the last release.
+   4. Adjust the notes as required.
+   5. Ensure that "Set as latest release" is checked and that both other boxes are unchecked.
+   6. Hit "Publish release".
+      - This will automatically trigger a [GitHub
+        workflow](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing
+        the package on PyPi.
 
 ## UML
 

@@ -1,0 +1,123 @@
+name: Draft GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_level:
+        description: "Semantic version level increase."
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  draft_release:
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Fail if main branch was selected
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          echo "Cannot release from main branch, please select valid release branch."
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # token with admin priviliges to override brach protection on main and dev
+          token: ${{ secrets.GH_RELEASE }}
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git pull
+
+      - name: Merge changes into main
+        run: |
+          git switch main
+          git merge origin/${{ github.ref_name }} --no-ff --no-commit
+          git commit --no-edit
+
+      - name: Bump version
+        id: bump
+        run: |
+          echo "-- install bump-my-version"
+          python3 -m pip install bump-my-version
+          echo "-- bump the version"
+          bump-my-version bump ${{ github.event.inputs.version_level }} --commit --tag
+          echo "-- push bumped version"
+          echo "RELEASE_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+          git push --tags -f
+          git push
+
+      - name: Create GitHub Release
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.bump.outputs.RELEASE_TAG }} \
+              --title="Release ${{ steps.bump.outputs.RELEASE_TAG }}" \
+              --generate-notes \
+              --draft
+
+  tidy_workspace:
+    # only run if action above succeeds
+    needs: draft_release
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # token with admin priviliges to override brach protection on main and dev
+          token: ${{ secrets.GH_RELEASE }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git pull
+
+      - name: Close PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "-- searching for associated PR"
+          pr_number=$(gh pr list --head ${{ github.ref_name }} --json number --jq '.[0].number')
+          if [ -n "$pr_number" ]; then
+            echo "-- closing PR #$pr_number"
+            gh pr close $pr_number
+          else
+            echo "-- no open pull request found for branch $branch_name"
+          fi
+
+      - name: Merge updates into dev
+        run: |
+          git switch dev
+          git merge origin/main
+          git push
+
+      - name: Delete release branch other than main or dev
+        run: |
+          if [[ ${{ github.ref_name }} != "main" && ${{ github.ref_name }} != "dev" ]]; then
+            echo "-- deleting branch '${{ github.ref_name }}'"
+            git push origin -d ${{ github.ref_name }}
+          else
+            echo "-- branch '${{ github.ref_name }}' will not be deleted from remote"
+          fi
