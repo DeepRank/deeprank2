@@ -27,7 +27,7 @@ target_name = "target1"
 target_value = 1.0
 
 
-@pytest.fixture()
+@pytest.fixture
 def graph() -> Graph:
     """Build a simple graph of two nodes and one edge in between them."""
     # load the structure

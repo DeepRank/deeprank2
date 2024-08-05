@@ -112,7 +112,7 @@ class DeeprankDataset(Dataset):
                         for key in data["features_transform"].values():
                             if key["transform"] is None:
                                 continue
-                            key["transform"] = eval(key["transform"])  # noqa: S307, PGH001
+                            key["transform"] = eval(key["transform"])  # noqa: S307
             except pickle.UnpicklingError as e:
                 msg = "The path provided to `train_source` is not a valid DeepRank2 pre-trained model."
                 raise ValueError(msg) from e
@@ -277,7 +277,7 @@ class DeeprankDataset(Dataset):
                     for operator_string in [">", "<", "==", "<=", ">=", "!="]:
                         operation = operation.replace(operator_string, f"{target_value}" + operator_string)
 
-                    if not eval(operation):  # noqa: S307, PGH001
+                    if not eval(operation):  # noqa: S307
                         return False
 
                 elif target_condition is not None:
