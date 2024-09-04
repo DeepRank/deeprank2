@@ -50,15 +50,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Output verbose logs
-          build-args: BUILDKIT_INLINE_CACHE=1
-          outputs: type=docker,dest=/tmp/myimage.tar
-
-      - name: Output Docker build logs
-        run: |
-          echo "Docker build logs"
-          docker load < /tmp/myimage.tar
-          docker history ${{ steps.meta.outputs.tags }}
 
       # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)."
       - name: Generate artifact attestation
