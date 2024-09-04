@@ -26,6 +26,7 @@ The physico-chemical and geometrical features are then computed and assigned to 
 
 Main features:
 
+- Edit something to open a PR
 - Predefined atom-level and residue-level feature types
   - e.g. atom/residue type, charge, size, potential energy
   - All features' documentation is available [here](https://deeprank2.readthedocs.io/en/latest/features.html)
