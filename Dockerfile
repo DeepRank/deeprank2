@@ -22,11 +22,7 @@ RUN \
   echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate base" >> /etc/skel/.bashrc && \
   echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate base" >> ~/.bashrc
 
-RUN ls -la /home
-
 ADD ./env/deeprank2.yml /home/deeprank2/
-
-RUN ls -la /home/deeprank2
 
 RUN \
   ## Create the environment and install the dependencies
