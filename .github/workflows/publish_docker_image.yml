@@ -65,7 +65,7 @@ jobs:
     with:
       ghcr_user: ${{github.actor}}
       base_image_name: ghcr.io/DeepRank/deeprank2
-      image_tag: ${{needs.release_tag.outputs.tag}}
+      image_tag: latest
       dockerfile: ./Dockerfile
       docker_context: .
     secrets:
