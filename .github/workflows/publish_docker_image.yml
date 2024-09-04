@@ -64,7 +64,7 @@ jobs:
     uses: ./.github/workflows/_ghcr.yml
     with:
       ghcr_user: ${{github.actor}}
-      base_image_name: ghcr.io/deeprank/deeprank2
+      base_image_name: ghcr.io/DeepRank/deeprank2
       image_tag: ${{needs.release_tag.outputs.tag}}
       dockerfile: ./Dockerfile
       docker_context: .
