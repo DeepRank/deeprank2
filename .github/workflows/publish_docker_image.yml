@@ -56,9 +56,9 @@ jobs:
         run: |
           echo skipped=${{needs.release_tag.outputs.skipped}}
           echo tag=${{needs.release_tag.outputs.tag}}
-  auth:
-    # it needs to be checked on string value
-    if: needs.release_tag.outputs.skipped == 'false'
+  docker_image_deeprank2:
+    # # it needs to be checked on string value
+    # if: needs.release_tag.outputs.skipped == 'false'
     needs: release_tag
     name: docker_image_deeprank2
     uses: ./.github/workflows/_ghcr.yml
