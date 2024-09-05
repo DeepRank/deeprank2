@@ -29,29 +29,35 @@ jobs:
           REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
 
-          # Determine the appropriate directory for tests
-          if docker exec test_container [ -d "/app" ]; then
-            TEST_DIR="/app/tests"
-          elif docker exec test_container [ -d "/usr/src/app" ]; then
-            TEST_DIR="/usr/src/app/tests"
-          else
-            TEST_DIR="/tests"
-          fi
+          WORK_DIR="/"
 
-          echo "Using test directory: $TEST_DIR"
+          echo "Using working directory: $WORK_DIR"
 
-          # Copy tests to the container
-          docker cp tests test_container:$TEST_DIR
+          # Copy entire project directory to the container
+          docker cp . test_container:$WORK_DIR
 
           # Verify the tests were copied correctly
-          echo "Contents of $TEST_DIR:"
-          docker exec test_container ls -la $TEST_DIR
-          echo "Contents of $TEST_DIR/data/:"
-          docker exec test_container ls -la $TEST_DIR/data || echo "data directory not found"
+          echo "Contents of $WORK_DIR/tests:"
+          docker exec test_container ls -la $WORK_DIR/tests
+          echo "Contents of $WORK_DIR/tests/data:"
+          docker exec test_container ls -la $WORK_DIR/tests/data
 
-          # Install pytest and run tests
+          # Print debugging information
+          echo "Current working directory:"
+          docker exec -w $WORK_DIR test_container pwd
+          echo "Full path of test directory:"
+          docker exec test_container readlink -f $WORK_DIR/tests
+
+          # Print content of a test file
+          echo "Content of a test file that accesses data (first 20 lines):"
+          docker exec test_container head -n 20 $WORK_DIR/tests/test_*.py
+
+          # Install pytest
           docker exec test_container pip install pytest
-          docker exec -e PYTHONPATH=$TEST_DIR test_container pytest $TEST_DIR -v
+
+          # Run pytest from the working directory
+          echo "Running pytest from the working directory:"
+          docker exec -w $WORK_DIR test_container pytest tests -v
 
           # Clean up
           docker stop test_container
