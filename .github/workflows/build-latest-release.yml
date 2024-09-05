@@ -3,7 +3,7 @@ name: build (latest release)
 # Only trigger, when the release workflow succeeded
 on:
   workflow_run:
-    workflows: ["Build and upload to PyPI"]
+    workflows: ["Build and upload to PyPI and ghcr.io"]
     types:
       - completed
 
