@@ -30,28 +30,33 @@ jobs:
           REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
 
-          TEST_DIR="/tests"
+          PROJECT_DIR="/app"
+          TEST_DIR="$PROJECT_DIR/tests"
+          echo "Project directory: $PROJECT_DIR"
           echo "Tests directory: $TEST_DIR"
 
-          # Copy only the tests folder to the container
+          # Create project directory and copy tests folder
+          docker exec test_container mkdir -p $PROJECT_DIR
           docker cp tests test_container:$TEST_DIR
 
           # Verify the directory structure
+          echo "Contents of project directory:"
+          docker exec test_container ls -la $PROJECT_DIR
           echo "Contents of tests directory:"
           docker exec test_container ls -la $TEST_DIR
-          echo "Contents of tests/data directory:"
-          docker exec test_container ls -la $TEST_DIR/data
 
-          # Print content of a test file
-          echo "Content of a test file (first 20 lines):"
-          docker exec test_container head -n 20 $TEST_DIR/test_*.py | head -n 20
+          # List test files and print content of the first one
+          echo "List of test files:"
+          docker exec test_container find $TEST_DIR -name "test_*.py"
+          echo "Content of the first test file (first 20 lines):"
+          docker exec test_container bash -c "head -n 20 \$(find $TEST_DIR -name 'test_*.py' | head -n 1)"
 
           # Install pytest
           docker exec test_container pip install pytest
 
-          # Run pytest
-          echo "Running pytest in the tests directory:"
-          docker exec -w $TEST_DIR test_container pytest -v
+          # Run pytest from the project directory
+          echo "Running pytest from the project directory:"
+          docker exec -w $PROJECT_DIR test_container python -m pytest tests -v
 
           # Clean up
           docker stop test_container
