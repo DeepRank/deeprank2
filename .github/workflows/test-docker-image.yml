@@ -1,9 +1,11 @@
-name: test latest docker image (dev) # TODO: change
+name: test latest docker image
 
+# Only trigger, when the release workflow succeeded
 on:
-  push:
-    branches:
-      - 529_add_docker_testing_action_gcroci2 # TODO: change
+  workflow_run:
+    workflows: ["Build and upload to PyPI and ghcr.io"]
+    types:
+      - completed
 
 jobs:
   test_latest_docker_image:
@@ -44,12 +46,6 @@ jobs:
           docker exec test_container ls -la $PROJECT_DIR
           echo "Contents of tests directory:"
           docker exec test_container ls -la $TEST_DIR
-
-          # List test files and print content of the first one
-          echo "List of test files:"
-          docker exec test_container find $TEST_DIR -name "test_*.py"
-          echo "Content of the first test file (first 20 lines):"
-          docker exec test_container bash -c "head -n 20 \$(find $TEST_DIR -name 'test_*.py' | head -n 1)"
 
           # Install pytest
           docker exec test_container pip install pytest
