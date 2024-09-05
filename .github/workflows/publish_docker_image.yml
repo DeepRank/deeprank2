@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.VERSION }}
+      repo_lowercase: ${{ steps.repo_lowercase.outputs.REPO_LOWERCASE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,13 +32,19 @@ jobs:
           VERSION=$(grep '^version =' pyproject.toml | awk -F '"' '{print $2}')
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Convert repository name to lowercase
+        id: repo_lowercase
+        run: |
+          REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "REPO_LOWERCASE=$REPO_LOWERCASE" >> $GITHUB_OUTPUT
+
   docker_image_deeprank2:
     needs: read_version
     name: docker_image_deeprank2
     uses: ./.github/workflows/_ghcr.yml
     with:
       ghcr_user: ${{github.actor}}
-      base_image_name: ghcr.io/${{ github.repository }}
+      base_image_name: ghcr.io/${{ needs.read_version.outputs.repo_lowercase }}
       image_tag: ${{ needs.read_version.outputs.version }}
       dockerfile: ./Dockerfile
       docker_context: .
