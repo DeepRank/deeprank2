@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/install-python-and-package
+      - uses: ./.github/actions/install-python-and-package.yml
         with:
           python-version: ${{ matrix.python-version }}
           extras-require: test, publishing
