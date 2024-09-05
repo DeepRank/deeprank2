@@ -16,56 +16,29 @@ on:
     branches: ["529_add_docker_testing_action_gcroci2"]
 
 jobs:
-  release_tag:
-    name: conventional changelog
-    runs-on: ubuntu-22.04
+  read_version:
+    name: Read version from TOML
+    runs-on: ubuntu-latest
     outputs:
-      changelog: ${{steps.changelog.outputs.clean_changelog}}
-      tag: ${{steps.changelog.outputs.tag}}
-      skipped: ${{steps.changelog.outputs.skipped}}
+      version: ${{ steps.get_version.outputs.VERSION }}
     steps:
-      - name: checkout all history
-        # https://github.com/actions/checkout
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          # checkout whole history
-          fetch-depth: 0
 
-      - name: calculate new version and create changelog content
-        id: changelog
-        # https://github.com/TriPSs/conventional-changelog-action
-        uses: TriPSs/conventional-changelog-action@v5
-        with:
-          # you can also create separate token to trace action
-          github-token: "${{secrets.GITHUB_TOKEN}}"
-          # do not create changelog file, the content is used at next step for relase body
-          output-file: false
-          # do not create additional commit, just tag current commit with the version
-          skip-commit: true
-          # do not pull - we already checked out the selection we want to use for versioning in previous step
-          skip-git-pull: true
-          # skip tag push - it will not push but it will tag
-          git-push: false
-
-  log_release_tag:
-    needs: release_tag
-    name: log version output
-    runs-on: ubuntu-22.04
-    steps:
-      - name: info
+      - name: Read version from TOML
+        id: get_version
         run: |
-          echo skipped=${{needs.release_tag.outputs.skipped}}
-          echo tag=${{needs.release_tag.outputs.tag}}
+          VERSION=$(grep '^version =' pyproject.toml | awk -F '"' '{print $2}')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
   docker_image_deeprank2:
-    # # it needs to be checked on string value
-    # if: needs.release_tag.outputs.skipped == 'false'
-    needs: release_tag
+    needs: read_version
     name: docker_image_deeprank2
     uses: ./.github/workflows/_ghcr.yml
     with:
       ghcr_user: ${{github.actor}}
-      base_image_name: ghcr.io/deeprank/deeprank2
-      image_tag: latest
+      base_image_name: ghcr.io/${{ github.repository }}
+      image_tag: ${{ needs.read_version.outputs.version }}
       dockerfile: ./Dockerfile
       docker_context: .
     secrets:
