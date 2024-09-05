@@ -26,11 +26,6 @@ jobs:
 
       - name: Run tests in Docker container
         run: |
-          REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
-
-          WORK_DIR="/"
-          echo "Using working directory: $WORK_DIR"
 
           REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
