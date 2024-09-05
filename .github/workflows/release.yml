@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest"]
+        os: ["ubuntu-22.04"]
         python-version: ["3.10"]
 
     # https://github.com/marketplace/actions/setup-miniconda#use-a-default-shell
@@ -37,7 +37,7 @@ jobs:
 
   upload_test_pypi:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/download-artifact@v3
@@ -52,7 +52,7 @@ jobs:
 
   upload_pypi:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v3
@@ -67,7 +67,7 @@ jobs:
   read_version:
     needs: upload_pypi
     name: Read version from TOML
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       version: ${{ steps.get_version.outputs.VERSION }}
       repo_lowercase: ${{ steps.repo_lowercase.outputs.REPO_LOWERCASE }}
