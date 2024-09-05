@@ -29,10 +29,6 @@ jobs:
           REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
 
-          # Inspect container filesystem
-          echo "Container filesystem structure before copying tests:"
-          docker exec test_container ls /
-
           # Determine the appropriate directory for tests
           if docker exec test_container [ -d "/app" ]; then
             TEST_DIR="/app/tests"
@@ -45,14 +41,17 @@ jobs:
           echo "Using test directory: $TEST_DIR"
 
           # Copy tests to the container
-          docker cp -r tests/. test_container:$TEST_DIR
+          docker cp tests test_container:$TEST_DIR
 
-          echo "Container filesystem structure after copying tests:"
-          docker exec test_container ls $TEST_DIR
+          # Verify the tests were copied correctly
+          echo "Contents of $TEST_DIR:"
+          docker exec test_container ls -la $TEST_DIR
+          echo "Contents of $TEST_DIR/data/:"
+          docker exec test_container ls -la $TEST_DIR/data || echo "data directory not found"
 
           # Install pytest and run tests
           docker exec test_container pip install pytest
-          docker exec -e PYTHONPATH=$TEST_DIR test_container pytest $TEST_DIR
+          docker exec -e PYTHONPATH=$TEST_DIR test_container pytest $TEST_DIR -v
 
           # Clean up
           docker stop test_container
