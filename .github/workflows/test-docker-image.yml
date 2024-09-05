@@ -1,9 +1,9 @@
-name: Test Latest Docker Image (Dev)
+name: test latest docker image (dev) # TODO: change
 
 on:
   push:
     branches:
-      - 529_add_docker_testing_action_gcroci2
+      - 529_add_docker_testing_action_gcroci2 # TODO: change
 
 jobs:
   test_latest_docker_image:
@@ -28,9 +28,29 @@ jobs:
         run: |
           REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
-          docker cp tests test_container:/app/tests
+          # Inspect container filesystem
+          echo "Container filesystem structure:"
+          docker exec test_container ls -R /
+
+          # Determine the appropriate directory for tests
+          if docker exec test_container [ -d "/app" ]; then
+            TEST_DIR="/app/tests"
+          elif docker exec test_container [ -d "/usr/src/app" ]; then
+            TEST_DIR="/usr/src/app/tests"
+          else
+            TEST_DIR="/tests"
+          fi
+
+          echo "Using test directory: $TEST_DIR"
+
+          # Copy tests to the container
+          docker cp tests test_container:$TEST_DIR
+
+          # Install pytest and run tests
           docker exec test_container pip install pytest
-          docker exec test_container pytest /app/tests
+          docker exec -e PYTHONPATH=$TEST_DIR test_container pytest $TEST_DIR
+
+          # Clean up
           docker stop test_container
           docker rm test_container
 
