@@ -61,7 +61,7 @@ jobs:
     # if: needs.release_tag.outputs.skipped == 'false'
     needs: release_tag
     name: docker_image_deeprank2
-    uses: ./.github/workflows/_ghcr.yml
+    uses: ./.github/actions/ghcr.yml
     with:
       ghcr_user: ${{github.actor}}
       base_image_name: ghcr.io/deeprank/deeprank2
