@@ -32,36 +32,31 @@ jobs:
           WORK_DIR="/"
           echo "Using working directory: $WORK_DIR"
 
-          # Copy entire project directory to the container
-          docker cp . test_container:$WORK_DIR
+          REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
+
+          TEST_DIR="/tests"
+          echo "Tests directory: $TEST_DIR"
+
+          # Copy only the tests folder to the container
+          docker cp tests test_container:$TEST_DIR
 
           # Verify the directory structure
-          echo "Contents of root directory:"
-          docker exec test_container ls -la $WORK_DIR
-          echo "Contents of tests directory (if it exists):"
-          docker exec test_container ls -la $WORK_DIR/tests || echo "No tests directory found"
-          echo "Contents of data directory (if it exists):"
-          docker exec test_container ls -la $WORK_DIR/data || echo "No data directory found"
+          echo "Contents of tests directory:"
+          docker exec test_container ls -la $TEST_DIR
+          echo "Contents of tests/data directory:"
+          docker exec test_container ls -la $TEST_DIR/data
 
-          # Print debugging information
-          echo "Current working directory:"
-          docker exec -w $WORK_DIR test_container pwd
-
-          # Find and print content of a test file
+          # Print content of a test file
           echo "Content of a test file (first 20 lines):"
-          docker exec test_container find $WORK_DIR -name "test_*.py" -type f | head -n 1 | xargs -I {} docker exec test_container head -n 20 {}
+          docker exec test_container head -n 20 $TEST_DIR/test_*.py | head -n 20
 
           # Install pytest
           docker exec test_container pip install pytest
 
-          # Find the directory containing test files and run pytest
-          TEST_DIR=$(docker exec test_container find $WORK_DIR -name "test_*.py" -type f | head -n 1 | xargs dirname)
-          if [ -n "$TEST_DIR" ]; then
-            echo "Running pytest in directory: $TEST_DIR"
-            docker exec -w $TEST_DIR test_container pytest -v
-          else
-            echo "No test files found"
-          fi
+          # Run pytest
+          echo "Running pytest in the tests directory:"
+          docker exec -w $TEST_DIR test_container pytest -v
 
           # Clean up
           docker stop test_container
