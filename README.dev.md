@@ -81,7 +81,7 @@ During the development cycle, three main supporting branches are used:
 
 ### Automated release workflow:
 
-1. **IMP0RTANT:** Create a PR pointing to `main` for the release branch and make sure that there are no conflicts and that all checks pass.
+1. **IMP0RTANT:** Create a PR for the release branch, targeting the `main` branch. Ensure there are no conflicts and that all checks pass successfully. Release branches are typically: traditional [release branches](https://nvie.com/posts/a-successful-git-branching-model/#release-branches) (these are created from the `dev` branch), or [hotfix branches](https://nvie.com/posts/a-successful-git-branching-model/#hotfix-branches) (these are created directly from the `main` branch).
    - if everything goes well, this PR will automatically be closed after the draft release is created.
 2. Navigate to [Draft Github Release](https://github.com/DeepRank/deeprank2/actions/workflows/release_github.yml)
    on the [Actions](https://github.com/DeepRank/deeprank2/actions) tab.
