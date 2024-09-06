@@ -81,28 +81,28 @@ During the development cycle, three main supporting branches are used:
 
 ### Automated release workflow:
 
-0. **IMP0RTANT:** Create a PR pointing to `main` for the release branch (usually `dev`) and make sure that there are no conflicts and that all checks pass!
+1. **IMP0RTANT:** Create a PR pointing to `main` for the release branch and make sure that there are no conflicts and that all checks pass.
    - if everything goes well, this PR will automatically be closed after the draft release is created.
-1. Navigate to [Draft Github Release](https://github.com/DeepRank/deeprank2/actions/workflows/release_github.yml)
+2. Navigate to [Draft Github Release](https://github.com/DeepRank/deeprank2/actions/workflows/release_github.yml)
    on the [Actions](https://github.com/DeepRank/deeprank2/actions) tab.
-2. On the right hand side, you can select the level increase ("patch", "minor", or "major") and which branch to release from.
+3. On the right hand side, you can select the level increase ("patch", "minor", or "major") and which branch to release from.
    - [Follow semantic versioning conventions](https://semver.org/) to chose the level increase:
      - `patch`: when backward compatible bug fixes were made
      - `minor`: when functionality was added in a backward compatible manner
      - `major`: when API-incompatible changes have been made
    - Note that you cannot release from `main` (the default shown) using the automated workflow. To release from `main`
      directly, you must [create the release manually](#manually-create-a-release).
-3. Visit [Actions](https://github.com/DeepRank/deeprank2/actions) tab to check whether everything went as expected.
+4. Visit [Actions](https://github.com/DeepRank/deeprank2/actions) tab to check whether everything went as expected.
    - NOTE: there are two separate jobs in the workflow: "draft_release" and "tidy_workspace". The first creates the draft release on github, while the second merges changes into `dev` and closes the PR.
-     - If "draft_release" fails, then there are likely merge conflicts with `main` that need to be resolved first. No release draft is created and the "tidy_workspace" job does not run. If this action is succesfull, then the release branch (including a version bump) have been merged into the remote `main` branch.
+     - If "draft_release" fails, then there are likely merge conflicts with `main` that need to be resolved first. No release draft is created and the "tidy_workspace" job does not run. Coversely, if this action is succesfull, then the release branch (including a version bump) have been merged into the remote `main` branch.
      - If "draft_release" is succesfull but "tidy_workspace" fails, then there are likely merge conflicts with `dev` that are not conflicts with `main`. In this case, the draft release is created (and changes were merged into the remote `main`). Conflicts with `dev` need to be resolved with `dev` by the user (note that this should never happen if the release branch was `dev`, as the only change will be the version bump).
-     - If both jobs succeed, then the draft release is created and the changes are merged into both remote `main` and `dev` without any problems and the associated PR is closed. Also, if the release branch is different from `dev`, then that branch will be deleted from the remote repository.
-4. Navigate to the [Releases](https://github.com/DeepRank/deeprank2/releases) tab and click on the newest draft
+     - If both jobs succeed, then the draft release is created and the changes are merged into both remote `main` and `dev` without any problems and the associated PR is closed. Also, the release branch is deleted from the remote repository.
+5. Navigate to the [Releases](https://github.com/DeepRank/deeprank2/releases) tab and click on the newest draft
    release that was just generated.
-5. Click on the edit (pencil) icon on the right side of the draft release.
-6. Check/adapt the release notes and make sure that everything is as expected.
-7. Check that "Set as the latest release is checked".
-8. Click green "Publish Release" button to convert the draft to a published release on GitHub.
+6. Click on the edit (pencil) icon on the right side of the draft release.
+7. Check/adapt the release notes and make sure that everything is as expected.
+8. Check that "Set as the latest release is checked".
+9. Click green "Publish Release" button to convert the draft to a published release on GitHub.
    - This will automatically trigger [another GitHub workflow](https://github.com/DeepRank/deeprank2/actions/workflows/release.yml) that will take care of publishing the package on PyPi.
 
 #### Updating the token:
