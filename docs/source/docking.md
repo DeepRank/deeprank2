@@ -1,4 +1,4 @@
-# Docking scores
+# Docking Scores
 
 The following scores have been developed for evaluating the quality of the protein-protein models produced by computational methods (docking models), and all of them compare the structural similarity between the decoys (computationally generated structures) and the experimentally solved native structures. To calculate these measures, the interface between the two interacting protein molecules is defined as any pair of heavy atoms from the two molecules within 5Å of each other.
 
@@ -11,7 +11,7 @@ The following scores have been developed for evaluating the quality of the prote
 
 See https://onlinelibrary.wiley.com/doi/abs/10.1002/prot.10393 for more details about `capri_class`, `lrmsd`, `irmsd`, and `fnat`. See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0161879 for more details about `dockq`.
 
-## Compute and add docking scores
+## Compute and Add Docking Scores
 
 The following code snippet shows an example of how to use deeprank2 to compute the docking scores for a given docking model, and how to add one of the scores (e.g., `dockq`) as a target to the already processed data.
 
