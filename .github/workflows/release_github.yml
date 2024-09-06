@@ -32,6 +32,18 @@ jobs:
           echo "Releasing from main or dev branch is not permitted, please select a valid release branch."
           exit 1
 
+      - name: Check GitHub Token Validity
+        run: |
+          echo "-- Validating GitHub Token"
+          status_code=$(curl -o /dev/null -s -w "%{http_code}" -H "Authorization: token ${{ secrets.GH_RELEASE }}" https://api.github.com/user)
+          if [ "$status_code" -ne 200 ]; then
+            echo "Error: GitHub token is invalid or expired. Please update your token in secrets."
+            echo "Instructions can be found at: https://github.com/DeepRank/deeprank2/blob/main/README.dev.md#updating-the-token"
+            exit 1
+          else
+            echo "GitHub token is valid."
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
