@@ -26,10 +26,16 @@ jobs:
       fail-fast: true
 
     steps:
-      - name: Ensure that permitted release branch was selected
-        if: ${{ github.ref_name == 'main' }} || ${{ github.ref_name == 'dev' }}
+      - name: Display selection
         run: |
-          echo "Releasing from main or dev branch is not permitted, please select a valid release branch."
+          echo "Branch selected: '${{ github.ref_name }}'"
+          echo "Release level selected: '${{ github.event.inputs.version_level }}'"
+
+      - name: Ensure that permitted release branch was selected
+        if: ${{ github.ref_name == 'main' || github.ref_name == 'dev' }}
+        run: |
+          echo "Branch selected: '${{ github.ref_name }}'"
+          echo "Releasing from main or dev branch is not permitted, please select a different release branch."
           exit 1
 
       - name: Check GitHub Token Validity
@@ -129,9 +135,5 @@ jobs:
 
       - name: Delete release branch other than main or dev
         run: |
-          if [[ ${{ github.ref_name }} != "main" && ${{ github.ref_name }} != "dev" ]]; then
-            echo "-- deleting branch '${{ github.ref_name }}'"
-            git push origin -d ${{ github.ref_name }}
-          else
-            echo "-- branch '${{ github.ref_name }}' will not be deleted from remote"
-          fi
+          echo "-- deleting branch '${{ github.ref_name }}'"
+          git push origin -d ${{ github.ref_name }}
