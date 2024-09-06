@@ -54,7 +54,7 @@ jobs:
       - name: Download the data for the tutorials
         shell: bash -l {0}
         run: |
-          wget https://zenodo.org/records/8349335/files/data_raw.zip
+          wget https://zenodo.org/records/13709906/files/data_raw.zip
           unzip data_raw.zip -d data_raw
           mv data_raw tutorials
 
