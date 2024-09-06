@@ -88,7 +88,7 @@ if not os.path.exists(os.path.join(processed_data_path, "atomic")):
 
 
 def get_pdb_files_and_target_data(data_path: str) -> tuple[list[str], list, list, list, list]:
-    csv_data = pd.read_csv(os.path.join(data_path, "srv_target_values.csv"))
+    csv_data = pd.read_csv(os.path.join(data_path, "srv_target_values_curated.csv"))
     # before running this script change .ent to .pdb
     pdb_files = glob.glob(os.path.join(data_path, "pdb", "*.pdb"))
     pdb_files.sort()
