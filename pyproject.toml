@@ -148,15 +148,3 @@ isort.known-first-party = ["deeprank2"]
 ]
 "docs/*" = ["ALL"]
 "tests/perf/*" = ["T201"] # Use of print statements
-
-[tool.bumpversion]
-current_version = "3.0.4"
-
-[[tool.bumpversion.files]]
-filename = "pyproject.toml"
-
-[[tool.bumpversion.files]]
-filename = "CITATION.cff"
-
-[[tool.bumpversion.files]]
-filename = "deeprank2/__init__.py"
