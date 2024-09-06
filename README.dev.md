@@ -81,7 +81,7 @@ During the development cycle, three main supporting branches are used:
 
 ### Automated release workflow:
 
-1. **IMP0RTANT:** Create a PR pointing to `main` for the release branch and make sure that there are no conflicts and that all checks pass.
+1. **IMP0RTANT:** Create a PR for the release branch, targeting the `main` branch. Ensure there are no conflicts and that all checks pass successfully. Release branches are typically: traditional [release branches](https://nvie.com/posts/a-successful-git-branching-model/#release-branches) (these are created from the `dev` branch), or [hotfix branches](https://nvie.com/posts/a-successful-git-branching-model/#hotfix-branches) (these are created directly from the `main` branch).
    - if everything goes well, this PR will automatically be closed after the draft release is created.
 2. Navigate to [Draft Github Release](https://github.com/DeepRank/deeprank2/actions/workflows/release_github.yml)
    on the [Actions](https://github.com/DeepRank/deeprank2/actions) tab.
@@ -95,7 +95,7 @@ During the development cycle, three main supporting branches are used:
 4. Visit [Actions](https://github.com/DeepRank/deeprank2/actions) tab to check whether everything went as expected.
    - NOTE: there are two separate jobs in the workflow: "draft_release" and "tidy_workspace". The first creates the draft release on github, while the second merges changes into `dev` and closes the PR.
      - If "draft_release" fails, then there are likely merge conflicts with `main` that need to be resolved first. No release draft is created and the "tidy_workspace" job does not run. Coversely, if this action is succesfull, then the release branch (including a version bump) have been merged into the remote `main` branch.
-     - If "draft_release" is succesfull but "tidy_workspace" fails, then there are likely merge conflicts with `dev` that are not conflicts with `main`. In this case, the draft release is created (and changes were merged into the remote `main`). Conflicts with `dev` need to be resolved with `dev` by the user (note that this should never happen if the release branch was `dev`, as the only change will be the version bump).
+     - If "draft_release" is succesfull but "tidy_workspace" fails, then there are likely merge conflicts with `dev` that are not conflicts with `main`. In this case, the draft release is created (and changes were merged into the remote `main`). Conflicts with `dev` need to be resolved with `dev` by the user.
      - If both jobs succeed, then the draft release is created and the changes are merged into both remote `main` and `dev` without any problems and the associated PR is closed. Also, the release branch is deleted from the remote repository.
 5. Navigate to the [Releases](https://github.com/DeepRank/deeprank2/releases) tab and click on the newest draft
    release that was just generated.
