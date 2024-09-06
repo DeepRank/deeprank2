@@ -24,10 +24,10 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      - name: Fail if main branch was selected
-        if: ${{ github.ref_name == 'main' }}
+      - name: Ensure that permitted release branch was selected
+        if: ${{ github.ref_name == 'main' }} || ${{ github.ref_name == 'dev' }}
         run: |
-          echo "Cannot release from main branch, please select valid release branch."
+          echo "Releasing from main or dev branch is not permitted, please select a valid release branch."
           exit 1
 
       - name: Checkout repository
