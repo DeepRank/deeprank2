@@ -121,11 +121,8 @@ NOTE: the current token (associated to @DaniBodor) allowing to bypass branch pro
 ### Manually create a release:
 
 0. Make sure you have all required developers tools installed `pip install -e .'[test]'`.
-1. Create a `release` branch from `main` and merge the changes into this branch.
-   - Ensure that the `release` branch is ready to be merged back into `main` (e.g., removing the unnecessary files, fix minor bugs if necessary).
-   - Normally speaking, `release` should contain the changes from `dev` (see our [development workflow](#branching-workflow)), although in some cases a hotfix may be implemented from a different branch.
-2. Ensure all tests pass `pytest -v` and that linting (`ruff check`) and formatting (`ruff format --check`) conventions
-   are adhered to.
+1. Create a `release-` branch from `main` (if there has been an hotfix) or `dev` (regular new production release).
+2. Prepare the branch for the release (e.g., removing the unnecessary dev files, fix minor bugs if necessary). Do this by ensuring all tests pass `pytest -v` and that linting (`ruff check`) and formatting (`ruff format --check`) conventions are adhered to.
 3. Bump the version using [bump-my-version](https://github.com/callowayproject/bump-my-version): `bump-my-version bump <level>`
    where level must be one of the following ([following semantic versioning conventions](https://semver.org/)):
    - `major`: when API-incompatible changes have been made
