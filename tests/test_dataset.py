@@ -1201,7 +1201,7 @@ class TestDataSet(unittest.TestCase):
             for key in data["features_transform"].values():
                 if key["transform"] is None:
                     continue
-                key["transform"] = eval(key["transform"])  # noqa: S307, PGH001
+                key["transform"] = eval(key["transform"])  # noqa: S307
 
         dataset_test_vars = vars(dataset_test)
         for param in dataset_test.inherited_params:
