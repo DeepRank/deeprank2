@@ -121,7 +121,7 @@ docker run -p 8888:8888 deeprank2
 
 #### Removing the Docker Image
 
-If you no longer need the Docker image (which can be quite large), you can remove it after stopping the container. Follow the [container stop instructions](https://docs.docker.com/engine/reference/commandline/stop/) and [remove the image](https://docs.docker.com/engine/reference/commandline/image_rm/). For more general information on Docker, refer to the [official Docker documentation](https://docs.docker.com/get-started/).
+If you no longer need the Docker image (which can be quite large), you can remove it after stopping the container. Follow the [container stop](https://docs.docker.com/engine/reference/commandline/stop/) and [remove the image](https://docs.docker.com/engine/reference/commandline/image_rm/) instructions. For more general information on Docker, refer to the [Docker documentation](https://docs.docker.com/get-started/) directly.
 
 ### Local/remote Installation
 

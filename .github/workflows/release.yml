@@ -64,7 +64,7 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN_DEEPRANK2 }}
 
-  read_version:
+  read_only_version:
     needs: upload_pypi
     name: Read version from TOML
     runs-on: ubuntu-22.04
@@ -88,13 +88,13 @@ jobs:
           echo "REPO_LOWERCASE=$REPO_LOWERCASE" >> $GITHUB_OUTPUT
 
   upload_docker_image:
-    needs: read_version
+    needs: read_only_version
     name: Upload Docker image to ghcr.io
     uses: ./.github/workflows/_ghcr.yml
     with:
       ghcr_user: ${{github.actor}}
-      base_image_name: ghcr.io/${{ needs.read_version.outputs.repo_lowercase }}
-      image_tag: ${{ needs.read_version.outputs.version }}
+      base_image_name: ghcr.io/${{ needs.read_only_version.outputs.repo_lowercase }}
+      image_tag: ${{ needs.read_only_version.outputs.version }}
       dockerfile: ./Dockerfile
       docker_context: .
     secrets:
