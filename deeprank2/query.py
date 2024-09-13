@@ -22,7 +22,7 @@ import pdb2sql
 import deeprank2.features
 from deeprank2.domain.aminoacidlist import convert_aa_nomenclature
 from deeprank2.features import components, conservation, contact
-from deeprank2.molstruct.residue import Residue, SingleResidueVariant
+from deeprank2.molstruct.residue import SingleResidueVariant
 from deeprank2.utils.buildgraph import get_contact_atoms, get_structure, get_surrounding_residues
 from deeprank2.utils.graph import Graph
 from deeprank2.utils.grid import Augmentation, GridSettings, MapMethod
@@ -265,12 +265,11 @@ class SingleResidueVariantQuery(Query):
         structure = self._load_structure()
 
         # find the variant residue and its surroundings
-        variant_residue: Residue = None
         for residue in structure.get_chain(self.variant_chain_id).residues:
             if residue.number == self.variant_residue_number and residue.insertion_code == self.insertion_code:
                 variant_residue = residue
                 break
-        if variant_residue is None:
+        else:  # if break is not reached
             msg = f"Residue not found in {self.pdb_path}: {self.variant_chain_id} {self.residue_id}"
             raise ValueError(msg)
         self.variant = SingleResidueVariant(variant_residue, self.variant_amino_acid)
@@ -354,19 +353,12 @@ class ProteinProteinInterfaceQuery(Query):
             raise ValueError(msg)
 
         # build the graph
-        if self.resolution == "atom":
-            graph = Graph.build_graph(
-                contact_atoms,
-                self.get_query_id(),
-                self.max_edge_length,
-            )
-        elif self.resolution == "residue":
-            residues_selected = list({atom.residue for atom in contact_atoms})
-            graph = Graph.build_graph(
-                residues_selected,
-                self.get_query_id(),
-                self.max_edge_length,
-            )
+        nodes = contact_atoms if self.resolution == "atom" else list({atom.residue for atom in contact_atoms})
+        graph = Graph.build_graph(
+            nodes=nodes,
+            graph_id=self.get_query_id(),
+            max_edge_length=self.max_edge_length,
+        )
 
         graph.center = np.mean([atom.position for atom in contact_atoms], axis=0)
         structure = contact_atoms[0].residue.chain.model
@@ -453,7 +445,7 @@ class QueryCollection:
     def __len__(self) -> int:
         return len(self._queries)
 
-    def _process_one_query(self, query: Query) -> None:
+    def _process_one_query(self, query: Query, log_error_traceback: bool = False) -> None:
         """Only one process may access an hdf5 file at a time."""
         try:
             output_path = f"{self._prefix}-{os.getpid()}.hdf5"
@@ -479,10 +471,12 @@ class QueryCollection:
 
         except (ValueError, AttributeError, KeyError, TimeoutError) as e:
             _log.warning(
-                f"\nGraph/Query with ID {query.get_query_id()} ran into an Exception ({e.__class__.__name__}: {e}),"
-                " and it has not been written to the hdf5 file. More details below:",
+                f"Graph/Query with ID {query.get_query_id()} ran into an Exception and was not written to the hdf5 file.\n"
+                f"Exception found: {e.__class__.__name__}: {e}.\n"
+                "You may proceed with your analysis, but this query will be ignored.\n",
             )
-            _log.exception(e)
+            if log_error_traceback:
+                _log.exception(f"----Full error traceback:----\n{e}")
 
     def process(
         self,
@@ -493,6 +487,7 @@ class QueryCollection:
         grid_settings: GridSettings | None = None,
         grid_map_method: MapMethod | None = None,
         grid_augmentation_count: int = 0,
+        log_error_traceback: bool = False,
     ) -> list[str]:
         """Render queries into graphs (and optionally grids).
 
@@ -510,6 +505,8 @@ class QueryCollection:
             grid_settings: If valid together with `grid_map_method`, the grid data will be stored as well. Defaults to None.
             grid_map_method: If valid together with `grid_settings`, the grid data will be stored as well. Defaults to None.
             grid_augmentation_count: Number of grid data augmentations (must be >= 0). Defaults to 0.
+            log_error_traceback: if True, logs full error message in case query fails. Otherwise only the error message is logged.
+                Defaults to false.
 
         Returns:
             The list of paths of the generated HDF5 files.
@@ -536,7 +533,7 @@ class QueryCollection:
         self._grid_augmentation_count = grid_augmentation_count
 
         _log.info(f"Creating pool function to process {len(self)} queries...")
-        pool_function = partial(self._process_one_query)
+        pool_function = partial(self._process_one_query, log_error_traceback=log_error_traceback)
         with Pool(self._cpu_count) as pool:
             _log.info("Starting pooling...\n")
             pool.map(pool_function, self.queries)
@@ -550,6 +547,24 @@ class QueryCollection:
                         f_src.copy(value, f_dest)
                 os.remove(output_path)
             return glob(f"{prefix}.hdf5")
+
+        n_processed = 0
+        for hdf5file in output_paths:
+            with h5py.File(hdf5file, "r") as hdf5:
+                # List of all graphs in hdf5, each graph representing
+                # a SRV and its sourrouding environment
+                n_processed += len(list(hdf5.keys()))
+
+        if not n_processed:
+            msg = "No queries have been processed."
+            raise ValueError(msg)
+        if n_processed != len(self.queries):
+            _log.warning(
+                f"Not all queries have been processed. You can proceed with the analysis of {n_processed}/{len(self.queries)} queries.\n"
+                "Set `log_error_traceback` to True for advanced troubleshooting.",
+            )
+        else:
+            _log.info(f"{n_processed} queries have been processed.")
 
         return output_paths
 

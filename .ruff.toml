@@ -1,0 +1,59 @@
+target-version = "py310"
+output-format = "concise"
+line-length = 159
+
+[lint]
+select = ["ALL"]
+pydocstyle.convention = "google" # docstring settings
+ignore = [
+    # Unrealistic for this code base
+    "PTH",     # flake8-use-pathlib    
+    "N",       # naming conventions
+    "PLR0912", # Too many branches,
+    "PLR0913", # Too many arguments in function definition
+    "D102",    # Missing docstring in public method
+    # Unwanted
+    "FBT",    # Using boolean arguments
+    "ANN101", # Missing type annotation for `self` in method
+    "ANN102", # Missing type annotation for `cls` in classmethod
+    "ANN204", # Missing return type annotation for special (dunder) method
+    "B028",   # No explicit `stacklevel` keyword argument found in warning
+    "S105",   # Possible hardcoded password
+    "S311",   # insecure random generators
+    "PT011",  # pytest-raises-too-broad
+    "SIM108", # Use ternary operator
+    # Unwanted docstrings
+    "D100", # Missing module docstring
+    "D104", # Missing public package docstring
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in `__init__`
+]
+
+# Autofix settings
+fixable = ["ALL"]
+unfixable = ["F401"] # unused imports (should not disappear while editing)
+extend-safe-fixes = [
+    "D415",   # First line should end with a period, question mark, or exclamation point
+    "D300",   # Use triple double quotes `"""`
+    "D200",   # One-line docstring should fit on one line
+    "TCH",    # Format type checking only imports
+    "ISC001", # Implicitly concatenated strings on a single line
+    "EM",     # Exception message variables
+    "RUF013", # Implicit Optional
+    "B006",   # Mutable default argument
+]
+
+isort.known-first-party = ["deeprank2"]
+
+[lint.per-file-ignores]
+"tests/*" = [
+    "S101",    # Use of `assert` detected
+    "PLR2004", # Magic value used in comparison
+    "D101",    # Missing class docstring
+    "D102",    # Missing docstring in public method
+    "D103",    # Missing docstring in public function
+    "SLF001",  # private member access
+]
+"docs/*" = ["ALL"]
+"tests/perf/*" = ["T201"] # Use of print statements
+"*.ipynb" = ["T201", "E402", "D103"]

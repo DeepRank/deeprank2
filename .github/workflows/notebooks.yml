@@ -57,6 +57,8 @@ jobs:
           wget https://zenodo.org/records/13709906/files/data_raw.zip
           unzip data_raw.zip -d data_raw
           mv data_raw tutorials
+          echo listing files in data_raw:
+          ls tutorials/data_raw
 
       - name: Run tutorial notebooks
         run: pytest --nbmake tutorials
