@@ -658,7 +658,7 @@ class TestTrainer(unittest.TestCase):
     def test_train_method_no_train(self) -> None:
         # Graphs data
         test_data_graph = "tests/data/hdf5/test.hdf5"
-        pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
+        pretrained_model_graph = "tests/data/pretrained/testing_graph_model2.pth.tar"
 
         dataset_test = GraphDataset(hdf5_path=test_data_graph, train_source=pretrained_model_graph)
         trainer = Trainer(
@@ -672,7 +672,7 @@ class TestTrainer(unittest.TestCase):
 
         # Grids data
         test_data_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
-        pretrained_model_grid = "tests/data/pretrained/testing_grid_model.pth.tar"
+        pretrained_model_grid = "tests/data/pretrained/testing_grid_model2.pth.tar"
 
         dataset_test = GridDataset(hdf5_path=test_data_grid, train_source=pretrained_model_grid)
         trainer = Trainer(
@@ -687,7 +687,7 @@ class TestTrainer(unittest.TestCase):
     def test_test_method_pretrained_model_on_dataset_with_target(self) -> None:
         # Graphs data
         test_data_graph = "tests/data/hdf5/test.hdf5"
-        pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
+        pretrained_model_graph = "tests/data/pretrained/testing_graph_model2.pth.tar"
 
         dataset_test = GraphDataset(hdf5_path=test_data_graph, train_source=pretrained_model_graph)
 
@@ -705,7 +705,7 @@ class TestTrainer(unittest.TestCase):
 
         # Grids data
         test_data_grid = "tests/data/hdf5/1ATN_ppi.hdf5"
-        pretrained_model_grid = "tests/data/pretrained/testing_grid_model.pth.tar"
+        pretrained_model_grid = "tests/data/pretrained/testing_grid_model2.pth.tar"
 
         dataset_test = GridDataset(hdf5_path=test_data_grid, train_source=pretrained_model_grid)
 
@@ -724,7 +724,7 @@ class TestTrainer(unittest.TestCase):
     def test_test_method_pretrained_model_on_dataset_without_target(self) -> None:
         # Graphs data
         test_data_graph = "tests/data/hdf5/test_no_target.hdf5"
-        pretrained_model_graph = "tests/data/pretrained/testing_graph_model.pth.tar"
+        pretrained_model_graph = "tests/data/pretrained/testing_graph_model2.pth.tar"
 
         dataset_test = GraphDataset(hdf5_path=test_data_graph, train_source=pretrained_model_graph)
 
@@ -744,7 +744,7 @@ class TestTrainer(unittest.TestCase):
 
         # Grids data
         test_data_grid = "tests/data/hdf5/test_no_target.hdf5"
-        pretrained_model_grid = "tests/data/pretrained/testing_grid_model.pth.tar"
+        pretrained_model_grid = "tests/data/pretrained/testing_grid_model2.pth.tar"
 
         dataset_test = GridDataset(hdf5_path=test_data_grid, train_source=pretrained_model_grid)
 
