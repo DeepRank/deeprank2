@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest"]
+        os: ["ubuntu-22.04"]
         python-version: ["3.10"] # ["3.10", "3.11"]
 
     # https://github.com/marketplace/actions/setup-miniconda#use-a-default-shell
@@ -54,9 +54,11 @@ jobs:
       - name: Download the data for the tutorials
         shell: bash -l {0}
         run: |
-          wget https://zenodo.org/records/8349335/files/data_raw.zip
+          wget https://zenodo.org/records/13709906/files/data_raw.zip
           unzip data_raw.zip -d data_raw
           mv data_raw tutorials
+          echo listing files in data_raw:
+          ls tutorials/data_raw
 
       - name: Run tutorial notebooks
         run: pytest --nbmake tutorials

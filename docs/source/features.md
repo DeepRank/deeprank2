@@ -2,7 +2,7 @@
 
 Features implemented in the code-base are defined in `deeprank2.feature` subpackage.
 
-## Custom features
+## Custom Features
 
 Users can add custom features by cloning the repository, creating a new module and placing it in `deeprank2.feature` subpackage. The custom features can then be used by installing the package in editable mode (see [here](https://deeprank2.readthedocs.io/en/latest/installation.html#install-deeprank2) for more details). We strongly recommend submitting a pull request (PR) to merge the new feature into the official repository.
 
@@ -77,15 +77,15 @@ dataset = GraphDataset(
 
 The following is a brief description of the features already implemented in the code-base, for each features' module.
 
-## Default node features
+## Default Node Features
 
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
 
-### Core properties of atoms and residues: `deeprank2.features.components`
+### Core Properties of Atoms and Residues: `deeprank2.features.components`
 
 These features relate to the chemical components (atoms and amino acid residues) of which the graph is composed. Detailed information and descrepancies between sources are described can be found in `deeprank2.domain.aminoacidlist.py`.
 
-#### Atom properties:
+#### Atom Properties:
 
 These features are only used in atomic graphs.
 
@@ -93,7 +93,7 @@ These features are only used in atomic graphs.
 - `atom_charge`: Atomic charge in Coulomb (float). Taken from `deeprank2.domain.forcefield.patch.top`.
 - `pdb_occupancy`: Proportion of structures where the atom was detected at this position (float). In some cases a single atom was detected at different positions, in which case separate structures exist whose occupancies sum to 1. Only the highest occupancy atom is used by deeprank2.
 
-#### Residue properties:
+#### Residue Properties:
 
 - `res_type`: One-hot encoding of the amino acid residue (size 20).
 - `polarity`: One-hot encoding of the polarity of the amino acid (options: NONPOLAR, POLAR, NEGATIVE, POSITIVE). Note that sources vary on the polarity for few of the amino acids; see detailed information in `deeprank2.domain.aminoacidlist.py`.
@@ -104,14 +104,14 @@ These features are only used in atomic graphs.
 
 - `hb_donors`, `hb_acceptors`: The number of hydrogen bond donor/acceptor atoms in the residue (int). Hydrogen bonds are noncovalent intermolecular interactions formed between an hydrogen atom (partially positively charged) bound to a small, highly electronegative atom (O, N, F) with an unshared electron pair.
 
-#### Properties related to variant residues:
+#### Properties Related to Variant Residues:
 
 These features are only used in SingleResidueVariant queries.
 
 - `variant_res`: One-hot encoding of variant amino acid (size 20).
 - `diff_charge`, `diff_polarity`, `diff_size`, `diff_mass`, `diff_pI`, `diff_hb_donors`, `diff_hb_acceptors`: Subtraction of the wildtype value of indicated feature from the variant value. For example, if the variant has 4 hb_donors and the wildtype has 5, then `diff_hb_donors == -1`.
 
-### Conservation features: `deeprank2.features.conservation`
+### Conservation Features: `deeprank2.features.conservation`
 
 These features relate to the conservation state of individual residues.
 
@@ -120,36 +120,36 @@ These features relate to the conservation state of individual residues.
 - `conservation` (only used in SingleResidueVariant queries): Conservation of the wild type amino acid (float). _More details required._
 - `diff_conservation` (only used in SingleResidueVariant queries): Subtraction of wildtype conservation from the variant conservation (float).
 
-### Protein context features:
+### Protein Context Features:
 
-#### Surface exposure: `deeprank2.features.exposure`
+#### Surface Exposure: `deeprank2.features.exposure`
 
 These features relate to the exposure of residues to the surface, and are computed using [biopython](https://biopython.org/docs/1.81/api/Bio.PDB.html). Note that these features can only be calculated per residue and not per atom.
 
 - `res_depth`: [Residue depth](https://en.wikipedia.org/wiki/Residue_depth) is the average distance (in Å) of the residue to the closest molecule of bulk water (float). See also [`Bio.PDB.ResidueDepth`](https://biopython.org/docs/1.75/api/Bio.PDB.ResidueDepth.html).
 - `hse`: [Half sphere exposure (HSE)](https://en.wikipedia.org/wiki/Half_sphere_exposure) is a protein solvent exposure measure indicating how buried an amino acid residue is in a protein (3 float values, see [Bio.PDB.HSExposure](https://biopython.org/docs/dev/api/Bio.PDB.HSExposure.html#module-Bio.PDB.HSExposure) for details).
 
-#### Surface accessibility: `deeprank2.features.surfacearea`
+#### Surface Accessibility: `deeprank2.features.surfacearea`
 
 These features relate to the surface area of the residue, and are computed using [freesasa](https://freesasa.github.io). Note that these features can only be calculated per residue and not per atom.
 
 - `sasa`: [Solvent-Accessible Surface Area](https://en.wikipedia.org/wiki/Accessible_surface_area) is the surface area (in Å^2) of a biomolecule that is accessible to the solvent (float).
 - `bsa`: Buried Surface Area is the surface area (in Å^2) that is buried away from the solvent when two or more proteins or subunits associate to form a complex, i.e. it measures the size of the complex interface (float).
 
-#### Secondary structure: `deeprank2.features.secondary_structure`
+#### Secondary Structure: `deeprank2.features.secondary_structure`
 
 - `sec_struct`: One-hot encoding of the [DSSP](<https://en.wikipedia.org/wiki/DSSP_(algorithm)>) assigned secondary structure of the amino acid, using the three major classes (HELIX, STRAND, COIL). Calculated using [DSSP4](https://github.com/PDB-REDO/dssp).
 
-#### Inter-residue contacts (IRCs): `deeprank2.features.irc`
+#### Inter-residue Contacts (IRCs): `deeprank2.features.irc`
 
 These features are only calculated for ProteinProteinInterface queries.
 
 - `irc_total`: The number of residues on the other chain that are within a cutoff distance of 5.5 Å (int).
 - `irc_nonpolar_nonpolar`, `irc_nonpolar_polar`, `irc_nonpolar_negative`, `irc_nonpolar_positive`, `irc_polar_polar`, `irc_polar_negative`, `irc_polar_positive`, `irc_negative_negative`, `irc_positive_positive`, `irc_negative_positive`: As above, but for specific residue polarity pairings.
 
-## Default edge features
+## Default Edge Features
 
-### Contact features: `deeprank2.features.contact`
+### Contact Features: `deeprank2.features.contact`
 
 These features relate to relationships between individual nodes.
 For atomic graphs, when features relate to residues then _all_ atoms of one residue receive the feature value for that residue.
@@ -166,7 +166,7 @@ These features relate to the structural relationship between nodes.
 - `same_res`: Boolean indicating whether atoms belong to the same residue (1) or separate residues (0). Only used in atomic graphs.
 - `covalent`: Boolean indicating whether nodes are covalently bound (1) or not (0). Note that covalency is not directly assessed, but any edge with a maximum distance of 2.1 Å is considered covalent.
 
-#### Nonbond energies:
+#### Nonbond Energies:
 
 These features measure nonbond energy potentials between nodes, and are calculated using [OPLS forcefield](https://en.wikipedia.org/wiki/OPLS).
 For residue graphs, the pairwise sum of potentials for all atoms from each residue is used. Note that no distance cutoff is used and the radius of influence is assumed to be infinite, although the potentials tends to 0 at large distance. Also edges are only assigned within a given cutoff radius when graphs are created.
