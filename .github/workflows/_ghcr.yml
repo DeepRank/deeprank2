@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2022 Dusan Mijatovic (dv4all)
+# SPDX-FileCopyrightText: 2022 dv4all
+# SPDX-FileCopyrightText: 2024 Ewan Cahen (Netherlands eScience Center) <e.cahen@esciencecenter.nl>
+# SPDX-FileCopyrightText: 2024 Netherlands eScience Center
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: reusable ghcr.io module
+
+on:
+  workflow_call:
+    inputs:
+      ghcr_user:
+        required: true
+        description: User for logging to ghcr.io (use github.actor)
+        type: string
+      base_image_name:
+        required: true
+        description: Base image name incl. ghcr.io
+        type: string
+      image_tag:
+        required: true
+        description: Image tag (version)
+        type: string
+      dockerfile:
+        required: true
+        description: Location and name of docker file
+        type: string
+      docker_context:
+        required: true
+        description: Docker context for the build command
+        type: string
+    secrets:
+      token:
+        required: true
+    outputs:
+      image_created:
+        description: Full image name after upload to ghcr.io
+        value: ${{jobs.build_and_push.outputs.image_build}}
+      image_uploaded:
+        description: Confirmation that image is uploaded to ghcr.io
+        value: ${{jobs.build_and_push.outputs.image_pushed}}
+
+jobs:
+  build_and_push:
+    name: build and push image
+    runs-on: ubuntu-22.04
+    outputs:
+      image_build: ${{steps.build_image.outputs.image_build}}
+      image_pushed: ${{steps.build_image.outputs.image_pushed}}
+    steps:
+      - name: checkout
+        # https://github.com/actions/checkout
+        uses: actions/checkout@v4
+      - name: build
+        id: build_image
+        run: |
+          IMAGE_TAG_VERSION=${{inputs.base_image_name}}:${{inputs.image_tag}}
+          IMAGE_TAG_LASTEST=${{inputs.base_image_name}}:latest
+          echo image_tag_version $IMAGE_TAG_VERSION
+          docker build -t $IMAGE_TAG_VERSION -t $IMAGE_TAG_LASTEST -f ${{inputs.dockerfile}} ${{inputs.docker_context}}
+          echo "{image_build}={$IMAGE_TAG_VERSIONvalue}" >> $GITHUB_OUTPUT
+      - name: push to ghcr.io
+        id: push_image
+        run: |
+          echo login
+          echo "${{secrets.token}}" | docker login https://ghcr.io -u ${{inputs.ghcr_user}} --password-stdin
+          echo push auth image with all tags
+          docker push ${{inputs.base_image_name}} --all-tags
+          echo "{image_build}={$IMAGE_TAG_VERSIONvalue}" >> $GITHUB_OUTPUT

@@ -22,7 +22,8 @@ RUN \
   echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate base" >> /etc/skel/.bashrc && \
   echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate base" >> ~/.bashrc
 
-ADD ./env/deeprank2.yml /home/deeprank2
+ADD ./env/deeprank2.yml /home/deeprank2/
+ADD ./tutorials /home/deeprank2/tutorials
 
 RUN \
   ## Create the environment and install the dependencies
@@ -35,7 +36,7 @@ RUN \
   # Get the data for running the tutorials
   if [ -d "/home/deeprank2/tutorials/data_raw" ]; then rm -Rf /home/deeprank2/tutorials/data_raw; fi && \
   if [ -d "/home/deeprank2/tutorials/data_processed" ]; then rm -Rf /home/deeprank2/tutorials/data_processed; fi && \
-  wget https://zenodo.org/records/8349335/files/data_raw.zip && \
+  wget https://zenodo.org/records/13709906/files/data_raw.zip && \
   unzip data_raw.zip -d data_raw && \
   mv data_raw /home/deeprank2/tutorials && \
   apt-get clean && \
@@ -44,8 +45,6 @@ RUN \
   find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
   find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
   conda clean --force-pkgs-dirs --all --yes
-
-ADD ./tutorials /home/deeprank2/tutorials
 
 ENV PATH /opt/conda/envs/deeprank2/bin:$PATH
 

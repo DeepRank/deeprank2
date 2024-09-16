@@ -11,7 +11,7 @@ jobs:
   verify:
     if: github.event.pull_request.draft == false
     name: "fair-software"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: fair-software/howfairis-github-action@0.2.1
         name: Measure compliance with fair-software.eu recommendations

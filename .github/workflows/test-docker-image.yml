@@ -1,0 +1,64 @@
+name: test latest docker image
+
+# Only trigger, when the release workflow succeeded
+on:
+  workflow_run:
+    workflows: ["Build and upload to PyPI and ghcr.io"]
+    types:
+      - completed
+
+jobs:
+  test_latest_docker_image:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull latest Docker image
+        run: |
+          REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker pull ghcr.io/$REPO_LOWERCASE:latest
+
+      - name: Run tests in Docker container
+        run: |
+
+          REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker run --name test_container -d ghcr.io/$REPO_LOWERCASE:latest tail -f /dev/null
+
+          PROJECT_DIR="/app"
+          TEST_DIR="$PROJECT_DIR/tests"
+          echo "Project directory: $PROJECT_DIR"
+          echo "Tests directory: $TEST_DIR"
+
+          # Create project directory and copy tests folder
+          docker exec test_container mkdir -p $PROJECT_DIR
+          docker cp tests test_container:$TEST_DIR
+
+          # Verify the directory structure
+          echo "Contents of project directory:"
+          docker exec test_container ls -la $PROJECT_DIR
+          echo "Contents of tests directory:"
+          docker exec test_container ls -la $TEST_DIR
+
+          # Install pytest
+          docker exec test_container pip install pytest
+
+          # Run pytest from the project directory
+          echo "Running pytest from the project directory:"
+          docker exec -w $PROJECT_DIR test_container python -m pytest tests -v
+
+          # Clean up
+          docker stop test_container
+          docker rm test_container
+
+      - name: Output test results
+        if: failure()
+        run: |
+          echo "Tests failed. Please check the test output above for more details."
