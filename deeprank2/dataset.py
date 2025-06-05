@@ -316,6 +316,8 @@ class DeeprankDataset(Dataset):
                 else:
                     entry_names = [entry for entry, _ in f.items()]
 
+                if not entry_names:
+                    continue
                 df_dict = {}
                 df_dict["id"] = entry_names
 
@@ -344,8 +346,8 @@ class DeeprankDataset(Dataset):
                                 df_dict[feat] = [transform(row) for row in df_dict[feat]]
 
                 df_temp = pd.DataFrame(data=df_dict)
-            df_concat = pd.concat([df_final, df_temp])
-        self.df = df_concat.reset_index(drop=True)
+            df_final = pd.concat([df_final, df_temp])
+        self.df = df_final.reset_index(drop=True)
         return self.df
 
     def save_hist(  # noqa: C901
