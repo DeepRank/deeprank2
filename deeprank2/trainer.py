@@ -873,9 +873,17 @@ class Trainer:
     def _load_params(self) -> None:
         """Loads the parameters of a pretrained model."""
         if torch.cuda.is_available():
-            state = torch.load(self.pretrained_model)
+            state = torch.load(self.pretrained_model, weights_only=False)
         else:
-            state = torch.load(self.pretrained_model, map_location=torch.device("cpu"))
+            state = torch.load(self.pretrained_model, map_location=torch.device("cpu"), weights_only=False)
+
+        features_transform = state["features_transform"]
+        for value in features_transform.values():
+            if value["transform"] is None:
+                continue
+
+            # Deserialize the function
+            value["transform"] = dill.loads(value["transform"])
 
         self.data_type = state["data_type"]
         self.model_load_state_dict = state["model_state"]
@@ -901,7 +909,7 @@ class Trainer:
         self.node_features = state["node_features"]
         self.edge_features = state["edge_features"]
         self.features = state["features"]
-        self.features_transform = state["features_transform"]
+        self.features_transform = features_transform
         self.means = state["means"]
         self.devs = state["devs"]
         self.cuda = state["cuda"]
@@ -912,16 +920,12 @@ class Trainer:
         features_transform_to_save = copy.deepcopy(self.features_transform)
         # prepare transform dictionary for being saved
         if features_transform_to_save:
-            for key in features_transform_to_save.values():
-                if key["transform"] is None:
+            for value in features_transform_to_save.values():
+                if value["transform"] is None:
                     continue
+
                 # Serialize the function
-                serialized_func = dill.dumps(key["transform"])
-                # Deserialize the function
-                deserialized_func = dill.loads(serialized_func)  # noqa: S301
-                str_expr = inspect.getsource(deserialized_func)
-                match = re.search(r"[\"|\']transform[\"|\']:.*(lambda.*).*,.*[\"|\']standardize[\"|\'].*", str_expr).group(1)
-                key["transform"] = match
+                value["transform"] = dill.dumps(value["transform"])
 
         state = {
             "data_type": self.data_type,

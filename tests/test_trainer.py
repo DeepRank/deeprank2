@@ -5,7 +5,9 @@ import shutil
 import tempfile
 import unittest
 import warnings
+import uuid
 
+import numpy
 import h5py
 import pandas as pd
 import pytest
@@ -123,6 +125,32 @@ class TestTrainer(unittest.TestCase):
     @classmethod
     def tearDownClass(class_) -> None:
         shutil.rmtree(class_.work_directory)
+
+    def test_save_transform_function(sef) -> None:
+        dataset = GridDataset(
+            hdf5_path="tests/data/hdf5/1ATN_ppi.hdf5",
+            subset=None,
+            features=[Efeat.VDW],
+            target=targets.IRMSD,
+            task=targets.REGRESS,
+        )
+        trainer = Trainer(CnnRegression, dataset)
+        trainer.features_transform = {"float32": {"transform": lambda t: t.astype(numpy.float32), "standardize": True}}
+
+        state = trainer._save_model()
+        assert "features_transform" in state
+        assert "float32" in state["features_transform"]
+
+        tmp_path = os.path.join(tempfile.gettempdir(), uuid.uuid4().hex + ".pth")
+        try:
+            torch.save(state, tmp_path)
+
+            trainer.pretrained_model = tmp_path
+            trainer._load_params()
+        finally:
+            os.remove(tmp_path)
+
+        trainer.features_transform["float32"]["transform"](numpy.array([0.0]))
 
     def test_grid_regression(self) -> None:
         dataset = GridDataset(
